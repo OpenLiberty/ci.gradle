@@ -1,0 +1,30 @@
+apply plugin: 'groovy'
+apply plugin: 'maven'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'WASdev Repository'
+        url = 'http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/maven/repository/'
+    }
+}
+
+configurations {
+    provided
+}
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+    provided group: 'com.ibm.websphere.appserver.api', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
+}
+
+sourceSets.main.compileClasspath += configurations.provided
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.11'
+}
+
+archivesBaseName = 'liberty-gradle-plugin'
+group = 'com.ibm.websphere.wlp.gradle.plugins'
+version = 1.0
