@@ -129,8 +129,8 @@ class Liberty implements Plugin<Project> {
             description 'Removes a WAR file from the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
             doLast {
-                def params = buildLibertyMap(project);
-                params.put('file', project.war.archivePath)
+                def params = buildLibertyMap(project)
+                params.put('file', project.war.archivePath.name)
                 project.ant.taskdef(name: 'undeploy', classname: 'com.ibm.websphere.wlp.ant.UndeployTask') {
                     classpath {
                         fileset(dir: project.liberty.wlpDir + '/dev/tools/ant', includes: '*.jar')
@@ -156,7 +156,7 @@ class Liberty implements Plugin<Project> {
         ServerBuilder sb = new ServerBuilder()
         sb.setName(project.liberty.serverName)
         sb.setUserDir(getUserDir(project))
-        sb.setOutputDir(project.liberty.outputDir)
+        sb.setOutputDir(new File(project.liberty.outputDir))
         return sb
     }
 
