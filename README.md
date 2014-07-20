@@ -10,19 +10,23 @@ Clone this repository and then, with a JRE on the path, execute the following co
 gradlew build
 ```
 
-This will download Gradle and then build the plugin `liberty-gradle-plugin-1.0.jar` in to the `build\libs` directory. It is also possible to install the plugin in to your local Maven repository using `gradlew install`.
+This will download Gradle and then build the plugin `liberty-gradle-plugin-1.0-SNAPSHOT.jar` in to the `build\libs` directory. It is also possible to install the plugin in to your local Maven repository using `gradlew install`.
 
 ## Usage
 
-Within your Gradle build script, you need to set up the classpath to include the Liberty Gradle plugin and the `ws-server.jar` from a WebSphere Application Server Liberty Profile installation. If you have installed the plugin in to your local Maven repository, this would be achieved as follows:
+Within your Gradle build script, you need to set up the classpath to include the Liberty Gradle plugin and the `ws-server.jar` from a WebSphere Application Server Liberty Profile installation. Also, if you are using a snapshot version of the plugin you need to define the Sonatype Nexus Snapshots repository to find the plugin. Otherwise, define the Maven Central repository:
 
 ```groovy
 buildscript {
     repositories {
-        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
     }	
     dependencies {
-        classpath 'com.ibm.websphere.wlp.gradle.plugins:liberty-gradle-plugin:1.0'
+        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:1.0-SNAPSHOT'
         classpath files('c:/wlp/bin/tools/ws-server.jar')
     }
 }

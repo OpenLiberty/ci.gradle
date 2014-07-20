@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.ibm.webshere.wlp.gradle.plugins
+package net.wasdev.wlp.gradle.plugins
 
 import org.gradle.api.*
 
@@ -116,11 +116,9 @@ class Liberty implements Plugin<Project> {
             doLast {
                 def params = buildLibertyMap(project);
                 params.put('file', project.war.archivePath)
-                project.ant.taskdef(name: 'deploy', classname: 'com.ibm.websphere.wlp.ant.DeployTask') {
-                    classpath {
-                        fileset(dir: project.liberty.wlpDir + '/dev/tools/ant', includes: '*.jar')
-                    }
-                }
+                project.ant.taskdef(name: 'deploy', 
+                                    classname: 'net.wasdev.wlp.ant.DeployTask', 
+                                    classpath: project.buildscript.configurations.classpath.asPath)
                 project.ant.deploy(params)
             }
         }
@@ -131,11 +129,9 @@ class Liberty implements Plugin<Project> {
             doLast {
                 def params = buildLibertyMap(project)
                 params.put('file', project.war.archivePath.name)
-                project.ant.taskdef(name: 'undeploy', classname: 'com.ibm.websphere.wlp.ant.UndeployTask') {
-                    classpath {
-                        fileset(dir: project.liberty.wlpDir + '/dev/tools/ant', includes: '*.jar')
-                    }
-                }
+                project.ant.taskdef(name: 'undeploy', 
+                                    classname: 'net.wasdev.wlp.ant.UndeployTask', 
+                                    classpath: project.buildscript.configurations.classpath.asPath)
                 project.ant.undeploy(params)
             }
         }
@@ -143,11 +139,9 @@ class Liberty implements Plugin<Project> {
     }
 
     private void executeServerCommand(Project project, String command, Map<String, String> params) {
-        project.ant.taskdef(name: 'server', classname: 'com.ibm.websphere.wlp.ant.ServerTask') {
-            classpath {
-                fileset(dir: project.liberty.wlpDir + '/dev/tools/ant', includes: '*.jar')
-            }
-        }
+        project.ant.taskdef(name: 'server', 
+                            classname: 'net.wasdev.wlp.ant.ServerTask', 
+                            classpath: project.buildscript.configurations.classpath.asPath)
         params.put('operation', command)
         project.ant.server(params)
     }

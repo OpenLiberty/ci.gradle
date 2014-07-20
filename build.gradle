@@ -1,11 +1,16 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
+apply plugin: 'signing'
 
 repositories {
     mavenCentral()
     maven {
         name = 'WASdev Repository'
         url = 'http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/maven/repository/'
+    }
+    maven {
+        name = 'Sonatype Nexus Snapshots'
+        url = 'https://oss.sonatype.org/content/repositories/snapshots/'
     }
 }
 
@@ -16,6 +21,7 @@ configurations {
 dependencies {
     compile gradleApi()
     compile localGroovy()
+    compile ('net.wasdev.wlp.ant:wlp-anttasks:1.1-SNAPSHOT')
     provided group: 'com.ibm.websphere.appserver.api', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
 }
 
@@ -26,5 +32,69 @@ task wrapper(type: Wrapper) {
 }
 
 archivesBaseName = 'liberty-gradle-plugin'
-group = 'com.ibm.websphere.wlp.gradle.plugins'
-version = 1.0
+group = 'net.wasdev.wlp.gradle.plugins'
+version = '1.0-SNAPSHOT'
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task groovydocJar(type: Jar) {
+    classifier = 'groovydoc'
+    from groovydoc
+} 
+
+artifacts {
+    archives groovydocJar, sourcesJar
+}
+
+if (!version.endsWith("SNAPSHOT")) {
+    signing {           
+        sign configurations.archives
+    }
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      pom.project {
+        name 'liberty-gradle-plugin'
+        packaging 'jar'
+        description 'Liberty Gradle Plug-in.'
+        url 'https://wasdev.github.io'
+
+        scm {
+          connection 'scm:git:git@github.com:WASdev/ci.gradle.git'
+          developerConnection 'scm:git:git@github.com:WASdev/ci.gradle.git'
+          url 'git@github.com:WASdev/ci.gradle.git'
+        }
+
+        licenses {
+          license {
+            name 'The Apache Software License, Version 2.0'
+            url 'https://raw.github.com/WASdev/ci.gradle/master/LICENSE'
+          }
+        }
+
+        developers {
+          developer {
+            id 'jgawor'
+            name 'Jarek Gawor'
+            email 'jgawor@gmail.com'
+          }
+        }
+      }
+    }
+  }
+}
