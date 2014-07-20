@@ -14,7 +14,7 @@ This will download Gradle and then build the plugin `liberty-gradle-plugin-1.0-S
 
 ## Usage
 
-Within your Gradle build script, you need to set up the classpath to include the Liberty Gradle plugin and the `ws-server.jar` from a WebSphere Application Server Liberty Profile installation. You also need to define the Maven Central repository to find the plugin or its dependencies. If you are using a snapshot version of the plugin make sure also define the Sonatype Nexus Snapshots repository.
+Within your Gradle build script, you need to set up the classpath to include the Liberty Gradle plugin and the `ws-server.jar` from a WebSphere Application Server Liberty Profile installation. You also need to define the Maven Central repository to find the plugin or its dependencies. If you are using a snapshot version of the plugin make sure to also define the Sonatype Nexus Snapshots repository.
 
 ```groovy
 buildscript {
