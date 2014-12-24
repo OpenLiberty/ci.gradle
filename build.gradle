@@ -55,46 +55,49 @@ if (!version.endsWith("SNAPSHOT")) {
     }
 }
 
-uploadArchives {
-  repositories {
-    mavenDeployer {
-      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
+  uploadArchives {
+    repositories {
+      mavenDeployer {
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-        authentication(userName: ossrhUsername, password: ossrhPassword)
-      }
-
-      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-        authentication(userName: ossrhUsername, password: ossrhPassword)
-      }
-
-      pom.project {
-        name 'liberty-gradle-plugin'
-        packaging 'jar'
-        description 'Liberty Gradle Plug-in.'
-        url 'https://wasdev.github.io'
-
-        scm {
-          connection 'scm:git:git@github.com:WASdev/ci.gradle.git'
-          developerConnection 'scm:git:git@github.com:WASdev/ci.gradle.git'
-          url 'git@github.com:WASdev/ci.gradle.git'
+        repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+          authentication(userName: ossrhUsername, password: ossrhPassword)
         }
 
-        licenses {
-          license {
-            name 'The Apache Software License, Version 2.0'
-            url 'https://raw.github.com/WASdev/ci.gradle/master/LICENSE'
+        snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+          authentication(userName: ossrhUsername, password: ossrhPassword)
+        }
+
+        pom.project {
+          name 'liberty-gradle-plugin'
+          packaging 'jar'
+          description 'Liberty Gradle Plug-in.'
+          url 'https://wasdev.github.io'
+
+          scm {
+            connection 'scm:git:git@github.com:WASdev/ci.gradle.git'
+            developerConnection 'scm:git:git@github.com:WASdev/ci.gradle.git'
+            url 'git@github.com:WASdev/ci.gradle.git'
           }
-        }
 
-        developers {
-          developer {
-            id 'jgawor'
-            name 'Jarek Gawor'
-            email 'jgawor@gmail.com'
+          licenses {
+            license {
+              name 'The Apache Software License, Version 2.0'
+              url 'https://raw.github.com/WASdev/ci.gradle/master/LICENSE'
+            }
+          }
+
+          developers {
+            developer {
+              id 'jgawor'
+              name 'Jarek Gawor'
+              email 'jgawor@gmail.com'
+            }
           }
         }
       }
     }
   }
 }
+
