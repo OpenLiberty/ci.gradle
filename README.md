@@ -38,10 +38,13 @@ Alternatively, you might choose to include the plugin JAR file as part of your b
 buildscript {
     dependencies {
         classpath files('gradle/liberty-gradle-plugin.jar')
+        classpath files('gradle/wlp-anttasks.jar')
         classpath files('c:/wlp/bin/tools/ws-server.jar')
     }
 }
 ```
+
+The dependent `wlp-anttasks.jar` file can be downloaded from the [snapshot repository](https://oss.sonatype.org/content/repositories/snapshots/net/wasdev/wlp/ant/wlp-anttasks/) or the [Maven central repository](http://repo1.maven.org/maven2/net/wasdev/wlp/ant/wlp-anttasks/). 
 
 Within the script, then apply the plugin and specify its configuration as follows:
 

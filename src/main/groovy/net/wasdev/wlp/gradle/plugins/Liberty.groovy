@@ -150,7 +150,9 @@ class Liberty implements Plugin<Project> {
         ServerBuilder sb = new ServerBuilder()
         sb.setName(project.liberty.serverName)
         sb.setUserDir(getUserDir(project))
-        sb.setOutputDir(new File(project.liberty.outputDir))
+        if (project.liberty.outputDir != null) {
+            sb.setOutputDir(new File(project.liberty.outputDir))
+        }
         return sb
     }
 
@@ -165,7 +167,9 @@ class Liberty implements Plugin<Project> {
         }
         result.put('userDir', libertyUserDirFile)
         result.put('installDir', project.liberty.wlpDir)
-        result.put('outputDir', project.liberty.outputDir)
+        if (project.liberty.outputDir != null) {
+            result.put('outputDir', project.liberty.outputDir)
+        }          
         result.put('timeout', 300000)
 
         return result;
