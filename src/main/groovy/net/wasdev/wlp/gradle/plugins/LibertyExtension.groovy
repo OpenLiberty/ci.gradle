@@ -22,4 +22,8 @@ class LibertyExtension {
     String userDir
     String serverName = "defaultServer"
     
+    String featureName
+    boolean acceptLicense = false
+    String whenFileExists
+    String to = "usr"
 }
