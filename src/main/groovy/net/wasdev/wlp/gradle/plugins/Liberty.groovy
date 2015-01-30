@@ -136,6 +136,24 @@ class Liberty implements Plugin<Project> {
             }
         }
         
+        project.task('installFeature') {
+            description 'Install a new feature to the WebSphere Liberty Profile server'
+            logging.level = LogLevel.INFO
+            doLast {
+                def params = buildLibertyMap(project);
+                params.put('name', project.liberty.featureName)
+                params.put('acceptLicense', project.liberty.acceptLicense)
+                if(project.liberty.whenFileExists != null) {
+                    params.put('whenFileExists', project.liberty.whenFileExists)
+                }
+                params.put('to', project.liberty.to)
+                params.remove('timeout')
+                project.ant.taskdef(name: 'installFeature', 
+                                   classname: 'net.wasdev.wlp.ant.InstallFeatureTask', 
+                                   classpath: project.buildscript.configurations.classpath.asPath)
+                project.ant.installFeature(params)
+            }
+        }
     }
 
     private void executeServerCommand(Project project, String command, Map<String, String> params) {

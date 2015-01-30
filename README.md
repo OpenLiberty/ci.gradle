@@ -63,10 +63,15 @@ Of the plugin configuration, only the `wlpDir` property is required. The default
 
 The plugin will have made the following tasks available to your project:
 
-* libertyCreate - Creates a WebSphere Liberty Profile server.
-* libertyStart - Starts the WebSphere Liberty Profile server.
-* libertyRun - Runs a WebSphere Liberty Profile server under the Gradle process.
-* libertyStatus - Checks the WebSphere Liberty Profile server is running.
-* libertyPackage - Generates a WebSphere Liberty Profile server archive.
-* deployWar - Deploys a WAR file to the WebSphere Liberty Profile server.
-* undeployWar - Removes a WAR file from the WebSphere Liberty Profile server.
+###Tasks
+
+| Task | Description |
+| --------- | ------------ | 
+| libertyCreate | Creates a WebSphere Liberty Profile server. |
+| libertyStart | Starts the WebSphere Liberty Profile server. | 
+| libertyRun | Runs a WebSphere Liberty Profile server under the Gradle process. | 
+| libertyStatus | Checks the WebSphere Liberty Profile server is running. |
+| libertyPackage | Generates a WebSphere Liberty Profile server archive. | 
+| deployWar | Deploys a WAR file to the WebSphere Liberty Profile server. |
+| undeployWar | Removes a WAR file from the WebSphere Liberty Profile server. | 
+| installFeature | Installs a new feature in the WebSphere Liberty Profile server. |
