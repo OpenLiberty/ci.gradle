@@ -23,8 +23,33 @@ dependencies {
     compile localGroovy()
     compile ('net.wasdev.wlp.ant:wlp-anttasks:1.1-SNAPSHOT')
     provided group: 'com.ibm.websphere.appserver.api', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
+    testCompile 'junit:junit:4.11'
+    testCompile group: 'com.ibm.websphere.appserver.api', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
 }
 
+sourceSets {
+    integrationTest {
+        groovy.srcDir file('src/integTest/groovy')
+        resources.srcDir file('src/integTest/resources')
+        compileClasspath = sourceSets.main.output + configurations.testRuntime
+        runtimeClasspath = output + compileClasspath
+    }
+}
+
+task integrationTest(type: Test) {
+    logging.level = LogLevel.INFO
+        description = 'Runs the integration tests.'
+        testClassesDir = sourceSets.integrationTest.output.classesDir
+        classpath = sourceSets.integrationTest.runtimeClasspath
+        if (!(project.hasProperty('wlpInstallDir'))) {
+            enabled = false
+        } else {
+            systemProperty 'wlpInstallDir', wlpInstallDir
+        }
+        mustRunAfter test
+}
+
+check.dependsOn integrationTest
 sourceSets.main.compileClasspath += configurations.provided
 
 task wrapper(type: Wrapper) {
