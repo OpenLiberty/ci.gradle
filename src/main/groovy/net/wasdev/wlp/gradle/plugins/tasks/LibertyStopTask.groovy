@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014.
+ * (C) Copyright IBM Corporation 2015.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.wasdev.wlp.gradle.plugins
+package net.wasdev.wlp.gradle.plugins.tasks;
 
-class LibertyExtension {
+import org.gradle.api.tasks.TaskAction
 
-    String wlpDir
-    String outputDir
-    String userDir
-    String serverName = "defaultServer"
+class LibertyStopTask extends AbstractTask {
     
-    String featureName
-    boolean acceptLicense = false
-    String whenFileExists
-    String to = "usr"
+    @TaskAction
+    void printResponse() {
+        try {
+            executeServerCommand(project, 'stop', buildLibertyMap(project))
+        } catch (Exception e) {
+            // Throws an exception if the server is already stopped.
+            println e
+        }
+    }
 }
