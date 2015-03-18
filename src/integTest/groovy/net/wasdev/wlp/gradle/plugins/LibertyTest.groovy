@@ -21,39 +21,9 @@ import org.junit.Test
 import org.junit.runners.MethodSorters
 import org.junit.FixMethodOrder
 import static org.junit.Assert.*
-import java.text.SimpleDateFormat
-import java.util.Date
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class LibertyTest extends AbstractIntegrationTest{
-
-    static final String RESOURCES_DIR = "../resources/integrationTest"
-    static final String USER_DIR = "../"
-
-    def static date = new Date()
-    def static dateFormat = new SimpleDateFormat("dd.MM.yy'_at_'HH.mm")
-    def static TIME_STAMP = dateFormat.format(date)
-    static final String SERVER_NAME = "myServer_"+TIME_STAMP
-
-    @BeforeClass
-    public static void createProjectAndApplyPlugin() {
-
-        buildFile << """
-apply plugin: 'liberty'
-
-liberty {
-    userDir = '$USER_DIR'
-    wlpDir = '$WLP_DIR'
-    serverName = '$SERVER_NAME'
-} 
-apply plugin : 'war'
-
-war{
-    destinationDir = new File('$RESOURCES_DIR')
-    archiveName = 'test-war.war'
-}       
-"""
-    }
 
     @AfterClass
     public static void tearDown() throws Exception {
@@ -62,7 +32,7 @@ war{
     }
 
     @Test
-    public void test1_Start() {
+    public void test1_start() {
         try {
             runTasks(integTestDir, 'libertyStart')
         } catch (Exception e) {
@@ -89,7 +59,7 @@ war{
     }
 
     @Test
-    public void test5_Stop() {
+    public void test5_stop() {
         try{
             runTasks(integTestDir, 'libertyStop')
         } catch (Exception e) {

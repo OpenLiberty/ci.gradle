@@ -19,7 +19,7 @@ This will download Gradle and then build the plugin `liberty-gradle-plugin-1.0-S
 To build the plugin and run the integration tests execute the following command in the root directory.
 
 ```bash
-gradlew build -PwlpDir=<liberty_install_directory>
+gradlew build -PwlpInstallDir=<liberty_install_directory>
 ```
 * Liberty Profile installation is required to run the integration tests.
 

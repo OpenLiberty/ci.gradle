@@ -15,6 +15,7 @@
  */
 package net.wasdev.wlp.gradle.plugins
 
+import org.apache.tools.ant.util.FileUtils
 import org.junit.BeforeClass
 import org.junit.AfterClass
 
@@ -29,31 +30,14 @@ import org.gradle.tooling.model.Task
 
 abstract class AbstractIntegrationTest {
     static File integTestDir = new File('build/integTest')
-    static File buildFile
     static final String WLP_DIR = System.getProperty("wlpInstallDir").replace("\\", "/")
 
     @BeforeClass
     public static void setup() {
         deleteDir(integTestDir)
         createDir(integTestDir)
-        buildFile = createFile(integTestDir, 'build.gradle')
+        createFile(integTestDir)
 
-        buildFile << """
-buildscript {
-    repositories {
-        mavenCentral()
-        maven {
-            name = 'Sonatype Nexus Snapshots'
-            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
-        }
-    }
-    dependencies {
-        classpath files('../libs/liberty-gradle-plugin-1.0-SNAPSHOT.jar')
-        classpath files('$WLP_DIR'+'/bin/tools/ws-server.jar')
-        classpath 'net.wasdev.wlp.ant:wlp-anttasks:1.1-SNAPSHOT'
-    }
-}
-"""
     }
 
     protected static void deleteDir(File dir) {
@@ -72,12 +56,17 @@ buildscript {
         }
     }
 
-    protected static File createFile(File parent, String filename) {
-        File file = new File(parent, filename)
-        if (!file.createNewFile()) {
-            throw new AssertionError("Unable to create file '${file.canonicalPath}'.")
+    protected static File createFile(File parent) {
+        File destFile = new File(parent, 'build.gradle')
+        File sourceFile = new File("build/resources/integrationTest/build.gradle")
+        if (!sourceFile.exists()){
+            throw new AssertionError("The source file '${sourceFile.canonicalPath}' doesn't exist.")
         }
-        return file
+        try {
+            FileUtils.getFileUtils().copyFile(sourceFile, destFile, null, true);
+        } catch (IOException e) {
+            throw new AssertionError("Unable to create file '${destFile.canonicalPath}'.")
+        }
     }
 
     protected static void runTasks(File projectDir, String... tasks) {
@@ -87,6 +76,7 @@ buildscript {
         
         try {
             BuildLauncher build = connection.newBuild()
+            build.setJvmArguments("-DWLP_DIR=$WLP_DIR")
             build.forTasks(tasks)
             build.run()
         }
