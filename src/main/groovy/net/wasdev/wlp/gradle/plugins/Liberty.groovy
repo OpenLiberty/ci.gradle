@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014.
+ * (C) Copyright IBM Corporation 2014, 2015.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,19 @@ class Liberty implements Plugin<Project> {
         project.plugins.apply 'war'
 
         project.extensions.create('liberty', LibertyExtension)
+        project.extensions.create('installLiberty', InstallLibertyExtension)
+
+        project.task('installLiberty') {
+            description 'Installs Liberty from a repository'
+            logging.level = LogLevel.INFO
+            doLast {
+                def params = buildInstallLibertyMap(project)
+                project.ant.taskdef(name: 'installLiberty', 
+                                    classname: 'net.wasdev.wlp.ant.install.InstallLibertyTask', 
+                                    classpath: project.buildscript.configurations.classpath.asPath)
+                project.ant.installLiberty(params)
+            }
+        }
 
         project.task('libertyRun') {
             description = "Runs a WebSphere Liberty Profile server under the Gradle process."
@@ -192,7 +205,33 @@ class Liberty implements Plugin<Project> {
 
         return result;
     }
-    
+
+    private Map<String, String> buildInstallLibertyMap(Project project) {
+
+        Map<String, String> result = new HashMap();
+        result.put('licenseCode', project.installLiberty.licenseCode)
+        result.put('version', project.installLiberty.version)
+
+        if (project.installLiberty.runtimeUrl != null) {
+            result.put('runtimeUrl', project.installLiberty.runtimeUrl)
+        }
+
+        result.put('baseDir', project.installLiberty.baseDir)
+
+        if (project.installLiberty.cacheDir != null) {
+            result.put('cacheDir', project.installLiberty.cacheDir)
+        }
+
+        if (project.installLiberty.username != null) {
+            result.put('username', project.installLiberty.username)
+            result.put('password', project.installLiberty.password)
+        }
+
+        result.put('maxDownloadTime', project.installLiberty.maxDownloadTime)
+
+        return result;
+    }
+
     private File getUserDir(Project project) {
         return (project.liberty.userDir == null) ? new File(project.buildDir, 'wlp') : new File(project.liberty.userDir)
     }

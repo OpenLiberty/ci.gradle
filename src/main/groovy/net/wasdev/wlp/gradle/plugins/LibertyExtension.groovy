@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014.
+ * (C) Copyright IBM Corporation 2014, 2015.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 package net.wasdev.wlp.gradle.plugins
 
 class LibertyExtension {
-
+    
     String wlpDir
     String outputDir
     String userDir
@@ -26,4 +26,16 @@ class LibertyExtension {
     boolean acceptLicense = false
     String whenFileExists
     String to = "usr"
+}
+
+class InstallLibertyExtension{
+    
+    String licenseCode
+    String version = "8.5.+"
+    String runtimeUrl
+    String baseDir = "."
+    String cacheDir
+    String username
+    String password
+    String maxDownloadTime = "0"
 }
