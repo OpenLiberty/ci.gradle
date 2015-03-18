@@ -1,4 +1,4 @@
-# ci.gradle
+# ci.gradle [![Build Status](https://travis-ci.org/WASdev/ci.gradle.svg?branch=master)](https://travis-ci.org/WASdev/ci.gradle)
 
 A Gradle plugin to support the manipulation of WebSphere Application Server Liberty Profile servers.
 
