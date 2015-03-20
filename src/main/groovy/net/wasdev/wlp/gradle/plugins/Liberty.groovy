@@ -15,7 +15,7 @@
  */
 package net.wasdev.wlp.gradle.plugins
 
-import net.wasdev.wlp.gradle.plugins.extension.LibertyExtension
+import net.wasdev.wlp.gradle.plugins.extension.*
 import net.wasdev.wlp.gradle.plugins.tasks.*
 
 import org.gradle.api.*
@@ -28,6 +28,7 @@ class Liberty implements Plugin<Project> {
         project.plugins.apply 'war'
 
         project.extensions.create('liberty', LibertyExtension)
+        project.extensions.create('installFeature', InstallFeatureExtension)
 
         project.task('deployWar', type: DeployWarTask){
             description 'Deploys a WAR file to the WebSphere Liberty Profile server.'

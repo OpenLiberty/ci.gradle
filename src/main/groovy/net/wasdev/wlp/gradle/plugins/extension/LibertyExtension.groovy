@@ -21,7 +21,10 @@ class LibertyExtension {
     String outputDir
     String userDir
     String serverName = "defaultServer"
-    
+
+}
+
+class InstallFeatureExtension {
     String featureName
     boolean acceptLicense = false
     String whenFileExists

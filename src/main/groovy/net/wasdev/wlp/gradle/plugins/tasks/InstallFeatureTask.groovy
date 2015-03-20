@@ -19,16 +19,15 @@ import org.gradle.api.tasks.TaskAction
 
 class InstallFeatureTask extends AbstractTask {
     
-    
     @TaskAction
     void printResponse() {
         def params = buildLibertyMap(project);
-        params.put('name', project.liberty.featureName)
-        params.put('acceptLicense', project.liberty.acceptLicense)
-        if(project.liberty.whenFileExists != null) {
-            params.put('whenFileExists', project.liberty.whenFileExists)
+        params.put('name', project.installFeature.featureName)
+        params.put('acceptLicense', project.installFeature.acceptLicense)
+        if(project.installFeature.whenFileExists != null) {
+            params.put('whenFileExists', project.installFeature.whenFileExists)
         }
-        params.put('to', project.liberty.to)
+        params.put('to', project.installFeature.to)
         params.remove('timeout')
         project.ant.taskdef(name: 'installFeature', 
                             classname: 'net.wasdev.wlp.ant.InstallFeatureTask', 
