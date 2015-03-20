@@ -22,12 +22,29 @@ class UndeployTask extends AbstractTask {
     @TaskAction
     void undeploy() {
         def params = buildLibertyMap(project);
+
         params.put('timeout', project.liberty.timeout)
         params.put('file', project.war.archiveName)
+
         project.ant.taskdef(name: 'undeploy', 
                             classname: 'net.wasdev.wlp.ant.UndeployTask', 
                             classpath: project.buildscript.configurations.classpath.asPath)
-        project.ant.undeploy(params)
+
+        def application = project.liberty.undeploy.application
+        def include = project.liberty.undeploy.include
+        def exclude = project.liberty.undeploy.exclude
+
+        if (application != null) {
+            params.put('file', application)
+            project.ant.undeploy(params)
+        } else if (include != null || exclude != null) {
+            project.ant.undeploy(params) {
+                patternset(includes: include, excludes: exclude)
+            }
+        }
+        else {
+            project.ant.undeploy(params)
+        }
     }
 
 }

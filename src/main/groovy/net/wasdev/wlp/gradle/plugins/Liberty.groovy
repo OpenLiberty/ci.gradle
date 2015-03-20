@@ -38,8 +38,6 @@ class Liberty implements Plugin<Project> {
 
     void apply(Project project) {
 
-        project.plugins.apply 'war'
-
         project.extensions.create('liberty', LibertyExtension)
 
         project.task('installLiberty', type: InstallLibertyTask) {
@@ -82,7 +80,6 @@ class Liberty implements Plugin<Project> {
             description 'Stops the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
         }
-        project.tasks.clean.dependsOn project.tasks.libertyStop
 
         project.task('libertyPackage', type: PackageTask) {
             description 'Generates a WebSphere Liberty Profile server archive.'
@@ -104,16 +101,16 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
         }
 
-        project.task('deployWar', type: DeployTask) {
-            description 'Deploys a WAR file to the WebSphere Liberty Profile server.'
+        project.task('deploy', type: DeployTask) {
+            description 'Deploys a supported file to the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
         }
 
-        project.task('undeployWar', type: UndeployTask) {
-            description 'Removes a WAR file from the WebSphere Liberty Profile server.'
+        project.task('undeploy', type: UndeployTask) {
+            description 'Removes an application from the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
         }
-        
+
         project.task('installFeature', type: InstallFeatureTask) {
             description 'Install a new feature to the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO

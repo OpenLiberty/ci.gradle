@@ -101,8 +101,8 @@ The plugin will have made the following tasks available to your project:
 | libertyDebug | Runs the Liberty Profile server in the console foreground after a debugger connects to the debug port (default: 7777). | 
 | libertyStatus | Checks the WebSphere Liberty Profile server is running. |
 | libertyPackage | Generates a WebSphere Liberty Profile server archive. |
-| deployWar | Deploys a WAR file to the WebSphere Liberty Profile server. |
-| undeployWar | Removes a WAR file from the WebSphere Liberty Profile server. |
+| deploy | Deploys a supported file to the WebSphere Liberty Profile server. |
+| undeploy | Removes an application from the WebSphere Liberty Profile server. |
 | installFeature | Installs a new feature in the WebSphere Liberty Profile server. |
 
 ###Extension properties
@@ -118,6 +118,7 @@ These properties are divided in two groups, the general properties (Which need t
 | userDir | Value of the `${wlp_user_dir}` variable. The default value is `${installDir}/usr/`. | No |
 | serverName |Name of the Liberty profile server instance. The default value is `defaultServer`. | No |
 
+
 #### Server Properties
 
 | Attribute | Description | Required |
@@ -129,6 +130,9 @@ These properties are divided in two groups, the general properties (Which need t
 | template | Name of the template to use when creating a new server. Only used with the `libertyCreate` task. | No |
 
 This example shows you how to configure these properties in your script:
+=======
+This example shows you how to configure this properties in your script:
+
 ```groovy
 apply plugin: 'liberty'
 
@@ -159,6 +163,7 @@ liberty {
 Of the plugin configuration, only the `wlpDir` property is required. The default configuration is to use a server named `defaultServer` under the `build\wlp` directory of the Gradle project.
 
 
+
 ### installLiberty task
 
 The `installLiberty` task is used to download and install Liberty profile server. The task can download the Liberty runtime archive from a specified location (via `runtimeUrl`) or automatically resolve it from the [Liberty repository](https://developer.ibm.com/wasdev/downloads/) based on a version. 
@@ -181,6 +186,7 @@ The Liberty license code must always be set in order to install the runtime. If 
 #### Examples
 
 ```groovy
+
     // Install using Liberty repository
     apply plugin: 'liberty'
 
@@ -206,7 +212,104 @@ The Liberty license code must always be set in order to install the runtime. If 
 
 ```
 
-####**installFeature** task properties.
+### deploy task
+
+The `deploy` task supports deployment of one or more applications to the Liberty Profile server.
+
+####**Properties**.
+
+| Attribute | Description | Required |
+| --------- | ------------ | ----------|
+| file| Location of a single application to be deployed. The application type can be war, ear, rar, eba, zip, or jar. | Yes, only when a single file will be deployed. |
+| dir|  Location of the directory where are the applications to be deployed.| Yes, only when multiples files will be deployed and `file` is not specified.|
+| include| Comma- or space-separated list of patterns of files that must be included. All files are included when omitted.| No |
+| exclude| Comma- or space-separated list of patterns of files that must be excluded. No files are excluded when omitted.| No |
+
+
+Deploy's properties must be set up in the `deploy` closure inside the `liberty` closure.
+
+```
+    // Deploys a single file
+    apply plugin: 'liberty'
+
+    liberty {
+        wlpDir = 'c:/wlp'
+        serverName = 'myServer'
+        
+        deploy {
+            file = 'c:/files/app.war'
+        }
+    }
+
+    //Deploy multiples files
+    /*Deploy 'app.war' and 'sample.war' 
+      but exclude 'test-war.war'*/
+    apply plugin: 'liberty'
+
+    liberty {
+        
+        wlpDir = 'c:/wlp'
+        serverName = 'myServer'
+        
+        deploy {
+            dir = 'c:/files'
+            include = 'app.war, sample.war'
+            exclude = 'test-war.war'
+        }
+    }
+```
+
+### undeploy task
+
+The `undeploy` task supports undeployment of one or more applications from the Liberty Profile server.
+
+####**Properties**.
+
+| Attribute | Description | Required |
+| --------- | ------------ | ----------|
+| application| Name of the application to be undeployed.| Yes, only when a single application will be undeployed. |
+| include| Comma- or space-separated list of patterns of files that must be included. All files are included when omitted.| No |
+| exclude| Comma- or space-separated list of patterns of files that must be excluded. No files are excluded when omitted.| No |
+
+Undeploy's properties must be set up in the `undeploy` closure inside the `liberty` closure.
+
+#### Examples
+
+```groovy
+    // Undeploys a single application
+    
+    apply plugin: 'liberty'
+
+    liberty {
+        wlpDir = 'c:/wlp'
+        serverName = 'myServer'
+        
+        undeploy {
+            application = 'app.war'
+        }
+    }
+
+    //Undeploy multiples applications
+    /*Undeploy 'app.war' and 'sample.war' 
+      but exclude 'test-war.war'*/
+      
+    apply plugin: 'liberty'
+
+    liberty {
+        
+        wlpDir = 'c:/wlp'
+        serverName = 'myServer'
+        
+        undeploy {
+            include = 'app.war, sample.war'
+            exclude = 'test-war.war'
+        }
+    }
+```
+### installFeature task
+The `installFeature` task installs a feature packaged as a Subsystem Archive (ESA file) to the Liberty runtime.
+
+####**Properties**.
 
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
@@ -217,7 +320,8 @@ The Liberty license code must always be set in order to install the runtime. If 
 
 The following example shows what properties must be set up to install the [`mongodb-2.0`](https://developer.ibm.com/wasdev/downloads/#asset/features-com.ibm.websphere.appserver.mongodb-2.0) feature to your server:
 
-```
+
+```groovy
 apply plugin: 'liberty'
 
 liberty {

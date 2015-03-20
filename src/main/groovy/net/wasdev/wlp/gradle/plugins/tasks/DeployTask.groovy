@@ -22,12 +22,31 @@ class DeployTask extends AbstractTask {
     @TaskAction
     void deploy() {
         def params = buildLibertyMap(project);
+
         params.put('timeout', project.liberty.timeout)
         params.put('file', project.war.archivePath)
+
         project.ant.taskdef(name: 'deploy', 
                             classname: 'net.wasdev.wlp.ant.DeployTask', 
                             classpath: project.buildscript.configurations.classpath.asPath)
-        project.ant.deploy(params)
+
+        def deployDir = project.liberty.deploy.dir
+        def fileToDeploy = project.liberty.deploy.file
+        def include = project.liberty.deploy.include
+        def exclude = project.liberty.deploy.exclude
+        
+        if (fileToDeploy != null) {
+            params.put('file', fileToDeploy)
+            project.ant.deploy(params)
+        } else {
+            if (deployDir != null) {
+                project.ant.deploy(params) {
+                    fileset(dir:deployDir, includes: include, excludes: exclude)
+                }
+            } else {
+                project.ant.deploy(params)
+            }
+        }
     }
 
 }

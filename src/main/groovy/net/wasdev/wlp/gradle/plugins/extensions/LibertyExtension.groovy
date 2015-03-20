@@ -29,6 +29,10 @@ class LibertyExtension {
     
     FeatureExtension features = new FeatureExtension()
     InstallExtension install = new InstallExtension()
+
+    DeployExtension deploy = new DeployExtension()
+    UndeployExtension undeploy = new UndeployExtension()
+    
     PackageAndDumpExtension packageLiberty = new PackageAndDumpExtension()
     PackageAndDumpExtension dumpLiberty = new PackageAndDumpExtension()
     PackageAndDumpExtension javaDumpLiberty = new PackageAndDumpExtension()
@@ -41,6 +45,14 @@ class LibertyExtension {
         ConfigureUtil.configure(closure, install)
     }
 
+    def deploy(Closure closure) {
+        ConfigureUtil.configure(closure, deploy)
+    }
+
+    def undeploy(Closure closure) {
+        ConfigureUtil.configure(closure, undeploy)
+    }
+    
     def packageLiberty(Closure closure) {
         ConfigureUtil.configure(closure, packageLiberty)
     }
