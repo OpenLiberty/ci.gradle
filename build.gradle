@@ -31,10 +31,6 @@ task wrapper(type: Wrapper) {
     gradleVersion = '1.11'
 }
 
-archivesBaseName = 'liberty-gradle-plugin'
-group = 'net.wasdev.wlp.gradle.plugins'
-version = '1.0-SNAPSHOT'
-
 task sourcesJar(type: Jar) {
     classifier = 'sources'
     from sourceSets.main.allSource
@@ -100,4 +96,5 @@ if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')
     }
   }
 }
+
 
