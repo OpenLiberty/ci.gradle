@@ -90,6 +90,7 @@ The plugin will have made the following tasks available to your project:
 
 | Task | Description |
 | --------- | ------------ |
+| installLiberty | Installs Liberty Profile from a repository. |
 | libertyCreate | Creates a WebSphere Liberty Profile server. |
 | libertyStart | Starts the WebSphere Liberty Profile server. |
 | libertyStop | Stops the WebSphere Liberty Profile server. |
@@ -102,7 +103,7 @@ The plugin will have made the following tasks available to your project:
 
 ###Extension properties
 The Liberty Gradle Plugin has some properties defined in the `Liberty` closure which will let you customize the different tasks.
-These properties are divided in two groups, the general properties (Which need to be set for any task) and the specific ones. (Which only must be set when a specific task will be kicked off).
+These properties are divided in two groups, the general properties (Which need to be set for any task excluding `installLiberty` task) and the specific ones. (Which only must be set when a specific task will be kicked off).
 
 ####**General properties**.
 
@@ -127,6 +128,55 @@ liberty {
 ```
 
 Of the plugin configuration, only the `wlpDir` property is required. The default configuration is to use a server named `defaultServer` under the `build\wlp` directory of the Gradle project.
+
+
+### installLiberty task
+
+The `installLiberty` task is used to download and install Liberty profile server. The task can download the Liberty runtime archive from a specified location (via `runtimeUrl`) or automatically resolve it from the [Liberty repository](https://developer.ibm.com/wasdev/downloads/) based on a version. 
+
+The Liberty license code must always be set in order to install the runtime. If you are installing Liberty from the Liberty repository, you can obtain the license code by reading the [current license](http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/8.5.5.2/lafiles/runtime/en.html) and looking for the `D/N: <license code>` line. Otherwise, download the runtime archive and execute `java -jar wlp*runtime.jar --viewLicenseInfo` command and look for the `D/N: <license code>` line.
+
+####**Properties**
+
+| Attribute | Description | Required |
+| --------- | ------------ | ----------|
+| licenseCode | Liberty profile license code. See [above](#install-liberty-task). | Yes |
+| version | Exact or wildcard version of the Liberty profile server to install. Available versions are listed in the [index.yml](http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/index.yml) file. Only used if `runtimeUrl` is not set. The default value is `8.5.+`. | No |
+| runtimeUrl | URL to the Liberty profile's `wlp*runtime.jar`. If not set, the Liberty repository will be used to find the Liberty runtime archive. | No |
+| baseDir | The base installation directory. The actual installation directory of Liberty profile will be `${baseDir}/wlp`. The default value is `.` (current working directory). | No | 
+| cacheDir | The directory used for caching downloaded files such as the license or `.jar` files. The default value is `${java.io.tmpdir}/wlp-cache`. | No | 
+| username | Username needed for basic authentication. | No | 
+| password | Password needed for basic authentication. | No | 
+| maxDownloadTime | Maximum time in seconds the download can take. The default value is `0` (no maximum time). | No | 
+
+#### Examples
+
+```groovy
+    // Install using Liberty repository
+    apply plugin: 'liberty'
+
+    liberty {
+
+        installLiberty {
+            licenseCode = "<license code>"
+        }
+
+    }
+
+    //Install from a specific location
+    apply plugin: 'liberty'
+
+    liberty {
+
+        installLiberty {
+            licenseCode = "<license code>"
+            runtimeUrl = "<url to runtime.jar>"
+        }
+
+    }
+
+```
+
 ####**installFeature** task properties.
 
 | Attribute | Description | Required |
