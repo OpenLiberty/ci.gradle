@@ -157,7 +157,7 @@ The Liberty license code must always be set in order to install the runtime. If 
 
     liberty {
 
-        installLiberty {
+        instal {
             licenseCode = "<license code>"
         }
 
@@ -168,7 +168,7 @@ The Liberty license code must always be set in order to install the runtime. If 
 
     liberty {
 
-        installLiberty {
+        install {
             licenseCode = "<license code>"
             runtimeUrl = "<url to runtime.jar>"
         }
@@ -192,9 +192,11 @@ The following example shows what properties must be set up to install the [`mong
 apply plugin: 'liberty'
 
 liberty {
-	wlpDir = "c:/wlp"
+    wlpDir = "c:/wlp"
 
-	featureName = 'mongodb-2.0'
-	acceptLicense = true
+    features {
+        name = ['mongodb-2.0']
+        acceptLicense = true
+    } 
 }
 ```

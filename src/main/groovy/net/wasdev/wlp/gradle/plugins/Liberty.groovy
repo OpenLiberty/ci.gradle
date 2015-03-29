@@ -27,6 +27,8 @@ import com.ibm.wsspi.kernel.embeddable.ServerEventListener.ServerEvent.Type
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 
+import net.wasdev.wlp.gradle.extensions.LibertyExtension
+
 import org.gradle.api.logging.LogLevel
 
 class Liberty implements Plugin<Project> {
@@ -36,7 +38,6 @@ class Liberty implements Plugin<Project> {
         project.plugins.apply 'war'
 
         project.extensions.create('liberty', LibertyExtension)
-        project.extensions.create('installLiberty', InstallLibertyExtension)
 
         project.task('installLiberty') {
             description 'Installs Liberty from a repository'
@@ -154,12 +155,14 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
             doLast {
                 def params = buildLibertyMap(project);
-                params.put('name', project.liberty.featureName)
-                params.put('acceptLicense', project.liberty.acceptLicense)
-                if(project.liberty.whenFileExists != null) {
-                    params.put('whenFileExists', project.liberty.whenFileExists)
+                params.put('name', project.liberty.features.name.join(","))
+                params.put('acceptLicense', project.liberty.features.acceptLicense)
+                if (project.liberty.features.whenFileExists != null) {
+                    params.put('whenFileExists', project.liberty.features.whenFileExists)
                 }
-                params.put('to', project.liberty.to)
+                if (project.liberty.features.to != null) {
+                    params.put('to', project.liberty.features.to)
+                }
                 params.remove('timeout')
                 project.ant.taskdef(name: 'installFeature', 
                                    classname: 'net.wasdev.wlp.ant.InstallFeatureTask', 
@@ -209,25 +212,25 @@ class Liberty implements Plugin<Project> {
     private Map<String, String> buildInstallLibertyMap(Project project) {
 
         Map<String, String> result = new HashMap();
-        result.put('licenseCode', project.installLiberty.licenseCode)
-        result.put('version', project.installLiberty.version)
+        result.put('licenseCode', project.liberty.install.licenseCode)
+        result.put('version', project.liberty.install.version)
 
-        if (project.installLiberty.runtimeUrl != null) {
-            result.put('runtimeUrl', project.installLiberty.runtimeUrl)
+        if (project.liberty.install.runtimeUrl != null) {
+            result.put('runtimeUrl', project.liberty.install.runtimeUrl)
         }
 
-        result.put('baseDir', project.installLiberty.baseDir)
+        result.put('baseDir', project.liberty.install.baseDir)
 
-        if (project.installLiberty.cacheDir != null) {
-            result.put('cacheDir', project.installLiberty.cacheDir)
+        if (project.liberty.install.cacheDir != null) {
+            result.put('cacheDir', project.liberty.install.cacheDir)
         }
 
-        if (project.installLiberty.username != null) {
-            result.put('username', project.installLiberty.username)
-            result.put('password', project.installLiberty.password)
+        if (project.liberty.install.username != null) {
+            result.put('username', project.liberty.install.username)
+            result.put('password', project.liberty.install.password)
         }
 
-        result.put('maxDownloadTime', project.installLiberty.maxDownloadTime)
+        result.put('maxDownloadTime', project.liberty.install.maxDownloadTime)
 
         return result;
     }

@@ -13,22 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.wasdev.wlp.gradle.plugins
+package net.wasdev.wlp.gradle.extensions
 
-class LibertyExtension {
-    
-    String wlpDir
-    String outputDir
-    String userDir
-    String serverName = "defaultServer"
-    
-    String featureName
-    boolean acceptLicense = false
-    String whenFileExists
-    String to = "usr"
-}
-
-class InstallLibertyExtension{
+class InstallExtension {
     
     String licenseCode
     String version = "8.5.+"
@@ -38,4 +25,5 @@ class InstallLibertyExtension{
     String username
     String password
     String maxDownloadTime = "0"
+
 }
