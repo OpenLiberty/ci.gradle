@@ -13,17 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.wasdev.wlp.gradle.extensions
+package net.wasdev.wlp.gradle.plugins.tasks
 
-class InstallExtension {
-    
-    String licenseCode
-    String version = "8.5.+"
-    String runtimeUrl
-    String baseDir = "."
-    String cacheDir
-    String username
-    String password
-    String maxDownloadTime = "0"
+import org.gradle.api.tasks.TaskAction
+
+class CreateTask extends AbstractTask {
+
+    @TaskAction
+    void create() {
+        executeServerCommand(project, 'create', buildLibertyMap(project))
+    }
 
 }

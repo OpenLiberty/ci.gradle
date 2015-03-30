@@ -13,25 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.wasdev.wlp.gradle.extensions
+package net.wasdev.wlp.gradle.plugins.tasks
 
-import org.gradle.util.ConfigureUtil
+import org.gradle.api.tasks.TaskAction
 
-class LibertyExtension {
-    
-    String wlpDir
-    String outputDir
-    String userDir
-    String serverName = "defaultServer"
-    
-    FeatureExtension features = new FeatureExtension()
-    InstallExtension install = new InstallExtension()
+class StatusTask extends AbstractTask {
 
-    def features(Closure closure) {
-        ConfigureUtil.configure(closure, features)
+    @TaskAction
+    void status() {
+        executeServerCommand(project, 'status', buildLibertyMap(project))
     }
 
-    def install(Closure closure) {
-        ConfigureUtil.configure(closure, install)
-    }
 }

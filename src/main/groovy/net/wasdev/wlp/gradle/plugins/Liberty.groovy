@@ -17,17 +17,17 @@ package net.wasdev.wlp.gradle.plugins
 
 import org.gradle.api.*
 
-import com.ibm.wsspi.kernel.embeddable.Server
-import com.ibm.wsspi.kernel.embeddable.ServerBuilder
-import com.ibm.wsspi.kernel.embeddable.Server.Result
-import com.ibm.wsspi.kernel.embeddable.ServerEventListener
-import com.ibm.wsspi.kernel.embeddable.ServerEventListener.ServerEvent
-import com.ibm.wsspi.kernel.embeddable.ServerEventListener.ServerEvent.Type
-
-import java.util.concurrent.BlockingQueue
-import java.util.concurrent.LinkedBlockingQueue
-
-import net.wasdev.wlp.gradle.extensions.LibertyExtension
+import net.wasdev.wlp.gradle.plugins.extensions.LibertyExtension
+import net.wasdev.wlp.gradle.plugins.tasks.StartTask
+import net.wasdev.wlp.gradle.plugins.tasks.StopTask
+import net.wasdev.wlp.gradle.plugins.tasks.StatusTask
+import net.wasdev.wlp.gradle.plugins.tasks.CreateTask
+import net.wasdev.wlp.gradle.plugins.tasks.RunTask
+import net.wasdev.wlp.gradle.plugins.tasks.PackageTask
+import net.wasdev.wlp.gradle.plugins.tasks.DeployTask
+import net.wasdev.wlp.gradle.plugins.tasks.UndeployTask
+import net.wasdev.wlp.gradle.plugins.tasks.InstallFeatureTask
+import net.wasdev.wlp.gradle.plugins.tasks.InstallLibertyTask
 
 import org.gradle.api.logging.LogLevel
 
@@ -39,219 +39,57 @@ class Liberty implements Plugin<Project> {
 
         project.extensions.create('liberty', LibertyExtension)
 
-        project.task('installLiberty') {
+        project.task('installLiberty', type: InstallLibertyTask) {
             description 'Installs Liberty from a repository'
             logging.level = LogLevel.INFO
-            doLast {
-                def params = buildInstallLibertyMap(project)
-                project.ant.taskdef(name: 'installLiberty', 
-                                    classname: 'net.wasdev.wlp.ant.install.InstallLibertyTask', 
-                                    classpath: project.buildscript.configurations.classpath.asPath)
-                project.ant.installLiberty(params)
-            }
         }
 
-        project.task('libertyRun') {
+        project.task('libertyRun', type: RunTask) {
             description = "Runs a WebSphere Liberty Profile server under the Gradle process."
-            doLast {
-                ServerBuilder builder = getServerBuilder(project);
-
-                LibertyListener listener = new LibertyListener()
-                builder.setServerEventListener(listener)
-                Result result = builder.build().start().get()
-                if (!result.successful()) throw result.getException()
-
-                while (!Type.STOPPED.equals(listener.next().getType())) {}
-            }
+            logging.level = LogLevel.INFO
         }
 
-        project.task('libertyStatus') {
+        project.task('libertyStatus', type: StatusTask) {
             description 'Checks the WebSphere Liberty Profile server is running.'
             logging.level = LogLevel.INFO
-            doLast {
-                try {
-                    executeServerCommand(project, 'status', buildLibertyMap(project))
-                } catch (Exception e) {
-                    // Throws an exception if the server is stopped
-                    println e
-                }
-            }
         }
 
-        project.task('libertyCreate') {
+        project.task('libertyCreate', type: CreateTask) {
             description 'Creates a WebSphere Liberty Profile server.'
             outputs.file { new File(getUserDir(project), "servers/${project.liberty.serverName}/server.xml") }
             logging.level = LogLevel.INFO
-            doLast {
-                executeServerCommand(project, 'create', buildLibertyMap(project))
-            }
         }
 
-        project.task('libertyStart') {
+        project.task('libertyStart', type: StartTask) {
             description 'Starts the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
-            doLast {
-                try {
-                    executeServerCommand(project, 'start', buildLibertyMap(project))
-                } catch (Exception e) {
-                    // Throws an exception if the server is already started
-                    println e
-                }
-            }
         }
 
-        project.task('libertyStop') {
+        project.task('libertyStop', type: StopTask) {
             description 'Stops the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
-            doLast {
-                try {
-                    executeServerCommand(project, 'stop', buildLibertyMap(project))
-                } catch (Exception e) {
-                    // Throws an exception if the server is already stopped
-                    println e
-                }
-            }
         }
         project.tasks.clean.dependsOn project.tasks.libertyStop
 
-        project.task('libertyPackage') {
+        project.task('libertyPackage', type: PackageTask) {
             description 'Generates a WebSphere Liberty Profile server archive.'
             logging.level = LogLevel.INFO
-            doLast {
-                def params = buildLibertyMap(project);
-                params.put('archive', new File(project.buildDir, project.liberty.serverName + '.zip'))
-                executeServerCommand(project, 'package', params)
-            }
         }
 
-        project.task('deployWar') {
+        project.task('deployWar', type: DeployTask) {
             description 'Deploys a WAR file to the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
-            doLast {
-                def params = buildLibertyMap(project);
-                params.put('file', project.war.archivePath)
-                project.ant.taskdef(name: 'deploy', 
-                                    classname: 'net.wasdev.wlp.ant.DeployTask', 
-                                    classpath: project.buildscript.configurations.classpath.asPath)
-                project.ant.deploy(params)
-            }
         }
 
-        project.task('undeployWar') {
+        project.task('undeployWar', type: UndeployTask) {
             description 'Removes a WAR file from the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
-            doLast {
-                def params = buildLibertyMap(project)
-                params.put('file', project.war.archivePath.name)
-                project.ant.taskdef(name: 'undeploy', 
-                                    classname: 'net.wasdev.wlp.ant.UndeployTask', 
-                                    classpath: project.buildscript.configurations.classpath.asPath)
-                project.ant.undeploy(params)
-            }
         }
         
-        project.task('installFeature') {
+        project.task('installFeature', type: InstallFeatureTask) {
             description 'Install a new feature to the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO
-            doLast {
-                def params = buildLibertyMap(project);
-                params.put('name', project.liberty.features.name.join(","))
-                params.put('acceptLicense', project.liberty.features.acceptLicense)
-                if (project.liberty.features.whenFileExists != null) {
-                    params.put('whenFileExists', project.liberty.features.whenFileExists)
-                }
-                if (project.liberty.features.to != null) {
-                    params.put('to', project.liberty.features.to)
-                }
-                params.remove('timeout')
-                project.ant.taskdef(name: 'installFeature', 
-                                   classname: 'net.wasdev.wlp.ant.InstallFeatureTask', 
-                                   classpath: project.buildscript.configurations.classpath.asPath)
-                project.ant.installFeature(params)
-            }
         }
     }
-
-    private void executeServerCommand(Project project, String command, Map<String, String> params) {
-        project.ant.taskdef(name: 'server', 
-                            classname: 'net.wasdev.wlp.ant.ServerTask', 
-                            classpath: project.buildscript.configurations.classpath.asPath)
-        params.put('operation', command)
-        project.ant.server(params)
-    }
-
-    private ServerBuilder getServerBuilder(Project project) {
-        ServerBuilder sb = new ServerBuilder()
-        sb.setName(project.liberty.serverName)
-        sb.setUserDir(getUserDir(project))
-        if (project.liberty.outputDir != null) {
-            sb.setOutputDir(new File(project.liberty.outputDir))
-        }
-        return sb
-    }
-
-
-    private Map<String, String> buildLibertyMap(Project project) {
-
-        Map<String, String> result = new HashMap();
-        result.put('serverName', project.liberty.serverName)
-        def libertyUserDirFile = getUserDir(project)
-        if (!libertyUserDirFile.isDirectory()) {
-            libertyUserDirFile.mkdirs()
-        }
-        result.put('userDir', libertyUserDirFile)
-        result.put('installDir', project.liberty.wlpDir)
-        if (project.liberty.outputDir != null) {
-            result.put('outputDir', project.liberty.outputDir)
-        }          
-        result.put('timeout', 300000)
-
-        return result;
-    }
-
-    private Map<String, String> buildInstallLibertyMap(Project project) {
-
-        Map<String, String> result = new HashMap();
-        result.put('licenseCode', project.liberty.install.licenseCode)
-        result.put('version', project.liberty.install.version)
-
-        if (project.liberty.install.runtimeUrl != null) {
-            result.put('runtimeUrl', project.liberty.install.runtimeUrl)
-        }
-
-        result.put('baseDir', project.liberty.install.baseDir)
-
-        if (project.liberty.install.cacheDir != null) {
-            result.put('cacheDir', project.liberty.install.cacheDir)
-        }
-
-        if (project.liberty.install.username != null) {
-            result.put('username', project.liberty.install.username)
-            result.put('password', project.liberty.install.password)
-        }
-
-        result.put('maxDownloadTime', project.liberty.install.maxDownloadTime)
-
-        return result;
-    }
-
-    private File getUserDir(Project project) {
-        return (project.liberty.userDir == null) ? new File(project.buildDir, 'wlp') : new File(project.liberty.userDir)
-    }
-
-    private static class LibertyListener implements ServerEventListener {
-
-        private BlockingQueue<ServerEvent> queue = new LinkedBlockingQueue<ServerEvent>()
-
-        void serverEvent(ServerEvent event) {
-            queue.put(event)
-        }
-
-        ServerEvent next() {
-            return queue.take()
-        }
-
-    }
-
 
 }
