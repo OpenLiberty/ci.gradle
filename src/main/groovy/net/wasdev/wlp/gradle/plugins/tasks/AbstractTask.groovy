@@ -15,6 +15,8 @@
  */
 package net.wasdev.wlp.gradle.plugins.tasks
 
+import net.wasdev.wlp.gradle.plugins.extensions.DeployExtension
+import net.wasdev.wlp.gradle.plugins.extensions.LibertyExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 

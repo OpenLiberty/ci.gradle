@@ -15,11 +15,18 @@
  */
 package net.wasdev.wlp.gradle.plugins.extensions
 
-class DeployExtension {
+class DeployExtension implements Cloneable{
   
     String dir
-    String include
+    String include = ""
     String exclude
     String file
+    List<Object> listOfClosures = new ArrayList<Object>()
 
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        super.clone()
+    }
 }
+
+

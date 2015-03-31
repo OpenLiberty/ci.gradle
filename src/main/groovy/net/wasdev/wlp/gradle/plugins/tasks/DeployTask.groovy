@@ -21,32 +21,57 @@ class DeployTask extends AbstractTask {
 
     @TaskAction
     void deploy() {
-        def params = buildLibertyMap(project);
 
         params.put('timeout', project.liberty.timeout)
         params.put('file', project.war.archivePath)
 
-        project.ant.taskdef(name: 'deploy', 
-                            classname: 'net.wasdev.wlp.ant.DeployTask', 
-                            classpath: project.buildscript.configurations.classpath.asPath)
+        def containsPlugin = false
 
-        def deployDir = project.liberty.deploy.dir
-        def fileToDeploy = project.liberty.deploy.file
-        def include = project.liberty.deploy.include
-        def exclude = project.liberty.deploy.exclude
-        
-        if (fileToDeploy != null) {
-            params.put('file', fileToDeploy)
-            project.ant.deploy(params)
-        } else {
-            if (deployDir != null) {
-                project.ant.deploy(params) {
-                    fileset(dir:deployDir, includes: include, excludes: exclude)
-                }
-            } else {
+        project.ant.taskdef(name: 'deploy', 
+                                classname: 'net.wasdev.wlp.ant.DeployTask', 
+                                classpath: project.buildscript.configurations.classpath.asPath)
+                                
+        if (project.plugins.hasPlugin("war")) {
+            def params = buildLibertyMap(project);
+            def warFile = project.war.archivePath
+            if (warFile.exists()) {
+                params.put('file', warFile)
                 project.ant.deploy(params)
+                containsPlugin = true
+            }
+        }
+
+        if (project.plugins.hasPlugin("ear")) {
+            def params = buildLibertyMap(project);
+            def earFile = project.ear.archivePath
+            if (earFile.exists()) {
+                params.put('file', earFile)
+                project.ant.deploy(params)
+                containsPlugin = true
+            }
+        }
+
+        project.liberty.deploy.listOfClosures.add(project.liberty.deploy)
+        for (Object deployable :  project.liberty.deploy.listOfClosures) {
+            def params = buildLibertyMap(project);
+            def fileToDeploy = deployable.file
+            if (fileToDeploy != null) {
+                params.put('file', fileToDeploy)
+                project.ant.deploy(params)
+            } else {
+                def deployDir = deployable.dir
+                def include = deployable.include
+                def exclude = deployable.exclude
+
+                if (deployDir != null) {
+                    project.ant.deploy(params) {
+                        fileset(dir:deployDir, includes: include, excludes: exclude)
+                    }
+                } else {
+                    if (!containsPlugin)
+                    project.ant.deploy(params)
+                }
             }
         }
     }
-
 }

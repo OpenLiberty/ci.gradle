@@ -37,7 +37,7 @@ import org.gradle.api.logging.LogLevel
 class Liberty implements Plugin<Project> {
 
     void apply(Project project) {
-
+        
         project.extensions.create('liberty', LibertyExtension)
 
         project.task('installLiberty', type: InstallLibertyTask) {

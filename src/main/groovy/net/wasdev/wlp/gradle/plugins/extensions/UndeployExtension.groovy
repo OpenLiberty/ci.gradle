@@ -18,7 +18,7 @@ package net.wasdev.wlp.gradle.plugins.extensions
 class UndeployExtension {
 
     String application
-    String include
+    String include = ""
     String exclude
 
 }

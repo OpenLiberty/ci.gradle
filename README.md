@@ -130,8 +130,6 @@ These properties are divided in two groups, the general properties (Which need t
 | template | Name of the template to use when creating a new server. Only used with the `libertyCreate` task. | No |
 
 This example shows you how to configure these properties in your script:
-=======
-This example shows you how to configure this properties in your script:
 
 ```groovy
 apply plugin: 'liberty'
@@ -257,7 +255,56 @@ Deploy's properties must be set up in the `deploy` closure inside the `liberty` 
             exclude = 'test-war.war'
         }
     }
+    
+    /*Deploy multiple files using multiple closures*/
+    
+    apply plugin: 'liberty'
+
+    liberty {
+        
+        wlpDir = 'c:/wlp'
+        serverName = 'myServer'
+        
+        deploy {
+            file = 'c:/files/app.war'
+        }
+
+        deploy {
+            file = 'c:/resources/test.war'
+        }
+        
+        deploy {
+            dir = 'c:/extras'
+            include = 'sample.war, demo.war'
+        }
+    }
 ```
+
+The following examples shows you how to deploy a file using the `WAR` or the `EAR` gradle plugins:
+
+```
+    /* Deploys 'sample.war' using the WAR plugin */
+    apply plugin: 'war'
+
+    war {
+        destinationDir = new File ('C:/files')
+        archiveName = 'sample.war'
+    }
+```
+
+`destinationDir` and `archiveName` are native properties of the Gradle's WAR plugin. For more information see [here.](https://gradle.org/docs/current/dsl/org.gradle.api.tasks.bundling.War.html)
+
+```
+    /* Deploys 'test.ear' using the EAR plugin */
+    apply plugin: 'ear'
+
+    ear {
+        destinationDir = new File ('C:/files')
+        archiveName = 'test.ear'
+    }
+```
+
+`destinationDir` and `archiveName` are native properties of the Gradle's EAR plugin. For more information see [here.](https://gradle.org/docs/current/dsl/org.gradle.plugins.ear.Ear.html)
 
 ### undeploy task
 
@@ -306,6 +353,9 @@ Undeploy's properties must be set up in the `undeploy` closure inside the `liber
         }
     }
 ```
+
+If none property is set,  all the applications availables in the server at the moment of the execution will be undeployed.
+
 ### installFeature task
 The `installFeature` task installs a feature packaged as a Subsystem Archive (ESA file) to the Liberty runtime.
 
@@ -329,6 +379,21 @@ liberty {
 
     features {
         name = ['mongodb-2.0']
+        acceptLicense = true
+    } 
+}
+```
+
+Also is possible install multiple features in a single closure, for example:
+```groovy
+/* Install 'mongodb-2.0' and 'ejbLite-3.1' features using a single closure. */
+apply plugin: 'liberty'
+
+liberty {
+    wlpDir = "c:/wlp"
+
+    features {
+        name = ['mongodb-2.0', 'ejbLite-3.1']
         acceptLicense = true
     } 
 }
