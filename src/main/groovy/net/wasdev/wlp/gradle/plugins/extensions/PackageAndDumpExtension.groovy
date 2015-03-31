@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2015.
+ * (C) Copyright IBM Corporation 2015.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.wasdev.wlp.gradle.plugins.tasks
+package net.wasdev.wlp.gradle.plugins.extensions
 
-import org.gradle.api.tasks.TaskAction
-
-class StartTask extends AbstractTask {
-
-    @TaskAction
-    void start() {
-        def params = buildLibertyMap(project);
-        params.put('clean', project.liberty.clean)
-        if (project.liberty.timeout != null && project.liberty.timeout.length() != 0) {
-        params.put('timeout', project.liberty.timeout)
-        }
-        executeServerCommand(project, 'start', params)
-    }
+class PackageAndDumpExtension {
+    
+    String include
+    String archive
 
 }

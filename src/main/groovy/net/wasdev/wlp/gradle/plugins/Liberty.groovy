@@ -24,6 +24,9 @@ import net.wasdev.wlp.gradle.plugins.tasks.StatusTask
 import net.wasdev.wlp.gradle.plugins.tasks.CreateTask
 import net.wasdev.wlp.gradle.plugins.tasks.RunTask
 import net.wasdev.wlp.gradle.plugins.tasks.PackageTask
+import net.wasdev.wlp.gradle.plugins.tasks.DumpTask
+import net.wasdev.wlp.gradle.plugins.tasks.JavaDumpTask
+import net.wasdev.wlp.gradle.plugins.tasks.DebugTask
 import net.wasdev.wlp.gradle.plugins.tasks.DeployTask
 import net.wasdev.wlp.gradle.plugins.tasks.UndeployTask
 import net.wasdev.wlp.gradle.plugins.tasks.InstallFeatureTask
@@ -83,6 +86,21 @@ class Liberty implements Plugin<Project> {
 
         project.task('libertyPackage', type: PackageTask) {
             description 'Generates a WebSphere Liberty Profile server archive.'
+            logging.level = LogLevel.INFO
+        }
+
+        project.task('libertyDump', type: DumpTask) {
+            description 'Dumps diagnostic information from the Liberty Profile server into an archive.'
+            logging.level = LogLevel.INFO
+        }
+
+        project.task('libertyJavaDump', type: JavaDumpTask) {
+            description 'Dumps diagnostic information from the Liberty Profile server JVM.'
+            logging.level = LogLevel.INFO
+        }
+
+        project.task('libertyDebug', type: DebugTask) {
+            description 'Runs the Liberty Profile server in the console foreground after a debugger connects to the debug port (default: 7777).'
             logging.level = LogLevel.INFO
         }
 

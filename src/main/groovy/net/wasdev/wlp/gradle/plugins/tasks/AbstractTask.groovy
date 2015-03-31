@@ -40,7 +40,6 @@ abstract class AbstractTask extends DefaultTask {
         if (project.liberty.outputDir != null) {
             result.put('outputDir', project.liberty.outputDir)
         }          
-        result.put('timeout', 300000)
 
         return result;
     }

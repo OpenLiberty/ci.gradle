@@ -23,9 +23,15 @@ class LibertyExtension {
     String outputDir
     String userDir
     String serverName = "defaultServer"
+    boolean clean = false
+    String timeout
+    String template
     
     FeatureExtension features = new FeatureExtension()
     InstallExtension install = new InstallExtension()
+    PackageAndDumpExtension packageLiberty = new PackageAndDumpExtension()
+    PackageAndDumpExtension dumpLiberty = new PackageAndDumpExtension()
+    PackageAndDumpExtension javaDumpLiberty = new PackageAndDumpExtension()
 
     def features(Closure closure) {
         ConfigureUtil.configure(closure, features)
@@ -33,5 +39,17 @@ class LibertyExtension {
 
     def install(Closure closure) {
         ConfigureUtil.configure(closure, install)
+    }
+
+    def packageLiberty(Closure closure) {
+        ConfigureUtil.configure(closure, packageLiberty)
+    }
+
+    def dumpLiberty(Closure closure) {
+        ConfigureUtil.configure(closure, dumpLiberty)
+    }
+
+    def javaDumpLiberty(Closure closure) {
+        ConfigureUtil.configure(closure, javaDumpLiberty)
     }
 }
