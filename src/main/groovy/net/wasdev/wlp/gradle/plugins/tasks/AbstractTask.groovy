@@ -46,7 +46,8 @@ abstract class AbstractTask extends DefaultTask {
     }
 
     protected File getUserDir(Project project) {
-        return (project.liberty.userDir == null) ? new File(project.liberty.wlpDir, 'usr') : new File(project.liberty.userDir)
+        String wlpDir = project.liberty.wlpDir == null ? "" : project.liberty.wlpDir
+        return (project.liberty.userDir == null) ? new File(wlpDir, 'usr') : new File(project.liberty.userDir)
     }
 
 }
