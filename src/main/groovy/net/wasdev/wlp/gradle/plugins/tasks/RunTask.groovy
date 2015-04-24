@@ -37,6 +37,9 @@ class RunTask extends AbstractTask {
         builder.setServerEventListener(listener)
         Result result = builder.build().start().get()
         if (!result.successful()) throw result.getException()
+
+
+        while (!Type.STOPPED.equals(listener.next().getType())) {}
     }
 
     protected ServerBuilder getServerBuilder(Project project) {

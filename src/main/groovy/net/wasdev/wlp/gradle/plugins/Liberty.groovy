@@ -44,9 +44,19 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
         }
 
-        project.task('libertyRun', type: RunTask) {
-            description = "Runs a WebSphere Liberty Profile server under the Gradle process."
-            logging.level = LogLevel.INFO
+       try {
+            project.task('libertyRun', type: RunTask) {
+                description = "Runs a WebSphere Liberty Profile server under the Gradle process."
+                logging.level = LogLevel.INFO
+            }
+        } catch (Exception e) {
+            project.task('libertyRun') {
+                description = "Runs a WebSphere Liberty Profile server under the Gradle process."
+                logging.level = LogLevel.INFO
+                doLast {
+                    println ("This task can't be executed because some dependencies are missing")
+                }
+            }
         }
 
         project.task('libertyStatus', type: StatusTask) {
