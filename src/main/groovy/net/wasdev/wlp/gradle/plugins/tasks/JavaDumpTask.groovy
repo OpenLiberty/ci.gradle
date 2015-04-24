@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2015.
+ * (C) Copyright IBM Corporation 2015.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,14 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.tasks.TaskAction
 
-class PackageTask extends AbstractTask {
+class JavaDumpTask extends AbstractTask {
 
     @TaskAction
-    void packageServer() {
+    void javaDump() {
         def params = buildLibertyMap(project);
-        if (project.liberty.packageLiberty.archive != null && project.liberty.packageLiberty.archive.length() != 0) {
-            params.put('archive', new File(project.liberty.packageLiberty.archive))
+        if (project.liberty.javaDumpLiberty.include != null && project.liberty.javaDumpLiberty.include.length() != 0) {
+            params.put('include',project.liberty.javaDumpLiberty.include)
         }
-        if (project.liberty.packageLiberty.include != null && project.liberty.packageLiberty.include.length() != 0) {
-            params.put('include',project.liberty.packageLiberty.include)
-        }
-        executeServerCommand(project, 'package', params)
+        executeServerCommand(project, 'javadump', params)
     }
-
 }

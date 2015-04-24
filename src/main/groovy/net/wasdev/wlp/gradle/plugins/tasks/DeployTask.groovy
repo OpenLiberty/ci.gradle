@@ -22,6 +22,7 @@ class DeployTask extends AbstractTask {
     @TaskAction
     void deploy() {
         def params = buildLibertyMap(project);
+        params.put('timeout', project.liberty.timeout)
         params.put('file', project.war.archivePath)
         project.ant.taskdef(name: 'deploy', 
                             classname: 'net.wasdev.wlp.ant.DeployTask', 

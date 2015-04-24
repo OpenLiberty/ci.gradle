@@ -22,7 +22,8 @@ class UndeployTask extends AbstractTask {
     @TaskAction
     void undeploy() {
         def params = buildLibertyMap(project);
-        params.put('file', project.war.archivePath)
+        params.put('timeout', project.liberty.timeout)
+        params.put('file', project.war.archiveName)
         project.ant.taskdef(name: 'undeploy', 
                             classname: 'net.wasdev.wlp.ant.UndeployTask', 
                             classpath: project.buildscript.configurations.classpath.asPath)

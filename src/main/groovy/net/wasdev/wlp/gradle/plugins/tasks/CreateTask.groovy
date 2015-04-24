@@ -21,7 +21,11 @@ class CreateTask extends AbstractTask {
 
     @TaskAction
     void create() {
-        executeServerCommand(project, 'create', buildLibertyMap(project))
+        def params = buildLibertyMap(project);
+        if (project.liberty.template != null && project.liberty.template.length() != 0) {
+            params.put('template', project.liberty.template)
+        }
+        executeServerCommand(project, 'create', params)
     }
 
 }
