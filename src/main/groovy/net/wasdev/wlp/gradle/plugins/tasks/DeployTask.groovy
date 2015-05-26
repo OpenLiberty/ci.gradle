@@ -22,40 +22,18 @@ class DeployTask extends AbstractTask {
     @TaskAction
     void deploy() {
 
-        params.put('timeout', project.liberty.timeout)
-        params.put('file', project.war.archivePath)
-
-        def containsPlugin = false
+        def deployClosureDeclared = false
 
         project.ant.taskdef(name: 'deploy', 
                                 classname: 'net.wasdev.wlp.ant.DeployTask', 
                                 classpath: project.buildscript.configurations.classpath.asPath)
                                 
-        if (project.plugins.hasPlugin("war")) {
-            def params = buildLibertyMap(project);
-            def warFile = project.war.archivePath
-            if (warFile.exists()) {
-                params.put('file', warFile)
-                project.ant.deploy(params)
-                containsPlugin = true
-            }
-        }
-
-        if (project.plugins.hasPlugin("ear")) {
-            def params = buildLibertyMap(project);
-            def earFile = project.ear.archivePath
-            if (earFile.exists()) {
-                params.put('file', earFile)
-                project.ant.deploy(params)
-                containsPlugin = true
-            }
-        }
-
         project.liberty.deploy.listOfClosures.add(project.liberty.deploy)
         for (Object deployable :  project.liberty.deploy.listOfClosures) {
             def params = buildLibertyMap(project);
             def fileToDeploy = deployable.file
             if (fileToDeploy != null) {
+                deployClosureDeclared = true
                 params.put('file', fileToDeploy)
                 project.ant.deploy(params)
             } else {
@@ -64,11 +42,29 @@ class DeployTask extends AbstractTask {
                 def exclude = deployable.exclude
 
                 if (deployDir != null) {
+                    deployClosureDeclared = true
                     project.ant.deploy(params) {
                         fileset(dir:deployDir, includes: include, excludes: exclude)
                     }
-                } else {
-                    if (!containsPlugin)
+                }
+            }
+        }
+
+        if (!deployClosureDeclared) {
+            if (project.plugins.hasPlugin("war")) {
+                def params = buildLibertyMap(project);
+                def warFile = project.war.archivePath
+                if (warFile.exists()) {
+                    params.put('file', warFile)
+                    project.ant.deploy(params)
+                }
+            }
+
+            if (project.plugins.hasPlugin("ear")) {
+                def params = buildLibertyMap(project);
+                def earFile = project.ear.archivePath
+                if (earFile.exists()) {
+                    params.put('file', earFile)
                     project.ant.deploy(params)
                 }
             }

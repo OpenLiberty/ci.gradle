@@ -23,9 +23,6 @@ class UndeployTask extends AbstractTask {
     void undeploy() {
         def params = buildLibertyMap(project);
 
-        params.put('timeout', project.liberty.timeout)
-        params.put('file', project.war.archiveName)
-
         project.ant.taskdef(name: 'undeploy', 
                             classname: 'net.wasdev.wlp.ant.UndeployTask', 
                             classpath: project.buildscript.configurations.classpath.asPath)
@@ -41,8 +38,14 @@ class UndeployTask extends AbstractTask {
             project.ant.undeploy(params) {
                 patternset(includes: include, excludes: exclude)
             }
-        }
-        else {
+        } else {
+            if (project.plugins.hasPlugin("war")) {
+                params.put('file', project.war.archiveName)
+            }
+
+            if (project.plugins.hasPlugin("ear")) {
+                params.put('file', project.ear.archiveName)
+            }
             project.ant.undeploy(params)
         }
     }

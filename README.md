@@ -226,7 +226,7 @@ The `deploy` task supports deployment of one or more applications to the Liberty
 
 Deploy's properties must be set up in the `deploy` closure inside the `liberty` closure.
 
-```
+```groovy
     // Deploys a single file
     apply plugin: 'liberty'
 
@@ -239,7 +239,7 @@ Deploy's properties must be set up in the `deploy` closure inside the `liberty` 
         }
     }
 
-    //Deploy multiples files
+    //Deploy multiple files
     /*Deploy 'app.war' and 'sample.war' 
       but exclude 'test-war.war'*/
     apply plugin: 'liberty'
@@ -282,7 +282,7 @@ Deploy's properties must be set up in the `deploy` closure inside the `liberty` 
 
 The following examples shows you how to deploy a file using the `WAR` or the `EAR` gradle plugins:
 
-```
+```groovy
     /* Deploys 'sample.war' using the WAR plugin */
     apply plugin: 'war'
 
@@ -292,9 +292,9 @@ The following examples shows you how to deploy a file using the `WAR` or the `EA
     }
 ```
 
-`destinationDir` and `archiveName` are native properties of the Gradle's WAR plugin. For more information see [here.](https://gradle.org/docs/current/dsl/org.gradle.api.tasks.bundling.War.html)
+`destinationDir` and `archiveName` are native properties of Gradle's WAR plugin. For more information see [here.](https://gradle.org/docs/current/dsl/org.gradle.api.tasks.bundling.War.html)
 
-```
+```groovy
     /* Deploys 'test.ear' using the EAR plugin */
     apply plugin: 'ear'
 
@@ -304,7 +304,7 @@ The following examples shows you how to deploy a file using the `WAR` or the `EA
     }
 ```
 
-`destinationDir` and `archiveName` are native properties of the Gradle's EAR plugin. For more information see [here.](https://gradle.org/docs/current/dsl/org.gradle.plugins.ear.Ear.html)
+`destinationDir` and `archiveName` are native properties of Gradle's EAR plugin. For more information see [here.](https://gradle.org/docs/current/dsl/org.gradle.plugins.ear.Ear.html)
 
 ### undeploy task
 
@@ -336,7 +336,7 @@ Undeploy's properties must be set up in the `undeploy` closure inside the `liber
         }
     }
 
-    //Undeploy multiples applications
+    //Undeploy multiple applications
     /*Undeploy 'app.war' and 'sample.war' 
       but exclude 'test-war.war'*/
       
@@ -354,7 +354,7 @@ Undeploy's properties must be set up in the `undeploy` closure inside the `liber
     }
 ```
 
-If none property is set,  all the applications availables in the server at the moment of the execution will be undeployed.
+If no property is set for the `undeploy` closure, but the EAR or WAR plugin is being used and their properties `destinationDir` and `archiveName` are declared, this will be the application that will be undeployed. Otherwise, all the applications available in the server at the moment of the execution will be undeployed.
 
 ### installFeature task
 The `installFeature` task installs a feature packaged as a Subsystem Archive (ESA file) to the Liberty runtime.
