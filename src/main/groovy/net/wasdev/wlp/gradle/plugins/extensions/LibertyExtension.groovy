@@ -23,12 +23,19 @@ class LibertyExtension {
     String outputDir
     String userDir
     String serverName = "defaultServer"
+
     boolean clean = false
     String timeout
     String template
-    
+
+    def numberOfClosures = 0    
+
     FeatureExtension features = new FeatureExtension()
     InstallExtension install = new InstallExtension()
+
+    DeployExtension deploy = new DeployExtension()
+    UndeployExtension undeploy = new UndeployExtension()
+
     PackageAndDumpExtension packageLiberty = new PackageAndDumpExtension()
     PackageAndDumpExtension dumpLiberty = new PackageAndDumpExtension()
     PackageAndDumpExtension javaDumpLiberty = new PackageAndDumpExtension()
@@ -41,6 +48,19 @@ class LibertyExtension {
         ConfigureUtil.configure(closure, install)
     }
 
+    def deploy(Closure closure) {
+        if (numberOfClosures > 0){
+            deploy.listOfClosures.add(deploy.clone())
+            deploy.file = null
+        }
+        ConfigureUtil.configure(closure, deploy)
+        numberOfClosures++
+    }
+
+    def undeploy(Closure closure) {
+        ConfigureUtil.configure(closure, undeploy)
+    }
+    
     def packageLiberty(Closure closure) {
         ConfigureUtil.configure(closure, packageLiberty)
     }

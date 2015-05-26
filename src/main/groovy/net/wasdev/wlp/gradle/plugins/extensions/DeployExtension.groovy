@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2015.
+ * (C) Copyright IBM Corporation 2015.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,18 @@
  */
 package net.wasdev.wlp.gradle.plugins.extensions
 
-class FeatureExtension {
+class DeployExtension implements Cloneable{
+  
+    String dir
+    String include = ""
+    String exclude
+    String file
+    List<Object> listOfClosures = new ArrayList<Object>()
 
-    String[] name
-    boolean acceptLicense = false
-    String whenFileExists
-    String to
-
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        super.clone()
+    }
 }
+
+

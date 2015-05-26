@@ -15,6 +15,8 @@
  */
 package net.wasdev.wlp.gradle.plugins.tasks
 
+import net.wasdev.wlp.gradle.plugins.extensions.DeployExtension
+import net.wasdev.wlp.gradle.plugins.extensions.LibertyExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 
@@ -40,6 +42,9 @@ abstract class AbstractTask extends DefaultTask {
         if (project.liberty.outputDir != null) {
             result.put('outputDir', project.liberty.outputDir)
         }          
+        if (project.liberty.timeout != null && !project.liberty.timeout.isEmpty()) {
+            result.put('timeout', project.liberty.timeout)
+        }
 
         return result;
     }
