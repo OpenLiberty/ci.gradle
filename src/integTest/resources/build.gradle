@@ -1,0 +1,31 @@
+buildscript {
+    def WLP_DIR = System.getProperty('WLP_DIR')
+    repositories {
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath files('../libs/liberty-gradle-plugin-1.0-SNAPSHOT.jar')
+        classpath files(WLP_DIR+'/bin/tools/ws-server.jar')
+        classpath 'net.wasdev.wlp.ant:wlp-anttasks:1.1-SNAPSHOT'
+    }
+}
+
+
+def WLP_DIR = System.getProperty('WLP_DIR')
+apply plugin: 'liberty'
+
+liberty {
+    userDir = '../'
+    wlpDir = WLP_DIR
+    serverName = 'default_TestServer'
+} 
+apply plugin : 'war'
+
+war{
+    destinationDir = new File('../resources/integrationTest')
+    archiveName = 'test-war.war'
+}       

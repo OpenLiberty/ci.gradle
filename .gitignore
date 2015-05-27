@@ -5,8 +5,3 @@
 bin/
 build
 *~
-/bin/
-.classpath
-.project
-.settings/gradle
-
