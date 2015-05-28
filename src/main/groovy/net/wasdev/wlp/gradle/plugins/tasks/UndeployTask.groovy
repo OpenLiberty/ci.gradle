@@ -34,7 +34,7 @@ class UndeployTask extends AbstractTask {
         if (application != null) {
             params.put('file', application)
             project.ant.undeploy(params)
-        } else if (include != null || exclude != null) {
+        } else if ((include != null && !include.isEmpty()) || exclude != null) {
             project.ant.undeploy(params) {
                 patternset(includes: include, excludes: exclude)
             }

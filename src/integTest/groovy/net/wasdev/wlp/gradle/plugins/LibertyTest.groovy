@@ -43,23 +43,23 @@ class LibertyTest extends AbstractIntegrationTest{
     @Test
     public void test2_executeDeployTask() {
         try {
-            runTasks(integTestDir, 'deployWar')
+            runTasks(integTestDir, 'deploy')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task deployWar. "+e)
+            throw new AssertionError ("Fail on task deploy. "+e)
         }
     }
 
     @Test
     public void test3_executeUndeployTask() {
         try {
-            runTasks(integTestDir, 'undeployWar')
+            runTasks(integTestDir, 'undeploy')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task undeployWar. "+e)
+            throw new AssertionError ("Fail on task undeploy. "+e)
         }
     }
 
     @Test
-    public void test5_stop() {
+    public void test4_stop() {
         try{
             runTasks(integTestDir, 'libertyStop')
         } catch (Exception e) {

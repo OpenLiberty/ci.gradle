@@ -22,10 +22,7 @@ liberty {
     userDir = '../'
     wlpDir = WLP_DIR
     serverName = 'default_TestServer'
+    deploy {
+        file = '../resources/integrationTest/test-war.war'
+    }
 } 
-apply plugin : 'war'
-
-war{
-    destinationDir = new File('../resources/integrationTest')
-    archiveName = 'test-war.war'
-}       
