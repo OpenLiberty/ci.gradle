@@ -16,6 +16,13 @@ gradlew build
 
 This will download Gradle and then build the plugin `liberty-gradle-plugin-1.0-SNAPSHOT.jar` in to the `build\libs` directory. It is also possible to install the plugin in to your local Maven repository using `gradlew install`.
 
+To build the plugin and run the integration tests execute the following command in the root directory.
+
+```bash
+gradlew build -PwlpInstallDir=<liberty_install_directory>
+```
+* Liberty Profile installation is required to run the integration tests.
+
 ## Usage
 ###1. Configuring your dependencies
 #### 1.1 Adding the ant plugin to the build script
