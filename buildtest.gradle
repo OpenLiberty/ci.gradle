@@ -1,0 +1,40 @@
+buildscript{
+	repositories{
+		mavenLocal()
+		//mavenCentral()
+		//maven {
+			//name = 'Sonatype Nexus Snapshots'
+			//url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+	//	}
+	}
+	dependencies {
+		classpath ('net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:1.0-SNAPSHOT')
+		classpath ('net.wasdev.wlp.ant:wlp-anttasks:1.1-SNAPSHOT')
+		classpath files('c:/wlp/bin/tools/ws-server.jar')
+	}
+}
+//
+apply plugin: 'liberty'
+
+liberty {
+	
+	wlpDir = 'c:/wpl'
+	serverName = 'myServer1'
+	userDir = 'C:/wpl/usr/servers'
+	outputDir = 'C:/wpl/usr/servers'
+	clean = true
+	timeout = "10000"
+	
+//	deploy {
+//		file = 'C:/Users/Administrator/workspace/Ant_Liberty/sample.war'
+//	}
+//	features{
+//		name = ['mongodb-2.0']
+//		acceptLicense = true
+//	}
+		uninstallfeatures{
+			name = ['mongodb-2.0']
+			
+		}
+
+}
