@@ -53,8 +53,8 @@ class InstallLibertyTask extends AbstractTask {
 		result.put('type', project.liberty.install.type)
 	}
         result.put('maxDownloadTime', project.liberty.install.maxDownloadTime)
-
-        return result;
+	
+	return result;
     }
 
 }
