@@ -48,7 +48,7 @@ class InstallLibertyTask extends AbstractTask {
             result.put('username', project.liberty.install.username)
             result.put('password', project.liberty.install.password)
         }
-		
+	
 	if (project.liberty.install.type != null) {
 		result.put('type', project.liberty.install.type)
 	}
