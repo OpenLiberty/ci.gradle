@@ -23,8 +23,8 @@ class UninstallFeatureTask extends AbstractTask {
     void uninstallFeature() {
         def params = buildLibertyMap(project);
         params.put('name', project.liberty.uninstallfeatures.name.join(","))
-		
         params.remove('timeout')
+        
         project.ant.taskdef(name: 'uninstallFeature', 
                             classname: 'net.wasdev.wlp.ant.UninstallFeatureTask', 
                             classpath: project.buildscript.configurations.classpath.asPath)
