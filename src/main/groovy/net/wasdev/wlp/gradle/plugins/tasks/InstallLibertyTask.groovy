@@ -19,7 +19,7 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 
 class InstallLibertyTask extends AbstractTask {
-
+	
     @TaskAction
     void install() {
         def params = buildInstallLibertyMap(project)
