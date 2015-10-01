@@ -37,7 +37,7 @@ class InstallLibertyTask extends AbstractTask {
         if (project.liberty.install.runtimeUrl != null) {
             result.put('runtimeUrl', project.liberty.install.runtimeUrl)
 		}
-//rarrerl parameter before used to be reference 'runtimeUrl'
+
         result.put('baseDir', project.liberty.install.baseDir)
 
         if (project.liberty.install.cacheDir != null) {
@@ -49,9 +49,9 @@ class InstallLibertyTask extends AbstractTask {
             result.put('password', project.liberty.install.password)
         }
 		
-		if (project.liberty.install.type != null) {
-			result.put('type', project.liberty.install.type)
-		}
+	if (project.liberty.install.type != null) {
+		result.put('type', project.liberty.install.type)
+	}
         result.put('maxDownloadTime', project.liberty.install.maxDownloadTime)
 
         return result;
