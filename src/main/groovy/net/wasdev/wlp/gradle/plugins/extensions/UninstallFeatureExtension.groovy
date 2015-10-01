@@ -17,7 +17,7 @@ package net.wasdev.wlp.gradle.plugins.extensions
 
 class UninstallFeatureExtension{
  
-	String[] name
+    String[] name
 }
 
 
