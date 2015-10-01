@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2015.
+ * (C) Copyright IBM Corporation 2015.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ class InstallLibertyTask extends AbstractTask {
 
         if (project.liberty.install.runtimeUrl != null) {
             result.put('runtimeUrl', project.liberty.install.runtimeUrl)
-        }
-
+		}
+//rarrerl parameter before used to be reference 'runtimeUrl'
         result.put('baseDir', project.liberty.install.baseDir)
 
         if (project.liberty.install.cacheDir != null) {
@@ -48,7 +48,10 @@ class InstallLibertyTask extends AbstractTask {
             result.put('username', project.liberty.install.username)
             result.put('password', project.liberty.install.password)
         }
-
+		
+		if (project.liberty.install.type != null) {
+			result.put('type', project.liberty.install.type)
+		}
         result.put('maxDownloadTime', project.liberty.install.maxDownloadTime)
 
         return result;

@@ -29,12 +29,18 @@ liberty {
 //		file = 'C:/Users/Administrator/workspace/Ant_Liberty/sample.war'
 //	}
 //	features{
-//		name = ['mongodb-2.0']
+//		name = ['mongodb-2.0','monitor-1.0']
 //		acceptLicense = true
 //	}
-		uninstallfeatures{
-			name = ['mongodb-2.0']
-			
+//		uninstallfeatures{
+//			name = ['mongodb-2.0','monitor-1.0']
+//			
+//		}
+		install {
+//			licenseCode = "L-MCAO-9SYMVC"
+//			runtimeUrl = "<url to runtime.jar>"
+			//type= "webProfile7"//type="javaee7" //Ya fuinciona
+	     runtimeUrl = "http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/maven/repository/com/ibm/websphere/appserver/runtime/wlp-javaee7/8.5.5.7/wlp-javaee7-8.5.5.7.zip"
 		}
 
 }
