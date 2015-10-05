@@ -117,10 +117,10 @@ class Liberty implements Plugin<Project> {
             description 'Install a new feature to the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO
         }
-		project.task('uninstallFeature', type: UninstallFeatureTask) {
-			description 'Uninstall a feature to the WebSphere Liberty Profile server'
-			logging.level = LogLevel.INFO
-		}
+	project.task('uninstallFeature', type: UninstallFeatureTask) {
+		description 'Uninstall a feature to the WebSphere Liberty Profile server'
+		logging.level = LogLevel.INFO
+	}
     }
 
 }
