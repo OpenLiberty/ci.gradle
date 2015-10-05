@@ -111,6 +111,7 @@ The plugin will have made the following tasks available to your project:
 | deploy | Deploys a supported file to the WebSphere Liberty Profile server. |
 | undeploy | Removes an application from the WebSphere Liberty Profile server. |
 | installFeature | Installs a new feature in the WebSphere Liberty Profile server. |
+| uninstallFeature | Uninstalls a feature in the WebSphere Liberty Profile server. |
 
 ###Extension properties
 The Liberty Gradle Plugin has some properties defined in the `Liberty` closure which will let you customize the different tasks.
