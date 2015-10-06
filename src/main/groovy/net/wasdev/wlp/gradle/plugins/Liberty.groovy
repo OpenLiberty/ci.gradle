@@ -31,6 +31,8 @@ import net.wasdev.wlp.gradle.plugins.tasks.DeployTask
 import net.wasdev.wlp.gradle.plugins.tasks.UndeployTask
 import net.wasdev.wlp.gradle.plugins.tasks.InstallFeatureTask
 import net.wasdev.wlp.gradle.plugins.tasks.InstallLibertyTask
+import net.wasdev.wlp.gradle.plugins.tasks.UninstallFeatureTask
+
 
 import org.gradle.api.logging.LogLevel
 
@@ -115,6 +117,10 @@ class Liberty implements Plugin<Project> {
             description 'Install a new feature to the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO
         }
+	project.task('uninstallFeature', type: UninstallFeatureTask) {
+		description 'Uninstall a feature to the WebSphere Liberty Profile server'
+		logging.level = LogLevel.INFO
+	}
     }
 
 }

@@ -111,6 +111,7 @@ The plugin will have made the following tasks available to your project:
 | deploy | Deploys a supported file to the WebSphere Liberty Profile server. |
 | undeploy | Removes an application from the WebSphere Liberty Profile server. |
 | installFeature | Installs a new feature in the WebSphere Liberty Profile server. |
+| uninstallFeature | Uninstalls a feature in the WebSphere Liberty Profile server. |
 
 ###Extension properties
 The Liberty Gradle Plugin has some properties defined in the `Liberty` closure which will let you customize the different tasks.
@@ -179,15 +180,16 @@ The Liberty license code must always be set in order to install the runtime. If 
 
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
-| licenseCode | Liberty profile license code. See [above](#install-liberty-task). | Yes |
+| licenseCode | Liberty profile license code. See [above](#install-liberty-task). | Yes, if `type` is `webProfile6` or `runtimeUrl` specifies a `.jar` file.|
 | version | Exact or wildcard version of the Liberty profile server to install. Available versions are listed in the [index.yml](http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/index.yml) file. Only used if `runtimeUrl` is not set. The default value is `8.5.+`. | No |
-| runtimeUrl | URL to the Liberty profile's `wlp*runtime.jar`. If not set, the Liberty repository will be used to find the Liberty runtime archive. | No |
+| runtimeUrl | URL to the Liberty profile's `.jar` or a `.zip` file. If not set, the Liberty repository will be used to find the Liberty runtime archive. | No |
 | baseDir | The base installation directory. The actual installation directory of Liberty profile will be `${baseDir}/wlp`. The default value is `.` (current working directory). | No | 
 | cacheDir | The directory used for caching downloaded files such as the license or `.jar` files. The default value is `${java.io.tmpdir}/wlp-cache`. | No | 
 | username | Username needed for basic authentication. | No | 
 | password | Password needed for basic authentication. | No | 
 | maxDownloadTime | Maximum time in seconds the download can take. The default value is `0` (no maximum time). | No | 
-
+| type | Liberty runtime type to download from the Liberty repository. Currently, the following types are supported: `kernel`, `webProfile6`, `webProfile7`, and `javaee7`. Only used if `runtimeUrl` is not set. The default value is `webProfile6`. | No |
+| offline | Enable offline mode. Install without access to a network. The Liberty profile files must be present in the `cacheDir` directory. The default value is `false`. | No |
 #### Examples
 
 ```groovy
@@ -214,7 +216,28 @@ The Liberty license code must always be set in order to install the runtime. If 
         }
 
     }
+    
+    //Install Liberty runtime with all Java EE 7 features using Liberty repository.
+    apply plugin: 'liberty'
 
+    liberty {
+
+        install {
+            type= "javaee7"
+        }
+
+    }
+    
+    //Install from a specific location using a zip file.
+    apply plugin: 'liberty'
+
+    liberty {
+
+        install {
+            runtimeUrl = "<url to wlp*.zip>"
+        }
+
+    }
 ```
 
 ### deploy task
@@ -405,3 +428,42 @@ liberty {
     } 
 }
 ```
+### UninstallFeature task
+The `uninstallFeature` task uninstalls a feature packaged as a Subsystem Archive (ESA file) to the Liberty runtime.
+
+####**Properties**.
+
+| Attribute | Description | Required |
+| --------- | ------------ | ----------|
+| featureName |Specifies the name of the Subsystem Archive (ESA file) to be uninstalled. The value can be a feature name, a file name or a URL. | Yes |
+
+
+The following example shows what propertie will be uninstall the [`mongodb-2.0`](https://developer.ibm.com/wasdev/downloads/#asset/features-com.ibm.websphere.appserver.mongodb-2.0) 
+Feature to your server:
+
+
+```groovy
+apply plugin: 'liberty'
+
+liberty {
+    wlpDir = "c:/wlp"
+
+    uninstallfeatures {
+        name = ['mongodb-2.0']
+    } 
+}
+```
+Also is possible uninstall multiple features in a single closure, for example:
+```groovy
+/* Uninstall 'mongodb-2.0' and 'monitor-1.0' features using a single closure. */
+apply plugin: 'liberty'
+
+liberty {
+    wlpDir = "c:/wlp"
+
+    uninstallfeatures {
+        name = ['mongodb-2.0', 'monitor-1.0']
+    } 
+}
+```
+

@@ -15,15 +15,9 @@
  */
 package net.wasdev.wlp.gradle.plugins.extensions
 
-class InstallExtension {
-    
-    String licenseCode
-    String version = "8.5.+"
-    String runtimeUrl
-    String baseDir = "."
-    String cacheDir
-    String username
-    String password
-    String maxDownloadTime = "0"
-    String type
+class UninstallFeatureExtension{
+ 
+    String[] name
 }
+
+

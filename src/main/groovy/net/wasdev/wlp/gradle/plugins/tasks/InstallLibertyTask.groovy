@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2015.
+ * (C) Copyright IBM Corporation 2015.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 
 class InstallLibertyTask extends AbstractTask {
-
+	
     @TaskAction
     void install() {
         def params = buildInstallLibertyMap(project)
@@ -36,7 +36,7 @@ class InstallLibertyTask extends AbstractTask {
 
         if (project.liberty.install.runtimeUrl != null) {
             result.put('runtimeUrl', project.liberty.install.runtimeUrl)
-        }
+		}
 
         result.put('baseDir', project.liberty.install.baseDir)
 
@@ -48,10 +48,13 @@ class InstallLibertyTask extends AbstractTask {
             result.put('username', project.liberty.install.username)
             result.put('password', project.liberty.install.password)
         }
-
+	
+	if (project.liberty.install.type != null) {
+		result.put('type', project.liberty.install.type)
+	}
         result.put('maxDownloadTime', project.liberty.install.maxDownloadTime)
-
-        return result;
+	
+	return result;
     }
 
 }
