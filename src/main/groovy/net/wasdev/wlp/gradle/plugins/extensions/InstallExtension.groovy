@@ -25,5 +25,5 @@ class InstallExtension {
     String username
     String password
     String maxDownloadTime = "0"
-
+    String type
 }
