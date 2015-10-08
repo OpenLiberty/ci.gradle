@@ -111,6 +111,7 @@ The plugin will have made the following tasks available to your project:
 | deploy | Deploys a supported file to the WebSphere Liberty Profile server. |
 | undeploy | Removes an application from the WebSphere Liberty Profile server. |
 | installFeature | Installs a new feature in the WebSphere Liberty Profile server. |
+| uninstallFeature | Uninstall a feature in the WebSphere Liberty Profile server. |
 
 ###Extension properties
 The Liberty Gradle Plugin has some properties defined in the `Liberty` closure which will let you customize the different tasks.
@@ -402,6 +403,44 @@ liberty {
     features {
         name = ['mongodb-2.0', 'ejbLite-3.1']
         acceptLicense = true
+    } 
+}
+```
+### UninstallFeature task
+The `uninstallFeature` task uninstall a feature packaged as a Subsystem Archive (ESA file) to the Liberty runtime.
+
+####**Properties**.
+
+| Attribute | Description | Required |
+| --------- | ------------ | ----------|
+| featureName |Specifies the name of the Subsystem Archive (ESA file) to be uninstalled. The value can be a feature name, a file name or a URL. | Yes |
+
+
+The following example shows what propertie will be uninstall the [`mongodb-2.0`](https://developer.ibm.com/wasdev/downloads/#asset/features-com.ibm.websphere.appserver.mongodb-2.0) 
+Feature to your server:
+
+
+```groovy
+apply plugin: 'liberty'
+
+liberty {
+    wlpDir = "c:/wlp"
+
+    uninstallfeatures {
+        name = ['mongodb-2.0']
+    } 
+}
+```
+Also is possible uninstall multiple features in a single closure, for example:
+```groovy
+/* Uninstall 'mongodb-2.0', 'monitor-1.0' and 'oauth-2.0' features using a single closure. */
+apply plugin: 'liberty'
+
+liberty {
+    wlpDir = "c:/wlp"
+
+    uninstallfeatures {
+        name = ['mongodb-2.0', 'monitor-1.0', 'oauth-2.0']
     } 
 }
 ```
