@@ -189,7 +189,7 @@ In certain cases, the Liberty license code may need to be provided in order to i
 | password | Password needed for basic authentication. | No | 
 | maxDownloadTime | Maximum time in seconds the download can take. The default value is `0` (no maximum time). | No | 
 | type | Liberty runtime type to download from the Liberty repository. Currently, the following types are supported: `kernel`, `webProfile6`, `webProfile7`, and `javaee7`. Only used if `runtimeUrl` is not set. The default value is `webProfile6`. | No |
-| Offline | Enable offline mode. Install without access to a network. The Liberty profile files must be present in the cacheDir directory. The default value is false. | No |
+| offline | Enable offline mode. Install without access to a network. The Liberty profile files must be present in the cacheDir directory. The default value is false. | No |
 
 #### Examples
 
