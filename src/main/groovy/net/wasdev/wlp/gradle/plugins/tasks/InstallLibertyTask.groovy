@@ -55,6 +55,8 @@ class InstallLibertyTask extends AbstractTask {
 
         result.put('maxDownloadTime', project.liberty.install.maxDownloadTime)
 
+        result.put('offline', project.liberty.install.offline)
+
         return result;
     }
 
