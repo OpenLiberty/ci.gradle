@@ -28,6 +28,10 @@ class PackageTask extends AbstractTask {
         if (project.liberty.packageLiberty.include != null && project.liberty.packageLiberty.include.length() != 0) {
             params.put('include',project.liberty.packageLiberty.include)
         }
+        if (project.liberty.packageLiberty.os != null && project.liberty.packageLiberty.os.length() != 0) {
+            params.put('os',project.liberty.packageLiberty.os)
+        }
+
         executeServerCommand(project, 'package', params)
     }
 

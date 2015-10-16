@@ -19,5 +19,5 @@ class PackageAndDumpExtension {
     
     String include
     String archive
-
+    String os
 }
