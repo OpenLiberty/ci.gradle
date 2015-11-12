@@ -30,14 +30,26 @@ import org.gradle.tooling.model.Task
 
 abstract class AbstractIntegrationTest {
     static File integTestDir = new File('build/integTest')
-    static final String WLP_DIR = System.getProperty("wlpInstallDir").replace("\\", "/")
+    static final String test_mode = System.getProperty("runit")
+    static String WLP_DIR = System.getProperty("wlpInstallDir")
+    static String licenseCode = System.getProperty("wlpLicense")
+    static String wlpversion = System.getProperty("wlpVersion")
 
     @BeforeClass
     public static void setup() {
         deleteDir(integTestDir)
         createDir(integTestDir)
-        createFile(integTestDir)
-
+        if(test_mode == "offline"){
+            WLP_DIR.replace("\\","/")
+            createFile(integTestDir)
+        }else if(test_mode == "online"){
+            createFile(integTestDir)
+            try {
+                runTasks(integTestDir, 'installLiberty')
+            } catch (Exception e) {
+                throw new AssertionError ("Fail on task installLiberty. "+e)
+            }
+        }
     }
 
     protected static void deleteDir(File dir) {
@@ -73,7 +85,7 @@ abstract class AbstractIntegrationTest {
         GradleConnector gradleConnector = GradleConnector.newConnector()
         gradleConnector.forProjectDirectory(projectDir)
         ProjectConnection connection = gradleConnector.connect()
-        
+
         try {
             BuildLauncher build = connection.newBuild()
             build.setJvmArguments("-DWLP_DIR=$WLP_DIR")

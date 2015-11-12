@@ -40,10 +40,11 @@ task integrationTest(type: Test) {
     description = 'Runs the integration tests.'
     testClassesDir = sourceSets.integrationTest.output.classesDir
     classpath = sourceSets.integrationTest.runtimeClasspath
-    if (!(project.hasProperty('wlpInstallDir'))) {
+    if (!(project.hasProperty('runit'))) {
         enabled = false
     } else {
-        systemProperty 'wlpInstallDir', wlpInstallDir
+        systemProperties System.getProperties()
+        systemProperty 'runit',runit
     }
     mustRunAfter test
 }

@@ -1,7 +1,7 @@
 language: java
 jdk:
   - oraclejdk8
-script: "./gradlew check"
+script: "./gradlew check -Prunit=online -DwlpLicense=L-MCAO-9SYMVC -DwlpVersion=8.5.5_07"
 
 
 
