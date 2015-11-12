@@ -1,7 +1,7 @@
+sudo: false
 language: java
 jdk:
+  - oraclejdk7
   - oraclejdk8
-script: "./gradlew check -Prunit=online -DwlpLicense=L-MCAO-9SYMVC -DwlpVersion=8.5.5_07"
-
-
-
+script:
+  - travis_wait ./gradlew check -Prunit=online -DwlpVersion=8.5.5_07 -DwlpLicense=L-MCAO-9SYMVC
