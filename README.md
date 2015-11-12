@@ -11,24 +11,27 @@ A Gradle plugin to support the manipulation of WebSphere Application Server Libe
 Clone this repository and then, with a JRE on the path, execute the following command in the root directory.
 
 ```bash
-gradlew build
+$ gradlew build
 ```
 
 This will download Gradle and then build the plugin `liberty-gradle-plugin-1.0-SNAPSHOT.jar` in to the `build\libs` directory. It is also possible to install the plugin in to your local Maven repository using `gradlew install`.
 
 To build the plugin and run the integration tests execute the following commands in the root directory.
 
-```bash
-1. gradlew build -Prunit=offline -DwlpInstallDir=<liberty_install_directory>: to run the
-   integration tests by providing an existing installation.
+1. To run the integration tests against an existing Liberty profile installation.
+ ```bash
+ $ gradlew build -Prunit=offline -DwlpInstallDir=<liberty_install_directory>
+ ```
    
-2. gradlew build -Prunit=online -DwlpLicense=<liberty_licesnse_code> -DwlpVersion=<liberty_version>: to 
-   run the integration tests by downloading and installing a new runtime.
-```
+2. Run the integration tests against automatically downloaded and installed Liberty profile server.
+ ```bash
+ $ gradlew build -Prunit=online -DwlpLicense=<liberty_licesnse_code> -DwlpVersion=<liberty_version>
+ ```
 
 ## Usage
 ###1. Configuring your dependencies
-####  Adding the ant plugin to the build script
+
+####  Adding the Ant plugin to the build script
 This plugin needs the `wlp-anttasks.jar`file as dependency, this file can be downloaded from the [snapshot repository](https://oss.sonatype.org/content/repositories/snapshots/net/wasdev/wlp/ant/wlp-anttasks/) or the [Maven central repository](http://repo1.maven.org/maven2/net/wasdev/wlp/ant/wlp-anttasks/).
 
 The following code snippet shows an example on how to set up your build script correctly.
@@ -141,21 +144,21 @@ liberty {
     clean = true
     timeout = "10000"
 
-    packageLiberty{
+    packageLiberty {
         archive = "MyServerPackage.zip"
         include = "usr"
     }
     //Example to package with 'os' parameter
-    packageLiberty{
+    packageLiberty {
         archive = "MyServerPackage.zip"
         include = "minify"
         os = "Linux"
     }
-    dumpLiberty{
+    dumpLiberty {
         archive = "C:/Dump.zip"
         include = "heap, system"
     }
-    javaDumpLiberty{
+    javaDumpLiberty {
         archive = "JavaDump.zip"
         include = "system"
     }
@@ -190,66 +193,50 @@ In certain cases, the Liberty license code may need to be provided in order to i
 
 #### Examples
 
-```groovy
-
-    // Install using Liberty repository
+1. Install using Liberty repository.
+  ```groovy
     apply plugin: 'liberty'
 
     liberty {
-
         install {
             licenseCode = "<license code>"
         }
-
     }
+  ```
 
-    //Install from a specific location
+2. Install from a specific location.
+  ```groovy
     apply plugin: 'liberty'
 
     liberty {
-
         install {
             licenseCode = "<license code>"
             runtimeUrl = "<url to runtime.jar>"
         }
-
     }
+  ```
 
-    //Install Liberty runtime with all Java EE 7 features using Liberty repository
+3. Install Liberty runtime with all Java EE 7 features using Liberty repository.
+  ```groovy
     apply plugin: 'liberty'
 
     liberty {
-
         install {
             type = "javaee7"
         }
-
     }
+  ```
 
-    //Install from a specific location using a zip file
+4. Install from a specific location using a zip file.
+  ```groovy
     apply plugin: 'liberty'
 
     liberty {
-
         install {
             runtimeUrl="<url to wlp*.zip>"
         }
-
     }
-
-    //Install without access to network
-    apply plugin: 'liberty'
-
-    liberty {
-
-        install {
-           licenseCode = "<license code>"
-           offline = "true"
-        }
-
-    }
-   	//
-```
+  ```
 
 ### deploy task
 
@@ -264,11 +251,10 @@ The `deploy` task supports deployment of one or more applications to the Liberty
 | include| Comma- or space-separated list of patterns of files that must be included. All files are included when omitted.| No |
 | exclude| Comma- or space-separated list of patterns of files that must be excluded. No files are excluded when omitted.| No |
 
-
 Deploy's properties must be set up in the `deploy` closure inside the `liberty` closure.
 
-```groovy
-    // Deploys a single file
+1. Deploys a single file.
+  ```groovy
     apply plugin: 'liberty'
 
     liberty {
@@ -279,14 +265,13 @@ Deploy's properties must be set up in the `deploy` closure inside the `liberty` 
             file = 'c:/files/app.war'
         }
     }
+  ```
 
-    //Deploy multiple files
-    /*Deploy 'app.war' and 'sample.war' 
-      but exclude 'test-war.war'*/
+2. Deploy multiple files. Specifically, deploy `app.war` and `sample.war` but exclude `test-war.war`.
+  ```groovy
     apply plugin: 'liberty'
 
-    liberty {
-        
+    liberty { 
         wlpDir = 'c:/wlp'
         serverName = 'myServer'
         
@@ -296,13 +281,13 @@ Deploy's properties must be set up in the `deploy` closure inside the `liberty` 
             exclude = 'test-war.war'
         }
     }
-    
-    /*Deploy multiple files using multiple closures*/
-    
+  ```
+
+3. Deploy multiple files using multiple closures.
+  ```groovy
     apply plugin: 'liberty'
 
-    liberty {
-        
+    liberty { 
         wlpDir = 'c:/wlp'
         serverName = 'myServer'
         
@@ -319,9 +304,9 @@ Deploy's properties must be set up in the `deploy` closure inside the `liberty` 
             include = 'sample.war, demo.war'
         }
     }
-```
+  ```
 
-The following examples shows you how to deploy a file using the `WAR` or the `EAR` gradle plugins:
+The following examples shows you how to deploy a file using the `WAR` or the `EAR` Gradle plugins:
 
 ```groovy
     /* Deploys 'sample.war' using the WAR plugin */
@@ -363,9 +348,8 @@ Undeploy's properties must be set up in the `undeploy` closure inside the `liber
 
 #### Examples
 
-```groovy
-    // Undeploys a single application
-    
+1. Undeploys a single application.
+  ```groovy
     apply plugin: 'liberty'
 
     liberty {
@@ -376,11 +360,10 @@ Undeploy's properties must be set up in the `undeploy` closure inside the `liber
             application = 'app.war'
         }
     }
+  ```
 
-    //Undeploy multiple applications
-    /*Undeploy 'app.war' and 'sample.war' 
-      but exclude 'test-war.war'*/
-      
+2. Undeploy multiple applications. Specifically, undeploy `app.war` and `sample.war` but exclude `test-war.war`. 
+  ```groovy
     apply plugin: 'liberty'
 
     liberty {
@@ -393,7 +376,7 @@ Undeploy's properties must be set up in the `undeploy` closure inside the `liber
             exclude = 'test-war.war'
         }
     }
-```
+  ```
 
 If no property is set for the `undeploy` closure, but the EAR or WAR plugin is being used and their properties `destinationDir` and `archiveName` are declared, this will be the application that will be undeployed. Otherwise, all the applications available in the server at the moment of the execution will be undeployed.
 
