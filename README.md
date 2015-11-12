@@ -28,7 +28,7 @@ To build the plugin and run the integration tests execute the following commands
 
 ## Usage
 ###1. Configuring your dependencies
-#### 1.1 Adding the ant plugin to the build script
+####  Adding the ant plugin to the build script
 This plugin needs the `wlp-anttasks.jar`file as dependency, this file can be downloaded from the [snapshot repository](https://oss.sonatype.org/content/repositories/snapshots/net/wasdev/wlp/ant/wlp-anttasks/) or the [Maven central repository](http://repo1.maven.org/maven2/net/wasdev/wlp/ant/wlp-anttasks/).
 
 The following code snippet shows an example on how to set up your build script correctly.
@@ -36,18 +36,6 @@ The following code snippet shows an example on how to set up your build script c
 buildscript {
     dependencies {
         classpath files('gradle/wlp-anttasks.jar')
-    }
-}
-```
-
-####1.2 Configuring the path to your WebSphere Application Server Liberty Profile installation
-You need to set up the classpath to the `ws-server.jar` of your WebSphere Application Server Liberty Profile installation. This JAR is located inside `/bin/tools/` in your installation folder.
-
-For example:
-```groovy
-buildscript {
-    dependencies {
-        classpath files('c:/wlp/bin/tools/ws-server.jar')
     }
 }
 ```
@@ -83,7 +71,6 @@ buildscript {
     dependencies {
         classpath files('gradle/liberty-gradle-plugin.jar')
         classpath files('gradle/wlp-anttasks.jar')
-        classpath files('c:/wlp/bin/tools/ws-server.jar')
     }
 }
 ```
