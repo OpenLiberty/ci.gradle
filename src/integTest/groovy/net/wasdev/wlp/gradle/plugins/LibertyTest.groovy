@@ -27,7 +27,6 @@ class LibertyTest extends AbstractIntegrationTest{
 
     @AfterClass
     public static void tearDown() throws Exception {
-        runTasks(integTestDir, 'libertyStop')
         deleteDir(integTestDir)
     }
 
@@ -64,6 +63,42 @@ class LibertyTest extends AbstractIntegrationTest{
             runTasks(integTestDir, 'libertyStop')
         } catch (Exception e) {
             throw new AssertionError ("Fail on task libertyStop. "+e)
+        }
+    }
+
+    @Test
+    public void test5_status() {
+        try{
+          runTasks(integTestDir, 'libertyStatus')
+        } catch (Exception e) {
+          throw new AssertionError ("Fail on task libertyStatus. "+e)
+        }
+    }
+
+    @Test
+    public void test6_package() {
+        try{
+           runTasks(integTestDir, 'libertyPackage')
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task libertyPackage. "+e)
+        }
+    }
+
+    @Test
+    public void test7_installFeature() {
+        try{
+           runTasks(integTestDir, 'InstallFeature')
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task InstallFeature. "+e)
+        }
+    }
+
+    @Test
+    public void test8_uninstallFeature() {
+        try{
+           runTasks(integTestDir, 'UninstallFeature')
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task UninstallFeature. "+e)
         }
     }
 }
