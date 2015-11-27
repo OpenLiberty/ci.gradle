@@ -43,7 +43,7 @@ class LibertyExtension {
     PackageAndDumpExtension javaDumpLiberty = new PackageAndDumpExtension()
 
     def uninstallfeatures(Closure closure) {
-	ConfigureUtil.configure(closure, uninstallfeatures)
+        ConfigureUtil.configure(closure, uninstallfeatures)
     }
 
     def features(Closure closure) {
