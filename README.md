@@ -105,6 +105,7 @@ The plugin will have made the following tasks available to your project:
 | undeploy | Removes an application from the WebSphere Liberty Profile server. |
 | installFeature | Installs a new feature in the WebSphere Liberty Profile server. |
 | uninstallFeature | Uninstall a feature in the WebSphere Liberty Profile server. |
+| cleanDir | Delete files from some directories in the WebSphere Liberty Profile server. |
 
 ###Extension properties
 The Liberty Gradle Plugin has some properties defined in the `Liberty` closure which will let you customize the different tasks.
@@ -459,4 +460,33 @@ liberty {
         name = ['mongodb-2.0', 'monitor-1.0', 'oauth-2.0']
     } 
 }
+```
+### clean task
+The `clean` task deletes every file in the `${wlp_output_dir}/logs`, `${wlp_output_dir}/workarea`, `${wlp_user_dir}/dropins` or `${wlp_user_dir}/apps`.
+
+####**Properties**.
+
+| Attribute | Description | Required |
+| --------- | ------------ | ----------|
+| logs |Delete all the files in the `${wlp_output_dir}/logs` directory. The default value is `true`. | No |
+| workarea |Delete all the files in the `${wlp_output_dir}/workarea` directory. The default value is `true`. | No |
+| dropins |Delete all the files in the `${wlp_user_dir}/dropins` directory. The default value is `false`. | No |
+| apps |Delete all the files in the `${wlp_user_dir}/apps` directory. The default value is `false`. | No |
+
+The following example removes every app deployed to the `${userDir}/dropins` and every file in the `${wlp_output_dir}/workarea` and `${wlp_output_dir}/logs` directories: 
+
+
+```groovy
+apply plugin: 'liberty'
+
+liberty {
+    wlpDir = "c:/wlp"
+    serverName = 'Server'
+
+    cleanDir {
+        dropins = true
+    } 
+}
+```
+Note: If you want to delete files from `${wlp_output_dir}/workarea` and `${wlp_output_dir}/logs` directories, the server needs to be stopped. 
 ```
