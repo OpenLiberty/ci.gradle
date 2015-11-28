@@ -115,7 +115,7 @@ These properties are divided in two groups, the general properties (Which need t
 
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
-| wlpDir | Location of the Liberty profile server installation. | Yes |
+| installDir | Location of the Liberty profile server installation. | Yes |
 | outputDir |  Value of the `${wlp_output_dir}` variable. The default value is `${installDir}/usr/servers/${serverName}`.| No |
 | userDir | Value of the `${wlp_user_dir}` variable. The default value is `${installDir}/usr/`. | No |
 | serverName |Name of the Liberty profile server instance. The default value is `defaultServer`. | No |
@@ -138,7 +138,7 @@ This example shows you how to configure these properties in your script:
 apply plugin: 'liberty'
 
 liberty {
-    wlpDir = 'c:/wlp'
+    installDir = 'c:/wlp'
     serverName = 'myServer'
     userDir = 'c:/usr'
     outputDir = 'c:/usr'
@@ -167,7 +167,7 @@ liberty {
 
 ```
 
-Of the plugin configuration, only the `wlpDir` property is required. The default configuration is to use a server named `defaultServer` under the `build\wlp` directory of the Gradle project.
+Of the plugin configuration, only the `installDir` property is required. The default configuration is to use a server named `defaultServer` under the `build\wlp` directory of the Gradle project.
 
 
 
@@ -259,7 +259,7 @@ Deploy's properties must be set up in the `deploy` closure inside the `liberty` 
     apply plugin: 'liberty'
 
     liberty {
-        wlpDir = 'c:/wlp'
+        installDir = 'c:/wlp'
         serverName = 'myServer'
         
         deploy {
@@ -273,7 +273,7 @@ Deploy's properties must be set up in the `deploy` closure inside the `liberty` 
     apply plugin: 'liberty'
 
     liberty { 
-        wlpDir = 'c:/wlp'
+        installDir = 'c:/wlp'
         serverName = 'myServer'
         
         deploy {
@@ -289,7 +289,7 @@ Deploy's properties must be set up in the `deploy` closure inside the `liberty` 
     apply plugin: 'liberty'
 
     liberty { 
-        wlpDir = 'c:/wlp'
+        installDir = 'c:/wlp'
         serverName = 'myServer'
         
         deploy {
@@ -354,7 +354,7 @@ Undeploy's properties must be set up in the `undeploy` closure inside the `liber
     apply plugin: 'liberty'
 
     liberty {
-        wlpDir = 'c:/wlp'
+        installDir = 'c:/wlp'
         serverName = 'myServer'
         
         undeploy {
@@ -369,7 +369,7 @@ Undeploy's properties must be set up in the `undeploy` closure inside the `liber
 
     liberty {
         
-        wlpDir = 'c:/wlp'
+        installDir = 'c:/wlp'
         serverName = 'myServer'
         
         undeploy {
@@ -400,7 +400,7 @@ The following example shows what properties must be set up to install the [`mong
 apply plugin: 'liberty'
 
 liberty {
-    wlpDir = "c:/wlp"
+    installDir = "c:/wlp"
 
     features {
         name = ['mongodb-2.0']
@@ -415,7 +415,7 @@ Also is possible install multiple features in a single closure, for example:
 apply plugin: 'liberty'
 
 liberty {
-    wlpDir = "c:/wlp"
+    installDir = "c:/wlp"
 
     features {
         name = ['mongodb-2.0', 'ejbLite-3.1']
@@ -441,7 +441,7 @@ Feature to your server:
 apply plugin: 'liberty'
 
 liberty {
-    wlpDir = "c:/wlp"
+    installDir = "c:/wlp"
 
     uninstallfeatures {
         name = ['mongodb-2.0']
@@ -454,7 +454,7 @@ Also is possible uninstall multiple features in a single closure, for example:
 apply plugin: 'liberty'
 
 liberty {
-    wlpDir = "c:/wlp"
+    installDir = "c:/wlp"
 
     uninstallfeatures {
         name = ['mongodb-2.0', 'monitor-1.0', 'oauth-2.0']
@@ -480,7 +480,7 @@ The following example removes every app deployed to the `${userDir}/dropins` and
 apply plugin: 'liberty'
 
 liberty {
-    wlpDir = "c:/wlp"
+    installDir = "c:/wlp"
     serverName = 'Server'
 
     cleanDir {

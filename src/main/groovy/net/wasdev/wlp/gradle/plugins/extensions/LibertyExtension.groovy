@@ -19,7 +19,7 @@ import org.gradle.util.ConfigureUtil
 
 class LibertyExtension {
     
-    String wlpDir
+    String installDir
     String outputDir
     String userDir
     String serverName = "defaultServer"

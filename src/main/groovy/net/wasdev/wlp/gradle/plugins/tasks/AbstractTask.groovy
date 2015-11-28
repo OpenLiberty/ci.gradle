@@ -51,14 +51,14 @@ abstract class AbstractTask extends DefaultTask {
     }
 
     protected File getInstallDir(Project project) {
-        if (project.liberty.wlpDir == null) {
+        if (project.liberty.installDir == null) {
            if (project.liberty.install.baseDir == null) {
                return new File(project.buildDir, 'wlp')
            } else {
                return new File(project.liberty.install.baseDir, 'wlp')
            }
         } else {
-           return new File(project.liberty.wlpDir)
+           return new File(project.liberty.installDir)
         }
     }
 

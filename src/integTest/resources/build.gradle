@@ -20,34 +20,32 @@ def WLP_DIR = System.getProperty('wlpInstallDir')
 apply plugin: 'liberty'
 
 liberty {
-    if(test_mode == 'online'){
-        install{
+    if (test_mode == 'online') {
+        install {
             licenseCode = wlplicense
         }
-        userDir = '../'
-        wlpDir = 'wlp/'
         serverName ='libertyOnline'
-    }else {
-        userDir = '../'
-        wlpDir = WLP_DIR
+    } else {
+        installDir = WLP_DIR
         serverName = 'libertyOffline'
     }
+    userDir = '../'
 
     deploy {
         file = '../resources/integrationTest/test-war.war'
     }
 
-    packageLiberty{
+    packageLiberty {
         include = 'minify'
         os='Linux'
     }
 
-    features{
+    features {
         name= ['mongodb-2.0']
         acceptLicense = true
     }
 
-    uninstallfeatures{
+    uninstallfeatures {
         name= ['mongodb-2.0']
     }
 }
