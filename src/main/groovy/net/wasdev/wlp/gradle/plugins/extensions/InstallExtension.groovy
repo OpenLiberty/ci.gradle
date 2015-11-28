@@ -20,7 +20,7 @@ class InstallExtension {
     String licenseCode
     String version = "8.5.+"
     String runtimeUrl
-    String baseDir = "."
+    String baseDir
     String cacheDir
     String username
     String password

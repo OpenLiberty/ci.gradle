@@ -33,12 +33,13 @@ abstract class AbstractTask extends DefaultTask {
     protected Map<String, String> buildLibertyMap(Project project) {
         Map<String, String> result = new HashMap();
         result.put('serverName', project.liberty.serverName)
-        def libertyUserDirFile = getUserDir(project)
-        if (!libertyUserDirFile.isDirectory()) {
-            libertyUserDirFile.mkdirs()
-        }
-        result.put('userDir', libertyUserDirFile)
-        result.put('installDir', project.liberty.wlpDir)
+
+        def installDir = getInstallDir(project)
+        result.put('installDir', installDir)
+
+        def userDir = getUserDir(project, installDir)
+        result.put('userDir', userDir)
+
         if (project.liberty.outputDir != null) {
             result.put('outputDir', project.liberty.outputDir)
         }          
@@ -49,9 +50,20 @@ abstract class AbstractTask extends DefaultTask {
         return result;
     }
 
-    protected File getUserDir(Project project) {
-        String wlpDir = project.liberty.wlpDir == null ? "" : project.liberty.wlpDir
-        return (project.liberty.userDir == null) ? new File(wlpDir, 'usr') : new File(project.liberty.userDir)
+    protected File getInstallDir(Project project) {
+        if (project.liberty.wlpDir == null) {
+           if (project.liberty.install.baseDir == null) {
+               return new File(project.buildDir, 'wlp')
+           } else {
+               return new File(project.liberty.install.baseDir, 'wlp')
+           }
+        } else {
+           return new File(project.liberty.wlpDir)
+        }
+    }
+
+    protected File getUserDir(Project project, File installDir) {
+        return (project.liberty.userDir == null) ? new File(installDir, 'usr') : new File(project.liberty.userDir)
     }
 
 }

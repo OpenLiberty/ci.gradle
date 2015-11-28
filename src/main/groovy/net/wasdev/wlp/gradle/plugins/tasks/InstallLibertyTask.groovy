@@ -31,14 +31,21 @@ class InstallLibertyTask extends AbstractTask {
 
     private Map<String, String> buildInstallLibertyMap(Project project) {
         Map<String, String> result = new HashMap();
-        result.put('licenseCode', project.liberty.install.licenseCode)
+        if (project.liberty.install.licenseCode != null) {
+           result.put('licenseCode', project.liberty.install.licenseCode)
+        }
+
         result.put('version', project.liberty.install.version)
 
         if (project.liberty.install.runtimeUrl != null) {
             result.put('runtimeUrl', project.liberty.install.runtimeUrl)
         }
 
-        result.put('baseDir', project.liberty.install.baseDir)
+        if (project.liberty.install.baseDir == null) {
+           result.put('baseDir', project.buildDir)
+        } else {
+           result.put('baseDir', project.liberty.install.baseDir)
+        }
 
         if (project.liberty.install.cacheDir != null) {
             result.put('cacheDir', project.liberty.install.cacheDir)
