@@ -32,7 +32,6 @@ import net.wasdev.wlp.gradle.plugins.tasks.UndeployTask
 import net.wasdev.wlp.gradle.plugins.tasks.InstallFeatureTask
 import net.wasdev.wlp.gradle.plugins.tasks.InstallLibertyTask
 import net.wasdev.wlp.gradle.plugins.tasks.UninstallFeatureTask
-import net.wasdev.wlp.gradle.plugins.tasks.CleanTask
 
 import org.gradle.api.logging.LogLevel
 
@@ -122,10 +121,6 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
         }
 
-        project.task('cleanDirs', type: CleanTask) {
-            description 'Delete files from some directories from the WebSphere Liberty Profile server'
-            logging.level = LogLevel.INFO
-        }
     }
 
 }

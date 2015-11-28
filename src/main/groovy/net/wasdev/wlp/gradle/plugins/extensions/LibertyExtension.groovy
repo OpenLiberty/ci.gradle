@@ -33,7 +33,6 @@ class LibertyExtension {
     FeatureExtension features = new FeatureExtension()
     UninstallFeatureExtension uninstallfeatures = new UninstallFeatureExtension()
     InstallExtension install = new InstallExtension()
-    CleanExtension cleanDir = new CleanExtension()
 
     DeployExtension deploy = new DeployExtension()
     UndeployExtension undeploy = new UndeployExtension()
@@ -79,7 +78,4 @@ class LibertyExtension {
         ConfigureUtil.configure(closure, javaDumpLiberty)
     }
 
-    def cleanDir(Closure closure) {
-        ConfigureUtil.configure(closure, cleanDir)
-    }
 }
