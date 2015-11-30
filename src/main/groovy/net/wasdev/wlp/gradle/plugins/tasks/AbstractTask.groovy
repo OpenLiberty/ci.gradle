@@ -62,6 +62,10 @@ abstract class AbstractTask extends DefaultTask {
         }
     }
 
+    protected File getUserDir(Project project) {
+        return getUserDir(project, getInstallDir(project))
+    }
+
     protected File getUserDir(Project project, File installDir) {
         return (project.liberty.userDir == null) ? new File(installDir, 'usr') : new File(project.liberty.userDir)
     }
