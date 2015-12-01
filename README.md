@@ -14,7 +14,7 @@ Clone this repository and then, with a JRE on the path, execute the following co
 $ gradlew build
 ```
 
-This will download Gradle and then build the plugin `liberty-gradle-plugin-1.0-SNAPSHOT.jar` in to the `build\libs` directory. It is also possible to install the plugin in to your local Maven repository using `gradlew install`.
+This will download Gradle and then build the plugin `liberty-gradle-plugin-1.1-SNAPSHOT.jar` in to the `build\libs` directory. It is also possible to install the plugin in to your local Maven repository using `gradlew install`.
 
 To build the plugin and run the integration tests execute the following commands in the root directory.
 
@@ -62,7 +62,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:1.0-SNAPSHOT'
+        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:1.1-SNAPSHOT'
     }
 }
 ```
