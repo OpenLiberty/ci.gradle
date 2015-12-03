@@ -101,4 +101,13 @@ class LibertyTest extends AbstractIntegrationTest{
            throw new AssertionError ("Fail on task UninstallFeature. "+e)
         }
     }
+
+    @Test
+    public void test9_cleanDirectories() {
+        try{
+           runTasks(integTestDir, 'cleanDirs')
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task Clean. "+e)
+        }
+    }
 }
