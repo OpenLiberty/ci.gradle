@@ -123,7 +123,7 @@ class Liberty implements Plugin<Project> {
         }
 
         project.task('cleanDirs', type: CleanTask) {
-            description 'Delete files from some directories from the WebSphere Liberty Profile server'
+            description 'Deletes files from some directories from the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO
         }
     }

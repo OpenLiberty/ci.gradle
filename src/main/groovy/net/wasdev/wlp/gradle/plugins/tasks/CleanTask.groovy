@@ -20,7 +20,7 @@ import org.gradle.api.tasks.TaskAction
 class CleanTask extends AbstractTask {
 
     @TaskAction
-    void installFeature() {
+    void cleanDirectories() {
         def params = buildLibertyMap(project);
         params.put('logs', project.liberty.cleanDir.logs)
         params.put('workarea', project.liberty.cleanDir.workarea)
