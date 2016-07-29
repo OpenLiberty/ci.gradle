@@ -13,8 +13,8 @@ buildscript {
 }
 
 def test_mode = System.getProperty('runit')
-def wlplicense = System.getProperty('wlpLicense')
-def wlpversion = System.getProperty('wlpVersion')
+def wlpLicense = System.getProperty('wlpLicense')
+def wlpVersion = System.getProperty('wlpVersion')
 def WLP_DIR = System.getProperty('wlpInstallDir')
 
 apply plugin: 'liberty'
@@ -22,7 +22,8 @@ apply plugin: 'liberty'
 liberty {
     if (test_mode == 'online') {
         install {
-            licenseCode = wlplicense
+            licenseCode = wlpLicense
+            version = wlpVersion
         }
         serverName ='libertyOnline'
     } else {

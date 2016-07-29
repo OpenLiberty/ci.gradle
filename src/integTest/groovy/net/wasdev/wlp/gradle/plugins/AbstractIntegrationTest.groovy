@@ -32,8 +32,6 @@ abstract class AbstractIntegrationTest {
     static File integTestDir = new File('build/integTest')
     static final String test_mode = System.getProperty("runit")
     static String WLP_DIR = System.getProperty("wlpInstallDir")
-    static String licenseCode = System.getProperty("wlpLicense")
-    static String wlpversion = System.getProperty("wlpVersion")
 
     @BeforeClass
     public static void setup() {
@@ -89,6 +87,7 @@ abstract class AbstractIntegrationTest {
         try {
             BuildLauncher build = connection.newBuild()
             build.setJvmArguments("-DWLP_DIR=$WLP_DIR")
+            build.withArguments("-i"); 
             build.forTasks(tasks)
             build.run()
         }
