@@ -35,8 +35,6 @@ class InstallLibertyTask extends AbstractTask {
            result.put('licenseCode', project.liberty.install.licenseCode)
         }
 
-        println(project.liberty.install.version)
-
         if (project.liberty.install.version != null) {
             result.put('version', project.liberty.install.version)
         }
