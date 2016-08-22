@@ -18,7 +18,7 @@ package net.wasdev.wlp.gradle.plugins.extensions
 class InstallExtension {
     
     String licenseCode
-    String version = "8.5.+"
+    String version
     String runtimeUrl
     String baseDir
     String cacheDir
