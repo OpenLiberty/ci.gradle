@@ -5,7 +5,7 @@ A Gradle plugin to support the manipulation of WebSphere Application Server Libe
 * [Build](#build)
 * [Usage](#usage)
 * [Tasks](#tasks)
-* [Properties] (#extension-properties)
+* [Properties](#extension-properties)
 
 ## Build
 
@@ -106,7 +106,7 @@ The plugin will have made the following tasks available to your project:
 | [undeploy](#undeploy-task) | Removes an application from the WebSphere Liberty Profile server. |
 | [installFeature](#installfeature-task) | Installs a new feature in the WebSphere Liberty Profile server. |
 | [uninstallFeature](#uninstallfeature-task) | Uninstall a feature in the WebSphere Liberty Profile server. |
-| cleanDir | Deletes files from some directories in the WebSphere Liberty Profile server. |
+| [cleanDir](#clean-task) | Deletes files from some directories in the WebSphere Liberty Profile server. |
 
 ## Extension properties
 The Liberty Gradle Plugin has some properties defined in the `Liberty` closure which will let you customize the different tasks.
