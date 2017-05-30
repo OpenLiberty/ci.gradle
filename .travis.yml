@@ -5,6 +5,6 @@ matrix:
     - jdk: oraclejdk7
       env: WLP_VERSION=8.5.5_09 WLP_LICENSE=L-MCAO-9SYMVC
     - jdk: oraclejdk8
-      env: WLP_VERSION=17.0.0_1 WLP_LICENSE=L-SWIS-AEPPZP
+      env: WLP_VERSION=17.0.0_01 WLP_LICENSE=L-SWIS-AEPPZP
 script:
   - travis_wait ./gradlew check -Prunit=online -DwlpVersion=$WLP_VERSION -DwlpLicense=$WLP_LICENSE
