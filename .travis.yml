@@ -3,8 +3,8 @@ language: java
 matrix:
   include:
     - jdk: oraclejdk7
-      env: WLP_VERSION=8.5.5_09 WLP_LICENSE=L-MCAO-9SYMVC
+      env: WLP_VERSION=17.0.0.1
     - jdk: oraclejdk8
-      env: WLP_VERSION=17.0.0_01 WLP_LICENSE=L-SWIS-AEPPZP
+      env: WLP_VERSION=17.0.0.2
 script:
-  - travis_wait ./gradlew check -Prunit=online -DwlpVersion=$WLP_VERSION -DwlpLicense=$WLP_LICENSE
+  - travis_wait ./gradlew check -Prunit=online -DwlpVersion=$WLP_VERSION
