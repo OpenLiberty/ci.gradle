@@ -5,6 +5,7 @@ A Gradle plugin to support the manipulation of WebSphere Application Server Libe
 * [Build](#build)
 * [Usage](#usage)
 * [Tasks](#tasks)
+* [Properties](#extension-properties)
 
 ## Build
 
@@ -29,12 +30,12 @@ To build the plugin and run the integration tests execute the following commands
  ```
 
 ## Usage
-###1. Configuring your dependencies
+### Configuring your dependencies
 
 ####  Adding the Ant plugin to the build script
-This plugin needs the `wlp-anttasks.jar`file as dependency, this file can be downloaded from the [snapshot repository](https://oss.sonatype.org/content/repositories/snapshots/net/wasdev/wlp/ant/wlp-anttasks/) or the [Maven central repository](http://repo1.maven.org/maven2/net/wasdev/wlp/ant/wlp-anttasks/).
+This plugin needs the `wlp-anttasks.jar`file as a dependency, this file can be downloaded from the [snapshot repository](https://oss.sonatype.org/content/repositories/snapshots/net/wasdev/wlp/ant/wlp-anttasks/) or the [Maven central repository](http://repo1.maven.org/maven2/net/wasdev/wlp/ant/wlp-anttasks/).
 
-The following code snippet shows an example on how to set up your build script correctly.
+The following code snippet shows an example for how to set up your build script correctly.
 ```groovy
 buildscript {
     dependencies {
@@ -44,7 +45,7 @@ buildscript {
 ```
 
 
-###2. Adding the binary plugin to the build script
+### Adding the binary plugin to the build script
 
 Within your Gradle build script, you need to set up the classpath to include the Liberty Gradle plugin. You also need to define the Maven Central repository to find the plugin or its dependencies. 
 
@@ -84,13 +85,13 @@ To use the Liberty Gradle Plugin, include the following code in your build scrip
 apply plugin: 'liberty'
 ```
 
-##Tasks
+## Tasks
 
 The plugin will have made the following tasks available to your project:
 
 | Task | Description |
 | --------- | ------------ |
-| installLiberty | Installs Liberty Profile from a repository. |
+| [installLiberty](#installliberty-task) | Installs Liberty Profile from a repository. |
 | libertyCreate | Creates a WebSphere Liberty Profile server. |
 | libertyStart | Starts the WebSphere Liberty Profile server. |
 | libertyStop | Stops the WebSphere Liberty Profile server. |
@@ -101,17 +102,17 @@ The plugin will have made the following tasks available to your project:
 | libertyDebug | Runs the Liberty Profile server in the console foreground after a debugger connects to the debug port (default: 7777). | 
 | libertyStatus | Checks the WebSphere Liberty Profile server is running. |
 | libertyPackage | Generates a WebSphere Liberty Profile server archive. |
-| deploy | Deploys a supported file to the WebSphere Liberty Profile server. |
-| undeploy | Removes an application from the WebSphere Liberty Profile server. |
-| installFeature | Installs a new feature in the WebSphere Liberty Profile server. |
-| uninstallFeature | Uninstall a feature in the WebSphere Liberty Profile server. |
-| cleanDir | Deletes files from some directories in the WebSphere Liberty Profile server. |
+| [deploy](#deploy-task) | Deploys a supported file to the WebSphere Liberty Profile server. |
+| [undeploy](#undeploy-task) | Removes an application from the WebSphere Liberty Profile server. |
+| [installFeature](#installfeature-task) | Installs a new feature in the WebSphere Liberty Profile server. |
+| [uninstallFeature](#uninstallfeature-task) | Uninstall a feature in the WebSphere Liberty Profile server. |
+| [cleanDir](#clean-task) | Deletes files from some directories in the WebSphere Liberty Profile server. |
 
-###Extension properties
+## Extension properties
 The Liberty Gradle Plugin has some properties defined in the `Liberty` closure which will let you customize the different tasks.
 These properties are divided in two groups, the general properties (Which need to be set for any task excluding `installLiberty` task) and the specific ones. (Which only must be set when a specific task will be kicked off).
 
-####**General properties**.
+### General properties
 
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
@@ -121,7 +122,7 @@ These properties are divided in two groups, the general properties (Which need t
 | serverName |Name of the Liberty profile server instance. The default value is `defaultServer`. | No |
 
 
-#### Server Properties
+### Server Task Properties
 
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
@@ -171,13 +172,13 @@ Of the plugin configuration, only the `installDir` property is required. The def
 
 
 
-### installLiberty task
+## installLiberty task
 
 The `install-liberty` task is used to download and install Liberty profile server. The task can download the Liberty runtime archive from a specified location (via `runtimeUrl`) or automatically resolve it from the [Liberty repository](https://developer.ibm.com/wasdev/downloads/) based on a version and a runtime type. 
 
 In certain cases, the Liberty license code may need to be provided in order to install the runtime. If the license code is required and if you are installing Liberty from the Liberty repository, you can obtain the license code by reading the [current license](https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/16.0.0.2/lafiles/runtime/en.html) and looking for the `D/N: <license code>` line. Otherwise, download the runtime archive and execute `java -jar wlp*runtime.jar --viewLicenseInfo` command and look for the `D/N: <license code>` line.
 
-####**Properties**
+### Properties
 
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
@@ -191,7 +192,7 @@ In certain cases, the Liberty license code may need to be provided in order to i
 | maxDownloadTime | Maximum time in seconds the download can take. The default value is `0` (no maximum time). | No | 
 | type | Liberty runtime type to download from the Liberty repository. Currently, the following types are supported: `kernel`, `webProfile6`, `webProfile7`, and `javaee7`. Only used if `runtimeUrl` is not set. The default value is `webProfile6`. | No |
 
-#### Examples
+### Examples
 
 1. Install using Liberty repository.
   ```groovy
@@ -238,11 +239,11 @@ In certain cases, the Liberty license code may need to be provided in order to i
     }
   ```
 
-### deploy task
+## deploy task
 
 The `deploy` task supports deployment of one or more applications to the Liberty Profile server.
 
-####**Properties**.
+### Properties
 
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
@@ -252,6 +253,8 @@ The `deploy` task supports deployment of one or more applications to the Liberty
 | exclude| Comma- or space-separated list of patterns of files that must be excluded. No files are excluded when omitted.| No |
 
 Deploy's properties must be set up in the `deploy` closure inside the `liberty` closure.
+
+### Examples
 
 1. Deploys a single file.
   ```groovy
@@ -332,11 +335,11 @@ The following examples shows you how to deploy a file using the `WAR` or the `EA
 
 `destinationDir` and `archiveName` are native properties of Gradle's EAR plugin. For more information see [here.](https://gradle.org/docs/current/dsl/org.gradle.plugins.ear.Ear.html)
 
-### undeploy task
+## undeploy task
 
 The `undeploy` task supports undeployment of one or more applications from the Liberty Profile server.
 
-####**Properties**.
+### Properties
 
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
@@ -346,7 +349,7 @@ The `undeploy` task supports undeployment of one or more applications from the L
 
 Undeploy's properties must be set up in the `undeploy` closure inside the `liberty` closure.
 
-#### Examples
+### Examples
 
 1. Undeploys a single application.
   ```groovy
@@ -380,10 +383,10 @@ Undeploy's properties must be set up in the `undeploy` closure inside the `liber
 
 If no property is set for the `undeploy` closure, but the EAR or WAR plugin is being used and their properties `destinationDir` and `archiveName` are declared, this will be the application that will be undeployed. Otherwise, all the applications available in the server at the moment of the execution will be undeployed.
 
-### installFeature task
+## installFeature task
 The `installFeature` task installs a feature packaged as a Subsystem Archive (ESA file) to the Liberty runtime.
 
-####**Properties**.
+### Properties
 
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
@@ -392,8 +395,9 @@ The `installFeature` task installs a feature packaged as a Subsystem Archive (ES
 | whenFileExists | Specifies the action to take if a file to be installed already exits. Use `fail` to abort the installation, `ignore` to continue the installation and ignore the file that exists, and `replace` to overwrite the existing file.| No |
 | to | Specifies feature installation location. Set to `usr` to install as a user feature. Otherwise, set it to any configured product extension location. The default value is `usr`.| No |
 
-The following example shows what properties must be set up to install the [`mongodb-2.0`](https://developer.ibm.com/wasdev/downloads/#asset/features-com.ibm.websphere.appserver.mongodb-2.0) feature to your server:
+### Examples
 
+The following example shows what properties must be set up to install the [`mongodb-2.0`](https://developer.ibm.com/wasdev/downloads/#asset/features-com.ibm.websphere.appserver.mongodb-2.0) feature to your server:
 
 ```groovy
 apply plugin: 'liberty'
@@ -422,19 +426,19 @@ liberty {
     } 
 }
 ```
-### UninstallFeature task
+## uninstallFeature task
 The `uninstallFeature` task uninstall a feature packaged as a Subsystem Archive (ESA file) to the Liberty runtime.
 
-####**Properties**.
+### Properties
 
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
 | featureName |Specifies the name of the Subsystem Archive (ESA file) to be uninstalled. The value can be a feature name, a file name or a URL. | Yes |
 
+### Examples
 
 The following example shows what propertie will be uninstall the [`mongodb-2.0`](https://developer.ibm.com/wasdev/downloads/#asset/features-com.ibm.websphere.appserver.mongodb-2.0) 
 Feature to your server:
-
 
 ```groovy
 apply plugin: 'liberty'
@@ -460,10 +464,10 @@ liberty {
     } 
 }
 ```
-### clean task
+## clean task
 The `clean` task deletes every file in the `${wlp_output_dir}/logs`, `${wlp_output_dir}/workarea`, `${wlp_user_dir}/dropins` or `${wlp_user_dir}/apps`.
 
-####**Properties**.
+### Properties
 
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
@@ -472,8 +476,9 @@ The `clean` task deletes every file in the `${wlp_output_dir}/logs`, `${wlp_outp
 | dropins |Delete all the files in the `${wlp_user_dir}/dropins` directory. The default value is `false`. | No |
 | apps |Delete all the files in the `${wlp_user_dir}/apps` directory. The default value is `false`. | No |
 
-The following example removes every app deployed to the `${userDir}/dropins` and every file in the `${wlp_output_dir}/workarea` and `${wlp_output_dir}/logs` directories: 
+### Examples
 
+The following example removes every app deployed to the `${userDir}/dropins` and every file in the `${wlp_output_dir}/workarea` and `${wlp_output_dir}/logs` directories: 
 
 ```groovy
 apply plugin: 'liberty'
