@@ -101,7 +101,6 @@ The plugin will have made the following tasks available to your project:
 | libertyJavaDump | Dumps diagnostic information from the Liberty Profile server JVM. | 
 | libertyDebug | Runs the Liberty Profile server in the console foreground after a debugger connects to the debug port (default: 7777). | 
 | libertyStatus | Checks the WebSphere Liberty Profile server is running. |
-| libertyPackage | Generates a WebSphere Liberty Profile server archive. |
 | [deploy](#deploy-task) | Deploys a supported file to the WebSphere Liberty Profile server. |
 | [undeploy](#undeploy-task) | Removes an application from the WebSphere Liberty Profile server. |
 | [installFeature](#installfeature-task) | Installs a new feature in the WebSphere Liberty Profile server. |
@@ -128,7 +127,7 @@ These properties are divided in two groups, the general properties (Which need t
 | --------- | ------------ | ----------|
 | clean | Clean all cached information on server start up. The default value is `false`. Only used with the `libertyStart` task. | No | 
 | timeout | Waiting time before the server starts. The default value is 30 seconds. The unit is milliseconds. Only used with the `libertyStart` task. | No | 
-| include | A comma-delimited list of values. The valid values vary depending on the task. For the `libertyPackage` task the valid values are `all`, `usr`, and `minify` and must be declared in the `packageLiberty` closure. For the `libertyDump` task the valid values are `heap`, `system`, and `thread` and must be declared in the `dumpLiberty` closure. For the `libertyJavaDump` task the valid values are `heap` and `system` and must be declared in the `javaDumpLiberty` closure. |  Yes, only when the `os` option is set in the `packageLiberty` closure|
+| include | A comma-delimited list of values. The valid values vary depending on the task. For the `libertyPackage` task the valid values are `all`, `usr`, `runnable` and `minify` and must be declared in the `packageLiberty` closure. For the `libertyDump` task the valid values are `heap`, `system`, and `thread` and must be declared in the `dumpLiberty` closure. For the `libertyJavaDump` task the valid values are `heap` and `system` and must be declared in the `javaDumpLiberty` closure. |  Yes, only when the `os` option is set in the `packageLiberty` closure|
 | archive | Location of the target archive file. Only used with the `libertyPackage` or `libertyDump` tasks on their respective closures. | No |
 | template | Name of the template to use when creating a new server. Only used with the `libertyCreate` task. | No |
 | os| A comma-delimited list of operating systems that you want the packaged server to support. Only used with the `package` operation and in the `packageLiberty` closure. The 'include' option must be set to 'minify'. | No |
