@@ -91,7 +91,7 @@ The plugin will have made the following tasks available to your project:
 
 | Task | Description |
 | --------- | ------------ |
-| [installLiberty](docs/installLiberty.md#installLiberty) | Installs WebSphere Liberty server from a repository. |
+| [installLiberty](docs/installLiberty.md#installLiberty-task) | Installs WebSphere Liberty server from a repository. |
 | libertyCreate | Creates a WebSphere Liberty server. |
 | libertyStart | Starts the WebSphere Liberty server. |
 | libertyStop | Stops the WebSphere Liberty server. |
