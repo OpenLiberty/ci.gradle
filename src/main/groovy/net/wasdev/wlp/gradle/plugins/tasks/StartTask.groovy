@@ -20,8 +20,8 @@ import net.wasdev.wlp.ant.ServerTask;
 
 class StartTask extends AbstractTask {
 
-	protected final String START_APP_MESSAGE_REGEXP = "CWWKZ0001I.*"
-	
+    protected final String START_APP_MESSAGE_REGEXP = "CWWKZ0001I.*"
+
     @TaskAction
     void start() {
         def params = buildLibertyMap(project);
