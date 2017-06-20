@@ -27,4 +27,3 @@ liberty {
 }
 ```
 Note: If you want to delete files from `${wlp_output_dir}/workarea` and `${wlp_output_dir}/logs` directories, the server needs to be stopped. 
-```
