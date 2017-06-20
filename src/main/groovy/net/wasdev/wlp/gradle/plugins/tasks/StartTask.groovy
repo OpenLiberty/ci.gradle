@@ -27,7 +27,7 @@ class StartTask extends AbstractTask {
         def params = buildLibertyMap(project);
         params.put('clean', project.liberty.clean)
         if (project.liberty.timeout != null && project.liberty.timeout.length() != 0) {
-        	params.put('timeout', project.liberty.timeout)
+            params.put('timeout', project.liberty.timeout)
         }
         executeServerCommand(project, 'start', params)
         
@@ -40,20 +40,20 @@ class StartTask extends AbstractTask {
         
         def verifyTimeout = project.liberty.verifyTimeout
         if(project.liberty.verifyTimeout < 0) {
-        	verifyTimeout = 30
+            verifyTimeout = 30
         }
         long timeout = verifyTimeout * 1000
         long endTime = System.currentTimeMillis() + timeout;
         if(project.liberty.applications) {
-        	String[] apps = project.liberty.applications.split("[,\\s]+")
-        	for(String archiveName : apps) {
-        		String verify = serverTask.waitForStringInLog(START_APP_MESSAGE_REGEXP + archiveName, timeout, serverTask.getLogFile())
-        		if (!verify) { 
-        			executeServerCommand(project, 'stop', buildLibertyMap(project))
-        			throw new Exception("CWWKM2148E: Unable to verify if the server was started after ${verifyTimeout} seconds")
-        		}
-        		timeout = endTime - System.currentTimeMillis();
-        	}
+            String[] apps = project.liberty.applications.split("[,\\s]+")
+            for(String archiveName : apps) {
+                String verify = serverTask.waitForStringInLog(START_APP_MESSAGE_REGEXP + archiveName, timeout, serverTask.getLogFile())
+                if (!verify) { 
+                    executeServerCommand(project, 'stop', buildLibertyMap(project))
+                    throw new Exception("CWWKM2148E: Unable to verify if the server was started after ${verifyTimeout} seconds")
+                }
+                timeout = endTime - System.currentTimeMillis();
+            }
         }
     }
 }

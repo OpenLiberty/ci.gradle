@@ -28,8 +28,8 @@ class LibertyExtension {
     String timeout
     String template
 	
-	int verifyTimeout = 30
-	String applications
+    int verifyTimeout = 30
+    String applications
 
     def numberOfClosures = 0    
 
