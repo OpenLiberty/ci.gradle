@@ -27,6 +27,9 @@ class LibertyExtension {
     boolean clean = false
     String timeout
     String template
+	
+    int verifyTimeout = 30
+    String applications
 
     def numberOfClosures = 0    
 
