@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2015.
+ * (C) Copyright IBM Corporation 2014, 2017.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,18 +21,44 @@ class PackageTask extends AbstractTask {
 
     @TaskAction
     void packageServer() {
+	
         def params = buildLibertyMap(project);
-        if (project.liberty.packageLiberty.archive != null && project.liberty.packageLiberty.archive.length() != 0) {
-            params.put('archive', new File(project.liberty.packageLiberty.archive))
-        }
+		def fileType = getPackageFileType(project.liberty.packageLiberty.include)
+		final archive = project.liberty.packageLiberty.archive
+		
+        if (archive != null && archive.length() != 0) {
+			def packageFile = new File(project.getProjectDir(), archive)
+			
+			if (!archive.endsWith(".zip") && !archive.endsWith(".jar")) {
+				// check if target directory exists
+				if (!packageFile.exists()) {
+					packageFile.mkdirs()
+				}
+				packageFile = new File(packageFile, project.getName() + fileType)			
+			} 
+			params.put('archive', packageFile)
+			logger.debug 'Packaging ' + packageFile
+			
+        } else {
+			def defaultPackageFile = new File(project.getBuildDir(), project.getName() + fileType)
+			params.put('archive', defaultPackageFile)
+			logger.debug 'Packaging ' + defaultPackageFile
+		}
+		
         if (project.liberty.packageLiberty.include != null && project.liberty.packageLiberty.include.length() != 0) {
-            params.put('include',project.liberty.packageLiberty.include)
+            params.put('include', project.liberty.packageLiberty.include)
         }
         if (project.liberty.packageLiberty.os != null && project.liberty.packageLiberty.os.length() != 0) {
-            params.put('os',project.liberty.packageLiberty.os)
+            params.put('os', project.liberty.packageLiberty.os)
         }
 
         executeServerCommand(project, 'package', params)
     }
-
+	
+	private String getPackageFileType(String include) {
+		if (include != null && include.contains("runnable")) {
+			return ".jar"
+		}
+		return ".zip"
+	}
 }
