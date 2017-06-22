@@ -96,7 +96,7 @@ The plugin will have made the following tasks available to your project:
 | libertyStart | Starts the WebSphere Liberty server. |
 | libertyStop | Stops the WebSphere Liberty server. |
 | libertyRun | Runs a WebSphere Liberty server under the Gradle process. |
-| libertyPackage](docs/libertyPackage.md#libertypackage-task) | Package a WebSphere Liberty server. | 
+| [libertyPackage](docs/libertyPackage.md#libertypackage-task) | Package a WebSphere Liberty server. | 
 | libertyDump | Dumps diagnostic information from the WebSphere Liberty server into an archive. | 
 | libertyJavaDump | Dumps diagnostic information from the WebSphere Liberty server JVM. | 
 | libertyDebug | Runs the WebSphere Liberty server in the console foreground after a debugger connects to the debug port (default: 7777). | 
