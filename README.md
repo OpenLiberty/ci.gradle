@@ -96,7 +96,7 @@ The plugin will have made the following tasks available to your project:
 | libertyStart | Starts the WebSphere Liberty server. |
 | libertyStop | Stops the WebSphere Liberty server. |
 | libertyRun | Runs a WebSphere Liberty server under the Gradle process. |
-| libertyPackage | Generates a WebSphere Liberty server archive. | 
+| libertyPackage(docs/libertyPackage.md#libertypackage-task) | Package a WebSphere Liberty server. | 
 | libertyDump | Dumps diagnostic information from the WebSphere Liberty server into an archive. | 
 | libertyJavaDump | Dumps diagnostic information from the WebSphere Liberty server JVM. | 
 | libertyDebug | Runs the WebSphere Liberty server in the console foreground after a debugger connects to the debug port (default: 7777). | 
@@ -127,7 +127,7 @@ These properties are divided in two groups, the general properties (Which need t
 | --------- | ------------ | ----------|
 | clean | Clean all cached information on server start up. The default value is `false`. Only used with the `libertyStart` task. | No | 
 | timeout | Waiting time before the server starts. The default value is 30 seconds. The unit is milliseconds. Only used with the `libertyStart` task. | No | 
-| include | A comma-delimited list of values. The valid values vary depending on the task. For the `libertyPackage` task the valid values are `all`, `usr`, `runnable` and `minify` and must be declared in the `packageLiberty` closure. For the `libertyDump` task the valid values are `heap`, `system`, and `thread` and must be declared in the `dumpLiberty` closure. For the `libertyJavaDump` task the valid values are `heap` and `system` and must be declared in the `javaDumpLiberty` closure. |  Yes, only when the `os` option is set in the `packageLiberty` closure |
+| include | A comma-delimited list of values. The valid values vary depending on the task. For the `libertyDump` task the valid values are `heap`, `system`, and `thread` and must be declared in the `dumpLiberty` closure. For the `libertyJavaDump` task the valid values are `heap` and `system` and must be declared in the `javaDumpLiberty` closure. |  No |
 | archive | Location of the target archive file. Only used with the `libertyPackage` or `libertyDump` tasks on their respective closures. | No |
 | template | Name of the template to use when creating a new server. Only used with the `libertyCreate` task. | No |
 | os| A comma-delimited list of operating systems that you want the packaged server to support. Only used with the `package` operation and in the `packageLiberty` closure. The 'include' option must be set to 'minify'. | No |
@@ -145,16 +145,6 @@ liberty {
     clean = true
     timeout = "10000"
 
-    packageLiberty {
-        archive = "MyServerPackage.zip"
-        include = "usr"
-    }
-    //Example to package with 'os' parameter
-    packageLiberty {
-        archive = "MyServerPackage.zip"
-        include = "minify"
-        os = "Linux"
-    }
     dumpLiberty {
         archive = "C:/Dump.zip"
         include = "heap, system"
