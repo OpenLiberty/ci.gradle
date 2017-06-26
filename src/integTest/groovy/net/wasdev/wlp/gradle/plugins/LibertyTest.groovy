@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2015.
+ * (C) Copyright IBM Corporation 2015, 2017
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,6 +79,12 @@ class LibertyTest extends AbstractIntegrationTest{
     public void test6_package() {
         try{
            runTasks(integTestDir, 'libertyPackage')
+		   
+		   def file = new File("build/integTest/testDir/integTest.jar")
+		   
+		   assert file.exists() : "file not found"
+		   assert file.canRead() : "file cannot be read"
+		   
         } catch (Exception e) {
            throw new AssertionError ("Fail on task libertyPackage. "+e)
         }

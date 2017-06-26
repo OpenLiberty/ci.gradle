@@ -37,8 +37,8 @@ liberty {
     }
 
     packageLiberty {
-        include = 'minify'
-        os='Linux'
+		archive = 'testDir'
+        include = 'runnable'
     }
 
     features {
