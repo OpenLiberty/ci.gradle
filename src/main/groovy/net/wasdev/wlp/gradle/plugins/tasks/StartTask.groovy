@@ -15,6 +15,7 @@
  */
 package net.wasdev.wlp.gradle.plugins.tasks
 
+import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import net.wasdev.wlp.ant.ServerTask;
 
@@ -50,7 +51,7 @@ class StartTask extends AbstractTask {
                 String verify = serverTask.waitForStringInLog(START_APP_MESSAGE_REGEXP + archiveName, timeout, serverTask.getLogFile())
                 if (!verify) { 
                     executeServerCommand(project, 'stop', buildLibertyMap(project))
-                    throw new Exception("CWWKM2148E: Unable to verify if the server was started after ${verifyTimeout} seconds")
+                    throw new GradleException("CWWKM2148E: Unable to verify if the server was started after ${verifyTimeout} seconds")
                 }
                 timeout = endTime - System.currentTimeMillis();
             }

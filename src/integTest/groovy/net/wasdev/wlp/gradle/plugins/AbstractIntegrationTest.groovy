@@ -16,6 +16,7 @@
 package net.wasdev.wlp.gradle.plugins
 
 import org.apache.tools.ant.util.FileUtils
+import java.io.File;
 import org.junit.BeforeClass
 import org.junit.AfterClass
 
@@ -26,29 +27,13 @@ import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.ProjectConnection
 import org.gradle.tooling.model.GradleProject
 import org.gradle.tooling.model.Task
+import org.codehaus.groovy.runtime.typehandling.GroovyCastException
 
 
 abstract class AbstractIntegrationTest {
     static File integTestDir = new File('build/integTest')
     static final String test_mode = System.getProperty("runit")
     static String WLP_DIR = System.getProperty("wlpInstallDir")
-
-    @BeforeClass
-    public static void setup() {
-        deleteDir(integTestDir)
-        createDir(integTestDir)
-        if(test_mode == "offline"){
-            WLP_DIR.replace("\\","/")
-            createFile(integTestDir)
-        }else if(test_mode == "online"){
-            createFile(integTestDir)
-            try {
-                runTasks(integTestDir, 'installLiberty')
-            } catch (Exception e) {
-                throw new AssertionError ("Fail on task installLiberty. "+e)
-            }
-        }
-    }
 
     protected static void deleteDir(File dir) {
         if (dir.exists()) {
@@ -66,16 +51,19 @@ abstract class AbstractIntegrationTest {
         }
     }
 
-    protected static File createFile(File parent) {
-        File destFile = new File(parent, 'build.gradle')
-        File sourceFile = new File("build/resources/integrationTest/build.gradle")
-        if (!sourceFile.exists()){
-            throw new AssertionError("The source file '${sourceFile.canonicalPath}' doesn't exist.")
+    protected static File createTestProject(File parent, File sourceDir) {
+        if (!sourceDir.exists()){
+            throw new AssertionError("The source file '${sourceDir.canonicalPath}' doesn't exist.")
         }
         try {
-            FileUtils.getFileUtils().copyFile(sourceFile, destFile, null, true);
+            AntBuilder ant = new AntBuilder()
+            ant.copy(todir: parent.toString()){
+                fileset(dir: sourceDir.toString())
+            }
         } catch (IOException e) {
-            throw new AssertionError("Unable to create file '${destFile.canonicalPath}'.")
+            throw new AssertionError("Unable to create file '${parent.canonicalPath}'.")
+        } catch (GroovyCastException e) {
+            assertTrue(new File(parent, "build.gradle").exists())
         }
     }
 
