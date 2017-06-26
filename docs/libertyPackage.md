@@ -35,18 +35,6 @@ liberty {
         include = "minify"
         os = "Linux"
     }
-    
-    packageLiberty {
-        archive = "MyServerPackage.jar"
-        include = "runnable"
-    }
-    
-    //Example to package in a target directory
-    packageLiberty {
-        archive = "MyTargetDir"
-        include = "minify"
-        os = "Linux"
-    }
 }
 
 ```
