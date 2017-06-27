@@ -22,7 +22,10 @@ class RunTask extends AbstractTask {
 
     @TaskAction
     void run() {
-        List<String> command = buildCommand ("run")
+        List<String> command = buildCommand("run")
+        if (project.liberty.clean) {
+            command.add("--clean")
+        }
         def run_process = new ProcessBuilder(command).redirectErrorStream(true).start()       
         run_process.inputStream.eachLine {
             println it

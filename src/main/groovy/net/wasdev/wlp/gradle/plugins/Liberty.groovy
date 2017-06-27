@@ -53,8 +53,7 @@ class Liberty implements Plugin<Project> {
                 logging.level = LogLevel.INFO
 
                 addShutdownHook {
-                    List<String> command = buildCommand("stop")
-                    def stop_process = new ProcessBuilder(command).redirectErrorStream(true).start()
+                    def stop_process = new ProcessBuilder(buildCommand("stop")).redirectErrorStream(true).start()
                     stop_process.inputStream.eachLine {
                         println it
                     }
