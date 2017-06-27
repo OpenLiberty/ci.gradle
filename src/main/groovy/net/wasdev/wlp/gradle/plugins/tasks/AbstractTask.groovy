@@ -70,4 +70,22 @@ abstract class AbstractTask extends DefaultTask {
         return (project.liberty.userDir == null) ? new File(installDir, 'usr') : new File(project.liberty.userDir)
     }
 
+    protected List<String> buildCommand (String operation) {
+        List<String> command = new ArrayList<String>()
+        boolean isWindows = System.properties['os.name'].toLowerCase().indexOf("windows") >= 0
+        String installDir = getInstallDir(project).toString()
+
+        if (isWindows) {
+            // println ("Windows detected") 
+            command.add(installDir + "\\bin\\server.bat")
+        } else {
+            // println ("Not-Windows detected")
+            command.add(installDir + "/bin/server")
+        }
+        command.add(operation)
+        command.add(project.liberty.serverName)
+        
+        return command
+    }
+
 }
