@@ -26,7 +26,7 @@ import static org.junit.Assert.*
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class LibertyTest extends AbstractIntegrationTest{
     static File sourceDir = new File("build/resources/integrationTest/liberty-test")
-    
+
     @BeforeClass
     public static void setup() {
         deleteDir(integTestDir)

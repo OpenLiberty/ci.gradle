@@ -127,6 +127,7 @@ These properties are divided in two groups, the general properties (Which need t
 | --------- | ------------ | ----------|
 | clean | Clean all cached information on server start up. The default value is `false`. Only used with the `libertyStart` task. | No | 
 | timeout | Waiting time before the server starts. The default value is 30 seconds. The unit is milliseconds. Only used with the `libertyStart` task. | No | 
+| applications | A comma-separated list of application names to wait for during server start-up. Only used with the `libertyStart` task. | No |
 | include | A comma-delimited list of values. The valid values vary depending on the task. For the `libertyDump` task the valid values are `heap`, `system`, and `thread` and must be declared in the `dumpLiberty` closure. For the `libertyJavaDump` task the valid values are `heap` and `system` and must be declared in the `javaDumpLiberty` closure. |  No |
 | archive | Location of the target archive file. Only used with the `libertyPackage` or `libertyDump` tasks on their respective closures. | No |
 | template | Name of the template to use when creating a new server. Only used with the `libertyCreate` task. | No |

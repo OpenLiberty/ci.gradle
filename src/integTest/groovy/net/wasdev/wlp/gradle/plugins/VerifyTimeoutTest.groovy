@@ -9,7 +9,7 @@ import org.junit.Test
 
 public class VerifyTimeoutTest extends AbstractIntegrationTest{
     static File sourceDir = new File("build/resources/integrationTest/sample.servlet")
-    
+
     @BeforeClass
     public static void setup() {
         deleteDir(integTestDir)
@@ -19,18 +19,13 @@ public class VerifyTimeoutTest extends AbstractIntegrationTest{
             createTestProject(integTestDir, sourceDir)
         }else if(test_mode == "online"){
             createTestProject(integTestDir, sourceDir)
-            try {
-                runTasks(integTestDir, 'installLiberty')
-            } catch (Exception e) {
-                throw new AssertionError ("Fail on task installLiberty. "+e)
-            }
         }
     }
 
     @AfterClass
     public static void tearDown() throws Exception {
-        deleteDir(integTestDir)
         runTasks(integTestDir, 'libertyStop')
+        deleteDir(integTestDir)
     }
     
     @Test
@@ -38,7 +33,7 @@ public class VerifyTimeoutTest extends AbstractIntegrationTest{
         try {
             runTasks(integTestDir, 'libertyStart')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task libertyStart. "+e)
+            throw new AssertionError ("Fail on task libertyStart. "+ e)
         }
     }
 }
