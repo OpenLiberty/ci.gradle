@@ -21,8 +21,8 @@ apply plugin: 'maven'
 apply plugin: 'war'
 apply plugin: 'liberty'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
 compileJava.options.encoding = 'UTF-8'
 
