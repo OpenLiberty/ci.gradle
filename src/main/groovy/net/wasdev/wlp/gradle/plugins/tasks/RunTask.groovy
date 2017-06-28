@@ -26,10 +26,13 @@ class RunTask extends AbstractTask {
         if (project.liberty.clean) {
             command.add("--clean")
         }
-        def run_process = new ProcessBuilder(command).redirectErrorStream(true).start()       
+        def run_process = new ProcessBuilder(command).redirectErrorStream(true).start()
+        addShutdownHook {
+            run_process.waitFor()
+        }
         run_process.inputStream.eachLine {
             println it
-        }   
+        }
     }
 
 }

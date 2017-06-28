@@ -51,13 +51,6 @@ class Liberty implements Plugin<Project> {
             project.task('libertyRun', type: RunTask) {
                 description = "Runs a WebSphere Liberty Profile server under the Gradle process."
                 logging.level = LogLevel.INFO
-
-                addShutdownHook {
-                    def stop_process = new ProcessBuilder(buildCommand("stop")).redirectErrorStream(true).start()
-                    stop_process.inputStream.eachLine {
-                        println it
-                    }
-                }
             }
         } catch (Exception e) {
             project.task('libertyRun') {
@@ -66,7 +59,6 @@ class Liberty implements Plugin<Project> {
                 doLast {
                     logger.error ("libertyRun task could not finish execution due to an exception.")
                     throw new Exception (e) 
-                    // Alternatively done with --stacktrace
                     // e.printStackTrace()
                 }
             }
