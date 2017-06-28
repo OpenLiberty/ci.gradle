@@ -21,30 +21,40 @@ class PackageTask extends AbstractTask {
 
     @TaskAction
     void packageServer() {
-	
+    
         def params = buildLibertyMap(project);
-		def fileType = getPackageFileType(project.liberty.packageLiberty.include)
-		final archive = project.liberty.packageLiberty.archive
-		
+
+        final archive = project.liberty.packageLiberty.archive
+        
+        // default output directory
+        def buildLibsDir = new File(project.getBuildDir(), 'libs')
+        def fileType = getPackageFileType(project.liberty.packageLiberty.include)
+        
         if (archive != null && archive.length() != 0) {
-			def packageFile = new File(project.getProjectDir(), archive)
-			
-			if (!archive.endsWith(".zip") && !archive.endsWith(".jar")) {
-				// check if target directory exists
-				if (!packageFile.exists()) {
-					packageFile.mkdirs()
-				}
-				packageFile = new File(packageFile, project.getName() + fileType)			
-			} 
-			params.put('archive', packageFile)
-			logger.debug 'Packaging ' + packageFile
-			
+            def archiveFile = new File(project.getProjectDir(), archive)
+            
+            if (archiveFile.exists()) {
+                if (archiveFile.isDirectory()) {
+                    // package ${project.name}.zip | jar 
+                    archiveFile = new File(archiveFile, project.getName() + fileType)
+                } 
+            } else {
+                if (archive.endsWith(".zip") || archive.endsWith(".jar")) {
+                    archiveFile = new File(buildLibsDir, archive)
+                } else {
+                    archiveFile = new File(buildLibsDir, archive + fileType)
+                }
+            }
+            
+            params.put('archive', archiveFile)
+            logger.info 'Packaging ' + archiveFile
+            
         } else {
-			def defaultPackageFile = new File(project.getBuildDir(), project.getName() + fileType)
-			params.put('archive', defaultPackageFile)
-			logger.debug 'Packaging ' + defaultPackageFile
-		}
-		
+            def defaultPackageFile = new File(buildLibsDir, project.getName() + fileType)
+            params.put('archive', defaultPackageFile)
+            logger.info 'Packaging ' + defaultPackageFile
+        }
+        
         if (project.liberty.packageLiberty.include != null && project.liberty.packageLiberty.include.length() != 0) {
             params.put('include', project.liberty.packageLiberty.include)
         }
@@ -54,11 +64,11 @@ class PackageTask extends AbstractTask {
 
         executeServerCommand(project, 'package', params)
     }
-	
-	private String getPackageFileType(String include) {
-		if (include != null && include.contains("runnable")) {
-			return ".jar"
-		}
-		return ".zip"
-	}
+    
+    private String getPackageFileType(String include) {
+        if (include != null && include.contains("runnable")) {
+            return ".jar"
+        }
+        return ".zip"
+    }
 }

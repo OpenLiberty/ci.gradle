@@ -9,7 +9,7 @@ Starting with WebSphere Liberty 8.5.5.9, it is possible to package a server into
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
 | include | Packaging type. Can be used with values `all`, `usr`, `minify`, `wlp`, `runnable`, `all,runnable` and `minify,runnable`. The default value is `all`. The `runnable`, `all,runnable` and `minify,runnable` values are supported beginning with 8.5.5.9 and works with `jar` type archives only. This must be declared in the `packageLiberty` closure. | Yes, only when the `os` option is set. |
-| archive | Location of the target file or directory. If the target location is a file, the contents of the server instance will be compressed into the specified file. If the target location is a directory, the contents of the server instance will be compressed into `${archive}/${project.name}.zip`&#124;`jar` file. If the target location is not specified, it defaults to `${buildDir}/libs/${project.name}.zip`&#124;`jar`. A jar file is created when the packaging type is either `runnable`,`all,runnable` or `minify,runnable`. A zip file is created for other packaging types. | No |
+| archive | Location of the target file or directory. If the target location is a file with extension `zip`&#124;`jar`, the contents of the server instance will be compressed into the specified file, `${buildDir}/libs/${archive}` . If the target location is an existing directory, the contents of the server instance will be compressed into `${archive}/${project.name}.zip`&#124;`jar` file. If the `archive` option is not set, it defaults to `${buildDir}/libs/${project.name}.zip`&#124;`jar`. A jar file is created when the packaging type is either `runnable`,`all,runnable` or `minify,runnable`. A zip file is created for other packaging types. | No |
 | os| A comma-delimited list of operating systems that you want the packaged server to support. To specify that an operating system is not to be supported, prefix it with a minus sign ("-"). The 'include' attribute __must__ be set to `minify`. | No |
 
 
@@ -34,7 +34,7 @@ liberty {
     }
     
     //Example to package with 'jar' type 'archive' parameter. 
-    //Packaging type should be `runnable`, `all,runnable`, or `minify,runnable`.
+    //Acceptable packaging types are `runnable`, `all,runnable`, or `minify,runnable`.
     packageLiberty {
         archive = "MyServerRunnable.jar"
         include = "runnable"
@@ -44,12 +44,6 @@ liberty {
     packageLiberty {
         archive = "MyTargetDir"
         include = "runnable"
-    }
-    
-    //Example to package in a target directory
-    packageLiberty {
-        archive = "MyTargetDir"
-        include = "minify"
         os = "Linux"
     }
 }

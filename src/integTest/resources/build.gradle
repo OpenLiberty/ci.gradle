@@ -16,6 +16,8 @@ def test_mode = System.getProperty('runit')
 def wlpLicense = System.getProperty('wlpLicense')
 def wlpVersion = System.getProperty('wlpVersion')
 def WLP_DIR = System.getProperty('wlpInstallDir')
+def libertyPackageInclude = System.getProperty('libertyPackageInclude')
+def libertyPackageArchive = System.getProperty('libertyPackageArchive')
 def wlpUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/" + wlpVersion + "/wlp-webProfile7-" + wlpVersion + ".zip"
 
 apply plugin: 'liberty'
@@ -37,8 +39,8 @@ liberty {
     }
 
     packageLiberty {
-		archive = 'testDir'
-        include = 'runnable'
+        archive = libertyPackageArchive
+        include = libertyPackageInclude
     }
 
     features {
