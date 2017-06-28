@@ -11,16 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet(urlPatterns="/servlet")
 public class LibertyServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
- 
-    public void init() {
-    	System.out.println("START INIT SERVLET");
-    	try {
-			Thread.sleep(41000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    } 
 
     /**
      * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)

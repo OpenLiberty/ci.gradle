@@ -23,36 +23,35 @@ import org.junit.runners.MethodSorters
 import org.junit.FixMethodOrder
 import static org.junit.Assert.*
 
+import java.io.File
+
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class LibertyTest extends AbstractIntegrationTest{
     static File sourceDir = new File("build/resources/integrationTest/liberty-test")
+    static File buildDir = new File(integTestDir, "/liberty-test")
+    static String buildFilename = "build.gradle"
 
     @BeforeClass
     public static void setup() {
-        deleteDir(integTestDir)
-        createDir(integTestDir)
+        createDir(buildDir)
         if(test_mode == "offline"){
             WLP_DIR.replace("\\","/")
-            createTestProject(integTestDir, sourceDir)
+            createTestProject(buildDir, sourceDir, buildFilename)
         }else if(test_mode == "online"){
-            createTestProject(integTestDir, sourceDir)
+            createTestProject(buildDir, sourceDir, buildFilename)
             try {
-                runTasks(integTestDir, 'installLiberty')
+                runTasks(buildDir, 'installLiberty')
             } catch (Exception e) {
-                throw new AssertionError ("Fail on task installLiberty. "+e)
+                throw new AssertionError ("Fail on task installLiberty. "+ e)
             }
         }
-    }
-
-    @AfterClass
-    public static void tearDown() throws Exception {
-        deleteDir(integTestDir)
+        renameBuildFile(buildFilename, buildDir)
     }
 
     @Test
     public void test1_start() {
         try {
-            runTasks(integTestDir, 'libertyStart')
+            runTasks(buildDir, 'libertyStart')
         } catch (Exception e) {
             throw new AssertionError ("Fail on task libertyStart. "+e)
         }
@@ -61,7 +60,7 @@ class LibertyTest extends AbstractIntegrationTest{
     @Test
     public void test2_executeDeployTask() {
         try {
-            runTasks(integTestDir, 'deploy')
+            runTasks(buildDir, 'deploy')
         } catch (Exception e) {
             throw new AssertionError ("Fail on task deploy. "+e)
         }
@@ -70,7 +69,7 @@ class LibertyTest extends AbstractIntegrationTest{
     @Test
     public void test3_executeUndeployTask() {
         try {
-            runTasks(integTestDir, 'undeploy')
+            runTasks(buildDir, 'undeploy')
         } catch (Exception e) {
             throw new AssertionError ("Fail on task undeploy. "+e)
         }
@@ -79,7 +78,7 @@ class LibertyTest extends AbstractIntegrationTest{
     @Test
     public void test4_stop() {
         try{
-            runTasks(integTestDir, 'libertyStop')
+            runTasks(buildDir, 'libertyStop')
         } catch (Exception e) {
             throw new AssertionError ("Fail on task libertyStop. "+e)
         }
@@ -88,7 +87,7 @@ class LibertyTest extends AbstractIntegrationTest{
     @Test
     public void test5_status() {
         try{
-          runTasks(integTestDir, 'libertyStatus')
+          runTasks(buildDir, 'libertyStatus')
         } catch (Exception e) {
           throw new AssertionError ("Fail on task libertyStatus. "+e)
         }
@@ -97,7 +96,7 @@ class LibertyTest extends AbstractIntegrationTest{
     @Test
     public void test6_package() {
         try{
-           runTasks(integTestDir, 'libertyPackage')
+           runTasks(buildDir, 'libertyPackage')
         } catch (Exception e) {
            throw new AssertionError ("Fail on task libertyPackage. "+e)
         }
@@ -106,7 +105,7 @@ class LibertyTest extends AbstractIntegrationTest{
     @Test
     public void test7_installFeature() {
         try{
-           runTasks(integTestDir, 'InstallFeature')
+           runTasks(buildDir, 'InstallFeature')
         } catch (Exception e) {
            throw new AssertionError ("Fail on task InstallFeature. "+e)
         }
@@ -115,7 +114,7 @@ class LibertyTest extends AbstractIntegrationTest{
     @Test
     public void test8_uninstallFeature() {
         try{
-           runTasks(integTestDir, 'UninstallFeature')
+           runTasks(buildDir, 'UninstallFeature')
         } catch (Exception e) {
            throw new AssertionError ("Fail on task UninstallFeature. "+e)
         }
@@ -124,7 +123,7 @@ class LibertyTest extends AbstractIntegrationTest{
     @Test
     public void test9_cleanDirectories() {
         try{
-           runTasks(integTestDir, 'cleanDirs')
+           runTasks(buildDir, 'cleanDirs')
         } catch (Exception e) {
            throw new AssertionError ("Fail on task Clean. "+e)
         }

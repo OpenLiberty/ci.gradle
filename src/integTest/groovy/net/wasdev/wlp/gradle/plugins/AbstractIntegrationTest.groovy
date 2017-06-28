@@ -31,7 +31,7 @@ import org.codehaus.groovy.runtime.typehandling.GroovyCastException
 
 
 abstract class AbstractIntegrationTest {
-    static File integTestDir = new File('build/integTest')
+    static File integTestDir = new File('build/testBuilds')
     static final String test_mode = System.getProperty("runit")
     static String WLP_DIR = System.getProperty("wlpInstallDir")
 
@@ -51,7 +51,7 @@ abstract class AbstractIntegrationTest {
         }
     }
 
-    protected static File createTestProject(File parent, File sourceDir) {
+    protected static File createTestProject(File parent, File sourceDir, String buildFilename) {
         if (!sourceDir.exists()){
             throw new AssertionError("The source file '${sourceDir.canonicalPath}' doesn't exist.")
         }
@@ -63,7 +63,9 @@ abstract class AbstractIntegrationTest {
         } catch (IOException e) {
             throw new AssertionError("Unable to create file '${parent.canonicalPath}'.")
         } catch (GroovyCastException e) {
-            assertTrue(new File(parent, "build.gradle").exists())
+            File build = new File(parent, buildFilename)
+            if(!build.exists())
+                throw new AssertionError("Files not copied correctly")
         }
     }
 
@@ -82,5 +84,13 @@ abstract class AbstractIntegrationTest {
         finally {
             connection?.close()
         }
+    }
+    
+    public static void renameBuildFile(String buildFilename, File buildDir) {
+        println("renaminnnnnggggg the fiillleee for you Dylan")
+        println("the new name is: " + buildDir.toString() + '/build.gradle')
+        File sourceFile = new File(buildDir, buildFilename)
+        sourceFile.renameTo(buildDir.toString() + '/build.gradle')
+        //FileUtils.getFileUtils().copyFile(sourceFile, destFile, null, true)
     }
 }
