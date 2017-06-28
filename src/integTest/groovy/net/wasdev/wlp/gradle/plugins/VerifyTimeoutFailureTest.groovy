@@ -5,11 +5,12 @@ import java.io.File
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
+import org.gradle.tooling.BuildException
 
-public class VerifyTimeoutTest extends AbstractIntegrationTest{
+public class VerifyTimeoutFailureTest extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/integrationTest/sample.servlet")
-    static File buildDir = new File(integTestDir, "/verify-timeout-test")
-    static String buildFilename = "verifyTimeoutTest.gradle"
+    static File buildDir = new File(integTestDir, "/verify-timeout-failure-test")
+    static String buildFilename = "verifyTimeoutFailureTest.gradle"
 
     @BeforeClass
     public static void setup() {
@@ -26,12 +27,8 @@ public class VerifyTimeoutTest extends AbstractIntegrationTest{
         runTasks(buildDir, 'libertyStop')
     }
     
-    @Test
-    public void test_start_with_timeout() {
-        try {
-            runTasks(buildDir, 'libertyStart')
-        } catch (Exception e) {
-            throw new AssertionError ("Fail on task libertyStart. "+ e)
-        }
+    @Test(expected = BuildException.class)
+    public void test_start_with_timeout_failure() {
+        runTasks(buildDir, 'libertyStart')
     }
 }
