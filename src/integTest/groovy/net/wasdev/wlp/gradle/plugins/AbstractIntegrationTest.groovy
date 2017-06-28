@@ -94,10 +94,6 @@ abstract class AbstractIntegrationTest {
         ProjectConnection connection = gradleConnector.connect()
 
         try {
-            
-            System.println "KJOSEPH : libertyPackageArchive is "  + System.getProperty("libertyPackageArchive")
-            System.println "KJOSEPH : libertyPackageInclude is "  + System.getProperty("libertyPackageInclude")
-            
             BuildLauncher build = connection.newBuild()
             build.setJvmArguments("-DWLP_DIR=$WLP_DIR",
                 "-DlibertyPackageArchive=" + System.getProperty("libertyPackageArchive"), 
