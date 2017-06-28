@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2015.
+ * (C) Copyright IBM Corporation 2015, 2017
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,14 +76,121 @@ class LibertyTest extends AbstractIntegrationTest{
     }
 
     @Test
-    public void test6_package() {
+    public void test6_1_packageZip() {
         try{
+           setPackageLibertyConfig("MyServerPackage.zip", null, null)
            runTasks(integTestDir, 'libertyPackage')
+           
+           def file = new File("build/integTest/build/libs/MyServerPackage.zip")
+           
+           assert file.exists() : "file not found"
+           assert file.canRead() : "file cannot be read"
+
+           deleteFile(file)
+           
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task libertyPackage. "+e)
+        }
+    }
+    
+    @Test
+    public void test6_2_packageRunnable() {
+        try{
+           setPackageLibertyConfig("MyServerPackage.jar", null, null)
+           runTasks(integTestDir, 'libertyPackage')
+           
+           def file = new File("build/integTest/build/libs/MyServerPackage.jar")
+           
+           assert file.exists() : "file not found"
+           assert file.canRead() : "file cannot be read"
+           
+           deleteFile(file)
+           
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task libertyPackage. "+e)
+        }
+    }
+    
+    @Test
+    public void test6_3_packageRunnable_dirExist() {
+        try{
+           setPackageLibertyConfig("existDir", "runnable", null)
+           def existDir = new File(integTestDir, 'existDir')
+           createDir(existDir)
+           
+           runTasks(integTestDir, 'libertyPackage')
+           
+           def file = new File("build/integTest/existDir/integTest.jar")
+           
+           assert file.exists() : "file not found"
+           assert file.canRead() : "file cannot be read"
+
+           deleteDir(existDir)
+           
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task libertyPackage. "+e)
+        }
+    }
+    
+    @Test
+    public void test6_3_packageZip_dirExist() {
+        try{
+           setPackageLibertyConfig("existDir", "all", null)
+           def existDir = new File(integTestDir, 'existDir')
+           createDir(existDir)
+           
+           runTasks(integTestDir, 'libertyPackage')
+           
+           def file = new File("build/integTest/existDir/integTest.zip")
+           
+           assert file.exists() : "file not found"
+           assert file.canRead() : "file cannot be read"
+
+           deleteDir(existDir)
+           
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task libertyPackage. "+e)
+        }
+    }
+    
+    @Test
+    public void test6_5_packageRunnable_dirNotExist() {
+        try{
+           setPackageLibertyConfig("MyServerPackage", "all,runnable", null)
+           
+           runTasks(integTestDir, 'libertyPackage')
+           
+           def file = new File("build/integTest/build/libs/MyServerPackage.jar")
+           
+           assert file.exists() : "file not found"
+           assert file.canRead() : "file cannot be read"
+
+           deleteFile(file)
+           
         } catch (Exception e) {
            throw new AssertionError ("Fail on task libertyPackage. "+e)
         }
     }
 
+    @Test
+    public void test6_6_packageZip_dirNotExist() {
+        try{
+           setPackageLibertyConfig("MyServerPackage", "minify", "Linux")
+           
+           runTasks(integTestDir, 'libertyPackage')
+           
+           def file = new File("build/integTest/build/libs/MyServerPackage.zip")
+           
+           assert file.exists() : "file not found"
+           assert file.canRead() : "file cannot be read"
+
+           deleteFile(file)
+           
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task libertyPackage. "+e)
+        }
+    }
+    
     @Test
     public void test7_installFeature() {
         try{

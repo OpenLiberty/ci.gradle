@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2015.
+ * (C) Copyright IBM Corporation 2015, 2017.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,12 @@ abstract class AbstractIntegrationTest {
     static File integTestDir = new File('build/integTest')
     static final String test_mode = System.getProperty("runit")
     static String WLP_DIR = System.getProperty("wlpInstallDir")
-
+    
     @BeforeClass
     public static void setup() {
         deleteDir(integTestDir)
-        createDir(integTestDir)
+        createDir(new File(integTestDir, 'build/libs'))
+        
         if(test_mode == "offline"){
             WLP_DIR.replace("\\","/")
             createFile(integTestDir)
@@ -52,8 +53,16 @@ abstract class AbstractIntegrationTest {
 
     protected static void deleteDir(File dir) {
         if (dir.exists()) {
-            if (!integTestDir.deleteDir()) {
+            if (!dir.deleteDir()) {
                 throw new AssertionError("Unable to delete directory '$dir.canonicalPath'.")
+            }
+        }
+    }
+    
+    protected static void deleteFile(File file) {
+        if (file.exists()) {
+            if (!file.delete()) {
+                throw new AssertionError("Unable to delete file '$file.canonicalPath'.")
             }
         }
     }
@@ -86,13 +95,27 @@ abstract class AbstractIntegrationTest {
 
         try {
             BuildLauncher build = connection.newBuild()
-            build.setJvmArguments("-DWLP_DIR=$WLP_DIR")
-            build.withArguments("-i"); 
+            build.setJvmArguments("-DWLP_DIR=$WLP_DIR",
+                "-DlibertyPackageArchive=" + System.getProperty("libertyPackageArchive"), 
+                "-DlibertyPackageInclude=" + System.getProperty("libertyPackageInclude"),
+                "-DlibertyPackageOS=" + System.getProperty("libertyPackageOS"))
+            build.withArguments("-i") 
             build.forTasks(tasks)
             build.run()
         }
         finally {
             connection?.close()
         }
+    }
+    
+    protected static void setPackageLibertyConfig(String archive, String include, String os) {
+        if (archive != null && !archive.isEmpty())
+            System.setProperty("libertyPackageArchive", archive)
+        
+        if (include != null && !include.isEmpty())
+            System.setProperty("libertyPackageInclude", include)
+        
+        if (os != null && !os.isEmpty())
+            System.setProperty("libertyPackageOS", os)
     }
 }
