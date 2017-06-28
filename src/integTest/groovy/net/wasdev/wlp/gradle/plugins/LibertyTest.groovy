@@ -27,7 +27,7 @@ import java.io.File
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class LibertyTest extends AbstractIntegrationTest{
-    static File sourceDir = new File("build/resources/integrationTest/liberty-test")
+    static File resourceDir = new File("build/resources/integrationTest/liberty-test")
     static File buildDir = new File(integTestDir, "/liberty-test")
     static String buildFilename = "build.gradle"
 
@@ -36,9 +36,9 @@ class LibertyTest extends AbstractIntegrationTest{
         createDir(buildDir)
         if(test_mode == "offline"){
             WLP_DIR.replace("\\","/")
-            createTestProject(buildDir, sourceDir, buildFilename)
+            createTestProject(buildDir, resourceDir, buildFilename)
         }else if(test_mode == "online"){
-            createTestProject(buildDir, sourceDir, buildFilename)
+            createTestProject(buildDir, resourceDir, buildFilename)
             try {
                 runTasks(buildDir, 'installLiberty')
             } catch (Exception e) {

@@ -7,7 +7,7 @@ import org.junit.BeforeClass
 import org.junit.Test
 
 public class VerifyTimeoutTest extends AbstractIntegrationTest{
-    static File sourceDir = new File("build/resources/integrationTest/sample.servlet")
+    static File resourceDir = new File("build/resources/integrationTest/sample.servlet")
     static File buildDir = new File(integTestDir, "/verify-timeout-test")
     static String buildFilename = "verifyTimeoutTest.gradle"
 
@@ -16,11 +16,8 @@ public class VerifyTimeoutTest extends AbstractIntegrationTest{
         createDir(buildDir)
         if(test_mode == "offline"){
             WLP_DIR.replace("\\","/")
-            createTestProject(buildDir, sourceDir, buildFilename)
         }
-        else if(test_mode == "online"){
-            createTestProject(buildDir, sourceDir, buildFilename)
-        }
+        createTestProject(buildDir, resourceDir, buildFilename)
         renameBuildFile(buildFilename, buildDir)
     }
 

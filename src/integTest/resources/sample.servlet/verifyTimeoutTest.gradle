@@ -55,10 +55,6 @@ liberty {
 
 repositories {
     mavenCentral()
-    maven {
-        name 'liberty-starter-maven-repo'
-        url 'http://liberty-starter.wasdev.developer.ibm.com/start/api/v1/repo'
-    }
 }
 
 dependencies {
@@ -66,7 +62,6 @@ dependencies {
     testCompile 'org.apache.cxf:cxf-rt-rs-client:3.1.1'
     testCompile 'org.glassfish:javax.json:1.0.4'
     providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
-    runtime 'net.wasdev.wlp.starters.rest:runtime-pom:0.0.3'
 }
 
 task publishWar(type: Copy) {

@@ -15,7 +15,7 @@ import org.junit.Test
 public class YourAwesomeTest extends AbstractIntegrationTest{
     // location of the directory containing the files need to run your test build
     // test resources are added in the root_dir/src/integTest/resources/ directory 
-    static File sourceDir = new File("build/resources/integrationTest/your-awesome-build-files") // **required**
+    static File resourceDir = new File("build/resources/integrationTest/your-awesome-build-files") // **required**
     // directory from which your build will take place
     // you only must configure the second parameter of the below file instantiation 
     static File buildDir = new File(integTestDir, "/your-awesome-test") // **required**
@@ -32,10 +32,8 @@ public class YourAwesomeTest extends AbstractIntegrationTest{
             // copy your testing resources into your build directory 
             createTestProject(buildDir, sourceDir, buildFilename) // **required**
         }
-        else if(test_mode == "online"){
-            // copy your testing resource into your build directory 
-            createTestProject(buildDir, sourceDir, buildFilename) // **required**
-        }
+        // copy your testing resource into your build directory 
+        createTestProject(buildDir, resourceDir, buildFilename) // **required**
         // rename your build file to build.gradle so you can build with it...
         renameBuildFile(buildFilename, buildDir) // **required**
     }
