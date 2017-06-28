@@ -87,10 +87,7 @@ abstract class AbstractIntegrationTest {
     }
     
     public static void renameBuildFile(String buildFilename, File buildDir) {
-        println("renaminnnnnggggg the fiillleee for you Dylan")
-        println("the new name is: " + buildDir.toString() + '/build.gradle')
         File sourceFile = new File(buildDir, buildFilename)
         sourceFile.renameTo(buildDir.toString() + '/build.gradle')
-        //FileUtils.getFileUtils().copyFile(sourceFile, destFile, null, true)
     }
 }
