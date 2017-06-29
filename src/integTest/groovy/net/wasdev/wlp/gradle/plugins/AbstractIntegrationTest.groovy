@@ -15,7 +15,7 @@
  */
 package net.wasdev.wlp.gradle.plugins
 
-import org.apache.tools.ant.util.FileUtils
+import org.apache.commons.io.FileUtils
 import java.io.File;
 import org.junit.BeforeClass
 import org.junit.AfterClass
@@ -56,16 +56,9 @@ abstract class AbstractIntegrationTest {
             throw new AssertionError("The source file '${sourceDir.canonicalPath}' doesn't exist.")
         }
         try {
-            AntBuilder ant = new AntBuilder()
-            ant.copy(todir: parent.toString()){
-                fileset(dir: sourceDir.toString())
-            }
+            FileUtils.copyDirectory(sourceDir, parent)
         } catch (IOException e) {
-            throw new AssertionError("Unable to create file '${parent.canonicalPath}'.")
-        } catch (GroovyCastException e) {
-            File build = new File(parent, buildFilename)
-            if(!build.exists())
-                throw new AssertionError("Files not copied correctly")
+            throw new AssertionError("Unable to copy directory '${parent.canonicalPath}'.")
         }
     }
 
