@@ -16,7 +16,6 @@
 package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.tasks.TaskAction
-import java.lang.Process
 
 class RunTask extends AbstractTask {
 

@@ -51,6 +51,11 @@ class Liberty implements Plugin<Project> {
             project.task('libertyRun', type: RunTask) {
                 description = "Runs a WebSphere Liberty Profile server under the Gradle process."
                 logging.level = LogLevel.INFO
+
+                addShutdownHook {
+                    // Making sure the server is stopped when executing with a daemon
+                    def stop_process = new ProcessBuilder(buildCommand("stop")).redirectErrorStream(true).start()
+                }
             }
         } catch (Exception e) {
             project.task('libertyRun') {
