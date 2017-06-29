@@ -51,7 +51,7 @@ class StartTask extends AbstractTask {
                 String verify = serverTask.waitForStringInLog(START_APP_MESSAGE_REGEXP + archiveName, timeout, serverTask.getLogFile())
                 if (!verify) { 
                     executeServerCommand(project, 'stop', buildLibertyMap(project))
-                    throw new GradleException("Unable to verify if the server was started after ${verifyTimeout} seconds")
+                    throw new GradleException("Unable to verify if the server was started after ${verifyTimeout} seconds.")
                 }
                 timeout = endTime - System.currentTimeMillis();
             }
