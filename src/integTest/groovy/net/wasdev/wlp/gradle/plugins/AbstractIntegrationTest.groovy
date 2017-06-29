@@ -109,13 +109,13 @@ abstract class AbstractIntegrationTest {
     }
     
     protected static void setPackageLibertyConfig(String archive, String include, String os) {
-        if (archive != null && !archive.isEmpty())
+        if (archive != null)
             System.setProperty("libertyPackageArchive", archive)
         
-        if (include != null && !include.isEmpty())
+        if (include != null)
             System.setProperty("libertyPackageInclude", include)
         
-        if (os != null && !os.isEmpty())
+        if (os != null)
             System.setProperty("libertyPackageOS", os)
     }
 }

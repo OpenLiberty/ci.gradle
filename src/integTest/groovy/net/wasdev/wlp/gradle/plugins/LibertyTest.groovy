@@ -78,10 +78,10 @@ class LibertyTest extends AbstractIntegrationTest{
     @Test
     public void test6_1_packageZip() {
         try{
-           setPackageLibertyConfig("MyServerPackage.zip", null, null)
+           setPackageLibertyConfig("MyServerPackage.zip", "", "")
            runTasks(integTestDir, 'libertyPackage')
            
-           def file = new File("build/integTest/build/libs/MyServerPackage.zip")
+           def file = new File("build/integTest/MyServerPackage.zip")
            
            assert file.exists() : "file not found"
            assert file.canRead() : "file cannot be read"
@@ -96,10 +96,10 @@ class LibertyTest extends AbstractIntegrationTest{
     @Test
     public void test6_2_packageRunnable() {
         try{
-           setPackageLibertyConfig("MyServerPackage.jar", null, null)
+           setPackageLibertyConfig("MyServerPackage.jar", "", "")
            runTasks(integTestDir, 'libertyPackage')
            
-           def file = new File("build/integTest/build/libs/MyServerPackage.jar")
+           def file = new File("build/integTest/MyServerPackage.jar")
            
            assert file.exists() : "file not found"
            assert file.canRead() : "file cannot be read"
@@ -112,74 +112,130 @@ class LibertyTest extends AbstractIntegrationTest{
     }
     
     @Test
-    public void test6_3_packageRunnable_dirExist() {
+    public void test6_3_packageZipPath() {
         try{
-           setPackageLibertyConfig("existDir", "runnable", null)
-           def existDir = new File(integTestDir, 'existDir')
-           createDir(existDir)
-           
-           runTasks(integTestDir, 'libertyPackage')
-           
-           def file = new File("build/integTest/existDir/integTest.jar")
-           
-           assert file.exists() : "file not found"
-           assert file.canRead() : "file cannot be read"
-
-           deleteDir(existDir)
-           
-        } catch (Exception e) {
-           throw new AssertionError ("Fail on task libertyPackage. "+e)
-        }
-    }
-    
-    @Test
-    public void test6_3_packageZip_dirExist() {
-        try{
-           setPackageLibertyConfig("existDir", "all", null)
-           def existDir = new File(integTestDir, 'existDir')
-           createDir(existDir)
-           
-           runTasks(integTestDir, 'libertyPackage')
-           
-           def file = new File("build/integTest/existDir/integTest.zip")
-           
-           assert file.exists() : "file not found"
-           assert file.canRead() : "file cannot be read"
-
-           deleteDir(existDir)
-           
-        } catch (Exception e) {
-           throw new AssertionError ("Fail on task libertyPackage. "+e)
-        }
-    }
-    
-    @Test
-    public void test6_5_packageRunnable_dirNotExist() {
-        try{
-           setPackageLibertyConfig("MyServerPackage", "all,runnable", null)
-           
-           runTasks(integTestDir, 'libertyPackage')
-           
-           def file = new File("build/integTest/build/libs/MyServerPackage.jar")
-           
-           assert file.exists() : "file not found"
-           assert file.canRead() : "file cannot be read"
-
-           deleteFile(file)
-           
-        } catch (Exception e) {
-           throw new AssertionError ("Fail on task libertyPackage. "+e)
-        }
-    }
-
-    @Test
-    public void test6_6_packageZip_dirNotExist() {
-        try{
-           setPackageLibertyConfig("MyServerPackage", "minify", "Linux")
-           
+           setPackageLibertyConfig("build/libs/MyServerPackage.zip", "", "")
            runTasks(integTestDir, 'libertyPackage')
            
            def file = new File("build/integTest/build/libs/MyServerPackage.zip")
+           
+           assert file.exists() : "file not found"
+           assert file.canRead() : "file cannot be read"
+
+           deleteFile(file)
+           
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task libertyPackage. "+e)
+        }
+    }
+    
+    @Test
+    public void test6_4_packageRunnablePath() {
+        try{
+           setPackageLibertyConfig("build/libs/MyServerPackage.jar", "all,runnable", "")
+           runTasks(integTestDir, 'libertyPackage')
+           
+           def file = new File("build/integTest/build/libs/MyServerPackage.jar")
+           
+           assert file.exists() : "file not found"
+           assert file.canRead() : "file cannot be read"
+           
+           deleteFile(file)
+           
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task libertyPackage. "+e)
+        }
+    }
+    
+    @Test
+    public void test6_5_packageZipPath() {
+        try{
+           setPackageLibertyConfig("build/libs/MyServerPackage", "", "")
+           runTasks(integTestDir, 'libertyPackage')
+           
+           def file = new File("build/integTest/build/libs/MyServerPackage.zip")
+           
+           assert file.exists() : "file not found"
+           assert file.canRead() : "file cannot be read"
+
+           deleteFile(file)
+           
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task libertyPackage. "+e)
+        }
+    }
+    
+    @Test
+    public void test6_6_packageRunnablePath() {
+        try{
+           setPackageLibertyConfig("build/libs/MyServerPackage", "minify,runnable", "")
+           runTasks(integTestDir, 'libertyPackage')
+           
+           // a zip file is created
+           def file = new File("build/integTest/build/libs/MyServerPackage.zip")
+           
+           assert file.exists() : "file not found"
+           assert file.canRead() : "file cannot be read"
+           
+           deleteFile(file)
+           
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task libertyPackage. "+e)
+        }
+    }
+    @Test
+    public void test6_7_packageRunnable_dirExist() {
+        try{
+           
+            // 'build/existDir.jar' is a directory in this test case
+           def existDir = new File(integTestDir, 'build/existDir.jar')
+           createDir(existDir)
+           
+           setPackageLibertyConfig(existDir.getAbsolutePath(), "runnable", "")
+           runTasks(integTestDir, 'libertyPackage')
+           
+           def file = new File("build/integTest/build/existDir.jar/integTest.jar")
+           
+           assert file.exists() : "file not found"
+           assert file.canRead() : "file cannot be read"
+
+           deleteDir(existDir)
+           
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task libertyPackage. "+e)
+        }
+    }
+    
+    @Test
+    public void test6_8_packageZip_dirExist() {
+        try{
+            // 'build/existDir.zip' is a directory in this test case
+           def existDir = new File(integTestDir, 'build/existDir.zip')
+           createDir(existDir)
+           
+           setPackageLibertyConfig(existDir.getAbsolutePath(), "all", "")
+           runTasks(integTestDir, 'libertyPackage')
+           
+           def file = new File("build/integTest/build/existDir.zip/integTest.zip")
+           
+           assert file.exists() : "file not found"
+           assert file.canRead() : "file cannot be read"
+
+           deleteDir(existDir)
+           
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task libertyPackage. "+e)
+        }
+    }
+    
+    @Test
+    public void test6_9_packageZip_NoAttributes() {
+        try{
+           setPackageLibertyConfig("", "", "")
+           
+           runTasks(integTestDir, 'libertyPackage')
+           
+           def file = new File("build/integTest/build/libs/integTest.zip")
            
            assert file.exists() : "file not found"
            assert file.canRead() : "file cannot be read"

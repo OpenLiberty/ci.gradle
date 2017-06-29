@@ -85,7 +85,7 @@ class Liberty implements Plugin<Project> {
 
         project.task('libertyPackage', type: PackageTask) {
             description 'Generates a WebSphere Liberty Profile server archive.'
-            logging.level = LogLevel.INFO
+            logging.level = LogLevel.DEBUG
         }
 
         project.task('libertyDump', type: DumpTask) {

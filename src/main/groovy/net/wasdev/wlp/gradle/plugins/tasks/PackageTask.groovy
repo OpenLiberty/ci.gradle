@@ -21,38 +21,26 @@ class PackageTask extends AbstractTask {
 
     @TaskAction
     void packageServer() {
-    
-        def params = buildLibertyMap(project);
-
-        final archive = project.liberty.packageLiberty.archive
         
-        // default output directory
-        def buildLibsDir = new File(project.getBuildDir(), 'libs')
+        def params = buildLibertyMap(project);
         def fileType = getPackageFileType(project.liberty.packageLiberty.include)
         
+        def archive = project.liberty.packageLiberty.archive
+        
         if (archive != null && archive.length() != 0) {
-            def archiveFile = new File(project.getProjectDir(), archive)
+            def archiveFile = new File(archive)
             
-            if (archiveFile.exists()) {
-                if (archiveFile.isDirectory()) {
-                    // package ${project.name}.zip | jar 
-                    archiveFile = new File(archiveFile, project.getName() + fileType)
-                } 
-            } else {
-                if (archive.endsWith(".zip") || archive.endsWith(".jar")) {
-                    archiveFile = new File(buildLibsDir, archive)
-                } else {
-                    archiveFile = new File(buildLibsDir, archive + fileType)
-                }
-            }
-            
+            if (archiveFile.exists() && archiveFile.isDirectory()) {
+                archiveFile = new File(archiveFile, project.getName() + fileType)
+            } 
             params.put('archive', archiveFile)
-            logger.info 'Packaging ' + archiveFile
-            
+            logger.debug 'Packaging ' + archiveFile
         } else {
+            // default output directory
+            def buildLibsDir = new File(project.getBuildDir(), 'libs')
             def defaultPackageFile = new File(buildLibsDir, project.getName() + fileType)
             params.put('archive', defaultPackageFile)
-            logger.info 'Packaging ' + defaultPackageFile
+            logger.debug 'Packaging default ' + defaultPackageFile
         }
         
         if (project.liberty.packageLiberty.include != null && project.liberty.packageLiberty.include.length() != 0) {
