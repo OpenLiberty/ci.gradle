@@ -16,16 +16,19 @@
 package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.GradleException
 
 class CreateTask extends AbstractTask {
 
     @TaskAction
     void create() {
+        
         def params = buildLibertyMap(project);
         if (project.liberty.template != null && project.liberty.template.length() != 0) {
             params.put('template', project.liberty.template)
         }
         executeServerCommand(project, 'create', params)
+        
+        copyConfigFiles();
     }
-
 }

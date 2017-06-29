@@ -23,7 +23,15 @@ class LibertyExtension {
     String outputDir
     String userDir
     String serverName = "defaultServer"
-
+    String configDirectory
+    String configFile
+    String bootstrapPropertiesFile
+    String jvmOptionsFile
+    String serverEnv
+    
+    Map<String, String> bootstrapProperties
+    List<String> jvmOptions
+    
     boolean clean = false
     String timeout
     String template
