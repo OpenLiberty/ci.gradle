@@ -1,5 +1,6 @@
 buildscript {
     repositories {
+        mavenLocal()
         mavenCentral()
         maven {
             name = 'Sonatype Nexus Snapshots'
@@ -8,6 +9,7 @@ buildscript {
     }
     dependencies {
         classpath fileTree(dir: '../libs', include: '*.jar', exclude: ['*-groovydoc.jar', '*-sources.jar'])
+        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:1.1-SNAPSHOT'
         classpath 'net.wasdev.wlp.ant:wlp-anttasks:1.3-SNAPSHOT'
     }
 }
@@ -30,10 +32,9 @@ liberty {
         installDir = WLP_DIR
         serverName = 'libertyOffline'
     }
-    userDir = '../'
 
     deploy {
-        file = '../resources/integrationTest/test-war.war'
+        file = '../../resources/integrationTest/test-war.war'
     }
 
     packageLiberty {

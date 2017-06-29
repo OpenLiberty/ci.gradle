@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2015.
+ * (C) Copyright IBM Corporation 2014, 2017.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,9 @@ class LibertyExtension {
     boolean clean = false
     String timeout
     String template
+	
+    int verifyTimeout = 30
+    String applications
 
     def numberOfClosures = 0    
 
