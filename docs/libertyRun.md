@@ -11,12 +11,12 @@ While running this task, Gradle will show in the console:
 <-------------> 0% EXECUTING  
 > :libertyRun
 ```  
-This is expected behavior because the task will neither progress nor stop as long as the server/process is running. The "build" will successfully finish with an external `libertyStop` or a Ctrl-C break (with `--no-daemon`).
+This is expected behavior because the task will neither progress nor stop as long as the server/process is running. The "build" will successfully finish with an external `libertyStop` or a Ctrl-C break (if ran with `--no-daemon`).
 
 ### What is the Gradle Daemon and why --no-daemon?
 The Gradle Daemon is a long-running background process designed to help speed up each build process. It does so by avoiding constant JVM startup costs while caching information about the project. This behavior is default until specified otherwise.  
-Users who like to Ctrl-C their `libertyRun` task will find that this practice kills their daemon, ends `libertyRun` prematurely, and also leaves the server running in the background. In this state, it's best to restart your server. You will have to execute a separate `libertyStop` command to stop the server before starting it with either `libertyRun` or `libertyStart`. You may find that executing any new task with Gradle after killing the initial daemon will spawn another daemon in its absence, defeating the purpose of kiling the first.  
-By running `libertyRun` with `--no-daemon`, this task will not benefit from the existing daemon, only suffering a slightly slower startup time. However, this protects the currently running daemon for future tasks and now ending the server with a Ctrl-C or an external `libertyStop` command should successfully end `libertyRun` without further problems.
+If running with the daemon, users who like to Ctrl-C their `libertyRun` task will find that this kills their daemon, ends `libertyRun` prematurely, and most importantly, leaves the server still running. In this state, it's best to restart your server. You will have to execute a separate `libertyStop` command to stop the server before starting it again.  
+By running `libertyRun` with `--no-daemon`, this task will not benefit from the existing daemon, only suffering a slightly slower startup time. However, this protects the currently running daemon for future tasks and ending the server with a Ctrl-C or an external `libertyStop` command should cleanly end `libertyRun`.
 
 ### Additional parameters
 
