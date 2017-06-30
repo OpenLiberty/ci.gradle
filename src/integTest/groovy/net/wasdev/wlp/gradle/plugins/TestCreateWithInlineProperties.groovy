@@ -33,6 +33,9 @@ public class TestCreateWithInlineProperties extends AbstractIntegrationTest{
             assert jvmOptionsFile.exists() : "file not found"
 
         } catch (Exception e) {
+            println(e.getMessage())
+            org.codehaus.groovy.runtime.StackTraceUtils.printSanitizedStackTrace(e)
+
             throw new AssertionError ("Fail on task libertyCreate. "+ e)
         }
     }
