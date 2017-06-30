@@ -23,21 +23,17 @@ public class TestCreateWithFiles extends AbstractIntegrationTest{
     
     @Test
     public void test_create_with_files() {
-        try {
-            runTasks(buildDir, 'libertyCreate')
 
-            def bootstrapFile = new File("build/testBuilds/test-create-with-files/build/wlp/usr/servers/LibertyProjectServer/bootstrap.properties")
-            def jvmOptionsFile = new File("build/testBuilds/test-create-with-files/build/wlp/usr/servers/LibertyProjectServer/jvm.options")
-            def configFile = new File("build/testBuilds/test-create-with-files/build/wlp/usr/servers/LibertyProjectServer/server.xml")
-            def serverEnvFile = new File("build/testBuilds/test-create-with-files/build/wlp/usr/servers/LibertyProjectServer/server.env")
+        runTasks(buildDir, 'libertyCreate')
 
-            assert bootstrapFile.exists() : "file not found"
-            assert jvmOptionsFile.exists() : "file not found"
-            assert configFile.exists() : "file not found"
-            assert serverEnvFile.exists() : "file not found"
+        def bootstrapFile = new File("build/testBuilds/test-create-with-files/build/wlp/usr/servers/LibertyProjectServer/bootstrap.properties")
+        def jvmOptionsFile = new File("build/testBuilds/test-create-with-files/build/wlp/usr/servers/LibertyProjectServer/jvm.options")
+        def configFile = new File("build/testBuilds/test-create-with-files/build/wlp/usr/servers/LibertyProjectServer/server.xml")
+        def serverEnvFile = new File("build/testBuilds/test-create-with-files/build/wlp/usr/servers/LibertyProjectServer/server.env")
 
-        } catch (Exception e) {
-            throw new AssertionError ("Fail on task libertyCreate. "+ e)
-        }
+        assert bootstrapFile.exists() : "file not found"
+        assert jvmOptionsFile.exists() : "file not found"
+        assert configFile.exists() : "file not found"
+        assert serverEnvFile.exists() : "file not found"
     }
 }

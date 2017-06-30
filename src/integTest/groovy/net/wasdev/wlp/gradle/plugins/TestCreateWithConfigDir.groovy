@@ -23,21 +23,17 @@ public class TestCreateWithConfigDir extends AbstractIntegrationTest{
     
     @Test
     public void test_create_with_configDir() {
-        try {
-            runTasks(testBuildDir, 'libertyCreate')
 
-            def bootstrapFile = new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/bootstrap.properties")
-            def jvmOptionsFile = new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/jvm.options")
-            def configFile = new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/server.xml")
-            def serverEnvFile = new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/server.env")
+        runTasks(testBuildDir, 'libertyCreate')
 
-            assert serverEnvFile.exists() : "file not found"
-            assert configFile.exists() : "file not found"
-            assert bootstrapFile.exists() : "file not found"
-            assert jvmOptionsFile.exists() : "file not found"
+        def bootstrapFile = new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/bootstrap.properties")
+        def jvmOptionsFile = new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/jvm.options")
+        def configFile = new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/server.xml")
+        def serverEnvFile = new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/server.env")
 
-        } catch (Exception e) {
-            throw new AssertionError ("Fail on task libertyCreate. "+ e)
-        }
+        assert serverEnvFile.exists() : "file not found"
+        assert configFile.exists() : "file not found"
+        assert bootstrapFile.exists() : "file not found"
+        assert jvmOptionsFile.exists() : "file not found"
     }
 }
