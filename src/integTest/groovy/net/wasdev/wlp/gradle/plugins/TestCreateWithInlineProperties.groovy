@@ -23,7 +23,10 @@ public class TestCreateWithInlineProperties extends AbstractIntegrationTest{
     
     @Test
     public void test_create_with_inline_properties() {
-        try {
+        //try {
+            println '---------------------------------------------'
+            println buildDir
+            println '---------------------------------------------'
             runTasks(buildDir, 'libertyCreate')
 
             def bootstrapFile = new File("build/testBuilds/test-create-with-inline-properties/build/wlp/usr/servers/LibertyProjectServer/bootstrap.properties")
@@ -32,11 +35,11 @@ public class TestCreateWithInlineProperties extends AbstractIntegrationTest{
             assert bootstrapFile.exists() : "file not found"
             assert jvmOptionsFile.exists() : "file not found"
 
-        } catch (Exception e) {
+        /**} catch (Exception e) {
             println(e.getMessage())
             org.codehaus.groovy.runtime.StackTraceUtils.printSanitizedStackTrace(e)
 
             throw new AssertionError ("Fail on task libertyCreate. "+ e)
-        }
+        }**/
     }
 }
