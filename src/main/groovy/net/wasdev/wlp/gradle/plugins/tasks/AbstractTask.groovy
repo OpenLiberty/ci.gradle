@@ -168,32 +168,37 @@ abstract class AbstractTask extends DefaultTask {
         String bootStrapPropertiesPath = null
         String serverEnvPath = null
 
-        if (configDirectory != null && configDirectory.exists()) {
-            // copy configuration files from configuration directory to server directory if end-user set it
-            def copyAnt = new AntBuilder()
-            copyAnt.copy(todir: serverDirectory) {
-                fileset(dir: project.liberty.configDirectory)
+        if (configDirectory != null) {
+            if(configDirectory.exists()){
+	            // copy configuration files from configuration directory to server directory if end-user set it
+	            def copyAnt = new AntBuilder()
+	            copyAnt.copy(todir: serverDirectory) {
+	                fileset(dir: project.liberty.configDirectory)
+	            }
+	
+	            File configDirServerXML = new File(configDirectory, "server.xml")
+	            if (configDirServerXML.exists()) {
+	                serverXMLPath = configDirServerXML.getCanonicalPath()
+	            }
+	
+	            File configDirJvmOptionsFile = new File(configDirectory, "jvm.options")
+	            if (configDirJvmOptionsFile.exists()) {
+	                jvmOptionsPath = configDirJvmOptionsFile.getCanonicalPath()
+	            }
+	
+	            File configDirBootstrapFile = new File(configDirectory, "bootstrap.properties")
+	            if (configDirBootstrapFile.exists()) {
+	                bootStrapPropertiesPath = configDirBootstrapFile.getCanonicalPath()
+	            }
+	
+	            File configDirServerEnv = new File(configDirectory, "server.env")
+	            if (configDirServerEnv.exists()) {
+	                serverEnvPath = configDirServerEnv.getCanonicalPath()
+	            }
             }
-
-            File configDirServerXML = new File(configDirectory, "server.xml")
-            if (configDirServerXML.exists()) {
-                serverXMLPath = configDirServerXML.getCanonicalPath()
-            }
-
-            File configDirJvmOptionsFile = new File(configDirectory, "jvm.options")
-            if (configDirJvmOptionsFile.exists()) {
-                jvmOptionsPath = configDirJvmOptionsFile.getCanonicalPath()
-            }
-
-            File configDirBootstrapFile = new File(configDirectory, "bootstrap.properties")
-            if (configDirBootstrapFile.exists()) {
-                bootStrapPropertiesPath = configDirBootstrapFile.getCanonicalPath()
-            }
-
-            File configDirServerEnv = new File(configDirectory, "server.env")
-            if (configDirServerEnv.exists()) {
-                serverEnvPath = configDirServerEnv.getCanonicalPath()
-            }
+            else{
+                println('WARNING - ConfigDir was configured but not found: ' + configDirectory)
+             }
         } 
 
         // handle server.xml if not overwritten by server.xml from configDirectory
