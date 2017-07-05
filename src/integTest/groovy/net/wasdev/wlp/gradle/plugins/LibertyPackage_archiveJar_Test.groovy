@@ -64,3 +64,4 @@ class LibertyPackage_archiveJar_Test extends AbstractIntegrationTest{
         }
     }
 }
+
