@@ -15,19 +15,12 @@
  */
 package net.wasdev.wlp.gradle.plugins
 
-import org.apache.commons.io.FileUtils
-import java.io.File;
-import org.junit.BeforeClass
-import org.junit.AfterClass
-
 import static org.junit.Assert.*
 
+import org.apache.commons.io.FileUtils
 import org.gradle.tooling.BuildLauncher
 import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.ProjectConnection
-import org.gradle.tooling.model.GradleProject
-import org.gradle.tooling.model.Task
-import org.codehaus.groovy.runtime.typehandling.GroovyCastException
 
 
 abstract class AbstractIntegrationTest {

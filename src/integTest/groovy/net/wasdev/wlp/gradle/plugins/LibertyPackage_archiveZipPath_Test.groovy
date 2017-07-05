@@ -15,15 +15,12 @@
  */
 package net.wasdev.wlp.gradle.plugins
 
-import org.junit.AfterClass
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
-import org.junit.runners.MethodSorters
-import org.junit.FixMethodOrder
 import static org.junit.Assert.*
 
-import java.io.File
+import org.junit.BeforeClass
+import org.junit.FixMethodOrder
+import org.junit.Test
+import org.junit.runners.MethodSorters
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class LibertyPackage_archiveZipPath_Test extends AbstractIntegrationTest{
@@ -64,3 +61,5 @@ class LibertyPackage_archiveZipPath_Test extends AbstractIntegrationTest{
         }
     }
 }
+
+
