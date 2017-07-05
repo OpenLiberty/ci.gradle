@@ -65,3 +65,4 @@ class LibertyPackage_noAttrib_Test extends AbstractIntegrationTest{
         }
     }
 }
+
