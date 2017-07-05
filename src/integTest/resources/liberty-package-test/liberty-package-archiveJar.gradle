@@ -37,3 +37,4 @@ liberty {
         archive = 'testPackage.jar'
     }
 }
+
