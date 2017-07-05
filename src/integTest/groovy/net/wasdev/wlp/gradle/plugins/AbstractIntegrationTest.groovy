@@ -50,8 +50,8 @@ abstract class AbstractIntegrationTest {
             }
         }
     }
-
-    protected static File createTestProject(File parent, File sourceDir, String buildFilename) {
+    
+    protected static File createTestProject(File parent, File sourceDir) {
         if (!sourceDir.exists()){
             throw new AssertionError("The source file '${sourceDir.canonicalPath}' doesn't exist.")
         }
@@ -83,4 +83,16 @@ abstract class AbstractIntegrationTest {
         File sourceFile = new File(buildDir, buildFilename)
         sourceFile.renameTo(buildDir.toString() + '/build.gradle')
     }
+    
+    protected static File copyFile(File sourceFile, File destFile) {
+        if (!sourceFile.exists()){
+            throw new AssertionError("The source file '${sourceFile.canonicalPath}' doesn't exist.")
+        }
+        try {
+            FileUtils.copyFile(sourceFile, destFile)
+        } catch (Exception e) {
+            throw new AssertionError("Unable to create file '${destFile.canonicalPath}'.")
+        }
+    }
+
 }

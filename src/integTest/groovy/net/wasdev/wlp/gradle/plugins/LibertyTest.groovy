@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2015.
+ * (C) Copyright IBM Corporation 2015, 2017.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,9 @@ class LibertyTest extends AbstractIntegrationTest{
         createDir(buildDir)
         if(test_mode == "offline"){
             WLP_DIR.replace("\\","/")
-            createTestProject(buildDir, resourceDir, buildFilename)
+            createTestProject(buildDir, resourceDir)
         }else if(test_mode == "online"){
-            createTestProject(buildDir, resourceDir, buildFilename)
+            createTestProject(buildDir, resourceDir)
             try {
                 runTasks(buildDir, 'installLiberty')
             } catch (Exception e) {
