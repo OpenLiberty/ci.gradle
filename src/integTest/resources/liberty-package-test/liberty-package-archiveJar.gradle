@@ -35,6 +35,7 @@ liberty {
 
     packageLiberty {
         archive = 'testPackage.jar'
+        include = 'runnable,minify'
     }
 }
 
