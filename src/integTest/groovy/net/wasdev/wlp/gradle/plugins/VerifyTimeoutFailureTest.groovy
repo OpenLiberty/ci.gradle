@@ -30,5 +30,3 @@ public class VerifyTimeoutFailureTest extends AbstractIntegrationTest{
         runTasks(buildDir, 'libertyStart')
     }
 }
-
-

@@ -61,5 +61,3 @@ class LibertyPackage_noArchive_Test extends AbstractIntegrationTest{
         }
     }
 }
-
-

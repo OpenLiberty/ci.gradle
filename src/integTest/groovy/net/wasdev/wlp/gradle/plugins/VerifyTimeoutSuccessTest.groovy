@@ -33,5 +33,3 @@ public class VerifyTimeoutSuccessTest extends AbstractIntegrationTest{
         }
     }
 }
-
-

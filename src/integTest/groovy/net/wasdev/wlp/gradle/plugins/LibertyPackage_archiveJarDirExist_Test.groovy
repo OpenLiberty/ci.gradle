@@ -61,5 +61,3 @@ class LibertyPackage_archiveJarDirExist_Test extends AbstractIntegrationTest{
         }
     }
 }
-
-

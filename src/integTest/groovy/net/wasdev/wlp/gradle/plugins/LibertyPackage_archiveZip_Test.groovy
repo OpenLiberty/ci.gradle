@@ -61,5 +61,3 @@ class LibertyPackage_archiveZip_Test extends AbstractIntegrationTest{
         }
     }
 }
-
-
