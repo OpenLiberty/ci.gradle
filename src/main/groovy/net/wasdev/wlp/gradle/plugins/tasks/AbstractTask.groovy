@@ -102,7 +102,7 @@ abstract class AbstractTask extends DefaultTask {
     }
 
     //Sets directories for the various configuration files
-    protected void setDirs(){
+    protected void initializeConfigVariables(){
         if(project.liberty.configDirectory != null && project.liberty.configDirectory.length() != 0){
             configDirectory = new File(project.liberty.configDirectory)
         }
@@ -138,7 +138,7 @@ abstract class AbstractTask extends DefaultTask {
     }
 
     //Gets the loose bootstrap and jvm properties from the build file
-    protected void setProperties(){
+    protected void initializeConfigProperties(){
         if(project.liberty.bootstrapProperties != null && !project.liberty.bootstrapProperties.isEmpty()){
             bootstrapProperties = project.liberty.bootstrapProperties
         }
@@ -158,10 +158,10 @@ abstract class AbstractTask extends DefaultTask {
      */
     protected void copyConfigFiles() throws IOException {
 
-        setDirs()
-        setProperties()
+        initializeConfigVariables()
+        initializeConfigProperties()
 
-        String serverDirectory = project.buildDir.toString() + "/wlp/usr/servers/" + project.liberty.serverName
+        String serverDirectory = getInstallDir(project).toString() + "/usr/servers/" + project.liberty.serverName
 
         String serverXMLPath = null
         String jvmOptionsPath = null
@@ -170,35 +170,35 @@ abstract class AbstractTask extends DefaultTask {
 
         if (configDirectory != null) {
             if(configDirectory.exists()){
-	            // copy configuration files from configuration directory to server directory if end-user set it
-	            def copyAnt = new AntBuilder()
-	            copyAnt.copy(todir: serverDirectory) {
-	                fileset(dir: project.liberty.configDirectory)
-	            }
-	
-	            File configDirServerXML = new File(configDirectory, "server.xml")
-	            if (configDirServerXML.exists()) {
-	                serverXMLPath = configDirServerXML.getCanonicalPath()
-	            }
-	
-	            File configDirJvmOptionsFile = new File(configDirectory, "jvm.options")
-	            if (configDirJvmOptionsFile.exists()) {
-	                jvmOptionsPath = configDirJvmOptionsFile.getCanonicalPath()
-	            }
-	
-	            File configDirBootstrapFile = new File(configDirectory, "bootstrap.properties")
-	            if (configDirBootstrapFile.exists()) {
-	                bootStrapPropertiesPath = configDirBootstrapFile.getCanonicalPath()
-	            }
-	
-	            File configDirServerEnv = new File(configDirectory, "server.env")
-	            if (configDirServerEnv.exists()) {
-	                serverEnvPath = configDirServerEnv.getCanonicalPath()
-	            }
+                // copy configuration files from configuration directory to server directory if end-user set it
+                def copyAnt = new AntBuilder()
+                copyAnt.copy(todir: serverDirectory) {
+                    fileset(dir: project.liberty.configDirectory)
+                }
+
+                File configDirServerXML = new File(configDirectory, "server.xml")
+                if (configDirServerXML.exists()) {
+                    serverXMLPath = configDirServerXML.getCanonicalPath()
+                }
+
+                File configDirJvmOptionsFile = new File(configDirectory, "jvm.options")
+                if (configDirJvmOptionsFile.exists()) {
+                    jvmOptionsPath = configDirJvmOptionsFile.getCanonicalPath()
+                }
+
+                File configDirBootstrapFile = new File(configDirectory, "bootstrap.properties")
+                if (configDirBootstrapFile.exists()) {
+                    bootStrapPropertiesPath = configDirBootstrapFile.getCanonicalPath()
+                }
+
+                File configDirServerEnv = new File(configDirectory, "server.env")
+                if (configDirServerEnv.exists()) {
+                    serverEnvPath = configDirServerEnv.getCanonicalPath()
+                }
             }
             else{
-                println('WARNING - ConfigDir was configured but not found: ' + configDirectory)
-             }
+                println('WARNING: The configDirectory attribute was configured but the directory is not found: ' + configDirectory)
+            }
         } 
 
         // handle server.xml if not overwritten by server.xml from configDirectory

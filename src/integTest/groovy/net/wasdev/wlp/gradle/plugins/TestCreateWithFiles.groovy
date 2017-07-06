@@ -7,7 +7,7 @@ import org.junit.BeforeClass
 import org.junit.Test
 
 public class TestCreateWithFiles extends AbstractIntegrationTest{
-    static File sourceDir = new File("build/resources/integrationTest/sample.servlet")
+    static File sourceDir = new File("build/resources/integrationTest/server-config")
     static File buildDir = new File(integTestDir, "/test-create-with-files")
     static String buildFilename = "testCreateLibertyFiles.gradle"
 
@@ -35,5 +35,7 @@ public class TestCreateWithFiles extends AbstractIntegrationTest{
         assert jvmOptionsFile.exists() : "file not found"
         assert configFile.exists() : "file not found"
         assert serverEnvFile.exists() : "file not found"
+
+        assert bootstrapFile.text.equals(new File("build/testBuilds/test-create-with-files/src/main/liberty/config/bootstrap.test.properties").text) : "bootstrap.test.properties file did not copy properly"
     }
 }

@@ -7,7 +7,7 @@ import org.junit.BeforeClass
 import org.junit.Test
 
 public class TestCreateWithConfigDir extends AbstractIntegrationTest{
-    static File sourceDir = new File("build/resources/integrationTest/sample.servlet")
+    static File sourceDir = new File("build/resources/integrationTest/server-config")
     static File testBuildDir = new File(integTestDir, "/test-create-with-config-dir")
     static String buildFilename = "testCreateLibertyConfigDir.gradle"
 
