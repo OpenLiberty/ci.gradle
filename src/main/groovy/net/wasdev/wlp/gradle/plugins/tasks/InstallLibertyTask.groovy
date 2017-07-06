@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2015.
+ * (C) Copyright IBM Corporation 2014, 2017.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,12 @@ class InstallLibertyTask extends AbstractTask {
     }
 
     private Map<String, String> buildInstallLibertyMap(Project project) {
+
+        final maven_repo_prefix = "http://repo1.maven.org/maven2/"
+        
+        String version = "17.0.0.2"
+        String type = "webProfile7"
+        
         Map<String, String> result = new HashMap();
         if (project.liberty.install.licenseCode != null) {
            result.put('licenseCode', project.liberty.install.licenseCode)
@@ -37,12 +43,27 @@ class InstallLibertyTask extends AbstractTask {
 
         if (project.liberty.install.version != null) {
             result.put('version', project.liberty.install.version)
+            version = project.liberty.install.version
+        }
+        
+        if (project.liberty.install.type != null) {
+            result.put('type', project.liberty.install.type)
+            type = project.liberty.install.type
         }
 
         if (project.liberty.install.runtimeUrl != null) {
             result.put('runtimeUrl', project.liberty.install.runtimeUrl)
-        }
+        } 
+        else if (project.liberty.install.groupId != null) {
+            logger.debug 'Getting WebSphere Liberty server from the Maven repository.'
+            String groupId = project.liberty.install.groupId.replaceAll("\\.", "/")
 
+            result.put('runtimeUrl', maven_repo_prefix + groupId + "/wlp-" + type + "/" + 
+                version + "/wlp-" + type + "-" + version + ".zip")
+            
+            logger.debug 'Composed runtimeUrl : ' + result.getAt('runtimeUrl')
+        } 
+        
         if (project.liberty.install.baseDir == null) {
            result.put('baseDir', project.buildDir)
         } else {
@@ -58,15 +79,10 @@ class InstallLibertyTask extends AbstractTask {
             result.put('password', project.liberty.install.password)
         }
 
-        if (project.liberty.install.type != null) {
-            result.put('type', project.liberty.install.type)
-        }
-
         result.put('maxDownloadTime', project.liberty.install.maxDownloadTime)
 
         result.put('offline', project.gradle.startParameter.offline)
 
-        return result;
+        return result
     }
-
 }
