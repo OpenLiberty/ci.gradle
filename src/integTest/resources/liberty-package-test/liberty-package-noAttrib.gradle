@@ -1,0 +1,42 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath fileTree(dir: '../libs', include: '*.jar', exclude: ['*-groovydoc.jar', '*-sources.jar'])
+        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:1.1-SNAPSHOT'
+        classpath 'net.wasdev.wlp.ant:wlp-anttasks:1.3-SNAPSHOT'
+    }
+}
+
+def test_mode = System.getProperty('runit')
+def wlpLicense = System.getProperty('wlpLicense')
+def wlpVersion = System.getProperty('wlpVersion')
+def WLP_DIR = System.getProperty('wlpInstallDir')
+def wlpUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/" + wlpVersion + "/wlp-webProfile7-" + wlpVersion + ".zip"
+
+apply plugin: 'liberty'
+
+liberty {
+    if (test_mode == 'online') {
+        install {
+            runtimeUrl = wlpUrl
+        }
+        serverName ='libertyOnline'
+    } else {
+        installDir = WLP_DIR
+        serverName = 'libertyOffline'
+    }
+
+// TEST: packageLiberty attributes are not set on purpose
+//    packageLiberty {
+//        archive = 'test' 
+//        include = 'minify'
+//        os='Linux'
+//    }
+}
