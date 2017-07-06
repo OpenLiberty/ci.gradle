@@ -33,16 +33,15 @@ class LibertyTest extends AbstractIntegrationTest{
         createDir(buildDir)
         if(test_mode == "offline"){
             WLP_DIR.replace("\\","/")
-            createTestProject(buildDir, resourceDir)
+            createTestProject(buildDir, resourceDir, buildFilename)
         }else if(test_mode == "online"){
-            createTestProject(buildDir, resourceDir)
+            createTestProject(buildDir, resourceDir, buildFilename)
             try {
                 runTasks(buildDir, 'installLiberty')
             } catch (Exception e) {
                 throw new AssertionError ("Fail on task installLiberty. "+ e)
             }
         }
-        renameBuildFile(buildFilename, buildDir)
     }
 
     @Test

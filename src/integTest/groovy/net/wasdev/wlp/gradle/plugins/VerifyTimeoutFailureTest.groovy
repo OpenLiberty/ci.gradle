@@ -16,8 +16,7 @@ public class VerifyTimeoutFailureTest extends AbstractIntegrationTest{
         if(test_mode == "offline"){
             WLP_DIR.replace("\\","/")
         }
-        createTestProject(buildDir, resourceDir)
-        renameBuildFile(buildFilename, buildDir)
+        createTestProject(buildDir, resourceDir, buildFilename)
     }
 
     @AfterClass

@@ -44,12 +44,13 @@ abstract class AbstractIntegrationTest {
         }
     }
     
-    protected static File createTestProject(File parent, File sourceDir) {
+    protected static File createTestProject(File parent, File sourceDir, String buildFilename) {
         if (!sourceDir.exists()){
             throw new AssertionError("The source file '${sourceDir.canonicalPath}' doesn't exist.")
         }
         try {
             FileUtils.copyDirectory(sourceDir, parent)
+            renameBuildFile(buildFilename, parent)
         } catch (IOException e) {
             throw new AssertionError("Unable to copy directory '${parent.canonicalPath}'.")
         }
