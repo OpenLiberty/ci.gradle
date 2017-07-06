@@ -36,7 +36,7 @@ class PackageTask extends AbstractTask {
             params.put('archive', archiveFile)
             logger.debug 'Packaging ' + archiveFile
         } else {
-            // default output directory
+            // default output directory  
             def buildLibsDir = new File(project.getBuildDir(), 'libs')
             
             createDir(buildLibsDir)
