@@ -8,23 +8,22 @@ import org.junit.Test
 
 public class TestCreateWithInlineProperties extends AbstractIntegrationTest{
     static File sourceDir = new File("build/resources/integrationTest/server-config")
-    static File buildDir = new File(integTestDir, "/test-create-with-inline-properties")
+    static File testBuildDir = new File(integTestDir, "/test-create-with-inline-properties")
     static String buildFilename = "testCreateLibertyInlineProperties.gradle"
 
     @BeforeClass
     public static void setup() {
-        createDir(buildDir)
+        createDir(testBuildDir)
         if(test_mode == "offline"){
             WLP_DIR.replace("\\","/")
         }
-        createTestProject(buildDir, sourceDir, buildFilename)
-        renameBuildFile(buildFilename, buildDir)
+        createTestProject(testBuildDir, sourceDir, buildFilename)
     }
     
     @Test
     public void test_create_with_inline_properties() {
 
-        runTasks(buildDir, 'libertyCreate')
+        runTasks(testBuildDir, 'libertyCreate')
 
         def bootstrapFile = new File("build/testBuilds/test-create-with-inline-properties/build/wlp/usr/servers/LibertyProjectServer/bootstrap.properties")
         def jvmOptionsFile = new File("build/testBuilds/test-create-with-inline-properties/build/wlp/usr/servers/LibertyProjectServer/jvm.options")

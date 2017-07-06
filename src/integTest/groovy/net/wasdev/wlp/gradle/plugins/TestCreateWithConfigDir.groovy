@@ -18,7 +18,6 @@ public class TestCreateWithConfigDir extends AbstractIntegrationTest{
             WLP_DIR.replace("\\","/")
         }
         createTestProject(testBuildDir, sourceDir, buildFilename)
-        renameBuildFile(buildFilename, testBuildDir)
     }
     
     @Test
