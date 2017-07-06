@@ -1,11 +1,9 @@
 package net.wasdev.wlp.gradle.plugins;
 
-import java.io.File
-
+import org.gradle.tooling.BuildException
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
-import org.gradle.tooling.BuildException
 
 public class VerifyTimeoutFailureTest extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/integrationTest/sample.servlet")
@@ -19,7 +17,6 @@ public class VerifyTimeoutFailureTest extends AbstractIntegrationTest{
             WLP_DIR.replace("\\","/")
         }
         createTestProject(buildDir, resourceDir, buildFilename)
-        renameBuildFile(buildFilename, buildDir)
     }
 
     @AfterClass

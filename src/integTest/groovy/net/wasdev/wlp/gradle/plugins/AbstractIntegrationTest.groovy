@@ -15,19 +15,12 @@
  */
 package net.wasdev.wlp.gradle.plugins
 
-import org.apache.commons.io.FileUtils
-import java.io.File;
-import org.junit.BeforeClass
-import org.junit.AfterClass
-
 import static org.junit.Assert.*
 
+import org.apache.commons.io.FileUtils
 import org.gradle.tooling.BuildLauncher
 import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.ProjectConnection
-import org.gradle.tooling.model.GradleProject
-import org.gradle.tooling.model.Task
-import org.codehaus.groovy.runtime.typehandling.GroovyCastException
 
 
 abstract class AbstractIntegrationTest {
@@ -50,13 +43,14 @@ abstract class AbstractIntegrationTest {
             }
         }
     }
-
+    
     protected static File createTestProject(File parent, File sourceDir, String buildFilename) {
         if (!sourceDir.exists()){
             throw new AssertionError("The source file '${sourceDir.canonicalPath}' doesn't exist.")
         }
         try {
             FileUtils.copyDirectory(sourceDir, parent)
+            renameBuildFile(buildFilename, parent)
         } catch (IOException e) {
             throw new AssertionError("Unable to copy directory '${parent.canonicalPath}'.")
         }
@@ -83,4 +77,16 @@ abstract class AbstractIntegrationTest {
         File sourceFile = new File(buildDir, buildFilename)
         sourceFile.renameTo(buildDir.toString() + '/build.gradle')
     }
+    
+    protected static File copyFile(File sourceFile, File destFile) {
+        if (!sourceFile.exists()){
+            throw new AssertionError("The source file '${sourceFile.canonicalPath}' doesn't exist.")
+        }
+        try {
+            FileUtils.copyFile(sourceFile, destFile)
+        } catch (Exception e) {
+            throw new AssertionError("Unable to create file '${destFile.canonicalPath}'.")
+        }
+    }
+
 }

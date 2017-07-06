@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2015.
+ * (C) Copyright IBM Corporation 2015, 2017.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,12 @@
  */
 package net.wasdev.wlp.gradle.plugins
 
-import org.junit.AfterClass
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
-import org.junit.runners.MethodSorters
-import org.junit.FixMethodOrder
 import static org.junit.Assert.*
 
-import java.io.File
+import org.junit.BeforeClass
+import org.junit.FixMethodOrder
+import org.junit.Test
+import org.junit.runners.MethodSorters
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class LibertyTest extends AbstractIntegrationTest{
@@ -45,7 +42,6 @@ class LibertyTest extends AbstractIntegrationTest{
                 throw new AssertionError ("Fail on task installLiberty. "+ e)
             }
         }
-        renameBuildFile(buildFilename, buildDir)
     }
 
     @Test
