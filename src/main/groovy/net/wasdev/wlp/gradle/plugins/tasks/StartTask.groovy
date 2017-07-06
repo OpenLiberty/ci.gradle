@@ -32,6 +32,8 @@ class StartTask extends AbstractTask {
         }
         executeServerCommand(project, 'start', params)
         
+        copyConfigFiles()
+        
         ServerTask serverTask = new ServerTask()
         serverTask.setInstallDir(params.get('installDir'))
         serverTask.setServerName(params.get('serverName'))

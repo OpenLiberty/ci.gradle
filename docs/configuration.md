@@ -1,6 +1,6 @@
 ## Liberty Server Configuration
 
-Liberty server configuration can be specified within the build.gradle file by specifying a configuration directory, specific configuration files, or inline properties. This configuration is copied to the appropriate server directory during the 'libertyCreate' task.
+Liberty server configuration can be specified within the build.gradle file by specifying a configuration directory, specific configuration files, or inline properties. This configuration is copied to the appropriate server directory during the `libertyCreate` task.
 
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|

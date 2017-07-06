@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2015.
+ * (C) Copyright IBM Corporation 2015, 2017.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ class DumpTask extends AbstractTask {
     @TaskAction
     void dump() {
         def params = buildLibertyMap(project);
+        copyConfigFiles()
         if (project.liberty.dumpLiberty.archive != null && project.liberty.dumpLiberty.archive.length() != 0) {
             params.put('archive', new File(project.liberty.dumpLiberty.archive))
         }

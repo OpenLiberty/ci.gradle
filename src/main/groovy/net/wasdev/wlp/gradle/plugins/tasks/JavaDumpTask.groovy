@@ -22,6 +22,7 @@ class JavaDumpTask extends AbstractTask {
     @TaskAction
     void javaDump() {
         def params = buildLibertyMap(project);
+        copyConfigFiles()
         if (project.liberty.javaDumpLiberty.include != null && project.liberty.javaDumpLiberty.include.length() != 0) {
             params.put('include',project.liberty.javaDumpLiberty.include)
         }
