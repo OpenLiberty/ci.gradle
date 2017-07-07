@@ -84,16 +84,18 @@ Note: The group ID for these artifacts is: `com.ibm.websphere.appserver.runtime`
 
 ### assemblyArtifact Properties
 
+These properties are used if `runtimeUrl` is not set.
+
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
-| groupId | Set Maven groupId to `com.ibm.websphere.appserver.runtime` to  download Liberty runtime archive from the Maven repository. If not set, the [Liberty repository](https://developer.ibm.com/wasdev/downloads/) will be used by default. Only used if `runtimeUrl` is not set. | No |
-| artifactId | Liberty runtime type to download from the Maven repository. Currently, the following types are supported: `wlp-javaee7`, `wlp-webProfile7`, `wlp-kernel`, `wlp-osgi` and `wlp-microProfile1`. The default value is `wlp-webProfile7`. Only used if `runtimeUrl` is not set.  | No |
-| version | Exact version of the WebSphere Liberty server to install. The default version is '17.0.0.2'. Only used if `runtimeUrl` is not set. | No |
+| groupId | Set Maven groupId to `com.ibm.websphere.appserver.runtime` to  download Liberty runtime archive from the Maven repository. If not set, the [Liberty repository](https://developer.ibm.com/wasdev/downloads/) will be used by default. | No |
+| artifactId | Liberty runtime type to download from the Maven repository. Currently, the following types are supported: `wlp-javaee7`, `wlp-webProfile7`, `wlp-kernel`, `wlp-osgi` and `wlp-microProfile1`. The default value is `wlp-webProfile7`. | No |
+| version | Exact version of the WebSphere Liberty server to install. The default version is '17.0.0.2'. | No |
 | type | Liberty runtime type to download from the Maven repository. The default value is `zip` for the Maven repository. | No |
 
 ### Example for using the `assemblyArtifact` parameter:
 
-1. Install using Maven repository.
+1. Install using the Maven repository.
   ```groovy
     apply plugin: 'liberty'
 
@@ -105,8 +107,9 @@ Note: The group ID for these artifacts is: `com.ibm.websphere.appserver.runtime`
             type = "zip"  
         }
     }
+  ```
     
-2. Install using Maven repository with default values.
+2. Install using the Maven repository with default values.
   ```groovy
     apply plugin: 'liberty'
 
