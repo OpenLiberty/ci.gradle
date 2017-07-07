@@ -23,10 +23,11 @@ apply plugin: 'liberty'
 
 liberty {
     if (test_mode == 'online') {
-        install {
+        assemblyArtifact {
             groupId = "com.ibm.websphere.appserver.runtime"
-            type = "webProfile7"
-            version = wlpVersion 
+            artifactId = "wlp-webProfile7"
+            version = wlpVersion
+            type = "zip"
         }
         serverName ='libertyOnline'
     } else {
