@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2015.
+ * (C) Copyright IBM Corporation 2014, 2017.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ class Liberty implements Plugin<Project> {
 
         project.task('installLiberty', type: InstallLibertyTask) {
             description 'Installs Liberty from a repository'
-            logging.level = LogLevel.INFO
+            logging.level = LogLevel.DEBUG
         }
 
        try {
@@ -85,7 +85,7 @@ class Liberty implements Plugin<Project> {
 
         project.task('libertyPackage', type: PackageTask) {
             description 'Generates a WebSphere Liberty Profile server archive.'
-            logging.level = LogLevel.INFO
+            logging.level = LogLevel.DEBUG
         }
 
         project.task('libertyDump', type: DumpTask) {
