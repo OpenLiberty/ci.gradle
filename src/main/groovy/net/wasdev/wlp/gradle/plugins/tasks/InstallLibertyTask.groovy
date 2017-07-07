@@ -78,7 +78,7 @@ class InstallLibertyTask extends AbstractTask {
                 logger.debug 'Getting WebSphere Liberty server from the remote Maven repository.'
                 result.put('runtimeUrl', remoteMavenRepo)
             }
-            logger.debug 'Composed runtimeUrl : ' + result.getAt('runtimeUrl')
+            logger.debug 'Maven runtimeUrl is ' + result.getAt('runtimeUrl')
         } 
         
         if (project.liberty.install.baseDir == null) {
