@@ -16,8 +16,6 @@
 package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.Project
-import org.gradle.api.internal.artifacts.repositories.resolver.MavenLocalResolver
-import org.gradle.api.internal.artifacts.repositories.resolver.MavenResolver.MavenLocalRepositoryAccess
 import org.gradle.api.tasks.TaskAction
 
 class InstallLibertyTask extends AbstractTask {
