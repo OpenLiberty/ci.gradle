@@ -39,7 +39,7 @@ liberty {
 
 
 
-    configDirectory = "${project.projectDir}/src/main/liberty/config"
+    configDirectory = file("${project.projectDir}/src/main/liberty/config")
 }
 
 repositories {

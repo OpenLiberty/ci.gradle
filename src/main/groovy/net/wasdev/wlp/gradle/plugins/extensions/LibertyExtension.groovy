@@ -20,14 +20,15 @@ import org.gradle.util.ConfigureUtil
 class LibertyExtension {
     
     String installDir
-    String outputDir
     String userDir
     String serverName = "defaultServer"
-    String configDirectory
-    String configFile
-    String bootstrapPropertiesFile
-    String jvmOptionsFile
-    String serverEnv
+    String outputDir
+    
+    File configDirectory
+    File configFile = new File("/src/main/liberty/config/server.xml")
+    File bootstrapPropertiesFile = new File("/src/main/liberty/config/bootstrap.properties")
+    File jvmOptionsFile = new File("/src/main/liberty/config/jvm.options")
+    File serverEnv = new File("/src/main/liberty/config/server.env")
     
     Map<String, String> bootstrapProperties
     List<String> jvmOptions
