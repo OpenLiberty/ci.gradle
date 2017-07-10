@@ -25,6 +25,17 @@ class RunTask extends AbstractTask {
         if (project.liberty.clean) {
             command.add("--clean")
         }
+
+        /*
+        // check if server must be created first
+        if (!new File(project.ext.serverDirectory).exists()) {
+            def create_process = new ProcessBuilder(buildCommand("create")).redirectErrorStream(true).start()
+            create_process.inputStream.eachLine {
+                println it
+            }
+        }
+        */
+
         def run_process = new ProcessBuilder(command).redirectErrorStream(true).start()
         addShutdownHook {
             run_process.waitFor()

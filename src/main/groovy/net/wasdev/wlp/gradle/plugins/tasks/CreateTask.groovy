@@ -21,11 +21,23 @@ class CreateTask extends AbstractTask {
 
     @TaskAction
     void create() {
-        def params = buildLibertyMap(project);
-        if (project.liberty.template != null && project.liberty.template.length() != 0) {
-            params.put('template', project.liberty.template)
-        }
-        executeServerCommand(project, 'create', params)
+        // Check if server needs to be created
+        if (!new File(project.ext.serverDirectory).exists()) {
+            def params = buildLibertyMap(project);
+            if (project.liberty.template != null && project.liberty.template.length() != 0) {
+                params.put('template', project.liberty.template)
+            }
+            executeServerCommand(project, 'create', params)
+            
+            /*
+            def create_process = new ProcessBuilder(buildCommand("create")).redirectErrorStream(true).start()
+            create_process.inputStream.eachLine {
+                println it
+            }
+            */
+        }       
+
+        // copyConfigFiles()
     }
 
 }

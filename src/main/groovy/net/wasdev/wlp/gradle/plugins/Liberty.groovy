@@ -48,25 +48,27 @@ class Liberty implements Plugin<Project> {
         }
 
         try {
-            project.task('libertyRun', type: RunTask) {
+            project.task('libertyRun', type: RunTask, dependsOn: 'libertyCreate') {
                 description = "Runs a WebSphere Liberty Profile server under the Gradle process."
                 logging.level = LogLevel.INFO
-
                 addShutdownHook {
-                    // Making sure the server is stopped when executing with a daemon
-                    def stop_process = new ProcessBuilder(buildCommand("stop")).redirectErrorStream(true).start()
+                    // Making sure the server stops when executing with a daemon
+                    def stop_process = new ProcessBuilder(buildCommand("stop")).start()
                 }
             }
         } catch (Exception e) {
-            project.task('libertyRun') {
+            doLast {
+                logger.error ("libertyRun task could not finish execution due to an exception.")
+                throw e
+            }
+            /*project.task('libertyRun') {
                 description = "Runs a WebSphere Liberty Profile server under the Gradle process."
                 logging.level = LogLevel.INFO
                 doLast {
                     logger.error ("libertyRun task could not finish execution due to an exception.")
-                    throw new Exception (e) 
-                    // e.printStackTrace()
+                    throw e
                 }
-            }
+            }*/
         }
 
         project.task('libertyStatus', type: StatusTask) {
@@ -74,7 +76,7 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
         }
 
-        project.task('libertyCreate', type: CreateTask) {
+        project.task('libertyCreate', type: CreateTask, dependsOn: 'installLiberty') {
             description 'Creates a WebSphere Liberty Profile server.'
             outputs.file { new File(getUserDir(project), "servers/${project.liberty.serverName}/server.xml") }
             logging.level = LogLevel.INFO

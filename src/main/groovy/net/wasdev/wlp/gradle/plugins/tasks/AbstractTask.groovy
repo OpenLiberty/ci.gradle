@@ -76,10 +76,8 @@ abstract class AbstractTask extends DefaultTask {
         String installDir = getInstallDir(project).toString()
 
         if (isWindows) {
-            // println ("Windows detected") 
             command.add(installDir + "\\bin\\server.bat")
         } else {
-            // println ("Not-Windows detected")
             command.add(installDir + "/bin/server")
         }
         command.add(operation)
