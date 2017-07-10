@@ -1,11 +1,11 @@
 ## uninstallFeature task
-The `uninstallFeature` task uninstall a feature packaged as a Subsystem Archive (ESA file) to the Liberty runtime.
+The `uninstallFeature` task uninstalls a feature from the Liberty runtime.
 
 ### Properties
 
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
-| featureName |Specifies the name of the Subsystem Archive (ESA file) to be uninstalled. The value can be a feature name, a file name or a URL. | Yes |
+| name | Specifies the feature name to be uninstalled. The name can a short name or a symbolic name of a Subsystem Archive (ESA file). | Yes |
 
 ### Examples
 
