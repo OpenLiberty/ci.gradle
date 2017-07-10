@@ -19,7 +19,7 @@ These examples show you how to configure these properties in your scripts:
 apply plugin: 'liberty'
 
 liberty {
-    configDirectory = 'src/main/liberty/config'
+    configDirectory = file('src/main/liberty/config')
 } 
 ```
 2. Configured with inline properties.
@@ -36,9 +36,9 @@ liberty {
 apply plugin: 'liberty'
 
 liberty {
-    configFile = 'src/main/liberty/config/server.xml'
-    bootstrapPropertiesFile = 'src/main/liberty/config/bootstrap.properties'
-    jvmOptionsFile = 'src/main/liberty/config/jvm.options'
-    serverEnv = 'src/main/liberty/config/server.env'
+    configFile = file('src/main/liberty/config/server.xml')
+    bootstrapPropertiesFile = file('src/main/liberty/config/bootstrap.properties')
+    jvmOptionsFile = file('src/main/liberty/config/jvm.options')
+    serverEnv = file('src/main/liberty/config/server.env')
 } 
 ```
