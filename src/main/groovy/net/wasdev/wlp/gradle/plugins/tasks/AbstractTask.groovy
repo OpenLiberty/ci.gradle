@@ -19,6 +19,8 @@ import net.wasdev.wlp.gradle.plugins.extensions.DeployExtension
 import net.wasdev.wlp.gradle.plugins.extensions.LibertyExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 
 abstract class AbstractTask extends DefaultTask {
 
@@ -70,11 +72,6 @@ abstract class AbstractTask extends DefaultTask {
 
     protected File getUserDir(Project project, File installDir) {
         return (project.liberty.userDir == null) ? new File(installDir, 'usr') : new File(project.liberty.userDir)
-    }
-
-    private void copyFiles(File srcFile, File destFile){
-        def copyAnt = new AntBuilder()
-        copyAnt.copy(file:srcFile.getCanonicalPath(), tofile:destFile.getCanonicalPath(), overwrite:true)
     }
 
     /**
@@ -133,7 +130,7 @@ abstract class AbstractTask extends DefaultTask {
         if (serverXMLPath == null || serverXMLPath.isEmpty()) {
             // copy configuration file to server directory if end-user set it.
             if (project.liberty.configFile != null && project.liberty.configFile.exists()) {
-                copyFiles(project.liberty.configFile, new File(serverDirectory, "server.xml"))
+                Files.copy(project.liberty.configFile.toPath(), new File(serverDirectory, "server.xml").toPath(), StandardCopyOption.REPLACE_EXISTING)
                 serverXMLPath = project.liberty.configFile.getCanonicalPath()
             }
         }
@@ -145,7 +142,7 @@ abstract class AbstractTask extends DefaultTask {
                 writeJvmOptions(optionsFile, project.liberty.jvmOptions)
                 jvmOptionsPath = "inlined configuration"
             } else if (project.liberty.jvmOptionsFile != null && project.liberty.jvmOptionsFile.exists()) {
-                copyFiles(project.liberty.jvmOptionsFile, optionsFile)
+                Files.copy(project.liberty.jvmOptionsFile.toPath(), optionsFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
                 jvmOptionsPath = project.liberty.jvmOptionsFile.getCanonicalPath()
             }
         }
@@ -157,7 +154,7 @@ abstract class AbstractTask extends DefaultTask {
                 writeBootstrapProperties(bootstrapFile, project.liberty.bootstrapProperties)
                 bootStrapPropertiesPath = "inlined configuration"
             } else if (project.liberty.bootstrapPropertiesFile != null && project.liberty.bootstrapPropertiesFile.exists()) {
-                copyFiles(project.liberty.bootstrapPropertiesFile, bootstrapFile)
+                Files.copy(project.liberty.bootstrapPropertiesFile.toPath(), bootstrapFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
                 bootStrapPropertiesPath = project.liberty.bootstrapPropertiesFile.getCanonicalPath()
             }
         }
@@ -165,7 +162,7 @@ abstract class AbstractTask extends DefaultTask {
         // handle server.env if not overwritten by server.env from configDirectory
         if (serverEnvPath == null || serverEnvPath.isEmpty()) {
             if (project.liberty.serverEnv != null && project.liberty.serverEnv.exists()) {
-                copyFiles(project.liberty.serverEnv, new File(serverDirectory, "server.env"))
+                Files.copy(project.liberty.serverEnv.toPath(), new File(serverDirectory, "server.env").toPath(), StandardCopyOption.REPLACE_EXISTING)
                 serverEnvPath = project.liberty.serverEnv.getCanonicalPath()
             }
         }
