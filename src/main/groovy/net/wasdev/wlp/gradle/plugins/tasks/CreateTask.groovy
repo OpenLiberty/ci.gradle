@@ -28,16 +28,7 @@ class CreateTask extends AbstractTask {
                 params.put('template', project.liberty.template)
             }
             executeServerCommand(project, 'create', params)
-            
-            /*
-            def create_process = new ProcessBuilder(buildCommand("create")).redirectErrorStream(true).start()
-            create_process.inputStream.eachLine {
-                println it
-            }
-            */
         }       
-
-        // copyConfigFiles()
     }
 
 }
