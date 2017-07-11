@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2015.
+ * (C) Copyright IBM Corporation 2014, 2017.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,9 @@
  */
 package net.wasdev.wlp.gradle.plugins.extensions
 
-class InstallExtension {
-    
-    String licenseCode
+class AssemblyArtifactExtension {
+    String groupId
+    String artifactId
     String version
-    String runtimeUrl
-    String baseDir
-    String cacheDir
-    String username
-    String password
-    String maxDownloadTime = "0"
-    String type
-
+    String type = "zip"
 }

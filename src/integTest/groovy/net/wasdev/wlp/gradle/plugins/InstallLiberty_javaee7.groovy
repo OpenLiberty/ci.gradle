@@ -23,7 +23,7 @@ import org.junit.Test
 import org.junit.runners.MethodSorters
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class InstallLiberty_javaee7 extends AbstractIntegrationTest{
+class InstallLiberty_javaee7 extends AbstractIntegrationTest {
     static File resourceDir = new File("build/resources/integrationTest/liberty-test")
     static File buildDir = new File(integTestDir, "/InstallLiberty_javaee7")
     static String buildFilename = "install_liberty_javaee7.gradle"

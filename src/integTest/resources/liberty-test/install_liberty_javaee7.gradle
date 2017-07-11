@@ -33,5 +33,4 @@ liberty {
         installDir = WLP_DIR
         serverName = 'libertyOffline'
     }
-
 }

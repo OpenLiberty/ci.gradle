@@ -31,11 +31,6 @@ class InstallLibertyTask extends AbstractTask {
 
     private Map<String, String> buildInstallLibertyMap(Project project) {
 
-        final maven_repo_prefix = "http://repo1.maven.org/maven2/"
-        
-        String version = "17.0.0.2"
-        String type = "webProfile7"
-        
         Map<String, String> result = new HashMap();
         if (project.liberty.install.licenseCode != null) {
            result.put('licenseCode', project.liberty.install.licenseCode)
@@ -54,14 +49,36 @@ class InstallLibertyTask extends AbstractTask {
         if (project.liberty.install.runtimeUrl != null) {
             result.put('runtimeUrl', project.liberty.install.runtimeUrl)
         } 
-        else if (project.liberty.install.groupId != null) {
-            logger.debug 'Getting WebSphere Liberty server from the Maven repository.'
-            String groupId = project.liberty.install.groupId.replaceAll("\\.", "/")
+        else if (project.liberty.assemblyArtifact.groupId != null) {
+            final maven_repo_path = "http://repo1.maven.org/maven2"
+            String version = "17.0.0.2"
+            String artifactId = "wlp-webProfile7"
 
-            result.put('runtimeUrl', maven_repo_prefix + groupId + "/wlp-" + type + "/" + 
-                version + "/wlp-" + type + "-" + version + ".zip")
+            if (project.liberty.assemblyArtifact.version != null) {
+                version = project.liberty.assemblyArtifact.version
+            }
             
-            logger.debug 'Composed runtimeUrl : ' + result.getAt('runtimeUrl')
+            if (project.liberty.assemblyArtifact.artifactId != null) {
+                artifactId = project.liberty.assemblyArtifact.artifactId
+            }
+
+            String groupId = project.liberty.assemblyArtifact.groupId.replaceAll("\\.", "/")
+            String artifactPath =  artifactId + "/" + version + "/" + artifactId + "-" + version + ".zip"
+            String remoteMavenRepo = maven_repo_path + "/" + groupId + "/" + artifactPath
+            String localMavenRepo = new File(System.getProperty('user.home'), '.m2/repository').absolutePath + 
+                                    "/" + groupId + "/" + artifactPath
+            
+            File localFile = new File(localMavenRepo)
+            
+            if (localFile.exists()) {
+                logger.debug 'Getting WebSphere Liberty server from the local Maven repository.'
+                result.put('runtimeUrl', localFile.toURI().toURL())
+            }
+            else { 
+                logger.debug 'Getting WebSphere Liberty server from the remote Maven repository.'
+                result.put('runtimeUrl', remoteMavenRepo)
+            }
+            logger.debug 'Maven runtimeUrl is ' + result.getAt('runtimeUrl')
         } 
         
         if (project.liberty.install.baseDir == null) {
