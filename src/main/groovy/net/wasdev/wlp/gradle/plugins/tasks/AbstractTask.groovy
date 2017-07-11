@@ -74,13 +74,8 @@ abstract class AbstractTask extends DefaultTask {
         return (project.liberty.userDir == null) ? new File(installDir, 'usr') : new File(project.liberty.userDir)
     }
 
-    /**
-     * @throws IOException
-     * @throws FileNotFoundException
-     */
-    protected void copyConfigFiles() throws IOException {
+    protected File getServerDir(Project project){
         String serverDirectory
-        
         if(project.liberty.outputDir !=null && !project.liberty.outputDir.isEmpty()){
             serverDirectory = project.liberty.outputDir
         }
@@ -88,6 +83,16 @@ abstract class AbstractTask extends DefaultTask {
             serverDirectory = getInstallDir(project).toString() + "/usr/servers/" + project.liberty.serverName
         }
         
+        return new File(serverDirectory)
+    }
+    
+    /**
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    protected void copyConfigFiles() throws IOException {
+        
+        String serverDirectory = getServerDir(project).toString()
         String serverXMLPath = null
         String jvmOptionsPath = null
         String bootStrapPropertiesPath = null
