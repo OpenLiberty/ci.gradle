@@ -33,7 +33,6 @@ class RunTask extends AbstractTask {
     @TaskAction
     void run() {
         ServerBuilder builder = getServerBuilder(project);
-        copyConfigFiles()
         LibertyListener listener = new LibertyListener()
         builder.setServerEventListener(listener)
         Result result = builder.build().start().get()

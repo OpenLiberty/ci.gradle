@@ -79,12 +79,19 @@ abstract class AbstractTask extends DefaultTask {
      * @throws FileNotFoundException
      */
     protected void copyConfigFiles() throws IOException {
-
-        if(project.liberty.outputDir == null){
+        String serverDirectory
+        /*if(project.liberty.outputDir == null){
             project.liberty.outputDir = getInstallDir(project).toString() + "/usr/servers/" + project.liberty.serverName
+        }*/
+        
+        if(project.liberty.outputDir !=null && !project.liberty.outputDir.isEmpty()){
+            serverDirectory = project.liberty.outputDir
+        }
+        else{ 
+            serverDirectory = getInstallDir(project).toString() + "/usr/servers/" + project.liberty.serverName
         }
         
-        String serverDirectory = project.liberty.outputDir
+        
         String serverXMLPath = null
         String jvmOptionsPath = null
         String bootStrapPropertiesPath = null

@@ -22,7 +22,6 @@ class DumpTask extends AbstractTask {
     @TaskAction
     void dump() {
         def params = buildLibertyMap(project);
-        copyConfigFiles()
         if (project.liberty.dumpLiberty.archive != null && project.liberty.dumpLiberty.archive.length() != 0) {
             params.put('archive', new File(project.liberty.dumpLiberty.archive))
         }

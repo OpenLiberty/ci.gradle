@@ -2,7 +2,6 @@ package net.wasdev.wlp.gradle.plugins;
 
 import java.io.File
 
-import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
 

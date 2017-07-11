@@ -20,9 +20,9 @@ import org.gradle.util.ConfigureUtil
 class LibertyExtension {
     
     String installDir
+    String outputDir
     String userDir
     String serverName = "defaultServer"
-    String outputDir
     
     File configDirectory
     File configFile = new File("/src/main/liberty/config/server.xml")
