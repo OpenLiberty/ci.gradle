@@ -27,7 +27,6 @@ compileJava.options.encoding = 'UTF-8'
 ext {
     // Liberty server properties
     wlpServerName = 'LibertyProjectServer'
-    serverDirectory = "${project.liberty.installDir}/usr/servers/${wlpServerName}"
 }
 
 liberty {
