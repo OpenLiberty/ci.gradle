@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2015.
+ * (C) Copyright IBM Corporation 2014, 2017.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,13 @@ class CreateTask extends AbstractTask {
 
     @TaskAction
     void create() {
-        def params = buildLibertyMap(project);
-        if (project.liberty.template != null && project.liberty.template.length() != 0) {
-            params.put('template', project.liberty.template)
+        if(!getServerDir(project).exists()){ 
+            def params = buildLibertyMap(project);
+            if (project.liberty.template != null && project.liberty.template.length() != 0) {
+                params.put('template', project.liberty.template)
+            }
+            executeServerCommand(project, 'create', params)
         }
-        executeServerCommand(project, 'create', params)
+        copyConfigFiles();
     }
-
 }
