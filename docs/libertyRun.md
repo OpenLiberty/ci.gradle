@@ -1,6 +1,6 @@
 ## libertyRun task  
 Start a Liberty server in the foreground. The server instance will be automatically created if it does not exist.  
-**NOTE!** To view shutdown messages when terminating `libertyRun` with a Ctrl-C, run `libertyRun` like this:  
+**NOTE!** For proper server shutdown and shutdown console messages when terminating `libertyRun` with a Ctrl-C, you **must** run `libertyRun` like this:  
 ```
 gradle libertyRun --no-daemon
 ```
@@ -16,11 +16,12 @@ or
 <========-----> 66% EXECUTING
 > :libertyRun
 ```
-This is expected behavior because the task will neither progress nor stop as long as the server/process is running. The "build" will successfully finish with an external `libertyStop` or a Ctrl-C break (if ran with `--no-daemon`).
+This is expected behavior because the task will neither progress nor stop as long as the server/process is running. The "build" will successfully finish with an external `libertyStop` or a Ctrl-C break.
 
 ### What is the Gradle Daemon and why --no-daemon?
-The Gradle Daemon is a long-running background process designed to help speed up the build process. It does so by avoiding constant JVM startup costs while caching information about the project. This behavior is default until specified otherwise.  
-If running with the daemon (default), a Ctrl-C on the `libertyRun` task will kill the daemon and end `libertyRun` prematurely. Although the server will eventually shut down, it does so silently and will require about ~8-12 seconds to complete in the background. Running `libertyRun` with `--no-daemon` should eliminate these difficulties.
+The Gradle Daemon is a long-running background process designed to help speed up the build process. It does so by caching project information and staying alive, avoiding constant JVM startup costs. This behavior is default until specified otherwise.  
+Gradle's current daemon design makes it difficult to use a `run` task, as a Ctrl-C would kill the daemon while simultaneously leaving the application running in the background. Therefore, we need `--no-daemon` so that the signal can be received and properly handled.  
+In the event that a user does run a `libertyRun` with a daemon (default), an external `libertyStop` must be called in order to properly shut down the server. A Ctrl-C while the Gradle process is running will not stop the server. Use `libertyStatus` to confirm the state of your server.
 
 ### Additional parameters
 
