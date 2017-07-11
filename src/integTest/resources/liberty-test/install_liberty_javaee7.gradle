@@ -29,11 +29,9 @@ liberty {
             version = wlpVersion
             type = "zip"
         }
-        
         serverName ='libertyOnline'
     } else {
         installDir = WLP_DIR
         serverName = 'libertyOffline'
     }
-
 }

@@ -25,8 +25,8 @@ import org.junit.runners.MethodSorters
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class InstallLiberty_webProfile7 extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/integrationTest/liberty-test")
-    static File buildDir = new File(integTestDir, "/InstallLiberty_webProfie7")
-    static String buildFilename = "install_liberty_webProfie7.gradle"
+    static File buildDir = new File(integTestDir, "/InstallLiberty_webProfile7")
+    static String buildFilename = "install_liberty_webProfile7.gradle"
 
     @BeforeClass
     public static void setup() {
