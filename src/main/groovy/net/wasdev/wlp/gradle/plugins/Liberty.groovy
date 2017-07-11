@@ -47,28 +47,9 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
         }
 
-        try {
-            project.task('libertyRun', type: RunTask, dependsOn: 'libertyCreate') {
-                description = "Runs a WebSphere Liberty Profile server under the Gradle process."
-                logging.level = LogLevel.INFO
-                addShutdownHook {
-                    // Making sure the server stops when executing with a daemon
-                    def stop_process = new ProcessBuilder(buildCommand("stop")).start()
-                }
-            }
-        } catch (Exception e) {
-            doLast {
-                logger.error ("libertyRun task could not finish execution due to an exception.")
-                throw e
-            }
-            /*project.task('libertyRun') {
-                description = "Runs a WebSphere Liberty Profile server under the Gradle process."
-                logging.level = LogLevel.INFO
-                doLast {
-                    logger.error ("libertyRun task could not finish execution due to an exception.")
-                    throw e
-                }
-            }*/
+        project.task('libertyRun', type: RunTask, dependsOn: 'libertyCreate') {
+            description = "Runs a Websphere Liberty Profile server under the Gradle process."
+            logging.level = LogLevel.INFO
         }
 
         project.task('libertyStatus', type: StatusTask) {
