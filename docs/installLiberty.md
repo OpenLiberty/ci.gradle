@@ -67,14 +67,12 @@ Note: Either `liberty-install` or `liberty-assemblyArtifact` closure should be u
     }
   ```
 
-### assemblyArtifact Properties
-
-These properties are used if `runtimeUrl` is not set.
+### Properties for assemblyArtifact closure
 
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
-| artifactId | Liberty runtime type to download from the Maven repository. Currently, the following types are supported: `wlp-javaee7`, `wlp-webProfile7`, `wlp-kernel`, `wlp-osgi` and `wlp-microProfile1`. The default value is `wlp-webProfile7`. | No |
-| version | Exact version of the WebSphere Liberty server to install. The latest version from the Maven repository is used by default if not specified. | No |
+| artifactId | Liberty runtime type to download from the Maven repository. Currently, the following types are supported: `wlp-javaee7`, `wlp-webProfile7`, `wlp-kernel`, `wlp-osgi` and `wlp-microProfile1`. The default value is `wlp-webProfile7`. | Yes, either `artifactId` or `version` is required. |
+| version | Exact version of the WebSphere Liberty server to install. The latest version from the Maven repository is used by default if not specified. | Yes, either `artifactId` or `version` is required. |
 | type | Liberty runtime type to download from the Maven repository. The default type is `zip`. | No |
 
 #### Example for using the assemblyArtifact :
