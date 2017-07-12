@@ -8,6 +8,8 @@ Note: Either `liberty-install` or `liberty-assemblyArtifact` closure should be u
 
 ### Properties for librerty-install closure
 
+Use the `install` to specify the name of the Liberty server to install from the Liberty repository.
+
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
 | licenseCode | WebSphere Liberty server license code. See [above](#installliberty-task). | Yes, if `type` is `webProfile6` or `runtimeUrl` specifies a `.jar` file. |
@@ -69,11 +71,13 @@ Note: Either `liberty-install` or `liberty-assemblyArtifact` closure should be u
 
 ### Properties for assemblyArtifact closure
 
+Use the `assemblyArtifact` to specify the name of the Maven artifact.
+
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
 | artifactId | Liberty runtime type to download from the Maven repository. Currently, the following types are supported: `wlp-javaee7`, `wlp-webProfile7`, `wlp-kernel`, `wlp-osgi` and `wlp-microProfile1`. The default value is `wlp-webProfile7`. | Yes, either `artifactId` or `version` is required. |
-| version | Exact version of the WebSphere Liberty server to install. The latest version from the Maven repository is used by default if not specified. | Yes, either `artifactId` or `version` is required. |
-| type | Liberty runtime type to download from the Maven repository. The default type is `zip`. | No |
+| version | Exact version of the WebSphere Liberty server to install. By default, the latest stable release is used in the Maven repository. | Yes, either `artifactId` or `version` is required. |
+| type | Liberty runtime type to download. The default type is `zip`. | No |
 
 #### Example for using the assemblyArtifact :
 
