@@ -6,7 +6,7 @@ When installing Liberty from a JAR file, the Liberty license code is needed to i
 
 Note: Either `liberty-install` or `liberty-assemblyArtifact` closure should be used. They shouldn't be used together. If both are specified the Maven repository with `liberty-assemblyArtifact` is used.
 
-### Properties for librerty-install closure
+### Properties for install closure
 
 Use the `install` to specify the name of the Liberty server to install from the Liberty repository.
 
