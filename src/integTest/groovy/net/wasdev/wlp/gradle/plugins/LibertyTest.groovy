@@ -124,4 +124,22 @@ class LibertyTest extends AbstractIntegrationTest{
            throw new AssertionError ("Fail on task Clean. "+e)
         }
     }
+
+    @Test
+    public void test10_run() {
+        try{
+            def stop_thread = Thread.start {
+                sleep(30000)    // sleep 30 sec
+                try {
+                    runTasks(buildDir, 'libertyStop')
+                } catch (Exception e) {
+                    throw new AssertionError ("Fail on task libertyStop for libertyRun. "+e)
+                }
+            }
+            runTasks(buildDir, 'libertyRun')
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task libertyRun. "+e)
+        }
+    }
+
 }
