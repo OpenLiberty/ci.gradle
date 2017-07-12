@@ -15,10 +15,14 @@
  */
 package net.wasdev.wlp.gradle.plugins.tasks
 
+import javax.xml.parsers.*
+
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 
 class InstallLibertyTask extends AbstractTask {
+	
+	final MAVEN_REPO = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/"
 
     @TaskAction
     void install() {
@@ -38,35 +42,43 @@ class InstallLibertyTask extends AbstractTask {
 
         if (project.liberty.install.version != null) {
             result.put('version', project.liberty.install.version)
-            version = project.liberty.install.version
         }
         
         if (project.liberty.install.type != null) {
             result.put('type', project.liberty.install.type)
-            type = project.liberty.install.type
         }
 
         if (project.liberty.install.runtimeUrl != null) {
             result.put('runtimeUrl', project.liberty.install.runtimeUrl)
         } 
-        else if (project.liberty.assemblyArtifact.groupId != null) {
-            final maven_repo_path = "http://repo1.maven.org/maven2"
-            String version = "17.0.0.2"
-            String artifactId = "wlp-webProfile7"
-
-            if (project.liberty.assemblyArtifact.version != null) {
-                version = project.liberty.assemblyArtifact.version
-            }
+        else if (project.liberty.assemblyArtifact.artifactId != null ||
+            project.liberty.assemblyArtifact.version != null) {
             
+            String version 
+            String artifactId = "wlp-webProfile7"
+            String type = "zip"
+
             if (project.liberty.assemblyArtifact.artifactId != null) {
                 artifactId = project.liberty.assemblyArtifact.artifactId
             }
 
-            String groupId = project.liberty.assemblyArtifact.groupId.replaceAll("\\.", "/")
-            String artifactPath =  artifactId + "/" + version + "/" + artifactId + "-" + version + ".zip"
-            String remoteMavenRepo = maven_repo_path + "/" + groupId + "/" + artifactPath
+            if (project.liberty.assemblyArtifact.version != null) {
+                version = project.liberty.assemblyArtifact.version
+            } else {
+                def maven_version = getLatestVersionFromMaven(artifactId)
+                if (maven_version != null) {
+                    version = maven_version
+                }
+            }
+            
+            if (project.liberty.assemblyArtifact.type != null) {
+                type = project.liberty.assemblyArtifact.type
+            }
+            
+            String artifactPath =  artifactId + "/" + version + "/" + artifactId + "-" + version + "." + type
+            String remoteMavenRepo = MAVEN_REPO + artifactPath
             String localMavenRepo = new File(System.getProperty('user.home'), '.m2/repository').absolutePath + 
-                                    "/" + groupId + "/" + artifactPath
+                                    "/com/ibm/websphere/appserver/runtime/" + artifactPath
             
             File localFile = new File(localMavenRepo)
             
@@ -101,5 +113,22 @@ class InstallLibertyTask extends AbstractTask {
         result.put('offline', project.gradle.startParameter.offline)
 
         return result
+    }
+    
+    private String getLatestVersionFromMaven(String artifactId) {
+        def url= MAVEN_REPO + artifactId + "/maven-metadata.xml"
+        def metadata
+        def version
+        
+        try {
+            metadata = new XmlSlurper().parse(url)
+            version = metadata.versioning.latest
+            logger.debug "Obtained the latest release version from the Maven repository : " + version
+        } catch (Exception e) {
+            logger.debug "Failed to get latest version from the Maven repository : " + e
+            version = "17.0.0.2"
+        }
+        
+        return version
     }
 }
