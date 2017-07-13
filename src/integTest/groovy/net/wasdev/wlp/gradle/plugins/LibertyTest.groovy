@@ -21,6 +21,7 @@ import org.junit.BeforeClass
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runners.MethodSorters
+import net.wasdev.wlp.ant.ServerTask
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class LibertyTest extends AbstractIntegrationTest{
@@ -127,11 +128,24 @@ class LibertyTest extends AbstractIntegrationTest{
 
     @Test
     public void test10_run() {
+        final int timeout = 30000     // 30 sec
+        final String START_SERVER_MESSAGE_REGEXP = "CWWKF0011I.*"
+        
+        ServerTask st = new ServerTask()
+        def installDir = new File(buildDir.getAbsolutePath() + "/build/wlp")
+        st.setInstallDir(installDir)
+        st.setServerName((test_mode == "offline") ? "libertyOffline" : "libertyOnline")
+        st.initTask()
+        
         try{
             def stop_thread = Thread.start {
-                sleep(30000)    // sleep 30 sec
+                String verify = st.waitForStringInLog(START_SERVER_MESSAGE_REGEXP, timeout, st.getLogFile())
                 try {
-                    runTasks(buildDir, 'libertyStop')
+                    if (verify) {
+                        runTasks(buildDir, 'libertyStop')
+                    } else {
+                        throw new AssertionError ("Fail to start server for libertyRun.")
+                    }
                 } catch (Exception e) {
                     throw new AssertionError ("Fail on task libertyStop for libertyRun. "+e)
                 }
