@@ -19,6 +19,10 @@ def WLP_DIR = System.getProperty('wlpInstallDir')
 
 apply plugin: 'liberty'
 
+repositories {
+    mavenCentral()
+}
+    
 liberty {
     if (test_mode == 'online') {
         assemblyArtifact {

@@ -16,7 +16,8 @@
 package net.wasdev.wlp.gradle.plugins.extensions
 
 class AssemblyArtifactExtension {
+    String groupId
     String artifactId
     String version
-    String type = "zip"
+    String type
 }
