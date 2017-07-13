@@ -27,7 +27,8 @@ class CreateTask extends AbstractTask {
                 params.put('template', project.liberty.template)
             }
             executeServerCommand(project, 'create', params)
-        }
+        }       
         copyConfigFiles();
     }
+
 }
