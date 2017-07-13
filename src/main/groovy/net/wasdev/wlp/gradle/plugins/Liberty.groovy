@@ -52,7 +52,7 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
         }
 
-        project.task('libertyStatus', type: StatusTask) {
+        project.task('libertyStatus', type: StatusTask, dependsOn: 'libertyCreate') {
             description 'Checks the WebSphere Liberty Profile server is running.'
             logging.level = LogLevel.INFO
         }
@@ -63,12 +63,12 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
         }
 
-        project.task('libertyStart', type: StartTask) {
+        project.task('libertyStart', type: StartTask, dependsOn: 'libertyCreate') {
             description 'Starts the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
         }
 
-        project.task('libertyStop', type: StopTask) {
+        project.task('libertyStop', type: StopTask, dependsOn: 'libertyCreate') {
             description 'Stops the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
         }
@@ -78,7 +78,7 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.DEBUG
         }
 
-        project.task('libertyDump', type: DumpTask) {
+        project.task('libertyDump', type: DumpTask, dependsOn 'libertyCreate') {
             description 'Dumps diagnostic information from the Liberty Profile server into an archive.'
             logging.level = LogLevel.INFO
         }
