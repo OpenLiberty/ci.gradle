@@ -21,7 +21,10 @@ class StatusTask extends AbstractTask {
 
     @TaskAction
     void status() {
-        executeServerCommand(project, 'status', buildLibertyMap(project))
+        def status_process = new ProcessBuilder(buildCommand("status")).redirectErrorStream(true).start()
+        status_process.inputStream.eachLine {
+            println it
+        }
     }
 
 }
