@@ -53,7 +53,7 @@ class Liberty implements Plugin<Project> {
         }
 
         project.task('libertyStatus', type: StatusTask, dependsOn: 'libertyCreate') {
-            description 'Checks if Liberty server is running.'
+            description 'Checks if the Liberty server is running.'
             logging.level = LogLevel.INFO
         }
 
