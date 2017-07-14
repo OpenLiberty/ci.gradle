@@ -52,8 +52,8 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
         }
 
-        project.task('libertyStatus', type: StatusTask) {
-            description 'Checks the WebSphere Liberty Profile server is running.'
+        project.task('libertyStatus', type: StatusTask, dependsOn: 'libertyCreate') {
+            description 'Checks if the Liberty server is running.'
             logging.level = LogLevel.INFO
         }
 
@@ -63,7 +63,7 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
         }
 
-        project.task('libertyStart', type: StartTask) {
+        project.task('libertyStart', type: StartTask, dependsOn: 'libertyCreate') {
             description 'Starts the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
         }
@@ -73,7 +73,7 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
         }
 
-        project.task('libertyPackage', type: PackageTask) {
+        project.task('libertyPackage', type: PackageTask, dependsOn: 'libertyCreate') {
             description 'Generates a WebSphere Liberty Profile server archive.'
             logging.level = LogLevel.DEBUG
         }
@@ -88,7 +88,7 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
         }
 
-        project.task('libertyDebug', type: DebugTask) {
+        project.task('libertyDebug', type: DebugTask, dependsOn: 'libertyCreate') {
             description 'Runs the Liberty Profile server in the console foreground after a debugger connects to the debug port (default: 7777).'
             logging.level = LogLevel.INFO
         }
@@ -103,11 +103,11 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
         }
 
-        project.task('installFeature', type: InstallFeatureTask) {
+        project.task('installFeature', type: InstallFeatureTask, dependsOn: 'installLiberty') {
             description 'Install a new feature to the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO
         }
-        project.task('uninstallFeature', type: UninstallFeatureTask) {
+        project.task('uninstallFeature', type: UninstallFeatureTask, dependsOn: 'installLiberty') {
             description 'Uninstall a feature from the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO
         }
