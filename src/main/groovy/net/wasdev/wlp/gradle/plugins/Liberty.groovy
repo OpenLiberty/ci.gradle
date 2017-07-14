@@ -68,17 +68,17 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
         }
 
-        project.task('libertyStop', type: StopTask, dependsOn: 'libertyCreate') {
+        project.task('libertyStop', type: StopTask) {
             description 'Stops the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
         }
 
-        project.task('libertyPackage', type: PackageTask) {
+        project.task('libertyPackage', type: PackageTask, dependsOn: 'libertyCreate') {
             description 'Generates a WebSphere Liberty Profile server archive.'
             logging.level = LogLevel.DEBUG
         }
 
-        project.task('libertyDump', type: DumpTask, dependsOn 'libertyCreate') {
+        project.task('libertyDump', type: DumpTask) {
             description 'Dumps diagnostic information from the Liberty Profile server into an archive.'
             logging.level = LogLevel.INFO
         }
@@ -88,7 +88,7 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
         }
 
-        project.task('libertyDebug', type: DebugTask) {
+        project.task('libertyDebug', type: DebugTask, dependsOn: 'libertyCreate') {
             description 'Runs the Liberty Profile server in the console foreground after a debugger connects to the debug port (default: 7777).'
             logging.level = LogLevel.INFO
         }
@@ -103,11 +103,11 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
         }
 
-        project.task('installFeature', type: InstallFeatureTask) {
+        project.task('installFeature', type: InstallFeatureTask, dependsOn: 'installLiberty') {
             description 'Install a new feature to the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO
         }
-        project.task('uninstallFeature', type: UninstallFeatureTask) {
+        project.task('uninstallFeature', type: UninstallFeatureTask, dependsOn: 'installLiberty') {
             description 'Uninstall a feature from the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO
         }
