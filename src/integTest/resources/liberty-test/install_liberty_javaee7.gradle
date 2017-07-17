@@ -8,9 +8,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath fileTree(dir: '../libs', include: '*.jar', exclude: ['*-groovydoc.jar', '*-sources.jar'])
         classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:1.1-SNAPSHOT'
-        classpath 'net.wasdev.wlp.ant:wlp-anttasks:1.3-SNAPSHOT'
     }
 }
 
@@ -21,10 +19,13 @@ def WLP_DIR = System.getProperty('wlpInstallDir')
 
 apply plugin: 'liberty'
 
+repositories {
+    mavenCentral()
+}
+    
 liberty {
     if (test_mode == 'online') {
         assemblyArtifact {
-            groupId = "com.ibm.websphere.appserver.runtime"
             artifactId = "wlp-javaee7"
             version = wlpVersion
             type = "zip"

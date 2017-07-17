@@ -27,6 +27,7 @@ class PackageTask extends AbstractTask {
         
         def archive = project.liberty.packageLiberty.archive
         
+        copyConfigFiles()
         if (archive != null && archive.length() != 0) {
             def archiveFile = new File(archive)
             
