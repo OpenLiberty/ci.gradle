@@ -1,0 +1,67 @@
+group = 'liberty.gradle'
+version = '1'
+
+buildscript {
+    repositories {
+        mavenCentral()
+		mavenLocal()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:1.1-SNAPSHOT'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'liberty'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+compileJava.options.encoding = 'UTF-8'
+
+ext {
+    // Liberty server properties
+    wlpServerName = 'LibertyProjectServer'
+}
+
+liberty {
+    install {
+        runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/17.0.0.2/wlp-webProfile7-17.0.0.2.zip"
+    }
+    serverName = wlpServerName
+
+    configFile = file("${project.projectDir}/src/main/liberty/config/server.xml")
+    bootstrapPropertiesFile = file("${project.projectDir}/src/main/liberty/config/bootstrap.test.properties")
+    jvmOptionsFile = file("${project.projectDir}/src/main/liberty/config/jvm.options")
+    serverEnv = file("${project.projectDir}/src/main/liberty/config/server.env")
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        name 'liberty-starter-maven-repo'
+        url 'http://liberty-starter.wasdev.developer.ibm.com/start/api/v1/repo'
+    }
+}
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+}
+
+task integrationTest(type: Test) {
+    group 'Verification'
+    description 'Runs the integration tests.'
+    reports.html.destination = file("$buildDir/reports/it")
+    reports.junitXml.destination = file("$buildDir/test-results/it")
+    include '**/it/**'
+    exclude '**/unit/**'
+}
+
+check.dependsOn 'integrationTest'
+libertyCreate.dependsOn 'installLiberty'
+integrationTest.dependsOn 'libertyCreate'
