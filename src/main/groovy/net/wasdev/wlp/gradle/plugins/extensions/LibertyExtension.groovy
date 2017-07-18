@@ -25,10 +25,10 @@ class LibertyExtension {
     String serverName = "defaultServer"
     
     File configDirectory
-    File configFile = new File("/src/main/liberty/config/server.xml")
-    File bootstrapPropertiesFile = new File("/src/main/liberty/config/bootstrap.properties")
-    File jvmOptionsFile = new File("/src/main/liberty/config/jvm.options")
-    File serverEnv = new File("/src/main/liberty/config/server.env")
+    File configFile = new File("src/main/liberty/config/server.xml")
+    File bootstrapPropertiesFile = new File("src/main/liberty/config/bootstrap.properties")
+    File jvmOptionsFile = new File("src/main/liberty/config/jvm.options")
+    File serverEnv = new File("src/main/liberty/config/server.env")
     
     Map<String, String> bootstrapProperties
     List<String> jvmOptions
@@ -53,6 +53,8 @@ class LibertyExtension {
     PackageAndDumpExtension packageLiberty = new PackageAndDumpExtension()
     PackageAndDumpExtension dumpLiberty = new PackageAndDumpExtension()
     PackageAndDumpExtension javaDumpLiberty = new PackageAndDumpExtension()
+    
+    InstallAppsExtension installapps = new InstallAppsExtension()
 
     def uninstallfeatures(Closure closure) {
         ConfigureUtil.configure(closure, uninstallfeatures)
@@ -93,5 +95,9 @@ class LibertyExtension {
 
     def cleanDir(Closure closure) {
         ConfigureUtil.configure(closure, cleanDir)
+    }
+    
+    def installapps(Closure closure) {
+        ConfigureUtil.configure(closure, installapps)
     }
 }
