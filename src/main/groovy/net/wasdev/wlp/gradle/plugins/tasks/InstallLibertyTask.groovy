@@ -77,16 +77,16 @@ class InstallLibertyTask extends AbstractTask {
                 type = project.liberty.assemblyArtifact.type
             }
             
-            String gradleFilePath = ""
             def configNames = project.getConfigurations().getNames()
             if (!configNames.contains('InstallLibertyTaskConfig')) {
                 project.getConfigurations().create('InstallLibertyTaskConfig')
                 project.getDependencies().add('InstallLibertyTaskConfig', groupId + ':' +
                     artifactId + ':' + version)
-                gradleFilePath = project.getConfigurations().getByName('InstallLibertyTaskConfig').getAsPath()
-                logger.debug 'Liberty archive file Path to the local Gradle repository  : ' + gradleFilePath
             }
             
+            String gradleFilePath = project.getConfigurations().getByName('InstallLibertyTaskConfig').getAsPath()
+            logger.debug 'Liberty archive file Path to the local Gradle repository  : ' + gradleFilePath
+
             File localFile = new File(gradleFilePath)
             
             if (localFile.exists()) {
