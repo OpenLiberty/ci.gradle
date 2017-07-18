@@ -21,7 +21,6 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
-import java.nio.file.Paths
 
 abstract class AbstractTask extends DefaultTask {
 
@@ -169,7 +168,7 @@ abstract class AbstractTask extends DefaultTask {
         if (serverXMLPath == null || serverXMLPath.isEmpty()) {
             // copy configuration file to server directory if end-user set it.
             if (project.liberty.configFile != null && project.liberty.configFile.exists()) {
-                Files.copy(Paths.get(project.liberty.configFile.absolutePath), new File(serverDirectory, "server.xml").toPath(), StandardCopyOption.REPLACE_EXISTING)
+                Files.copy(project.liberty.configFile.toPath(), new File(serverDirectory, "server.xml").toPath(), StandardCopyOption.REPLACE_EXISTING)
                 serverXMLPath = project.liberty.configFile.getCanonicalPath()
             }
         }
