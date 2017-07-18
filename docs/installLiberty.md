@@ -4,7 +4,7 @@ The `installLiberty` task is used to download and install WebSphere Liberty serv
 
 When installing Liberty from a JAR file, the Liberty license code is needed to install the runtime. When you are installing Liberty from the Liberty repository, you can see the versions of Liberty available to install and find the link to their license using the index.yml file. After opening the license, look for the `D/N: <license code>` line. Otherwise, download the runtime archive and execute `java -jar wlp*runtime.jar --viewLicenseInfo` command and look for the `D/N: <license code>` line.
 
-Note: It recommended to use either `install` or `assemblyArtifact` block should be used. If both blocks are specified the Maven repository with `assemblyArtifact` is used.
+Note: Only one of the install or assemblyArtifact blocks should be used in the same Gradle project. Use the install block to install from the Liberty repository or from a local file. Use the assemblyArtifact block to install from the Maven repository. If both blocks are specified, the Maven repository with assemblyArtifact is used.
 
 ### Properties for install block
 
