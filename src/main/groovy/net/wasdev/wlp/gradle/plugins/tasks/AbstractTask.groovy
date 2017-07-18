@@ -74,6 +74,22 @@ abstract class AbstractTask extends DefaultTask {
         return (project.liberty.userDir == null) ? new File(installDir, 'usr') : new File(project.liberty.userDir)
     }
 
+    protected List<String> buildCommand (String operation) {
+        List<String> command = new ArrayList<String>()
+        boolean isWindows = System.properties['os.name'].toLowerCase().indexOf("windows") >= 0
+        String installDir = getInstallDir(project).toString()
+
+        if (isWindows) {
+            command.add(installDir + "\\bin\\server.bat")
+        } else {
+            command.add(installDir + "/bin/server")
+        }
+        command.add(operation)
+        command.add(project.liberty.serverName)
+        
+        return command
+    }
+
     protected File getServerDir(Project project){
         String serverDirectory
         if(project.liberty.outputDir !=null && !project.liberty.outputDir.isEmpty()){
@@ -227,4 +243,5 @@ abstract class AbstractTask extends DefaultTask {
             parentDir.mkdirs()
         }
     }
+
 }

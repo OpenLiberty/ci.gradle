@@ -15,54 +15,23 @@
  */
 package net.wasdev.wlp.gradle.plugins.tasks
 
-import com.ibm.wsspi.kernel.embeddable.Server
-import com.ibm.wsspi.kernel.embeddable.ServerBuilder
-import com.ibm.wsspi.kernel.embeddable.Server.Result
-import com.ibm.wsspi.kernel.embeddable.ServerEventListener
-import com.ibm.wsspi.kernel.embeddable.ServerEventListener.ServerEvent
-import com.ibm.wsspi.kernel.embeddable.ServerEventListener.ServerEvent.Type
-
-import java.util.concurrent.BlockingQueue
-import java.util.concurrent.LinkedBlockingQueue
-
-import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 
 class RunTask extends AbstractTask {
 
     @TaskAction
     void run() {
-        ServerBuilder builder = getServerBuilder(project);
-        LibertyListener listener = new LibertyListener()
-        builder.setServerEventListener(listener)
-        Result result = builder.build().start().get()
-        if (!result.successful()) throw result.getException()
-
-
-        while (!Type.STOPPED.equals(listener.next().getType())) {}
+        List<String> command = buildCommand("run")
+        if (project.liberty.clean) {
+            command.add("--clean")
+        }
+        def run_process = new ProcessBuilder(command).redirectErrorStream(true).start()
+        addShutdownHook {
+            run_process.waitFor()
+        }
+        run_process.inputStream.eachLine {
+            println it
+        }
     }
 
-    protected ServerBuilder getServerBuilder(Project project) {
-        ServerBuilder sb = new ServerBuilder()
-        sb.setName(project.liberty.serverName)
-        sb.setUserDir(getUserDir(project))
-        if (project.liberty.outputDir != null) {
-            sb.setOutputDir(new File(project.liberty.outputDir))
-        }
-        return sb
-    }
-
-    private static class LibertyListener implements ServerEventListener {
-
-        private BlockingQueue<ServerEvent> queue = new LinkedBlockingQueue<ServerEvent>()
-
-        void serverEvent(ServerEvent event) {
-            queue.put(event)
-        }
-
-        ServerEvent next() {
-            return queue.take()
-        }
-
-    }
 }

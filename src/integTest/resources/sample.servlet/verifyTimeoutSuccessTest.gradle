@@ -96,8 +96,8 @@ task printMessageAboutRunningServer {
 }
 
 check.dependsOn 'integrationTest'
-publishWar.dependsOn 'war'
-libertyStart.dependsOn 'installLiberty', 'libertyCreate', 'publishWar'
+installApps.dependsOn 'war'
+libertyStart.dependsOn 'installLiberty', 'libertyCreate', 'installApps'
 integrationTest.dependsOn 'libertyStart', 'testClasses'
 integrationTest.finalizedBy 'libertyStop'
 libertyStart.finalizedBy 'printMessageAboutRunningServer'

@@ -47,10 +47,6 @@ class InstallAppsTask extends AbstractTask {
                 return
         }
         
-        //if (installDependencies) {
-        //    installDependencies()
-        //}
-        
         if (installProject) {
             installProjectArchive()
         }

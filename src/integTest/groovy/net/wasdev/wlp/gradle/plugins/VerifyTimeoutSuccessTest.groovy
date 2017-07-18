@@ -30,5 +30,6 @@ public class VerifyTimeoutSuccessTest extends AbstractIntegrationTest{
         } catch (Exception e) {
             throw new AssertionError ("Fail on task libertyStart. "+ e)
         }
+        assert new File('build/testBuilds/verify-timeout-success-test/build/wlp/usr/servers/LibertyProjectServer/dropins/sample.servlet-1.war').exists() : 'application not installed on server'
     }
 }
