@@ -21,6 +21,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import java.nio.file.Paths
 
 abstract class AbstractTask extends DefaultTask {
 
@@ -102,6 +103,21 @@ abstract class AbstractTask extends DefaultTask {
         return new File(serverDirectory)
     }
     
+    protected void setDefaults(Project project){
+        if(project.liberty.configFile.toString().equals('default')){
+            project.liberty.configFile = new File(project.projectDir.toString() + '/src/main/liberty/config/server.xml')
+        }
+        if(project.liberty.bootstrapPropertiesFile.toString().equals('default')){
+            project.liberty.bootstrapPropertiesFile = new File(project.projectDir.toString() + '/src/main/liberty/config/bootstrap.properties')
+        }
+        if(project.liberty.jvmOptionsFile.toString().equals('default')){
+            project.liberty.jvmOptionsFile = new File(project.projectDir.toString() + '/src/main/liberty/config/jvm.options')
+        }
+        if(project.liberty.serverEnv.toString().equals('default')){
+            project.liberty.serverEnv = new File(project.projectDir.toString() + '/src/main/liberty/config/server.env')
+        }
+    }
+    
     /**
      * @throws IOException
      * @throws FileNotFoundException
@@ -113,6 +129,8 @@ abstract class AbstractTask extends DefaultTask {
         String jvmOptionsPath = null
         String bootStrapPropertiesPath = null
         String serverEnvPath = null
+
+        setDefaults(project)
 
         if (project.liberty.configDirectory != null) {
             if(project.liberty.configDirectory.exists()){
@@ -151,7 +169,7 @@ abstract class AbstractTask extends DefaultTask {
         if (serverXMLPath == null || serverXMLPath.isEmpty()) {
             // copy configuration file to server directory if end-user set it.
             if (project.liberty.configFile != null && project.liberty.configFile.exists()) {
-                Files.copy(project.liberty.configFile.toPath(), new File(serverDirectory, "server.xml").toPath(), StandardCopyOption.REPLACE_EXISTING)
+                Files.copy(Paths.get(project.liberty.configFile.absolutePath), new File(serverDirectory, "server.xml").toPath(), StandardCopyOption.REPLACE_EXISTING)
                 serverXMLPath = project.liberty.configFile.getCanonicalPath()
             }
         }
