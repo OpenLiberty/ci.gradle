@@ -50,8 +50,10 @@ liberty {
         archive = packageFile
         include = packagingType
     }
-    applications = "fake.application-1"
-    verifyTimeout = 1
+    installapps{
+        appsDirectory = 'apps'
+    }
+    applications = "sample.servlet-1"
 }
 
 repositories {

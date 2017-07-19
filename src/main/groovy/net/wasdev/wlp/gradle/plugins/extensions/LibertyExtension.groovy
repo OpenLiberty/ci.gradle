@@ -25,10 +25,10 @@ class LibertyExtension {
     String serverName = "defaultServer"
     
     File configDirectory
-    File configFile = new File("src/main/liberty/config/server.xml")
-    File bootstrapPropertiesFile = new File("src/main/liberty/config/bootstrap.properties")
-    File jvmOptionsFile = new File("src/main/liberty/config/jvm.options")
-    File serverEnv = new File("src/main/liberty/config/server.env")
+    File configFile = new File("default")
+    File bootstrapPropertiesFile = new File("default")
+    File jvmOptionsFile = new File("default")
+    File serverEnv = new File("default")
     
     Map<String, String> bootstrapProperties
     List<String> jvmOptions

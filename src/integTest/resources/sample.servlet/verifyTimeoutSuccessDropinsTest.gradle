@@ -64,11 +64,6 @@ dependencies {
     providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
 }
 
-task publishWar(type: Copy) {
-    from(war)
-    into("${serverDirectory}/dropins")
-}
-
 test {
 	println 'inside the test block'
     reports.html.destination = file("$buildDir/reports/unit")

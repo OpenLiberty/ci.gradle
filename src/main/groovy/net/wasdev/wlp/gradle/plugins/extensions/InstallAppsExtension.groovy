@@ -19,5 +19,5 @@ class InstallAppsExtension {
  
     String appsDirectory = "apps"
     boolean stripVersion = false
-    String installAppPackages = "dependencies"
+    String installAppPackages = "project"
 }

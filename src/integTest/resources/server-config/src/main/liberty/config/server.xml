@@ -18,7 +18,7 @@
     </featureManager>
 
 
-    <httpEndpoint httpPort="${default.http.port}" httpsPort="${default.https.port}"
+    <httpEndpoint httpPort="9081" httpsPort="9444"
         id="defaultHttpEndpoint">
     <tcpOptions soReuseAddr="true"/>
     

@@ -35,10 +35,9 @@ liberty {
     }
     serverName = wlpServerName
 
-    configFile = file("${project.projectDir}/src/main/liberty/config/server.xml")
-    bootstrapPropertiesFile = file("${project.projectDir}/src/main/liberty/config/bootstrap.test.properties")
-    jvmOptionsFile = file("${project.projectDir}/src/main/liberty/config/jvm.options")
-    serverEnv = file("${project.projectDir}/src/main/liberty/config/server.env")
+    bootstrapPropertiesFile = file("src/main/liberty/config/bootstrap.test.properties")
+    jvmOptionsFile = file("src/main/liberty/config/jvm.options")
+    serverEnv = file("src/main/liberty/config/server.env")
 }
 
 repositories {
