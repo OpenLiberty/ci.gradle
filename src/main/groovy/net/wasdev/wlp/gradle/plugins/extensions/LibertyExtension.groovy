@@ -36,7 +36,7 @@ class LibertyExtension {
     boolean clean = false
     String timeout
     String template
-	
+    
     int verifyTimeout = 30
     String applications
 
@@ -45,6 +45,7 @@ class LibertyExtension {
     FeatureExtension features = new FeatureExtension()
     UninstallFeatureExtension uninstallfeatures = new UninstallFeatureExtension()
     InstallExtension install = new InstallExtension()
+    AssemblyArtifactExtension assemblyArtifact = new AssemblyArtifactExtension()
     CleanExtension cleanDir = new CleanExtension()
 
     DeployExtension deploy = new DeployExtension()
@@ -66,6 +67,10 @@ class LibertyExtension {
 
     def install(Closure closure) {
         ConfigureUtil.configure(closure, install)
+    }
+    
+    def assemblyArtifact(Closure closure) {
+        ConfigureUtil.configure(closure, assemblyArtifact)
     }
 
     def deploy(Closure closure) {
