@@ -18,7 +18,7 @@ The following are the parameters supported by this goal in addition to the [comm
 apply plugin: 'liberty'
 
 liberty {
-	installapps{
+    installapps{
         appsDirectory = 'dropins'
         stripVersion = false
         installAppPackages = 'project'
