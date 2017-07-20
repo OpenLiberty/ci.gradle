@@ -102,6 +102,21 @@ abstract class AbstractTask extends DefaultTask {
         return new File(serverDirectory)
     }
     
+    protected void setDefaults(Project project){
+        if(project.liberty.configFile.toString().equals('default')){
+            project.liberty.configFile = new File(project.projectDir.toString() + '/src/main/liberty/config/server.xml')
+        }
+        if(project.liberty.bootstrapPropertiesFile.toString().equals('default')){
+            project.liberty.bootstrapPropertiesFile = new File(project.projectDir.toString() + '/src/main/liberty/config/bootstrap.properties')
+        }
+        if(project.liberty.jvmOptionsFile.toString().equals('default')){
+            project.liberty.jvmOptionsFile = new File(project.projectDir.toString() + '/src/main/liberty/config/jvm.options')
+        }
+        if(project.liberty.serverEnv.toString().equals('default')){
+            project.liberty.serverEnv = new File(project.projectDir.toString() + '/src/main/liberty/config/server.env')
+        }
+    }
+    
     /**
      * @throws IOException
      * @throws FileNotFoundException
@@ -113,6 +128,8 @@ abstract class AbstractTask extends DefaultTask {
         String jvmOptionsPath = null
         String bootStrapPropertiesPath = null
         String serverEnvPath = null
+
+        setDefaults(project)
 
         if (project.liberty.configDirectory != null) {
             if(project.liberty.configDirectory.exists()){
