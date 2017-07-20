@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2015.
+ * (C) Copyright IBM Corporation 2014, 2017.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,14 @@
  */
 package net.wasdev.wlp.gradle.plugins.tasks
 
+import javax.xml.parsers.*
+
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 
 class InstallLibertyTask extends AbstractTask {
+    
+    final MAVEN_REPO = 'http://repo1.maven.org/maven2/' 
 
     @TaskAction
     void install() {
@@ -30,6 +34,7 @@ class InstallLibertyTask extends AbstractTask {
     }
 
     private Map<String, String> buildInstallLibertyMap(Project project) {
+
         Map<String, String> result = new HashMap();
         if (project.liberty.install.licenseCode != null) {
            result.put('licenseCode', project.liberty.install.licenseCode)
@@ -38,11 +43,50 @@ class InstallLibertyTask extends AbstractTask {
         if (project.liberty.install.version != null) {
             result.put('version', project.liberty.install.version)
         }
-
-        if (project.liberty.install.runtimeUrl != null) {
-            result.put('runtimeUrl', project.liberty.install.runtimeUrl)
+        
+        if (project.liberty.install.type != null) {
+            result.put('type', project.liberty.install.type)
         }
+        
+        // Maven repository is higher precedence over Liberty repository 
+        if (project.liberty.assemblyArtifact.version != null) {
+            String version = project.liberty.assemblyArtifact.version
+            
+            String groupId = 'com.ibm.websphere.appserver.runtime'
+            String artifactId = 'wlp-webProfile7'
+            String type = 'zip'
 
+            if (project.liberty.assemblyArtifact.groupId != null) {
+                groupId = project.liberty.assemblyArtifact.groupId
+            }
+            if (project.liberty.assemblyArtifact.artifactId != null) {
+                artifactId = project.liberty.assemblyArtifact.artifactId
+            }
+            
+            if (project.liberty.assemblyArtifact.type != null) {
+                type = project.liberty.assemblyArtifact.type
+            }
+            
+            def configNames = project.getConfigurations().getNames()
+            if (!configNames.contains('InstallLibertyTaskConfig')) {
+                project.getConfigurations().create('InstallLibertyTaskConfig')
+                project.getDependencies().add('InstallLibertyTaskConfig', groupId + ':' +
+                    artifactId + ':' + version)
+            }
+            
+            String gradleFilePath = project.getConfigurations().getByName('InstallLibertyTaskConfig').getAsPath()
+            logger.debug 'Liberty archive file Path to the local Gradle repository  : ' + gradleFilePath
+
+            File localFile = new File(gradleFilePath)
+            
+            if (localFile.exists()) {
+                logger.debug 'Getting WebSphere Liberty archive file from the local Gradle repository.'
+                result.put('runtimeUrl', localFile.toURI().toURL())
+            } 
+        } else if (project.liberty.install.runtimeUrl != null) {
+            result.put('runtimeUrl', project.liberty.install.runtimeUrl)
+        } 
+        
         if (project.liberty.install.baseDir == null) {
            result.put('baseDir', project.buildDir)
         } else {
@@ -58,15 +102,11 @@ class InstallLibertyTask extends AbstractTask {
             result.put('password', project.liberty.install.password)
         }
 
-        if (project.liberty.install.type != null) {
-            result.put('type', project.liberty.install.type)
-        }
-
         result.put('maxDownloadTime', project.liberty.install.maxDownloadTime)
 
         result.put('offline', project.gradle.startParameter.offline)
 
-        return result;
+        return result
     }
-
+    
 }
