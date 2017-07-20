@@ -50,6 +50,9 @@ liberty {
         archive = packageFile
         include = packagingType
     }
+    installapps{
+        appsDirectory = 'dropins'
+    }
 	applications = "sample.servlet-1"
 } 
 
