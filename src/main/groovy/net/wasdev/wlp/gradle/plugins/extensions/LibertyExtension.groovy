@@ -26,10 +26,10 @@ class LibertyExtension {
     String license
 
     File configDirectory
-    File configFile = new File("/src/main/liberty/config/server.xml")
-    File bootstrapPropertiesFile = new File("/src/main/liberty/config/bootstrap.properties")
-    File jvmOptionsFile = new File("/src/main/liberty/config/jvm.options")
-    File serverEnv = new File("/src/main/liberty/config/server.env")
+    File configFile = new File("default")
+    File bootstrapPropertiesFile = new File("default")
+    File jvmOptionsFile = new File("default")
+    File serverEnv = new File("default")
     
     Map<String, String> bootstrapProperties
     List<String> jvmOptions
@@ -37,7 +37,7 @@ class LibertyExtension {
     boolean clean = false
     String timeout
     String template
-	
+    
     int verifyTimeout = 30
     String applications
 
@@ -46,6 +46,7 @@ class LibertyExtension {
     FeatureExtension features = new FeatureExtension()
     UninstallFeatureExtension uninstallfeatures = new UninstallFeatureExtension()
     InstallExtension install = new InstallExtension()
+    AssemblyArtifactExtension assemblyArtifact = new AssemblyArtifactExtension()
     CleanExtension cleanDir = new CleanExtension()
     LicenseArtifactExtension licenseArtifact = new LicenseArtifactExtension()
 
@@ -66,6 +67,10 @@ class LibertyExtension {
 
     def install(Closure closure) {
         ConfigureUtil.configure(closure, install)
+    }
+    
+    def assemblyArtifact(Closure closure) {
+        ConfigureUtil.configure(closure, assemblyArtifact)
     }
 
     def deploy(Closure closure) {
