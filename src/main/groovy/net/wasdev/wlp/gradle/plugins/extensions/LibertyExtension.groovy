@@ -23,7 +23,8 @@ class LibertyExtension {
     String outputDir
     String userDir
     String serverName = "defaultServer"
-    
+    String license
+
     File configDirectory
     File configFile = new File("/src/main/liberty/config/server.xml")
     File bootstrapPropertiesFile = new File("/src/main/liberty/config/bootstrap.properties")
@@ -46,6 +47,7 @@ class LibertyExtension {
     UninstallFeatureExtension uninstallfeatures = new UninstallFeatureExtension()
     InstallExtension install = new InstallExtension()
     CleanExtension cleanDir = new CleanExtension()
+    LicenseArtifactExtension licenseArtifact = new LicenseArtifactExtension()
 
     DeployExtension deploy = new DeployExtension()
     UndeployExtension undeploy = new UndeployExtension()
@@ -93,5 +95,9 @@ class LibertyExtension {
 
     def cleanDir(Closure closure) {
         ConfigureUtil.configure(closure, cleanDir)
+    }
+
+    def licenseArtifact(Closure closure) {
+        ConfigureUtil.configure(closure, licenseArtifact)
     }
 }

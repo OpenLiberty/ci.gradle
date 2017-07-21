@@ -27,6 +27,23 @@ class InstallLibertyTask extends AbstractTask {
                             classname: 'net.wasdev.wlp.ant.install.InstallLibertyTask', 
                             classpath: project.buildscript.configurations.classpath.asPath)
         project.ant.installLiberty(params)
+       
+        if (project.liberty.license || (project.liberty.licenseArtifact.groupId &&
+                                        project.liberty.licenseArtifact.artifactId &&
+                                        project.liberty.licenseArtifact.version)) {
+            project.getConfigurations().create('LicenseConfig')
+            if (project.liberty.license) {
+                project.dependencies.add('LicenseConfig', project.liberty.license)
+            } else {
+                project.dependencies.add('LicenseConfig', project.liberty.licenseArtifact.groupId + ":" +
+                                                          project.liberty.licenseArtifact.artifactId + ":" +
+                                                          project.liberty.licenseArtifact.version)
+            }
+            String filePath = project.getConfigurations().getByName('LicenseConfig').getAsPath()
+            def command = "java -jar " + filePath + " --acceptLicense " + project.buildDir
+            def process = command.execute()
+            process.waitFor()
+        }
     }
 
     private Map<String, String> buildInstallLibertyMap(Project project) {
