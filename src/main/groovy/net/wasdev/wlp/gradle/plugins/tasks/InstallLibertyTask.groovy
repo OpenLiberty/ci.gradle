@@ -32,17 +32,9 @@ class InstallLibertyTask extends AbstractTask {
                             classpath: project.buildscript.configurations.classpath.asPath)
         project.ant.installLiberty(params)
        
-        if (project.liberty.license || (project.liberty.licenseArtifact.groupId &&
-                                        project.liberty.licenseArtifact.artifactId &&
-                                        project.liberty.licenseArtifact.version)) {
+        if (project.liberty.licenseArtifact) {
             project.configurations.create('LicenseConfig')
-            if (project.liberty.license) {
-                project.dependencies.add('LicenseConfig', project.liberty.license)
-            } else {
-                project.dependencies.add('LicenseConfig', project.liberty.licenseArtifact.groupId + ":" +
-                                                          project.liberty.licenseArtifact.artifactId + ":" +
-                                                          project.liberty.licenseArtifact.version)
-            }
+            project.dependencies.add('LicenseConfig', project.liberty.licenseArtifact)
             String filePath = project.configurations.getByName('LicenseConfig').getAsPath()
             def command = "java -jar " + filePath + " --acceptLicense " + project.buildDir
             def process = command.execute()

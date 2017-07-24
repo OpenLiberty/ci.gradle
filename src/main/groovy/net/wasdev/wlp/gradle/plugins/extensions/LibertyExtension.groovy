@@ -23,7 +23,7 @@ class LibertyExtension {
     String outputDir
     String userDir
     String serverName = "defaultServer"
-    String license
+    String licenseArtifact
 
     File configDirectory
     File configFile = new File("default")
@@ -48,7 +48,6 @@ class LibertyExtension {
     InstallExtension install = new InstallExtension()
     AssemblyArtifactExtension assemblyArtifact = new AssemblyArtifactExtension()
     CleanExtension cleanDir = new CleanExtension()
-    LicenseArtifactExtension licenseArtifact = new LicenseArtifactExtension()
 
     DeployExtension deploy = new DeployExtension()
     UndeployExtension undeploy = new UndeployExtension()
@@ -102,7 +101,4 @@ class LibertyExtension {
         ConfigureUtil.configure(closure, cleanDir)
     }
 
-    def licenseArtifact(Closure closure) {
-        ConfigureUtil.configure(closure, licenseArtifact)
-    }
 }
