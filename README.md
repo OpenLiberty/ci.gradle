@@ -126,7 +126,7 @@ These properties are divided in two groups, the general properties (Which need t
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
 | clean | Clean all cached information on server start up. The default value is `false`. Only used with the `libertyStart` task. | No | 
-| timeout | Waiting time before the server starts. The default value is 30 seconds. The unit is milliseconds. Only used with the `libertyStart` task. | No | 
+| timeout | Waiting time before the server starts. The default value is 30 seconds. The unit is milliseconds. Only used with `libertyStart` and `deploy` tasks. | No | 
 | applications | A comma-separated list of application names to wait for during server start-up. Only used with the `libertyStart` task. | No |
 | verifyTimeout | Wait time for checking message logs for start of applications listed in the above attribute. Only used with the `libertyStart` task. Default value is 30. | No |
 | include | A comma-delimited list of values. The valid values vary depending on the task. For the `libertyDump` task the valid values are `heap`, `system`, and `thread` and must be declared in the `dumpLiberty` closure. For the `libertyJavaDump` task the valid values are `heap` and `system` and must be declared in the `javaDumpLiberty` closure. |  No |
