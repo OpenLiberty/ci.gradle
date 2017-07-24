@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2015, 2017.
+ * (C) Copyright IBM Corporation 2014, 2017.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,6 @@ class InstallAppsTask extends AbstractTask {
     @TaskAction
     void installApps() {
         
-        copyConfigFiles()
-        
         boolean installDependencies = false
         boolean installProject = false
         
@@ -50,21 +48,14 @@ class InstallAppsTask extends AbstractTask {
         if (installProject) {
             installProjectArchive()
         }
-        
     }
-    
     
     private void installProjectArchive() throws Exception {
         File archive = new File(archivePath())
         if(!archive.exists()) {
-            throw new GradleException("The project archive was not found and can't be installed.")
+            throw new GradleException("The project archive was not found and cannot be installed.")
         }
-        if(project.liberty.installapps.appsDirectory.equals("apps")) {
-            Files.copy(archive.toPath(), new File(getServerDir(project), "/apps/" + archive.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING)
-        }
-        else {
-            Files.copy(archive.toPath(), new File(getServerDir(project), "/dropins/" + archive.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING)
-        }
+        Files.copy(archive.toPath(), new File(getServerDir(project), "/" + project.liberty.installapps.appsDirectory + "/" + archive.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING)
     }
     
     private String getInstallAppPackages() {
@@ -74,18 +65,19 @@ class InstallAppsTask extends AbstractTask {
         return project.liberty.installapps.installAppPackages
     }
     
-        
-    private String archivePath() {
+    private String archivePath() throws Exception {
         if (project.plugins.hasPlugin("ear")) {
             return project.ear.archivePath
         }
         else if (project.plugins.hasPlugin("war")) {
             return project.war.archivePath
         }
-        else {
+        else if (project.plugins.hasPlugin("java")){
             return project.jar.archivePath
         }
-        
+        else {
+            throw new GradleException("Archive path not found. Supported formats are jar, war, and ear.")
+        }
     }
     
 }
