@@ -17,13 +17,10 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.tasks.TaskAction
 
-class InstallFeatureTask extends InstallLibertyTask {
+class InstallFeatureTask extends AbstractTask {
 
     @TaskAction
     void installFeature() {
-        // install Liberty if not installed yet
-        install()
-
         def params = buildLibertyMap(project);
         params.put('name', project.liberty.features.name.join(","))
         params.put('acceptLicense', project.liberty.features.acceptLicense)
