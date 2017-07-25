@@ -149,6 +149,7 @@ mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file -Dfile=wlp-
 Add these details to the `build.gradle` file before executing a `gradle publishToMavenLocal` command. This has the same effect as `maven-install-plugin` above.
 ##### build.gradle
 ```
+apply-plugin: 'maven'
 apply-plugin: 'maven-publish'
 
 def licenseFile = file('wlp-core-license.jar')
@@ -173,16 +174,29 @@ publishing {
 The `licenseArtifact` parameter defines the coordinates for the Liberty license JAR file that you add to an internal repository. The installLiberty task will only upgrade the license if this configuration is present.  
 The `licenseArtifact` format is `'<groupId>:<artifactId>:<version>'`
 ```
+repositories {
+    ...
+    mavenLocal()
+}
+
 liberty {
     ...
     licenseArtifact = 'com.ibm.websphere.appserver.license:wlp-core-license:17.0.0.2'
 }
 ```
 
-The local Maven repository must also be added:  
+### Adding a Custom Repository
+Add to your `build.gradle` this outline with your information.
+For more details, refer to Gradle's [documentation](https://docs.gradle.org/current/userguide/artifact_dependencies_tutorial.html#sec:repositories_tutorial)
 ```
 repositories {
-    ...
-    mavenLocal()
+    maven {
+        name 'Your Custom Repository'
+        url 'https://your-url-here.me'
+        credentials {
+            username ''
+            password ''
+        }
+    }
 }
 ```
