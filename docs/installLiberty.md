@@ -135,7 +135,7 @@ The Maven Central repository includes the following Liberty runtime artifacts:
 | [wlp-microProfile1](https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-microProfile1/) | 17.0.0.2, 17.0.0.1, 16.0.0.4, 16.0.0.3 | Liberty with features for a MicroProfile runtime. |
 
 ### Installing your Upgrade License
-To upgrade the runtime installation, the Liberty license jar file, which is available to download from IBM Fix Central or the Passport Advantage website, must be installed into a local repository or an internal custom repository. After successful installation, add your license artifact to your Liberty block in your `build.gradle` file to upgrade the runtime during the `installLiberty` task.
+To upgrade the runtime license, the Liberty license JAR file, which is available to download from IBM Fix Central or the Passport Advantage website, must be installed into a local repository or an internal custom repository. After successful installation, add your license artifact to your Liberty block in your `build.gradle` file to upgrade the license during the `installLiberty` task.
   
 You can install your Liberty license JAR file in an internal repository such as Artifactory or to a local Maven repository. The following examples show how you can install the JAR file to a local Maven repository:
 
