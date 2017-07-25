@@ -186,8 +186,7 @@ liberty {
 ```
 
 ### Adding a Custom Repository
-Add to your `build.gradle` this outline with your information.
-For more details, refer to Gradle's [documentation](https://docs.gradle.org/current/userguide/artifact_dependencies_tutorial.html#sec:repositories_tutorial)
+Add to your `build.gradle` this outline with your information. For more details, refer to Gradle's [documentation](https://docs.gradle.org/current/userguide/artifact_dependencies_tutorial.html#sec:repositories_tutorial).
 ```
 repositories {
     maven {
