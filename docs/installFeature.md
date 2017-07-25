@@ -5,10 +5,10 @@ The `installFeature` task installs a feature packaged as a Subsystem Archive (ES
 
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
-| featureName |Specifies the name of the Subsystem Archive (ESA file) to be installed. The value can be a feature name, a file name or a URL. | Yes |
+| name | Specifies the name of the Subsystem Archive (ESA file) to be installed. This can be an ESA file, an IBM-Shortname or a Subsystem-SymbolicName of the Subsystem archive. The value can be a file name or a URL to the ESA file. | Yes |
 | acceptLicense | Accept feature license terms and conditions. The default value is `false`.  | No |
-| whenFileExists | Specifies the action to take if a file to be installed already exits. Use `fail` to abort the installation, `ignore` to continue the installation and ignore the file that exists, and `replace` to overwrite the existing file.| No |
-| to | Specifies feature installation location. Set to `usr` to install as a user feature. Otherwise, set it to any configured product extension location. The default value is `usr`.| No |
+| to | Specify where to install the feature. The feature can be installed to any configured product extension location, or as a user feature (usr, extension). If this option is not specified the feature will be installed as a user feature. | No |
+| from | Specifies a single directory-based repository as the source of the assets. | No |
 
 ### Examples
 
@@ -29,14 +29,14 @@ liberty {
 
 Also is possible install multiple features in a single closure, for example:
 ```groovy
-/* Install 'mongodb-2.0' and 'ejbLite-3.1' features using a single closure. */
+/* Install 'mongodb-2.0' and 'adminCenter-1.0' features using a single closure. */
 apply plugin: 'liberty'
 
 liberty {
     installDir = "c:/wlp"
 
     features {
-        name = ['mongodb-2.0', 'ejbLite-3.1']
+        name = ['mongodb-2.0', 'adminCenter-1.0']
         acceptLicense = true
     } 
 }

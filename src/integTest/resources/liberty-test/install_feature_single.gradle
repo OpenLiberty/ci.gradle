@@ -1,0 +1,48 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:1.1-SNAPSHOT'
+    }
+}
+
+def test_mode = System.getProperty('runit')
+def wlpLicense = System.getProperty('wlpLicense')
+def wlpVersion = System.getProperty('wlpVersion')
+def WLP_DIR = System.getProperty('wlpInstallDir')
+
+apply plugin: 'liberty'
+
+repositories {
+    mavenCentral()
+}
+    
+liberty {
+    if (test_mode == 'online') {
+        assemblyArtifact {
+            groupId = "com.ibm.websphere.appserver.runtime"
+            artifactId = "wlp-javaee7"
+            version = wlpVersion
+            type = "zip"
+        }
+        serverName ='libertyOnline'
+    } else {
+        installDir = WLP_DIR
+        serverName = 'libertyOffline'
+    }
+    
+    features {
+        name = ["mongodb-2.0"]
+        acceptLicense = true
+    }
+    
+    uninstallfeatures {
+        name = ["mongodb-2.0"]
+    }
+}

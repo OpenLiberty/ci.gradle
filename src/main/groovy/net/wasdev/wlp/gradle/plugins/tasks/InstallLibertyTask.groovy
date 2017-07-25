@@ -22,8 +22,6 @@ import org.gradle.api.tasks.TaskAction
 
 class InstallLibertyTask extends AbstractTask {
     
-    final MAVEN_REPO = 'http://repo1.maven.org/maven2/' 
-
     @TaskAction
     void install() {
         def params = buildInstallLibertyMap(project)
@@ -108,5 +106,5 @@ class InstallLibertyTask extends AbstractTask {
 
         return result
     }
-    
+
 }
