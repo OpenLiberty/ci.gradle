@@ -134,7 +134,7 @@ The Maven Central repository includes the following Liberty runtime artifacts:
 | [wlp-osgi](https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-osgi/) | 17.0.0.2, 17.0.0.1, 16.0.0.4, 16.0.0.3, 16.0.0.2, 8.5.5.9, 8.5.5.8 | Liberty runtime with features that support OSGi applications. |
 | [wlp-microProfile1](https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-microProfile1/) | 17.0.0.2, 17.0.0.1, 16.0.0.4, 16.0.0.3 | Liberty with features for a MicroProfile runtime. |
 
-### Installing your Upgrade License
+### Installing your upgrade license
 To upgrade the runtime license, the Liberty license JAR file, which is available to download from IBM Fix Central or the Passport Advantage website, must be installed into a local repository or a protected internal repository. After successful installation, add your license artifact to your Liberty block in your `build.gradle` file to upgrade the license during the `installLiberty` task.
   
 You can install your Liberty license JAR file in an internal repository such as Artifactory or to a local Maven repository. The following examples show how you can install the JAR file to a local Maven repository:
@@ -170,7 +170,7 @@ publishing {
 }
 ```
 
-#### License Configuration
+### License configuration
 The `licenseArtifact` parameter defines the coordinates for the Liberty license JAR file that you added to an internal repository. The installLiberty task will only upgrade the license if this configuration is present.  
 The `licenseArtifact` format is `'<groupId>:<artifactId>:<version>'`
 ```
@@ -185,7 +185,7 @@ liberty {
 }
 ```
 
-### Adding a Custom Repository
+### Adding a custom repository
 Add to your `build.gradle` this outline with your information. For more details, refer to Gradle's [documentation](https://docs.gradle.org/current/userguide/artifact_dependencies_tutorial.html#sec:repositories_tutorial).
 ```
 repositories {
