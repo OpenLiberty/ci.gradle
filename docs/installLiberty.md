@@ -5,7 +5,7 @@ The `installLiberty` task is used to download and install WebSphere Liberty serv
 The task can download the WebSphere Liberty runtime archive in three ways: 
 * from a specified location (via `runtimeUrl`)
 * from the [Liberty repository](https://developer.ibm.com/wasdev/downloads/) based on a version and a runtime type
-* from the Maven repository.  
+* from the Maven Central repository.  
 
 When installing Liberty from a JAR file, the Liberty license code is needed to install the runtime. When you are installing Liberty from the Liberty repository, you can see the versions of Liberty available to install and find the link to their license using the index.yml file. After opening the license, look for the `D/N: <license code>` line. Otherwise, download the runtime archive and execute `java -jar wlp*runtime.jar --viewLicenseInfo` command and look for the `D/N: <license code>` line.
 
@@ -171,7 +171,7 @@ publishing {
 ```
 
 #### License Configuration
-The `licenseArtifact` parameter defines the coordinates for the Liberty license JAR file that you add to an internal repository. The installLiberty task will only upgrade the license if this configuration is present.  
+The `licenseArtifact` parameter defines the coordinates for the Liberty license JAR file that you added to an internal repository. The installLiberty task will only upgrade the license if this configuration is present.  
 The `licenseArtifact` format is `'<groupId>:<artifactId>:<version>'`
 ```
 repositories {
