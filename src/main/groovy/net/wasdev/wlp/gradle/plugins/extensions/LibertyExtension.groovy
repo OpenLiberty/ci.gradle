@@ -23,7 +23,8 @@ class LibertyExtension {
     String outputDir
     String userDir
     String serverName = "defaultServer"
-    
+    String licenseArtifact
+
     File configDirectory
     File configFile = new File("default")
     File bootstrapPropertiesFile = new File("default")
@@ -105,4 +106,5 @@ class LibertyExtension {
     def installapps(Closure closure) {
         ConfigureUtil.configure(closure, installapps)
     }
+
 }

@@ -45,7 +45,7 @@ class Liberty implements Plugin<Project> {
 
         project.task('installLiberty', type: InstallLibertyTask) {
             description 'Installs Liberty from a repository'
-            logging.level = LogLevel.DEBUG
+            logging.level = LogLevel.INFO
         }
 
         project.task('libertyRun', type: RunTask, dependsOn: 'libertyCreate') {
