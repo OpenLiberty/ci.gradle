@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2017.
+ * (C) Copyright IBM Corporation 2017.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,9 @@
  */
 package net.wasdev.wlp.gradle.plugins.extensions
 
-class FeatureExtension {
-
-    String[] name
-    boolean acceptLicense = false
-    String to
-    String from
+class InstallAppsExtension {
+ 
+    String appsDirectory = "apps"
+    boolean stripVersion = false
+    String installAppPackages = "project"
 }

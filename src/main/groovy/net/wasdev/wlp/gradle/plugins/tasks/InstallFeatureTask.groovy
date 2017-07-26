@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2015.
+ * (C) Copyright IBM Corporation 2014, 2017.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ class InstallFeatureTask extends AbstractTask {
         def params = buildLibertyMap(project);
         params.put('name', project.liberty.features.name.join(","))
         params.put('acceptLicense', project.liberty.features.acceptLicense)
-        if (project.liberty.features.whenFileExists != null) {
-            params.put('whenFileExists', project.liberty.features.whenFileExists)
-        }
         if (project.liberty.features.to != null) {
             params.put('to', project.liberty.features.to)
+        }
+        if (project.liberty.features.from != null) {
+            params.put('from', project.liberty.features.from)
         }
         params.remove('timeout')
         project.ant.taskdef(name: 'installFeature', 

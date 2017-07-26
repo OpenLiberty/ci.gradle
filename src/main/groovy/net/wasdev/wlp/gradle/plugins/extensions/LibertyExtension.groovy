@@ -55,6 +55,8 @@ class LibertyExtension {
     PackageAndDumpExtension packageLiberty = new PackageAndDumpExtension()
     PackageAndDumpExtension dumpLiberty = new PackageAndDumpExtension()
     PackageAndDumpExtension javaDumpLiberty = new PackageAndDumpExtension()
+    
+    InstallAppsExtension installapps = new InstallAppsExtension()
 
     def uninstallfeatures(Closure closure) {
         ConfigureUtil.configure(closure, uninstallfeatures)
@@ -99,6 +101,10 @@ class LibertyExtension {
 
     def cleanDir(Closure closure) {
         ConfigureUtil.configure(closure, cleanDir)
+    }
+    
+    def installapps(Closure closure) {
+        ConfigureUtil.configure(closure, installapps)
     }
 
 }
