@@ -56,7 +56,7 @@ liberty {
     installapps{ 
         stripVersion = true
     }
-    applications = "sample.servlet-1"
+    applications = "sample.servlet.war"
 }
 
 repositories {

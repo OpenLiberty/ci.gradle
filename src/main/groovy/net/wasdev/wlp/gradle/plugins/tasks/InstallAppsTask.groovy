@@ -67,7 +67,8 @@ class InstallAppsTask extends AbstractTask {
     
     private String getArchiveName(String archiveName){ 
         if(project.liberty.installapps.stripVersion){
-            return archiveName.replaceAll(project.version,"")
+            StringBuilder sbArchiveName = new StringBuilder().append("-").append(project.version)
+            return archiveName.replaceAll(sbArchiveName.toString(),"")
         }
         return archiveName;
     }
