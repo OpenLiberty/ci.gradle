@@ -23,7 +23,7 @@ To build the plugin and run the integration tests execute the following commands
  ```bash
  $ gradlew build -Prunit=offline -DwlpInstallDir=<liberty_install_directory>
  ```
-   
+
 2. Run the integration tests against automatically downloaded and installed WebSphere Liberty server.
  ```bash
  $ gradlew build -Prunit=online -DwlpLicense=<liberty_licesnse_code> -DwlpVersion=<liberty_version>
@@ -47,7 +47,7 @@ buildscript {
 
 ### Adding the binary plugin to the build script
 
-Within your Gradle build script, you need to set up the classpath to include the Liberty Gradle plugin. You also need to define the Maven Central repository to find the plugin or its dependencies. 
+Within your Gradle build script, you need to set up the classpath to include the Liberty Gradle plugin. You also need to define the Maven Central repository to find the plugin or its dependencies.
 
 If you are using a snapshot version of the plugin make sure to define the Sonatype Nexus Snapshots repository in addition to the Maven Central repository.
 
@@ -96,16 +96,18 @@ The plugin will have made the following tasks available to your project:
 | libertyStart | Starts the WebSphere Liberty server. |
 | libertyStop | Stops the WebSphere Liberty server. |
 | [libertyRun](docs/libertyRun.md#libertyRun-task) | Runs a WebSphere Liberty server under the Gradle process. |
-| [libertyPackage](docs/libertyPackage.md#libertypackage-task) | Package a WebSphere Liberty server. | 
-| libertyDump | Dumps diagnostic information from the WebSphere Liberty server into an archive. | 
-| libertyJavaDump | Dumps diagnostic information from the WebSphere Liberty server JVM. | 
-| libertyDebug | Runs the WebSphere Liberty server in the console foreground after a debugger connects to the debug port (default: 7777). | 
+| [libertyPackage](docs/libertyPackage.md#libertypackage-task) | Package a WebSphere Liberty server. |
+| libertyDump | Dumps diagnostic information from the WebSphere Liberty server into an archive. |
+| libertyJavaDump | Dumps diagnostic information from the WebSphere Liberty server JVM. |
+| libertyDebug | Runs the WebSphere Liberty server in the console foreground after a debugger connects to the debug port (default: 7777). |
 | libertyStatus | Checks the WebSphere Liberty server is running. |
 | [deploy](docs/deploy.md#deploy-task) | Deploys a supported file to the WebSphere Liberty server. |
 | [undeploy](docs/undeploy.md#undeploy-task) | Removes an application from the WebSphere Liberty server. |
 | [installFeature](docs/installFeature.md#installfeature-task) | Installs a new feature in the WebSphere Liberty server. |
+| [installApps](docs/installApps.md#installApps-task) | Copies applications to Liberty server's dropins or apps directories. |
 | [uninstallFeature](docs/uninstallFeature.md#uninstallfeature-task) | Uninstall a feature in the WebSphere Liberty server. |
 | [cleanDir](docs/clean.md#clean-task) | Deletes files from some directories in the WebSphere Liberty server. |
+
 
 ## Extension properties
 The Liberty Gradle Plugin has some properties defined in the `Liberty` closure which will let you customize the different tasks.
@@ -125,8 +127,8 @@ These properties are divided in two groups, the general properties (Which need t
 
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
-| clean | Clean all cached information on server start up. The default value is `false`. Only used with the `libertyStart` task. | No | 
-| timeout | Waiting time before the server starts. The default value is 30 seconds. The unit is milliseconds. Only used with `libertyStart` and `deploy` tasks. | No | 
+| clean | Clean all cached information on server start up. The default value is `false`. Only used with the `libertyStart` task. | No |
+| timeout | Waiting time before the server starts. The default value is 30 seconds. The unit is milliseconds. Only used with `libertyStart` and `deploy` tasks. | No |
 | applications | A comma-separated list of application names to wait for during server start-up. Only used with the `libertyStart` task. | No |
 | verifyTimeout | Wait time for checking message logs for start of applications listed in the above attribute. Only used with the `libertyStart` task. Default value is 30. | No |
 | include | A comma-delimited list of values. The valid values vary depending on the task. For the `libertyDump` task the valid values are `heap`, `system`, and `thread` and must be declared in the `dumpLiberty` closure. For the `libertyJavaDump` task the valid values are `heap` and `system` and must be declared in the `javaDumpLiberty` closure. |  No |
