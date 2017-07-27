@@ -42,6 +42,7 @@ class Liberty implements Plugin<Project> {
     void apply(Project project) {
         
         project.extensions.create('liberty', LibertyExtension)
+        project.configurations.create('libertyLicense')
 
         project.task('installLiberty', type: InstallLibertyTask) {
             description 'Installs Liberty from a repository'
