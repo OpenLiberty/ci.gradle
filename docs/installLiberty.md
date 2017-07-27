@@ -171,18 +171,30 @@ publishing {
 ```
 
 ### License configuration
-The `licenseArtifact` parameter defines the coordinates for the Liberty license JAR file that you added to an internal repository. The installLiberty task will only upgrade the license if this configuration is present.  
-The `licenseArtifact` format is `'<groupId>:<artifactId>:<version>'`
+The `libertyLicense` parameter defines the coordinates for the Liberty license JAR file that you added to an internal repository. The installLiberty task will only upgrade the license if this configuration is present.  
 ```
+apply plugin: 'liberty'
+
 repositories {
-    ...
     mavenLocal()
 }
 
-liberty {
-    ...
-    licenseArtifact = 'com.ibm.websphere.appserver.license:wlp-core-license:17.0.0.2'
+dependencies {
+    libertyLicense 'com.ibm.websphere.appserver.license:wlp-core-license:17.0.0.2'
 }
+```
+
+You can define your dependency with any of the following formats:
+```  
+libertyLicense 'com.ibm.websphere.appserver.license:wlp-core-license:17.0.0.2'
+```
+```
+libertyLicense group: 'com.ibm.websphere.appserver.license', name: 'wlp-core-license', version: '17.0.0.2'
+```
+```
+libertyLicense(
+    [group: 'com.ibm.websphere.appserver.license', name: 'wlp-core-license', version: '17.0.0.2']
+)
 ```
 
 ### Adding a custom repository
