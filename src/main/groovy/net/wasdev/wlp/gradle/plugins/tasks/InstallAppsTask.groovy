@@ -55,7 +55,7 @@ class InstallAppsTask extends AbstractTask {
         if(!archive.exists()) {
             throw new GradleException("The project archive was not found and cannot be installed.")
         }
-        Files.copy(archive.toPath(), new File(getServerDir(project), "/" + project.liberty.installapps.appsDirectory + "/" + archive.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING)
+        Files.copy(archive.toPath(), new File(getServerDir(project), "/" + project.liberty.installapps.appsDirectory + "/" + getArchiveName(archive.getName())).toPath(), StandardCopyOption.REPLACE_EXISTING)
     }
     
     private String getInstallAppPackages() {
@@ -63,6 +63,13 @@ class InstallAppsTask extends AbstractTask {
             project.liberty.installapps.installAppPackages = "project"
         }
         return project.liberty.installapps.installAppPackages
+    }
+    
+    private String getArchiveName(String archiveName){ 
+        if(project.liberty.installapps.stripVersion){
+            return archiveName.replaceAll(project.version,"")
+        }
+        return archiveName;
     }
     
     private String archivePath() throws Exception {
