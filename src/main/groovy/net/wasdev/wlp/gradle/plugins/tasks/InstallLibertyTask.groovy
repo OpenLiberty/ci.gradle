@@ -30,7 +30,7 @@ class InstallLibertyTask extends AbstractTask {
                             classpath: project.buildscript.configurations.classpath.asPath)
         project.ant.installLiberty(params)
        
-        String filePath = project.configurations.getByName('LicenseConfig').getAsPath()
+        String filePath = project.configurations.getByName('libertyLicense').getAsPath()
         if (filePath) {
             def command = "java -jar " + filePath + " --acceptLicense " + project.buildDir
             def process = command.execute()
