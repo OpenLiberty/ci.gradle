@@ -9,7 +9,7 @@ The following are the parameters supported by this goal in addition to the [comm
 | Parameter | Type | Description | Required |
 | --------  | ---- | ----------- | -------  |
 | appsDirectory | String | The server's `apps` or `dropins` directory where the application files should be copied. The default value is set to `apps` if the application is defined in the server configuration, otherwise it is set to `dropins`.  | No |
-| stripVersion | boolean | Strip artifact version when copying the application to Liberty runtime's application directory. The default value is false.  | No |
+| stripVersion | boolean | Strip the artifact version when copying the application to Liberty runtime's application directory. The default value is false.  | No |
 
 ##### Example: 
 
