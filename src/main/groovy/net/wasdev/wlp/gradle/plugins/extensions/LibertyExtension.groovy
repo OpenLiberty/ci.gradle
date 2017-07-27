@@ -23,7 +23,6 @@ class LibertyExtension {
     String outputDir
     String userDir
     String serverName = "defaultServer"
-    String licenseArtifact
 
     File configDirectory
     File configFile = new File("default")
