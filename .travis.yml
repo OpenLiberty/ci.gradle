@@ -8,3 +8,4 @@ matrix:
       env: WLP_VERSION=17.0.0.2
 script:
   - travis_wait ./gradlew install check -Prunit=online -DwlpVersion=$WLP_VERSION --stacktrace --info 
+dist: precise
