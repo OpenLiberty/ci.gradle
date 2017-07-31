@@ -61,7 +61,7 @@ class InstallLibertyTask extends AbstractTask {
             def localFile = new File(runtimeFilePath)
             
             if (localFile.exists()) {
-                logger.debug 'Getting WebSphere Liberty arhive file from the local Gradle repository.'
+                logger.debug 'Getting WebSphere Liberty archive file from the local Gradle repository.'
                 result.put('runtimeUrl', localFile.toURI().toURL())
             }
         } else if (project.liberty.install.runtimeUrl != null) {
