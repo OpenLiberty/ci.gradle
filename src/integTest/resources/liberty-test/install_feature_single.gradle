@@ -22,15 +22,13 @@ apply plugin: 'liberty'
 repositories {
     mavenCentral()
 }
+
+dependencies {
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-javaee7', version: wlpVersion
+}
     
 liberty {
     if (test_mode == 'online') {
-        assemblyArtifact {
-            groupId = "com.ibm.websphere.appserver.runtime"
-            artifactId = "wlp-javaee7"
-            version = wlpVersion
-            type = "zip"
-        }
         serverName ='libertyOnline'
     } else {
         installDir = WLP_DIR

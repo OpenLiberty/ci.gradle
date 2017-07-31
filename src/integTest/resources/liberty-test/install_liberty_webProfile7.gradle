@@ -23,13 +23,12 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-webProfile7', version: wlpVersion
+}
+
 liberty {
     if (test_mode == 'online') {
-        assemblyArtifact {
-            artifactId = "wlp-webProfile7"
-            version = wlpVersion
-            type = "zip"
-        }
         serverName ='libertyOnline'
     } else {
         installDir = WLP_DIR
