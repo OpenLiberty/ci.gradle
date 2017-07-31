@@ -43,10 +43,11 @@ class Liberty implements Plugin<Project> {
         
         project.extensions.create('liberty', LibertyExtension)
         project.configurations.create('libertyLicense')
+        project.configurations.create('libertyRuntime')
 
         project.task('installLiberty', type: InstallLibertyTask) {
             description 'Installs Liberty from a repository'
-            logging.level = LogLevel.INFO
+            logging.level = LogLevel.DEBUG
         }
 
         project.task('libertyRun', type: RunTask, dependsOn: 'libertyCreate') {
