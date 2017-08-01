@@ -1,3 +1,7 @@
+/*
+	This test checks whether the application was successfully installed without the version number in the package
+	when installApps is called and stripVersion is set to true. 
+*/
 group = 'liberty.gradle'
 version = '1'
 
@@ -35,9 +39,6 @@ ext {
 
     // This is set in the ibm-web-ext.xml file
     warContext = 'myLibertyApp'
-    appName = 'LibertyProject'
-    packageFile = "${project.buildDir}/${appName}.zip"
-    packagingType = 'usr'
     
 }
 
@@ -48,15 +49,10 @@ liberty {
     configFile = file("src/main/liberty/config/server-apps-test.xml")
     
     serverName = wlpServerName
-    packageLiberty {
-        archive = packageFile
-        include = packagingType
-    }
     
     installapps{ 
         stripVersion = true
     }
-    applications = "sample.servlet.war"
 }
 
 repositories {
@@ -65,8 +61,6 @@ repositories {
 
 dependencies {
     testCompile 'junit:junit:4.12'
-    testCompile 'org.apache.cxf:cxf-rt-rs-client:3.1.1'
-    testCompile 'org.glassfish:javax.json:1.0.4'
     providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
 }
 
@@ -96,9 +90,5 @@ task printMessageAboutRunningServer {
     }
 }
 
-check.dependsOn 'integrationTest'
 installApps.dependsOn 'war'
-libertyStart.dependsOn 'installApps'
-integrationTest.dependsOn 'libertyStart', 'testClasses'
-integrationTest.finalizedBy 'libertyStop'
 libertyStart.finalizedBy 'printMessageAboutRunningServer'
