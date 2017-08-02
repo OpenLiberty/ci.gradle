@@ -32,10 +32,9 @@ public class YourAwesomeTest extends AbstractIntegrationTest{
             // copy your testing resources into your build directory 
             createTestProject(buildDir, sourceDir, buildFilename) // **required**
         }
-        // copy your testing resource into your build directory 
+        // copy your testing resource into your build directory as
+        // well as your needed .gradle files.
         createTestProject(buildDir, resourceDir, buildFilename) // **required**
-        // rename your build file to build.gradle so you can build with it...
-        renameBuildFile(buildFilename, buildDir) // **required**
     }
 
     // Any configuration you need to run after your test suite

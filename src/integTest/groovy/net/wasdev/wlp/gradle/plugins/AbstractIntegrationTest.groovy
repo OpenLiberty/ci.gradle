@@ -21,6 +21,9 @@ import org.apache.commons.io.FileUtils
 import org.gradle.tooling.BuildLauncher
 import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.ProjectConnection
+import java.nio.file.StandardCopyOption
+import java.nio.file.Files
+import java.io.File
 
 
 abstract class AbstractIntegrationTest {
@@ -49,8 +52,20 @@ abstract class AbstractIntegrationTest {
             throw new AssertionError("The source file '${sourceDir.canonicalPath}' doesn't exist.")
         }
         try {
-            FileUtils.copyDirectory(sourceDir, parent)
-            renameBuildFile(buildFilename, parent)
+            // Copy all resources except the individual test .gradle files
+            // Do copy settings.gradle.
+            FileUtils.copyDirectory(sourceDir, parent, new FileFilter() {
+               public boolean accept (File pathname) { 
+                   return (pathname.getPath().endsWith("settings.gradle") ||
+                           !pathname.getPath().endsWith(".gradle"))
+               }
+            });
+            
+            // copy the needed gradle file
+            File sourceFile = new File(sourceDir, buildFilename)
+            File targetFile = new File(parent, "build.gradle")
+            copyFile(sourceFile, targetFile)
+            
         } catch (IOException e) {
             throw new AssertionError("Unable to copy directory '${parent.canonicalPath}'.")
         }
@@ -72,12 +87,7 @@ abstract class AbstractIntegrationTest {
             connection?.close()
         }
     }
-    
-    public static void renameBuildFile(String buildFilename, File buildDir) {
-        File sourceFile = new File(buildDir, buildFilename)
-        sourceFile.renameTo(buildDir.toString() + '/build.gradle')
-    }
-    
+
     protected static File copyFile(File sourceFile, File destFile) {
         if (!sourceFile.exists()){
             throw new AssertionError("The source file '${sourceFile.canonicalPath}' doesn't exist.")
