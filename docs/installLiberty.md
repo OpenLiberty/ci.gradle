@@ -3,18 +3,18 @@
 The `installLiberty` task is used to download and install WebSphere Liberty server. The task can also upgrade your Liberty runtime from an ILAN to an IPLA license with a license JAR file [setup](#installing-your-upgrade-license) and [license configuration](#license-configuration).  
 
 The task can download the WebSphere Liberty runtime archive in three ways: 
-* from a specified location (via `runtimeUrl`)
+* from a specified location using `runtimeUrl`
 * from the [Liberty repository](https://developer.ibm.com/wasdev/downloads/) based on a version and a runtime type
-* from the [Maven Central repository](http://search.maven.org/) using the dependencies block.  
+* from the [Central repository](https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/index.yml) using the `libertyRuntime` dependencies configuration.  
 
 When installing Liberty from a JAR file, the Liberty license code is needed to install the runtime. When you are installing Liberty from the Liberty repository, you can see the versions of Liberty available to install and find the link to their license using the index.yml file. After opening the license, look for the `D/N: <license code>` line. Otherwise, download the runtime archive and execute `java -jar wlp*runtime.jar --viewLicenseInfo` command and look for the `D/N: <license code>` line.
 
-Note: Use the install block to install from the Liberty repository or from a local file. Use the dependencies block to install from the Maven repository. If both blocks are specified, the dependencies block will take precendence.
+Note: Use the libertyRuntime dependency to install Liberty from The Central Repository. Use the install block to install from the Liberty repository or from a local file. If both configurations are specified, the libertyRuntime dependency takes precedence.
 
 ### Using the dependencies block
-The Liberty Gradle plugin defines two dependency configurations: `libertyRuntime` and `libertyLicense`.  `libertyRuntime` defines which [WebSphere Liberty runtime](#using-maven-artifact) to download from Maven Central. `libertyLicense` [configures](#license-configuration) a license artifact so that your license JAR archive can be identified and used during the `installLiberty` task. Make sure properly [setup](#installing-your-upgrade-license) your license JAR to prevent a missing dependency failure.
+The Liberty Gradle plugin defines two dependency configurations: `libertyRuntime` and `libertyLicense`.  `libertyRuntime` defines which [WebSphere Liberty runtime](#using-maven-artifact) to download from The Central Repository. `libertyLicense` [configures](#license-configuration) a license artifact so that your license JAR archive can be identified and used during the `installLiberty` task. Make sure to properly [setup](#installing-your-upgrade-license) your license JAR to prevent a missing dependency failure.
 
-You will need to include `group`, `name`, and `version` values for each of your configurations. An `ext` value for a specific archive type can be used but is not required.
+You need to include `group`, `name`, and `version` values that describes the artifacts to use. An `ext` value for a specific archive type can be used but is not required.
 
 #### Example
 ```
@@ -104,8 +104,7 @@ Use the `install` to specify the name of the Liberty server to install from the 
 
 #### Using Maven artifact
 
-Use the [dependencies block](#using-the-dependencies-block) to specify the name of the Maven artifact that contains a custom Liberty server or use one of the provided on the [Maven Central repository](http://search.maven.org/).  
-The `group` value for all the runtimes listed in the table below is `com.ibm.websphere.appserver.runtime`.
+Use the [dependencies block](#using-the-dependencies-block) to specify the name of the repository artifact that contains your custom Liberty server or use one of the provided on the [Central Repository](http://search.maven.org/#search%7Cga%7C1%7Ccom.ibm.websphere.appserver.runtime).  
 
 The Maven Central repository includes the following Liberty runtime artifacts:
 
@@ -116,6 +115,8 @@ The Maven Central repository includes the following Liberty runtime artifacts:
 | [wlp-kernel](https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-kernel/) | 17.0.0.2, 17.0.0.1, 16.0.0.4, 16.0.0.3, 16.0.0.2, 8.5.5.9, 8.5.5.8 | Liberty runtime kernel. |
 | [wlp-osgi](https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-osgi/) | 17.0.0.2, 17.0.0.1, 16.0.0.4, 16.0.0.3, 16.0.0.2, 8.5.5.9, 8.5.5.8 | Liberty runtime with features that support OSGi applications. |
 | [wlp-microProfile1](https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-microProfile1/) | 17.0.0.2, 17.0.0.1, 16.0.0.4, 16.0.0.3 | Liberty with features for a MicroProfile runtime. |
+
+The `group` value for all the artifacts listed above is `com.ibm.websphere.appserver.runtime`.
 
 ### Installing your upgrade license
 To upgrade the runtime license, the Liberty license JAR file, which is available to download from IBM Fix Central or the Passport Advantage website, must be installed into a local repository or a protected internal repository. After successful installation, add your license artifact to your Liberty block in your `build.gradle` file to upgrade the license during the `installLiberty` task.
