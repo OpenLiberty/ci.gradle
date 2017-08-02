@@ -26,7 +26,7 @@ import net.wasdev.wlp.gradle.plugins.utils.*;
 
 class InstallAppsTask extends AbstractTask {
 
-    protected ApplicationXmlDocument applicationServerXml = new ApplicationXmlDocument();
+    protected ApplicationXmlDocument applicationXml = new ApplicationXmlDocument();
 
     @TaskAction
     void installApps() {
@@ -55,6 +55,16 @@ class InstallAppsTask extends AbstractTask {
         else if(installDependencies){
             installDependencies()
         }
+        
+        // create application configuration in configDropins if application is not configured
+        if (applicationXml.hasChildElements()) {
+            logger.warn("The application is not defined in the server configuration but the build file indicates it should be installed in the apps folder. Application configuration is being added to the target server configuration dropins folder by the plug-in.");
+            applicationXml.writeApplicationXmlDocument(getServerDir(project));
+        } else {
+            if (ApplicationXmlDocument.getApplicationXmlFile(getServerDir(project)).exists()) {
+                ApplicationXmlDocument.getApplicationXmlFile(getServerDir(project)).delete();
+            }
+        }
     }
     
     private void installProjectArchive() throws Exception {
@@ -71,7 +81,7 @@ class InstallAppsTask extends AbstractTask {
         String appsDir = project.liberty.installapps.appsDirectory
         
         if(appsDir.equalsIgnoreCase('apps') && !isAppConfiguredInSourceServerXml(fileName)){
-            applicationServerXml.createApplicationElement(fileName, artifactId)
+            applicationXml.createApplicationElement(fileName, artifactId)
         }
         else if(appsDir.equalsIgnoreCase('dropins') && isAppConfiguredInSourceServerXml(fileName)){
             throw new GradleException("The application is configured in the server.xml and the plug-in is configured to install the application in the dropins folder. A configured application must be installed to the apps folder.")
@@ -79,24 +89,20 @@ class InstallAppsTask extends AbstractTask {
     }
     
     protected boolean isAppConfiguredInSourceServerXml(String fileName) {
-        println 'woooooooooooooooooooooooooooooop------------------------------------------'
         boolean configured = false; 
-        
         if (project.liberty.configFile != null && project.liberty.configFile.exists()) {
             try {
-                ServerConfigDocument scd = ServerConfigDocument.getInstance(project.liberty.configFile, project.liberty.configDir, project.liberty.bootstrapPropertiesFile, project.liberty.bootstrapProperties, project.liberty.serverEnv)
-                
+                ServerConfigDocument scd = ServerConfigDocument.getInstance(project.liberty.configFile, project.liberty.configDirectory, project.liberty.bootstrapPropertiesFile, project.liberty.bootstrapProperties, project.liberty.serverEnv)
                 if (scd != null && scd.getLocations().contains(fileName)) {
-                    log.debug("Application configuration is found in server.xml : " + fileName)
+                    logger.debug("Application configuration is found in server.xml : " + fileName)
                     configured = true
                 }
             } 
             catch (Exception e) {
-                //logger.warn(e.getLocalizedMessage())
-                //logger.debug(e)
+                logger.warn(e.getLocalizedMessage())
+                logger.debug(e)
             }
         }
-        println configured
         return configured
     }
     
