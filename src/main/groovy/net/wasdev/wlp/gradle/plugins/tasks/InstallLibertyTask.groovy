@@ -56,9 +56,8 @@ class InstallLibertyTask extends AbstractTask {
         String runtimeFilePath = project.configurations.getByName('libertyRuntime').getAsPath()
         if (runtimeFilePath) {
             logger.debug 'Liberty archive file Path to the local Gradle repository  : ' + runtimeFilePath 
-            println runtimeFilePath
             
-            def localFile = new File(runtimeFilePath)
+            File localFile = new File(runtimeFilePath)
             
             if (localFile.exists()) {
                 logger.debug 'Getting WebSphere Liberty archive file from the local Gradle repository.'
