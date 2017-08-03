@@ -30,9 +30,9 @@ class InstallLibertyTask extends AbstractTask {
                             classpath: project.buildscript.configurations.classpath.asPath)
         project.ant.installLiberty(params)
        
-        String filePath = project.configurations.getByName('libertyLicense').getAsPath()
-        if (filePath) {
-            def command = "java -jar " + filePath + " --acceptLicense " + project.buildDir
+        String licenseFilePath = project.configurations.getByName('libertyLicense').getAsPath()
+        if (licenseFilePath) {
+            def command = "java -jar " + licenseFilePath + " --acceptLicense " + project.buildDir
             def process = command.execute()
             process.waitFor()
         }
@@ -52,42 +52,17 @@ class InstallLibertyTask extends AbstractTask {
         if (project.liberty.install.type != null) {
             result.put('type', project.liberty.install.type)
         }
-        
-        // Maven repository is higher precedence over Liberty repository 
-        if (project.liberty.assemblyArtifact.version != null) {
-            String version = project.liberty.assemblyArtifact.version
+       
+        String runtimeFilePath = project.configurations.getByName('libertyRuntime').getAsPath()
+        if (runtimeFilePath) {
+            logger.debug 'Liberty archive file Path to the local Gradle repository  : ' + runtimeFilePath 
             
-            String groupId = 'com.ibm.websphere.appserver.runtime'
-            String artifactId = 'wlp-webProfile7'
-            String type = 'zip'
-
-            if (project.liberty.assemblyArtifact.groupId != null) {
-                groupId = project.liberty.assemblyArtifact.groupId
-            }
-            if (project.liberty.assemblyArtifact.artifactId != null) {
-                artifactId = project.liberty.assemblyArtifact.artifactId
-            }
-            
-            if (project.liberty.assemblyArtifact.type != null) {
-                type = project.liberty.assemblyArtifact.type
-            }
-            
-            def configNames = project.getConfigurations().getNames()
-            if (!configNames.contains('InstallLibertyTaskConfig')) {
-                project.getConfigurations().create('InstallLibertyTaskConfig')
-                project.getDependencies().add('InstallLibertyTaskConfig', groupId + ':' +
-                    artifactId + ':' + version)
-            }
-            
-            String gradleFilePath = project.getConfigurations().getByName('InstallLibertyTaskConfig').getAsPath()
-            logger.debug 'Liberty archive file Path to the local Gradle repository  : ' + gradleFilePath
-
-            File localFile = new File(gradleFilePath)
+            File localFile = new File(runtimeFilePath)
             
             if (localFile.exists()) {
                 logger.debug 'Getting WebSphere Liberty archive file from the local Gradle repository.'
                 result.put('runtimeUrl', localFile.toURI().toURL())
-            } 
+            }
         } else if (project.liberty.install.runtimeUrl != null) {
             result.put('runtimeUrl', project.liberty.install.runtimeUrl)
         } 

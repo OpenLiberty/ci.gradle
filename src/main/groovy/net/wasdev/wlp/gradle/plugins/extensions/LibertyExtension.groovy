@@ -45,7 +45,6 @@ class LibertyExtension {
     FeatureExtension features = new FeatureExtension()
     UninstallFeatureExtension uninstallfeatures = new UninstallFeatureExtension()
     InstallExtension install = new InstallExtension()
-    AssemblyArtifactExtension assemblyArtifact = new AssemblyArtifactExtension()
     CleanExtension cleanDir = new CleanExtension()
 
     DeployExtension deploy = new DeployExtension()
@@ -69,10 +68,6 @@ class LibertyExtension {
         ConfigureUtil.configure(closure, install)
     }
     
-    def assemblyArtifact(Closure closure) {
-        ConfigureUtil.configure(closure, assemblyArtifact)
-    }
-
     def deploy(Closure closure) {
         if (numberOfClosures > 0){
             deploy.listOfClosures.add(deploy.clone())
