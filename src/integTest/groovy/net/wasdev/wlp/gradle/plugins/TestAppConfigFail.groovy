@@ -25,6 +25,7 @@ public class TestAppConfigFail extends AbstractIntegrationTest{
         runTasks(buildDir, 'libertyStop')
     }
     
+    //Should throw a GradleException when validating the app configuration which resolves as a BuildException.
     @Test(expected = BuildException.class)
     public void test_smart_config_fail() {
         runTasks(buildDir, 'installApps')

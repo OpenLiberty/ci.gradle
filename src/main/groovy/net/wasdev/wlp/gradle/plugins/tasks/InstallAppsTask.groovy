@@ -52,9 +52,9 @@ class InstallAppsTask extends AbstractTask {
         if (installProject) {
             installProjectArchive()
         }
-        else if(installDependencies){
+        /**if(installDependencies){
             installDependencies()
-        }
+        }*/
         
         // create application configuration in configDropins if application is not configured
         if (applicationXml.hasChildElements()) {
@@ -89,15 +89,16 @@ class InstallAppsTask extends AbstractTask {
     }
     
     protected boolean isAppConfiguredInSourceServerXml(String fileName) {
-        boolean configured = false; 
-        if (project.liberty.configFile != null && project.liberty.configFile.exists()) {
+        boolean configured = false;
+        File serverConfigFile = new File(getServerDir(project), 'server.xml') 
+        if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
-                ServerConfigDocument scd = ServerConfigDocument.getInstance(project.liberty.configFile, project.liberty.configDirectory, project.liberty.bootstrapPropertiesFile, project.liberty.bootstrapProperties, project.liberty.serverEnv)
+                ServerConfigDocument scd = ServerConfigDocument.getInstance(serverConfigFile, project.liberty.configDirectory, project.liberty.bootstrapPropertiesFile, project.liberty.bootstrapProperties, project.liberty.serverEnv)
                 if (scd != null && scd.getLocations().contains(fileName)) {
                     logger.debug("Application configuration is found in server.xml : " + fileName)
                     configured = true
                 }
-            } 
+            }
             catch (Exception e) {
                 logger.warn(e.getLocalizedMessage())
                 logger.debug(e)
