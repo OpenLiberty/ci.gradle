@@ -79,7 +79,7 @@ Use the `install` to specify the name of the Liberty server to install from the 
     }
   ```
   
-3. Install from a specific location.
+3. Install from a specific location using a jar file. `licenseCode` is required when installing from a jar file.
   ```groovy
     apply plugin: 'liberty'
 
