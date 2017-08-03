@@ -5,9 +5,9 @@ The `installLiberty` task is used to download and install WebSphere Liberty serv
 The task can download the WebSphere Liberty runtime archive in three ways: 
 * from a specified location using `runtimeUrl`
 * from the [Liberty repository](https://developer.ibm.com/wasdev/downloads/) based on a version and a runtime type
-* from the [Central repository](https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/index.yml) using the `libertyRuntime` dependencies configuration.  
+* from [The Central Repository](http://search.maven.org/) using the `libertyRuntime` dependencies configuration.  
 
-When installing Liberty from a JAR file, the Liberty license code is needed to install the runtime. When you are installing Liberty from the Liberty repository, you can see the versions of Liberty available to install and find the link to their license using the index.yml file. After opening the license, look for the `D/N: <license code>` line. Otherwise, download the runtime archive and execute `java -jar wlp*runtime.jar --viewLicenseInfo` command and look for the `D/N: <license code>` line.
+When installing Liberty from a JAR file, the Liberty license code is needed to install the runtime. When you are installing Liberty from the Liberty repository, you can see the versions of Liberty available to install and find the link to their license using the [index.yml](https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/index.yml) file. After opening the license, look for the `D/N: <license code>` line. Otherwise, download the runtime archive and execute `java -jar wlp*runtime.jar --viewLicenseInfo` command and look for the `D/N: <license code>` line.
 
 Note: Use the libertyRuntime dependency to install Liberty from The Central Repository. Use the install block to install from the Liberty repository or from a local file. If both configurations are specified, the libertyRuntime dependency takes precedence.
 
@@ -104,7 +104,7 @@ Use the `install` to specify the name of the Liberty server to install from the 
 
 #### Using Maven artifact
 
-Use the [dependencies block](#using-the-dependencies-block) to specify the name of the repository artifact that contains your custom Liberty server or use one of the provided on the [Central Repository](http://search.maven.org/#search%7Cga%7C1%7Ccom.ibm.websphere.appserver.runtime).  
+Use the [dependencies block](#using-the-dependencies-block) to specify the name of the repository artifact that contains your custom Liberty server or use one of the provided on [The Central Repository](http://search.maven.org/#search%7Cga%7C1%7Ccom.ibm.websphere.appserver.runtime).  
 
 The Maven Central repository includes the following Liberty runtime artifacts:
 
