@@ -30,10 +30,10 @@ class InstallAppsTask extends AbstractTask {
 
     @TaskAction
     void installApps() {
-        
+
         boolean installDependencies = false
         boolean installProject = false
-        
+
         switch (getInstallAppPackages()) {
             case "all":
                 installDependencies = true
@@ -48,14 +48,14 @@ class InstallAppsTask extends AbstractTask {
             default:
                 return
         }
-        
+
         if (installProject) {
             installProjectArchive()
         }
         /**if(installDependencies){
             installDependencies()
         }*/
-        
+
         // create application configuration in configDropins if application is not configured
         if (applicationXml.hasChildElements()) {
             logger.warn("The application is not defined in the server configuration but the build file indicates it should be installed in the apps folder. Application configuration is being added to the target server configuration dropins folder by the plug-in.");
@@ -66,20 +66,20 @@ class InstallAppsTask extends AbstractTask {
             }
         }
     }
-    
+
     private void installProjectArchive() throws Exception {
         File archive = new File(archivePath())
         if(!archive.exists()) {
             throw new GradleException("The project archive was not found and cannot be installed.")
         }
         Files.copy(archive.toPath(), new File(getServerDir(project), "/" + project.liberty.installapps.appsDirectory + "/" + getArchiveName(archive.getName())).toPath(), StandardCopyOption.REPLACE_EXISTING)
-    
+
         validateAppConfig(getArchiveName(archive.getName()), getBaseName(archive))
     }
-    
+
     private void validateAppConfig(String fileName, String artifactId) throws Exception {
         String appsDir = project.liberty.installapps.appsDirectory
-        
+
         if(appsDir.equalsIgnoreCase('apps') && !isAppConfiguredInSourceServerXml(fileName)){
             applicationXml.createApplicationElement(fileName, artifactId)
         }
@@ -87,10 +87,10 @@ class InstallAppsTask extends AbstractTask {
             throw new GradleException("The application is configured in the server.xml and the plug-in is configured to install the application in the dropins folder. A configured application must be installed to the apps folder.")
         }
     }
-    
+
     protected boolean isAppConfiguredInSourceServerXml(String fileName) {
         boolean configured = false;
-        File serverConfigFile = new File(getServerDir(project), 'server.xml') 
+        File serverConfigFile = new File(getServerDir(project), 'server.xml')
         if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
                 ServerConfigDocument scd = ServerConfigDocument.getInstance(serverConfigFile, project.liberty.configDirectory, project.liberty.bootstrapPropertiesFile, project.liberty.bootstrapProperties, project.liberty.serverEnv)
@@ -106,27 +106,27 @@ class InstallAppsTask extends AbstractTask {
         }
         return configured
     }
-    
-    private String getArchiveName(String archiveName){ 
+
+    private String getArchiveName(String archiveName){
         if(project.liberty.installapps.stripVersion){
             StringBuilder sbArchiveName = new StringBuilder().append("-").append(project.version)
             return archiveName.replaceAll(sbArchiveName.toString(),"")
         }
         return archiveName;
     }
-    
+
     private String getInstallAppPackages() {
         if (project.plugins.hasPlugin("ear")) {
             project.liberty.installapps.installAppPackages = "project"
         }
         return project.liberty.installapps.installAppPackages
     }
-    
+
     //Removes extension
     private String getBaseName(File file){
-        return file.name.take(getArchiveName(file.name).lastIndexOf('.')) 
+        return file.name.take(getArchiveName(file.name).lastIndexOf('.'))
     }
-    
+
     private String archivePath() throws Exception {
         if (project.plugins.hasPlugin("ear")) {
             return project.ear.archivePath
@@ -141,5 +141,63 @@ class InstallAppsTask extends AbstractTask {
             throw new GradleException("Archive path not found. Supported formats are jar, war, and ear.")
         }
     }
-    
+    /*
+    private void installProject() throws Exception{
+      if(isSupportedType()){
+        if(project.liberty.installapps.looseApplication){
+          String looseConfigFileName = getLooseConfigFileName(project)
+          String application = looseConfigFileName.substring(0, looseConfigFileName.length()-4)
+          File destDir = new File(serverDirectory, getAppsDirectory)
+          File looseConfigFile = new File(destDir, looseConfigFileName)
+          LooseConfigData config = new LooseConfigData()
+          switch(getPackagingType()){
+            case "war":
+
+              break
+            case "ear":
+              break
+            default:
+              log.info(MessageFormat.format(messages.getString("info.loose.application.not.supported"),
+                              project.getPackaging()));
+              installProjectArchive()
+              break
+          }
+        }
+        else{
+          installProjectArchive()
+        }
+      }
+      else{
+        throw new GradleException("Application is not supported")
+      }
+
+    }
+
+    //Need to modify to emulate what it's doing in InstallAppsMojo
+    private boolean isSupportedType(){
+      //if()
+      return true;
+    }
+    //According to installAppsMojoSupp, only worried about war??
+    private String getLooseConfigFileName(){
+      /*
+        LibertyAssembly was ignored and may need to be added
+      */
+    /*  return getArchiveName(project.war.archiveName) + ".xml"
+    }
+
+    private String getPackagingType() throws Exception{
+      if (project.plugins.hasPlugin("ear")) {
+          return "ear"
+      }
+      else if (project.plugins.hasPlugin("war")) {
+          return "war"
+      }
+      else if (project.plugins.hasPlugin("java")){
+          return "java"
+      }
+      else {
+          throw new GradleException("Archive path not found. Supported formats are jar, war, and ear.")
+      }
+  }*/
 }
