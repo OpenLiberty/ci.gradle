@@ -45,13 +45,13 @@ liberty {
     install {
         runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/17.0.0.1/wlp-webProfile7-17.0.0.1.zip"
     }
+    
     serverName = wlpServerName
     packageLiberty {
         archive = packageFile
         include = packagingType
     }
-    applications = "fake.application-1"
-    verifyTimeout = 1
+    applications = "sample.servlet-1"
 }
 
 repositories {
@@ -60,6 +60,8 @@ repositories {
 
 dependencies {
     testCompile 'junit:junit:4.12'
+    testCompile 'org.apache.cxf:cxf-rt-rs-client:3.1.1'
+    testCompile 'org.glassfish:javax.json:1.0.4'
     providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
 }
 
@@ -89,5 +91,9 @@ task printMessageAboutRunningServer {
     }
 }
 
+check.dependsOn 'integrationTest'
 installApps.dependsOn 'war'
+libertyStart.dependsOn 'installApps'
+integrationTest.dependsOn 'libertyStart', 'testClasses'
+integrationTest.finalizedBy 'libertyStop'
 libertyStart.finalizedBy 'printMessageAboutRunningServer'
