@@ -141,23 +141,25 @@ class InstallAppsTask extends AbstractTask {
             throw new GradleException("Archive path not found. Supported formats are jar, war, and ear.")
         }
     }
-    /*
+
     private void installProject() throws Exception{
       if(isSupportedType()){
         if(project.liberty.installapps.looseApplication){
           String looseConfigFileName = getLooseConfigFileName(project)
           String application = looseConfigFileName.substring(0, looseConfigFileName.length()-4)
-          File destDir = new File(serverDirectory, getAppsDirectory)
+          File destDir = new File(getServerDir(project), "apps")
           File looseConfigFile = new File(destDir, looseConfigFileName)
           LooseConfigData config = new LooseConfigData()
-          switch(getPackagingType()){
+          /*switch(getPackagingType()){
             case "war":
-
+                  validateAppConfig(application, application.take(getArchiveName(application).lastIndexOf('.')))
+                  logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFileName));
+                  installLooseConfigWar(config)
               break
             case "ear":
               break
             default:
-              log.info(MessageFormat.format(messages.getString("info.loose.application.not.supported"),
+              logger.info(MessageFormat.format(("Loose application configuration is not supported for packaging type {0}. The project artifact will be installed as is."),
                               project.getPackaging()));
               installProjectArchive()
               break
@@ -169,10 +171,74 @@ class InstallAppsTask extends AbstractTask {
       }
       else{
         throw new GradleException("Application is not supported")
-      }
+      }*/
 
     }
 
+    //Start of methods that need to be implemented
+    // install war project artifact using loose application configuration file
+    protected void installLooseConfigWar(LooseConfigData config) throws Exception {
+        File dir = new File(archivePath())
+        if (dir.exists()) {
+            config.addDir(dir.getCanonicalPath(), "/");
+        }
+
+        dir = new File(project.liberty.outputDir);
+        if (dir.exists()) {
+            config.addDir(dir.getCanonicalPath(), "/WEB-INF/classes");
+        } else if (containsJavaSource(project)) {
+            // if webapp contains java source, it has to be compiled first.
+            throw new GradleException(MessageFormat.format(messages.getString("Failed to install loose application. The project has not been compiled.")));
+        }
+    }
+
+
+
+        // // retrieves dependent library jar files
+        // List<Artifact> libraries = getDependentLibraries();
+        // if (!libraries.isEmpty()) {
+        //     // get a list of dependent-modules from eclipse project deployment
+        //     // assembly if running in eclipse
+        //     List<String> eclipseModules = getEclipseDependentMods();
+        //
+        //     // referencing dependent library jar file from mvn repository or set
+        //     // loose application configuration reference to dependent eclipse project output classpath
+        //     if (eclipseModules.isEmpty()) {
+        //         addLibraries(libraries, config);
+        //     } else {
+        //         for (Artifact library : libraries) {
+        //             if (library.getFile() == null || !eclipseModules.contains(getFileName(library.getFile()))) {
+        //                 addLibraryFromM2(library, config);
+        //             } else {
+        //                 File classDir = new File(project.getBasedir() + "/../" + library.getArtifactId() + "/target/classes");
+        //                 log.debug("sibling module target class directory pathname: " + classDir.getCanonicalPath());
+        //
+        //                 if (classDir.exists()) {
+        //                     config.addArchive(classDir.getCanonicalPath(), "/WEB-INF/lib/" + getFileName(library.getFile()));
+        //                 } else {
+        //                     addLibraryFromM2(library, config);
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+        //}
+    // private List<Artifact> getDependentLibraries() {
+    //     List<Artifact> libraries = new ArrayList<Artifact>();
+    //
+    //     @SuppressWarnings("unchecked")
+    //     List<Artifact> artifacts = (List<Artifact>) project.getCompileArtifacts();
+    //     for (Artifact artifact : artifacts) {
+    //         if (artifact.getScope().equals("compile") && !artifact.isOptional()) {
+    //             libraries.add(artifact);
+    //         }
+    //     }
+    //     return libraries;
+    // }
+
+    //getCompileArtifacts
+
+//End of methods that need to be implemented
     //Need to modify to emulate what it's doing in InstallAppsMojo
     private boolean isSupportedType(){
       //if()
@@ -180,10 +246,7 @@ class InstallAppsTask extends AbstractTask {
     }
     //According to installAppsMojoSupp, only worried about war??
     private String getLooseConfigFileName(){
-      /*
-        LibertyAssembly was ignored and may need to be added
-      */
-    /*  return getArchiveName(project.war.archiveName) + ".xml"
+      return getArchiveName(project.war.archiveName) + ".xml"
     }
 
     private String getPackagingType() throws Exception{
@@ -199,5 +262,5 @@ class InstallAppsTask extends AbstractTask {
       else {
           throw new GradleException("Archive path not found. Supported formats are jar, war, and ear.")
       }
-  }*/
+  }
 }

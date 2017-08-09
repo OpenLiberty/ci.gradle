@@ -20,4 +20,5 @@ class InstallAppsExtension {
     String appsDirectory = "apps"
     boolean stripVersion = false
     String installAppPackages = "project"
+    boolean looseApplication = false
 }

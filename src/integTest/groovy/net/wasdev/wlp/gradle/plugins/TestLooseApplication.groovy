@@ -4,10 +4,10 @@ import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
 
-public class TestStripVersion extends AbstractIntegrationTest{
+public class TestLooseApplication extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/integrationTest/sample.servlet")
-    static File buildDir = new File(integTestDir, "/test-strip-version")
-    static String buildFilename = "TestStripVersion.gradle"
+    static File buildDir = new File(integTestDir, "/test-loose-application")
+    static String buildFilename = "TestLooseApplication.gradle"
 
     @BeforeClass
     public static void setup() {
@@ -22,14 +22,14 @@ public class TestStripVersion extends AbstractIntegrationTest{
     public static void tearDown() throws Exception {
         runTasks(buildDir, 'libertyStop')
     }
-
+    
     @Test
-    public void test_strip_version_true() {
+    public void test_loose_config_file_exists() {
         try {
             runTasks(buildDir, 'installApps')
         } catch (Exception e) {
             throw new AssertionError ("Fail on task installApps. "+ e)
         }
-        assert new File('build/testBuilds/test-strip-version/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war').exists() : 'version was NOT removed properly when stripVersion was set to true'
+        assert new File('build/testBuilds/test-loose-application/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war.xml').exists() : 'looseApplication config file was not copied over to the liberty runtime'
     }
 }
