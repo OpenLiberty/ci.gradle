@@ -17,7 +17,7 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.tasks.TaskAction
 
-class JavaDumpTask extends AbstractTask {
+class JavaDumpTask extends AbstractServerTask {
 
     @TaskAction
     void javaDump() {

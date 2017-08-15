@@ -19,7 +19,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import net.wasdev.wlp.ant.ServerTask;
 
-class StartTask extends AbstractTask {
+class StartTask extends AbstractServerTask {
 
     protected final String START_APP_MESSAGE_REGEXP = "CWWKZ0001I.*"
 

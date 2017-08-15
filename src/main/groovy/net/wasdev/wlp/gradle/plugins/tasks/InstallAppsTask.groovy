@@ -24,7 +24,7 @@ import groovy.util.XmlParser
 
 import net.wasdev.wlp.gradle.plugins.utils.*;
 
-class InstallAppsTask extends AbstractTask {
+class InstallAppsTask extends AbstractServerTask {
 
     protected ApplicationXmlDocument applicationXml = new ApplicationXmlDocument();
 

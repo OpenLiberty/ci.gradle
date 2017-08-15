@@ -17,16 +17,16 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.tasks.TaskAction
 
-class UninstallFeatureTask extends AbstractTask {
+class UninstallFeatureTask extends AbstractServerTask {
 
     @TaskAction
     void uninstallFeature() {
         def params = buildLibertyMap(project);
         params.put('name', project.liberty.uninstallfeatures.name.join(","))
         params.remove('timeout')
-        
-        project.ant.taskdef(name: 'uninstallFeature', 
-                            classname: 'net.wasdev.wlp.ant.UninstallFeatureTask', 
+
+        project.ant.taskdef(name: 'uninstallFeature',
+                            classname: 'net.wasdev.wlp.ant.UninstallFeatureTask',
                             classpath: project.buildscript.configurations.classpath.asPath)
         project.ant.uninstallFeature(params)
     }
