@@ -23,47 +23,47 @@ class PackageTask extends AbstractTask {
     void packageServer() {
 
         def params = buildLibertyMap(project);
-        def fileType = getPackageFileType(project.liberty.packageLiberty.include)
-        
-        def archive = project.liberty.packageLiberty.archive
-        
+        def fileType = getPackageFileType(project.liberty.server.packageLiberty.include)
+
+        def archive = project.liberty.server.packageLiberty.archive
+
         copyConfigFiles()
         if (archive != null && archive.length() != 0) {
             def archiveFile = new File(archive)
-            
+
             if (archiveFile.exists() && archiveFile.isDirectory()) {
                 archiveFile = new File(archiveFile, project.getName() + fileType)
-            } 
+            }
             params.put('archive', archiveFile)
             logger.debug 'Packaging ' + archiveFile
         } else {
-            // default output directory  
+            // default output directory
             def buildLibsDir = new File(project.getBuildDir(), 'libs')
-            
+
             createDir(buildLibsDir)
-            
+
             def defaultPackageFile = new File(buildLibsDir, project.getName() + fileType)
             params.put('archive', defaultPackageFile)
             logger.debug 'Packaging default ' + defaultPackageFile
         }
-        
-        if (project.liberty.packageLiberty.include != null && project.liberty.packageLiberty.include.length() != 0) {
-            params.put('include', project.liberty.packageLiberty.include)
+
+        if (project.liberty.server.packageLiberty.include != null && project.liberty.server.packageLiberty.include.length() != 0) {
+            params.put('include', project.liberty.server.packageLiberty.include)
         }
-        if (project.liberty.packageLiberty.os != null && project.liberty.packageLiberty.os.length() != 0) {
-            params.put('os', project.liberty.packageLiberty.os)
+        if (project.liberty.server.packageLiberty.os != null && project.liberty.server.packageLiberty.os.length() != 0) {
+            params.put('os', project.liberty.server.packageLiberty.os)
         }
 
         executeServerCommand(project, 'package', params)
     }
-    
+
     private String getPackageFileType(String include) {
         if (include != null && include.contains("runnable")) {
             return ".jar"
         }
         return ".zip"
     }
-    
+
     private static void createDir(File dir) {
         if (!dir.exists()) {
             if (!dir.mkdirs()) {

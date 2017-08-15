@@ -18,7 +18,7 @@ public class TestCreateWithFiles extends AbstractIntegrationTest{
         }
         createTestProject(testBuildDir, sourceDir, buildFilename)
     }
-    
+
     @Test
     public void test_create_with_files() {
 

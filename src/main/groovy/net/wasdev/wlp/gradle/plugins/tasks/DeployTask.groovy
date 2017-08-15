@@ -24,12 +24,12 @@ class DeployTask extends AbstractTask {
 
         def deployClosureDeclared = false
 
-        project.ant.taskdef(name: 'deploy', 
-                                classname: 'net.wasdev.wlp.ant.DeployTask', 
+        project.ant.taskdef(name: 'deploy',
+                                classname: 'net.wasdev.wlp.ant.DeployTask',
                                 classpath: project.buildscript.configurations.classpath.asPath)
-                                
-        project.liberty.deploy.listOfClosures.add(project.liberty.deploy)
-        for (Object deployable :  project.liberty.deploy.listOfClosures) {
+
+        project.liberty.server.deploy.listOfClosures.add(project.liberty.deploy)
+        for (Object deployable :  project.liberty.server.deploy.listOfClosures) {
             def params = buildLibertyMap(project);
             def fileToDeploy = deployable.file
             if (fileToDeploy != null) {

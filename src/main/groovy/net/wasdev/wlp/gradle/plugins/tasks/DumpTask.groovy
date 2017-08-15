@@ -22,11 +22,11 @@ class DumpTask extends AbstractTask {
     @TaskAction
     void dump() {
         def params = buildLibertyMap(project);
-        if (project.liberty.dumpLiberty.archive != null && project.liberty.dumpLiberty.archive.length() != 0) {
-            params.put('archive', new File(project.liberty.dumpLiberty.archive))
+        if (project.liberty.server.dumpLiberty.archive != null && project.liberty.server.dumpLiberty.archive.length() != 0) {
+            params.put('archive', new File(project.liberty.server.dumpLiberty.archive))
         }
-        if (project.liberty.dumpLiberty.include != null && project.liberty.dumpLiberty.include.length() != 0) {
-            params.put('include',project.liberty.dumpLiberty.include)
+        if (project.liberty.server.dumpLiberty.include != null && project.liberty.server.dumpLiberty.include.length() != 0) {
+            params.put('include',project.liberty.server.dumpLiberty.include)
         }
         executeServerCommand(project, 'dump', params)
     }

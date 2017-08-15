@@ -1,6 +1,6 @@
 /*
 	This test checks whether the application was successfully installed without the version number in the package
-	when installApps is called and stripVersion is set to true. 
+	when installApps is called and stripVersion is set to true.
 */
 group = 'liberty.gradle'
 version = '1'
@@ -39,19 +39,21 @@ ext {
 
     // This is set in the ibm-web-ext.xml file
     warContext = 'myLibertyApp'
-    
+
 }
 
 liberty {
     install {
         runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/17.0.0.1/wlp-webProfile7-17.0.0.1.zip"
     }
-    configFile = file("src/main/liberty/config/server-apps-test.xml")
-    
-    serverName = wlpServerName
-    
-    installapps{ 
-        stripVersion = true
+    server{
+        configFile = file("src/main/liberty/config/server-apps-test.xml")
+
+        name = wlpServerName
+
+        installapps{
+            stripVersion = true
+        }
     }
 }
 

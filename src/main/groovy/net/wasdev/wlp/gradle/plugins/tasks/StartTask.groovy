@@ -25,31 +25,32 @@ class StartTask extends AbstractTask {
 
     @TaskAction
     void start() {
+
         def params = buildLibertyMap(project);
-        params.put('clean', project.liberty.clean)
-        if (project.liberty.timeout != null && project.liberty.timeout.length() != 0) {
-            params.put('timeout', project.liberty.timeout)
+        params.put('clean', project.liberty.server.clean)
+        if (project.liberty.server.timeout != null && project.liberty.server.timeout.length() != 0) {
+            params.put('timeout', project.liberty.server.timeout)
         }
         executeServerCommand(project, 'start', params)
-        
+
         ServerTask serverTask = new ServerTask()
         serverTask.setInstallDir(params.get('installDir'))
         serverTask.setServerName(params.get('serverName'))
         serverTask.setUserDir(params.get('userDir'))
         serverTask.setOutputDir(params.get('outputDir'))
         serverTask.initTask()
-        
-        def verifyTimeout = project.liberty.verifyTimeout
+
+        def verifyTimeout = project.liberty.server.verifyTimeout
         if(project.liberty.verifyTimeout < 0) {
             verifyTimeout = 30
         }
         long timeout = verifyTimeout * 1000
         long endTime = System.currentTimeMillis() + timeout;
-        if(project.liberty.applications) {
-            String[] apps = project.liberty.applications.split("[,\\s]+")
+        if(project.liberty.server.applications) {
+            String[] apps = project.liberty.server.applications.split("[,\\s]+")
             for(String archiveName : apps) {
                 String verify = serverTask.waitForStringInLog(START_APP_MESSAGE_REGEXP + archiveName, timeout, serverTask.getLogFile())
-                if (!verify) { 
+                if (!verify) {
                     executeServerCommand(project, 'stop', buildLibertyMap(project))
                     throw new GradleException("The server has been stopped. Unable to verify if the server was started after ${verifyTimeout} seconds.")
                 }
