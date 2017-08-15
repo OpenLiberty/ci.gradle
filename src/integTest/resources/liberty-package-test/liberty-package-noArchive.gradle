@@ -27,15 +27,20 @@ liberty {
         install {
             runtimeUrl = wlpUrl
         }
-        serverName ='libertyOnline'
+        server{
+            serverName ='libertyOnline'
+        }
     } else {
         installDir = WLP_DIR
-        serverName = 'libertyOffline'
+        server{
+            serverName = 'libertyOffline'
+        }
     }
-
-    packageLiberty {
-        // archive is not set
-        include = 'minify'
-        os='Linux'
+    server{
+        packageLiberty {
+            // archive is not set
+            include = 'minify'
+            os='Linux'
+        }
     }
 }

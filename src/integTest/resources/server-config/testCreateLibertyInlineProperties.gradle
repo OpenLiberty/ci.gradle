@@ -33,10 +33,12 @@ liberty {
     install {
         runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/17.0.0.2/wlp-webProfile7-17.0.0.2.zip"
     }
-    serverName = wlpServerName
-    
-    bootstrapProperties = ['default.http.port':'9083', 'default.https.port':'9474']
-    jvmOptions = ['-Xms128m', '-Xmx512m']
+    server{
+        serverName = wlpServerName
+
+        bootstrapProperties = ['default.http.port':'9083', 'default.https.port':'9474']
+        jvmOptions = ['-Xms128m', '-Xmx512m']
+    }
 }
 
 repositories {

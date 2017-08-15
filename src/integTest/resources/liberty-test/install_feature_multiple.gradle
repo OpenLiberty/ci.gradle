@@ -26,21 +26,25 @@ repositories {
 dependencies {
     libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-webProfile7', version: wlpVersion
 }
-    
+
 liberty {
     if (test_mode == 'online') {
-        serverName ='libertyOnline'
+        server{
+            serverName ='libertyOnline'
+        }
     } else {
         installDir = WLP_DIR
-        serverName = 'libertyOffline'
+        server{
+            serverName = 'libertyOffline'
+        }
     }
-    
+
     features {
         name = ["mongodb-2.0, adminCenter-1.0"]
         acceptLicense = true
         to = "usr"
     }
-    
+
     uninstallfeatures {
         name = ["mongodb-2.0, adminCenter-1.0"]
     }

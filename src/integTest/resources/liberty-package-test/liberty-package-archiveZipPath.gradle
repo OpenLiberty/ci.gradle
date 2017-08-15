@@ -27,13 +27,18 @@ liberty {
         install {
             runtimeUrl = wlpUrl
         }
-        serverName ='libertyOnline'
+        server{
+            serverName ='libertyOnline'
+        }
     } else {
         installDir = WLP_DIR
-        serverName = 'libertyOffline'
+        server{
+            serverName = 'libertyOffline'
+        }
     }
-
-    packageLiberty {
-        archive = 'build/testPackage'
+    server{
+        packageLiberty {
+            archive = 'build/testPackage'
+        }
     }
 }

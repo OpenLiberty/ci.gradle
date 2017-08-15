@@ -27,21 +27,26 @@ liberty {
         install {
             runtimeUrl = wlpUrl
         }
-        serverName ='libertyOnline'
+        server{
+            serverName ='libertyOnline'
+        }
     } else {
         installDir = WLP_DIR
-        serverName = 'libertyOffline'
+        server{
+            serverName = 'libertyOffline'
+        }
     }
+    server{
+        deploy {
+            file = '../../resources/integrationTest/test-war.war'
+        }
 
-    deploy {
-        file = '../../resources/integrationTest/test-war.war'
+        packageLiberty {
+            include = 'minify'
+            os='Linux'
+        }
     }
-
-    packageLiberty {
-        include = 'minify'
-        os='Linux'
-    }
-
+    
     features {
         name= ['mongodb-2.0']
         acceptLicense = true

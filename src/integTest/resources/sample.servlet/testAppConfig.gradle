@@ -38,20 +38,21 @@ ext {
     appName = 'LibertyProject'
     packageFile = "${project.buildDir}/${appName}.zip"
     packagingType = 'usr'
-    
+
 }
 
 liberty {
     install {
         runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/17.0.0.1/wlp-webProfile7-17.0.0.1.zip"
     }
-    
-    serverName = wlpServerName
-    packageLiberty {
-        archive = packageFile
-        include = packagingType
+    server{
+        serverName = wlpServerName
+        packageLiberty {
+            archive = packageFile
+            include = packagingType
+        }
+        applications = "sample.servlet-1"
     }
-    applications = "sample.servlet-1"
 }
 
 repositories {

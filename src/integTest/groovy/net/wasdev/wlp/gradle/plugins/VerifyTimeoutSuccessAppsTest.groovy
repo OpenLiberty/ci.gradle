@@ -22,7 +22,7 @@ public class VerifyTimeoutSuccessAppsTest extends AbstractIntegrationTest{
     public static void tearDown() throws Exception {
         runTasks(buildDir, 'libertyStop')
     }
-    
+
     @Test
     public void test_start_with_timeout_success() {
         try {

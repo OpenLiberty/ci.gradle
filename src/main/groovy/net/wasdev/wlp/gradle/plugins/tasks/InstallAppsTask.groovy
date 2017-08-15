@@ -30,10 +30,10 @@ class InstallAppsTask extends AbstractTask {
 
     @TaskAction
     void installApps() {
-        
+
         boolean installDependencies = false
         boolean installProject = false
-        
+
         switch (getInstallAppPackages()) {
             case "all":
                 installDependencies = true
@@ -48,14 +48,14 @@ class InstallAppsTask extends AbstractTask {
             default:
                 return
         }
-        
+
         if (installProject) {
             installProjectArchive()
         }
         /**if(installDependencies){
             installDependencies()
         }*/
-        
+
         // create application configuration in configDropins if application is not configured
         if (applicationXml.hasChildElements()) {
             logger.warn("The application is not defined in the server configuration but the build file indicates it should be installed in the apps folder. Application configuration is being added to the target server configuration dropins folder by the plug-in.");
@@ -66,20 +66,20 @@ class InstallAppsTask extends AbstractTask {
             }
         }
     }
-    
+
     private void installProjectArchive() throws Exception {
         File archive = new File(archivePath())
         if(!archive.exists()) {
             throw new GradleException("The project archive was not found and cannot be installed.")
         }
-        Files.copy(archive.toPath(), new File(getServerDir(project), "/" + project.liberty.installapps.appsDirectory + "/" + getArchiveName(archive.getName())).toPath(), StandardCopyOption.REPLACE_EXISTING)
-    
+        Files.copy(archive.toPath(), new File(getServerDir(project), "/" + project.liberty.server.installapps.appsDirectory + "/" + getArchiveName(archive.getName())).toPath(), StandardCopyOption.REPLACE_EXISTING)
+
         validateAppConfig(getArchiveName(archive.getName()), getBaseName(archive))
     }
-    
+
     private void validateAppConfig(String fileName, String artifactId) throws Exception {
-        String appsDir = project.liberty.installapps.appsDirectory
-        
+        String appsDir = project.liberty.server.installapps.appsDirectory
+
         if(appsDir.equalsIgnoreCase('apps') && !isAppConfiguredInSourceServerXml(fileName)){
             applicationXml.createApplicationElement(fileName, artifactId)
         }
@@ -87,13 +87,13 @@ class InstallAppsTask extends AbstractTask {
             throw new GradleException("The application is configured in the server.xml and the plug-in is configured to install the application in the dropins folder. A configured application must be installed to the apps folder.")
         }
     }
-    
+
     protected boolean isAppConfiguredInSourceServerXml(String fileName) {
         boolean configured = false;
-        File serverConfigFile = new File(getServerDir(project), 'server.xml') 
+        File serverConfigFile = new File(getServerDir(project), 'server.xml')
         if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
-                ServerConfigDocument scd = ServerConfigDocument.getInstance(serverConfigFile, project.liberty.configDirectory, project.liberty.bootstrapPropertiesFile, project.liberty.bootstrapProperties, project.liberty.serverEnv)
+                ServerConfigDocument scd = ServerConfigDocument.getInstance(serverConfigFile, project.liberty.server.configDirectory, project.liberty.server.bootstrapPropertiesFile, project.liberty.server.bootstrapProperties, project.liberty.server.serverEnv)
                 if (scd != null && scd.getLocations().contains(fileName)) {
                     logger.debug("Application configuration is found in server.xml : " + fileName)
                     configured = true
@@ -106,27 +106,27 @@ class InstallAppsTask extends AbstractTask {
         }
         return configured
     }
-    
-    private String getArchiveName(String archiveName){ 
-        if(project.liberty.installapps.stripVersion){
+
+    private String getArchiveName(String archiveName){
+        if(project.liberty.server.installapps.stripVersion){
             StringBuilder sbArchiveName = new StringBuilder().append("-").append(project.version)
             return archiveName.replaceAll(sbArchiveName.toString(),"")
         }
         return archiveName;
     }
-    
+
     private String getInstallAppPackages() {
         if (project.plugins.hasPlugin("ear")) {
-            project.liberty.installapps.installAppPackages = "project"
+            project.liberty.server.installapps.installAppPackages = "project"
         }
-        return project.liberty.installapps.installAppPackages
+        return project.liberty.server.installapps.installAppPackages
     }
-    
+
     //Removes extension
     private String getBaseName(File file){
-        return file.name.take(getArchiveName(file.name).lastIndexOf('.')) 
+        return file.name.take(getArchiveName(file.name).lastIndexOf('.'))
     }
-    
+
     private String archivePath() throws Exception {
         if (project.plugins.hasPlugin("ear")) {
             return project.ear.archivePath
@@ -141,5 +141,5 @@ class InstallAppsTask extends AbstractTask {
             throw new GradleException("Archive path not found. Supported formats are jar, war, and ear.")
         }
     }
-    
+
 }

@@ -26,20 +26,24 @@ repositories {
 dependencies {
     libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-javaee7', version: wlpVersion
 }
-    
+
 liberty {
     if (test_mode == 'online') {
-        serverName ='libertyOnline'
+        server{
+            serverName ='libertyOnline'
+        }
     } else {
         installDir = WLP_DIR
-        serverName = 'libertyOffline'
+        server{
+            serverName = 'libertyOffline'
+        }
     }
-    
+
     features {
         name = ["mongodb-2.0"]
         acceptLicense = true
     }
-    
+
     uninstallfeatures {
         name = ["mongodb-2.0"]
     }
