@@ -26,10 +26,6 @@ class StartTask extends AbstractTask {
     @TaskAction
     void start() {
 
-        if(project.hasProperty('startMessage')){
-            START_APP_MESSAGE_REGEXP = project.getProperty('startMessage');
-        }
-
         def params = buildLibertyMap(project);
         params.put('clean', project.liberty.server.clean)
         if (project.liberty.server.timeout != null && project.liberty.server.timeout.length() != 0) {
