@@ -72,13 +72,13 @@ class InstallAppsTask extends AbstractServerTask {
         if(!archive.exists()) {
             throw new GradleException("The project archive was not found and cannot be installed.")
         }
-        Files.copy(archive.toPath(), new File(getServerDir(project), "/" + project.liberty.server.installapps.appsDirectory + "/" + getArchiveName(archive.getName())).toPath(), StandardCopyOption.REPLACE_EXISTING)
+        Files.copy(archive.toPath(), new File(getServerDir(project), "/" + server.installapps.appsDirectory + "/" + getArchiveName(archive.getName())).toPath(), StandardCopyOption.REPLACE_EXISTING)
 
         validateAppConfig(getArchiveName(archive.getName()), getBaseName(archive))
     }
 
     private void validateAppConfig(String fileName, String artifactId) throws Exception {
-        String appsDir = project.liberty.server.installapps.appsDirectory
+        String appsDir = server.installapps.appsDirectory
 
         if(appsDir.equalsIgnoreCase('apps') && !isAppConfiguredInSourceServerXml(fileName)){
             applicationXml.createApplicationElement(fileName, artifactId)
@@ -93,7 +93,7 @@ class InstallAppsTask extends AbstractServerTask {
         File serverConfigFile = new File(getServerDir(project), 'server.xml')
         if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
-                ServerConfigDocument scd = ServerConfigDocument.getInstance(serverConfigFile, project.liberty.server.configDirectory, project.liberty.server.bootstrapPropertiesFile, project.liberty.server.bootstrapProperties, project.liberty.server.serverEnv)
+                ServerConfigDocument scd = ServerConfigDocument.getInstance(serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, server.bootstrapProperties, server.serverEnv)
                 if (scd != null && scd.getLocations().contains(fileName)) {
                     logger.debug("Application configuration is found in server.xml : " + fileName)
                     configured = true
@@ -108,7 +108,7 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
     private String getArchiveName(String archiveName){
-        if(project.liberty.server.installapps.stripVersion){
+        if(server.installapps.stripVersion){
             StringBuilder sbArchiveName = new StringBuilder().append("-").append(project.version)
             return archiveName.replaceAll(sbArchiveName.toString(),"")
         }
@@ -117,9 +117,9 @@ class InstallAppsTask extends AbstractServerTask {
 
     private String getInstallAppPackages() {
         if (project.plugins.hasPlugin("ear")) {
-            project.liberty.server.installapps.installAppPackages = "project"
+            server.installapps.installAppPackages = "project"
         }
-        return project.liberty.server.installapps.installAppPackages
+        return server.installapps.installAppPackages
     }
 
     //Removes extension

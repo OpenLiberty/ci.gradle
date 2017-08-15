@@ -28,8 +28,8 @@ class DeployTask extends AbstractServerTask {
                                 classname: 'net.wasdev.wlp.ant.DeployTask',
                                 classpath: project.buildscript.configurations.classpath.asPath)
 
-        project.liberty.server.deploy.listOfClosures.add(project.liberty.deploy)
-        for (Object deployable :  project.liberty.server.deploy.listOfClosures) {
+        server.deploy.listOfClosures.add(project.liberty.deploy)
+        for (Object deployable :  server.deploy.listOfClosures) {
             def params = buildLibertyMap(project);
             def fileToDeploy = deployable.file
             if (fileToDeploy != null) {

@@ -23,9 +23,9 @@ class PackageTask extends AbstractServerTask {
     void packageServer() {
 
         def params = buildLibertyMap(project);
-        def fileType = getPackageFileType(project.liberty.server.packageLiberty.include)
+        def fileType = getPackageFileType(server.packageLiberty.include)
 
-        def archive = project.liberty.server.packageLiberty.archive
+        def archive = server.packageLiberty.archive
 
         copyConfigFiles()
         if (archive != null && archive.length() != 0) {
@@ -47,11 +47,11 @@ class PackageTask extends AbstractServerTask {
             logger.debug 'Packaging default ' + defaultPackageFile
         }
 
-        if (project.liberty.server.packageLiberty.include != null && project.liberty.server.packageLiberty.include.length() != 0) {
-            params.put('include', project.liberty.server.packageLiberty.include)
+        if (server.packageLiberty.include != null && server.packageLiberty.include.length() != 0) {
+            params.put('include', server.packageLiberty.include)
         }
-        if (project.liberty.server.packageLiberty.os != null && project.liberty.server.packageLiberty.os.length() != 0) {
-            params.put('os', project.liberty.server.packageLiberty.os)
+        if (server.packageLiberty.os != null && server.packageLiberty.os.length() != 0) {
+            params.put('os', server.packageLiberty.os)
         }
 
         executeServerCommand(project, 'package', params)

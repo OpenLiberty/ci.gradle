@@ -22,8 +22,8 @@ class JavaDumpTask extends AbstractServerTask {
     @TaskAction
     void javaDump() {
         def params = buildLibertyMap(project);
-        if (project.liberty.server.javaDumpLiberty.include != null && project.liberty.server.javaDumpLiberty.include.length() != 0) {
-            params.put('include',project.liberty.server.javaDumpLiberty.include)
+        if (server.javaDumpLiberty.include != null && server.javaDumpLiberty.include.length() != 0) {
+            params.put('include',server.javaDumpLiberty.include)
         }
         executeServerCommand(project, 'javadump', params)
     }

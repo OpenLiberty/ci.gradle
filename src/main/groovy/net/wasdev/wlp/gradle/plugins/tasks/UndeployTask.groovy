@@ -27,9 +27,9 @@ class UndeployTask extends AbstractServerTask {
                             classname: 'net.wasdev.wlp.ant.UndeployTask',
                             classpath: project.buildscript.configurations.classpath.asPath)
 
-        def application = project.liberty.server.undeploy.application
-        def include = project.liberty.server.undeploy.include
-        def exclude = project.liberty.server.undeploy.exclude
+        def application = server.undeploy.application
+        def include = server.undeploy.include
+        def exclude = server.undeploy.exclude
 
         if (application != null) {
             params.put('file', application)

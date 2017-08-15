@@ -27,9 +27,9 @@ class StartTask extends AbstractServerTask {
     void start() {
 
         def params = buildLibertyMap(project);
-        params.put('clean', project.liberty.server.clean)
-        if (project.liberty.server.timeout != null && project.liberty.server.timeout.length() != 0) {
-            params.put('timeout', project.liberty.server.timeout)
+        params.put('clean', server.clean)
+        if (server.timeout != null && server.timeout.length() != 0) {
+            params.put('timeout', server.timeout)
         }
         executeServerCommand(project, 'start', params)
 
@@ -40,14 +40,14 @@ class StartTask extends AbstractServerTask {
         serverTask.setOutputDir(params.get('outputDir'))
         serverTask.initTask()
 
-        def verifyTimeout = project.liberty.server.verifyTimeout
+        def verifyTimeout = server.verifyTimeout
         if(project.liberty.verifyTimeout < 0) {
             verifyTimeout = 30
         }
         long timeout = verifyTimeout * 1000
         long endTime = System.currentTimeMillis() + timeout;
-        if(project.liberty.server.applications) {
-            String[] apps = project.liberty.server.applications.split("[,\\s]+")
+        if(server.applications) {
+            String[] apps = server.applications.split("[,\\s]+")
             for(String archiveName : apps) {
                 String verify = serverTask.waitForStringInLog(START_APP_MESSAGE_REGEXP + archiveName, timeout, serverTask.getLogFile())
                 if (!verify) {
