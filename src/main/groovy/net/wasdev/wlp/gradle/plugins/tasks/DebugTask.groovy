@@ -17,7 +17,7 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.tasks.TaskAction
 
-class DebugTask extends AbstractTask {
+class DebugTask extends AbstractServerTask {
 
     @TaskAction
     void debug() {

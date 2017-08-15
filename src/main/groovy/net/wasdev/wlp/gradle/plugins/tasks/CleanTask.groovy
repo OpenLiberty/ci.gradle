@@ -17,7 +17,7 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.tasks.TaskAction
 
-class CleanTask extends AbstractTask {
+class CleanTask extends AbstractServerTask {
 
     @TaskAction
     void cleanDirectories() {
@@ -27,8 +27,8 @@ class CleanTask extends AbstractTask {
         params.put('dropins', project.liberty.cleanDir.dropins)
         params.put('apps', project.liberty.cleanDir.apps)
         params.remove('timeout')
-        project.ant.taskdef(name: 'cleanDir', 
-                            classname: 'net.wasdev.wlp.ant.CleanTask', 
+        project.ant.taskdef(name: 'cleanDir',
+                            classname: 'net.wasdev.wlp.ant.CleanTask',
                             classpath: project.buildscript.configurations.classpath.asPath)
         project.ant.cleanDir(params)
     }
