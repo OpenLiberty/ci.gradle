@@ -21,7 +21,7 @@ import net.wasdev.wlp.ant.ServerTask;
 
 class StartTask extends AbstractTask {
 
-    protected String START_APP_MESSAGE_REGEXP = "CWWKZ0001I.*"
+    protected String final START_APP_MESSAGE_REGEXP = "CWWKZ0001I.*"
 
     @TaskAction
     void start() {

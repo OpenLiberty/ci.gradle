@@ -30,12 +30,12 @@ dependencies {
 liberty {
     if (test_mode == 'online') {
         server{
-            serverName ='libertyOnline'
+            name ='libertyOnline'
         }
     } else {
         installDir = WLP_DIR
         server{
-            serverName = 'libertyOffline'
+            name = 'libertyOffline'
         }
     }
 }

@@ -34,7 +34,7 @@ liberty {
         runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/17.0.0.2/wlp-webProfile7-17.0.0.2.zip"
     }
     server{
-        serverName = wlpServerName
+        name = wlpServerName
 
         bootstrapPropertiesFile = file("src/main/liberty/config/bootstrap.test.properties")
         jvmOptionsFile = file("src/main/liberty/config/jvm.options")

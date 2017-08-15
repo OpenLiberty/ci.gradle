@@ -36,7 +36,7 @@ abstract class AbstractTask extends DefaultTask {
 
     protected Map<String, String> buildLibertyMap(Project project) {
         Map<String, String> result = new HashMap();
-        result.put('serverName', project.liberty.server.serverName)
+        result.put('serverName', project.liberty.server.name)
 
         def installDir = getInstallDir(project)
         result.put('installDir', installDir)
@@ -85,7 +85,7 @@ abstract class AbstractTask extends DefaultTask {
             command.add(installDir + "/bin/server")
         }
         command.add(operation)
-        command.add(project.liberty.server.serverName)
+        command.add(project.liberty.server.name)
 
         return command
     }
@@ -96,7 +96,7 @@ abstract class AbstractTask extends DefaultTask {
             serverDirectory = project.liberty.server.outputDir
         }
         else{
-            serverDirectory = getInstallDir(project).toString() + "/usr/servers/" + project.liberty.server.serverName
+            serverDirectory = getInstallDir(project).toString() + "/usr/servers/" + project.liberty.server.name
         }
 
         return new File(serverDirectory)

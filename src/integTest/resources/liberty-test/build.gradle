@@ -28,12 +28,12 @@ liberty {
             runtimeUrl = wlpUrl
         }
         server{
-            serverName ='libertyOnline'
+            name ='libertyOnline'
         }
     } else {
         installDir = WLP_DIR
         server{
-            serverName = 'libertyOffline'
+            name = 'libertyOffline'
         }
     }
     server{
@@ -46,7 +46,7 @@ liberty {
             os='Linux'
         }
     }
-    
+
     features {
         name= ['mongodb-2.0']
         acceptLicense = true

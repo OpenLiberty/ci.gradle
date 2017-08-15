@@ -49,7 +49,7 @@ liberty {
     server{
         configFile = file("src/main/liberty/config/server-apps-test.xml")
 
-        serverName = wlpServerName
+        name = wlpServerName
 
         installapps{
             stripVersion = true
