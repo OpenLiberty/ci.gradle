@@ -54,6 +54,7 @@ liberty {
         installapps{
             stripVersion = true
         }
+     }
 }
 
 repositories {
