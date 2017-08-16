@@ -200,8 +200,8 @@ class InstallAppsTask extends AbstractTask {
     }
 
     private void addWarEmbeddedLib(Element parent, LooseApplication looseApp) throws Exception {
-        Dependency[] deps = project.configuration.dependencies.toArray();
-        for (dep in deps) {
+        DependencySet deps = project.configuration.dependencies
+        /*for (dep in deps) {
             MavenProject dependProject = getMavenProject(dep.getGroupId(), dep.getArtifactId(),
                     dep.getVersion());
             if (dependProject.getBasedir() != null && dependProject.getBasedir().exists()) {
@@ -214,7 +214,7 @@ class InstallAppsTask extends AbstractTask {
                         "/WEB-INF/lib/" + resolveArtifact(dependProject.getArtifact()).getFile().getName());
             }
         }
-    }
+    }*/
   }
     private boolean containsJavaSource(){
       Set<File> srcDirs = project.sourceSets.allJava.getSrcDirs();
