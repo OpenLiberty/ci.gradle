@@ -17,7 +17,7 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.tasks.TaskAction
 
-class InstallFeatureTask extends AbstractTask {
+class InstallFeatureTask extends AbstractServerTask {
 
     @TaskAction
     void installFeature() {
@@ -31,8 +31,8 @@ class InstallFeatureTask extends AbstractTask {
             params.put('from', project.liberty.features.from)
         }
         params.remove('timeout')
-        project.ant.taskdef(name: 'installFeature', 
-                            classname: 'net.wasdev.wlp.ant.InstallFeatureTask', 
+        project.ant.taskdef(name: 'installFeature',
+                            classname: 'net.wasdev.wlp.ant.InstallFeatureTask',
                             classpath: project.buildscript.configurations.classpath.asPath)
         project.ant.installFeature(params)
     }

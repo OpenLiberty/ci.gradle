@@ -28,7 +28,7 @@ import org.w3c.dom.Element;
 
 import net.wasdev.wlp.gradle.plugins.utils.*;
 
-class InstallAppsTask extends AbstractTask {
+class InstallAppsTask extends AbstractServerTask {
 
     protected ApplicationXmlDocument applicationXml = new ApplicationXmlDocument();
 
@@ -76,13 +76,13 @@ class InstallAppsTask extends AbstractTask {
         if(!archive.exists()) {
             throw new GradleException("The project archive was not found and cannot be installed.")
         }
-        Files.copy(archive.toPath(), new File(getServerDir(project), "/" + project.liberty.installapps.appsDirectory + "/" + getArchiveName(archive.getName())).toPath(), StandardCopyOption.REPLACE_EXISTING)
+        Files.copy(archive.toPath(), new File(getServerDir(project), "/" + server.installapps.appsDirectory + "/" + getArchiveName(archive.getName())).toPath(), StandardCopyOption.REPLACE_EXISTING)
 
         validateAppConfig(getArchiveName(archive.getName()), getBaseName(archive))
     }
 
     private void validateAppConfig(String fileName, String artifactId) throws Exception {
-        String appsDir = project.liberty.installapps.appsDirectory
+        String appsDir = server.installapps.appsDirectory
 
         if(appsDir.equalsIgnoreCase('apps') && !isAppConfiguredInSourceServerXml(fileName)){
             applicationXml.createApplicationElement(fileName, artifactId)
@@ -97,7 +97,7 @@ class InstallAppsTask extends AbstractTask {
         File serverConfigFile = new File(getServerDir(project), 'server.xml')
         if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
-                ServerConfigDocument scd = ServerConfigDocument.getInstance(serverConfigFile, project.liberty.configDirectory, project.liberty.bootstrapPropertiesFile, project.liberty.bootstrapProperties, project.liberty.serverEnv)
+                ServerConfigDocument scd = ServerConfigDocument.getInstance(serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, server.bootstrapProperties, server.serverEnv)
                 if (scd != null && scd.getLocations().contains(fileName)) {
                     logger.debug("Application configuration is found in server.xml : " + fileName)
                     configured = true
@@ -112,7 +112,7 @@ class InstallAppsTask extends AbstractTask {
     }
 
     private String getArchiveName(String archiveName){
-        if(project.liberty.installapps.stripVersion){
+        if(server.installapps.stripVersion){
             StringBuilder sbArchiveName = new StringBuilder().append("-").append(project.version)
             return archiveName.replaceAll(sbArchiveName.toString(),"")
         }
@@ -121,9 +121,9 @@ class InstallAppsTask extends AbstractTask {
 
     private String getInstallAppPackages() {
         if (project.plugins.hasPlugin("ear")) {
-            project.liberty.installapps.installAppPackages = "project"
+            server.installapps.installAppPackages = "project"
         }
-        return project.liberty.installapps.installAppPackages
+        return server.installapps.installAppPackages
     }
 
     //Removes extension

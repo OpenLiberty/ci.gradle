@@ -17,19 +17,19 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.tasks.TaskAction
 
-class UndeployTask extends AbstractTask {
+class UndeployTask extends AbstractServerTask {
 
     @TaskAction
     void undeploy() {
         def params = buildLibertyMap(project);
 
-        project.ant.taskdef(name: 'undeploy', 
-                            classname: 'net.wasdev.wlp.ant.UndeployTask', 
+        project.ant.taskdef(name: 'undeploy',
+                            classname: 'net.wasdev.wlp.ant.UndeployTask',
                             classpath: project.buildscript.configurations.classpath.asPath)
 
-        def application = project.liberty.undeploy.application
-        def include = project.liberty.undeploy.include
-        def exclude = project.liberty.undeploy.exclude
+        def application = server.undeploy.application
+        def include = server.undeploy.include
+        def exclude = server.undeploy.exclude
 
         if (application != null) {
             params.put('file', application)

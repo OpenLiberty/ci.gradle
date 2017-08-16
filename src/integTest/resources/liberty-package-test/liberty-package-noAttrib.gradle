@@ -27,15 +27,19 @@ liberty {
         install {
             runtimeUrl = wlpUrl
         }
-        serverName ='libertyOnline'
+        server{
+            name ='libertyOnline'
+        }
     } else {
         installDir = WLP_DIR
-        serverName = 'libertyOffline'
+        server{
+            name = 'libertyOffline'
+        }
     }
 
 // TEST: packageLiberty attributes are not set on purpose
 //    packageLiberty {
-//        archive = 'test' 
+//        archive = 'test'
 //        include = 'minify'
 //        os='Linux'
 //    }

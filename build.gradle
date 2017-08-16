@@ -33,13 +33,18 @@ sourceSets {
         resources.srcDir file('src/integTest/resources')
         compileClasspath = sourceSets.main.output + configurations.testRuntime
         runtimeClasspath = output + compileClasspath
+        output.classesDir = new File(buildDir, 'classes/java/integrationTest')
     }
 }
 
 task integrationTest(type: Test) {
     logging.level = LogLevel.INFO
-    description = 'Runs the integration tests.'
-    testClassesDir = sourceSets.integrationTest.output.classesDir
+    description = 'Runs the integration tests.' + gradle.gradleVersion
+    if (!gradle.gradleVersion.contains('4.')) {
+        testClassesDir = sourceSets.integrationTest.output.classesDir
+    } else {
+        testClassesDirs = fileTree(dir: sourceSets.integrationTest.output.classesDir)
+    }
     classpath = sourceSets.integrationTest.runtimeClasspath
     if (!(project.hasProperty('runit'))) {
         enabled = false

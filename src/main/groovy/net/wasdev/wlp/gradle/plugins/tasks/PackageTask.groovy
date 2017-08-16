@@ -17,53 +17,53 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.tasks.TaskAction
 
-class PackageTask extends AbstractTask {
+class PackageTask extends AbstractServerTask {
 
     @TaskAction
     void packageServer() {
 
         def params = buildLibertyMap(project);
-        def fileType = getPackageFileType(project.liberty.packageLiberty.include)
-        
-        def archive = project.liberty.packageLiberty.archive
-        
+        def fileType = getPackageFileType(server.packageLiberty.include)
+
+        def archive = server.packageLiberty.archive
+
         copyConfigFiles()
         if (archive != null && archive.length() != 0) {
             def archiveFile = new File(archive)
-            
+
             if (archiveFile.exists() && archiveFile.isDirectory()) {
                 archiveFile = new File(archiveFile, project.getName() + fileType)
-            } 
+            }
             params.put('archive', archiveFile)
             logger.debug 'Packaging ' + archiveFile
         } else {
-            // default output directory  
+            // default output directory
             def buildLibsDir = new File(project.getBuildDir(), 'libs')
-            
+
             createDir(buildLibsDir)
-            
+
             def defaultPackageFile = new File(buildLibsDir, project.getName() + fileType)
             params.put('archive', defaultPackageFile)
             logger.debug 'Packaging default ' + defaultPackageFile
         }
-        
-        if (project.liberty.packageLiberty.include != null && project.liberty.packageLiberty.include.length() != 0) {
-            params.put('include', project.liberty.packageLiberty.include)
+
+        if (server.packageLiberty.include != null && server.packageLiberty.include.length() != 0) {
+            params.put('include', server.packageLiberty.include)
         }
-        if (project.liberty.packageLiberty.os != null && project.liberty.packageLiberty.os.length() != 0) {
-            params.put('os', project.liberty.packageLiberty.os)
+        if (server.packageLiberty.os != null && server.packageLiberty.os.length() != 0) {
+            params.put('os', server.packageLiberty.os)
         }
 
         executeServerCommand(project, 'package', params)
     }
-    
+
     private String getPackageFileType(String include) {
         if (include != null && include.contains("runnable")) {
             return ".jar"
         }
         return ".zip"
     }
-    
+
     private static void createDir(File dir) {
         if (!dir.exists()) {
             if (!dir.mkdirs()) {

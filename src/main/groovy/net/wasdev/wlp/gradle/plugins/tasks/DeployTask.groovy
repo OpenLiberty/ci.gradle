@@ -17,19 +17,19 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.tasks.TaskAction
 
-class DeployTask extends AbstractTask {
+class DeployTask extends AbstractServerTask {
 
     @TaskAction
     void deploy() {
 
         def deployClosureDeclared = false
 
-        project.ant.taskdef(name: 'deploy', 
-                                classname: 'net.wasdev.wlp.ant.DeployTask', 
+        project.ant.taskdef(name: 'deploy',
+                                classname: 'net.wasdev.wlp.ant.DeployTask',
                                 classpath: project.buildscript.configurations.classpath.asPath)
-                                
-        project.liberty.deploy.listOfClosures.add(project.liberty.deploy)
-        for (Object deployable :  project.liberty.deploy.listOfClosures) {
+
+        server.deploy.listOfClosures.add(project.liberty.deploy)
+        for (Object deployable :  server.deploy.listOfClosures) {
             def params = buildLibertyMap(project);
             def fileToDeploy = deployable.file
             if (fileToDeploy != null) {

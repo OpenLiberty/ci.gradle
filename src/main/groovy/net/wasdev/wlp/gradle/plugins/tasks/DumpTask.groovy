@@ -17,16 +17,16 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.tasks.TaskAction
 
-class DumpTask extends AbstractTask {
+class DumpTask extends AbstractServerTask {
 
     @TaskAction
     void dump() {
         def params = buildLibertyMap(project);
-        if (project.liberty.dumpLiberty.archive != null && project.liberty.dumpLiberty.archive.length() != 0) {
-            params.put('archive', new File(project.liberty.dumpLiberty.archive))
+        if (server.dumpLiberty.archive != null && server.dumpLiberty.archive.length() != 0) {
+            params.put('archive', new File(server.dumpLiberty.archive))
         }
-        if (project.liberty.dumpLiberty.include != null && project.liberty.dumpLiberty.include.length() != 0) {
-            params.put('include',project.liberty.dumpLiberty.include)
+        if (server.dumpLiberty.include != null && server.dumpLiberty.include.length() != 0) {
+            params.put('include',server.dumpLiberty.include)
         }
         executeServerCommand(project, 'dump', params)
     }

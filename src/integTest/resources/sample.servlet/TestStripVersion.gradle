@@ -46,13 +46,14 @@ liberty {
     install {
         runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/17.0.0.1/wlp-webProfile7-17.0.0.1.zip"
     }
-    configFile = file("src/main/liberty/config/server-apps-test.xml")
+    server{
+        configFile = file("src/main/liberty/config/server-apps-test.xml")
 
-    serverName = wlpServerName
+        name = wlpServerName
 
-    installapps{
-        stripVersion = true
-    }
+        installapps{
+            stripVersion = true
+        }
 }
 
 repositories {

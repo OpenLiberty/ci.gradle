@@ -27,19 +27,24 @@ liberty {
         install {
             runtimeUrl = wlpUrl
         }
-        serverName ='libertyOnline'
+        server{
+            name ='libertyOnline'
+        }
     } else {
         installDir = WLP_DIR
-        serverName = 'libertyOffline'
+        server{
+            name = 'libertyOffline'
+        }
     }
+    server{
+        deploy {
+            file = '../../resources/integrationTest/test-war.war'
+        }
 
-    deploy {
-        file = '../../resources/integrationTest/test-war.war'
-    }
-
-    packageLiberty {
-        include = 'minify'
-        os='Linux'
+        packageLiberty {
+            include = 'minify'
+            os='Linux'
+        }
     }
 
     features {

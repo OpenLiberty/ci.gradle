@@ -17,7 +17,7 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.tasks.TaskAction
 
-class StatusTask extends AbstractTask {
+class StatusTask extends AbstractServerTask {
 
     @TaskAction
     void status() {
