@@ -54,7 +54,7 @@ class InstallAppsTask extends AbstractServerTask {
         }
 
         if (installProject) {
-            installProjectArchive()
+            installProjectLooseConfig()
         }
         /**if(installDependencies){
             installDependencies()
@@ -146,25 +146,27 @@ class InstallAppsTask extends AbstractServerTask {
         }
     }
     //Loose Config Start
-    private void installProject() throws Exception{
-      if(isSupportedType(getPackagingType())){
+    private void installProjectLooseConfig() throws Exception{
+      if(isSupportedType()){
         if(project.liberty.installapps.looseApplication){
-          String looseConfigFileName = getLooseConfigFileName(project.liberty.applications)
+          String looseConfigFileName = getLooseConfigFileName()
           String application = looseConfigFileName.substring(0, looseConfigFileName.length()-4)
           File destDir = new File(getServerDir(project), "apps")
           File looseConfigFile = new File(destDir, looseConfigFileName)
           LooseConfigData config = new LooseConfigData()
           switch(getPackagingType()){
             case "war":
+                  println("\n\n\n\n3:::::::::::::::::::::::::::::::::;\n\n\n\n")
                   installLooseConfigWar(config)
+                  println("\n\n\n\n2:::::::::::::::::::::::::::::::::;\n\n\n\n")
                   //validateAppConfig(getArchiveName(archive.getName()), getBaseName(archive))
                   validateAppConfig(application, application.take(getArchiveName(application).lastIndexOf('.')))
+                  println("\n\n\n\n1:::::::::::::::::::::::::::::::::;\n\n\n\n")
                   logger.debug("Ask matt what to put here again")
                   /*logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFileName));*/
                   deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
                   deleteApplication(new File(getServerDir(project), "dropins"), looseConfigFile)
                   config.toXmlFile(looseConfigFile)
-                  println("\n\n\n\n:::::::::::::::::::::::::::::::::;\n\n\n\n")
               break
             case "ear":
               break
@@ -200,9 +202,11 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
     private void addWarEmbeddedLib(Element parent, LooseApplication looseApp) throws Exception {
-        DependencySet deps = project.configuration.dependencies
-        /*for (dep in deps) {
-            MavenProject dependProject = getMavenProject(dep.getGroupId(), dep.getArtifactId(),
+        ArrayList<Dependency> deps = new ArrayList<Dependency>()
+        project.configurations.runtime.each { deps.add(it) }
+        project.configurations.providedRuntime.each { deps.remove(it) }
+        for (dep in deps) {
+            /*MavenProject dependProject = getMavenProject(dep.getGroupId(), dep.getArtifactId(),
                     dep.getVersion());
             if (dependProject.getBasedir() != null && dependProject.getBasedir().exists()) {
                 Element archive = looseApp.addArchive(parent, "/WEB-INF/lib/" + dependProject.getBuild().getFinalName() + ".jar");
@@ -212,10 +216,9 @@ class InstallAppsTask extends AbstractServerTask {
                 looseApp.getConfig().addFile(parent,
                         resolveArtifact(dependProject.getArtifact()).getFile().getAbsolutePath(),
                         "/WEB-INF/lib/" + resolveArtifact(dependProject.getArtifact()).getFile().getName());
-            }
+            }*/
         }
-    }*/
-  }
+    }
     private boolean containsJavaSource(){
       Set<File> srcDirs = project.sourceSets.allJava.getSrcDirs();
       for(srcDir in srcDirs){
@@ -244,7 +247,7 @@ class InstallAppsTask extends AbstractServerTask {
 //End of methods that need to be implemented
     //Need to modify to emulate what it's doing in InstallAppsMojo
     private boolean isSupportedType(){
-      switch (type) {
+      switch (getPackagingType()) {
         case "ear":
         case "war":
         case "eba":
