@@ -29,22 +29,20 @@ dependencies {
 
 liberty {
     if (test_mode == 'online') {
-        server{
-            name ='libertyOnline'
-        }
+        serverName = 'libertyOnline'
     } else {
         installDir = WLP_DIR
-        server{
-            name = 'libertyOffline'
+        serverName = 'libertyOffline'
+    }
+    server{
+        name = serverName
+        features {
+            name = ["mongodb-2.0"]
+            acceptLicense = true
         }
-    }
 
-    features {
-        name = ["mongodb-2.0"]
-        acceptLicense = true
-    }
-
-    uninstallfeatures {
-        name = ["mongodb-2.0"]
+        uninstallfeatures {
+            name = ["mongodb-2.0"]
+        }
     }
 }

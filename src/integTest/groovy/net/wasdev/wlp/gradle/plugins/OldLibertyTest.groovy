@@ -24,10 +24,10 @@ import org.junit.runners.MethodSorters
 import net.wasdev.wlp.ant.ServerTask
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class LibertyTest extends AbstractIntegrationTest{
+class OldLibertyTest extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/integrationTest/liberty-test")
-    static File buildDir = new File(integTestDir, "/liberty-test")
-    static String buildFilename = "build.gradle"
+    static File buildDir = new File(integTestDir, "/old-liberty-test")
+    static String buildFilename = "oldStyleTest.gradle"
 
     @BeforeClass
     public static void setup() {

@@ -41,6 +41,10 @@ class ServerExtension{
 
     def numberOfClosures = 0
 
+    FeatureExtension features = new FeatureExtension()
+    UninstallFeatureExtension uninstallfeatures = new UninstallFeatureExtension()
+    CleanExtension cleanDir = new CleanExtension()
+
     DeployExtension deploy = new DeployExtension()
     UndeployExtension undeploy = new UndeployExtension()
 
@@ -49,6 +53,18 @@ class ServerExtension{
     PackageAndDumpExtension javaDumpLiberty = new PackageAndDumpExtension()
 
     InstallAppsExtension installapps = new InstallAppsExtension()
+
+    def uninstallfeatures(Closure closure) {
+        ConfigureUtil.configure(closure, uninstallfeatures)
+    }
+
+    def features(Closure closure) {
+        ConfigureUtil.configure(closure, features)
+    }
+
+    def cleanDir(Closure closure) {
+        ConfigureUtil.configure(closure, cleanDir)
+    }
 
     def deploy(Closure closure) {
         if (numberOfClosures > 0){
