@@ -200,6 +200,13 @@ class InstallAppsTask extends AbstractServerTask {
         project.configurations.runtime.each { deps.add(it) }
         project.configurations.providedRuntime.each { deps.remove(it) }
         for (dep in deps) {
+
+            //Patrick added a check here to check if it is a compile dependency and it is of jar type, don't think it's necessary for gradle
+             //looseApp.addArchive(Element Parent, jav version of project) and put this in addArchive
+            //addArchive, instead of using Maven project, maybe just pass as a dependency instead to see if it works
+            //add the manifest file with properties we already have
+            //idk how to make this check in gradle... need to find this out
+
             /*MavenProject dependProject = getMavenProject(dep.getGroupId(), dep.getArtifactId(),
                     dep.getVersion());
             if (dependProject.getBasedir() != null && dependProject.getBasedir().exists()) {

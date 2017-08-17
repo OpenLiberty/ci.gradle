@@ -26,11 +26,7 @@ public class LooseConfigData extends XmlDocument {
   }
 
   public void addDir(String src, String target) {
-    System.out.println("\n\n\nSource!!!::::: " + src);
-    System.out.println("\n\n\nDir!!!::::: " + target);      
       if (new File(src).exists()) {
-          System.out.println("File Exists!!!!");
-          System.out.println("\n\n\n:::::::::::");
           addDir(doc.getDocumentElement(), src, target);
       }
   }
