@@ -2,6 +2,7 @@ package net.wasdev.wlp.gradle.plugins.utils;
 
 import java.io.File;
 import org.gradle.api.Project;
+import org.gradle.api.plugins.WarPluginConvention
 
 public class LooseWarApplication extends LooseApplication {
 
@@ -10,7 +11,8 @@ public class LooseWarApplication extends LooseApplication {
     }
 
     public void addSourceDir() throws Exception {
-        File sourceDir = new File(project.war.webAppDir.getAbsolutePath(), "src/main/webapp");
+        WarPluginConvention wpc = new WarPluginConvention(project)
+        File sourceDir = new File(wpc.getWebAppDir().getAbsolutePath());
         config.addDir(sourceDir.getCanonicalPath(), "/");
     }
 

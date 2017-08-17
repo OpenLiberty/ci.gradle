@@ -156,25 +156,20 @@ class InstallAppsTask extends AbstractServerTask {
           LooseConfigData config = new LooseConfigData()
           switch(getPackagingType()){
             case "war":
-                  println("\n\n\n\n3:::::::::::::::::::::::::::::::::;\n\n\n\n")
-                  installLooseConfigWar(config)
-                  println("\n\n\n\n2:::::::::::::::::::::::::::::::::;\n\n\n\n")
-                  //validateAppConfig(getArchiveName(archive.getName()), getBaseName(archive))
-                  validateAppConfig(application, application.take(getArchiveName(application).lastIndexOf('.')))
-                  println("\n\n\n\n1:::::::::::::::::::::::::::::::::;\n\n\n\n")
-                  logger.debug("Ask matt what to put here again")
-                  /*logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFileName));*/
-                  deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
-                  deleteApplication(new File(getServerDir(project), "dropins"), looseConfigFile)
-                  config.toXmlFile(looseConfigFile)
-              break
+                validateAppConfig(application, application.take(getArchiveName(application).lastIndexOf('.')))
+                logger.debug("Ask matt what to put here again")/*logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFileName));*/\
+                installLooseConfigWar(config)
+                deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
+                deleteApplication(new File(getServerDir(project), "dropins"), looseConfigFile)
+                config.toXmlFile(looseConfigFile)
+                break
             case "ear":
-              break
+                break
             default:
-              logger.info(MessageFormat.format(("Loose application configuration is not supported for packaging type {0}. The project artifact will be installed as is."),
-                      project.getPackaging()));
-              installProjectArchive()
-              break
+                logger.info(MessageFormat.format(("Loose application configuration is not supported for packaging type {0}. The project artifact will be installed as is."),
+                        project.getPackaging()));
+                installProjectArchive()
+                break
           }
         }
         else{
@@ -189,14 +184,13 @@ class InstallAppsTask extends AbstractServerTask {
     //Start of methods that need to be implemented
     // install war project artifact using loose application configuration file
     protected void installLooseConfigWar(LooseConfigData config) throws Exception {
-        File dir = new File(project.liberty.outputDir)
+        File dir = getServerDir(project)
         if (!dir.exists() && containsJavaSource()) {
           throw new GradleException("Ask Matt what to put here")
         }
         LooseWarApplication looseWar = new LooseWarApplication(project, config)
         looseWar.addSourceDir()
         looseWar.addOutputDir(looseWar.getDocumentRoot(), project, "/WEB-INF/classes");
-
         // retrieves dependent library jar files
         addWarEmbeddedLib(looseWar.getDocumentRoot(), looseWar);
     }
@@ -219,6 +213,7 @@ class InstallAppsTask extends AbstractServerTask {
             }*/
         }
     }
+
     private boolean containsJavaSource(){
       Set<File> srcDirs = project.sourceSets.allJava.getSrcDirs();
       for(srcDir in srcDirs){
@@ -231,8 +226,8 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
     private boolean containsJavaSource(File f){
-      File[] files = dir.listFiles()
-      for (File file : files) {
+      File[] files = f.listFiles()
+      for (file in Files) {
             if (file.isFile() && file.getName().toLowerCase().endsWith(".java")) {
                 return true;
             } else if (file.isDirectory()) {

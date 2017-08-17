@@ -21,62 +21,70 @@ import org.w3c.dom.Element;
 
 public class LooseConfigData extends XmlDocument {
 
-    public LooseConfigData() throws ParserConfigurationException {
-        createDocument("archive");
-    }
+  public LooseConfigData() throws ParserConfigurationException {
+      createDocument("archive");
+  }
 
-    public void addDir(String src, String target) {
-        if (new File(src).exists()) {
-            addDir(doc.getDocumentElement(), src, target);
-        }
-    }
+  public void addDir(String src, String target) {
+    System.out.println("\n\n\nSource!!!::::: " + src);
+    System.out.println("\n\n\nDir!!!::::: " + target);      
+      if (new File(src).exists()) {
+          System.out.println("File Exists!!!!");
+          System.out.println("\n\n\n:::::::::::");
+          addDir(doc.getDocumentElement(), src, target);
+      }
+  }
 
-    public void addDir(Element parent, String src, String target) {
-        if (new File(src).exists()) {
-            Element child = doc.createElement("dir");
-            addElement(parent, child, target, src);
-        }
-    }
+  public void addDir(Element parent, String src, String target) {
+      if (new File(src).exists()) {
+          Element child = doc.createElement("dir");
+          addElement(parent, child, target, src);
+      }
+  }
 
-    public void addFile(String src, String target) {
-        if (new File(src).exists()) {
-            addFile(doc.getDocumentElement(), src, target);
-        }
-    }
+  public void addFile(String src, String target) {
+      if (new File(src).exists()) {
+          addFile(doc.getDocumentElement(), src, target);
+      }
+  }
 
-    public void addFile(Element parent, String src, String target) {
-        if (new File(src).exists()) {
-            Element child = doc.createElement("file");
-            addElement(parent, child, target, src);
-        }
-    }
+  public void addFile(Element parent, String src, String target) {
+      if (new File(src).exists()) {
+          Element child = doc.createElement("file");
+          addElement(parent, child, target, src);
+      }
+  }
 
-    public Element addArchive(String target) {
-        return addArchive(doc.getDocumentElement(), target);
-    }
+  public Element addArchive(String target) {
+      return addArchive(doc.getDocumentElement(), target);
+  }
 
-    public Element addArchive(Element parent, String target) {
-        Element child = doc.createElement("archive");
-        addElement(parent, child, target);
-        return child;
-    }
+  public Element addArchive(Element parent, String target) {
+      Element child = doc.createElement("archive");
+      addElement(parent, child, target);
+      return child;
+  }
 
-    public void addArchive(String src, String target) {
-        Element child = addArchive(target);
-        addElement(child, doc.createElement("dir"), "/", src);
-    }
+  public void addArchive(String src, String target) {
+      Element child = addArchive(target);
+      addElement(child, doc.createElement("dir"), "/", src);
+  }
 
-    public void toXmlFile(File xmlFile) throws Exception {
-        writeXMLDocument(xmlFile);
-    }
+  public void toXmlFile(File xmlFile) throws Exception {
+      writeXMLDocument(xmlFile);
+  }
 
-    private void addElement(Element parent, Element child, String targetAttr, String srcAttr) {
-        child.setAttribute("sourceOnDisk", srcAttr);
-        addElement(parent, child, targetAttr);
-    }
+  public Element getDocumentRoot() {
+      return doc.getDocumentElement();
+  }
 
-    private void addElement(Element parent, Element child, String targetAttr) {
-        child.setAttribute("targetInArchive", targetAttr);
-        parent.appendChild(child);
-    }
+  private void addElement(Element parent, Element child, String targetAttr, String srcAttr) {
+      child.setAttribute("sourceOnDisk", srcAttr);
+      addElement(parent, child, targetAttr);
+  }
+
+  private void addElement(Element parent, Element child, String targetAttr) {
+      child.setAttribute("targetInArchive", targetAttr);
+      parent.appendChild(child);
+  }
 }

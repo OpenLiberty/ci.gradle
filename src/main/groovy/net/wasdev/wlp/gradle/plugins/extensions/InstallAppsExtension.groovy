@@ -16,9 +16,9 @@
 package net.wasdev.wlp.gradle.plugins.extensions
 
 class InstallAppsExtension {
- 
+
     String appsDirectory = "apps"
     boolean stripVersion = false
     String installAppPackages = "project"
-    boolean looseApplication = false
+    boolean looseApplication = true
 }
