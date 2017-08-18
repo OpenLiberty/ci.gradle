@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2015, 2017.
+ * (C) Copyright IBM Corporation 2017.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import org.junit.runners.MethodSorters
 import net.wasdev.wlp.ant.ServerTask
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class LibertyTest extends AbstractIntegrationTest{
+class OldLibertyTest extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/integrationTest/liberty-test")
-    static File buildDir = new File(integTestDir, "/liberty-test")
-    static String buildFilename = "build.gradle"
+    static File buildDir = new File(integTestDir, "/old-liberty-test")
+    static String buildFilename = "oldStyleTest.gradle"
 
     @BeforeClass
     public static void setup() {
