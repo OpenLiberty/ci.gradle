@@ -40,7 +40,7 @@ sourceSets {
 task integrationTest(type: Test) {
     logging.level = LogLevel.INFO
     description = 'Runs the integration tests.' + gradle.gradleVersion
-    if (!gradle.gradleVersion.contains('4.')) {
+    if (!gradle.gradleVersion.startsWith('4.')) {
         testClassesDir = sourceSets.integrationTest.output.classesDir
     } else {
         testClassesDirs = fileTree(dir: sourceSets.integrationTest.output.classesDir)
