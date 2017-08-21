@@ -20,11 +20,25 @@ public class LooseApplication {
     public Element getDocumentRoot() {
       return config.getDocumentRoot();
     }
-    /*
+
     public LooseConfigData getConfig() {
         return config;
     }
 
+    public void addOutputDir(Element parent, File proj, String target) {
+        config.addDir(parent, proj.getAbsolutePath(), target);
+    }
+
+    public void addManifestFile(Project proj, String pluginId) throws Exception {
+        config.addFile(proj.war.manifest, "/META-INF/MANIFEST.MF");
+    }
+
+    public Element addArchive(Element parent, String target) {
+        return config.addArchive(parent, target);
+    }
+
+
+    /*
     public Element getDocumentRoot() {
         return config.getDocumentRoot();
     }

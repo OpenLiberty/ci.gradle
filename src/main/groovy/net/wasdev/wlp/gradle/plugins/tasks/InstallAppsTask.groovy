@@ -157,7 +157,7 @@ class InstallAppsTask extends AbstractServerTask {
           switch(getPackagingType()){
             case "war":
                 validateAppConfig(application, application.take(getArchiveName(application).lastIndexOf('.')))
-                logger.debug("Ask matt what to put here again")/*logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFileName));*/\
+                logger.debug("Ask matt what to put here again")/*logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFileName));*/
                 installLooseConfigWar(config)
                 deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
                 deleteApplication(new File(getServerDir(project), "dropins"), looseConfigFile)
@@ -191,34 +191,22 @@ class InstallAppsTask extends AbstractServerTask {
         LooseWarApplication looseWar = new LooseWarApplication(project, config)
         looseWar.addSourceDir()
         looseWar.addOutputDir(looseWar.getDocumentRoot(), project, "/WEB-INF/classes");
-        // retrieves dependent library jar files
         addWarEmbeddedLib(looseWar.getDocumentRoot(), looseWar);
+        //looseWar.addManifestFile(proj, "gradle-war-plugin")
     }
 
     private void addWarEmbeddedLib(Element parent, LooseApplication looseApp) throws Exception {
-        ArrayList<Dependency> deps = new ArrayList<Dependency>()
-        project.configurations.runtime.each { deps.add(it) }
-        project.configurations.providedRuntime.each { deps.remove(it) }
-        for (dep in deps) {
-
-            //Patrick added a check here to check if it is a compile dependency and it is of jar type, don't think it's necessary for gradle
-             //looseApp.addArchive(Element Parent, jav version of project) and put this in addArchive
-            //addArchive, instead of using Maven project, maybe just pass as a dependency instead to see if it works
-            //add the manifest file with properties we already have
-            //idk how to make this check in gradle... need to find this out
-
-            /*MavenProject dependProject = getMavenProject(dep.getGroupId(), dep.getArtifactId(),
-                    dep.getVersion());
-            if (dependProject.getBasedir() != null && dependProject.getBasedir().exists()) {
-                Element archive = looseApp.addArchive(parent, "/WEB-INF/lib/" + dependProject.getBuild().getFinalName() + ".jar");
-                looseApp.addOutputDir(archive, dependProject, "/");
-                looseApp.addManifestFile(archive, dependProject, "maven-jar-plugin");
-            } else {
-                looseApp.getConfig().addFile(parent,
-                        resolveArtifact(dependProject.getArtifact()).getFile().getAbsolutePath(),
-                        "/WEB-INF/lib/" + resolveArtifact(dependProject.getArtifact()).getFile().getName());
-            }*/
-        }
+      ArrayList<File> deps = new ArrayList<File>();
+      project.configurations.runtime.each { deps.add(it)}
+      project.configurations.providedRuntime.each { deps.remove(it) }
+      for (File dep: deps) {
+          if(false){
+              Element archive = looseApp.addArchive(parent, "WEB-INF/lib/"+ dep.getName()+".jar");
+              looseApp.addOutputDir(archive, dep, "/");
+          } else{
+              looseApp.getConfig().addFile(parent, dep.getAbsolutePath() , "/WEB-INF/lib/" + dep.getName());
+          }
+      }
     }
 
     private boolean containsJavaSource(){
