@@ -24,6 +24,6 @@
     
     </httpEndpoint>
     
-    <application name="sample.servlet-1" context-root="myLibertyApp1" location="sample.servlet-1.war" type="war"></application>
+    <application name="sample.servlet-1" context-root="sample.servlet-1" location="sample.servlet-1.war" type="war"></application>
     
 </server>
