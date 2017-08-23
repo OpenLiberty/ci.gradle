@@ -29,6 +29,11 @@ public class LooseApplication {
         config.addDir(parent, proj.getAbsolutePath(), target);
     }
 
+    public void addOutputDirectory(Element parent, Project proj, String target) {
+        //config.addDir(parent, proj.sourceSets.main.getOutput().getClassesDirs().getSingleFile().getParentFile().getParentFile().getAbsolutePath(), target);
+        config.addDir(parent, proj.sourceSets.main.getOutput().getClassesDirs().getSingleFile().getParentFile().getParentFile().getAbsolutePath(), target);
+    }
+
     public void addManifestFile(File mf, String pluginId) throws Exception {
         if(!mf.exists()){
           project.jar.manifest.writeTo(mf.getAbsolutePath())
@@ -38,8 +43,7 @@ public class LooseApplication {
 
     public void addManifestFile(Element parent, Project proj, String pluginId) throws Exception {
         if(proj.jar.getManifest() != null)
-          config.addFile(parent, "/Users/jjvilleg/Desktop/LooseAppTest/build/liberty-maven/resources/META-INF/MANIFEST.MF", "/META-INF/MANIFEST.MF");
-        //proj.jar.getManifest()
+          config.addFile(parent, proj.sourceSets.main.getOutput().getResourcesDir().getParentFile().getAbsolutePath() + "/META-INF/MANIFEST.MF", "/META-INF/MANIFEST.MF");
     }
 
     public Element addArchive(Element parent, String target) {

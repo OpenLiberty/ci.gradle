@@ -194,7 +194,7 @@ class InstallAppsTask extends AbstractServerTask {
 
         //add Manifest file
         //need to find out how to get the path for the manifest file
-        File manifestFile = new File("/Users/jjvilleg/Desktop/LooseAppTest/build/liberty-maven/resources/META-INF/MANIFEST.MF")
+        File manifestFile = new File(project.sourceSets.main.getOutput().getResourcesDir().getParentFile().getAbsolutePath() + "/META-INF/MANIFEST.MF")
         looseWar.addManifestFile(manifestFile, "gradle-war-plugin")
     }
 
@@ -207,7 +207,7 @@ class InstallAppsTask extends AbstractServerTask {
         String projectPath = getProjectPath(parentProjectDir, dep)
         if(!projectPath.isEmpty() && project.getRootProject().findProject(projectPath) != null){
             Element archive = looseApp.addArchive(parent, "/WEB-INF/lib/"+ dep.getName());
-            looseApp.addOutputDir(archive, dep, "/");
+            looseApp.addOutputDirectory(archive, project.getRootProject().findProject(projectPath), "/");
             looseApp.addManifestFile(archive, project.getRootProject().findProject(projectPath), "gradle-jar-plugin");
         } else{
             looseApp.getConfig().addFile(parent, dep.getAbsolutePath() , "/WEB-INF/lib/" + dep.getName());
