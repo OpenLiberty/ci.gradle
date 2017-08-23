@@ -29,73 +29,20 @@ public class LooseApplication {
         config.addDir(parent, proj.getAbsolutePath(), target);
     }
 
-    public void addManifestFile(Project proj, String pluginId) throws Exception {
-        config.addFile(proj.war.manifest, "/META-INF/MANIFEST.MF");
+    public void addManifestFile(File mf, String pluginId) throws Exception {
+        if(!mf.exists()){
+          project.jar.manifest.writeTo(mf.getAbsolutePath())
+        }
+        config.addFile(mf.getAbsolutePath(), "/META-INF/MANIFEST.MF");
+    }
+
+    public void addManifestFile(Element parent, Project proj, String pluginId) throws Exception {
+        if(proj.jar.getManifest() != null)
+          config.addFile(parent, "/Users/jjvilleg/Desktop/LooseAppTest/build/liberty-maven/resources/META-INF/MANIFEST.MF", "/META-INF/MANIFEST.MF");
+        //proj.jar.getManifest()
     }
 
     public Element addArchive(Element parent, String target) {
         return config.addArchive(parent, target);
     }
-
-
-    /*
-    public Element getDocumentRoot() {
-        return config.getDocumentRoot();
-    }
-
-    public Element addArchive(Element parent, String target) {
-        return config.addArchive(parent, target);
-    }
-
-    public void addOutputDir(Element parent, MavenProject proj, String target) {
-        config.addDir(parent, proj.getBuild().getOutputDirectory(), target);
-    }
-
-    public void addManifestFile(Element parent, MavenProject proj, String pluginId) throws Exception {
-        config.addFile(parent, getManifestFile(proj, "org.apache.maven.plugins", pluginId), "/META-INF/MANIFEST.MF");
-    }
-
-    public void addManifestFile(MavenProject proj, String pluginId) throws Exception {
-        config.addFile(getManifestFile(proj, "org.apache.maven.plugins", pluginId), "/META-INF/MANIFEST.MF");
-    }
-
-    public String getPluginConfiguration(String pluginGroupId, String pluginArtifactId, String key) {
-        Xpp3Dom dom = project.getGoalConfiguration(pluginGroupId, pluginArtifactId, null, null);
-        if (dom != null) {
-            Xpp3Dom val = dom.getChild(key);
-            if (val != null) {
-                return val.getValue();
-            }
-        }
-        return null;
-    }
-
-    public String getManifestFile(MavenProject proj, String pluginGroupId, String pluginArtifactId) throws Exception {
-        Xpp3Dom dom = proj.getGoalConfiguration(pluginGroupId, pluginArtifactId, null, null);
-        if (dom != null) {
-            Xpp3Dom archive = dom.getChild("archive");
-            if (archive != null) {
-                Xpp3Dom val = archive.getChild("manifestFile");
-                if (val != null) {
-                    return proj.getBasedir().getAbsolutePath() + "/" + val.getValue();
-                }
-            }
-        }
-        return getDefaultManifest().getCanonicalPath();
-    }
-
-    public File getDefaultManifest() throws Exception {
-        if (defaultMF == null) {
-            defaultMF = new File(
-                    project.getBuild().getDirectory() + "/liberty-maven/resources/META-INF/MANIFEST.MF");
-            defaultMF.getParentFile().mkdirs();
-            FileOutputStream fos = new FileOutputStream(defaultMF);
-
-            Manifest manifest = new Manifest();
-            manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-            manifest.write(fos);
-            fos.close();
-        }
-        return defaultMF;
-    }*/
 }

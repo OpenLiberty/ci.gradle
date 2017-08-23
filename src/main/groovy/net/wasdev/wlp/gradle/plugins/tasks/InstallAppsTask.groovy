@@ -25,6 +25,8 @@ import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
 import org.w3c.dom.Element;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import net.wasdev.wlp.gradle.plugins.utils.*;
 
@@ -54,13 +56,9 @@ class InstallAppsTask extends AbstractServerTask {
         }
 
         if (installProject) {
-            installProjectLooseConfig()
+            installProj()
         }
-        /**if(installDependencies){
-            installDependencies()
-        }*/
 
-        // create application configuration in configDropins if application is not configured
         if (applicationXml.hasChildElements()) {
             logger.warn("The application is not defined in the server configuration but the build file indicates it should be installed in the apps folder. Application configuration is being added to the target server configuration dropins folder by the plug-in.");
             applicationXml.writeApplicationXmlDocument(getServerDir(project));
@@ -76,9 +74,9 @@ class InstallAppsTask extends AbstractServerTask {
         if(!archive.exists()) {
             throw new GradleException("The project archive was not found and cannot be installed.")
         }
-        Files.copy(archive.toPath(), new File(getServerDir(project), "/" + server.installapps.appsDirectory + "/" + getArchiveName(archive.getName())).toPath(), StandardCopyOption.REPLACE_EXISTING)
+        Files.copy(archive.toPath(), new File(getServerDir(project), "/" + server.installapps.appsDirectory + "/" + checkForStripVersion(archive.getName())).toPath(), StandardCopyOption.REPLACE_EXISTING)
 
-        validateAppConfig(getArchiveName(archive.getName()), getBaseName(archive))
+        validateAppConfig(checkForStripVersion(archive.getName()), getBaseName(archive))
     }
 
     private void validateAppConfig(String fileName, String artifactId) throws Exception {
@@ -111,7 +109,7 @@ class InstallAppsTask extends AbstractServerTask {
         return configured
     }
 
-    private String getArchiveName(String archiveName){
+    private String checkForStripVersion(String archiveName){
         if(server.installapps.stripVersion){
             StringBuilder sbArchiveName = new StringBuilder().append("-").append(project.version)
             return archiveName.replaceAll(sbArchiveName.toString(),"")
@@ -126,9 +124,8 @@ class InstallAppsTask extends AbstractServerTask {
         return server.installapps.installAppPackages
     }
 
-    //Removes extension
     private String getBaseName(File file){
-        return file.name.take(getArchiveName(file.name).lastIndexOf('.'))
+        return file.name.take(checkForStripVersion(file.name).lastIndexOf('.'))
     }
 
     private String archivePath() throws Exception {
@@ -145,44 +142,44 @@ class InstallAppsTask extends AbstractServerTask {
             throw new GradleException("Archive path not found. Supported formats are jar, war, and ear.")
         }
     }
-    //Loose Config Start
-    private void installProjectLooseConfig() throws Exception{
-      if(isSupportedType()){
+
+    private void installProj() throws Exception {
+      if(isSupportedType()) {
         if(project.liberty.installapps.looseApplication){
-          String looseConfigFileName = getLooseConfigFileName()
-          String application = looseConfigFileName.substring(0, looseConfigFileName.length()-4)
-          File destDir = new File(getServerDir(project), "apps")
-          File looseConfigFile = new File(destDir, looseConfigFileName)
-          LooseConfigData config = new LooseConfigData()
-          switch(getPackagingType()){
-            case "war":
-                validateAppConfig(application, application.take(getArchiveName(application).lastIndexOf('.')))
-                logger.debug("Ask matt what to put here again")/*logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFileName));*/
-                installLooseConfigWar(config)
-                deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
-                deleteApplication(new File(getServerDir(project), "dropins"), looseConfigFile)
-                config.toXmlFile(looseConfigFile)
-                break
-            case "ear":
-                break
-            default:
-                logger.info(MessageFormat.format(("Loose application configuration is not supported for packaging type {0}. The project artifact will be installed as is."),
-                        project.getPackaging()));
-                installProjectArchive()
-                break
-          }
-        }
-        else{
+          installLooseApplication()
+        } else{
           installProjectArchive()
         }
-      }
-      else{
+      } else {
         throw new GradleException("Application is not supported")
       }
     }
 
-    //Start of methods that need to be implemented
-    // install war project artifact using loose application configuration file
+    private void installLooseApplication() throws Exception {
+      String looseConfigFileName = getLooseConfigFileName()
+      String application = looseConfigFileName.substring(0, looseConfigFileName.length()-4)
+      File destDir = new File(getServerDir(project), "apps")
+      File looseConfigFile = new File(destDir, looseConfigFileName)
+      LooseConfigData config = new LooseConfigData()
+      switch(getPackagingType()){
+        case "war":
+            validateAppConfig(application, application.take(checkForStripVersion(application).lastIndexOf('.')))
+            logger.debug("Ask matt what to put here again")/*logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFileName));*/
+            installLooseConfigWar(config)
+            deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
+            deleteApplication(new File(getServerDir(project), "dropins"), looseConfigFile)
+            config.toXmlFile(looseConfigFile)
+            break
+        case "ear":
+            break
+        default:
+            logger.info(MessageFormat.format(("Loose application configuration is not supported for packaging type {0}. The project artifact will be installed as is."),
+                    project.getPackaging()));
+            installProjectArchive()
+            break
+        }
+    }
+
     protected void installLooseConfigWar(LooseConfigData config) throws Exception {
         File dir = getServerDir(project)
         if (!dir.exists() && containsJavaSource()) {
@@ -191,22 +188,40 @@ class InstallAppsTask extends AbstractServerTask {
         LooseWarApplication looseWar = new LooseWarApplication(project, config)
         looseWar.addSourceDir()
         looseWar.addOutputDir(looseWar.getDocumentRoot(), project, "/WEB-INF/classes");
+
+        //retrieves dependent library jar files
         addWarEmbeddedLib(looseWar.getDocumentRoot(), looseWar);
-        //looseWar.addManifestFile(proj, "gradle-war-plugin")
+
+        //add Manifest file
+        //need to find out how to get the path for the manifest file
+        File manifestFile = new File("/Users/jjvilleg/Desktop/LooseAppTest/build/liberty-maven/resources/META-INF/MANIFEST.MF")
+        looseWar.addManifestFile(manifestFile, "gradle-war-plugin")
     }
 
     private void addWarEmbeddedLib(Element parent, LooseApplication looseApp) throws Exception {
       ArrayList<File> deps = new ArrayList<File>();
       project.configurations.runtime.each { deps.add(it)}
       project.configurations.providedRuntime.each { deps.remove(it) }
+      File parentProjectDir = new File(project.getRootProject().rootDir.getAbsolutePath())
       for (File dep: deps) {
-          if(false){
-              Element archive = looseApp.addArchive(parent, "WEB-INF/lib/"+ dep.getName()+".jar");
-              looseApp.addOutputDir(archive, dep, "/");
-          } else{
-              looseApp.getConfig().addFile(parent, dep.getAbsolutePath() , "/WEB-INF/lib/" + dep.getName());
-          }
+        String projectPath = getProjectPath(parentProjectDir, dep)
+        if(!projectPath.isEmpty() && project.getRootProject().findProject(projectPath) != null){
+            Element archive = looseApp.addArchive(parent, "/WEB-INF/lib/"+ dep.getName());
+            looseApp.addOutputDir(archive, dep, "/");
+            looseApp.addManifestFile(archive, project.getRootProject().findProject(projectPath), "gradle-jar-plugin");
+        } else{
+            looseApp.getConfig().addFile(parent, dep.getAbsolutePath() , "/WEB-INF/lib/" + dep.getName());
+        }
       }
+    }
+
+    private String getProjectPath(File parentProjectDir, File dep){
+      String projectJunk = dep.getAbsolutePath().replace(parentProjectDir.getAbsolutePath()+"/","")
+      String projectPath = dep.getAbsolutePath().replace(projectJunk,"")
+      Pattern pattern = Pattern.compile("/build/.*")
+      Matcher matcher = pattern.matcher(projectJunk)
+      projectPath = matcher.replaceAll("")
+      return projectPath;
     }
 
     private boolean containsJavaSource(){
@@ -232,10 +247,6 @@ class InstallAppsTask extends AbstractServerTask {
         return false;
     }
 
-
-
-//End of methods that need to be implemented
-    //Need to modify to emulate what it's doing in InstallAppsMojo
     private boolean isSupportedType(){
       switch (getPackagingType()) {
         case "ear":
@@ -247,9 +258,8 @@ class InstallAppsTask extends AbstractServerTask {
             return false;
         }
     }
-    //According to installAppsMojoSupp, only worried about war??
     private String getLooseConfigFileName(){
-      return getArchiveName(project.war.archiveName) + ".xml"
+      return checkForStripVersion(project.war.archiveName) + ".xml"
     }
 
     private String getPackagingType() throws Exception{
@@ -279,7 +289,6 @@ class InstallAppsTask extends AbstractServerTask {
   protected void deleteApplication(File parent, String filename) throws IOException {
       File application = new File(parent, filename);
       if (application.isDirectory()) {
-          // application can be installed with expanded format
           FileUtils.deleteDirectory(application);
       } else {
           application.delete();
