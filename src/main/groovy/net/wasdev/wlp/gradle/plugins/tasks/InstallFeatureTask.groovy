@@ -22,13 +22,13 @@ class InstallFeatureTask extends AbstractServerTask {
     @TaskAction
     void installFeature() {
         def params = buildLibertyMap(project);
-        params.put('name', project.liberty.features.name.join(","))
-        params.put('acceptLicense', project.liberty.features.acceptLicense)
-        if (project.liberty.features.to != null) {
-            params.put('to', project.liberty.features.to)
+        params.put('name', server.features.name.join(","))
+        params.put('acceptLicense', server.features.acceptLicense)
+        if (server.features.to != null) {
+            params.put('to', server.features.to)
         }
-        if (project.liberty.features.from != null) {
-            params.put('from', project.liberty.features.from)
+        if (server.features.from != null) {
+            params.put('from', server.features.from)
         }
         params.remove('timeout')
         project.ant.taskdef(name: 'installFeature',

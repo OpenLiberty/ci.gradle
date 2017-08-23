@@ -34,7 +34,7 @@ ext {
     testServerHttpsPort = 9443
 
     // This is set in the ibm-web-ext.xml file
-    warContext = 'myLibertyApp'
+    warContext = 'sample.servlet-1'
     appName = 'LibertyProject'
     packageFile = "${project.buildDir}/${appName}.zip"
     packagingType = 'usr'

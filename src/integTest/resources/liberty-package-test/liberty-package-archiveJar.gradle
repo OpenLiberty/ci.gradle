@@ -27,17 +27,13 @@ liberty {
         install {
             runtimeUrl = wlpUrl
         }
-        server{
-            name ='libertyOnline'
-        }
+        serverName = 'libertyOnline'
     } else {
         installDir = WLP_DIR
-        server{
-            name = 'libertyOffline'
-        }
+        serverName = 'libertyOffline'
     }
-
     server{
+        name = serverName
         packageLiberty {
             archive = 'testPackage.jar'
             include = 'runnable,minify'

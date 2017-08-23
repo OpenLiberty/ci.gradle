@@ -6,7 +6,7 @@ public class ApplicationIT extends EndpointHelper {
 
     @Test
     public void testDeployment() {
-        testEndpoint("/index.html", "<h1>Welcome to your Liberty Application</h1>");
+        testEndpoint("/", "<h1>Welcome to your Liberty Application</h1>");
     }
 
 }
