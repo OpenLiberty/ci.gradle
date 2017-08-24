@@ -30,15 +30,14 @@ public class LooseApplication {
     }
 
     public void addOutputDirectory(Element parent, Project proj, String target) {
-        //config.addDir(parent, proj.sourceSets.main.getOutput().getClassesDirs().getSingleFile().getParentFile().getParentFile().getAbsolutePath(), target);
-        config.addDir(parent, proj.sourceSets.main.getOutput().getClassesDirs().getSingleFile().getParentFile().getParentFile().getAbsolutePath(), target);
+        config.addDir(parent, proj.sourceSets.main.getOutput().getClassesDirs().getSingleFile().getAbsolutePath(), target);
     }
 
     public void addManifestFile(File mf, String pluginId) throws Exception {
         if(!mf.exists()){
           project.jar.manifest.writeTo(mf.getAbsolutePath())
+          config.addFile(mf.getAbsolutePath(), "/META-INF/MANIFEST.MF");
         }
-        config.addFile(mf.getAbsolutePath(), "/META-INF/MANIFEST.MF");
     }
 
     public void addManifestFile(Element parent, Project proj, String pluginId) throws Exception {
