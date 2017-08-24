@@ -53,6 +53,9 @@ liberty {
             archive = packageFile
             include = packagingType
         }
+        installapps{
+            looseApplication = false
+        }
         applications = "sample.servlet-1"
     }
 }

@@ -54,7 +54,6 @@ class InstallAppsTask extends AbstractServerTask {
             default:
                 return
         }
-
         if (installProject) {
             installProj()
         }
@@ -145,9 +144,9 @@ class InstallAppsTask extends AbstractServerTask {
 
     private void installProj() throws Exception {
       if(isSupportedType()) {
-        if(project.liberty.installapps.looseApplication){
+        if(server.installapps.looseApplication){
           installLooseApplication()
-        } else{
+        } else {
           installProjectArchive()
         }
       } else {

@@ -53,6 +53,7 @@ liberty {
         }
         installapps{
             appsDirectory = 'dropins'
+            looseApplication = false
         }
     	applications = "sample.servlet-1"
     }

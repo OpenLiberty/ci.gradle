@@ -51,6 +51,9 @@ liberty {
             archive = packageFile
             include = packagingType
         }
+        installapps{
+            looseApplication = false
+        }
         applications = "fake.application-1"
         verifyTimeout = 1
     }
