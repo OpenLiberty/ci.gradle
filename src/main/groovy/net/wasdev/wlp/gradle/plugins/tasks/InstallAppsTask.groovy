@@ -38,24 +38,24 @@ class InstallAppsTask extends AbstractServerTask {
     void installApps() {
 
         boolean installDependencies = false
-        boolean installProject = false
+        boolean installApp = false
 
         switch (getInstallAppPackages()) {
             case "all":
                 installDependencies = true
-                installProject = true
+                installApp = true
                 break;
             case "dependencies":
                 installDependencies = true
                 break
             case "project":
-                installProject = true
+                installApp = true
                 break
             default:
                 return
         }
-        if (installProject) {
-            installProj()
+        if (installApp) {
+            installProject()
         }
 
         if (applicationXml.hasChildElements()) {
@@ -142,7 +142,7 @@ class InstallAppsTask extends AbstractServerTask {
         }
     }
 
-    private void installProj() throws Exception {
+    private void installProject() throws Exception {
       if(isSupportedType()) {
         if(server.installapps.looseApplication){
           installLooseApplication()
@@ -163,7 +163,7 @@ class InstallAppsTask extends AbstractServerTask {
       switch(getPackagingType()){
         case "war":
             validateAppConfig(application, application.take(checkForStripVersion(application).lastIndexOf('.')))
-            logger.debug("Ask matt what to put here again")/*logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFileName));*/
+            logger.debug("Installing application into the {0} folder.", looseConfigFile.getAbsolutePath())
             installLooseConfigWar(config)
             deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
             deleteApplication(new File(getServerDir(project), "dropins"), looseConfigFile)
@@ -182,7 +182,7 @@ class InstallAppsTask extends AbstractServerTask {
     protected void installLooseConfigWar(LooseConfigData config) throws Exception {
         File dir = getServerDir(project)
         if (!dir.exists() && containsJavaSource()) {
-          throw new GradleException("Ask Matt what to put here")
+          throw new GradleException("Failed to install loose application from project {0}. The project has not been compiled.", project.name)
         }
         LooseWarApplication looseWar = new LooseWarApplication(project, config)
         looseWar.addSourceDir()
@@ -192,7 +192,6 @@ class InstallAppsTask extends AbstractServerTask {
         addWarEmbeddedLib(looseWar.getDocumentRoot(), looseWar);
 
         //add Manifest file
-        //need to find out how to get the path for the manifest file
         File manifestFile = new File(project.sourceSets.main.getOutput().getResourcesDir().getParentFile().getAbsolutePath() + "/META-INF/MANIFEST.MF")
         looseWar.addManifestFile(manifestFile, "gradle-war-plugin")
     }
