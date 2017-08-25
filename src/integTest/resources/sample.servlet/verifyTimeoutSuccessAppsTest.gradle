@@ -12,11 +12,9 @@ buildscript {
     }
     dependencies {
         classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:1.1-SNAPSHOT'
-        classpath 'net.wasdev.wlp.ant:wlp-anttasks:1.3-SNAPSHOT'
     }
 }
 
-apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'war'
 apply plugin: 'liberty'
@@ -53,7 +51,7 @@ liberty {
             archive = packageFile
             include = packagingType
         }
-        applications = "sample.servlet-1"
+        verifyAppStartTimeout = 30
     }
 }
 
