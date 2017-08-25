@@ -17,6 +17,7 @@
 package net.wasdev.wlp.gradle.plugins.extensions
 
 import org.gradle.util.ConfigureUtil
+import org.gradle.api.Task
 
 class ServerExtension{
     //Server properties
@@ -32,11 +33,14 @@ class ServerExtension{
     Map<String, String> bootstrapProperties
     List<String> jvmOptions
 
+    List<Task> apps
+    List<Task> dropins
+
     boolean clean = false
     String timeout
     String template
 
-    int verifyTimeout = 30
+    int verifyAppStartTimeout = 0
     String applications
 
     def numberOfClosures = 0

@@ -53,7 +53,7 @@ liberty {
             archive = packageFile
             include = packagingType
         }
-        applications = "sample.servlet-1"
+        verifyAppStartTimeout = 30
     }
 }
 

@@ -34,11 +34,25 @@ ext {
     testServerHttpsPort = 9443
 
     // This is set in the ibm-web-ext.xml file
-    warContext = 'myLibertyApp'
+    warContext = 'sample.servlet-1'
     appName = 'LibertyProject'
     packageFile = "${project.buildDir}/${appName}.zip"
     packagingType = 'usr'
 
+}
+task war2(type:War){
+    baseName = 'sample.servlet2'
+    println 'war2 archiveName = ' + archiveName
+}
+
+task war3(type:War){
+    baseName = 'sample.servlet3'
+    println 'war3 archiveName = ' + archiveName
+}
+
+task war4(type:War){
+    baseName = 'sample.servlet4'
+    println 'war4 archiveName = ' + archiveName
 }
 
 liberty {
@@ -47,12 +61,15 @@ liberty {
     }
     server{
         name = wlpServerName
+        configFile = file("src/main/liberty/config/server-list-test.xml")
         packageLiberty {
             archive = packageFile
             include = packagingType
         }
-        dropins = [war]
-        
+
+    	apps = [war2, war3]
+        dropins = [war, war4]
+
         verifyAppStartTimeout = 30
     }
 }
@@ -69,7 +86,7 @@ dependencies {
 }
 
 test {
-	println 'inside the test block'
+    println 'inside the test block'
     reports.html.destination = file("$buildDir/reports/unit")
     reports.junitXml.destination = file("$buildDir/test-results/unit")
     exclude '**/it/**'
@@ -95,7 +112,7 @@ task printMessageAboutRunningServer {
 }
 
 check.dependsOn 'integrationTest'
-installApps.dependsOn 'war'
+installApps.dependsOn tasks.withType(War)
 libertyStart.dependsOn 'installApps'
 integrationTest.dependsOn 'libertyStart', 'testClasses'
 integrationTest.finalizedBy 'libertyStop'

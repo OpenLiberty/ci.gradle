@@ -51,11 +51,9 @@ liberty {
             archive = packageFile
             include = packagingType
         }
-        installapps{
-            appsDirectory = 'dropins'
-        }
+        dropins = [war]
         configFile = file("src/main/liberty/config/server-apps-test.xml")
-        applications = "sample.servlet-1"
+        verifyAppStartTimeout = 30
     }
 }
 

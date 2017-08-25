@@ -37,7 +37,7 @@ class LibertyExtension {
     String timeout
     String template
 
-    int verifyTimeout = 30
+    int verifyAppStartTimeout = 30
     String applications
 
     def numberOfClosures = 0

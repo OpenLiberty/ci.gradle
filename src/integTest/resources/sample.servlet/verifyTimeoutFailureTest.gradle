@@ -52,7 +52,7 @@ liberty {
             include = packagingType
         }
         applications = "fake.application-1"
-        verifyTimeout = 1
+        verifyAppStartTimeout = 1
     }
 }
 
