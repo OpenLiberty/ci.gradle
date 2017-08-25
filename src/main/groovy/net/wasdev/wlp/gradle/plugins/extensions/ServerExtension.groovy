@@ -41,7 +41,6 @@ class ServerExtension{
     String template
 
     int verifyAppStartTimeout = 0
-    String applications
 
     def numberOfClosures = 0
 

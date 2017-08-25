@@ -41,7 +41,7 @@ class StartTask extends AbstractServerTask {
         serverTask.setOutputDir(params.get('outputDir'))
         serverTask.initTask()
 
-        if(server != null && server.verifyAppStartTimeout > 0) {
+        if (server != null && server.verifyAppStartTimeout > 0) {
             def verifyAppStartTimeout = server.verifyAppStartTimeout
 
             long timeout = verifyAppStartTimeout * 1000
@@ -50,26 +50,26 @@ class StartTask extends AbstractServerTask {
             ArrayList<String> appsToVerify = new ArrayList<String>()
             ArrayList<Task> applicationBuildTasks = new ArrayList<Task>()
 
-            if(server.apps!=null && !server.apps.isEmpty()){
+            if (server.apps != null && !server.apps.isEmpty()) {
                 applicationBuildTasks += server.apps
             }
-            if(server.dropins!=null && !server.dropins.isEmpty()){
+            if (server.dropins != null && !server.dropins.isEmpty()) {
                 applicationBuildTasks += server.dropins
             }
 
-            if(!applicationBuildTasks.isEmpty()) {
+            if (!applicationBuildTasks.isEmpty()) {
                 applicationBuildTasks.each{ Task task ->
                     appsToVerify.add(task.baseName)
                 }
             }
-            else{
+            else {
                 //Do we need to do a stripVersion check here?
-                if(project.plugins.hasPlugin('war')) {
+                if (project.plugins.hasPlugin('war')) {
                     appsToVerify.add(project.war.baseName)
                 }
             }
 
-            for(String archiveName : appsToVerify) {
+            for (String archiveName : appsToVerify) {
                 String verify = serverTask.waitForStringInLog(START_APP_MESSAGE_REGEXP + archiveName, timeout, serverTask.getLogFile())
                 if (!verify) {
                     executeServerCommand(project, 'stop', buildLibertyMap(project))

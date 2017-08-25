@@ -53,21 +53,20 @@ class InstallAppsTask extends AbstractServerTask {
         }
 
         if (installProject) {
-            if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())){
-                if(project.plugins.hasPlugin('war')) {
+            if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
+                if (project.plugins.hasPlugin('war')) {
                     server.apps = [project.war]
                     installMultipleApps(server.apps, 'apps')
                 }
             }
-            else {
-                if (server.apps != null && !server.apps.isEmpty()) {
-                    installMultipleApps(server.apps, 'apps')
-                }
-                if (server.dropins != null && !server.dropins.isEmpty()) {
-                    installMultipleApps(server.dropins, 'dropins')
-                }
+            if (server.apps != null && !server.apps.isEmpty()) {
+                installMultipleApps(server.apps, 'apps')
+            }
+            if (server.dropins != null && !server.dropins.isEmpty()) {
+                installMultipleApps(server.dropins, 'dropins')
             }
         }
+        //TODO
         /**if(installDependencies){
             installDependencies()
         }*/
@@ -83,17 +82,7 @@ class InstallAppsTask extends AbstractServerTask {
         }
     }
 
-    private void installProjectArchive() throws Exception {
-        File archive = new File(archivePath())
-        if(!archive.exists()) {
-            throw new GradleException("The project archive was not found and cannot be installed.")
-        }
-        Files.copy(archive.toPath(), new File(getServerDir(project), "/" + server.installapps.appsDirectory + "/" + getArchiveName(archive.getName())).toPath(), StandardCopyOption.REPLACE_EXISTING)
-
-        validateAppConfig(getArchiveName(archive.getName()), getBaseName(archive))
-    }
-
-    private void installMultipleApps(List<Task> applications, String appsDir){
+    private void installMultipleApps(List<Task> applications, String appsDir) {
         applications.each{ Task task ->
             Files.copy(task.archivePath.toPath(), new File(getServerDir(project), "/" + appsDir + "/" + getArchiveName(task.archiveName)).toPath(), StandardCopyOption.REPLACE_EXISTING)
             validateAppConfig(getArchiveName(task.archiveName), task.baseName, appsDir)
@@ -107,10 +96,10 @@ class InstallAppsTask extends AbstractServerTask {
     protected void validateAppConfig(String fileName, String artifactId, String dir) throws Exception {
         String appsDir = dir
 
-        if(appsDir.equalsIgnoreCase('apps') && !isAppConfiguredInSourceServerXml(fileName)){
+        if (appsDir.equalsIgnoreCase('apps') && !isAppConfiguredInSourceServerXml(fileName)) {
             applicationXml.createApplicationElement(fileName, artifactId)
         }
-        else if(appsDir.equalsIgnoreCase('dropins') && isAppConfiguredInSourceServerXml(fileName)){
+        else if (appsDir.equalsIgnoreCase('dropins') && isAppConfiguredInSourceServerXml(fileName)) {
             throw new GradleException("The application, " + artifactId + ", is configured in the server.xml and the plug-in is configured to install the application in the dropins folder. A configured application must be installed to the apps folder.")
         }
     }
@@ -135,7 +124,7 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
     protected String getArchiveName(String archiveName){
-        if(server.installapps.stripVersion){
+        if (server.installapps.stripVersion){
             StringBuilder sbArchiveName = new StringBuilder().append("-").append(project.version)
             return archiveName.replaceAll(sbArchiveName.toString(),"")
         }
@@ -150,7 +139,7 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
     //Removes extension
-    private String getBaseName(File file){
+    private String getBaseName(File file) {
         return file.name.take(getArchiveName(file.name).lastIndexOf('.'))
     }
 
