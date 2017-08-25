@@ -56,7 +56,6 @@ class InstallAppsTask extends AbstractServerTask {
             if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
                 if (project.plugins.hasPlugin('war')) {
                     server.apps = [project.war]
-                    installMultipleApps(server.apps, 'apps')
                 }
             }
             if (server.apps != null && !server.apps.isEmpty()) {
