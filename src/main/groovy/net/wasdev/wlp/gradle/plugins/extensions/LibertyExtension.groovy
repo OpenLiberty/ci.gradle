@@ -37,8 +37,7 @@ class LibertyExtension {
     String timeout
     String template
 
-    int verifyTimeout = 30
-    String applications
+    int verifyAppStartTimeout = 30
 
     def numberOfClosures = 0
 
@@ -56,7 +55,7 @@ class LibertyExtension {
 
     InstallAppsExtension installapps = new InstallAppsExtension()
 
-    ServerExtension server = new ServerExtension()
+    ServerExtension server
 
     def uninstallfeatures(Closure closure) {
         ConfigureUtil.configure(closure, uninstallfeatures)
@@ -104,7 +103,9 @@ class LibertyExtension {
     }
 
     def server(Closure closure){
+        server = new ServerExtension()
         ConfigureUtil.configure(closure, server)
+
     }
 
 }

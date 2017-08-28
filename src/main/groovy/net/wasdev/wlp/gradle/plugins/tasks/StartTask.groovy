@@ -17,6 +17,7 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.Task
 import net.wasdev.wlp.ant.ServerTask;
 
 class StartTask extends AbstractServerTask {
@@ -40,19 +41,39 @@ class StartTask extends AbstractServerTask {
         serverTask.setOutputDir(params.get('outputDir'))
         serverTask.initTask()
 
-        def verifyTimeout = server.verifyTimeout
-        if(project.liberty.verifyTimeout < 0) {
-            verifyTimeout = 30
-        }
-        long timeout = verifyTimeout * 1000
-        long endTime = System.currentTimeMillis() + timeout;
-        if(server.applications) {
-            String[] apps = server.applications.split("[,\\s]+")
-            for(String archiveName : apps) {
+        if (server != null && server.verifyAppStartTimeout > 0) {
+            def verifyAppStartTimeout = server.verifyAppStartTimeout
+
+            long timeout = verifyAppStartTimeout * 1000
+            long endTime = System.currentTimeMillis() + timeout;
+
+            ArrayList<String> appsToVerify = new ArrayList<String>()
+            ArrayList<Task> applicationBuildTasks = new ArrayList<Task>()
+
+            if (server.apps != null && !server.apps.isEmpty()) {
+                applicationBuildTasks += server.apps
+            }
+            if (server.dropins != null && !server.dropins.isEmpty()) {
+                applicationBuildTasks += server.dropins
+            }
+
+            if (!applicationBuildTasks.isEmpty()) {
+                applicationBuildTasks.each{ Task task ->
+                    appsToVerify.add(task.baseName)
+                }
+            }
+            else {
+                //Do we need to do a stripVersion check here?
+                if (project.plugins.hasPlugin('war')) {
+                    appsToVerify.add(project.war.baseName)
+                }
+            }
+
+            for (String archiveName : appsToVerify) {
                 String verify = serverTask.waitForStringInLog(START_APP_MESSAGE_REGEXP + archiveName, timeout, serverTask.getLogFile())
                 if (!verify) {
                     executeServerCommand(project, 'stop', buildLibertyMap(project))
-                    throw new GradleException("The server has been stopped. Unable to verify if the server was started after ${verifyTimeout} seconds.")
+                    throw new GradleException("The server has been stopped. Unable to verify if the server was started after ${verifyAppStartTimeout} seconds.")
                 }
                 timeout = endTime - System.currentTimeMillis();
             }

@@ -235,10 +235,6 @@ abstract class AbstractServerTask extends AbstractTask {
             }
         }
     }
-    //selects a server from the servers extension or selects all servers if the input is empty or null if any are defined in the build file
-    //private void selectServer(String serverId){
-    //    if(servers)
-    //}
 
     private void makeParentDirectory(File file) {
         File parentDir = file.getParentFile()

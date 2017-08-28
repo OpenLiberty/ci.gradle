@@ -17,6 +17,7 @@
 package net.wasdev.wlp.gradle.plugins.extensions
 
 import org.gradle.util.ConfigureUtil
+import org.gradle.api.Task
 
 class ServerExtension{
     //Server properties
@@ -32,14 +33,20 @@ class ServerExtension{
     Map<String, String> bootstrapProperties
     List<String> jvmOptions
 
+    List<Task> apps
+    List<Task> dropins
+
     boolean clean = false
     String timeout
     String template
 
-    int verifyTimeout = 30
-    String applications
+    int verifyAppStartTimeout = 0
 
     def numberOfClosures = 0
+
+    FeatureExtension features = new FeatureExtension()
+    UninstallFeatureExtension uninstallfeatures = new UninstallFeatureExtension()
+    CleanExtension cleanDir = new CleanExtension()
 
     DeployExtension deploy = new DeployExtension()
     UndeployExtension undeploy = new UndeployExtension()
@@ -49,6 +56,18 @@ class ServerExtension{
     PackageAndDumpExtension javaDumpLiberty = new PackageAndDumpExtension()
 
     InstallAppsExtension installapps = new InstallAppsExtension()
+
+    def uninstallfeatures(Closure closure) {
+        ConfigureUtil.configure(closure, uninstallfeatures)
+    }
+
+    def features(Closure closure) {
+        ConfigureUtil.configure(closure, features)
+    }
+
+    def cleanDir(Closure closure) {
+        ConfigureUtil.configure(closure, cleanDir)
+    }
 
     def deploy(Closure closure) {
         if (numberOfClosures > 0){
