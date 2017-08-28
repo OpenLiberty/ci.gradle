@@ -28,6 +28,9 @@ import org.w3c.dom.Element;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import org.gradle.api.Task
+import org.gradle.api.tasks.bundling.War
+
 import net.wasdev.wlp.gradle.plugins.utils.*;
 
 class InstallAppsTask extends AbstractServerTask {
@@ -54,9 +57,24 @@ class InstallAppsTask extends AbstractServerTask {
             default:
                 return
         }
-        if (installApp) {
-            installProject()
+
+        if (installProject) {
+            if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
+                if (project.plugins.hasPlugin('war')) {
+                    server.apps = [project.war]
+                }
+            }
+            if (server.apps != null && !server.apps.isEmpty()) {
+                installMultipleApps(server.apps, 'apps')
+            }
+            if (server.dropins != null && !server.dropins.isEmpty()) {
+                installMultipleApps(server.dropins, 'dropins')
+            }
         }
+        //TODO
+        /**if(installDependencies){
+            installDependencies()
+        }*/
 
         if (applicationXml.hasChildElements()) {
             logger.warn("The application is not defined in the server configuration but the build file indicates it should be installed in the apps folder. Application configuration is being added to the target server configuration dropins folder by the plug-in.");
@@ -68,24 +86,25 @@ class InstallAppsTask extends AbstractServerTask {
         }
     }
 
-    private void installProjectArchive() throws Exception {
-        File archive = new File(archivePath())
-        if(!archive.exists()) {
-            throw new GradleException("The project archive was not found and cannot be installed.")
+    private void installMultipleApps(List<Task> applications, String appsDir) {
+        applications.each{ Task task ->
+            Files.copy(task.archivePath.toPath(), new File(getServerDir(project), "/" + appsDir + "/" + getArchiveName(task.archiveName)).toPath(), StandardCopyOption.REPLACE_EXISTING)
+            validateAppConfig(getArchiveName(task.archiveName), task.baseName, appsDir)
         }
-        Files.copy(archive.toPath(), new File(getServerDir(project), "/" + server.installapps.appsDirectory + "/" + checkForStripVersion(archive.getName())).toPath(), StandardCopyOption.REPLACE_EXISTING)
-
-        validateAppConfig(checkForStripVersion(archive.getName()), getBaseName(archive))
     }
 
-    private void validateAppConfig(String fileName, String artifactId) throws Exception {
-        String appsDir = server.installapps.appsDirectory
+    protected void validateAppConfig(String fileName, String artifactId) throws Exception {
+        validateAppConfig(fileName, artifactId, server.installapps.appsDirectory)
+    }
 
-        if(appsDir.equalsIgnoreCase('apps') && !isAppConfiguredInSourceServerXml(fileName)){
+    protected void validateAppConfig(String fileName, String artifactId, String dir) throws Exception {
+        String appsDir = dir
+
+        if (appsDir.equalsIgnoreCase('apps') && !isAppConfiguredInSourceServerXml(fileName)) {
             applicationXml.createApplicationElement(fileName, artifactId)
         }
-        else if(appsDir.equalsIgnoreCase('dropins') && isAppConfiguredInSourceServerXml(fileName)){
-            throw new GradleException("The application is configured in the server.xml and the plug-in is configured to install the application in the dropins folder. A configured application must be installed to the apps folder.")
+        else if (appsDir.equalsIgnoreCase('dropins') && isAppConfiguredInSourceServerXml(fileName)) {
+            throw new GradleException("The application, " + artifactId + ", is configured in the server.xml and the plug-in is configured to install the application in the dropins folder. A configured application must be installed to the apps folder.")
         }
     }
 
@@ -108,8 +127,8 @@ class InstallAppsTask extends AbstractServerTask {
         return configured
     }
 
-    private String checkForStripVersion(String archiveName){
-        if(server.installapps.stripVersion){
+    protected String getArchiveName(String archiveName){
+        if (server.installapps.stripVersion){
             StringBuilder sbArchiveName = new StringBuilder().append("-").append(project.version)
             return archiveName.replaceAll(sbArchiveName.toString(),"")
         }
@@ -123,8 +142,9 @@ class InstallAppsTask extends AbstractServerTask {
         return server.installapps.installAppPackages
     }
 
-    private String getBaseName(File file){
-        return file.name.take(checkForStripVersion(file.name).lastIndexOf('.'))
+    //Removes extension
+    private String getBaseName(File file) {
+        return file.name.take(getArchiveName(file.name).lastIndexOf('.'))
     }
 
     private String archivePath() throws Exception {
