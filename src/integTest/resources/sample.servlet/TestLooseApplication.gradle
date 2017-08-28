@@ -16,7 +16,6 @@ buildscript {
     }
     dependencies {
         classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:1.1-SNAPSHOT'
-        classpath 'net.wasdev.wlp.ant:wlp-anttasks:1.3-SNAPSHOT'
     }
 }
 
@@ -60,6 +59,12 @@ repositories {
     mavenCentral()
 }
 
+/*
+task war1(type:War){
+    baseName = 'sample.servlet4'
+    println 'war4 archiveName = ' + archiveName
+}*/
+
 dependencies {
     testCompile 'junit:junit:4.12'
     providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
@@ -94,4 +99,5 @@ task printMessageAboutRunningServer {
 }
 
 installApps.dependsOn 'war'
+//installApps.dependsOn tasks.withType(War)
 libertyStart.finalizedBy 'printMessageAboutRunningServer'
