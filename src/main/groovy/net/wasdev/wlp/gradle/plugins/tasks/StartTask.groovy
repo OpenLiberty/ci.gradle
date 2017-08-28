@@ -69,14 +69,16 @@ class StartTask extends AbstractServerTask {
                 }
             }
 
-            for (String archiveName : appsToVerify) {
-                String verify = serverTask.waitForStringInLog(START_APP_MESSAGE_REGEXP + archiveName, timeout, serverTask.getLogFile())
-                if (!verify) {
-                    executeServerCommand(project, 'stop', buildLibertyMap(project))
-                    throw new GradleException("The server has been stopped. Unable to verify if the server was started after ${verifyAppStartTimeout} seconds.")
+            def verifyAppStartedThreads = appsToVerify.collect{ String archiveName ->
+                    Thread.start{
+                        String verify = serverTask.waitForStringInLog(START_APP_MESSAGE_REGEXP + archiveName, timeout, serverTask.getLogFile())
+                        if (!verify) {
+                            executeServerCommand(project, 'stop', buildLibertyMap(project))
+                            throw new GradleException("The server has been stopped. Unable to verify if the server was started after ${verifyAppStartTimeout} seconds.")
+                        }
+                    }
                 }
-                timeout = endTime - System.currentTimeMillis();
-            }
+            verifyAppStartedThreads*.join()
         }
     }
 }
