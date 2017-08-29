@@ -225,30 +225,6 @@ class InstallAppsTask extends AbstractServerTask {
       return projectPath;
     }
 
-    /*
-    private boolean containsJavaSource(){
-      Set<File> srcDirs = project.sourceSets.allJava.getSrcDirs();
-      for(srcDir in srcDirs){
-        File javaSourceDir = new File (srcDir)
-        if(javaSourceDir.exists() && javaSourceDir.isDirectory() && containsJavaSource(javaSourceDir)){
-          return true;
-        }
-      }
-      return false;
-    }
-
-    private boolean containsJavaSource(File f){
-      File[] files = f.listFiles()
-      for (file in Files) {
-            if (file.isFile() && file.getName().toLowerCase().endsWith(".java")) {
-                return true;
-            } else if (file.isDirectory()) {
-                return containsJavaSource(file);
-            }
-        }
-        return false;
-    }*/
-
     private boolean isSupportedType(){
       switch (getPackagingType()) {
         case "ear":
