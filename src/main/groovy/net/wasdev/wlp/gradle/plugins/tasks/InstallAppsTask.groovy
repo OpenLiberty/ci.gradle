@@ -30,7 +30,7 @@ import java.util.regex.Matcher;
 
 import org.gradle.api.Task
 import org.gradle.api.tasks.bundling.War
-
+import org.gradle.plugins.ear.Ear
 import net.wasdev.wlp.gradle.plugins.utils.*;
 
 class InstallAppsTask extends AbstractServerTask {
@@ -58,7 +58,7 @@ class InstallAppsTask extends AbstractServerTask {
                 return
         }
 
-        if (installProject) {
+        if (installApp) {
             if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
                 if (project.plugins.hasPlugin('war')) {
                     server.apps = [project.war]
@@ -68,6 +68,7 @@ class InstallAppsTask extends AbstractServerTask {
                 installMultipleApps(server.apps, 'apps')
             }
             if (server.dropins != null && !server.dropins.isEmpty()) {
+                println("server.dropins going through")
                 installMultipleApps(server.dropins, 'dropins')
             }
         }
@@ -88,9 +89,13 @@ class InstallAppsTask extends AbstractServerTask {
 
     private void installMultipleApps(List<Task> applications, String appsDir) {
         applications.each{ Task task ->
-            Files.copy(task.archivePath.toPath(), new File(getServerDir(project), "/" + appsDir + "/" + getArchiveName(task.archiveName)).toPath(), StandardCopyOption.REPLACE_EXISTING)
-            validateAppConfig(getArchiveName(task.archiveName), task.baseName, appsDir)
+          installProject(task, appsDir)
         }
+    }
+
+    private void installProjectArchive(Task task, String appsDir){
+      Files.copy(task.archivePath.toPath(), new File(getServerDir(project), "/" + appsDir + "/" + getArchiveName(task)).toPath(), StandardCopyOption.REPLACE_EXISTING)
+      validateAppConfig(getArchiveName(task), task.baseName, appsDir)
     }
 
     protected void validateAppConfig(String fileName, String artifactId) throws Exception {
@@ -99,7 +104,6 @@ class InstallAppsTask extends AbstractServerTask {
 
     protected void validateAppConfig(String fileName, String artifactId, String dir) throws Exception {
         String appsDir = dir
-
         if (appsDir.equalsIgnoreCase('apps') && !isAppConfiguredInSourceServerXml(fileName)) {
             applicationXml.createApplicationElement(fileName, artifactId)
         }
@@ -127,12 +131,11 @@ class InstallAppsTask extends AbstractServerTask {
         return configured
     }
 
-    protected String getArchiveName(String archiveName){
+    protected String getArchiveName(Task task){
         if (server.installapps.stripVersion){
-            StringBuilder sbArchiveName = new StringBuilder().append("-").append(project.version)
-            return archiveName.replaceAll(sbArchiveName.toString(),"")
+            return task.baseName + "." + task.extension
         }
-        return archiveName;
+        return task.archiveName;
     }
 
     private String getInstallAppPackages() {
@@ -142,49 +145,29 @@ class InstallAppsTask extends AbstractServerTask {
         return server.installapps.installAppPackages
     }
 
-    //Removes extension
-    private String getBaseName(File file) {
-        return file.name.take(getArchiveName(file.name).lastIndexOf('.'))
-    }
-
-    private String archivePath() throws Exception {
-        if (project.plugins.hasPlugin("ear")) {
-            return project.ear.archivePath
-        }
-        else if (project.plugins.hasPlugin("war")) {
-            return project.war.archivePath
-        }
-        else if (project.plugins.hasPlugin("java")){
-            return project.jar.archivePath
-        }
-        else {
-            throw new GradleException("Archive path not found. Supported formats are jar, war, and ear.")
-        }
-    }
-
-    private void installProject() throws Exception {
+    protected void installProject(Task task, String appsDir) throws Exception {
       if(isSupportedType()) {
         if(server.installapps.looseApplication){
-          installLooseApplication()
+          installLooseApplication(task, appsDir)
         } else {
-          installProjectArchive()
+          installProjectArchive(task, appsDir)
         }
       } else {
         throw new GradleException("Application is not supported")
       }
     }
 
-    private void installLooseApplication() throws Exception {
-      String looseConfigFileName = getLooseConfigFileName()
+    private void installLooseApplication(Task task, String appsDir) throws Exception {
+      String looseConfigFileName = getLooseConfigFileName(task)
       String application = looseConfigFileName.substring(0, looseConfigFileName.length()-4)
-      File destDir = new File(getServerDir(project), "apps")
+      File destDir = new File(getServerDir(project), appsDir)
       File looseConfigFile = new File(destDir, looseConfigFileName)
       LooseConfigData config = new LooseConfigData()
       switch(getPackagingType()){
         case "war":
-            validateAppConfig(application, application.take(checkForStripVersion(application).lastIndexOf('.')))
-            logger.debug("Installing application into the {0} folder.", looseConfigFile.getAbsolutePath())
-            installLooseConfigWar(config)
+            validateAppConfig(application, application.take(getArchiveName(task).lastIndexOf('.')))
+            logger.info("Installing application into the {0} folder.", looseConfigFile.getAbsolutePath())
+            installLooseConfigWar(config, task)
             deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
             deleteApplication(new File(getServerDir(project), "dropins"), looseConfigFile)
             config.toXmlFile(looseConfigFile)
@@ -194,33 +177,33 @@ class InstallAppsTask extends AbstractServerTask {
         default:
             logger.info(MessageFormat.format(("Loose application configuration is not supported for packaging type {0}. The project artifact will be installed as is."),
                     project.getPackaging()));
-            installProjectArchive()
+            installProjectArchive(task, appsDir)
             break
         }
     }
 
-    protected void installLooseConfigWar(LooseConfigData config) throws Exception {
+    protected void installLooseConfigWar(LooseConfigData config, Task task) throws Exception {
         File dir = getServerDir(project)
-        if (!dir.exists() && containsJavaSource()) {
+        if (!dir.exists() && !task.sourceSets.allJava.getSrcDirs().isEmpty()) {
           throw new GradleException("Failed to install loose application from project {0}. The project has not been compiled.", project.name)
         }
-        LooseWarApplication looseWar = new LooseWarApplication(project, config)
+        LooseWarApplication looseWar = new LooseWarApplication(task, config)
         looseWar.addSourceDir()
-        looseWar.addOutputDir(looseWar.getDocumentRoot(), project, "/WEB-INF/classes");
+        looseWar.addOutputDir(looseWar.getDocumentRoot(), task, "/WEB-INF/classes");
 
         //retrieves dependent library jar files
-        addWarEmbeddedLib(looseWar.getDocumentRoot(), looseWar);
+        addWarEmbeddedLib(looseWar.getDocumentRoot(), looseWar, task);
 
         //add Manifest file
         File manifestFile = new File(project.sourceSets.main.getOutput().getResourcesDir().getParentFile().getAbsolutePath() + "/META-INF/MANIFEST.MF")
         looseWar.addManifestFile(manifestFile, "gradle-war-plugin")
     }
 
-    private void addWarEmbeddedLib(Element parent, LooseApplication looseApp) throws Exception {
+    private void addWarEmbeddedLib(Element parent, LooseApplication looseApp, Task task) throws Exception {
       ArrayList<File> deps = new ArrayList<File>();
       project.configurations.runtime.each { deps.add(it)}
       project.configurations.providedRuntime.each { deps.remove(it) }
-      File parentProjectDir = new File(project.getRootProject().rootDir.getAbsolutePath())
+      File parentProjectDir = new File(task.getProject().getRootProject().rootDir.getAbsolutePath())
       for (File dep: deps) {
         String projectPath = getProjectPath(parentProjectDir, dep)
         if(!projectPath.isEmpty() && project.getRootProject().findProject(projectPath) != null){
@@ -234,14 +217,15 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
     private String getProjectPath(File parentProjectDir, File dep){
-      String projectJunk = dep.getAbsolutePath().replace(parentProjectDir.getAbsolutePath()+"/","")
-      String projectPath = dep.getAbsolutePath().replace(projectJunk,"")
+      String dependencyPathPortion = dep.getAbsolutePath().replace(parentProjectDir.getAbsolutePath()+"/","")
+      String projectPath = dep.getAbsolutePath().replace(dependencyPathPortion,"")
       Pattern pattern = Pattern.compile("/build/.*")
-      Matcher matcher = pattern.matcher(projectJunk)
+      Matcher matcher = pattern.matcher(dependencyPathPortion)
       projectPath = matcher.replaceAll("")
       return projectPath;
     }
 
+    /*
     private boolean containsJavaSource(){
       Set<File> srcDirs = project.sourceSets.allJava.getSrcDirs();
       for(srcDir in srcDirs){
@@ -263,32 +247,27 @@ class InstallAppsTask extends AbstractServerTask {
             }
         }
         return false;
-    }
+    }*/
 
     private boolean isSupportedType(){
       switch (getPackagingType()) {
         case "ear":
         case "war":
-        case "eba":
-        case "esa":
             return true;
         default:
             return false;
         }
     }
-    private String getLooseConfigFileName(){
-      return checkForStripVersion(project.war.archiveName) + ".xml"
+    private String getLooseConfigFileName(Task task){
+      return getArchiveName(task) + ".xml"
     }
 
     private String getPackagingType() throws Exception{
-      if (project.plugins.hasPlugin("ear")) {
+      if (project.plugins.hasPlugin("ear") || !project.tasks.withType(Ear).isEmpty()) {
           return "ear"
       }
-      else if (project.plugins.hasPlugin("war")) {
+      else if (project.plugins.hasPlugin("war") || !project.tasks.withType(War).isEmpty()) {
           return "war"
-      }
-      else if (project.plugins.hasPlugin("java")){
-          return "java"
       }
       else {
           throw new GradleException("Archive path not found. Supported formats are jar, war, and ear.")

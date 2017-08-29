@@ -4,17 +4,19 @@ package net.wasdev.wlp.gradle.plugins.utils;
 import java.io.File;
 import org.w3c.dom.Element;
 import org.gradle.api.Project;
+import org.gradle.api.Task
+import org.gradle.api.tasks.bundling.War
 
 public class LooseApplication {
-    protected Project project;
+    protected Task task;
     protected LooseConfigData config;
 
-    public LooseApplication(Project project, LooseConfigData config) {
-        this.project = project;
+    public LooseApplication(Task task, LooseConfigData config) {
+        this.task = task;
         this.config = config;
     }
-    public void addOutputDir(Element parent, Project project, String target) {
-      config.addDir(parent, project.war.destinationDir.getParentFile().getCanonicalPath() + "/classes", target);
+    public void addOutputDir(Element parent, Task task, String target) {
+      config.addDir(parent, task.destinationDir.getParentFile().getCanonicalPath() + "/classes", target);
     }
 
     public Element getDocumentRoot() {
@@ -26,23 +28,23 @@ public class LooseApplication {
     }
 
     public void addOutputDir(Element parent, File proj, String target) {
-        config.addDir(parent, proj.getAbsolutePath(), target);
+        config.addDir(parent, task.getProject().getAbsolutePath(), target);
     }
 
-    public void addOutputDirectory(Element parent, Project proj, String target) {
-        config.addDir(parent, proj.sourceSets.main.getOutput().getClassesDirs().getSingleFile().getAbsolutePath(), target);
+    public void addOutputDirectory(Element parent, Task task, String target) {
+        config.addDir(parent, task.getProject().sourceSets.main.getOutput().getClassesDirs().getSingleFile().getAbsolutePath(), target);
     }
 
     public void addManifestFile(File mf, String pluginId) throws Exception {
         if(!mf.exists()){
-          project.jar.manifest.writeTo(mf.getAbsolutePath())
+          task.manifest.writeTo(mf.getAbsolutePath())
           config.addFile(mf.getAbsolutePath(), "/META-INF/MANIFEST.MF");
         }
     }
 
-    public void addManifestFile(Element parent, Project proj, String pluginId) throws Exception {
-        if(proj.jar.getManifest() != null)
-          config.addFile(parent, proj.sourceSets.main.getOutput().getResourcesDir().getParentFile().getAbsolutePath() + "/META-INF/MANIFEST.MF", "/META-INF/MANIFEST.MF");
+    public void addManifestFile(Element parent, Task task, String pluginId) throws Exception {
+        if(task.getManifest() != null)
+          config.addFile(parent, task.getProject().sourceSets.main.getOutput().getResourcesDir().getParentFile().getAbsolutePath() + "/META-INF/MANIFEST.MF", "/META-INF/MANIFEST.MF");
     }
 
     public Element addArchive(Element parent, String target) {

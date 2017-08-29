@@ -61,8 +61,8 @@ repositories {
 
 
 task war1(type:War){
-    baseName = 'sample.servlet4'
-    println 'war4 archiveName = ' + archiveName
+    baseName = 'sample.servlet1'
+    println 'war1 archiveName = ' + archiveName
 }
 
 dependencies {
@@ -99,5 +99,5 @@ task printMessageAboutRunningServer {
 }
 
 installApps.dependsOn 'war'
-//installApps.dependsOn tasks.withType(War)
+installApps.dependsOn tasks.withType(War)
 libertyStart.finalizedBy 'printMessageAboutRunningServer'

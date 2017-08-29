@@ -52,9 +52,7 @@ liberty {
         installapps{
             looseApplication = false
         }
-    	applications = "sample.servlet-1"
-        dropins = [war]
-
+      dropins = [war]
       verifyAppStartTimeout = 30
     }
 }
