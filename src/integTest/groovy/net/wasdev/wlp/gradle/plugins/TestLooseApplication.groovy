@@ -50,11 +50,11 @@ public class TestLooseApplication extends AbstractIntegrationTest{
   Expected output to the XML
   <?xml version="1.0" encoding="UTF-8"?>
   <archive>
-      <dir sourceOnDisk="/Users/jjvilleg/Desktop/ci.gradle/build/testBuilds/test-loose-application/src/main/webapp" targetInArchive="/"/>
-      <dir sourceOnDisk="/Users/jjvilleg/Desktop/ci.gradle/build/testBuilds/test-loose-application/build/classes" targetInArchive="/WEB-INF/classes"/>
-      <file sourceOnDisk="/Users/jjvilleg/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-text/1.1/c336bf600f44b88af356c8a85eef4af822b06a4d/commons-text-1.1.jar" targetInArchive="/WEB-INF/lib/commons-text-1.1.jar"/>
-      <file sourceOnDisk="/Users/jjvilleg/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-lang3/3.5/6c6c702c89bfff3cd9e80b04d668c5e190d588c6/commons-lang3-3.5.jar" targetInArchive="/WEB-INF/lib/commons-lang3-3.5.jar"/>
-      <file sourceOnDisk="/Users/jjvilleg/Desktop/ci.gradle/build/testBuilds/test-loose-application/build/resources/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
+      <dir sourceOnDisk="/Users/../../ci.gradle/build/testBuilds/test-loose-application/src/main/webapp" targetInArchive="/"/>
+      <dir sourceOnDisk="/Users/../../ci.gradle/build/testBuilds/test-loose-application/build/classes" targetInArchive="/WEB-INF/classes"/>
+      <file sourceOnDisk="/Users/../.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-text/1.1/c336bf600f44b88af356c8a85eef4af822b06a4d/commons-text-1.1.jar" targetInArchive="/WEB-INF/lib/commons-text-1.1.jar"/>
+      <file sourceOnDisk="/Users/../.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-lang3/3.5/6c6c702c89bfff3cd9e80b04d668c5e190d588c6/commons-lang3-3.5.jar" targetInArchive="/WEB-INF/lib/commons-lang3-3.5.jar"/>
+      <file sourceOnDisk="/Users/../../ci.gradle/build/testBuilds/test-loose-application/build/resources/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
   </archive>
 */
     @Test
