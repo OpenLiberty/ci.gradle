@@ -25,13 +25,14 @@ import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
 import org.w3c.dom.Element;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
+import java.util.regex.Pattern
+import java.util.regex.Matcher
+import groovy.lang.GroovyObjectSupport
 
 import org.gradle.api.Task
 import org.gradle.api.tasks.bundling.War
 import org.gradle.plugins.ear.Ear
-import net.wasdev.wlp.gradle.plugins.utils.*;
+import net.wasdev.wlp.gradle.plugins.utils.*
 
 class InstallAppsTask extends AbstractServerTask {
 
@@ -153,7 +154,7 @@ class InstallAppsTask extends AbstractServerTask {
           installProjectArchive(task, appsDir)
         }
       } else {
-        throw new GradleException("Application is not supported")
+        throw new GradleException(("Application {0} is not supported"), task.archiveName)
       }
     }
 
@@ -166,7 +167,7 @@ class InstallAppsTask extends AbstractServerTask {
       switch(getPackagingType()){
         case "war":
             validateAppConfig(application, application.take(getArchiveName(task).lastIndexOf('.')))
-            logger.info("Installing application into the {0} folder.", looseConfigFile.getAbsolutePath())
+            logger.info(("Installing application into the {0} folder."), looseConfigFile.getAbsolutePath())
             installLooseConfigWar(config, task)
             deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
             deleteApplication(new File(getServerDir(project), "dropins"), looseConfigFile)
@@ -175,8 +176,8 @@ class InstallAppsTask extends AbstractServerTask {
         case "ear":
             break
         default:
-            logger.info(MessageFormat.format(("Loose application configuration is not supported for packaging type {0}. The project artifact will be installed as is."),
-                    project.getPackaging()));
+            logger.info(("Loose application configuration is not supported for packaging type {0}. The project artifact will be installed as an archive file."),
+                    project.getPackaging())
             installProjectArchive(task, appsDir)
             break
         }
@@ -239,17 +240,18 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
     private String getPackagingType() throws Exception{
-      if (project.plugins.hasPlugin("ear") || !project.tasks.withType(Ear).isEmpty()) {
-          return "ear"
-      }
-      else if (project.plugins.hasPlugin("war") || !project.tasks.withType(War).isEmpty()) {
+      if (project.plugins.hasPlugin("war") || !project.tasks.withType(War).isEmpty()) {
           return "war"
+      }
+      else if (project.plugins.hasPlugin("ear") || !project.tasks.withType(Ear).isEmpty()) {
+          return "ear"
       }
       else {
           throw new GradleException("Archive path not found. Supported formats are jar, war, and ear.")
       }
   }
 
+  //Cleans up the application if the install style is switched from loose application to archive and vice versa
   protected void deleteApplication(File parent, File artifactFile) throws IOException {
       deleteApplication(parent, artifactFile.getName());
       if (artifactFile.getName().endsWith(".xml")) {
