@@ -38,37 +38,47 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
 public class ServerConfigDocument {
-    
+
     private static ServerConfigDocument instance;
-    
+
     private static DocumentBuilder docBuilder;
-    
+
     private static File configDirectory;
     private static File serverFile;
-    
+
     private static Set<String> locations;
+    private static Set<String> names;
+    private static Set<String> namelessLocations;
     private static Properties props;
-    
+
     public Set<String> getLocations() {
         return locations;
     }
-    
+
+    public Set<String> getNames() {
+        return names;
+    }
+
+    public Set<String> getNamelessLocations() {
+        return namelessLocations;
+    }
+
     public static Properties getProperties() {
         return props;
     }
-    
+
     private static File getServerFile() {
         return serverFile;
     }
-    
-    public ServerConfigDocument(File serverXML, File configDir, File bootstrapFile, 
+
+    public ServerConfigDocument(File serverXML, File configDir, File bootstrapFile,
     		Map<String, String> bootstrapProp, File serverEnvFile) {
         initializeAppsLocation(serverXML, configDir, bootstrapFile, bootstrapProp, serverEnvFile);
     }
-    
+
     private static DocumentBuilder getDocumentBuilder() throws Exception {
         if (docBuilder == null) {
-            // get input XML Document 
+            // get input XML Document
             DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
             docBuilderFactory.setIgnoringComments(true);
             docBuilderFactory.setCoalescing(true);
@@ -78,8 +88,8 @@ public class ServerConfigDocument {
         }
         return docBuilder;
     }
-    
-    public static ServerConfigDocument getInstance(File serverXML, File configDir, File bootstrapFile, 
+
+    public static ServerConfigDocument getInstance(File serverXML, File configDir, File bootstrapFile,
             Map<String, String> bootstrapProp, File serverEnvFile) throws IOException {
         // Initialize if instance is not created yet, or source server xml file location has been changed.
         if (instance == null || !serverXML.getCanonicalPath().equals(getServerFile().getCanonicalPath())) {
@@ -87,32 +97,34 @@ public class ServerConfigDocument {
         }
         return instance;
      }
-     
-    private static void initializeAppsLocation(File serverXML, File configDir, File bootstrapFile, 
+
+    private static void initializeAppsLocation(File serverXML, File configDir, File bootstrapFile,
             Map<String, String> bootstrapProp, File serverEnvFile) {
         try {
             serverFile = serverXML;
             configDirectory = configDir;
-            
+
             locations = new HashSet<String>();
+            names = new HashSet<String>();
+            namelessLocations = new HashSet<String>();
             props = new Properties();
-            
+
             Document doc = parseDocument(new FileInputStream(serverFile));
-            
+
             // Server variable precedence in ascending order if defined in multiple locations.
             //
             // 1. variables from 'server.env'
-            // 2. variables from 'bootstrap.properties' 
+            // 2. variables from 'bootstrap.properties'
             // 3. variables defined in <include/> files
             // 4. variables from configDropins/defaults/<file_name>
             // 5. variables defined in server.xml
             //    e.g. <variable name="myVarName" value="myVarValue" />
             // 6. variables from configDropins/overrides/<file_name>
-            
+
             Properties fProps;
-            // get variables from server.env 
+            // get variables from server.env
             File cfgDirFile = getFileFromConfigDirectory("server.env");
-            
+
             if (cfgDirFile != null) {
                 fProps = parseProperties(new FileInputStream(cfgDirFile));
                 props.putAll(fProps);
@@ -120,9 +132,9 @@ public class ServerConfigDocument {
                 fProps = parseProperties(new FileInputStream(serverEnvFile));
                 props.putAll(fProps);
             }
-            
+
             cfgDirFile = getFileFromConfigDirectory("bootstrap.properties");
-            
+
             if (cfgDirFile != null) {
                 fProps = parseProperties(new FileInputStream(cfgDirFile));
                 props.putAll(fProps);
@@ -132,15 +144,18 @@ public class ServerConfigDocument {
                 fProps = parseProperties(new FileInputStream(bootstrapFile));
                 props.putAll(fProps);
             }
-            
+
             parseIncludeVariables(doc);
             parseConfigDropinsDirVariables("defaults");
             parseVariables(doc);
             parseConfigDropinsDirVariables("overrides");
-            
+
             parseApplication(doc, "/server/application");
             parseApplication(doc, "/server/webApplication");
             parseApplication(doc, "/server/enterpriseApplication");
+            parseNames(doc, "/server/application");
+            parseNames(doc, "/server/webApplication");
+            parseNames(doc, "/server/enterpriseApplication");
             parseInclude(doc);
             parseConfigDropinsDir();
 
@@ -148,15 +163,15 @@ public class ServerConfigDocument {
             e.printStackTrace();
         }
     }
-    
+
     private static void parseApplication(Document doc, String expression) throws Exception {
         // parse input document
         XPath xPath = XPathFactory.newInstance().newXPath();
         NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
-        
+
         for (int i = 0; i < nodeList.getLength(); i++) {
             String nodeValue = nodeList.item(i).getAttributes().getNamedItem("location").getNodeValue();
-            
+
             // add unique values only
             if (!nodeValue.isEmpty()) {
                 String resolved = getResolvedVariable(nodeValue);
@@ -166,18 +181,18 @@ public class ServerConfigDocument {
             }
         }
     }
-    
+
     private static void parseInclude(Document doc) throws Exception {
         // parse include document in source server xml
         XPath xPath = XPathFactory.newInstance().newXPath();
         NodeList nodeList = (NodeList) xPath.compile("/server/include").evaluate(doc, XPathConstants.NODESET);
-       
+
         for (int i = 0; i < nodeList.getLength(); i++) {
             String nodeValue = nodeList.item(i).getAttributes().getNamedItem("location").getNodeValue();
-            
+
             if (!nodeValue.isEmpty()) {
                 Document docIncl = getIncludeDoc(nodeValue);
-                
+
                 if (docIncl != null) {
                     parseApplication(docIncl, "/server/application");
                     parseApplication(docIncl, "/server/webApplication");
@@ -188,37 +203,69 @@ public class ServerConfigDocument {
             }
         }
     }
-    
+
+    //Checks for application names in the document. Will add locations without names to a Set
+    private static void parseNames(Document doc, String expression) throws Exception {
+        // parse input document
+        XPath xPath = XPathFactory.newInstance().newXPath();
+        NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
+
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            if (nodeList.item(i).getAttributes().getNamedItem("name") != null) {
+                String nodeValue = nodeList.item(i).getAttributes().getNamedItem("name").getNodeValue();
+
+                // add unique values only
+                if (!nodeValue.isEmpty()) {
+                    String resolved = getResolvedVariable(nodeValue);
+                    if (!names.contains(resolved)) {
+                        names.add(resolved);
+                    }
+                }
+            }
+            else {
+                String nodeValue = nodeList.item(i).getAttributes().getNamedItem("location").getNodeValue();
+
+                // add unique values only
+                if (!nodeValue.isEmpty()) {
+                    String resolved = getResolvedVariable(nodeValue);
+                    if (!namelessLocations.contains(resolved)) {
+                        namelessLocations.add(resolved);
+                    }
+                }
+            }
+        }
+    }
+
     private static void parseConfigDropinsDir() throws Exception {
         File configDropins = null;
-        
-        // if configDirectory exists and contains configDropins directory, 
+
+        // if configDirectory exists and contains configDropins directory,
         // its configDropins has higher precedence.
         if (configDirectory != null && configDirectory.exists()) {
             configDropins = new File(configDirectory, "configDropins");
         }
-        
+
         if (configDropins == null || !configDropins.exists()) {
             configDropins = new File(getServerFile().getParent(), "configDropins");
         }
-        
+
         if (configDropins != null && configDropins.exists()) {
             File overrides = new File(configDropins, "overrides");
-            
+
             if (overrides.exists()) {
                 File[] cfgFiles = overrides.listFiles();
-                
+
                 for (int i = 0; i < cfgFiles.length; i++) {
                     if (cfgFiles[i].isFile()) {
                         parseDropinsFiles(cfgFiles[i]);
                     }
                 }
             }
-            
+
             File defaults = new File(configDropins, "defaults");
             if (defaults.exists()) {
                 File[] cfgFiles = defaults.listFiles();
-                
+
                 for (int i = 0; i < cfgFiles.length; i++) {
                     if (cfgFiles[i].isFile()) {
                         parseDropinsFiles(cfgFiles[i]);
@@ -227,22 +274,22 @@ public class ServerConfigDocument {
             }
         }
     }
-    
+
     private static void parseDropinsFiles(File file) throws Exception {
-        // get input XML Document 
+        // get input XML Document
         Document doc = parseDocument(new FileInputStream(file));
-        
+
         parseApplication(doc, "/server/application");
         parseApplication(doc, "/server/webApplication");
         parseApplication(doc, "/server/enterpriseApplication");
         parseInclude(doc);
     }
-    
+
     private static Document getIncludeDoc(String loc) throws Exception {
-    
+
         Document doc = null;
         File locFile = null;
-        
+
         if (loc.startsWith("http:") || loc.startsWith("https:")) {
             if (isValidURL(loc)) {
                 URL url = new URL(loc);
@@ -255,7 +302,7 @@ public class ServerConfigDocument {
                locFile = new File(loc);
                if (locFile.exists()) {
                    InputStream inputStream = new FileInputStream(locFile.getCanonicalPath());
-                   doc = parseDocument(inputStream);    
+                   doc = parseDocument(inputStream);
                }
            }
        }
@@ -264,31 +311,31 @@ public class ServerConfigDocument {
        }
        else {
            locFile = new File(loc);
-           
+
            // check if absolute file
            if (locFile.isAbsolute()) {
                InputStream inputStream = new FileInputStream(locFile.getCanonicalPath());
-               doc = parseDocument(inputStream);    
+               doc = parseDocument(inputStream);
            }
            else {
                // check configDirectory first if exists
                if (configDirectory != null && configDirectory.exists()) {
                    locFile = new File(configDirectory, loc);
-               }               
-               
+               }
+
                if (locFile == null || !locFile.exists()) {
                    locFile = new File(getServerFile().getParentFile(), loc);
                }
-               
+
                if (locFile != null && locFile.exists()) {
                    InputStream inputStream = new FileInputStream(locFile.getCanonicalPath());
-                   doc = parseDocument(inputStream);    
+                   doc = parseDocument(inputStream);
                }
            }
         }
         return doc;
     }
-    
+
     private static Document parseDocument(InputStream ins) throws Exception {
         Document doc = null;
         try {
@@ -302,7 +349,7 @@ public class ServerConfigDocument {
         }
         return doc;
     }
-    
+
     private static Properties parseProperties(InputStream ins) throws Exception {
         Properties props = null;
         try {
@@ -317,62 +364,62 @@ public class ServerConfigDocument {
         }
         return props;
     }
-    
+
     private static boolean isValidURL(String url) {
         try {
             URL testURL = new URL(url);
             testURL.toURI();
             return true;
-        } 
+        }
         catch (Exception exception) {
             return false;
         }
     }
-    
+
     private static String getResolvedVariable(String nodeValue) {
         final String VARIABLE_NAME_PATTERN = "\\$\\{(.*?)\\}";
 
         String resolved = nodeValue;
         Pattern varNamePattern = Pattern.compile(VARIABLE_NAME_PATTERN);
         Matcher varNameMatcher = varNamePattern.matcher(nodeValue);
-        
+
         while (varNameMatcher.find()) {
             String variable = getProperties().getProperty(varNameMatcher.group(1));
-            
+
             if (variable != null && !variable.isEmpty()) {
                 resolved = resolved.replaceAll("\\$\\{" +  varNameMatcher.group(1) + "\\}", variable);
             }
         }
         return resolved;
     }
-    
+
     private static void parseVariables(Document doc) throws Exception {
         // parse input document
         XPath xPath = XPathFactory.newInstance().newXPath();
         NodeList nodeList = (NodeList) xPath.compile("/server/variable").evaluate(doc, XPathConstants.NODESET);
-        
+
         for (int i = 0; i < nodeList.getLength(); i++) {
             String varName = nodeList.item(i).getAttributes().getNamedItem("name").getNodeValue();
             String varValue = nodeList.item(i).getAttributes().getNamedItem("value").getNodeValue();
-            
+
             // add unique values only
             if (!varName.isEmpty() && !varValue.isEmpty()) {
                 props.put(varName, varValue);
             }
         }
     }
-    
+
     private static void parseIncludeVariables(Document doc) throws Exception {
         // parse include document in source server xml
         XPath xPath = XPathFactory.newInstance().newXPath();
         NodeList nodeList = (NodeList) xPath.compile("/server/include").evaluate(doc, XPathConstants.NODESET);
-       
+
         for (int i = 0; i < nodeList.getLength(); i++) {
             String nodeValue = nodeList.item(i).getAttributes().getNamedItem("location").getNodeValue();
-            
+
             if (!nodeValue.isEmpty()) {
                 Document docIncl = getIncludeDoc(nodeValue);
-                
+
                 if (docIncl != null) {
                     parseVariables(docIncl);
                     // handle nested include elements
@@ -381,26 +428,26 @@ public class ServerConfigDocument {
             }
         }
     }
-    
+
     private static void parseConfigDropinsDirVariables(String inDir) throws Exception {
         File configDropins = null;
-        
-        // if configDirectory exists and contains configDropins directory, 
+
+        // if configDirectory exists and contains configDropins directory,
         // its configDropins has higher precedence.
         if (configDirectory != null && configDirectory.exists()) {
             configDropins = new File(configDirectory, "configDropins");
         }
-        
+
         if (configDropins == null || !configDropins.exists()) {
             configDropins = new File(getServerFile().getParent(), "configDropins");
         }
-        
+
         if (configDropins != null && configDropins.exists()) {
             File dir = new File(configDropins, inDir);
-            
+
             if (dir.exists()) {
                 File[] cfgFiles = dir.listFiles();
-                
+
                 for (int i = 0; i < cfgFiles.length; i++) {
                     if (cfgFiles[i].isFile()) {
                         parseDropinsFilesVariables(cfgFiles[i]);
@@ -409,32 +456,31 @@ public class ServerConfigDocument {
             }
         }
     }
-    
+
     private static void parseDropinsFilesVariables(File file) throws Exception {
-        // get input XML Document 
+        // get input XML Document
         Document doc = parseDocument(new FileInputStream(file));
-        
+
         parseVariables(doc);
         parseIncludeVariables(doc);
     }
-    
-    /* 
+
+    /*
      * Get the file from configDrectory if it exists;
      * otherwise return def only if it exists, or null if not
      */
     private static File getFileFromConfigDirectory(String file, File def) {
         File f = new File(configDirectory, file);
-        if (configDirectory != null && f.exists()) { 
+        if (configDirectory != null && f.exists()) {
             return f;
         }
         if (def != null && def.exists()) {
             return def;
-        } 
+        }
         return null;
     }
-    
+
     private static File getFileFromConfigDirectory(String file) {
         return getFileFromConfigDirectory(file, null);
     }
 }
-

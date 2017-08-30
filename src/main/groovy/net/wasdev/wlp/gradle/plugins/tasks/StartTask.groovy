@@ -19,6 +19,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.Task
 import net.wasdev.wlp.ant.ServerTask;
+import net.wasdev.wlp.gradle.plugins.utils.*;
 
 class StartTask extends AbstractServerTask {
 
@@ -47,12 +48,9 @@ class StartTask extends AbstractServerTask {
             long timeout = verifyAppStartTimeout * 1000
             long endTime = System.currentTimeMillis() + timeout;
 
-            ArrayList<String> appsToVerify = new ArrayList<String>()
+            Set<String> appsToVerify = getAppNamesFromServerXml()
             ArrayList<Task> applicationBuildTasks = new ArrayList<Task>()
 
-            if (server.apps != null && !server.apps.isEmpty()) {
-                applicationBuildTasks += server.apps
-            }
             if (server.dropins != null && !server.dropins.isEmpty()) {
                 applicationBuildTasks += server.dropins
             }
@@ -69,16 +67,52 @@ class StartTask extends AbstractServerTask {
                 }
             }
 
-            def verifyAppStartedThreads = appsToVerify.collect{ String archiveName ->
-                    Thread.start{
-                        String verify = serverTask.waitForStringInLog(START_APP_MESSAGE_REGEXP + archiveName, timeout, serverTask.getLogFile())
-                        if (!verify) {
-                            executeServerCommand(project, 'stop', buildLibertyMap(project))
-                            throw new GradleException("The server has been stopped. Unable to verify if the server was started after ${verifyAppStartTimeout} seconds.")
-                        }
+            def verifyAppStartedThreads = appsToVerify.collect { String archiveName ->
+                Thread.start {
+                    String verify = serverTask.waitForStringInLog(START_APP_MESSAGE_REGEXP + archiveName, timeout, serverTask.getLogFile())
+                    if (!verify) {
+                        executeServerCommand(project, 'stop', buildLibertyMap(project))
+                        throw new GradleException("The server has been stopped. Unable to verify if the server was started after ${verifyAppStartTimeout} seconds.")
                     }
                 }
+            }
             verifyAppStartedThreads*.join()
         }
+    }
+
+    private Set<String> getAppNamesFromServerXml() {
+        Set<String> appNames
+
+        File serverConfigFile = new File(getServerDir(project), 'server.xml')
+        if (serverConfigFile != null && serverConfigFile.exists()) {
+            try {
+                ServerConfigDocument scd = ServerConfigDocument.getInstance(serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, server.bootstrapProperties, server.serverEnv)
+                if (scd != null) {
+                    appNames = scd.getNames()
+                    appNames += scd.getNamelessLocations().collect { String fileName ->
+                            getNameByFile(fileName)
+                        }
+                    /*scd.getNamelessLocations().each { String fileName ->
+                            appNames.add(getNameByFile(fileName))
+                        }*/
+                }
+            }
+            catch (Exception e) {
+                logger.warn(e.getLocalizedMessage())
+                logger.debug(e)
+            }
+        }
+        return appNames
+    }
+
+    protected String getNameByFile(String fileName) {
+        String appName = ''
+
+        server.apps.each { task ->
+            if (task.archiveName.equals(fileName)) {
+                appName = task.baseName
+            }
+        }
+        return appName
     }
 }
