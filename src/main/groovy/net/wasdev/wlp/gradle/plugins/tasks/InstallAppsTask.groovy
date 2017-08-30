@@ -27,7 +27,7 @@ import org.gradle.api.artifacts.DependencySet
 import org.w3c.dom.Element;
 import java.util.regex.Pattern
 import java.util.regex.Matcher
-import groovy.lang.GroovyObjectSupport
+import java.text.MessageFormat
 
 import org.gradle.api.Task
 import org.gradle.api.tasks.bundling.War
@@ -40,10 +40,8 @@ class InstallAppsTask extends AbstractServerTask {
 
     @TaskAction
     void installApps() {
-
         boolean installDependencies = false
         boolean installApp = false
-
         switch (getInstallAppPackages()) {
             case "all":
                 installDependencies = true
@@ -154,7 +152,7 @@ class InstallAppsTask extends AbstractServerTask {
           installProjectArchive(task, appsDir)
         }
       } else {
-        throw new GradleException(("Application {0} is not supported"), task.archiveName)
+        throw new GradleException(MessageFormat.format("Application {0} is not supported", task.archiveName))
       }
     }
 
@@ -167,7 +165,7 @@ class InstallAppsTask extends AbstractServerTask {
       switch(getPackagingType()){
         case "war":
             validateAppConfig(application, application.take(getArchiveName(task).lastIndexOf('.')))
-            logger.info(("Installing application into the {0} folder."), looseConfigFile.getAbsolutePath())
+            logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFile.getAbsolutePath()))
             installLooseConfigWar(config, task)
             deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
             deleteApplication(new File(getServerDir(project), "dropins"), looseConfigFile)
@@ -176,8 +174,8 @@ class InstallAppsTask extends AbstractServerTask {
         case "ear":
             break
         default:
-            logger.info(("Loose application configuration is not supported for packaging type {0}. The project artifact will be installed as an archive file."),
-                    project.getPackaging())
+            logger.info(MessageFormat.format(("Loose application configuration is not supported for packaging type {0}. The project artifact will be installed as an archive file."),
+                    project.getPackaging()))
             installProjectArchive(task, appsDir)
             break
         }
@@ -186,7 +184,7 @@ class InstallAppsTask extends AbstractServerTask {
     protected void installLooseConfigWar(LooseConfigData config, Task task) throws Exception {
         File dir = getServerDir(project)
         if (!dir.exists() && !task.sourceSets.allJava.getSrcDirs().isEmpty()) {
-          throw new GradleException("Failed to install loose application from project {0}. The project has not been compiled.", project.name)
+          throw new GradleException(MessageFormat.format("Failed to install loose application from project {0}. The project has not been compiled.", project.name))
         }
         LooseWarApplication looseWar = new LooseWarApplication(task, config)
         looseWar.addSourceDir()
