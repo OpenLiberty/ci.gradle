@@ -92,9 +92,6 @@ class StartTask extends AbstractServerTask {
                     appNames += scd.getNamelessLocations().collect { String fileName ->
                             getNameByFile(fileName)
                         }
-                    /*scd.getNamelessLocations().each { String fileName ->
-                            appNames.add(getNameByFile(fileName))
-                        }*/
                 }
             }
             catch (Exception e) {
