@@ -36,6 +36,7 @@ import net.wasdev.wlp.gradle.plugins.tasks.UninstallFeatureTask
 import net.wasdev.wlp.gradle.plugins.tasks.CleanTask
 import net.wasdev.wlp.gradle.plugins.tasks.InstallAppsTask
 import net.wasdev.wlp.gradle.plugins.tasks.AbstractServerTask
+import org.gradle.api.tasks.bundling.War
 
 import org.gradle.api.logging.LogLevel
 
@@ -46,7 +47,6 @@ class Liberty implements Plugin<Project> {
         project.extensions.create('liberty', LibertyExtension)
         project.configurations.create('libertyLicense')
         project.configurations.create('libertyRuntime')
-
 
         //Create expected server extension from liberty extension data
         project.afterEvaluate{
@@ -63,19 +63,24 @@ class Liberty implements Plugin<Project> {
         }
 
         project.task('libertyRun', type: RunTask) {
-            //let's create a better sol to programatically set dependsOn
             description = "Runs a Websphere Liberty Profile server under the Gradle process."
             logging.level = LogLevel.INFO
+            
+            project.afterEvaluate {
+                dependsOn asdf(server, 'libertyCreate')
+            }
         }
 
-        project.task('libertyStatus', type: StatusTask, dependsOn: 'libertyCreate') {
+        project.task('libertyStatus', type: StatusTask) {
             description 'Checks if the Liberty server is running.'
             logging.level = LogLevel.INFO
+            dependsOn 'libertyCreate'
         }
 
-        project.task('libertyCreate', type: CreateTask, dependsOn: 'installLiberty') {
+        project.task('libertyCreate', type: CreateTask) {
             description 'Creates a WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
+            dependsOn 'installLiberty'
 
             project.afterEvaluate{
                 outputs.file { new File(getUserDir(project), "servers/${project.liberty.server.name}/server.xml") }
@@ -86,22 +91,24 @@ class Liberty implements Plugin<Project> {
             description 'Starts the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
 
-            project.afterEvaluate {
-                /*
-                if (project.liberty.server.installapps {
-                    dependsOn 'installApps'
-                }*/
+            project.afterEvaluate { 
+                dependsOn asdf(server, 'libertyCreate')
             }
         }
 
         project.task('libertyStop', type: StopTask) {
             description 'Stops the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
+            dependsOn project.tasks.getName().equals('clean')
         }
 
-        project.task('libertyPackage', type: PackageTask, dependsOn: 'libertyCreate') {
+        project.task('libertyPackage', type: PackageTask) {
             description 'Generates a WebSphere Liberty Profile server archive.'
             logging.level = LogLevel.DEBUG
+            
+            project.afterEvaluate {
+                dependsOn asdf(server, 'installLiberty')
+            }
         }
 
         project.task('libertyDump', type: DumpTask) {
@@ -114,23 +121,25 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
         }
 
-        project.task('libertyDebug', type: DebugTask, dependsOn: 'libertyCreate') {
+        project.task('libertyDebug', type: DebugTask) {
             description 'Runs the Liberty Profile server in the console foreground after a debugger connects to the debug port (default: 7777).'
             logging.level = LogLevel.INFO
+            
+            project.afterEvaluate {
+                dependsOn asdf(server, 'installLiberty')
+            }
         }
 
         project.task('deploy', type: DeployTask) {
-            // dependsOn a running server
             description 'Deploys a supported file to the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
-
-            mustRunAfter 'libertyStart'
+            dependsOn 'libertyStart'
         }
 
         project.task('undeploy', type: UndeployTask) {
-             // dependsOn a running server           
              description 'Removes an application from the WebSphere Liberty Profile server.'
              logging.level = LogLevel.INFO
+             dependsOn 'libertyStart'
         }
 
         project.task('installFeature', type: InstallFeatureTask) {
@@ -145,9 +154,10 @@ class Liberty implements Plugin<Project> {
                 }
             }
         }
-        project.task('uninstallFeature', type: UninstallFeatureTask, dependsOn: 'libertyCreate') {
+        project.task('uninstallFeature', type: UninstallFeatureTask) {
             description 'Uninstall a feature from the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO
+            dependsOn 'libertyCreate'
         }
 
         project.task('cleanDirs', type: CleanTask) {
@@ -165,12 +175,15 @@ class Liberty implements Plugin<Project> {
         project.task('installApps', type: InstallAppsTask) {
             description "Copy applications generated by the Gradle project to a Liberty server's dropins or apps directory."
             logging.level = LogLevel.INFO
-
+            dependsOn project.tasks.withType(War)
+ 
             project.afterEvaluate {
                 if (project.liberty.features.name != null) {
                     dependsOn 'installFeature'
+                } else {
+                    dependsOn 'libertyCreate'
                 }
-            }
+           }
         }
     }
 
@@ -194,6 +207,14 @@ class Liberty implements Plugin<Project> {
     void setServersForTasks(Project project){
         project.tasks.withType(AbstractServerTask).each {task ->
             task.server = project.liberty.server
+        }
+    }
+
+    String asdf(ServerExtension server, String elseDepends) {
+        if (server.apps != null || server.dropins != null) {
+            return 'installApps'
+        } else {
+            return elseDepends
         }
     }
 }
