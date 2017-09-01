@@ -101,7 +101,7 @@ libertyRuntime(
 
 #### Using Maven artifact
 
-Use the [dependencies block](#using-the-dependencies-block) to specify the name of the repository artifact that contains your custom Liberty server or use one of the provided on [The Central Repository](http://search.maven.org/#search%7Cga%7C1%7Ccom.ibm.websphere.appserver.runtime).  
+Use the [dependencies block](#dependencies) to specify the name of the repository artifact that contains your custom Liberty server or use one of the provided on [The Central Repository](http://search.maven.org/#search%7Cga%7C1%7Ccom.ibm.websphere.appserver.runtime).  
 
 The Maven Central repository includes the following Liberty runtime artifacts:
 

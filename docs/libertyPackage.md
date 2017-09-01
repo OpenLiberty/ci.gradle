@@ -18,7 +18,7 @@ The `libertyPackage` task uses a `packageLiberty` block to define task specific 
 | os| String | 1.0 | A comma-delimited list of operating systems that you want the packaged server to support. To specify that an operating system is not to be supported, prefix it with a minus sign ("-"). The 'include' attribute __must__ be set to `minify`. | No |
 
 
-This example shows you how to configure these properties in your script:
+This example shows you how to package a minified ZIP archive.
 
 ```groovy
 apply plugin: 'liberty'
@@ -27,16 +27,27 @@ liberty {
 
     server {
         name = 'myServer'
-        clean = true
 
-        //Example to package '${buildDir}/MyPackage.zip'
         packageLiberty {
             archive = "MyPackage.zip"
             include = "minify"
             os = "Linux"
         }
+    }
+}
 
-        //Example to package '${buildDir}/MyPackage.jar'
+```
+
+This example shows you how to package a runnable JAR file.
+
+```groovy
+apply plugin: 'liberty'
+
+liberty {
+
+    server {
+        name = 'myServer'
+
         packageLiberty {
             archive = "MyPackage.jar"
             include = "runnable"

@@ -6,14 +6,14 @@ The `deploy` task supports deployment of one or more applications to the Liberty
 
 See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.
 
+The `deploy` task uses a `deploy` block inside the `liberty` block to define task specific behavior.
+
 | Attribute | Type | Since | Description | Required |
 | --------- | ---- | ----- | ----------- | ---------|
 | file| String | 1.0 | Location of a single application to be deployed. The application type can be war, ear, rar, eba, zip, or jar. | Yes, only when a single file will be deployed. |
 | dir| String | 1.0 | Location of the directory where are the applications to be deployed.| Yes, only when multiples files will be deployed and `file` is not specified.|
 | include| String | 1.0 | Comma or space-separated list of patterns of files that must be included. All files are included when this attribute is omitted.| No |
 | exclude| String | 1.0 | Comma or space-separated list of patterns of files that must be excluded. No files are excluded when this attribute is omitted.| No |
-
-Deploy's properties must be set up in the `deploy` block inside the `liberty` block.
 
 ### Examples
 
