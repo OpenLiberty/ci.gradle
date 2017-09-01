@@ -4,7 +4,7 @@ The `undeploy` task supports undeployment of one or more applications from the W
 
 ### Properties
 
-See the [Liberty server configuration](libertyExtensions.md#Liberty-server-configuration) properties for common server configuration.
+See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.
 
 The `undeploy` task uses a `undeploy` block within the `liberty` block to define task specific behavior.
 

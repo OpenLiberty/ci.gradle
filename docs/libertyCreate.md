@@ -4,7 +4,7 @@ The `libertyCreate` task is used to create a named Liberty server instance.
 
 ### Properties
 
-Server configuration parameters were added to the [server extension](libertyExtensions.md#Liberty-server-configuration) for flexible configuration.
+Server configuration parameters were added to the [server extension](libertyExtensions.md#liberty-server-configuration) for flexible configuration.
 
 ### Examples
 

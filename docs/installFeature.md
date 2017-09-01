@@ -3,7 +3,7 @@ The `installFeature` task installs features packaged as a Subsystem Archive (ESA
 
 ### Properties
 
-See the [Liberty server configuration](libertyExtensions.md#Liberty-server-configuration) properties for server related configuration.
+See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for server related configuration.
 
 The `installFeature` task uses a `features` extension to define task specific properties. The following properties can be defined in the `features` extension.
 

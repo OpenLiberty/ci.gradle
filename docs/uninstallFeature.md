@@ -3,7 +3,7 @@ The `uninstallFeature` task uninstalls a feature from the Liberty runtime.
 
 ### Properties
 
-See the [Liberty server configuration](libertyExtensions.md#Liberty-server-configuration) properties for common server configuration.
+See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.
 
 The `uninstallFeature` task uses a `uninstallfeatures` block to define task specific behavior.
 

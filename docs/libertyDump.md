@@ -4,9 +4,9 @@ The `libertyDump` task is used to dump diagnostic information from the server in
 
 ### Properties
 
-See the [Liberty server configuration](libertyExtensions.md#Liberty-server-configuration) properties for common server configuration.
+See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.
 
-The `libertyDump` task uses a `dumpLiberty` block to define task specific behavior. 
+The `libertyDump` task uses a `dumpLiberty` block to define task specific behavior.
 
 | Attribute | Type  | Since | Description | Required |
 | --------- | ----- | ----- | ----------- | -------- |

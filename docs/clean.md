@@ -7,7 +7,7 @@ The `cleanDirs` task deletes server specific files including:
 
 ### Properties
 
-See the [Liberty server configuration](libertyExtensions.md#Liberty-server-configuration) properties for common server configuration.
+See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.
 
 The `cleanDirs` task uses a `cleanDir` block to define task specific behavior. The following properties can be defined in the `cleanDir` extension.
 

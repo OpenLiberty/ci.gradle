@@ -4,8 +4,9 @@ The Liberty Gradle plugin supports install and operational control of WebSphere 
 
 * [Build](#build)
 * [Usage](#usage)
+* [Plugin Configuration](#plugin-configuration)
 * [Tasks](#tasks)
-* [Properties](#extension-properties)
+
 
 ## Build
 

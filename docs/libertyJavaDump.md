@@ -4,9 +4,9 @@ The `libertyJavaDump` task dumps diagnostic information from the server JVM.
 
 ### Properties
 
-See the [Liberty server configuration](libertyExtensions.md#Liberty-server-configuration) properties for common server configuration.
+See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.
 
-The `libertyJavaDump` task uses a `javaDumpLiberty` block to define task specific behavior. 
+The `libertyJavaDump` task uses a `javaDumpLiberty` block to define task specific behavior.
 
 | Attribute | Type  | Since | Description | Required |
 | --------- | ----- | ----- | ----------- | -------- |

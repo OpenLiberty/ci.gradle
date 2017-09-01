@@ -4,7 +4,7 @@ The `deploy` task supports deployment of one or more applications to the Liberty
 
 ### Properties
 
-See the [Liberty server configuration](libertyExtensions.md#Liberty-server-configuration) properties for common server configuration.
+See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.
 
 | Attribute | Type | Since | Description | Required |
 | --------- | ---- | ----- | ----------- | ---------|

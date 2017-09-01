@@ -25,7 +25,7 @@ This is expected behavior because the task will neither progress nor stop as lon
 
 ### Parameters
 
-See the [Liberty server configuration](libertyExtensions.md#Liberty-server-configuration) properties for common server configuration.
+See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.
 
 ### Example  
 clean is set to `false` by default unless specified in `build.gradle` as shown in this example.  

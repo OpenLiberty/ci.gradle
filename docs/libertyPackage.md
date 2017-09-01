@@ -7,7 +7,7 @@ Starting with WebSphere Liberty 8.5.5.9, it is possible to package a server into
 
 ### Properties
 
-See the [Liberty server configuration](libertyExtensions.md#Liberty-server-configuration) properties for common server configuration.
+See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.
 
 The `libertyPackage` task uses a `packageLiberty` block to define task specific behavior.
 

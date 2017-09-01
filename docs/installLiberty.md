@@ -20,7 +20,7 @@ You need to include `group`, `name`, and `version` values that describes the art
 
 ### Properties
 
-Use the [general runtime properies](libertyExtensions.md#General-runtime-properties) for properties to configure the runtime installation location if you want to override the defaults.  By default, the runtime is installed in the `${project.buildDir}/wlp` folder.
+Use the [general runtime properies](libertyExtensions.md#general-runtime-properties) for properties to configure the runtime installation location if you want to override the defaults.  By default, the runtime is installed in the `${project.buildDir}/wlp` folder.
 
 ### install block
 

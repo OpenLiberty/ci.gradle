@@ -1,8 +1,8 @@
 ## Liberty extension properties
 The Liberty Gradle plugin defines properties in the `liberty` block to customize task behavior.
 These properties are divided in two groups:
-* The [general runtime properties](#General-runtime-properties) which control how the runtime is installed with the `installLiberty` task.
-* The [Liberty server configuration](#Liberty-server-configuration) properties control how a server is initialized and the applications that are installed. Starting in version 1.1, these properties are defined in a `server` block within the `liberty` block.
+* The [general runtime properties](#general-runtime-properties) which control how the runtime is installed with the `installLiberty` task.
+* The [Liberty server configuration](#liberty-server-configuration) properties control how a server is initialized and the applications that are installed. Starting in version 1.1, these properties are defined in a `server` block within the `liberty` block.
 
 Some tasks have additional configuration blocks.
 
