@@ -23,7 +23,6 @@ public class VerifyLooseAppTestTimeoutSuccess extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/integrationTest/sample.servlet")
     static File buildDir = new File(integTestDir, "/verify-loose-app-test-timeout-success")
     static String buildFilename = "verifyLooseAppTestTimeoutSuccess.gradle"
-    private static String URL;
 
     @BeforeClass
     public static void setup() {
@@ -32,7 +31,6 @@ public class VerifyLooseAppTestTimeoutSuccess extends AbstractIntegrationTest{
             WLP_DIR.replace("\\","/")
         }
         createTestProject(buildDir, resourceDir, buildFilename)
-        URL = "http://localhost:9080/sample.servlet/servlet";
     }
 
     @AfterClass
