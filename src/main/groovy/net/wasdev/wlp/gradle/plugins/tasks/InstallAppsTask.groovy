@@ -188,7 +188,7 @@ class InstallAppsTask extends AbstractServerTask {
         }
         LooseWarApplication looseWar = new LooseWarApplication(task, config)
         looseWar.addSourceDir()
-        looseWar.addOutputDir(looseWar.getDocumentRoot(), task, "/WEB-INF/classes");
+        looseWar.addOutputDir(looseWar.getDocumentRoot() , task, "/WEB-INF/classes/");
 
         //retrieves dependent library jar files
         addWarEmbeddedLib(looseWar.getDocumentRoot(), looseWar, task);
