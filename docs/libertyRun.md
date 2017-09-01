@@ -4,7 +4,7 @@ Start a Liberty server in the foreground. The server instance will be automatica
 ```
 gradle libertyRun --no-daemon
 ```
-  
+
 ### What is the Gradle Daemon and why --no-daemon?
 The Gradle Daemon is a long-running background process designed to help speed up the build process. It does so by caching project information and staying alive, avoiding constant JVM startup costs. This behavior is default until specified otherwise.  
 Gradle's current daemon design makes it difficult to use a `run` task, as a Ctrl-C would kill the daemon while simultaneously leaving the application running in the background. Therefore, we need `--no-daemon` so that the signal can be received and properly handled.  
@@ -23,11 +23,9 @@ or
 ```
 This is expected behavior because the task will neither progress nor stop as long as the server/process is running. The "build" will successfully finish with an external `libertyStop` or a Ctrl-C break.
 
-### Additional parameters
+### Parameters
 
-| Parameter | Type | Description | Required |
-| --------- | -----| ----------- | ---------|
-| clean | Boolean | Setting the `clean` attribute clears all cached information on server start up. It deletes every file in the `${wlp_output_dir}/logs`, `${wlp_output_dir}/workarea`, `${wlp_user_dir}/dropins` or `${wlp_user_dir}/apps`. | No |
+See the [Liberty server configuration](libertyExtensions.md#Liberty-server-configuration) properties for common server configuration.
 
 ### Example  
 clean is set to `false` by default unless specified in `build.gradle` as shown in this example.  
@@ -36,8 +34,10 @@ clean is set to `false` by default unless specified in `build.gradle` as shown i
 apply plugin: 'liberty'
 
 liberty {
-    serverName = 'myServer'
-    clean = true
+    server {
+        name = 'myServer'
+        clean = true
+    }
 }
 
 ```

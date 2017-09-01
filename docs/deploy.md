@@ -1,17 +1,19 @@
 ## deploy task
 
-The `deploy` task supports deployment of one or more applications to the WebSphere Liberty server.
+The `deploy` task supports deployment of one or more applications to the Liberty server.
 
 ### Properties
 
-| Attribute | Description | Required |
-| --------- | ------------ | ----------|
-| file| Location of a single application to be deployed. The application type can be war, ear, rar, eba, zip, or jar. | Yes, only when a single file will be deployed. |
-| dir|  Location of the directory where are the applications to be deployed.| Yes, only when multiples files will be deployed and `file` is not specified.|
-| include| Comma- or space-separated list of patterns of files that must be included. All files are included when omitted.| No |
-| exclude| Comma- or space-separated list of patterns of files that must be excluded. No files are excluded when omitted.| No |
+See the [Liberty server configuration](libertyExtensions.md#Liberty-server-configuration) properties for common server configuration.
 
-Deploy's properties must be set up in the `deploy` closure inside the `liberty` closure.
+| Attribute | Type | Since | Description | Required |
+| --------- | ---- | ----- | ----------- | ---------|
+| file| String | 1.0 | Location of a single application to be deployed. The application type can be war, ear, rar, eba, zip, or jar. | Yes, only when a single file will be deployed. |
+| dir| String | 1.0 | Location of the directory where are the applications to be deployed.| Yes, only when multiples files will be deployed and `file` is not specified.|
+| include| String | 1.0 | Comma or space-separated list of patterns of files that must be included. All files are included when this attribute is omitted.| No |
+| exclude| String | 1.0 | Comma or space-separated list of patterns of files that must be excluded. No files are excluded when this attribute is omitted.| No |
+
+Deploy's properties must be set up in the `deploy` block inside the `liberty` block.
 
 ### Examples
 
@@ -21,10 +23,13 @@ Deploy's properties must be set up in the `deploy` closure inside the `liberty` 
 
     liberty {
         installDir = 'c:/wlp'
-        serverName = 'myServer'
-        
-        deploy {
-            file = 'c:/files/app.war'
+
+        server {
+            name = 'myServer'
+
+            deploy {
+                file = 'c:/files/app.war'
+            }
         }
     }
   ```
@@ -33,37 +38,42 @@ Deploy's properties must be set up in the `deploy` closure inside the `liberty` 
   ```groovy
     apply plugin: 'liberty'
 
-    liberty { 
-        installDir = 'c:/wlp'
-        serverName = 'myServer'
-        
-        deploy {
-            dir = 'c:/files'
-            include = 'app.war, sample.war'
-            exclude = 'test-war.war'
+    liberty {
+
+        server {
+            name = 'myServer'
+
+            deploy {
+                dir = 'c:/files'
+                include = 'app.war, sample.war'
+                exclude = 'test-war.war'
+            }
         }
     }
   ```
 
-3. Deploy multiple files using multiple closures.
+3. Deploy multiple files using multiple blocks.
   ```groovy
     apply plugin: 'liberty'
 
-    liberty { 
+    liberty {
         installDir = 'c:/wlp'
-        serverName = 'myServer'
-        
-        deploy {
-            file = 'c:/files/app.war'
-        }
 
-        deploy {
-            file = 'c:/resources/test.war'
-        }
-        
-        deploy {
-            dir = 'c:/extras'
-            include = 'sample.war, demo.war'
+        server {
+            name = 'myServer'
+
+            deploy {
+                file = 'c:/files/app.war'
+            }
+
+            deploy {
+                file = 'c:/resources/test.war'
+            }
+
+            deploy {
+                dir = 'c:/extras'
+                include = 'sample.war, demo.war'
+            }
         }
     }
   ```
