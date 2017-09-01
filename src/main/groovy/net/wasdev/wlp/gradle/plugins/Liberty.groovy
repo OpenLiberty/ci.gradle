@@ -59,7 +59,7 @@ class Liberty implements Plugin<Project> {
 
         project.task('installLiberty', type: InstallLibertyTask) {
             description 'Installs Liberty from a repository'
-            logging.level = LogLevel.DEBUG
+            logging.level = LogLevel.INFO
         }
 
         project.task('libertyRun', type: RunTask) {
@@ -67,7 +67,7 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
             
             project.afterEvaluate {
-                dependsOn asdf(server, 'libertyCreate')
+                dependsOn installAppsDependsOn(server, 'libertyCreate')
             }
         }
 
@@ -92,14 +92,13 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
 
             project.afterEvaluate { 
-                dependsOn asdf(server, 'libertyCreate')
+                dependsOn installAppsDependsOn(server, 'libertyCreate')
             }
         }
 
         project.task('libertyStop', type: StopTask) {
             description 'Stops the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
-            dependsOn project.tasks.getName().equals('clean')
         }
 
         project.task('libertyPackage', type: PackageTask) {
@@ -107,7 +106,7 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.DEBUG
             
             project.afterEvaluate {
-                dependsOn asdf(server, 'installLiberty')
+                dependsOn installAppsDependsOn(server, 'installLiberty')
             }
         }
 
@@ -126,7 +125,7 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
             
             project.afterEvaluate {
-                dependsOn asdf(server, 'installLiberty')
+                dependsOn installAppsDependsOn(server, 'installLiberty')
             }
         }
 
@@ -210,7 +209,7 @@ class Liberty implements Plugin<Project> {
         }
     }
 
-    String asdf(ServerExtension server, String elseDepends) {
+    String installAppsDependsOn(ServerExtension server, String elseDepends) {
         if (server.apps != null || server.dropins != null) {
             return 'installApps'
         } else {
