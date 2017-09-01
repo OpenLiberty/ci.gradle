@@ -32,7 +32,7 @@ liberty {
 }
 ```
 
-2. It is possible install multiple features using a single block:
+2. It is possible to install multiple features using a single block:
 ```groovy
 /* Install 'mongodb-2.0' and 'adminCenter-1.0' features using a single block. */
 apply plugin: 'liberty'
