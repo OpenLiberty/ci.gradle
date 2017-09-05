@@ -49,9 +49,11 @@ liberty {
             archive = packageFile
             include = packagingType
         }
-        dropins = [war]
-
-        verifyAppStartTimeout = 30
+        installapps{
+            looseApplication = false
+        }
+      dropins = [war]
+      verifyAppStartTimeout = 30
     }
 }
 

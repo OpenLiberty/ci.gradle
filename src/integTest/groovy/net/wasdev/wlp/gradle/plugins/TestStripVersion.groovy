@@ -22,7 +22,7 @@ public class TestStripVersion extends AbstractIntegrationTest{
     public static void tearDown() throws Exception {
         runTasks(buildDir, 'libertyStop')
     }
-    
+
     @Test
     public void test_strip_version_true() {
         try {
