@@ -13,6 +13,7 @@ import javax.xml.xpath.XPathFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
+import org.apache.commons.io.IOUtils;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -76,9 +77,16 @@ public class VerifyLooseAppTestTimeoutSuccess extends AbstractIntegrationTest{
       String expression = "/archive/dir";
       NodeList nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
       Assert.assertEquals("Number of <dir/> element ==>", 2, nodes.getLength());
-
       expression = "/archive/archive";
       nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
+
+      System.out.println("\n\n\n:::::::::::")
+      BufferedReader br = new BufferedReader(new FileReader(on))
+       String line = null;
+       while ((line = br.readLine()) != null) {
+           System.out.println(line);
+       }
+      System.out.println("\n\n\n:::::::::::")
       Assert.assertEquals("Number of <archive/> element ==>", 0, nodes.getLength());
 
       expression = "/archive/file";
@@ -90,6 +98,7 @@ public class VerifyLooseAppTestTimeoutSuccess extends AbstractIntegrationTest{
 
       Assert.assertEquals("archive targetInArchive attribute value", "/WEB-INF/lib/commons-lang3-3.5.jar",
               nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue());
+
     }
 
     @Test
