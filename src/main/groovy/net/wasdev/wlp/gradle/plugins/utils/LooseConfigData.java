@@ -34,7 +34,7 @@ public class LooseConfigData extends XmlDocument {
   public void addDir(Element parent, String src, String target) {
       if (new File(src).exists()) {
           Element child = doc.createElement("dir");
-          addElement(parent, child, target, src + "/classes/java/main");
+          addElement(parent, child, target, src);
       }
   }
 

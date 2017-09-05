@@ -17,7 +17,7 @@ public class LooseApplication {
         this.config = config;
     }
     public void addOutputDir(Element parent, Task task, String target) {
-      config.addDir(parent, task.destinationDir.getParentFile().getCanonicalPath(), target);
+      config.addDir(parent, task.classpath.getFiles().toArray()[0].getCanonicalPath(), target);
     }
 
     public Element getDocumentRoot() {

@@ -43,15 +43,6 @@ public class VerifyLooseAppTestTimeoutSuccess extends AbstractIntegrationTest{
     public void test_loose_config_file_exists() {
         try {
             runTasks(buildDir, 'installApps')
-            System.out.println("\n\n\n:::::::::::")
-            File on = new File("build/testBuilds/verify-loose-app-test-timeout-success/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war.xml");
-            FileInputStream input = new FileInputStream(on);
-            BufferedReader br = new BufferedReader(new FileReader(on))
-             String line = null;
-             while ((line = br.readLine()) != null) {
-                 System.out.println(line);
-             }
-            System.out.println("\n\n\n:::::::::::")
         } catch (Exception e) {
             throw new AssertionError ("Fail on task installApps. " + e)
         }
