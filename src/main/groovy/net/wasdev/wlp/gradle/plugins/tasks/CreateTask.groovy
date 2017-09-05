@@ -23,7 +23,7 @@ class CreateTask extends AbstractServerTask {
     void create() {
         if(!getServerDir(project).exists()){
             def params = buildLibertyMap(project);
-            if (project.liberty.template != null && project.liberty.template.length() != 0) {
+            if (project.liberty.server.template != null && project.liberty.server.template.length() != 0) {
                 params.put('template', project.liberty.server.template)
             }
             executeServerCommand(project, 'create', params)
