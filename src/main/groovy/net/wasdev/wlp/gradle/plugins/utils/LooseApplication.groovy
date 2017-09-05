@@ -6,6 +6,7 @@ import org.w3c.dom.Element;
 import org.gradle.api.Project;
 import org.gradle.api.Task
 import org.gradle.api.tasks.bundling.War
+import org.gradle.api.GradleException
 
 public class LooseApplication {
     protected Task task;
@@ -16,10 +17,7 @@ public class LooseApplication {
         this.config = config;
     }
     public void addOutputDir(Element parent, Task task, String target) {
-      System.out.println("\n\n\n::::::::::::::")
-      System.out.println(task.destinationDir.getParentFile().getCanonicalPath())
-      System.out.println("\n\n\n::::::::::::::")
-      config.addDir(parent, task.destinationDir.getParentFile().getCanonicalPath() + "/classes/java/main", target);
+      config.addDir(parent, task.destinationDir.getParentFile().getCanonicalPath(), target);
     }
 
     public Element getDocumentRoot() {
