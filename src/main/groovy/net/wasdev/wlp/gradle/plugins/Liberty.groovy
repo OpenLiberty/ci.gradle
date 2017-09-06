@@ -142,7 +142,7 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
 
             project.afterEvaluate {
-                if (project.liberty.server.features.name == null || project.lbierty.server.features.name.isEmpty()) {
+                if (project.liberty.server.features.name == null || project.liberty.server.features.name.isEmpty()) {
                     dependsOn 'libertyCreate'
                 } else {
                     dependsOn 'installLiberty'
@@ -173,7 +173,7 @@ class Liberty implements Plugin<Project> {
             dependsOn project.tasks.withType(War)
  
             project.afterEvaluate {
-                if (project.liberty.server.features.name != null || !project.liberty.server.features.name.isEmpty()) {
+                if (project.liberty.server.features.name != null && !project.liberty.server.features.name.isEmpty()) {
                     dependsOn 'installFeature'
                 } else {
                     dependsOn 'libertyCreate'
