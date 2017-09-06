@@ -123,10 +123,6 @@ class Liberty implements Plugin<Project> {
         project.task('libertyDebug', type: DebugTask) {
             description 'Runs the Liberty Profile server in the console foreground after a debugger connects to the debug port (default: 7777).'
             logging.level = LogLevel.INFO
-            
-            project.afterEvaluate {
-                dependsOn installAppsDependsOn(server, 'installLiberty')
-            }
         }
 
         project.task('deploy', type: DeployTask) {
@@ -146,7 +142,7 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
 
             project.afterEvaluate {
-                if (project.liberty.features.name == null) {
+                if (project.liberty.server.features.name == null || project.lbierty.server.features.name.isEmpty()) {
                     dependsOn 'libertyCreate'
                 } else {
                     dependsOn 'installLiberty'
@@ -161,10 +157,10 @@ class Liberty implements Plugin<Project> {
 
         project.task('cleanDirs', type: CleanTask) {
             description 'Deletes files from some directories from the WebSphere Liberty Profile server'
-            logging.level = LogLevel.DEBUG
+            logging.level = LogLevel.INFO
 
             project.afterEvaluate {
-                if (project.liberty.cleanDir.workarea || project.liberty.cleanDir.dropins) {
+                if (project.liberty.server.cleanDir.workarea || project.liberty.server.cleanDir.dropins) {
                     logger.info ('Stopping the server to clean workarea or dropins')
                     dependsOn 'libertyStop'
                 }
@@ -177,7 +173,7 @@ class Liberty implements Plugin<Project> {
             dependsOn project.tasks.withType(War)
  
             project.afterEvaluate {
-                if (project.liberty.features.name != null) {
+                if (project.liberty.server.features.name != null || !project.liberty.server.features.name.isEmpty()) {
                     dependsOn 'installFeature'
                 } else {
                     dependsOn 'libertyCreate'
