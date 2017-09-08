@@ -7,7 +7,7 @@ import org.junit.Test
 public class TestWarTasksWithDifferentDependencies extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/integrationTest/sample.servlet-noWebAppConfig")
     static File buildDir = new File(integTestDir, "/test-war-tasks-with-different-dependencies")
-    static String buildFilename = "TestWarTasksWithDifferentDependencies.gradle"
+    static String buildFilename = "testWarTasksWithDifferentDependencies.gradle"
 
     @BeforeClass
     public static void setup() {
