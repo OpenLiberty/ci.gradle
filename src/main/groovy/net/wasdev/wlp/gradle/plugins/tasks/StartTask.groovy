@@ -50,14 +50,14 @@ class StartTask extends AbstractServerTask {
             ArrayList<String> appsToVerify = new ArrayList<String>()
             ArrayList<Task> applicationBuildTasks = new ArrayList<Task>()
 
-            if (server.apps != null && !server.apps.isEmpty()) {
+            if (server.apps != null && !server.apps.empty) {
                 applicationBuildTasks += server.apps
             }
-            if (server.dropins != null && !server.dropins.isEmpty()) {
+            if (server.dropins != null && !server.dropins.empty) {
                 applicationBuildTasks += server.dropins
             }
 
-            if (!applicationBuildTasks.isEmpty()) {
+            if (!applicationBuildTasks.empty) {
                 applicationBuildTasks.each{ Task task ->
                     appsToVerify.add(task.baseName)
                 }
