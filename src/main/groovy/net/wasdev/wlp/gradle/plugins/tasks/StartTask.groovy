@@ -18,8 +18,9 @@ package net.wasdev.wlp.gradle.plugins.tasks
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.Task
-import net.wasdev.wlp.ant.ServerTask;
-import net.wasdev.wlp.gradle.plugins.utils.*;
+import net.wasdev.wlp.ant.ServerTask
+import net.wasdev.wlp.gradle.plugins.utils.*
+import java.io.File
 
 class StartTask extends AbstractServerTask {
 
@@ -89,27 +90,49 @@ class StartTask extends AbstractServerTask {
                 ServerConfigDocument scd = ServerConfigDocument.getInstance(serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, server.bootstrapProperties, server.serverEnv)
                 if (scd != null) {
                     appNames = scd.getNames()
-                    appNames += scd.getNamelessLocations().collect { String fileName ->
-                            getNameByFile(fileName)
+                    appNames += scd.getNamelessLocations().collect { String location ->
+                            getNameFromLocation(location)
                         }
                 }
             }
             catch (Exception e) {
                 logger.warn(e.getLocalizedMessage())
-                logger.debug(e)
+                logger.debug(e.toString())
             }
         }
         return appNames
     }
 
-    protected String getNameByFile(String fileName) {
-        String appName = ''
+    protected String getNameFromLocation(String location) {
+        //gets file name from path
+        String fileName = location.substring(location.lastIndexOf(File.separator) + 1)
+        String appName = getBaseName(fileName)
+
+        boolean foundName = false
 
         server.apps.each { task ->
-            if (task.archiveName.equals(fileName)) {
+            if (getArchiveName(task.archiveName).equals(fileName)) { //stripVersion?
                 appName = task.baseName
+                foundName = true
             }
         }
+        //print debug statement if app is in server.xml but not in apps list
+        if (!foundName) {
+            logger.debug("The application at " + location + " was configured in the server.xml file but could not be found in the list of applications.")
+        }
         return appName
+    }
+
+    protected String getArchiveName(String archiveName){
+        if (server.installapps.stripVersion){
+            StringBuilder sbArchiveName = new StringBuilder().append("-").append(project.version)
+            return archiveName.replaceAll(sbArchiveName.toString(),"")
+        }
+        return archiveName;
+    }
+
+    protected String getBaseName(String fileName) {
+        File file = new File(fileName)
+        return file.name.take(getArchiveName(file.name).lastIndexOf('.'))
     }
 }

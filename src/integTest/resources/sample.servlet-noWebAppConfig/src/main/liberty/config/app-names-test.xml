@@ -24,7 +24,7 @@
 
     </httpEndpoint>
 
-    <application name="testApp" context-root="testApp2" location="test.servlet-1.war" type="war"></application>
+    <webApplication name="testApp" context-root="testApp2" location="${testAppLocation}" type="war"></webApplication>
     <application context-root="testApp3" location="servlet.test-1.war" type="war"></application>
 
 </server>

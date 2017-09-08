@@ -31,11 +31,12 @@ ext {
     testServerHttpPort = 9080
     testServerHttpsPort = 9443
 
-    // This is set in the ibm-web-ext.xml file
     warContext = 'sample.servlet-1'
     appName = 'LibertyProject'
     packageFile = "${project.buildDir}/${appName}.zip"
     packagingType = 'usr'
+
+
 
 }
 task war2(type:War){
@@ -60,6 +61,7 @@ liberty {
     server{
         name = wlpServerName
         configFile = file("src/main/liberty/config/app-names-test.xml")
+        bootstrapProperties = ['testAppLocation':'test.servlet-1.war']
         packageLiberty {
             archive = packageFile
             include = packagingType
@@ -109,6 +111,7 @@ task printMessageAboutRunningServer {
     }
 }
 
+clean.dependsOn 'libertyStop'
 check.dependsOn 'integrationTest'
 installApps.dependsOn tasks.withType(War)
 libertyStart.dependsOn 'installApps'

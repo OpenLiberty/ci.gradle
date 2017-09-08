@@ -150,12 +150,8 @@ public class ServerConfigDocument {
             parseVariables(doc);
             parseConfigDropinsDirVariables("overrides");
 
-            parseApplication(doc, "/server/application");
-            parseApplication(doc, "/server/webApplication");
-            parseApplication(doc, "/server/enterpriseApplication");
-            parseNames(doc, "/server/application");
-            parseNames(doc, "/server/webApplication");
-            parseNames(doc, "/server/enterpriseApplication");
+            parseApplication(doc, "/server/application | /server/webApplication | /server/enterpriseApplication");
+            parseNames(doc, "/server/application | /server/webApplication | /server/enterpriseApplication");
             parseInclude(doc);
             parseConfigDropinsDir();
 
@@ -194,9 +190,7 @@ public class ServerConfigDocument {
                 Document docIncl = getIncludeDoc(nodeValue);
 
                 if (docIncl != null) {
-                    parseApplication(docIncl, "/server/application");
-                    parseApplication(docIncl, "/server/webApplication");
-                    parseApplication(docIncl, "/server/enterpriseApplication");
+                    parseApplication(docIncl, "/server/application | /server/webApplication | /server/enterpriseApplication");
                     // handle nested include elements
                     parseInclude(docIncl);
                 }
@@ -279,9 +273,7 @@ public class ServerConfigDocument {
         // get input XML Document
         Document doc = parseDocument(new FileInputStream(file));
 
-        parseApplication(doc, "/server/application");
-        parseApplication(doc, "/server/webApplication");
-        parseApplication(doc, "/server/enterpriseApplication");
+        parseApplication(doc, "/server/application | /server/webApplication | /server/enterpriseApplication");
         parseInclude(doc);
     }
 
