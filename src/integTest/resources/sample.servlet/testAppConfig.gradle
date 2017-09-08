@@ -49,7 +49,9 @@ liberty {
             archive = packageFile
             include = packagingType
         }
-
+        installapps {
+            looseApplication = false
+        }
         verifyAppStartTimeout = 30
     }
 }

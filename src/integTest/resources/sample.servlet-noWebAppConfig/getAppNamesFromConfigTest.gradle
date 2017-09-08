@@ -67,10 +67,18 @@ liberty {
             include = packagingType
         }
 
+<<<<<<< HEAD:src/integTest/resources/sample.servlet-noWebAppConfig/getAppNamesFromConfigTest.gradle
     	apps = [war2, war3]
         dropins = [war, war4]
 
         verifyAppStartTimeout = 30
+=======
+        installapps {
+            looseApplication = false
+        }
+
+        verifyAppStartTimeout = 1
+>>>>>>> 5059bbd4fa5e319615603a9a95be9648a3b27bf0:src/integTest/resources/sample.servlet/verifyTimeoutFailureTest.gradle
     }
 }
 

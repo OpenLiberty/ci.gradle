@@ -1,3 +1,7 @@
+/*
+	This test checks whether the application was successfully installed without the version number in the package
+	when installApps is called and stripVersion is set to true.
+*/
 group = 'liberty.gradle'
 version = '1'
 
@@ -32,44 +36,21 @@ ext {
     testServerHttpsPort = 9443
 
     // This is set in the ibm-web-ext.xml file
-    warContext = 'sample.servlet-1'
-    appName = 'LibertyProject'
-    packageFile = "${project.buildDir}/${appName}.zip"
-    packagingType = 'usr'
+    warContext = 'myLibertyApp'
 
-}
-task war2(type:War){
-    baseName = 'sample.servlet2'
-    println 'war2 archiveName = ' + archiveName
-}
-
-task war3(type:War){
-    baseName = 'sample.servlet3'
-    println 'war3 archiveName = ' + archiveName
-}
-
-task war4(type:War){
-    baseName = 'sample.servlet4'
-    println 'war4 archiveName = ' + archiveName
 }
 
 liberty {
     install {
         runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/17.0.0.1/wlp-webProfile7-17.0.0.1.zip"
     }
-    server{
-        name = wlpServerName
-        configFile = file("src/main/liberty/config/server-list-test.xml")
-        packageLiberty {
-            archive = packageFile
-            include = packagingType
-        }
-      installapps{
-          looseApplication = false
-      }
-    	apps = [war2, war3]
-      dropins = [war, war4]
-      verifyAppStartTimeout = 30
+    configFile = file("src/main/liberty/config/server-apps-test.xml")
+
+    serverName = wlpServerName
+
+    installapps{
+        stripVersion = true
+        looseApplication = true
     }
 }
 
@@ -79,9 +60,8 @@ repositories {
 
 dependencies {
     testCompile 'junit:junit:4.12'
-    testCompile 'org.apache.cxf:cxf-rt-rs-client:3.1.1'
-    testCompile 'org.glassfish:javax.json:1.0.4'
     providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+    compile 'org.apache.commons:commons-text:1.1'
 }
 
 test {
@@ -110,9 +90,5 @@ task printMessageAboutRunningServer {
     }
 }
 
-check.dependsOn 'integrationTest'
-installApps.dependsOn tasks.withType(War)
-libertyStart.dependsOn 'installApps'
-integrationTest.dependsOn 'libertyStart', 'testClasses'
-integrationTest.finalizedBy 'libertyStop'
+installApps.dependsOn 'war'
 libertyStart.finalizedBy 'printMessageAboutRunningServer'
