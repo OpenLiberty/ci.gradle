@@ -200,10 +200,11 @@ class InstallAppsTask extends AbstractServerTask {
 
     private void addWarEmbeddedLib(Element parent, LooseApplication looseApp, Task task) throws Exception {
       ArrayList<File> deps = new ArrayList<File>();
-      task.classpath.each {deps.add(it) println(it)}
+      task.classpath.each {deps.add(it)}
       //Removes WEB-INF/lib/main directory since it is not rquired in the xml
-      if(deps != null && !deps.isEmpty())
+      if(deps != null && !deps.isEmpty()){
         deps.remove(0)
+      }
       File parentProjectDir = new File(task.getProject().getRootProject().rootDir.getAbsolutePath())
       for (File dep: deps) {
         String projectPath = getProjectPath(parentProjectDir, dep)
