@@ -38,11 +38,7 @@ class StartTask extends AbstractServerTask {
         serverTask.setInstallDir(params.get('installDir'))
         serverTask.setServerName(params.get('serverName'))
         serverTask.setUserDir(params.get('userDir'))
-        if(params.get('outputDir') == null ) {
-            serverTask.setOutputDir(params.get('outputDir'))
-        }else {
-            serverTask.setOutputDir(new File(params.get('outputDir')))
-        }
+        getOutputDir(params)
         serverTask.initTask()
 
         if (server != null && server.verifyAppStartTimeout > 0) {
