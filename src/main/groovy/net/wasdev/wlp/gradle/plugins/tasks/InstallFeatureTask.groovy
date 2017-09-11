@@ -22,8 +22,10 @@ class InstallFeatureTask extends AbstractServerTask {
     @TaskAction
     void installFeature() {
         def params = buildLibertyMap(project);
-        params.put('name', server.features.name.join(","))
         params.put('acceptLicense', server.features.acceptLicense)
+        if (server.features.name != null) {
+            params.put('name', server.features.name.join(","))
+        }
         if (server.features.to != null) {
             params.put('to', server.features.to)
         }

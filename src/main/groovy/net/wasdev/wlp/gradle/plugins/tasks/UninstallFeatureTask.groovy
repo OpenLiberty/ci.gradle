@@ -22,7 +22,9 @@ class UninstallFeatureTask extends AbstractServerTask {
     @TaskAction
     void uninstallFeature() {
         def params = buildLibertyMap(project);
-        params.put('name', server.uninstallfeatures.name.join(","))
+        if (server.uninstallfeatures.name != null) {
+            params.put('name', server.uninstallfeatures.name.join(","))
+        }
         params.remove('timeout')
 
         project.ant.taskdef(name: 'uninstallFeature',
