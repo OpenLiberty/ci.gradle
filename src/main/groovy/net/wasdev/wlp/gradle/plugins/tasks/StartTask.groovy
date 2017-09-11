@@ -56,7 +56,7 @@ class StartTask extends AbstractServerTask {
                 applicationBuildTasks += server.dropins
             }
 
-            if (!applicationBuildTasks.isEmpty()) {
+            if (!applicationBuildTasks.empty) {
                 applicationBuildTasks.each{ Task task ->
                     appsToVerify.add(task.baseName)
                 }
