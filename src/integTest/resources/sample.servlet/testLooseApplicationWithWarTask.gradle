@@ -80,7 +80,6 @@ liberty {
             include = packagingType
         }
       installapps{
-          looseApplication = true
           stripVersion = true
       }
     	apps = [war1, war2]

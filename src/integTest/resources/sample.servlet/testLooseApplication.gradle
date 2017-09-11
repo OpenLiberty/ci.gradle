@@ -50,7 +50,6 @@ liberty {
 
     installapps{
         stripVersion = true
-        looseApplication = true
     }
 }
 
@@ -70,7 +69,6 @@ test {
     reports.junitXml.destination = file("$buildDir/test-results/unit")
     exclude '**/it/**'
 }
-
 
 task integrationTest(type: Test) {
     group 'Verification'
