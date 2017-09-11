@@ -21,7 +21,7 @@ import org.w3c.dom.NodeList;
 public class TestLooseApplication extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/integrationTest/sample.servlet")
     static File buildDir = new File(integTestDir, "/test-loose-application")
-    static String buildFilename = "TestLooseApplication.gradle"
+    static String buildFilename = "testLooseApplication.gradle"
 
     @BeforeClass
     public static void setup() {
