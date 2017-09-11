@@ -45,9 +45,9 @@ abstract class AbstractTask extends DefaultTask {
     }
 
     protected File getOutputDir(Map<String, String> params) {
-      if(params.get('outputDir') == null ) {
+      if (params.get('outputDir') == null ) {
           return (params.get('outputDir'))
-      }else {
+      } else {
           return (new File(params.get('outputDir')))
       }
     }
