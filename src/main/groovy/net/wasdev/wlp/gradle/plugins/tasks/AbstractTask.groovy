@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2017.
+ * (C) Copyright IBM Corporation 2017.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,9 +45,9 @@ abstract class AbstractTask extends DefaultTask {
     }
 
     protected File getOutputDir(Map<String, String> params) {
-      if(params.get('outputDir') == null ) {
+      if (params.get('outputDir') == null ) {
           return (params.get('outputDir'))
-      }else {
+      } else {
           return (new File(params.get('outputDir')))
       }
     }

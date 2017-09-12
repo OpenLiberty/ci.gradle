@@ -69,7 +69,6 @@ test {
     exclude '**/it/**'
 }
 
-
 task integrationTest(type: Test) {
     group 'Verification'
     description 'Runs the integration tests.'
