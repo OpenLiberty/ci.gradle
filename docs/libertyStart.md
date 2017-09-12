@@ -7,7 +7,7 @@ See the [Liberty server configuration](libertyExtensions.md#liberty-server-confi
 
 ### Example
 `clean` is set to `false` by default unless specified in `build.gradle` as shown in this example.  
-To set up verification of applications installed from `installApps`, set `verifyAppStartTimeout` to how many seconds the server will wait in the message logs.
+To set up verification of applications installed from `installApps`, set `verifyAppStartTimeout` to the number of seconds the server should spend checking for start messages in the message logs before it times out.
 
 ```groovy
 apply plugin: 'liberty'
