@@ -75,15 +75,13 @@ liberty {
     }
     server{
         name = wlpServerName
+        looseApplication = true
+        stripVersion = true
         configFile = file("src/main/liberty/config/server-list-test.xml")
         packageLiberty {
             archive = packageFile
             include = packagingType
         }
-      installapps{
-          looseApplication = true
-          stripVersion = true
-      }
     	apps = [war1, war2]
       verifyAppStartTimeout = 30
     }
