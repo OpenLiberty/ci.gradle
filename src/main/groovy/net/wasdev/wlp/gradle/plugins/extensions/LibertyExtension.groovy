@@ -24,6 +24,11 @@ class LibertyExtension {
     String userDir
     String serverName = "defaultServer"
 
+    String appsDirectory = "apps"
+    boolean stripVersion = false
+    String installAppPackages = "project"
+    boolean looseApplication = true
+
     File configDirectory
     File configFile = new File("default")
     File bootstrapPropertiesFile = new File("default")
@@ -53,7 +58,6 @@ class LibertyExtension {
     PackageAndDumpExtension dumpLiberty = new PackageAndDumpExtension()
     PackageAndDumpExtension javaDumpLiberty = new PackageAndDumpExtension()
 
-    InstallAppsExtension installapps = new InstallAppsExtension()
 
     ServerExtension server
 
@@ -96,10 +100,6 @@ class LibertyExtension {
 
     def cleanDir(Closure closure) {
         ConfigureUtil.configure(closure, cleanDir)
-    }
-
-    def installapps(Closure closure) {
-        ConfigureUtil.configure(closure, installapps)
     }
 
     def server(Closure closure){
