@@ -40,7 +40,7 @@ class StartTask extends AbstractServerTask {
         serverTask.setInstallDir(params.get('installDir'))
         serverTask.setServerName(params.get('serverName'))
         serverTask.setUserDir(params.get('userDir'))
-        serverTask.setOutputDir(params.get('outputDir'))
+        serverTask.setOutputDir(getOutputDir(params))
         serverTask.initTask()
 
         if (server != null && server.verifyAppStartTimeout > 0) {
@@ -56,7 +56,7 @@ class StartTask extends AbstractServerTask {
                 applicationBuildTasks += server.dropins
             }
 
-            if (!applicationBuildTasks.isEmpty()) {
+            if (!applicationBuildTasks.empty) {
                 applicationBuildTasks.each{ Task task ->
                     appsToVerify.add(task.baseName)
                 }
