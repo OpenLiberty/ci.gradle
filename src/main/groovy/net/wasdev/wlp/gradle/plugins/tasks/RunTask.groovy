@@ -34,4 +34,10 @@ class RunTask extends AbstractServerTask {
         }
     }
 
+    void checkUserDir() {
+        //check if userDir is set to the default value and if a value has been set for WLP_USER_DIR
+        if (getUserDir(project) != new File(getinstallDir(project),'usr') && !serverEnv.text.contains('WLP_USER_DIR')) {
+            new File(getServerDir(project), 'server.env').append('WLP_USER_DIR=' + getUserDir(project).toString())
+        }
+    }
 }
