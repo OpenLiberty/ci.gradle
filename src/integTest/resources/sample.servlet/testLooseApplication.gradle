@@ -48,9 +48,8 @@ liberty {
 
     serverName = wlpServerName
 
-    installapps{
-        stripVersion = true
-    }
+    stripVersion = true
+    looseApplication = true
 }
 
 repositories {

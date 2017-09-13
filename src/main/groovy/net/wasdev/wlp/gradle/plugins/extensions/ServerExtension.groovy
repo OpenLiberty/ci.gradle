@@ -24,6 +24,11 @@ class ServerExtension{
     String name = "defaultServer"
     String outputDir
 
+    String appsDirectory = "apps"
+    boolean stripVersion = false
+    String installAppPackages = "project"
+    boolean looseApplication = true
+
     File configDirectory
     File configFile = new File("default")
     File bootstrapPropertiesFile = new File("default")
@@ -54,8 +59,6 @@ class ServerExtension{
     PackageAndDumpExtension packageLiberty = new PackageAndDumpExtension()
     PackageAndDumpExtension dumpLiberty = new PackageAndDumpExtension()
     PackageAndDumpExtension javaDumpLiberty = new PackageAndDumpExtension()
-
-    InstallAppsExtension installapps = new InstallAppsExtension()
 
     def uninstallfeatures(Closure closure) {
         ConfigureUtil.configure(closure, uninstallfeatures)
@@ -94,7 +97,4 @@ class ServerExtension{
         ConfigureUtil.configure(closure, javaDumpLiberty)
     }
 
-    def installapps(Closure closure) {
-        ConfigureUtil.configure(closure, installapps)
-    }
 }

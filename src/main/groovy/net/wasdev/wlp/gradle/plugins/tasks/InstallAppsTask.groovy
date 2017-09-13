@@ -98,7 +98,7 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
     protected void validateAppConfig(String fileName, String artifactId) throws Exception {
-        validateAppConfig(fileName, artifactId, server.installapps.appsDirectory)
+        validateAppConfig(fileName, artifactId, server.appsDirectory)
     }
 
     protected void validateAppConfig(String fileName, String artifactId, String dir) throws Exception {
@@ -131,7 +131,7 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
     protected String getArchiveName(Task task){
-        if (server.installapps.stripVersion){
+        if (server.stripVersion){
             return task.baseName + "." + task.extension
         }
         return task.archiveName;
@@ -139,14 +139,14 @@ class InstallAppsTask extends AbstractServerTask {
 
     private String getInstallAppPackages() {
         if (project.plugins.hasPlugin("ear")) {
-            server.installapps.installAppPackages = "project"
+            server.installAppPackages = "project"
         }
-        return server.installapps.installAppPackages
+        return server.installAppPackages
     }
 
     protected void installProject(Task task, String appsDir) throws Exception {
       if(isSupportedType()) {
-        if(server.installapps.looseApplication){
+        if(server.looseApplication){
           installLooseApplication(task, appsDir)
         } else {
           installProjectArchive(task, appsDir)
