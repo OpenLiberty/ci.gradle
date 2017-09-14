@@ -37,8 +37,7 @@ class RunTask extends AbstractServerTask {
     }
 
     void checkUserDir() {
-        File serverEnv = new File(getServerDir(project), 'server.env')
-        if (getUserDir(project) != new File(getInstallDir(project),'usr') && !serverEnv.text.contains('WLP_USER_DIR')) {
+        if (getUserDir(project) != new File(getInstallDir(project),'usr')) {
             File etcDir = new File(getInstallDir(project), 'etc')
             if (!etcDir.exists()) {
                 etcDir.mkdir()
