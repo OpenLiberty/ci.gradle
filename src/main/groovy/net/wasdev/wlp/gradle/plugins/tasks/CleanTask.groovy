@@ -22,10 +22,10 @@ class CleanTask extends AbstractServerTask {
     @TaskAction
     void cleanDirectories() {
         def params = buildLibertyMap(project);
-        params.put('logs', project.liberty.cleanDir.logs)
-        params.put('workarea', project.liberty.cleanDir.workarea)
-        params.put('dropins', project.liberty.cleanDir.dropins)
-        params.put('apps', project.liberty.cleanDir.apps)
+        params.put('logs', project.liberty.server.cleanDir.logs)
+        params.put('workarea', project.liberty.server.cleanDir.workarea)
+        params.put('dropins', project.liberty.server.cleanDir.dropins)
+        params.put('apps', project.liberty.server.cleanDir.apps)
         params.remove('timeout')
         project.ant.taskdef(name: 'cleanDir',
                             classname: 'net.wasdev.wlp.ant.CleanTask',

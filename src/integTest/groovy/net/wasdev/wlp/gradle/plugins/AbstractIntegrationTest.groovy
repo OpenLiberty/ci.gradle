@@ -44,7 +44,7 @@ abstract class AbstractIntegrationTest {
             }
         }
     }
-    
+
     protected static File createTestProject(File parent, File sourceDir, String buildFilename) {
         if (!sourceDir.exists()){
             throw new AssertionError("The source file '${sourceDir.canonicalPath}' doesn't exist.")
@@ -53,17 +53,17 @@ abstract class AbstractIntegrationTest {
             // Copy all resources except the individual test .gradle files
             // Do copy settings.gradle.
             FileUtils.copyDirectory(sourceDir, parent, new FileFilter() {
-               public boolean accept (File pathname) { 
+               public boolean accept (File pathname) {
                    return (pathname.getPath().endsWith("settings.gradle") ||
                            !pathname.getPath().endsWith(".gradle"))
                }
             });
-            
+
             // copy the needed gradle file
             File sourceFile = new File(sourceDir, buildFilename)
             File targetFile = new File(parent, "build.gradle")
             copyFile(sourceFile, targetFile)
-            
+
         } catch (IOException e) {
             throw new AssertionError("Unable to copy directory '${parent.canonicalPath}'.")
         }
@@ -77,7 +77,7 @@ abstract class AbstractIntegrationTest {
         try {
             BuildLauncher build = connection.newBuild()
             build.setJvmArguments("-DWLP_DIR=$WLP_DIR")
-            build.withArguments("-i"); 
+            build.withArguments("-i");
             build.forTasks(tasks)
             build.run()
         }

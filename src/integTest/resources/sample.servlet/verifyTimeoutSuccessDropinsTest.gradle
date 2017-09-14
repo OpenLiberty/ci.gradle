@@ -45,13 +45,15 @@ liberty {
     }
     server{
         name = wlpServerName
+        looseApplication = false
+
         packageLiberty {
             archive = packageFile
             include = packagingType
         }
-        dropins = [war]
 
-        verifyAppStartTimeout = 30
+      dropins = [war]
+      verifyAppStartTimeout = 30
     }
 }
 

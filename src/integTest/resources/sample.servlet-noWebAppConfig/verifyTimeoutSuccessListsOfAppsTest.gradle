@@ -64,11 +64,10 @@ liberty {
             archive = packageFile
             include = packagingType
         }
-
+      looseApplication = false
     	apps = [war2, war3]
-        dropins = [war, war4]
-
-        verifyAppStartTimeout = 30
+      dropins = [war, war4]
+      verifyAppStartTimeout = 30
     }
 }
 

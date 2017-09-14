@@ -78,7 +78,7 @@ abstract class AbstractServerTask extends AbstractTask {
             serverDirectory = server.outputDir
         }
         else{
-            serverDirectory = getInstallDir(project).toString() + "/usr/servers/" + server.name
+            serverDirectory = getUserDir(project).toString() + "/servers/" + server.name
         }
 
         return new File(serverDirectory)
@@ -242,5 +242,4 @@ abstract class AbstractServerTask extends AbstractTask {
             parentDir.mkdirs()
         }
     }
-
 }

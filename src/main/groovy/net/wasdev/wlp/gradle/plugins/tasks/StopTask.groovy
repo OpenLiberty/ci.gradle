@@ -21,7 +21,11 @@ class StopTask extends AbstractServerTask {
 
     @TaskAction
     void stop() {
-        executeServerCommand(project, 'stop', buildLibertyMap(project))
+        if (new File("${project.buildDir}/wlp/").exists()) {
+            executeServerCommand(project, 'stop', buildLibertyMap(project))
+        } else {
+            logger.error ('Server stopped, but the Liberty runtime has not yet been installed!')
+        }
     }
 
 }
