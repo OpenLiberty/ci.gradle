@@ -20,8 +20,8 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import org.gradle.api.Project
 
+import org.gradle.api.tasks.TaskAction
 
 import net.wasdev.wlp.ant.jsp.CompileJSPs;
 
@@ -31,7 +31,7 @@ class CompileJSPTask extends AbstractServerTask {
   protected int timeout = 30;
 
   @TaskAction
-  protected void compileJSP() throws Exception {
+  protected void compileJsps() throws Exception {
           CompileJSPs compile = (CompileJSPs) ant.createTask("antlib:net/wasdev/wlp/ant:compileJSPs");
           if (compile == null) {
               throw new IllegalStateException(MessageFormat.format(messages.getString("error.dependencies.not.found"), "compileJSPs"));
@@ -40,13 +40,25 @@ class CompileJSPTask extends AbstractServerTask {
           compile.setInstallDir(getInstallDir(project));
 
           compile.setSrcdir(new File("src/main/webapp"));
-          compile.setDestdir(liberty.server.outputDir);
+          compile.setDestdir(getOutputDir(libertyMap));
           compile.setTempdir(new File(project.buildDir));
           compile.setTimeout(timeout);
 
           // don't delete temporary server dir
           compile.setCleanup(false);
 
+          if(getPackagingType().equals('war')){
+            if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
+                server.apps = [project.war]
+            }
+            if (server.apps != null && !server.apps.isEmpty()) {
+                installMultipleApps(server.apps, 'apps')
+            }
+            if (server.dropins != null && !server.dropins.isEmpty()) {
+                installMultipleApps(server.dropins, 'dropins')
+            }
+          }
+          /*
           List<Plugin> plugins = getProject().getBuildPlugins();
           for (Plugin plugin : plugins) {
               if ("org.apache.maven.plugins:maven-compiler-plugin".equals(plugin.getKey())) {
@@ -99,7 +111,7 @@ class CompileJSPTask extends AbstractServerTask {
           // TODO should we try to calculate this from a pom dependency?
           if (jspVersion != null) {
               compile.setJspVersion(jspVersion);
-          }
+          }*/
 
           // TODO do we need to add features?
           compile.execute();
@@ -114,20 +126,6 @@ class CompileJSPTask extends AbstractServerTask {
               sb.append(str);
           }
           return sb.toString();
-      }
-
-      protected void init() throws GradleException {
-          boolean doInstall = (installDirectory == null);
-
-          super.init();
-
-          if (doInstall) {
-              try {
-                  installServerAssembly();
-              } catch (Exception e) {
-                  throw new MojoExecutionException("Failure installing server", e);
-              }
-          }
       }
 
 }

@@ -240,18 +240,6 @@ class InstallAppsTask extends AbstractServerTask {
       return getArchiveName(task) + ".xml"
     }
 
-    private String getPackagingType() throws Exception{
-      if (project.plugins.hasPlugin("war") || !project.tasks.withType(War).isEmpty()) {
-          return "war"
-      }
-      else if (project.plugins.hasPlugin("ear") || !project.tasks.withType(Ear).isEmpty()) {
-          return "ear"
-      }
-      else {
-          throw new GradleException("Archive path not found. Supported formats are jar, war, and ear.")
-      }
-  }
-
   //Cleans up the application if the install style is switched from loose application to archive and vice versa
   protected void deleteApplication(File parent, File artifactFile) throws IOException {
       deleteApplication(parent, artifactFile.getName());
