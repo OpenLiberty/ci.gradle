@@ -1,24 +1,26 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'signing'
-apply plugin: "com.gradle.plugin-publish"
 
-buildscript{
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'WASdev Repository'
+        url = 'http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/maven/repository/'
+    }
+    maven {
+        name = 'Sonatype Nexus Snapshots'
+        url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+    }
+}
+
+buildscript {
   repositories {
-      mavenCentral()
-      maven {
-          name = 'WASdev Repository'
-          url = 'http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/maven/repository/'
-      }
-      maven {
-          name = 'Sonatype Nexus Snapshots'
-          url = 'https://oss.sonatype.org/content/repositories/snapshots/'
-      }
-      maven {
-        url "https://plugins.gradle.org/m2/"
-      }
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
   }
-
   dependencies {
     classpath "com.gradle.publish:plugin-publish-plugin:0.9.7"
   }
@@ -38,6 +40,8 @@ dependencies {
     provided group: 'com.ibm.websphere.appserver.api', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
     testCompile 'junit:junit:4.11'
 }
+
+apply plugin: "com.gradle.plugin-publish"
 
 sourceSets {
     integrationTest {
@@ -99,13 +103,14 @@ if (!version.endsWith("SNAPSHOT")) {
 }
 
 pluginBundle {
-  website = 'http://www.gradle.org/'
-  vcsUrl = 'https://github.com/gradle/gradle'
-  description = 'ci.Gradle'
+  website = 'https://github.com/WASdev/ci.gradle'
+  vcsUrl = 'https://github.com/WASdev/ci.gradle'
+  description = 'Gradle plugins for managing Liberty profile servers'
+  tags = ['liberty', 'websphere', 'devops']
 
   plugins {
     ciGradle {
-      id = 'com.ibm.websphere.ciGradle'
+      id = 'net.wasdev.wlp.gradle.plugins.Liberty'
       displayName = 'ci.Gradle'
     }
   }
