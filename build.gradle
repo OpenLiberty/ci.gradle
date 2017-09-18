@@ -1,7 +1,7 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'signing'
-
+apply plugin: "com.gradle.plugin-publish"
 
 repositories {
     mavenCentral()
@@ -40,8 +40,6 @@ dependencies {
     provided group: 'com.ibm.websphere.appserver.api', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
     testCompile 'junit:junit:4.11'
 }
-
-apply plugin: "com.gradle.plugin-publish"
 
 sourceSets {
     integrationTest {
@@ -105,13 +103,13 @@ if (!version.endsWith("SNAPSHOT")) {
 pluginBundle {
   website = 'https://github.com/WASdev/ci.gradle'
   vcsUrl = 'https://github.com/WASdev/ci.gradle'
-  description = 'Gradle plugins for managing Liberty profile servers'
+  description = 'Gradle plugin for managing Liberty servers'
   tags = ['liberty', 'websphere', 'devops']
 
   plugins {
-    ciGradle {
+    cigradle {
       id = 'net.wasdev.wlp.gradle.plugins.Liberty'
-      displayName = 'ci.Gradle'
+      displayName = 'ci.gradle'
     }
   }
 }
