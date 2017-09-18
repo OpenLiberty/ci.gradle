@@ -25,6 +25,8 @@ class RunTask extends AbstractServerTask {
         if (project.liberty.clean) {
             command.add("--clean")
         }
+        checkUserDir()
+
         def run_process = new ProcessBuilder(command).redirectErrorStream(true).start()
         addShutdownHook {
             run_process.waitFor()
@@ -34,4 +36,18 @@ class RunTask extends AbstractServerTask {
         }
     }
 
+    void checkUserDir() {
+        if (getUserDir(project) != new File(getInstallDir(project),'usr')) {
+            File etcDir = new File(getInstallDir(project), 'etc')
+            if (!etcDir.exists()) {
+                etcDir.mkdir()
+            }
+            File etcServerEnv = new File(etcDir, 'server.env')
+            if (!etcServerEnv.exists()) {
+                etcServerEnv.write('WLP_USER_DIR=' + getUserDir(project).toString())
+            } else if (!etcServerEnv.text.contains('WLP_USER_DIR')) {
+                etcServerEnv.append('WLP_USER_DIR=' + getUserDir(project).toString())
+            }
+        }
+    }
 }
