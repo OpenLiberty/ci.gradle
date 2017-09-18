@@ -60,12 +60,14 @@ class Liberty implements Plugin<Project> {
         project.task('installLiberty', type: InstallLibertyTask) {
             description 'Installs Liberty from a repository'
             logging.level = LogLevel.INFO
+            outputs.dir new File("${project.buildDir}/wlp")
         }
 
         project.task('libertyRun', type: RunTask) {
             description = "Runs a Websphere Liberty Profile server under the Gradle process."
             logging.level = LogLevel.INFO
-            
+            outputs.dir new File("${project.buildDir}/wlp/usr/servers")
+
             project.afterEvaluate {
                 dependsOn installAppsDependsOn(server, 'libertyCreate')
             }
@@ -80,10 +82,27 @@ class Liberty implements Plugin<Project> {
         project.task('libertyCreate', type: CreateTask) {
             description 'Creates a WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
+            outputs.dir new File("${project.buildDir}/wlp/usr/servers")
             dependsOn 'installLiberty'
 
             project.afterEvaluate{
-                outputs.file { new File(getUserDir(project), "servers/${project.liberty.server.name}/server.xml") }
+                String serverDirPath = "servers/${project.liberty.server.name}"
+
+                // @Input
+                serverName = server.name
+
+                // @Input configs
+                // configCollection = [project.liberty.configDir,
+                                    // project.liberty.configFile,
+                configCollection = [project.liberty.configFile,
+                                    project.liberty.bootstrapPropertiesFile,
+                                    project.liberty.jvmOptionsFile,
+                                    project.liberty.serverEnv]
+
+                // @OutputDirectory
+                serverDir = new File(serverDirPath)
+
+                outputs.file { new File(getUserDir(project), serverDirPath + "/server.xml") }
             }
         }
 
@@ -173,6 +192,9 @@ class Liberty implements Plugin<Project> {
             dependsOn project.tasks.withType(War)
  
             project.afterEvaluate {
+                outputs.dir new File("${project.buildDir}/wlp/usr/servers/${project.liberty.server.name}/dropins")
+                outputs.dir new File("${project.buildDir}/wlp/usr/servers/${project.liberty.server.name}/apps")
+
                 if (server.features.name != null && !server.features.name.empty) {
                     dependsOn 'installFeature'
                 } else {
