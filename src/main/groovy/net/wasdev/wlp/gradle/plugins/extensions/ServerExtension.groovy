@@ -38,8 +38,8 @@ class ServerExtension{
     Map<String, String> bootstrapProperties
     List<String> jvmOptions
 
-    List<Task> apps
-    List<Task> dropins
+    List<Object> apps
+    List<Object> dropins
 
     boolean clean = false
     String timeout

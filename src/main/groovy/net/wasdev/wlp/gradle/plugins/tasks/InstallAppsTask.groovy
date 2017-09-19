@@ -21,6 +21,7 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import org.gradle.api.GradleException
 import groovy.util.XmlParser
+import groovy.lang.Tuple
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
@@ -57,6 +58,8 @@ class InstallAppsTask extends AbstractServerTask {
                 return
         }
 
+        //split apps and dropins lists
+
         if (installApp) {
             if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
                 if (project.plugins.hasPlugin('war')) {
@@ -64,11 +67,14 @@ class InstallAppsTask extends AbstractServerTask {
                 }
             }
             if (server.apps != null && !server.apps.isEmpty()) {
-                installMultipleApps(server.apps, 'apps')
+                Tuple appsLists = splitAppList(server.apps)
+                installMultipleApps(appsLists[0], 'apps')
+                installFileList(appsLists[1], 'apps')
             }
             if (server.dropins != null && !server.dropins.isEmpty()) {
-                println("server.dropins going through")
-                installMultipleApps(server.dropins, 'dropins')
+                Tuple dropinsLists = splitAppList(server.dropins)
+                installMultipleApps(dropinsLists[0], 'dropins')
+                installFileList(dropinsLists[1], 'dropins')
             }
         }
         //TODO
@@ -250,24 +256,52 @@ class InstallAppsTask extends AbstractServerTask {
       else {
           throw new GradleException("Archive path not found. Supported formats are jar, war, and ear.")
       }
-  }
+    }
 
-  //Cleans up the application if the install style is switched from loose application to archive and vice versa
-  protected void deleteApplication(File parent, File artifactFile) throws IOException {
-      deleteApplication(parent, artifactFile.getName());
-      if (artifactFile.getName().endsWith(".xml")) {
-          deleteApplication(parent, artifactFile.getName().substring(0, artifactFile.getName().length() - 4));
-      } else {
-          deleteApplication(parent, artifactFile.getName() + ".xml");
-      }
-  }
+    //Cleans up the application if the install style is switched from loose application to archive and vice versa
+    protected void deleteApplication(File parent, File artifactFile) throws IOException {
+        deleteApplication(parent, artifactFile.getName());
+        if (artifactFile.getName().endsWith(".xml")) {
+            deleteApplication(parent, artifactFile.getName().substring(0, artifactFile.getName().length() - 4));
+        } else {
+            deleteApplication(parent, artifactFile.getName() + ".xml");
+        }
+    }
 
-  protected void deleteApplication(File parent, String filename) throws IOException {
-      File application = new File(parent, filename);
-      if (application.isDirectory()) {
-          FileUtils.deleteDirectory(application);
-      } else {
-          application.delete();
-      }
-  }
+    protected void deleteApplication(File parent, String filename) throws IOException {
+        File application = new File(parent, filename);
+        if (application.isDirectory()) {
+            FileUtils.deleteDirectory(application);
+        } else {
+            application.delete();
+        }
+    }
+
+    protected void installFromFile(File file, String appsDir) {
+        Files.copy(file.toPath(), new File(getServerDir(project).toString() + '/' + appsDir + '/' + file.name).toPath(), StandardCopyOption.REPLACE_EXISTING)
+        validateAppConfig(file.name, file.name.take(file.name.lastIndexOf('.')), appsDir)
+    }
+
+    protected void installFileList(List<File> appFiles, String appsDir) {
+        appFiles.each { File appFile ->
+            installFromFile(appFile, appsDir)
+        }
+    }
+
+    private Tuple splitAppList(List<Object> allApps) {
+        List<File> appFiles = new ArrayList<File>()
+        List<Task> appTasks = new ArrayList<Task>()
+
+        allApps.each { Object appObj ->
+            if (appObj instanceof Task) {
+                appTasks.add((Task)appObj)
+            } else if (appObj instanceof File) {
+                appFiles.add((File)appObj)
+            } else {
+                logger.debug(appObj.getClass.name + ' is not a supported application type.')
+            }
+        }
+
+        return new Tuple(appTasks, appFiles)
+    }
 }

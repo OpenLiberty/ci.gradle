@@ -53,7 +53,13 @@ class StartTask extends AbstractServerTask {
             ArrayList<Task> applicationBuildTasks = new ArrayList<Task>()
 
             if (server.dropins != null && !server.dropins.isEmpty()) {
-                applicationBuildTasks += server.dropins
+                server.dropins.each { Object dropinObj ->
+                    if (dropinObj instanceof Task) {
+                        applicationBuildTasks += dropinObj
+                    } else if (dropinObj instanceof File) {
+                        appsToVerify += getBaseName(dropinObj.name)
+                    }
+                }
             }
 
             if (!applicationBuildTasks.empty) {
@@ -110,10 +116,17 @@ class StartTask extends AbstractServerTask {
 
         boolean foundName = false
 
-        server.apps.each { task ->
-            if (getArchiveName(task.archiveName).equals(fileName)) { //stripVersion?
-                appName = task.baseName
-                foundName = true
+        server.apps.each { app ->
+            if (app instanceof Task) {
+                if (getArchiveName(app.archiveName).equals(fileName)) {
+                    appName = app.baseName
+                    foundName = true
+                }
+            } else if (app instanceof File) {
+                if (getArchiveName(app.name).equals(fileName)) {
+                    appName = getBaseName(app.name)
+                    foundName = true
+                }
             }
         }
         //print debug statement if app is in server.xml but not in apps list
@@ -124,7 +137,7 @@ class StartTask extends AbstractServerTask {
     }
 
     protected String getArchiveName(String archiveName){
-        if (server.installapps.stripVersion){
+        if (server.stripVersion){
             StringBuilder sbArchiveName = new StringBuilder().append("-").append(project.version)
             return archiveName.replaceAll(sbArchiveName.toString(),"")
         }
