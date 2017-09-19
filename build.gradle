@@ -1,6 +1,7 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'signing'
+apply plugin: "com.gradle.plugin-publish"
 
 repositories {
     mavenCentral()
@@ -14,6 +15,17 @@ repositories {
     }
 }
 
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "com.gradle.publish:plugin-publish-plugin:0.9.7"
+  }
+}
+
 configurations {
     provided
 }
@@ -23,6 +35,8 @@ dependencies {
     compile localGroovy()
     compile ('net.wasdev.wlp.ant:wlp-anttasks:1.4-SNAPSHOT')
     compile group: 'commons-io', name: 'commons-io', version: '2.5'
+    compile gradleApi()
+    compile localGroovy()
     provided group: 'com.ibm.websphere.appserver.api', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
     testCompile 'junit:junit:4.11'
 }
@@ -74,16 +88,30 @@ task sourcesJar(type: Jar) {
 task groovydocJar(type: Jar) {
     classifier = 'groovydoc'
     from groovydoc
-} 
+}
 
 artifacts {
     archives groovydocJar, sourcesJar
 }
 
 if (!version.endsWith("SNAPSHOT")) {
-    signing {           
+    signing {
         sign configurations.archives
     }
+}
+
+pluginBundle {
+  website = 'https://github.com/WASdev/ci.gradle'
+  vcsUrl = 'https://github.com/WASdev/ci.gradle'
+  description = 'Gradle plugin for managing Liberty servers'
+  tags = ['liberty', 'websphere', 'devops']
+
+  plugins {
+    cigradle {
+      id = 'net.wasdev.wlp.gradle.plugins.Liberty'
+      displayName = 'ci.gradle'
+    }
+  }
 }
 
 if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
@@ -132,4 +160,3 @@ if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')
     }
   }
 }
-
