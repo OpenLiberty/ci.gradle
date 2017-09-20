@@ -10,6 +10,8 @@ In particular, the `apps`, `dropins`, `stripVersion`, and `looseApplication` pro
 
 If you target an application to the `dropins` folder, no configuration is needed to get the server to start the application. When you want to configure an application in server.xml, the `location` is relative to the `apps` folder. Applications in the `apps` folder are not started without configuration. If you configure an application to install to the `apps` folder and it is not configured, default configuration is created in the `configDropins` folder.
 
+Multiple applications can be installed to the `apps` or `dropins` directories. This can be done by adding application files, or the tasks that generate these files, to the respective list.
+
 ### Example:
 
 ```groovy
@@ -19,7 +21,7 @@ apply plugin: 'war'
 liberty {
     server {
         name = 'myServer'
-        apps = [file('libertyApp.war')]
+        apps = [file('libertyApp.war'), libertyWarTask]
         dropins = [war]
         stripVersion = true
     }
