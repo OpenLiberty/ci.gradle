@@ -29,8 +29,6 @@ abstract class AbstractServerTask extends AbstractTask {
 
     def server
 
-    def libertyMap = buildLibertyMap(project)
-
     protected void executeServerCommand(Project project, String command, Map<String, String> params) {
         project.ant.taskdef(name: 'server',
                             classname: 'net.wasdev.wlp.ant.ServerTask',

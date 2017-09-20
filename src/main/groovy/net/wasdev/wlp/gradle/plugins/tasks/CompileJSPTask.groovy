@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.Task
 
 import net.wasdev.wlp.ant.jsp.CompileJSPs;
 
@@ -40,68 +41,31 @@ class CompileJSPTask extends AbstractServerTask {
           compile.setInstallDir(getInstallDir(project));
 
           compile.setSrcdir(new File("src/main/webapp"));
-          compile.setDestdir(getOutputDir(libertyMap));
+          compile.setDestdir(getOutputDir(params));
           compile.setTempdir(new File(project.buildDir));
           compile.setTimeout(timeout);
 
           // don't delete temporary server dir
           compile.setCleanup(false);
 
+          Set<String> classpath = new TreeSet<String>();
+
+          // first add target/classes (or whatever is configured)
+          classpath.add(getOutputDir(params))
+
           if(getPackagingType().equals('war')){
+            if(project.war.source.getSingleFile().exists())
+              compile.setSrcdir = project.war.source.getSingleFile().getAbsolutePath()
+
             if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
                 server.apps = [project.war]
             }
             if (server.apps != null && !server.apps.isEmpty()) {
-                installMultipleApps(server.apps, 'apps')
+              setCompileDependencies(server.apps, compile, classpath)
             }
             if (server.dropins != null && !server.dropins.isEmpty()) {
-                installMultipleApps(server.dropins, 'dropins')
+              setCompileDependencies(server.dropins, compile, classpath)
             }
-          }
-          /*
-          List<Plugin> plugins = getProject().getBuildPlugins();
-          for (Plugin plugin : plugins) {
-              if ("org.apache.maven.plugins:maven-compiler-plugin".equals(plugin.getKey())) {
-                  Object config = plugin.getConfiguration();
-                  if (config instanceof Xpp3Dom) {
-                      Xpp3Dom dom = (Xpp3Dom) config;
-                      Xpp3Dom val = dom.getChild("source");
-                      if (val != null) {
-                          compile.setSource(val.getValue());
-                      }
-                  }
-                  break;
-              } else if ("org.apache.maven.plugins:maven-war-plugin".equals(plugin.getKey())) {
-                  Object config = plugin.getConfiguration();
-                  if (config instanceof Xpp3Dom) {
-                      Xpp3Dom dom = (Xpp3Dom) config;
-                      Xpp3Dom val = dom.getChild("warSourceDirectory");
-                      if (val != null) {
-                          compile.setSrcdir(new File(val.getValue()));
-                      }
-                  }
-              }
-          }
-
-          Set<String> classpath = new TreeSet<String>();
-
-          // first add target/classes (or whatever is configured)
-          classpath.add(getProject().getBuild().getOutputDirectory());
-
-          @SuppressWarnings("unchecked")
-          Set<Artifact> dependencies = getProject().getArtifacts();
-          for (Artifact dep : dependencies) {
-              if (!dep.isResolved()) {
-                  // TODO: Is transitive=true correct here?
-                  dep = resolveArtifact(dep, true);
-              }
-              if (dep.getFile() != null) {
-                  if (!classpath.add(dep.getFile().getAbsolutePath())) {
-                      getLog().warn("Duplicate dependency: " + dep.getId());
-                  }
-              } else {
-                  getLog().warn("Could not find: " + dep.getId());
-              }
           }
 
           String classpathStr = join(classpath, File.pathSeparator);
@@ -111,10 +75,37 @@ class CompileJSPTask extends AbstractServerTask {
           // TODO should we try to calculate this from a pom dependency?
           if (jspVersion != null) {
               compile.setJspVersion(jspVersion);
-          }*/
+          }
 
           // TODO do we need to add features?
           compile.execute();
+      }
+
+      private void setCompileDependencies(List<Task> applications, CompileJSPs compile, Set<String> classpath) {
+          applications.each{ Task task ->
+            compileDependencyJSP(task, compile, classpath)
+          }
+      }
+
+      private void compileDependencyJSP(Task task, CompileJSPs compile, Set<String> classpath) {
+        ArrayList<File> deps = new ArrayList<File>();
+        task.classpath.each {deps.add(it)}
+        //Removes WEB-INF/lib/main directory since it is not rquired in the xml
+        if(deps != null && !deps.isEmpty()){
+          deps.remove(0)
+        }
+
+        for (File dep: deps) {
+          if(!projectPath.isEmpty() && project.getRootProject().findProject(projectPath) != null){
+            if (dep.getFile() != null) {
+                if (!classpath.add(dep.getFile().getAbsolutePath())) {
+                    getLog().warn("Duplicate dependency: " + dep.getId());
+                }
+            } else {
+                getLog().warn("Could not find: " + dep.getId());
+            }
+          }
+        }
       }
 
       private String join(Set<String> depPathes, String sep) {
