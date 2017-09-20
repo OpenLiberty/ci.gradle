@@ -111,7 +111,6 @@ task printMessageAboutRunningServer {
     }
 }
 
-clean.dependsOn 'libertyStop'
 check.dependsOn 'integrationTest'
 installApps.dependsOn tasks.withType(War)
 libertyStart.dependsOn 'installApps'

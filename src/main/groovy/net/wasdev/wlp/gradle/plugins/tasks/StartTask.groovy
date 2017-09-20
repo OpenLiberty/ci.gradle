@@ -50,28 +50,19 @@ class StartTask extends AbstractServerTask {
             long endTime = System.currentTimeMillis() + timeout;
 
             Set<String> appsToVerify = getAppNamesFromServerXml()
-            ArrayList<Task> applicationBuildTasks = new ArrayList<Task>()
 
             if (server.dropins != null && !server.dropins.isEmpty()) {
                 server.dropins.each { Object dropinObj ->
                     if (dropinObj instanceof Task) {
-                        applicationBuildTasks += dropinObj
+                        appsToVerify += dropinObj.baseName
                     } else if (dropinObj instanceof File) {
                         appsToVerify += getBaseName(dropinObj.name)
                     }
                 }
             }
 
-            if (!applicationBuildTasks.empty) {
-                applicationBuildTasks.each{ Task task ->
-                    appsToVerify.add(task.baseName)
-                }
-            }
-            else {
-                //Do we need to do a stripVersion check here?
-                if (project.plugins.hasPlugin('war')) {
-                    appsToVerify.add(project.war.baseName)
-                }
+            if (appsToVerify.empty && project.plugins.hasPlugin('war')) {
+                appsToVerify.add(project.war.baseName)
             }
 
             def verifyAppStartedThreads = appsToVerify.collect { String archiveName ->
@@ -103,7 +94,6 @@ class StartTask extends AbstractServerTask {
             }
             catch (Exception e) {
                 logger.warn(e.getLocalizedMessage())
-                logger.debug(e.toString())
             }
         }
         return appNames

@@ -19,6 +19,7 @@ apply plugin: 'war'
 liberty {
     server {
         name = 'myServer'
+        apps = [file('libertyApp.war')]
         dropins = [war]
         stripVersion = true
     }

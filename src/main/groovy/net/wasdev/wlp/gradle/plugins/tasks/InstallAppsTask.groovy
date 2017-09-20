@@ -298,7 +298,7 @@ class InstallAppsTask extends AbstractServerTask {
             } else if (appObj instanceof File) {
                 appFiles.add((File)appObj)
             } else {
-                logger.debug(appObj.getClass.name + ' is not a supported application type.')
+                logger.debug(appObj.getClass.name + ' is not a supported application type for entry ' + appObj.toString() + '.')
             }
         }
 
