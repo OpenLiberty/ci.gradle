@@ -18,7 +18,6 @@ package net.wasdev.wlp.gradle.plugins.tasks
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.OutputDirectory
 
 class CreateTask extends AbstractServerTask {
 
@@ -28,24 +27,16 @@ class CreateTask extends AbstractServerTask {
     @Input
     String serverName
 
-    @OutputDirectory
-    def serverDir
-
     @TaskAction
     void create() {
         if(!getServerDir(project).exists()){
-            println ("Making the server for the first time.")
             def params = buildLibertyMap(project);
             if (project.liberty.server.template != null && project.liberty.server.template.length() != 0) {
                 params.put('template', project.liberty.server.template)
             }
             executeServerCommand(project, 'create', params)
-        } else {
-            println ("The server already exists.")
         }
         copyConfigFiles();
     }
-
-
 
 }
