@@ -151,6 +151,8 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
 
             project.afterEvaluate {
+                inputs.property "FeaturesName", server.features.name
+
                 if (server.features.name != null && !server.features.name.empty) {
                     dependsOn 'libertyCreate'
                 } else {
@@ -182,8 +184,9 @@ class Liberty implements Plugin<Project> {
             dependsOn project.tasks.withType(War)
 
             project.afterEvaluate {
-                inputs.property "apps", server.apps
-                inputs.property "dropins", server.dropins
+                // These inputs do not work yet because they are not serializable
+                // inputs.property "apps", server.apps
+                // inputs.property "dropins", server.dropins
                 outputs.dir new File(getServerDir(project), "apps")
                 outputs.dir new File(getServerDir(project), "dropins")
 
@@ -214,16 +217,8 @@ class Liberty implements Plugin<Project> {
     }
 
     void setServersForTasks(Project project){
-        project.tasks.withType(AbstractServerTask).each {task ->
+        project.tasks.withType(AbstractServerTask).each { task ->
             task.server = project.liberty.server
-        }
-    }
-
-    String installAppsDependsOn(ServerExtension server, String elseDepends) {
-        if (server.apps != null || server.dropins != null) {
-            return 'installApps'
-        } else {
-            return elseDepends
         }
     }
 }
