@@ -19,9 +19,9 @@ import javax.xml.parsers.*
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.Input
 
 class InstallLibertyTask extends AbstractTask {
-    
     @TaskAction
     void install() {
         def params = buildInstallLibertyMap(project)
