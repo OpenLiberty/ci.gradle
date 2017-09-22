@@ -25,10 +25,10 @@ class StopTask extends AbstractServerTask {
         	if (getServerDir(project).exists()) {
             	executeServerCommand(project, 'stop', buildLibertyMap(project))
         	} else {
-        		logger.error ('There is no server to stop!')
+        		logger.error ('There is no server to stop. The server has not been created.')
         	}
         } else {
-            logger.error ('Server stopped, but the Liberty runtime has not yet been installed!')
+            logger.error ('There is no server to stop. The runtime has not been installed.')
         }
     }
 
