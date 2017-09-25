@@ -4,7 +4,7 @@ import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
 
-public class TestCompileJSP.groovy extends AbstractIntegrationTest{
+public class TestCompileJSP extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/integrationTest/sample.servlet")
     static File buildDir = new File(integTestDir, "/test-compile-jsp")
     static String buildFilename = "testCompileJSP.gradle"
