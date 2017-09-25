@@ -20,95 +20,93 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.HashSet;
 
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.Task
+import org.gradle.api.GradleException
 
+import org.apache.tools.ant.Project;
 import net.wasdev.wlp.ant.jsp.CompileJSPs;
 
 class CompileJSPTask extends AbstractServerTask {
-
   protected String jspVersion;
   protected int timeout = 30;
-
+  protected Project ant = new Project();
   @TaskAction
-  protected void compileJsps() throws Exception {
-          CompileJSPs compile = (CompileJSPs) ant.createTask("antlib:net/wasdev/wlp/ant:compileJSPs");
-          if (compile == null) {
-              throw new IllegalStateException(MessageFormat.format(messages.getString("error.dependencies.not.found"), "compileJSPs"));
-          }
+  protected void compileJSP() throws Exception {
 
-          compile.setInstallDir(getInstallDir(project));
-
-          compile.setSrcdir(new File("src/main/webapp"));
-          compile.setDestdir(getOutputDir(params));
-          compile.setTempdir(new File(project.buildDir));
-          compile.setTimeout(timeout);
-
+          CompileJSPs compileJsp = new CompileJSPs()
+          compileJsp.setInstallDir(getInstallDir(project))
+          compileJsp.setSrcdir(new File("src/main/webapp"))
+          compileJsp.setTempdir(project.buildDir)
+          compileJsp.setDestdir(getServerDir(project))
+          compileJsp.setTimeout(timeout)
           // don't delete temporary server dir
-          compile.setCleanup(false);
+          compileJsp.setCleanup(false)
+          compileJsp.setProject(ant)
+          compileJsp.setTaskName('antlib:net/wasdev/wlp/ant:compileJSPs')
 
-          Set<String> classpath = new TreeSet<String>();
+          Set<String> classpath = new HashSet<String>();
 
           // first add target/classes (or whatever is configured)
-          classpath.add(getOutputDir(params))
+          classpath.add(getServerDir(project))
 
           if(getPackagingType().equals('war')){
-            if(project.war.source.getSingleFile().exists())
-              compile.setSrcdir = project.war.source.getSingleFile().getAbsolutePath()
+            if(project.sourceSets.main.getJava().getSourceDirectories().getSingleFile().exists())
+              compileJsp.setSrcdir(project.sourceSets.main.getJava().getSourceDirectories().getSingleFile())
 
             if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
                 server.apps = [project.war]
             }
             if (server.apps != null && !server.apps.isEmpty()) {
-              setCompileDependencies(server.apps, compile, classpath)
+              setCompileDependencies(server.apps, classpath)
             }
             if (server.dropins != null && !server.dropins.isEmpty()) {
-              setCompileDependencies(server.dropins, compile, classpath)
+              setCompileDependencies(server.dropins, classpath)
             }
           }
 
           String classpathStr = join(classpath, File.pathSeparator);
-          log.debug("Classpath: " + classpathStr);
-          compile.setClasspath(classpathStr);
+          logger.debug("Classpath: " + classpathStr)
+          compileJsp.setClasspath(classpathStr)
 
           // TODO should we try to calculate this from a pom dependency?
           if (jspVersion != null) {
-              compile.setJspVersion(jspVersion);
+              compileJsp.setJspVersion(jspVersion)
           }
 
-          // TODO do we need to add features?
-          compile.execute();
+          compileJsp.init()
+          compileJsp.execute()
       }
 
-      private void setCompileDependencies(List<Task> applications, CompileJSPs compile, Set<String> classpath) {
+      private void setCompileDependencies(List<Task> applications, Set<String> classpath) {
           applications.each{ Task task ->
-            compileDependencyJSP(task, compile, classpath)
+            compileDependencyJSP(task, classpath)
           }
       }
 
-      private void compileDependencyJSP(Task task, CompileJSPs compile, Set<String> classpath) {
+      protected void compileDependencyJSP(Task task, Set<String> classpaths) {
         ArrayList<File> deps = new ArrayList<File>();
         task.classpath.each {deps.add(it)}
-        //Removes WEB-INF/lib/main directory since it is not rquired in the xml
+
+        //Removes WEB-INF/lib/main directory since it is not a dependency
         if(deps != null && !deps.isEmpty()){
           deps.remove(0)
         }
 
         for (File dep: deps) {
-          if(!projectPath.isEmpty() && project.getRootProject().findProject(projectPath) != null){
-            if (dep.getFile() != null) {
-                if (!classpath.add(dep.getFile().getAbsolutePath())) {
-                    getLog().warn("Duplicate dependency: " + dep.getId());
-                }
-            } else {
-                getLog().warn("Could not find: " + dep.getId());
-            }
+          if (dep != null) {
+              if (!classpaths.add(dep.getAbsolutePath())) {
+                  logger.debug("Duplicate dependency: " + dep.getName());
+              }
+          } else {
+              logger.debug("Could not find: " + dep.getName());
           }
         }
       }
 
-      private String join(Set<String> depPathes, String sep) {
+      protected String join(Set<String> depPathes, String sep) {
           StringBuilder sb = new StringBuilder();
           for (String str : depPathes) {
               if (sb.length() != 0) {
@@ -118,5 +116,17 @@ class CompileJSPTask extends AbstractServerTask {
           }
           return sb.toString();
       }
+
+      private String getPackagingType() throws Exception{
+        if (project.plugins.hasPlugin("war") || !project.tasks.withType(War).isEmpty()) {
+            return "war"
+        }
+        else if (project.plugins.hasPlugin("ear") || !project.tasks.withType(Ear).isEmpty()) {
+            return "ear"
+        }
+        else {
+            throw new GradleException("Archive path not found. Supported formats are jar, war, and ear.")
+        }
+    }
 
 }
