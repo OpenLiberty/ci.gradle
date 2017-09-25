@@ -39,19 +39,9 @@ ext {
 
 
 }
-task war2(type:War){
-    baseName = 'test.servlet'
-    println 'war2 archiveName = ' + archiveName
-}
 
-task war3(type:War){
-    baseName = 'servlet.test'
-    println 'war3 archiveName = ' + archiveName
-}
-
-task war4(type:War){
-    baseName = 'sample.test'
-    println 'war4 archiveName = ' + archiveName
+task testWar(type:War){
+    baseName = 'testWar'
 }
 
 liberty {
@@ -60,15 +50,13 @@ liberty {
     }
     server{
         name = wlpServerName
-        configFile = file("src/main/liberty/config/app-names-test.xml")
-        bootstrapProperties = ['testAppLocation':'test.servlet-1.war']
+
         packageLiberty {
             archive = packageFile
             include = packagingType
         }
         looseApplication = false
-        apps = [war2, file(war3.archivePath)]
-        dropins = [war, file(war4.archivePath)]
+    	apps = [file('build/libs/testWar-1.war')]
 
         verifyAppStartTimeout = 30
     }
@@ -111,7 +99,6 @@ task printMessageAboutRunningServer {
     }
 }
 
-clean.dependsOn 'libertyStop'
 check.dependsOn 'integrationTest'
 installApps.dependsOn tasks.withType(War)
 libertyStart.dependsOn 'installApps'

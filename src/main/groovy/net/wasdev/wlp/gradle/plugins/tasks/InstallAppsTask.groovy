@@ -41,49 +41,24 @@ class InstallAppsTask extends AbstractServerTask {
 
     @TaskAction
     void installApps() {
-        boolean installDependencies = false
-        boolean installApp = false
-        switch (getInstallAppPackages()) {
-            case "all":
-                installDependencies = true
-                installApp = true
-                break;
-            case "dependencies":
-                installDependencies = true
-                break
-            case "project":
-                installApp = true
-                break
-            default:
-                return
-        }
-
-        //split apps and dropins lists
-
-        if (installApp) {
-            if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
-                if (project.plugins.hasPlugin('war')) {
-                    server.apps = [project.war]
-                }
-            }
-            if (server.apps != null && !server.apps.isEmpty()) {
-                Tuple appsLists = splitAppList(server.apps)
-                installMultipleApps(appsLists[0], 'apps')
-                installFileList(appsLists[1], 'apps')
-            }
-            if (server.dropins != null && !server.dropins.isEmpty()) {
-                Tuple dropinsLists = splitAppList(server.dropins)
-                installMultipleApps(dropinsLists[0], 'dropins')
-                installFileList(dropinsLists[1], 'dropins')
+        if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
+            if (project.plugins.hasPlugin('war')) {
+                server.apps = [project.war]
             }
         }
-        //TODO
-        /**if(installDependencies){
-            installDependencies()
-        }*/
+        if (server.apps != null && !server.apps.isEmpty()) {
+            Tuple appsLists = splitAppList(server.apps)
+            installMultipleApps(appsLists[0], 'apps')
+            installFileList(appsLists[1], 'apps')
+        }
+        if (server.dropins != null && !server.dropins.isEmpty()) {
+            Tuple dropinsLists = splitAppList(server.dropins)
+            installMultipleApps(dropinsLists[0], 'dropins')
+            installFileList(dropinsLists[1], 'dropins')
+        }
 
         if (applicationXml.hasChildElements()) {
-            logger.warn("The application is not defined in the server configuration but the build file indicates it should be installed in the apps folder. Application configuration is being added to the target server configuration dropins folder by the plug-in.");
+            logger.warn("At least one application is not defined in the server configuration but the build file indicates it should be installed in the apps folder. Application configuration is being added to the target server configuration dropins folder by the plug-in.");
             applicationXml.writeApplicationXmlDocument(getServerDir(project));
         } else {
             if (ApplicationXmlDocument.getApplicationXmlFile(getServerDir(project)).exists()) {
@@ -122,7 +97,7 @@ class InstallAppsTask extends AbstractServerTask {
         File serverConfigFile = new File(getServerDir(project), 'server.xml')
         if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
-                ServerConfigDocument scd = ServerConfigDocument.getInstance(serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, server.bootstrapProperties, server.serverEnv)
+                ServerConfigDocument scd = new ServerConfigDocument(serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, server.bootstrapProperties, server.serverEnv)
                 if (scd != null && scd.getLocations().contains(fileName)) {
                     logger.debug("Application configuration is found in server.xml : " + fileName)
                     configured = true
@@ -130,7 +105,6 @@ class InstallAppsTask extends AbstractServerTask {
             }
             catch (Exception e) {
                 logger.warn(e.getLocalizedMessage())
-                logger.debug(e)
             }
         }
         return configured
@@ -141,13 +115,6 @@ class InstallAppsTask extends AbstractServerTask {
             return task.baseName + "." + task.extension
         }
         return task.archiveName;
-    }
-
-    private String getInstallAppPackages() {
-        if (project.plugins.hasPlugin("ear")) {
-            server.installAppPackages = "project"
-        }
-        return server.installAppPackages
     }
 
     protected void installProject(Task task, String appsDir) throws Exception {
@@ -298,7 +265,7 @@ class InstallAppsTask extends AbstractServerTask {
             } else if (appObj instanceof File) {
                 appFiles.add((File)appObj)
             } else {
-                logger.debug(appObj.getClass.name + ' is not a supported application type for entry ' + appObj.toString() + '.')
+                logger.warn('Application ' + appObj.getClass.name + ' is expressed as ' + appObj.toString() + ' which is not a supported input type. Define applications using Task or File objects.')
             }
         }
 

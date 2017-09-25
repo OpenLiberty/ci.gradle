@@ -18,10 +18,14 @@ Multiple applications can be installed to the `apps` or `dropins` directories. T
 apply plugin: 'liberty'
 apply plugin: 'war'
 
+task libertyWarTask(type:War){
+    ...
+}
+
 liberty {
     server {
         name = 'myServer'
-        apps = [file('libertyApp.war'), libertyWarTask]
+        apps = [file('build/libs/libertyApp.war'), libertyWarTask]
         dropins = [war]
         stripVersion = true
     }

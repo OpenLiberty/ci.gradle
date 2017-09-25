@@ -61,10 +61,6 @@ class StartTask extends AbstractServerTask {
                 }
             }
 
-            if (appsToVerify.empty && project.plugins.hasPlugin('war')) {
-                appsToVerify.add(project.war.baseName)
-            }
-
             def verifyAppStartedThreads = appsToVerify.collect { String archiveName ->
                 Thread.start {
                     String verify = serverTask.waitForStringInLog(START_APP_MESSAGE_REGEXP + archiveName, timeout, serverTask.getLogFile())
@@ -84,7 +80,7 @@ class StartTask extends AbstractServerTask {
         File serverConfigFile = new File(getServerDir(project), 'server.xml')
         if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
-                ServerConfigDocument scd = ServerConfigDocument.getInstance(serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, server.bootstrapProperties, server.serverEnv)
+                ServerConfigDocument scd = new ServerConfigDocument(serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, server.bootstrapProperties, server.serverEnv)
                 if (scd != null) {
                     appNames = scd.getNames()
                     appNames += scd.getNamelessLocations().collect { String location ->
