@@ -24,12 +24,13 @@ public class TestCompileJSP extends AbstractIntegrationTest{
     }
 
     @Test
-    public void test_strip_version_true() {
+    public void test_compile_jsp() {
         try {
-            runTasks(buildDir, 'compileJSP')
+            runTasks(buildDir, 'libertyStart')
+            runTasks(buildDir, 'compileJsp')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task installApps. "+ e)
+            throw new AssertionError ("Fail on task compileJsp. "+ e)
         }
-        assert new File('build/testBuilds/test-compile-jsp/build/compileJsp').exists() : 'version was NOT removed properly when stripVersion was set to true'
+        assert new File('build/testBuilds/test-compile-jsp/build/compileJsp').exists() : 'compileJsp Directory not found!'
     }
 }

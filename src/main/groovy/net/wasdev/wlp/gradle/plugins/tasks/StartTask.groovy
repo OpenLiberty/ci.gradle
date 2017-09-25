@@ -29,7 +29,7 @@ class StartTask extends AbstractServerTask {
     @TaskAction
     void start() {
 
-        def params = buildLibertyMap(project);
+        params = buildLibertyMap(project);
         params.put('clean', server.clean)
         if (server.timeout != null && server.timeout.length() != 0) {
             params.put('timeout', server.timeout)
