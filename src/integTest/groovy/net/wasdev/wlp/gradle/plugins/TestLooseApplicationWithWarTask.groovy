@@ -83,12 +83,21 @@ public class TestLooseApplicationWithWarTask extends AbstractIntegrationTest{
 
       expression = "/archive/file";
       nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
-      Assert.assertEquals("Number of <file/> element ==>", 3, nodes.getLength());
+      Assert.assertEquals("Number of <file/> element ==>", 2, nodes.getLength());
 
       Assert.assertEquals("archive targetInArchive attribute value", "/WEB-INF/lib/commons-text-1.1.jar",
               nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue());
 
       Assert.assertEquals("archive targetInArchive attribute value", "/WEB-INF/lib/commons-lang3-3.5.jar",
               nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue());
+    }
+
+    @Test
+    public void test_start_with_timeout_success() throws Exception{
+      try {
+          runTasks(buildDir, 'libertyStart')
+      } catch (Exception e) {
+          throw new AssertionError ("Fail on task libertyStart. "+ e)
+      }
     }
 }

@@ -25,20 +25,36 @@ import java.util.HashSet;
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.Task
 import org.gradle.api.GradleException
+import org.gradle.api.tasks.bundling.War
 
 import org.apache.tools.ant.Project;
 import net.wasdev.wlp.ant.jsp.CompileJSPs;
 
 class CompileJSPTask extends AbstractServerTask {
+
   protected String jspVersion;
   protected int timeout = 30;
   protected Project ant = new Project();
+
   @TaskAction
-  protected void compileJSP() throws Exception {
+  protected void compileJSP(){
+    if(getPackagingType().equals('war')){
+      if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
+          perTaskCompileJSP(project.war)
+      }
+      else if (server.apps != null && !server.apps.isEmpty()) {
+        perTaskCompileJSP(server.apps[0])
+      }
+      else if (server.dropins != null && !server.dropins.isEmpty()) {
+        perTaskCompileJSP(server.dropins[0])
+      }
+    }
+  }
+
+  protected void perTaskCompileJSP(Task task) throws Exception {
 
           CompileJSPs compileJsp = new CompileJSPs()
           compileJsp.setInstallDir(getInstallDir(project))
-          compileJsp.setSrcdir(new File("src/main/webapp"))
           compileJsp.setTempdir(project.buildDir)
           compileJsp.setDestdir(getServerDir(project))
           compileJsp.setTimeout(timeout)
@@ -47,31 +63,22 @@ class CompileJSPTask extends AbstractServerTask {
           compileJsp.setProject(ant)
           compileJsp.setTaskName('antlib:net/wasdev/wlp/ant:compileJSPs')
 
+          if(project.convention.plugins.war.webAppDirName != null)
+            compileJsp.setSrcdir(new File(project.convention.plugins.war.webAppDirName))
+          else
+            compileJsp.setSrcdir(new File("src/main/webapp"))
           Set<String> classpath = new HashSet<String>();
 
           // first add target/classes (or whatever is configured)
           classpath.add(getServerDir(project))
-
-          if(getPackagingType().equals('war')){
-            if(project.sourceSets.main.getJava().getSourceDirectories().getSingleFile().exists())
-              compileJsp.setSrcdir(project.sourceSets.main.getJava().getSourceDirectories().getSingleFile())
-
-            if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
-                server.apps = [project.war]
-            }
-            if (server.apps != null && !server.apps.isEmpty()) {
-              setCompileDependencies(server.apps, classpath)
-            }
-            if (server.dropins != null && !server.dropins.isEmpty()) {
-              setCompileDependencies(server.dropins, classpath)
-            }
-          }
+          for(File f : task.classpath)
+            classpath.add(f.getAbsolutePath())
+          setCompileDependencies(task, classpath)
 
           String classpathStr = join(classpath, File.pathSeparator);
           logger.debug("Classpath: " + classpathStr)
           compileJsp.setClasspath(classpathStr)
 
-          // TODO should we try to calculate this from a pom dependency?
           if (jspVersion != null) {
               compileJsp.setJspVersion(jspVersion)
           }
@@ -80,13 +87,7 @@ class CompileJSPTask extends AbstractServerTask {
           compileJsp.execute()
       }
 
-      private void setCompileDependencies(List<Task> applications, Set<String> classpath) {
-          applications.each{ Task task ->
-            compileDependencyJSP(task, classpath)
-          }
-      }
-
-      protected void compileDependencyJSP(Task task, Set<String> classpaths) {
+      protected void setCompileDependencies(Task task, Set<String> classpaths) {
         ArrayList<File> deps = new ArrayList<File>();
         task.classpath.each {deps.add(it)}
 
@@ -117,7 +118,7 @@ class CompileJSPTask extends AbstractServerTask {
           return sb.toString();
       }
 
-      private String getPackagingType() throws Exception{
+      private String getPackagingType() throws Exception {
         if (project.plugins.hasPlugin("war") || !project.tasks.withType(War).isEmpty()) {
             return "war"
         }

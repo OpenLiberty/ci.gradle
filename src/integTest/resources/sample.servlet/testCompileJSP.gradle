@@ -1,6 +1,6 @@
 /*
-	This test checks whether the application was successfully installed without the version number in the package
-	when installApps is called and stripVersion is set to true.
+	This test checks whether the compileJsp task was able to compile the index.jsp file from the test
+  project
 */
 group = 'liberty.gradle'
 

@@ -61,6 +61,7 @@ class Liberty implements Plugin<Project> {
         project.task('compileJSP', type: CompileJSPTask) {
             description 'Compile the JSP files in the src/main/webapp directory. '
             logging.level = LogLevel.INFO
+            dependsOn 'classes'
         }
 
         project.task('installLiberty', type: InstallLibertyTask) {
