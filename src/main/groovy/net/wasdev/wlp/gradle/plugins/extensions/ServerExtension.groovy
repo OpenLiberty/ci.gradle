@@ -26,7 +26,6 @@ class ServerExtension{
 
     String appsDirectory = "apps"
     boolean stripVersion = false
-    String installAppPackages = "project"
     boolean looseApplication = true
 
     File configDirectory
@@ -38,8 +37,8 @@ class ServerExtension{
     Map<String, String> bootstrapProperties
     List<String> jvmOptions
 
-    List<Task> apps
-    List<Task> dropins
+    List<Object> apps
+    List<Object> dropins
 
     boolean clean = false
     String timeout

@@ -39,17 +39,15 @@ import org.w3c.dom.NodeList;
 
 public class ServerConfigDocument {
 
-    private static ServerConfigDocument instance;
+    private DocumentBuilder docBuilder;
 
-    private static DocumentBuilder docBuilder;
+    private File configDirectory;
+    private File serverFile;
 
-    private static File configDirectory;
-    private static File serverFile;
-
-    private static Set<String> locations;
-    private static Set<String> names;
-    private static Set<String> namelessLocations;
-    private static Properties props;
+    private Set<String> locations;
+    private Set<String> names;
+    private Set<String> namelessLocations;
+    private Properties props;
 
     public Set<String> getLocations() {
         return locations;
@@ -63,11 +61,11 @@ public class ServerConfigDocument {
         return namelessLocations;
     }
 
-    public static Properties getProperties() {
+    public Properties getProperties() {
         return props;
     }
 
-    private static File getServerFile() {
+    private File getServerFile() {
         return serverFile;
     }
 
@@ -76,7 +74,7 @@ public class ServerConfigDocument {
         initializeAppsLocation(serverXML, configDir, bootstrapFile, bootstrapProp, serverEnvFile);
     }
 
-    private static DocumentBuilder getDocumentBuilder() throws Exception {
+    private DocumentBuilder getDocumentBuilder() throws Exception {
         if (docBuilder == null) {
             // get input XML Document
             DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -89,16 +87,7 @@ public class ServerConfigDocument {
         return docBuilder;
     }
 
-    public static ServerConfigDocument getInstance(File serverXML, File configDir, File bootstrapFile,
-            Map<String, String> bootstrapProp, File serverEnvFile) throws IOException {
-        // Initialize if instance is not created yet, or source server xml file location has been changed.
-        if (instance == null || !serverXML.getCanonicalPath().equals(getServerFile().getCanonicalPath())) {
-           instance = new ServerConfigDocument(serverXML, configDir, bootstrapFile, bootstrapProp, serverEnvFile);
-        }
-        return instance;
-     }
-
-    private static void initializeAppsLocation(File serverXML, File configDir, File bootstrapFile,
+    private void initializeAppsLocation(File serverXML, File configDir, File bootstrapFile,
             Map<String, String> bootstrapProp, File serverEnvFile) {
         try {
             serverFile = serverXML;
@@ -160,7 +149,7 @@ public class ServerConfigDocument {
         }
     }
 
-    private static void parseApplication(Document doc, String expression) throws Exception {
+    private void parseApplication(Document doc, String expression) throws Exception {
         // parse input document
         XPath xPath = XPathFactory.newInstance().newXPath();
         NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
@@ -178,7 +167,7 @@ public class ServerConfigDocument {
         }
     }
 
-    private static void parseInclude(Document doc) throws Exception {
+    private void parseInclude(Document doc) throws Exception {
         // parse include document in source server xml
         XPath xPath = XPathFactory.newInstance().newXPath();
         NodeList nodeList = (NodeList) xPath.compile("/server/include").evaluate(doc, XPathConstants.NODESET);
@@ -199,7 +188,7 @@ public class ServerConfigDocument {
     }
 
     //Checks for application names in the document. Will add locations without names to a Set
-    private static void parseNames(Document doc, String expression) throws Exception {
+    private void parseNames(Document doc, String expression) throws Exception {
         // parse input document
         XPath xPath = XPathFactory.newInstance().newXPath();
         NodeList nodeList = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
@@ -230,7 +219,7 @@ public class ServerConfigDocument {
         }
     }
 
-    private static void parseConfigDropinsDir() throws Exception {
+    private void parseConfigDropinsDir() throws Exception {
         File configDropins = null;
 
         // if configDirectory exists and contains configDropins directory,
@@ -269,15 +258,22 @@ public class ServerConfigDocument {
         }
     }
 
-    private static void parseDropinsFiles(File file) throws Exception {
+    private void parseDropinsFiles(File file) throws Exception {
         // get input XML Document
-        Document doc = parseDocument(new FileInputStream(file));
 
-        parseApplication(doc, "/server/application | /server/webApplication | /server/enterpriseApplication");
-        parseInclude(doc);
+        Document doc = parseDocument(new FileInputStream(file));
+        if(doc != null) {
+            //We are not calling parseApplication for configDropins server.xml documents configured by the plugin
+            //because we do not want to add locations defined here to the list of locations defined in the other server.xml documents.
+            if (!file.getName().equals(ApplicationXmlDocument.APP_XML_FILENAME)) {
+                parseApplication(doc, "/server/application | /server/webApplication | /server/enterpriseApplication");
+            }
+            parseInclude(doc);
+            parseNames(doc, "/server/application | /server/webApplication | /server/enterpriseApplication");
+        }
     }
 
-    private static Document getIncludeDoc(String loc) throws Exception {
+    private Document getIncludeDoc(String loc) throws Exception {
 
         Document doc = null;
         File locFile = null;
@@ -328,7 +324,7 @@ public class ServerConfigDocument {
         return doc;
     }
 
-    private static Document parseDocument(InputStream ins) throws Exception {
+    private Document parseDocument(InputStream ins) throws Exception {
         Document doc = null;
         try {
             doc = getDocumentBuilder().parse(ins);
@@ -342,7 +338,7 @@ public class ServerConfigDocument {
         return doc;
     }
 
-    private static Properties parseProperties(InputStream ins) throws Exception {
+    private Properties parseProperties(InputStream ins) throws Exception {
         Properties props = null;
         try {
             props = new Properties();
@@ -357,7 +353,7 @@ public class ServerConfigDocument {
         return props;
     }
 
-    private static boolean isValidURL(String url) {
+    private boolean isValidURL(String url) {
         try {
             URL testURL = new URL(url);
             testURL.toURI();
@@ -368,7 +364,7 @@ public class ServerConfigDocument {
         }
     }
 
-    private static String getResolvedVariable(String nodeValue) {
+    private String getResolvedVariable(String nodeValue) {
         final String VARIABLE_NAME_PATTERN = "\\$\\{(.*?)\\}";
 
         String resolved = nodeValue;
@@ -385,7 +381,7 @@ public class ServerConfigDocument {
         return resolved;
     }
 
-    private static void parseVariables(Document doc) throws Exception {
+    private void parseVariables(Document doc) throws Exception {
         // parse input document
         XPath xPath = XPathFactory.newInstance().newXPath();
         NodeList nodeList = (NodeList) xPath.compile("/server/variable").evaluate(doc, XPathConstants.NODESET);
@@ -401,7 +397,7 @@ public class ServerConfigDocument {
         }
     }
 
-    private static void parseIncludeVariables(Document doc) throws Exception {
+    private void parseIncludeVariables(Document doc) throws Exception {
         // parse include document in source server xml
         XPath xPath = XPathFactory.newInstance().newXPath();
         NodeList nodeList = (NodeList) xPath.compile("/server/include").evaluate(doc, XPathConstants.NODESET);
@@ -421,7 +417,7 @@ public class ServerConfigDocument {
         }
     }
 
-    private static void parseConfigDropinsDirVariables(String inDir) throws Exception {
+    private void parseConfigDropinsDirVariables(String inDir) throws Exception {
         File configDropins = null;
 
         // if configDirectory exists and contains configDropins directory,
@@ -449,7 +445,7 @@ public class ServerConfigDocument {
         }
     }
 
-    private static void parseDropinsFilesVariables(File file) throws Exception {
+    private void parseDropinsFilesVariables(File file) throws Exception {
         // get input XML Document
         Document doc = parseDocument(new FileInputStream(file));
 
@@ -461,7 +457,7 @@ public class ServerConfigDocument {
      * Get the file from configDrectory if it exists;
      * otherwise return def only if it exists, or null if not
      */
-    private static File getFileFromConfigDirectory(String file, File def) {
+    private File getFileFromConfigDirectory(String file, File def) {
         File f = new File(configDirectory, file);
         if (configDirectory != null && f.exists()) {
             return f;
@@ -472,7 +468,7 @@ public class ServerConfigDocument {
         return null;
     }
 
-    private static File getFileFromConfigDirectory(String file) {
+    private File getFileFromConfigDirectory(String file) {
         return getFileFromConfigDirectory(file, null);
     }
 }
