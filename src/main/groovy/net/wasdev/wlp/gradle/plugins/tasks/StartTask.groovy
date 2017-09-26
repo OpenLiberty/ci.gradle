@@ -50,21 +50,14 @@ class StartTask extends AbstractServerTask {
             long endTime = System.currentTimeMillis() + timeout;
 
             Set<String> appsToVerify = getAppNamesFromServerXml()
-            ArrayList<Task> applicationBuildTasks = new ArrayList<Task>()
 
             if (server.dropins != null && !server.dropins.isEmpty()) {
-                applicationBuildTasks += server.dropins
-            }
-
-            if (!applicationBuildTasks.empty) {
-                applicationBuildTasks.each{ Task task ->
-                    appsToVerify.add(task.baseName)
-                }
-            }
-            else {
-                //Do we need to do a stripVersion check here?
-                if (project.plugins.hasPlugin('war')) {
-                    appsToVerify.add(project.war.baseName)
+                server.dropins.each { Object dropinObj ->
+                    if (dropinObj instanceof Task) {
+                        appsToVerify += dropinObj.baseName
+                    } else if (dropinObj instanceof File) {
+                        appsToVerify += getBaseName(dropinObj.name)
+                    }
                 }
             }
 
@@ -87,7 +80,7 @@ class StartTask extends AbstractServerTask {
         File serverConfigFile = new File(getServerDir(project), 'server.xml')
         if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
-                ServerConfigDocument scd = ServerConfigDocument.getInstance(serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, server.bootstrapProperties, server.serverEnv)
+                ServerConfigDocument scd = new ServerConfigDocument(serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, server.bootstrapProperties, server.serverEnv)
                 if (scd != null) {
                     appNames = scd.getNames()
                     appNames += scd.getNamelessLocations().collect { String location ->
@@ -97,7 +90,6 @@ class StartTask extends AbstractServerTask {
             }
             catch (Exception e) {
                 logger.warn(e.getLocalizedMessage())
-                logger.debug(e.toString())
             }
         }
         return appNames
@@ -110,10 +102,17 @@ class StartTask extends AbstractServerTask {
 
         boolean foundName = false
 
-        server.apps.each { task ->
-            if (getArchiveName(task.archiveName).equals(fileName)) { //stripVersion?
-                appName = task.baseName
-                foundName = true
+        server.apps.each { app ->
+            if (app instanceof Task) {
+                if (getArchiveName(app.archiveName).equals(fileName)) {
+                    appName = app.baseName
+                    foundName = true
+                }
+            } else if (app instanceof File) {
+                if (getArchiveName(app.name).equals(fileName)) {
+                    appName = getBaseName(app.name)
+                    foundName = true
+                }
             }
         }
         //print debug statement if app is in server.xml but not in apps list
@@ -124,7 +123,7 @@ class StartTask extends AbstractServerTask {
     }
 
     protected String getArchiveName(String archiveName){
-        if (server.installapps.stripVersion){
+        if (server.stripVersion){
             StringBuilder sbArchiveName = new StringBuilder().append("-").append(project.version)
             return archiveName.replaceAll(sbArchiveName.toString(),"")
         }
