@@ -56,7 +56,7 @@ liberty {
             include = packagingType
         }
         looseApplication = false
-    	apps = [file('build/libs/testWar-1.war')]
+        apps = [file('build/libs/testWar-1.war')]
 
         verifyAppStartTimeout = 30
     }
