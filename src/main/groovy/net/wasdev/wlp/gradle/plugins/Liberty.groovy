@@ -158,13 +158,7 @@ class Liberty implements Plugin<Project> {
         project.task('cleanDirs', type: CleanTask) {
             description 'Deletes files from some directories from the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO
-
-            project.afterEvaluate {
-                if (project.liberty.server.cleanDir.workarea || project.liberty.server.cleanDir.dropins) {
-                    logger.info ('Stopping the server to clean workarea or dropins')
-                    dependsOn 'libertyStop'
-                }
-            }
+            dependsOn 'libertyStop'
         }
 
         project.task('installApps', type: InstallAppsTask) {
