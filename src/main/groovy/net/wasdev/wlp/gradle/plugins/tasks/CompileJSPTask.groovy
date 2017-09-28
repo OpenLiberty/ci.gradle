@@ -56,7 +56,7 @@ class CompileJSPTask extends AbstractServerTask {
           CompileJSPs compileJsp = new CompileJSPs()
           compileJsp.setInstallDir(getInstallDir(project))
           compileJsp.setTempdir(project.buildDir)
-          compileJsp.setDestdir(getServerDir(project))
+          compileJsp.setDestdir(new File(project.buildDir.getAbsolutePath()+"/classes/java"))
           compileJsp.setTimeout(timeout)
           // don't delete temporary server dir
           compileJsp.setCleanup(false)

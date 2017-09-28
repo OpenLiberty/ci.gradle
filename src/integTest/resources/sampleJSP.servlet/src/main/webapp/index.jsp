@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
   <head>
-      <jsp:useBean id="datetime" class="java.util.Date" />
+      <jsp:useBean id="datetime" class="application.MyDate" />
       <title>Hello IBM WebSphere Application Server Liberty</title>
   </head>
   <body>
