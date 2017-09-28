@@ -15,17 +15,14 @@ buildscript {
 }
 
 def test_mode = System.getProperty('runit')
-def wlpLicense = System.getProperty('wlpLicense')
-def wlpVersion = System.getProperty('wlpVersion')
 def WLP_DIR = System.getProperty('wlpInstallDir')
-def wlpUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/" + wlpVersion + "/wlp-webProfile7-" + wlpVersion + ".zip"
 
 apply plugin: 'liberty'
 
 liberty {
     if (test_mode == 'online') {
         install {
-            runtimeUrl = wlpUrl
+            runtimeUrl = 'https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2017-09-16_2214/openliberty-17.0.0.3-RC.zip'
         }
         serverName = 'libertyOnline'
     } else {
