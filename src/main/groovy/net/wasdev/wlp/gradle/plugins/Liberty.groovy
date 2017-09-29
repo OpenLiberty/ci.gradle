@@ -36,6 +36,7 @@ import net.wasdev.wlp.gradle.plugins.tasks.UninstallFeatureTask
 import net.wasdev.wlp.gradle.plugins.tasks.CleanTask
 import net.wasdev.wlp.gradle.plugins.tasks.InstallAppsTask
 import net.wasdev.wlp.gradle.plugins.tasks.AbstractServerTask
+import net.wasdev.wlp.gradle.plugins.tasks.CompileJSPTask
 import org.gradle.api.tasks.bundling.War
 
 import org.gradle.api.logging.LogLevel
@@ -57,6 +58,13 @@ class Liberty implements Plugin<Project> {
             setServersForTasks(project)
         }
 
+        project.task('compileJSP', type: CompileJSPTask) {
+            description 'Compile the JSP files in the src/main/webapp directory. '
+            logging.level = LogLevel.INFO
+            dependsOn 'installLiberty', 'compileJava'
+            group 'Liberty'
+        }
+
         project.task('installLiberty', type: InstallLibertyTask) {
             description 'Installs Liberty from a repository'
             logging.level = LogLevel.INFO
@@ -67,7 +75,7 @@ class Liberty implements Plugin<Project> {
             description = "Runs a Websphere Liberty Profile server under the Gradle process."
             logging.level = LogLevel.INFO
             group 'Liberty'
-            
+
             project.afterEvaluate {
                 dependsOn installAppsDependsOn(server, 'libertyCreate')
             }
@@ -85,7 +93,6 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn 'installLiberty'
-
             project.afterEvaluate{
                 outputs.file { new File(getUserDir(project), "servers/${project.liberty.server.name}/server.xml") }
             }
@@ -96,7 +103,7 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
             group 'Liberty'
 
-            project.afterEvaluate { 
+            project.afterEvaluate {
                 dependsOn installAppsDependsOn(server, 'libertyCreate')
             }
         }
@@ -111,7 +118,7 @@ class Liberty implements Plugin<Project> {
             description 'Generates a WebSphere Liberty Profile server archive.'
             logging.level = LogLevel.DEBUG
             group 'Liberty'
-            
+
             project.afterEvaluate {
                 dependsOn installAppsDependsOn(server, 'installLiberty')
             }
@@ -181,7 +188,7 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn project.tasks.withType(War)
- 
+
             project.afterEvaluate {
                 if (server.features.name != null && !server.features.name.empty) {
                     dependsOn 'installFeature'
