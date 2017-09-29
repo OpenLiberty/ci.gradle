@@ -63,10 +63,12 @@ class CompileJSPTask extends AbstractServerTask {
           compileJsp.setProject(ant)
           compileJsp.setTaskName('antlib:net/wasdev/wlp/ant:compileJSPs')
 
-          if(project.convention.plugins.war.webAppDirName != null)
-            compileJsp.setSrcdir(new File(project.convention.plugins.war.webAppDirName))
-          else
+          if(project.convention.plugins.war.webAppDirName != null){
+            compileJsp.setSrcdir(project.convention.plugins.war.webAppDir)
+          }
+          else{
             compileJsp.setSrcdir(new File("src/main/webapp"))
+          }
           Set<String> classpath = new HashSet<String>();
 
           // first add target/classes (or whatever is configured)
