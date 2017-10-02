@@ -46,8 +46,8 @@ abstract class AbstractServerTask extends AbstractTask {
         def userDir = getUserDir(project, installDir)
         result.put('userDir', userDir)
 
-        if (server.outputDir != null) {
-            result.put('outputDir', server.outputDir)
+        if (getServerOutputDir(project) != null) {
+            result.put('outputDir', getServerOutputDir(project))
         }
         if (server.timeout != null && !server.timeout.isEmpty()) {
             result.put('timeout', server.timeout)
@@ -73,15 +73,15 @@ abstract class AbstractServerTask extends AbstractTask {
     }
 
     protected File getServerDir(Project project){
-        String serverDirectory
-        if(server.outputDir !=null && !server.outputDir.isEmpty()){
-            serverDirectory = server.outputDir
-        }
-        else{
-            serverDirectory = getUserDir(project).toString() + "/servers/" + server.name
-        }
+        return new File(getUserDir(project).toString() + "/servers/" + server.name)
+    }
 
-        return new File(serverDirectory)
+    protected String getServerOutputDir(Project project) {
+        if (server.outputDir != null) {
+            return server.outputDir
+        } else {
+            return project.liberty.outputDir
+        }
     }
 
     protected void setDefaults(Project project){
