@@ -56,7 +56,7 @@ liberty {
 
     server{
         name = wlpServerName
-        
+
         packageLiberty {
             archive = packageFile
             include = packagingType
@@ -64,7 +64,7 @@ liberty {
 
         serverEnv = file("src/main/liberty/config/testOutputDir-server.env")
         looseApplication = false
-    	apps = [file('build/libs/testWar-1.war')]
+        apps = [file('build/libs/testWar-1.war')]
 
         verifyAppStartTimeout = 30
     }

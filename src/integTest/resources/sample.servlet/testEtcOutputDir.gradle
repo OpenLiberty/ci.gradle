@@ -69,7 +69,7 @@ liberty {
         }
 
         looseApplication = false
-    	apps = [testWar]
+        apps = [testWar]
 
         verifyAppStartTimeout = 30
     }
