@@ -21,15 +21,15 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 
 class InstallLibertyTask extends AbstractTask {
-    
+
     @TaskAction
     void install() {
         def params = buildInstallLibertyMap(project)
-        project.ant.taskdef(name: 'installLiberty', 
-                            classname: 'net.wasdev.wlp.ant.install.InstallLibertyTask', 
+        project.ant.taskdef(name: 'installLiberty',
+                            classname: 'net.wasdev.wlp.ant.install.InstallLibertyTask',
                             classpath: project.buildscript.configurations.classpath.asPath)
         project.ant.installLiberty(params)
-       
+
         String licenseFilePath = project.configurations.getByName('libertyLicense').getAsPath()
         if (licenseFilePath) {
             def command = "java -jar " + licenseFilePath + " --acceptLicense " + project.buildDir
@@ -48,25 +48,25 @@ class InstallLibertyTask extends AbstractTask {
         if (project.liberty.install.version != null) {
             result.put('version', project.liberty.install.version)
         }
-        
+
         if (project.liberty.install.type != null) {
             result.put('type', project.liberty.install.type)
         }
-       
+
         String runtimeFilePath = project.configurations.getByName('libertyRuntime').getAsPath()
         if (runtimeFilePath) {
-            logger.debug 'Liberty archive file Path to the local Gradle repository  : ' + runtimeFilePath 
-            
+            logger.debug 'Liberty archive file Path to the local Gradle repository  : ' + runtimeFilePath
+
             File localFile = new File(runtimeFilePath)
-            
+
             if (localFile.exists()) {
                 logger.debug 'Getting WebSphere Liberty archive file from the local Gradle repository.'
                 result.put('runtimeUrl', localFile.toURI().toURL())
             }
         } else if (project.liberty.install.runtimeUrl != null) {
             result.put('runtimeUrl', project.liberty.install.runtimeUrl)
-        } 
-        
+        }
+
         if (project.liberty.install.baseDir == null) {
            result.put('baseDir', project.buildDir)
         } else {

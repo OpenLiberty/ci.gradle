@@ -22,7 +22,7 @@ class CreateTask extends AbstractServerTask {
 
     @TaskAction
     void create() {
-        //Checking etc/server.env for outputDir
+        //Checking etc/server.env for outputDirs
         Liberty.checkEtcServerEnvProperties(project)
         if(!getServerDir(project).exists()){
             def params = buildLibertyMap(project);

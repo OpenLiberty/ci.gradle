@@ -55,14 +55,14 @@ task createEtcServerEnv{
 }
 
 liberty {
-    
+
     install {
         runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/17.0.0.1/wlp-webProfile7-17.0.0.1.zip"
     }
 
     server{
         name = wlpServerName
-        
+
         packageLiberty {
             archive = packageFile
             include = packagingType
@@ -114,9 +114,7 @@ task printMessageAboutRunningServer {
 
 check.dependsOn 'integrationTest'
 createEtcServerEnv.dependsOn 'installLiberty'
-installApps.dependsOn 'createEtcServerEnv'
-installApps.dependsOn tasks.withType(War)
-libertyStart.dependsOn 'installApps'
+libertyCreate.dependsOn 'createEtcServerEnv'
 integrationTest.dependsOn 'libertyStart', 'testClasses'
 integrationTest.finalizedBy 'libertyStop'
 libertyStart.finalizedBy 'printMessageAboutRunningServer'

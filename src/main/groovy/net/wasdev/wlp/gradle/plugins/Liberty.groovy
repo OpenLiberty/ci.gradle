@@ -55,7 +55,7 @@ class Liberty implements Plugin<Project> {
             }
             //Checking serverEnv files for server properties
             Liberty.checkEtcServerEnvProperties(project)
-            Liberty.checkServerEnvProperties(project)
+            Liberty.checkServerEnvProperties(project.liberty.server)
             //Server objects need to be set per task after the project configuration phase
             setServersForTasks(project)
         }
@@ -223,18 +223,20 @@ class Liberty implements Plugin<Project> {
         }
     }
 
-    public static void checkServerEnvProperties(Project project) {
+    public static void checkServerEnvProperties(ServerExtension server) {
         Properties envProperties = new Properties()
         //check server.env files and set liberty.server.outputDir
-        if (project.liberty.server.configDirectory != null) {
-            File serverEnvFile = new File(project.liberty.server.configDirectory, 'server.env')
-            if (serverEnvFile.exists()) {
-                envProperties.load(new FileInputStream(serverEnvFile))
-                Liberty.setServerOutputDir(project, (String) envProperties.get("WLP_OUTPUT_DIR"))
+        if (server.outputDir == null) {
+            if (server.configDirectory != null) {
+                File serverEnvFile = new File(server.configDirectory, 'server.env')
+                if (serverEnvFile.exists()) {
+                    envProperties.load(new FileInputStream(serverEnvFile))
+                    Liberty.setServerOutputDir(server, (String) envProperties.get("WLP_OUTPUT_DIR"))
+                }
+            } else if (server.serverEnv.exists()) {
+                envProperties.load(new FileInputStream(server.serverEnv))
+                Liberty.setServerOutputDir(server, (String) envProperties.get("WLP_OUTPUT_DIR"))
             }
-        } else if (project.liberty.server.serverEnv.exists()) {
-            envProperties.load(new FileInputStream(project.liberty.server.serverEnv))
-            Liberty.setServerOutputDir(project, (String) envProperties.get("WLP_OUTPUT_DIR"))
         }
     }
 
@@ -244,9 +246,9 @@ class Liberty implements Plugin<Project> {
         }
     }
 
-    private static void setServerOutputDir(Project project, String envOutputDir){
+    private static void setServerOutputDir(ServerExtension server, String envOutputDir){
         if (envOutputDir != null) {
-            project.liberty.server.outputDir = envOutputDir
+            server.outputDir = envOutputDir
         }
     }
 
