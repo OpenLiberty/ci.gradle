@@ -66,9 +66,9 @@ liberty {
             archive = packageFile
             include = packagingType
         }
-      looseApplication = false
-    	apps = [war2, war3]
-        dropins = [war, war4]
+        looseApplication = false
+        apps = [war2, file(war3.archivePath)]
+        dropins = [war, file(war4.archivePath)]
 
         verifyAppStartTimeout = 30
     }
@@ -111,6 +111,7 @@ task printMessageAboutRunningServer {
     }
 }
 
+clean.dependsOn 'libertyStop'
 check.dependsOn 'integrationTest'
 installApps.dependsOn tasks.withType(War)
 libertyStart.dependsOn 'installApps'

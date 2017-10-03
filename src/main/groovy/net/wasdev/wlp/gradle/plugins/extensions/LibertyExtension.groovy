@@ -26,7 +26,6 @@ class LibertyExtension {
 
     String appsDirectory = "apps"
     boolean stripVersion = false
-    String installAppPackages = "project"
     boolean looseApplication = true
 
     File configDirectory
@@ -42,7 +41,7 @@ class LibertyExtension {
     String timeout
     String template
 
-    int verifyAppStartTimeout = 30
+    int verifyAppStartTimeout = 0
 
     def numberOfClosures = 0
 
