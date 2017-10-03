@@ -203,16 +203,16 @@ abstract class AbstractServerTask extends AbstractTask {
         }
     }
 
-    private void writeBootstrapProperties(File file, Map<String, String> properties) throws IOException {
+    private void writeBootstrapProperties(File file, Map<String, Object> properties) throws IOException {
         makeParentDirectory(file)
         PrintWriter writer = null
         try {
             writer = new PrintWriter(file, "UTF-8")
             writer.println(HEADER)
-            for (Map.Entry<String, String> entry : properties.entrySet()) {
+            for (Map.Entry<String, Object> entry : properties.entrySet()) {
                 writer.print(entry.getKey())
                 writer.print("=")
-                writer.println((entry.getValue() != null) ? entry.getValue().replace("\\", "/") : "")
+                writer.println((entry.getValue() != null) ? entry.getValue().toString().replace("\\", "/") : "")
             }
         } finally {
             if (writer != null) {

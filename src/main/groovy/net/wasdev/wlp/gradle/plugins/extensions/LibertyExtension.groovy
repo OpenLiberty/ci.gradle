@@ -34,7 +34,7 @@ class LibertyExtension {
     File jvmOptionsFile = new File("default")
     File serverEnv = new File("default")
 
-    Map<String, String> bootstrapProperties
+    Map<String, Object> bootstrapProperties
     List<String> jvmOptions
 
     boolean clean = false
