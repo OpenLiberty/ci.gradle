@@ -4,7 +4,7 @@ The `compileJsp` task compiles the JSP files in the src/main/webapp directory so
 
 ### Parameters
 
-See the [Liberty server configuration](libertyExtensions.md#general-runtime-properties) properties for common server configuration.
+See the [Liberty general runtime properties.](libertyExtensions.md#general-runtime-properties) properties for common server configuration.
 
 In particular, the jspVersion and the jspCompileTimeout properties are used for compiling JSP files.
 
