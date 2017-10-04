@@ -38,8 +38,8 @@ import net.wasdev.wlp.gradle.plugins.tasks.InstallAppsTask
 import net.wasdev.wlp.gradle.plugins.tasks.AbstractServerTask
 import net.wasdev.wlp.gradle.plugins.tasks.CompileJSPTask
 import org.gradle.api.tasks.bundling.War
-
 import org.gradle.api.logging.LogLevel
+import java.util.Properties
 
 class Liberty implements Plugin<Project> {
 
@@ -54,6 +54,9 @@ class Liberty implements Plugin<Project> {
             if (project.liberty.server == null) {
                 project.liberty.server = copyProperties(project.liberty)
             }
+            //Checking serverEnv files for server properties
+            Liberty.checkEtcServerEnvProperties(project)
+            Liberty.checkServerEnvProperties(project.liberty.server)
             //Server objects need to be set per task after the project configuration phase
             setServersForTasks(project)
         }
@@ -199,7 +202,7 @@ class Liberty implements Plugin<Project> {
         }
     }
 
-    ServerExtension copyProperties(LibertyExtension liberty) {
+    private ServerExtension copyProperties(LibertyExtension liberty) {
         def serverMap = new ServerExtension().getProperties()
         def libertyMap = liberty.getProperties()
 
@@ -212,21 +215,75 @@ class Liberty implements Plugin<Project> {
             }
         }
         serverMap.remove('class')
+        serverMap.remove('outputDir')
 
         return ServerExtension.newInstance(serverMap)
     }
 
-    void setServersForTasks(Project project){
+    public static void checkEtcServerEnvProperties(Project project) {
+        if (project.liberty.outputDir == null) {
+            Properties envProperties = new Properties()
+            //check etc/server.env and set liberty.outputDir
+            File serverEnvFile = new File(Liberty.getInstallDir(project), 'etc/server.env')
+            if (serverEnvFile.exists()) {
+                envProperties.load(new FileInputStream(serverEnvFile))
+                Liberty.setLibertyOutputDir(project, (String) envProperties.get("WLP_OUTPUT_DIR"))
+            }
+        }
+    }
+
+    public static void checkServerEnvProperties(ServerExtension server) {
+        if (server.outputDir == null) {
+            Properties envProperties = new Properties()
+            //check server.env files and set liberty.server.outputDir
+            if (server.configDirectory != null) {
+                File serverEnvFile = new File(server.configDirectory, 'server.env')
+                if (serverEnvFile.exists()) {
+                    envProperties.load(new FileInputStream(serverEnvFile))
+                    Liberty.setServerOutputDir(server, (String) envProperties.get("WLP_OUTPUT_DIR"))
+                }
+            } else if (server.serverEnv.exists()) {
+                envProperties.load(new FileInputStream(server.serverEnv))
+                Liberty.setServerOutputDir(server, (String) envProperties.get("WLP_OUTPUT_DIR"))
+            }
+        }
+    }
+
+    private static void setLibertyOutputDir(Project project, String envOutputDir){
+        if (envOutputDir != null) {
+            project.liberty.outputDir = envOutputDir
+        }
+    }
+
+    private static void setServerOutputDir(ServerExtension server, String envOutputDir){
+        if (envOutputDir != null) {
+            server.outputDir = envOutputDir
+        }
+    }
+
+    private void setServersForTasks(Project project){
         project.tasks.withType(AbstractServerTask).each {task ->
             task.server = project.liberty.server
         }
     }
 
-    String installAppsDependsOn(ServerExtension server, String elseDepends) {
+    private String installAppsDependsOn(ServerExtension server, String elseDepends) {
         if (server.apps != null || server.dropins != null) {
             return 'installApps'
         } else {
             return elseDepends
+        }
+    }
+
+    private static File getInstallDir(Project project) {
+        if (project.liberty.installDir == null) {
+           if (project.liberty.install.baseDir == null) {
+               return new File(project.buildDir, 'wlp')
+           } else {
+               return new File(project.liberty.install.baseDir, 'wlp')
+           }
+        } else {
+           return new File(project.liberty.installDir)
         }
     }
 }
