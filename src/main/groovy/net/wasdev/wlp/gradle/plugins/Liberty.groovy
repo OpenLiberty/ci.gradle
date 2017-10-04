@@ -214,19 +214,21 @@ class Liberty implements Plugin<Project> {
     }
 
     public static void checkEtcServerEnvProperties(Project project) {
-        Properties envProperties = new Properties()
-        //check etc/server.env and set liberty.outputDir
-        File serverEnvFile = new File(Liberty.getInstallDir(project), 'etc/server.env')
-        if (serverEnvFile.exists()) {
-            envProperties.load(new FileInputStream(serverEnvFile))
-            Liberty.setLibertyOutputDir(project, (String) envProperties.get("WLP_OUTPUT_DIR"))
+        if (project.liberty.outputDir == null) {
+            Properties envProperties = new Properties()
+            //check etc/server.env and set liberty.outputDir
+            File serverEnvFile = new File(Liberty.getInstallDir(project), 'etc/server.env')
+            if (serverEnvFile.exists()) {
+                envProperties.load(new FileInputStream(serverEnvFile))
+                Liberty.setLibertyOutputDir(project, (String) envProperties.get("WLP_OUTPUT_DIR"))
+            }
         }
     }
 
     public static void checkServerEnvProperties(ServerExtension server) {
-        Properties envProperties = new Properties()
-        //check server.env files and set liberty.server.outputDir
         if (server.outputDir == null) {
+            Properties envProperties = new Properties()
+            //check server.env files and set liberty.server.outputDir
             if (server.configDirectory != null) {
                 File serverEnvFile = new File(server.configDirectory, 'server.env')
                 if (serverEnvFile.exists()) {
