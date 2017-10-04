@@ -112,3 +112,4 @@ The Liberty plugin provides the following tasks for your project:
 | [libertyStatus](docs/libertyStatus.md) | Checks to see if the Liberty server is running. |
 | [deploy](docs/deploy.md#deploy-task) | Deploys a supported file to a running Liberty server. |
 | [undeploy](docs/undeploy.md#undeploy-task) | Removes an application from the Liberty server. |
+| [compileJsp](docs/compileJsp.md) | Compiles the JSP files from the src/main/webapp directory into the build/classes directory. |
