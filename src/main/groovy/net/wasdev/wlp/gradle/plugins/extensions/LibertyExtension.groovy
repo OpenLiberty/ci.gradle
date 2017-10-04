@@ -43,6 +43,9 @@ class LibertyExtension {
 
     int verifyAppStartTimeout = 0
 
+    String jspVersion
+    int jspCompileTimeout = 40
+
     def numberOfClosures = 0
 
     FeatureExtension features = new FeatureExtension()
@@ -104,7 +107,6 @@ class LibertyExtension {
     def server(Closure closure){
         server = new ServerExtension()
         ConfigureUtil.configure(closure, server)
-
     }
 
 }

@@ -1,12 +1,12 @@
-## InstallApps task
+## compileJsp task
 ---
-The `compileJsp` task compiles the JSP files in the src/main/webapp directory. This goal relies on a running server, so a Liberty server must be configured.
+The `compileJsp` task compiles the JSP files in the src/main/webapp directory so that they can be packaged with the application.
 
 ### Parameters
 
-See the Liberty server configuration properties for common server configuration.
+See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.
 
-In particular, the jspVersion and the timeout properties are used for compiling JSP files.
+In particular, the jspVersion and the jspCompileTimeout properties are used for compiling JSP files.
 
 ### Example:
 
@@ -16,7 +16,10 @@ apply plugin: 'war'
 
 liberty {
     server {
-        ...
+      configFile = file("src/resources/server.xml")
+      stripVersion = true
+      jspVersion = 2.2
+      jspCompileTimeout = 35
     }
 }
 
