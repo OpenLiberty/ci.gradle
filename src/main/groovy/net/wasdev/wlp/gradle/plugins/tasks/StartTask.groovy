@@ -36,14 +36,14 @@ class StartTask extends AbstractServerTask {
         }
         executeServerCommand(project, 'start', params)
 
-        ServerTask serverTask = new ServerTask()
-        serverTask.setInstallDir(params.get('installDir'))
-        serverTask.setServerName(params.get('serverName'))
-        serverTask.setUserDir(params.get('userDir'))
-        serverTask.setOutputDir(getOutputDir(params))
-        serverTask.initTask()
-
         if (server != null && server.verifyAppStartTimeout > 0) {
+            ServerTask serverTask = new ServerTask()
+            serverTask.setInstallDir(params.get('installDir'))
+            serverTask.setServerName(params.get('serverName'))
+            serverTask.setUserDir(params.get('userDir'))
+            serverTask.setOutputDir(getOutputDir(params))
+            serverTask.initTask()
+
             def verifyAppStartTimeout = server.verifyAppStartTimeout
 
             long timeout = verifyAppStartTimeout * 1000
