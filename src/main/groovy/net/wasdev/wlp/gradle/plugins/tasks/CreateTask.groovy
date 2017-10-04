@@ -15,12 +15,15 @@
  */
 package net.wasdev.wlp.gradle.plugins.tasks
 
+import net.wasdev.wlp.gradle.plugins.Liberty
 import org.gradle.api.tasks.TaskAction
 
 class CreateTask extends AbstractServerTask {
 
     @TaskAction
     void create() {
+        //Checking etc/server.env for outputDirs
+        Liberty.checkEtcServerEnvProperties(project)
         if(!getServerDir(project).exists()){
             def params = buildLibertyMap(project);
             if (project.liberty.server.template != null && project.liberty.server.template.length() != 0) {
