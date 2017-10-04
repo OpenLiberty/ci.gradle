@@ -34,7 +34,7 @@ class ServerExtension{
     File jvmOptionsFile = new File("default")
     File serverEnv = new File("default")
 
-    Map<String, String> bootstrapProperties
+    Map<String, Object> bootstrapProperties
     List<String> jvmOptions
 
     List<Object> apps
