@@ -25,6 +25,7 @@ class InstallLibertyTask extends AbstractTask {
     @TaskAction
     void install() {
         def params = buildInstallLibertyMap(project)
+
         project.ant.taskdef(name: 'installLiberty',
                             classname: 'net.wasdev.wlp.ant.install.InstallLibertyTask',
                             classpath: project.buildscript.configurations.classpath.asPath)

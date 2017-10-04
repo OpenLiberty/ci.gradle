@@ -36,6 +36,7 @@ import net.wasdev.wlp.gradle.plugins.tasks.UninstallFeatureTask
 import net.wasdev.wlp.gradle.plugins.tasks.CleanTask
 import net.wasdev.wlp.gradle.plugins.tasks.InstallAppsTask
 import net.wasdev.wlp.gradle.plugins.tasks.AbstractServerTask
+import net.wasdev.wlp.gradle.plugins.tasks.CompileJSPTask
 import org.gradle.api.tasks.bundling.War
 import org.gradle.api.logging.LogLevel
 import java.util.Properties
@@ -58,6 +59,13 @@ class Liberty implements Plugin<Project> {
             Liberty.checkServerEnvProperties(project.liberty.server)
             //Server objects need to be set per task after the project configuration phase
             setServersForTasks(project)
+        }
+
+        project.task('compileJSP', type: CompileJSPTask) {
+            description 'Compile the JSP files in the src/main/webapp directory. '
+            logging.level = LogLevel.INFO
+            dependsOn 'installLiberty', 'compileJava'
+            group 'Liberty'
         }
 
         project.task('installLiberty', type: InstallLibertyTask) {
@@ -88,7 +96,6 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn 'installLiberty'
-
             project.afterEvaluate{
                 outputs.file { new File(getUserDir(project), "servers/${project.liberty.server.name}/server.xml") }
             }

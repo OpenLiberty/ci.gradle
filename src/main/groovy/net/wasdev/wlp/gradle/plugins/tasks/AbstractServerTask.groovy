@@ -17,6 +17,7 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import net.wasdev.wlp.gradle.plugins.extensions.DeployExtension
 import net.wasdev.wlp.gradle.plugins.extensions.LibertyExtension
+import org.gradle.api.GradleException
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import java.nio.file.Files
@@ -202,16 +203,16 @@ abstract class AbstractServerTask extends AbstractTask {
         }
     }
 
-    private void writeBootstrapProperties(File file, Map<String, String> properties) throws IOException {
+    private void writeBootstrapProperties(File file, Map<String, Object> properties) throws IOException {
         makeParentDirectory(file)
         PrintWriter writer = null
         try {
             writer = new PrintWriter(file, "UTF-8")
             writer.println(HEADER)
-            for (Map.Entry<String, String> entry : properties.entrySet()) {
+            for (Map.Entry<String, Object> entry : properties.entrySet()) {
                 writer.print(entry.getKey())
                 writer.print("=")
-                writer.println((entry.getValue() != null) ? entry.getValue().replace("\\", "/") : "")
+                writer.println((entry.getValue() != null) ? entry.getValue().toString().replace("\\", "/") : "")
             }
         } finally {
             if (writer != null) {
@@ -242,4 +243,16 @@ abstract class AbstractServerTask extends AbstractTask {
             parentDir.mkdirs()
         }
     }
+
+    private String getPackagingType() throws Exception{
+      if (project.plugins.hasPlugin("war") || !project.tasks.withType(War).isEmpty()) {
+          return "war"
+      }
+      else if (project.plugins.hasPlugin("ear") || !project.tasks.withType(Ear).isEmpty()) {
+          return "ear"
+      }
+      else {
+          throw new GradleException("Archive path not found. Supported formats are jar, war, and ear.")
+      }
+  }
 }

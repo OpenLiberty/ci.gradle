@@ -1,5 +1,7 @@
 ## installFeature task
 The `installFeature` task installs features packaged as a Subsystem Archive (ESA file) to the Liberty runtime. The `installFeature` task can install a list of features to the Liberty runtime, or it can install a set of features based on the server configuration file.
+  
+This goal is not supported if the Liberty runtime is installed from the Open Liberty runtime package. You will get a missing file error since the `bin/installUtiltiy` command is removed from the Open Liberty runtime package. The Open Liberty runtime is always bundled with all applicable features and there isn't any need to install any additional feature.  
 
 ### Properties
 

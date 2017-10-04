@@ -29,21 +29,21 @@ class StartTask extends AbstractServerTask {
     @TaskAction
     void start() {
 
-        def params = buildLibertyMap(project);
+        params = buildLibertyMap(project);
         params.put('clean', server.clean)
         if (server.timeout != null && server.timeout.length() != 0) {
             params.put('timeout', server.timeout)
         }
         executeServerCommand(project, 'start', params)
 
-        ServerTask serverTask = new ServerTask()
-        serverTask.setInstallDir(params.get('installDir'))
-        serverTask.setServerName(params.get('serverName'))
-        serverTask.setUserDir(params.get('userDir'))
-        serverTask.setOutputDir(getOutputDir(params))
-        serverTask.initTask()
-
         if (server != null && server.verifyAppStartTimeout > 0) {
+            ServerTask serverTask = new ServerTask()
+            serverTask.setInstallDir(params.get('installDir'))
+            serverTask.setServerName(params.get('serverName'))
+            serverTask.setUserDir(params.get('userDir'))
+            serverTask.setOutputDir(getOutputDir(params))
+            serverTask.initTask()
+
             def verifyAppStartTimeout = server.verifyAppStartTimeout
 
             long timeout = verifyAppStartTimeout * 1000
