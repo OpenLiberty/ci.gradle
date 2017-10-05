@@ -88,15 +88,23 @@ abstract class AbstractServerTask extends AbstractTask {
     protected void setDefaults(Project project){
         if(server.configFile.toString().equals('default')){
             server.configFile = new File(project.projectDir.toString() + '/src/main/liberty/config/server.xml')
+        } else if (server.configFile != null && !server.configFile.exists()) {
+            logger.warn("The server configFile was configured but was not found at: ${server.configFile}")
         }
         if(server.bootstrapPropertiesFile.toString().equals('default')){
             server.bootstrapPropertiesFile = new File(project.projectDir.toString() + '/src/main/liberty/config/bootstrap.properties')
+        } else if (server.bootstrapPropertiesFile != null && !server.bootstrapPropertiesFile.exists()) {
+            logger.warn("The bootstrapPropertiesFile was configured but was not found at: ${server.bootstrapPropertiesFile}")
         }
         if(server.jvmOptionsFile.toString().equals('default')){
             server.jvmOptionsFile = new File(project.projectDir.toString() + '/src/main/liberty/config/jvm.options')
+        } else if (server.jvmOptionsFile != null && !server.jvmOptionsFile.exists()) {
+            logger.warn("The server jvmOptionsFile was configured but was not found at: ${server.jvmOptionsFile}")
         }
         if(server.serverEnv.toString().equals('default')){
             server.serverEnv = new File(project.projectDir.toString() + '/src/main/liberty/config/server.env')
+        } else if (server.serverEnv != null && !server.serverEnv.exists()) {
+            logger.warn("The server serverEnv was configured but was not found at: ${server.serverEnv}")
         }
     }
 
@@ -154,6 +162,7 @@ abstract class AbstractServerTask extends AbstractTask {
                 Files.copy(server.configFile.toPath(), new File(serverDirectory, "server.xml").toPath(), StandardCopyOption.REPLACE_EXISTING)
                 serverXMLPath = server.configFile.getCanonicalPath()
             }
+
         }
 
         // handle jvm.options if not overwritten by jvm.options from configDirectory
