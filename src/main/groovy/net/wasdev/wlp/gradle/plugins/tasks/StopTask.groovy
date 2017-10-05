@@ -22,14 +22,13 @@ class StopTask extends AbstractServerTask {
     @TaskAction
     void stop() {
         if (isLibertyInstalled(project)) {
-        	if (getServerDir(project).exists()) {
-            	executeServerCommand(project, 'stop', buildLibertyMap(project))
+            if (getServerDir(project).exists()) {
+                executeServerCommand(project, 'stop', buildLibertyMap(project))
         	} else {
-        		logger.error ('There is no server to stop. The server has not been created.')
+        	   logger.error ('There is no server to stop. The server has not been created.')
         	}
         } else {
             logger.error ('There is no server to stop. The runtime has not been installed.')
         }
     }
-
 }

@@ -29,13 +29,13 @@ abstract class AbstractTask extends DefaultTask {
 
     protected File getInstallDir(Project project) {
         if (project.liberty.installDir == null) {
-           if (project.liberty.install.baseDir == null) {
-               return new File(project.buildDir, 'wlp')
-           } else {
-               return new File(project.liberty.install.baseDir, 'wlp')
-           }
+            if (project.liberty.install.baseDir == null) {
+                return new File(project.buildDir, 'wlp')
+            } else {
+                return new File(project.liberty.install.baseDir, 'wlp')
+            }
         } else {
-           return new File(project.liberty.installDir)
+            return new File(project.liberty.installDir)
         }
     }
 
@@ -48,15 +48,15 @@ abstract class AbstractTask extends DefaultTask {
     }
 
     protected File getOutputDir(Map<String, String> params) {
-      if (params.get('outputDir') == null ) {
-          return (params.get('outputDir'))
-      } else {
-          return (new File(params.get('outputDir')))
-      }
+        if (params.get('outputDir') == null ) {
+            return (params.get('outputDir'))
+        } else {
+            return (new File(params.get('outputDir')))
+        }
     }
 
     protected boolean isLibertyInstalled(Project project) {
-      File installDir = getInstallDir(project)
-      return (installDir.exists() && new File(installDir, "lib/ws-launch.jar").exists())
+        File installDir = getInstallDir(project)
+        return (installDir.exists() && new File(installDir, "lib/ws-launch.jar").exists())
     }
 }
