@@ -39,7 +39,7 @@ class InstallLibertyTask extends AbstractTask {
                 process.waitFor()
             }
         } else {
-            logger.info ("Liberty is already installed at " + getInstallDir(project))
+            logger.info ("Liberty is already installed at: " + getInstallDir(project))
         }
     }
 
