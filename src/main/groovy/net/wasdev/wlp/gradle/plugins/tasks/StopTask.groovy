@@ -21,7 +21,7 @@ class StopTask extends AbstractServerTask {
 
     @TaskAction
     void stop() {
-        if (new File("${project.buildDir}/wlp/").exists()) {
+        if (isLibertyInstalled(project)) {
         	if (getServerDir(project).exists()) {
             	executeServerCommand(project, 'stop', buildLibertyMap(project))
         	} else {

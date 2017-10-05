@@ -54,4 +54,9 @@ abstract class AbstractTask extends DefaultTask {
           return (new File(params.get('outputDir')))
       }
     }
+
+    protected boolean isLibertyInstalled(Project project) {
+      File installDir = getInstallDir(project)
+      return (installDir.exists() && new File(installDir, "lib/ws-launch.jar").exists())
+    }
 }
