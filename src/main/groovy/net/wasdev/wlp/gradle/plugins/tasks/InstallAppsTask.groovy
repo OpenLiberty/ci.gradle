@@ -25,6 +25,7 @@ import groovy.lang.Tuple
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
+import org.apache.commons.io.FilenameUtils
 import org.w3c.dom.Element;
 import java.util.regex.Pattern
 import java.util.regex.Matcher
@@ -182,10 +183,12 @@ class InstallAppsTask extends AbstractServerTask {
       for (File dep: deps) {
         String projectPath = getProjectPath(parentProjectDir, dep)
         if(!projectPath.isEmpty() && project.getRootProject().findProject(projectPath) != null){
-            Element archive = looseApp.addArchive(parent, "/WEB-INF/classes/"+ dep.getName());
+            Element archive = looseApp.addArchive(parent, "/WEB-INF/lib/"+ dep.getName());
             looseApp.addOutputDirectory(archive, project.getRootProject().findProject(projectPath), "/");
             looseApp.addManifestFile(archive, project.getRootProject().findProject(projectPath), "gradle-jar-plugin");
-        } else{
+        } else if(FilenameUtils.getExtension(dep.getAbsolutePath()).equals("jar")){
+            looseApp.getConfig().addFile(parent, dep.getAbsolutePath() , "/WEB-INF/lib/" + dep.getName());
+        } else {
             looseApp.getConfig().addFile(parent, dep.getAbsolutePath() , "/WEB-INF/classes/" + dep.getName());
         }
       }
