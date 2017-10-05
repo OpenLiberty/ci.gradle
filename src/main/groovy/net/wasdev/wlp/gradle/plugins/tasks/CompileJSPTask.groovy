@@ -32,8 +32,6 @@ import net.wasdev.wlp.ant.jsp.CompileJSPs;
 
 class CompileJSPTask extends AbstractServerTask {
 
-  protected String jspVersion;
-  protected int timeout = 30;
   protected Project ant = new Project();
 
   @TaskAction
@@ -57,7 +55,7 @@ class CompileJSPTask extends AbstractServerTask {
           compileJsp.setInstallDir(getInstallDir(project))
           compileJsp.setTempdir(project.buildDir)
           compileJsp.setDestdir(new File(project.buildDir.getAbsolutePath()+"/classes/java"))
-          compileJsp.setTimeout(timeout)
+          compileJsp.setTimeout(project.liberty.jspCompileTimeout)
           // don't delete temporary server dir
           compileJsp.setCleanup(false)
           compileJsp.setProject(ant)
@@ -81,8 +79,8 @@ class CompileJSPTask extends AbstractServerTask {
           logger.debug("Classpath: " + classpathStr)
           compileJsp.setClasspath(classpathStr)
 
-          if (jspVersion != null) {
-              compileJsp.setJspVersion(jspVersion)
+          if (project.liberty.jspVersion != null) {
+              compileJsp.setJspVersion(project.liberty.jspVersion)
           }
 
           compileJsp.init()
