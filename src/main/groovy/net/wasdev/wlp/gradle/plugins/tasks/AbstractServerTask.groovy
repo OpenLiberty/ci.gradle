@@ -162,7 +162,6 @@ abstract class AbstractServerTask extends AbstractTask {
                 Files.copy(server.configFile.toPath(), new File(serverDirectory, "server.xml").toPath(), StandardCopyOption.REPLACE_EXISTING)
                 serverXMLPath = server.configFile.getCanonicalPath()
             }
-
         }
 
         // handle jvm.options if not overwritten by jvm.options from configDirectory
