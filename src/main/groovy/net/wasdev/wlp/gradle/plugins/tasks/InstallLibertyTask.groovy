@@ -38,6 +38,8 @@ class InstallLibertyTask extends AbstractTask {
                 def process = command.execute()
                 process.waitFor()
             }
+        } else {
+            logger.info ("Liberty is already installed at: " + getInstallDir(project))
         }
     }
 
