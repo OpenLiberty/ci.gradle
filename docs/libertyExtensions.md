@@ -14,6 +14,8 @@ Some tasks have additional configuration blocks.
 | outputDir | String | 1.0 | Deprecated. Value of the `${wlp_output_dir}` variable. The default value is `${installDir}/usr/servers/${serverName}`. This parameter has moved to the `server` block. | No |
 | userDir | String | 1.0 | Value of the `${wlp_user_dir}` variable. The default value is `${installDir}/usr/`. | No |
 | serverName | String | 1.0 | Deprecated. Name of the WebSphere Liberty server instance. The default value is `defaultServer`. The server name is now defined by the `name` property in the `server` extension. | No |
+| jspVersion | int | 1.1 | Maximum time to wait (in seconds) for all the JSP files to compile. The server is stopped and the goal ends after this specified time. The default value is 30 seconds. | No |
+| jspCompileTimeout | int | 1.1 | Maximum time to wait (in seconds) for all the JSP files to compile. The server is stopped and the goal ends after this specified time. The default value is 30 seconds. | No |
 
 
 ### Liberty server configuration
