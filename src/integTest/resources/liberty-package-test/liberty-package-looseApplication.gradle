@@ -1,6 +1,6 @@
 /*
-	This test checks whether the compileJsp task was able to compile the index.jsp file from the test
-  project
+	This test checks whether pakcageLiberty successfully packages the server with a looseApplication that requires
+    files from the src/resrouces folder.
 */
 group = 'liberty.gradle'
 
@@ -38,16 +38,16 @@ ext {
 }
 
 war {
-		archiveName = baseName + '.' + extension
+	archiveName = baseName + '.' + extension
 }
 
 liberty {
     server{
         configFile = file("src/main/liberty/config/server.xml")
-				bootstrapProperties = ['default.http.port': "${testServerHttpPort}" , 'default.https.port': "${testServerHttpsPort}", 'appContext': "${warContext}",'appLocation': "${war.archiveName}"]
+		bootstrapProperties = ['default.http.port': "${testServerHttpPort}" , 'default.https.port': "${testServerHttpsPort}", 'appContext': "${warContext}",'appLocation': "${war.archiveName}"]
         name = 'LibertyProjectServer'
         apps = [war]
-				features {
+		features {
             name = ['servlet-3.1', 'jdbc-4.1', 'jpa-2.0', 'localConnector-1.0']
             acceptLicense = true
         }
@@ -59,7 +59,7 @@ liberty {
 
 
 repositories {
-		maven { url "http://repo.maven.apache.org/maven2" }
+	maven { url "http://repo.maven.apache.org/maven2" }
     mavenCentral()
 }
 
@@ -74,8 +74,8 @@ dependencies {
     testCompile group: 'org.apache.cxf', name: 'cxf-rt-rs-client', version:'3.1.1'
     testCompile group: 'org.glassfish', name: 'javax.json', version:'1.0.4'
     providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
- 		derby group: 'org.apache.derby', name: 'derby', version: '10.13.1.1'
-		libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-kernel', version: '17.0.0.2'
+ 	derby group: 'org.apache.derby', name: 'derby', version: '10.13.1.1'
+	libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-kernel', version: '17.0.0.2'
 }
 
 
