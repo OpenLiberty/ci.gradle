@@ -85,18 +85,26 @@ abstract class AbstractServerTask extends AbstractTask {
         }
     }
 
-    protected void setDefaults(Project project){
-        if(server.configFile.toString().equals('default')){
+    protected void setDefaults(Project project) {
+        if (server.configFile.toString().equals('default')) {
             server.configFile = new File(project.projectDir.toString() + '/src/main/liberty/config/server.xml')
+        } else if (!server.configFile.exists()) {
+            logger.warn("The server configFile was configured but was not found at: ${server.configFile}")
         }
-        if(server.bootstrapPropertiesFile.toString().equals('default')){
+        if (server.bootstrapPropertiesFile.toString().equals('default')) {
             server.bootstrapPropertiesFile = new File(project.projectDir.toString() + '/src/main/liberty/config/bootstrap.properties')
+        } else if (!server.bootstrapPropertiesFile.exists()) {
+            logger.warn("The bootstrapPropertiesFile was configured but was not found at: ${server.bootstrapPropertiesFile}")
         }
-        if(server.jvmOptionsFile.toString().equals('default')){
+        if (server.jvmOptionsFile.toString().equals('default')) {
             server.jvmOptionsFile = new File(project.projectDir.toString() + '/src/main/liberty/config/jvm.options')
+        } else if (!server.jvmOptionsFile.exists()) {
+            logger.warn("The server jvmOptionsFile was configured but was not found at: ${server.jvmOptionsFile}")
         }
-        if(server.serverEnv.toString().equals('default')){
+        if(server.serverEnv.toString().equals('default')) {
             server.serverEnv = new File(project.projectDir.toString() + '/src/main/liberty/config/server.env')
+        } else if (!server.serverEnv.exists()) {
+            logger.warn("The server serverEnv was configured but was not found at: ${server.serverEnv}")
         }
     }
 

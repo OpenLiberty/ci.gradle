@@ -79,10 +79,6 @@ class InstallAppsTask extends AbstractServerTask {
       validateAppConfig(getArchiveName(task), task.baseName, appsDir)
     }
 
-    protected void validateAppConfig(String fileName, String artifactId) throws Exception {
-        validateAppConfig(fileName, artifactId, server.appsDirectory)
-    }
-
     protected void validateAppConfig(String fileName, String artifactId, String dir) throws Exception {
         String appsDir = dir
         if (appsDir.equalsIgnoreCase('apps') && !isAppConfiguredInSourceServerXml(fileName)) {
@@ -138,7 +134,7 @@ class InstallAppsTask extends AbstractServerTask {
       LooseConfigData config = new LooseConfigData()
       switch(getPackagingType()){
         case "war":
-            validateAppConfig(application, application.take(getArchiveName(task).lastIndexOf('.')))
+            validateAppConfig(application, application.take(getArchiveName(task).lastIndexOf('.')), appsDir)
             logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFile.getAbsolutePath()))
             installLooseConfigWar(config, task)
             deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
