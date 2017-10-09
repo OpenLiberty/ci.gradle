@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd"-->
+
+<web-app id="Sample-WebApp"
+		 xmlns="http://java.sun.com/xml/ns/javaee" 
+         version="2.5" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+
+    <display-name>Managed JPA</display-name>
+    <description>This is a sample servlet designed to exercise JPA functionality.</description>
+	
+     <!-- SERVLET DEFINITIONS -->
+
+    <servlet id="JPAServlet">
+        <servlet-name>JPA Servlet</servlet-name>
+        <servlet-class>application.servlet.JPAServlet</servlet-class>
+        <load-on-startup />
+    </servlet>
+
+    <!-- SERVLET MAPPINGS -->
+	
+    <servlet-mapping id="ServletMapping_JPAServlet">
+        <servlet-name>JPA Servlet</servlet-name>
+        <url-pattern>/JPAServlet</url-pattern>
+    </servlet-mapping>
+      
+    <welcome-file-list>
+    	<welcome-file>JPAServlet</welcome-file>
+    </welcome-file-list>
+    
+    <resource-ref id="DataSource_Transactional_ResourceRef">
+        <res-ref-name>jdbc/samplejpadatasource</res-ref-name>
+        <res-type>javax.sql.DataSource</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+    </resource-ref>
+	
+    <resource-ref id="DataSource_NonTransactional_ResourceRef">
+        <res-ref-name>jdbc/samplejpadatasourcenonjta</res-ref-name>
+        <res-type>javax.sql.DataSource</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+    </resource-ref>
+
+	<persistence-context-ref>
+    	<persistence-context-ref-name>jpasample/entitymanager</persistence-context-ref-name>
+    	<persistence-unit-name>jpasamplepersistenceunit</persistence-unit-name>
+	</persistence-context-ref>
+
+</web-app>

@@ -20,6 +20,10 @@ public class LooseApplication {
       config.addDir(parent, task.classpath.getFiles().toArray()[0].getCanonicalPath(), target);
     }
 
+    public void addOutputDir(Element parent, String path, String target) {
+      config.addDir(parent, path, target);
+    }
+
     public Element getDocumentRoot() {
       return config.getDocumentRoot();
     }

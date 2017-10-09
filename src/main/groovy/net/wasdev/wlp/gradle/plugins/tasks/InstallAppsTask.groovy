@@ -168,7 +168,7 @@ class InstallAppsTask extends AbstractServerTask {
         looseWar.addManifestFile(manifestFile, "gradle-war-plugin")
     }
 
-    private void addWarEmbeddedLib(Element parent, LooseApplication looseApp, Task task) throws Exception {
+    private void addWarEmbeddedLib(Element parent, LooseWarApplication looseApp, Task task) throws Exception {
       ArrayList<File> deps = new ArrayList<File>();
       task.classpath.each {deps.add(it)}
       //Removes WEB-INF/lib/main directory since it is not rquired in the xml
@@ -185,7 +185,7 @@ class InstallAppsTask extends AbstractServerTask {
         } else if(FilenameUtils.getExtension(dep.getAbsolutePath()).equalsIgnoreCase("jar")){
             looseApp.getConfig().addFile(parent, dep.getAbsolutePath() , "/WEB-INF/lib/" + dep.getName());
         } else {
-            looseApp.getConfig().addFile(parent, dep.getAbsolutePath() , "/WEB-INF/classes/" + dep.getName());
+            looseApp.addOutputDir(looseApp.getDocumentRoot(), dep.getAbsolutePath() , "/WEB-INF/classes/");
         }
       }
     }
