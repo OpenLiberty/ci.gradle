@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0"
+             xmlns="http://java.sun.com/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+
+  <persistence-unit name="jpasamplepersistenceunit">
+
+    <jta-data-source>java:comp/env/jdbc/samplejpadatasource</jta-data-source>
+    <non-jta-data-source>java:comp/env/jdbc/samplejpadatasourcenonjta</non-jta-data-source>
+
+    <class>application.servlet.Thing</class>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+    <properties>
+      <!-- These properties are creating the database on the fly. We are using them to avoid users having
+          to create a database to run the sample. 
+          See also the create=true line in the datasource meta data. -->
+      <property name="openjpa.jdbc.SynchronizeMappings" value="buildSchema(ForeignKeys=true)" />
+      <property name="openjpa.jdbc.DBDictionary" value="derby" />
+      
+      <!-- EclipseLink specific properties to create the database. They are only used if using the jpa-2.1 feature. -->
+		<property name="eclipselink.ddl-generation" value="drop-and-create-tables" />
+		<property name="eclipselink.ddl-generation.output-mode" value="both" />
+      
+    </properties>
+  </persistence-unit>
+
+</persistence>
