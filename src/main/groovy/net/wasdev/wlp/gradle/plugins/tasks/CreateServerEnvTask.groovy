@@ -18,7 +18,7 @@ class CreateServerEnvTask extends AbstractServerTask {
   @Optional
   File getServerEnvFile() {
     if (!server.serverEnv.exists()) {
-      logger.warn("The jvm.options was configured but was not found at: ${server.serverEnv}")
+      logger.warn("The server.env was configured but was not found at: ${server.serverEnv}")
     }
     return server.serverEnv
   }
@@ -27,7 +27,7 @@ class CreateServerEnvTask extends AbstractServerTask {
   void createServerConfig() {
     if (serverEnvFile.exists()) {
       project.copy {
-        from serverEnvFile.parent
+        from serverEnvFile
         into getServerDir(project)
         rename { String fileName ->
           if (fileName != configFilename) {

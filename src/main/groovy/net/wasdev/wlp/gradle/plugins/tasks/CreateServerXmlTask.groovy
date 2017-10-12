@@ -27,7 +27,7 @@ class CreateServerXmlTask extends AbstractServerTask {
   void createServerConfig() {
     if (serverXmlFile.exists()) {
       project.copy {
-        from serverXmlFile.parent
+        from serverXmlFile
         into getServerDir(project)
         rename { String fileName ->
           if (fileName != configFilename) {

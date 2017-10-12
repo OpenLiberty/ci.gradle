@@ -36,7 +36,7 @@ class CreateJvmOptionsTask extends AbstractServerTask {
       writeJvmOptions(getJvmOptionsOutFile(), jvmOptionsData)
     } else if (jvmOptionsFile.exists()) {
       project.copy {
-        from jvmOptionsFile.parent
+        from jvmOptionsFile
         into getServerDir(project)
         rename { String fileName ->
           if (fileName != configFilename) {

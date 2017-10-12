@@ -128,14 +128,18 @@ class Liberty implements Plugin<Project> {
             dependsOn 'libertyCreate'
         }
 
-        project.task('libertyCreate', type: CreateTask) {
+        project.task('libertyCreate') {
             description 'Creates a WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
             group groupName
-            dependsOn 'installLiberty', "libertyCreateConfig"
-            project.afterEvaluate{
-                outputs.file { new File(getUserDir(project), "servers/${project.liberty.server.name}/server.xml") }
-            }
+            dependsOn "libertyCreateAnt", "libertyCreateConfig"
+//            project.afterEvaluate{
+//                outputs.file { new File(getUserDir(project), "servers/${project.liberty.server.name}/server.xml") }
+//            }
+        }
+        project.task('libertyCreateAnt', type: CreateTask) {
+            group groupName
+            dependsOn 'installLiberty'
         }
 
         project.tasks.create([name: "libertyCreateConfig",
@@ -144,7 +148,7 @@ class Liberty implements Plugin<Project> {
                               type: CreateConfigTask]) {
             logging.level = LogLevel.INFO
             dependsOn "libertyCreateBoostrap", "libertyCreateServerXml", "libertyCreateJvmOptions", "libertyCreateServerEnv"
-            //mustRunAfter "libertyStop"
+            mustRunAfter "libertyCreateAnt"
         }
 
         project.task('libertyCreateBoostrap', type: CreateBootstrapTask) {
