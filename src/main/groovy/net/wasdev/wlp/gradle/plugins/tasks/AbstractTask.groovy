@@ -59,4 +59,23 @@ abstract class AbstractTask extends DefaultTask {
         File installDir = getInstallDir(project)
         return (installDir.exists() && new File(installDir, "lib/ws-launch.jar").exists())
     }
+
+    Map<String, Object> loadPropertiesToMap(File propFile) {
+        try {
+            ResourceBundle resources = new PropertyResourceBundle(propFile.newDataInputStream())
+            Map<String, Object> map = new HashMap<String, Object>()
+
+            //convert ResourceBundle to Map
+            Enumeration<String> keys = resources.getKeys()
+            while (keys.hasMoreElements()) {
+                String key = keys.nextElement()
+                map.put(key, resources.getString(key))
+            }
+            return map
+        } catch (FileNotFoundException e) {
+            e.printStackTrace()
+        } catch (IOException e) {
+            e.printStackTrace()
+        }
+    }
 }

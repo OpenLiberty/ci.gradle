@@ -15,7 +15,19 @@
  */
 package net.wasdev.wlp.gradle.plugins
 
+import net.wasdev.wlp.gradle.plugins.definition.DefaultLibertyBaseSourceSet
+import net.wasdev.wlp.gradle.plugins.definition.DefaultLibertyConfigSourceSet
+import net.wasdev.wlp.gradle.plugins.definition.LibertyBaseSourceSet
+import net.wasdev.wlp.gradle.plugins.definition.LibertyConfigSourceSet
+import net.wasdev.wlp.gradle.plugins.tasks.CreateBootstrapTask
+import net.wasdev.wlp.gradle.plugins.tasks.CreateConfigTask
+import net.wasdev.wlp.gradle.plugins.tasks.CreateJvmOptionsTask
+import net.wasdev.wlp.gradle.plugins.tasks.CreateServerEnvTask
+import net.wasdev.wlp.gradle.plugins.tasks.CreateServerXmlTask
 import org.gradle.api.*
+import org.gradle.api.file.FileTreeElement
+import org.gradle.api.internal.file.SourceDirectorySetFactory
+import org.gradle.api.internal.classpath.ModuleRegistry
 
 import net.wasdev.wlp.gradle.plugins.extensions.LibertyExtension
 import net.wasdev.wlp.gradle.plugins.extensions.ServerExtension
@@ -37,17 +49,42 @@ import net.wasdev.wlp.gradle.plugins.tasks.CleanTask
 import net.wasdev.wlp.gradle.plugins.tasks.InstallAppsTask
 import net.wasdev.wlp.gradle.plugins.tasks.AbstractServerTask
 import net.wasdev.wlp.gradle.plugins.tasks.CompileJSPTask
+import org.gradle.api.internal.plugins.DslObject
+import org.gradle.api.internal.tasks.DefaultSourceSet
+import org.gradle.api.plugins.GroovyPlugin
+import org.gradle.api.plugins.JavaBasePlugin
+import org.gradle.api.plugins.JavaPluginConvention
+import org.gradle.api.plugins.scala.ScalaPlugin
+import org.gradle.api.specs.Spec
 import org.gradle.api.tasks.bundling.War
 import org.gradle.api.logging.LogLevel
-import java.util.Properties
+
+import javax.inject.Inject
 
 class Liberty implements Plugin<Project> {
 
-    void apply(Project project) {
+    private final SourceDirectorySetFactory sourceDirectorySetFactory
+    private final ModuleRegistry moduleRegistry
+    Project project
 
-        project.extensions.create('liberty', LibertyExtension)
+    @Inject
+    Liberty(SourceDirectorySetFactory sourceDirectorySetFactory, ModuleRegistry moduleRegistry) {
+        this.sourceDirectorySetFactory = sourceDirectorySetFactory
+        this.moduleRegistry = moduleRegistry
+    }
+
+    void apply(Project project) {
+        this.project = project
+        project.plugins.apply(JavaBasePlugin)
+
+        configureSourceSetDefaults()
+
+        project.extensions.create('liberty', LibertyExtension, project)
         project.configurations.create('libertyLicense')
         project.configurations.create('libertyRuntime')
+
+        String groupName = "Liberty"
+
 
         //Create expected server extension from liberty extension data
         project.afterEvaluate{
@@ -65,19 +102,19 @@ class Liberty implements Plugin<Project> {
             description 'Compile the JSP files in the src/main/webapp directory. '
             logging.level = LogLevel.INFO
             dependsOn 'installLiberty', 'compileJava'
-            group 'Liberty'
+            group groupName
         }
 
         project.task('installLiberty', type: InstallLibertyTask) {
-            description 'Installs Liberty from a repository'
+            description "Installs Liberty from a repository"
             logging.level = LogLevel.INFO
-            group 'Liberty'
+            group groupName
         }
 
         project.task('libertyRun', type: RunTask) {
             description = "Runs a Websphere Liberty Profile server under the Gradle process."
             logging.level = LogLevel.INFO
-            group 'Liberty'
+            group groupName
 
             project.afterEvaluate {
                 dependsOn installAppsDependsOn(server, 'libertyCreate')
@@ -87,24 +124,61 @@ class Liberty implements Plugin<Project> {
         project.task('libertyStatus', type: StatusTask) {
             description 'Checks if the Liberty server is running.'
             logging.level = LogLevel.INFO
-            group 'Liberty'
+            group groupName
             dependsOn 'libertyCreate'
         }
 
         project.task('libertyCreate', type: CreateTask) {
             description 'Creates a WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
-            group 'Liberty'
-            dependsOn 'installLiberty'
+            group groupName
+            dependsOn 'installLiberty', "libertyCreateConfig"
             project.afterEvaluate{
                 outputs.file { new File(getUserDir(project), "servers/${project.liberty.server.name}/server.xml") }
             }
         }
 
+        project.tasks.create([name: "libertyCreateConfig",
+                              description: "Creates the configration files for the system",
+                              group: groupName,
+                              type: CreateConfigTask]) {
+            logging.level = LogLevel.INFO
+            dependsOn "libertyCreateBoostrap", "libertyCreateServerXml", "libertyCreateJvmOptions", "libertyCreateServerEnv"
+            //mustRunAfter "libertyStop"
+        }
+
+        project.task('libertyCreateBoostrap', type: CreateBootstrapTask) {
+            description 'Creates the server bootstrap.properties file'
+            logging.level = LogLevel.INFO
+            group groupName
+            dependsOn 'installLiberty'
+        }
+
+        project.task('libertyCreateJvmOptions', type: CreateJvmOptionsTask) {
+            description 'Creates the server jvm.options file'
+            logging.level = LogLevel.INFO
+            group groupName
+            dependsOn 'installLiberty'
+        }
+
+        project.task('libertyCreateServerXml', type: CreateServerXmlTask) {
+            description 'Creates the server.xml file'
+            logging.level = LogLevel.INFO
+            group groupName
+            dependsOn 'installLiberty'
+        }
+
+        project.task('libertyCreateServerEnv', type: CreateServerEnvTask) {
+            description 'Creates the server.evn file'
+            logging.level = LogLevel.INFO
+            group groupName
+            dependsOn 'installLiberty'
+        }
+
         project.task('libertyStart', type: StartTask) {
             description 'Starts the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
-            group 'Liberty'
+            group groupName
 
             project.afterEvaluate {
                 dependsOn installAppsDependsOn(server, 'libertyCreate')
@@ -114,13 +188,14 @@ class Liberty implements Plugin<Project> {
         project.task('libertyStop', type: StopTask) {
             description 'Stops the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
-            group 'Liberty'
+            group groupName
         }
 
         project.task('libertyPackage', type: PackageTask) {
             description 'Generates a WebSphere Liberty Profile server archive.'
             logging.level = LogLevel.DEBUG
-            group 'Liberty'
+            group groupName
+            dependsOn "libertyCreateConfig"
 
             project.afterEvaluate {
                 dependsOn installAppsDependsOn(server, 'installLiberty')
@@ -130,39 +205,39 @@ class Liberty implements Plugin<Project> {
         project.task('libertyDump', type: DumpTask) {
             description 'Dumps diagnostic information from the Liberty Profile server into an archive.'
             logging.level = LogLevel.INFO
-            group 'Liberty'
+            group groupName
         }
 
         project.task('libertyJavaDump', type: JavaDumpTask) {
             description 'Dumps diagnostic information from the Liberty Profile server JVM.'
             logging.level = LogLevel.INFO
-            group 'Liberty'
+            group groupName
         }
 
         project.task('libertyDebug', type: DebugTask) {
             description 'Runs the Liberty Profile server in the console foreground after a debugger connects to the debug port (default: 7777).'
             logging.level = LogLevel.INFO
-            group 'Liberty'
+            group groupName
         }
 
         project.task('deploy', type: DeployTask) {
             description 'Deploys a supported file to the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
-            group 'Liberty'
+            group groupName
             dependsOn 'libertyStart'
         }
 
         project.task('undeploy', type: UndeployTask) {
              description 'Removes an application from the WebSphere Liberty Profile server.'
              logging.level = LogLevel.INFO
-             group 'Liberty'
+             group groupName
              dependsOn 'libertyStart'
         }
 
         project.task('installFeature', type: InstallFeatureTask) {
             description 'Install a new feature to the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO
-            group 'Liberty'
+            group groupName
 
             project.afterEvaluate {
                 if (server.features.name != null && !server.features.name.empty) {
@@ -175,21 +250,21 @@ class Liberty implements Plugin<Project> {
         project.task('uninstallFeature', type: UninstallFeatureTask) {
             description 'Uninstall a feature from the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO
-            group 'Liberty'
+            group groupName
             dependsOn 'libertyCreate'
         }
 
         project.task('cleanDirs', type: CleanTask) {
             description 'Deletes files from some directories from the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO
-            group 'Liberty'
+            group groupName
             dependsOn 'libertyStop'
         }
 
         project.task('installApps', type: InstallAppsTask) {
             description "Copy applications generated by the Gradle project to a Liberty server's dropins or apps directory."
             logging.level = LogLevel.INFO
-            group 'Liberty'
+            group groupName
             dependsOn project.tasks.withType(War)
 
             project.afterEvaluate {
@@ -200,6 +275,69 @@ class Liberty implements Plugin<Project> {
                 }
            }
         }
+    }
+
+    private void configureSourceSetDefaults() {
+        configureLibertyBaseSourceset("libertyBase")
+        configureLibertyConfigSourceset("libertyConfig")
+    }
+
+    private blankSourcesetLanguages(def newSrcSet){
+        newSrcSet.with{
+            java.setSrcDirs([])
+            resources.setSrcDirs([])
+        }
+
+        if (project.plugins.hasPlugin(GroovyPlugin)){
+            newSrcSet.groovy.setSrcDirs([])
+        }
+
+        if (project.plugins.hasPlugin(ScalaPlugin)){
+            newSrcSet.scala.setSrcDirs([])
+        }
+    }
+
+    private void configureLibertyConfigSourceset(String sourceSetName) {
+        def newSrcSet = project.getConvention().getPlugin(JavaPluginConvention).getSourceSets().create(sourceSetName)
+        blankSourcesetLanguages(newSrcSet)
+
+        final LibertyConfigSourceSet libertyConfigSourceSet = new DefaultLibertyConfigSourceSet(((DefaultSourceSet) newSrcSet)
+            .getDisplayName(), sourceDirectorySetFactory)
+
+        new DslObject(newSrcSet).getConvention().getPlugins().put(sourceSetName, libertyConfigSourceSet)
+
+        libertyConfigSourceSet.getLibertyConfig().srcDir("/src/main/liberty/config/")
+
+        newSrcSet.getResources().getFilter().exclude(new Spec<FileTreeElement>() {
+            boolean isSatisfiedBy(FileTreeElement element) {
+                return libertyConfigSourceSet.getLibertyConfig().contains(element.getFile())
+            }
+        })
+
+        newSrcSet.getAllJava().source(libertyConfigSourceSet.libertyConfig)
+        newSrcSet.getAllSource().source(libertyConfigSourceSet.libertyConfig)
+
+    }
+
+    private void configureLibertyBaseSourceset(String sourceSetName) {
+        def newSrcSet = project.getConvention().getPlugin(JavaPluginConvention).getSourceSets().create(sourceSetName)
+        blankSourcesetLanguages(newSrcSet)
+
+        final LibertyBaseSourceSet libertyBaseSourceSet = new DefaultLibertyBaseSourceSet(((DefaultSourceSet) newSrcSet)
+            .getDisplayName(), sourceDirectorySetFactory)
+
+        new DslObject(newSrcSet).getConvention().getPlugins().put(sourceSetName, libertyBaseSourceSet)
+
+        libertyBaseSourceSet.getLibertyBase().srcDir("/src/main/liberty/")
+
+        newSrcSet.getResources().getFilter().exclude(new Spec<FileTreeElement>() {
+            boolean isSatisfiedBy(FileTreeElement element) {
+                return libertyBaseSourceSet.getLibertyBase().contains(element.getFile())
+            }
+        })
+
+        newSrcSet.getAllJava().source(libertyBaseSourceSet.libertyBase)
+        newSrcSet.getAllSource().source(libertyBaseSourceSet.libertyBase)
     }
 
     private ServerExtension copyProperties(LibertyExtension liberty) {

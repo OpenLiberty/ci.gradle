@@ -16,10 +16,49 @@
 
 package net.wasdev.wlp.gradle.plugins.extensions
 
+import org.gradle.api.GradleException
+import org.gradle.api.GradleScriptException
+import org.gradle.api.Project
+import org.gradle.api.file.FileTree
 import org.gradle.util.ConfigureUtil
-import org.gradle.api.Task
 
 class ServerExtension{
+
+    ServerExtension(Project project){
+        configDirectory =         new File(project.projectDir, '/src/main/liberty')
+
+        bootstrapPropertiesFile = findInConfigSourceset("bootstrap.properties", project)
+        configFile =              findInConfigSourceset("server.xml", project)
+        jvmOptionsFile =          findInConfigSourceset("jvm.options", project)
+        serverEnv =               findInConfigSourceset("server.env", project)
+    }
+
+    /**
+     * This method is configured to only find one particular file within the configuration sourceset.  If it
+     * finds multiple, it will throw an error.
+     *
+     * @param configFile
+     * @return
+     */
+    private File findInConfigSourceset(String configFile, Project project){
+
+        FileTree filtered = project.sourceSets.libertyConfig.allLibertyConfig.matching {
+            include configFile
+        }
+
+        switch (filtered.files.size()) {
+            case 1:
+                return filtered.files.getAt(0)
+                break
+            case { it > 1}:
+                throw new GradleException("More than one ${configFile} found in config sourceset".toString())
+                break
+            default:
+                return new File(configDirectory, "/config/${configFile}")
+                break
+        }
+    }
+
     //Server properties
     String name = "defaultServer"
     String outputDir
@@ -29,10 +68,10 @@ class ServerExtension{
     boolean looseApplication = true
 
     File configDirectory
-    File configFile = new File("default")
-    File bootstrapPropertiesFile = new File("default")
-    File jvmOptionsFile = new File("default")
-    File serverEnv = new File("default")
+    File configFile
+    File bootstrapPropertiesFile
+    File jvmOptionsFile
+    File serverEnv
 
     Map<String, Object> bootstrapProperties
     List<String> jvmOptions
@@ -95,5 +134,4 @@ class ServerExtension{
     def javaDumpLiberty(Closure closure) {
         ConfigureUtil.configure(closure, javaDumpLiberty)
     }
-
 }

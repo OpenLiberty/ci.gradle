@@ -70,7 +70,7 @@ class CompileJSPTask extends AbstractServerTask {
           Set<String> classpath = new HashSet<String>();
 
           // first add target/classes (or whatever is configured)
-          classpath.add(getServerDir(project))
+          classpath.add(getServerDir(project).absolutePath)
           for(File f : task.classpath)
             classpath.add(f.getAbsolutePath())
           setCompileDependencies(task, classpath)
