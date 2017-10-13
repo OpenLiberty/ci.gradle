@@ -113,12 +113,12 @@ task groovydocJar(type: Jar) {
 artifacts {
     archives groovydocJar, sourcesJar
 }
-/*
+
 if (!version.endsWith("SNAPSHOT")) {
     signing {
         sign configurations.archives
     }
-}*/
+}
 
 pluginBundle {
   website = 'https://github.com/WASdev/ci.gradle'
