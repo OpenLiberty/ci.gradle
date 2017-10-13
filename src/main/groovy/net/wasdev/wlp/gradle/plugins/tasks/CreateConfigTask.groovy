@@ -5,7 +5,7 @@ import org.gradle.api.tasks.TaskAction
 
 class CreateConfigTask extends AbstractServerTask {
 
-  @OutputDirectory
+  //@OutputDirectory
   File getServerOutDir() {
     getServerDir(project)
   }

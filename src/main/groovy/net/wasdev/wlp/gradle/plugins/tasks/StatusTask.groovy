@@ -15,16 +15,14 @@
  */
 package net.wasdev.wlp.gradle.plugins.tasks
 
+import net.wasdev.wlp.gradle.plugins.utils.LibertyIntstallController
 import org.gradle.api.tasks.TaskAction
 
 class StatusTask extends AbstractServerTask {
 
     @TaskAction
     void status() {
-        def status_process = new ProcessBuilder(buildCommand("status")).redirectErrorStream(true).start()
-        status_process.inputStream.eachLine {
-            println it
-        }
+        LibertyIntstallController.printServerStatus(project)
     }
 
 }

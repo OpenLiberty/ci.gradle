@@ -17,6 +17,7 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import net.wasdev.wlp.gradle.plugins.extensions.DeployExtension
 import net.wasdev.wlp.gradle.plugins.extensions.LibertyExtension
+import net.wasdev.wlp.gradle.plugins.utils.LibertyIntstallController
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import java.nio.file.Files
@@ -27,20 +28,8 @@ abstract class AbstractTask extends DefaultTask {
     //params that get built with installLiberty
     def params
 
-    protected File getInstallDir(Project project) {
-        if (project.liberty.installDir == null) {
-            if (project.liberty.install.baseDir == null) {
-                return new File(project.buildDir, 'wlp')
-            } else {
-                return new File(project.liberty.install.baseDir, 'wlp')
-            }
-        } else {
-            return new File(project.liberty.installDir)
-        }
-    }
-
     protected File getUserDir(Project project) {
-        return getUserDir(project, getInstallDir(project))
+        return getUserDir(project, LibertyIntstallController.getInstallDir(project))
     }
 
     protected File getUserDir(Project project, File installDir) {
@@ -56,7 +45,7 @@ abstract class AbstractTask extends DefaultTask {
     }
 
     protected boolean isLibertyInstalled(Project project) {
-        File installDir = getInstallDir(project)
+        File installDir = LibertyIntstallController.getInstallDir(project)
         return (installDir.exists() && new File(installDir, "lib/ws-launch.jar").exists())
     }
 

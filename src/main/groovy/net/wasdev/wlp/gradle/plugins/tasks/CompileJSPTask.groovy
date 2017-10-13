@@ -15,6 +15,8 @@
  */
 package net.wasdev.wlp.gradle.plugins.tasks
 
+import net.wasdev.wlp.gradle.plugins.utils.LibertyIntstallController
+
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.List;
@@ -52,7 +54,7 @@ class CompileJSPTask extends AbstractServerTask {
   protected void perTaskCompileJSP(Task task) throws Exception {
 
           CompileJSPs compileJsp = new CompileJSPs()
-          compileJsp.setInstallDir(getInstallDir(project))
+          compileJsp.setInstallDir(LibertyIntstallController.getInstallDir(project))
           compileJsp.setTempdir(project.buildDir)
           compileJsp.setDestdir(new File(project.buildDir.getAbsolutePath()+"/classes/java"))
           compileJsp.setTimeout(project.liberty.jspCompileTimeout)

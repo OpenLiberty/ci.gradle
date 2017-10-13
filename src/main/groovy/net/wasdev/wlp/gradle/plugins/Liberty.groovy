@@ -24,6 +24,7 @@ import net.wasdev.wlp.gradle.plugins.tasks.CreateConfigTask
 import net.wasdev.wlp.gradle.plugins.tasks.CreateJvmOptionsTask
 import net.wasdev.wlp.gradle.plugins.tasks.CreateServerEnvTask
 import net.wasdev.wlp.gradle.plugins.tasks.CreateServerXmlTask
+import net.wasdev.wlp.gradle.plugins.utils.LibertyIntstallController
 import org.gradle.api.*
 import org.gradle.api.file.FileTreeElement
 import org.gradle.api.internal.file.SourceDirectorySetFactory
@@ -67,6 +68,19 @@ class Liberty implements Plugin<Project> {
     private final ModuleRegistry moduleRegistry
     Project project
 
+    public static final String LIBERTY_DEPLOY_CONFIGURATION = "libertyDeploy"
+
+    public static final String TASK_LIBERTY_START = "libertyStart"
+    public static final String TASK_LIBERTY_CREATE = "libertyCreate"
+    public static final String TASK_LIBERTY_CREATE_CONFIG = "libertyCreateConfig"
+    public static final String TASK_LIBERTY_CREATE_ANT = "libertyCreateAnt"
+    public static final String TASK_LIBERTY_CREATE_BOOTSTRAP = "libertyCreateBoostrap"
+    public static final String TASK_LIBERTY_CREATE_JVM_OPTIONS = "libertyCreateJvmOptions"
+    public static final String TASK_LIBERTY_CREATE_SERVER_ENV = "libertyCreateServerEnv"
+    public static final String TASK_LIBERTY_CREATE_SERVER_XML = "libertyCreateServerXml"
+    public static final String TASK_DEPLOY = "deploy"
+    public static final String TASK_INSTALL_LIBERTY = "installLiberty"
+
     @Inject
     Liberty(SourceDirectorySetFactory sourceDirectorySetFactory, ModuleRegistry moduleRegistry) {
         this.sourceDirectorySetFactory = sourceDirectorySetFactory
@@ -82,6 +96,8 @@ class Liberty implements Plugin<Project> {
         project.extensions.create('liberty', LibertyExtension, project)
         project.configurations.create('libertyLicense')
         project.configurations.create('libertyRuntime')
+
+        project.configurations.create(LIBERTY_DEPLOY_CONFIGURATION)
 
         String groupName = "Liberty"
 
@@ -101,11 +117,11 @@ class Liberty implements Plugin<Project> {
         project.task('compileJSP', type: CompileJSPTask) {
             description 'Compile the JSP files in the src/main/webapp directory. '
             logging.level = LogLevel.INFO
-            dependsOn 'installLiberty', 'compileJava'
+            dependsOn TASK_INSTALL_LIBERTY, 'compileJava'
             group groupName
         }
 
-        project.task('installLiberty', type: InstallLibertyTask) {
+        project.task(TASK_INSTALL_LIBERTY, type: InstallLibertyTask) {
             description "Installs Liberty from a repository"
             logging.level = LogLevel.INFO
             group groupName
@@ -117,7 +133,7 @@ class Liberty implements Plugin<Project> {
             group groupName
 
             project.afterEvaluate {
-                dependsOn installAppsDependsOn(server, 'libertyCreate')
+                dependsOn installAppsDependsOn(server, TASK_LIBERTY_CREATE)
             }
         }
 
@@ -125,68 +141,76 @@ class Liberty implements Plugin<Project> {
             description 'Checks if the Liberty server is running.'
             logging.level = LogLevel.INFO
             group groupName
-            dependsOn 'libertyCreate'
+            dependsOn TASK_LIBERTY_CREATE
         }
 
-        project.task('libertyCreate') {
+        project.task(TASK_LIBERTY_CREATE) {
             description 'Creates a WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
             group groupName
-            dependsOn "libertyCreateAnt", "libertyCreateConfig"
+            dependsOn TASK_LIBERTY_CREATE_ANT, TASK_LIBERTY_CREATE_CONFIG
 //            project.afterEvaluate{
 //                outputs.file { new File(getUserDir(project), "servers/${project.liberty.server.name}/server.xml") }
 //            }
         }
-        project.task('libertyCreateAnt', type: CreateTask) {
+        project.task(TASK_LIBERTY_CREATE_ANT, type: CreateTask) {
             group groupName
-            dependsOn 'installLiberty'
+            dependsOn TASK_INSTALL_LIBERTY
         }
 
-        project.tasks.create([name: "libertyCreateConfig",
+        project.tasks.create([name: TASK_LIBERTY_CREATE_CONFIG,
                               description: "Creates the configration files for the system",
                               group: groupName,
                               type: CreateConfigTask]) {
             logging.level = LogLevel.INFO
-            dependsOn "libertyCreateBoostrap", "libertyCreateServerXml", "libertyCreateJvmOptions", "libertyCreateServerEnv"
-            mustRunAfter "libertyCreateAnt"
+            dependsOn TASK_LIBERTY_CREATE_BOOTSTRAP, TASK_LIBERTY_CREATE_SERVER_XML,
+                TASK_LIBERTY_CREATE_JVM_OPTIONS, TASK_LIBERTY_CREATE_SERVER_ENV
+            mustRunAfter TASK_LIBERTY_CREATE_ANT
         }
 
-        project.task('libertyCreateBoostrap', type: CreateBootstrapTask) {
+        project.task(TASK_LIBERTY_CREATE_BOOTSTRAP, type: CreateBootstrapTask) {
             description 'Creates the server bootstrap.properties file'
             logging.level = LogLevel.INFO
             group groupName
-            dependsOn 'installLiberty'
+            dependsOn TASK_INSTALL_LIBERTY
         }
 
-        project.task('libertyCreateJvmOptions', type: CreateJvmOptionsTask) {
+        project.task(TASK_LIBERTY_CREATE_JVM_OPTIONS, type: CreateJvmOptionsTask) {
             description 'Creates the server jvm.options file'
             logging.level = LogLevel.INFO
             group groupName
-            dependsOn 'installLiberty'
+            dependsOn TASK_INSTALL_LIBERTY
         }
 
-        project.task('libertyCreateServerXml', type: CreateServerXmlTask) {
+        project.task(TASK_LIBERTY_CREATE_SERVER_XML, type: CreateServerXmlTask) {
             description 'Creates the server.xml file'
             logging.level = LogLevel.INFO
             group groupName
-            dependsOn 'installLiberty'
+            dependsOn TASK_INSTALL_LIBERTY
         }
 
-        project.task('libertyCreateServerEnv', type: CreateServerEnvTask) {
+        project.task(TASK_LIBERTY_CREATE_SERVER_ENV, type: CreateServerEnvTask) {
             description 'Creates the server.evn file'
             logging.level = LogLevel.INFO
             group groupName
-            dependsOn 'installLiberty'
+            dependsOn TASK_INSTALL_LIBERTY
         }
 
-        project.task('libertyStart', type: StartTask) {
-            description 'Starts the WebSphere Liberty Profile server.'
+
+        def libertyStart = project.tasks.create([name: TASK_LIBERTY_START,
+                              type: StartTask,
+                              description: 'Starts the WebSphere Liberty Profile server.',
+                              group: groupName]) {
+
             logging.level = LogLevel.INFO
-            group groupName
 
             project.afterEvaluate {
-                dependsOn installAppsDependsOn(server, 'libertyCreate')
+                dependsOn installAppsDependsOn(server, TASK_LIBERTY_CREATE)
             }
+        }
+
+        libertyStart.onlyIf {
+            !LibertyIntstallController.isServerRunning(project)
         }
 
         project.task('libertyStop', type: StopTask) {
@@ -199,10 +223,10 @@ class Liberty implements Plugin<Project> {
             description 'Generates a WebSphere Liberty Profile server archive.'
             logging.level = LogLevel.DEBUG
             group groupName
-            dependsOn "libertyCreateConfig"
+            dependsOn TASK_LIBERTY_CREATE_CONFIG
 
             project.afterEvaluate {
-                dependsOn installAppsDependsOn(server, 'installLiberty')
+                dependsOn installAppsDependsOn(server, TASK_INSTALL_LIBERTY)
             }
         }
 
@@ -224,18 +248,18 @@ class Liberty implements Plugin<Project> {
             group groupName
         }
 
-        project.task('deploy', type: DeployTask) {
+        project.task(TASK_DEPLOY, type: DeployTask) {
             description 'Deploys a supported file to the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
             group groupName
-            dependsOn 'libertyStart'
+            dependsOn TASK_LIBERTY_START
         }
 
         project.task('undeploy', type: UndeployTask) {
              description 'Removes an application from the WebSphere Liberty Profile server.'
              logging.level = LogLevel.INFO
              group groupName
-             dependsOn 'libertyStart'
+             dependsOn TASK_LIBERTY_START
         }
 
         project.task('installFeature', type: InstallFeatureTask) {
@@ -245,9 +269,9 @@ class Liberty implements Plugin<Project> {
 
             project.afterEvaluate {
                 if (server.features.name != null && !server.features.name.empty) {
-                    dependsOn 'libertyCreate'
+                    dependsOn TASK_LIBERTY_CREATE
                 } else {
-                    dependsOn 'installLiberty'
+                    dependsOn TASK_INSTALL_LIBERTY
                 }
             }
         }
@@ -255,7 +279,7 @@ class Liberty implements Plugin<Project> {
             description 'Uninstall a feature from the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO
             group groupName
-            dependsOn 'libertyCreate'
+            dependsOn TASK_LIBERTY_CREATE
         }
 
         project.task('cleanDirs', type: CleanTask) {
@@ -275,7 +299,7 @@ class Liberty implements Plugin<Project> {
                 if (server.features.name != null && !server.features.name.empty) {
                     dependsOn 'installFeature'
                 } else {
-                    dependsOn 'libertyCreate'
+                    dependsOn TASK_LIBERTY_CREATE
                 }
            }
         }

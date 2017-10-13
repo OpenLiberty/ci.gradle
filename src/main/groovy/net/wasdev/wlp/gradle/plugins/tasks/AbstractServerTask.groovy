@@ -18,6 +18,7 @@ package net.wasdev.wlp.gradle.plugins.tasks
 import net.wasdev.wlp.gradle.plugins.extensions.DeployExtension
 import net.wasdev.wlp.gradle.plugins.extensions.LibertyExtension
 import net.wasdev.wlp.gradle.plugins.extensions.ServerExtension
+import net.wasdev.wlp.gradle.plugins.utils.LibertyIntstallController
 import org.gradle.api.GradleException
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -57,7 +58,7 @@ abstract class AbstractServerTask extends AbstractTask {
         Map<String, String> result = new HashMap();
         result.put('serverName', server.name)
 
-        def installDir = getInstallDir(project)
+        def installDir = LibertyIntstallController.getInstallDir(project)
         result.put('installDir', installDir)
 
         def userDir = getUserDir(project, installDir)
@@ -71,22 +72,6 @@ abstract class AbstractServerTask extends AbstractTask {
         }
 
         return result;
-    }
-
-    protected List<String> buildCommand (String operation) {
-        List<String> command = new ArrayList<String>()
-        boolean isWindows = System.properties['os.name'].toLowerCase().indexOf("windows") >= 0
-        String installDir = getInstallDir(project).toString()
-
-        if (isWindows) {
-            command.add(installDir + "\\bin\\server.bat")
-        } else {
-            command.add(installDir + "/bin/server")
-        }
-        command.add(operation)
-        command.add(server.name)
-
-        return command
     }
 
     protected File getServerDir(Project project){
