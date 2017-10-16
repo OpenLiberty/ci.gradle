@@ -113,3 +113,11 @@ The Liberty plugin provides the following tasks for your project:
 | [deploy](docs/deploy.md#deploy-task) | Deploys a supported file to a running Liberty server. |
 | [undeploy](docs/undeploy.md#undeploy-task) | Removes an application from the Liberty server. |
 | [compileJsp](docs/compileJsp.md) | Compiles the JSP files from the src/main/webapp directory into the build/classes directory. |
+
+### Task ordering
+
+The Liberty Gradle plugin defines a built-in task order to allow a user to call an end task without worrying about calling the necessary tasks in between. By having the plugin manage tasks and their order of execution we can easily avoid some simple human errors. For example, in order to have a majority of the tasks function, the principal task `installLiberty` must be called, which our plugin would do for you.  
+  
+The most appealing benefit from defining a task order is the ability to allow the user to call an end task directly. For example, if the user calls `libertyStart` out of the box, Gradle will recognize that it must call `installLiberty -> libertyCreate -> installFeature -> installApps` to get a server with features and apps properly running.
+  
+Click on a [task](#tasks) to view what it depends on.
