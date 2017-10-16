@@ -5,6 +5,11 @@ Package a Liberty server.
 The `libertyPackage` task is used to create a ZIP or JAR archive of your Liberty runtime and server.
 Starting with WebSphere Liberty 8.5.5.9, it is possible to package a server into an executable jar file by setting the include parameter to runnable. The created JAR file can be executed using the `java -jar` command.
 
+### dependsOn
+`libertyPackage` depends on `installLiberty`, and `installApps` if configured.  
+  
+**Note**: The 2.0 plugin is missing a depends on `installFeature` if `installApps` is not called. If this applies to you, you may need to add `libertyPackage.dependsOn 'installFeature'` to your `build.gradle`.
+
 ### Properties
 
 See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.
