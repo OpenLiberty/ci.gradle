@@ -4,7 +4,7 @@ The `installFeature` task installs features packaged as a Subsystem Archive (ESA
 This goal is not supported if the Liberty runtime is installed from the Open Liberty runtime package. You will get a missing file error since the `bin/installUtiltiy` command is removed from the Open Liberty runtime package. The Open Liberty runtime is always bundled with all applicable features and there isn't any need to install any additional feature.  
 
 ### dependsOn
-`installFeature` depends on `installLiberty`. If no specific features were requested, `installFeature` would depend on `libertyCreate` to evaluate the set of features in the server configuration file.
+`installFeature` depends on `installLiberty`. If no specific features are requested, `installFeature` depends on `libertyCreate` to evaluate the set of features in the server configuration file.
 
 ### Properties
 
