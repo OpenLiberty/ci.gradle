@@ -13,21 +13,21 @@ The Liberty Gradle plugin supports install and operational control of Liberty ru
 Clone this repository and then, with a JRE on the path, execute the following command in the root directory.
 
 ```bash
-$ gradlew build
+$ ./gradlew build
 ```
 
-This will download Gradle and then build the plugin `liberty-gradle-plugin-2.0-SNAPSHOT.jar` in to the `build\libs` directory. It is also possible to install the plugin in to your local Maven repository using `gradlew install`.
+This will download Gradle and then build the plugin `liberty-gradle-plugin-2.0.jar` in to the `build\libs` directory. It is also possible to install the plugin in to your local Maven repository using `gradlew install`.
 
 To build the plugin and run the integration tests execute the following commands in the root directory.
 
 1. To run the integration tests using an existing Liberty server installation.
  ```bash
- $ gradlew build -Prunit=offline -DwlpInstallDir=<liberty_install_directory>
+ $ ./gradlew build -Prunit=offline -DwlpInstallDir=<liberty_install_directory>
  ```
 
 2. To run the integration tests against an automatically downloaded and installed Liberty server. The `wlpLicense` parameter is only needed for Liberty packaged as a JAR file.
  ```bash
- $ gradlew build -Prunit=online -DwlpLicense=<liberty_licesnse_code> -DwlpVersion=<liberty_version>
+ $ ./gradlew build -Prunit=online -DwlpLicense=<liberty_licesnse_code> -DwlpVersion=<liberty_version>
  ```
 
 ## Usage
@@ -64,7 +64,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.0-SNAPSHOT'
+        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.1-SNAPSHOT'
     }
 }
 ```
