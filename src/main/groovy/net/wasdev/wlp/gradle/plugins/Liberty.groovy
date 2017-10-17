@@ -50,7 +50,6 @@ class Liberty implements Plugin<Project> {
         project.configurations.create('libertyRuntime')
 
         //Create expected server extension from liberty extension data
-
         project.afterEvaluate{
             project.liberty.server = (project.liberty.server) ?: copyProperties(project.liberty)
 
