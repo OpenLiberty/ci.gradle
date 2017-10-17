@@ -157,8 +157,16 @@ class Liberty implements Plugin<Project> {
             description 'Install a new feature to the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO
             group 'Liberty'
-            dependsOn 'libertyCreate'
+
+            project.afterEvaluate {
+                if (dependsOnFeature(server)) {
+                    dependsOn 'libertyCreate'
+                } else {
+                    dependsOn 'installLiberty'
+                }
+            }
         }
+
         project.task('uninstallFeature', type: UninstallFeatureTask) {
             description 'Uninstall a feature from the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO
