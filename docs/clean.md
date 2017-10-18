@@ -7,6 +7,9 @@ The `cleanDirs` task deletes server specific files including:
   
 Note that the `cleanDirs` task is different from the `clean` task from the Java plugin. `cleanDirs` cleans the server directories whereas `clean` removes the `build` directory. If a server is running during a `clean`, some files may remain and require a second `clean`. Adding a ```clean dependsOn 'libertyStop'``` to your `build.gradle` file can help prevent this. The Liberty `cleanDirs` task automatically depends on the `libertyStop` task.
 
+### dependsOn
+`cleanDirs` depends on `libertyStop` to ensure a successful clean.
+
 ### Properties
 
 See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.
