@@ -168,7 +168,7 @@ class Liberty implements Plugin<Project> {
             group 'Liberty'
 
             project.afterEvaluate {
-                if (server.features.name != null && !server.features.name.empty) {
+                if (server.features.name != null && !server.features.name.isEmpty()) {
                     dependsOn 'libertyCreate'
                 } else {
                     dependsOn 'installLiberty'
@@ -196,7 +196,7 @@ class Liberty implements Plugin<Project> {
             dependsOn project.tasks.withType(War)
 
             project.afterEvaluate {
-                if (server.features.name != null && !server.features.name.empty) {
+                if (server.features.name != null && !server.features.name.isEmpty()) {
                     dependsOn 'installFeature'
                 } else {
                     dependsOn 'libertyCreate'

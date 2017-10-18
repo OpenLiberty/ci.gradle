@@ -17,7 +17,7 @@ package net.wasdev.wlp.gradle.plugins.extensions
 
 class FeatureExtension {
 
-    String[] name
+    List<String> name
     boolean acceptLicense = false
     String to
     String from

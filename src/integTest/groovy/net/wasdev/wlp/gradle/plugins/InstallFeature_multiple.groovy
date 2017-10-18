@@ -34,22 +34,22 @@ class InstallFeature_multiple extends AbstractIntegrationTest{
         if (test_mode == "offline"){
             WLP_DIR.replace("\\","/")
         }
-        copyFile(buildFilename, new File(buildDir, 'build.gradle'))
+        copyBuildFiles(buildFilename, buildDir)
     }
-    
+
     @Test
     public void test_installFeature_multiple() {
         try {
             def file = new File(buildDir, "build/wlp/lib/features/com.ibm.websphere.appserver.mongodb-2.0.mf")
             def file_2 = new File(buildDir, "build/wlp/lib/features/com.ibm.websphere.appserver.adminCenter-1.0.mf")
             runTasks(buildDir, 'installFeature')
-            
+
             if (test_mode == "online") {
                 assert file.exists() : "com.ibm.websphere.appserver.mongodb-2.0.mf is not installed"
                 assert file.canRead() : "com.ibm.websphere.appserver.mongodb-2.0.mf cannot be read"
                 assert file_2.exists() : "com.ibm.websphere.appserver.adminCenter-1.0.mf is not installed"
                 assert file_2.canRead() : "com.ibm.websphere.appserver.adminCenter-1.0.mf cannot be read"
-            } 
+            }
         } catch (Exception e) {
             throw new AssertionError ("Fail on task installFeature. "+e)
         }
@@ -61,7 +61,7 @@ class InstallFeature_multiple extends AbstractIntegrationTest{
             def file = new File(buildDir, "build/wlp/lib/features/com.ibm.websphere.appserver.mongodb-2.0.mf")
             def file2 = new File(buildDir, "build/wlp/lib/features/com.ibm.websphere.appserver.adminCenter-1.0.mf")
             runTasks(buildDir, 'uninstallFeature')
-            
+
             if (test_mode == "online") {
                 assert !file.exists() : "com.ibm.websphere.appserver.mongodb-2.0.mf is not uninstalled"
                 assert !file2.exists() : "com.ibm.websphere.appserver.adminCenter-1.0.mf is not installed"
@@ -71,4 +71,3 @@ class InstallFeature_multiple extends AbstractIntegrationTest{
         }
     }
 }
-

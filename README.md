@@ -13,21 +13,21 @@ The Liberty Gradle plugin supports install and operational control of Liberty ru
 Clone this repository and then, with a JRE on the path, execute the following command in the root directory.
 
 ```bash
-$ gradlew build
+$ ./gradlew build
 ```
 
-This will download Gradle and then build the plugin `liberty-gradle-plugin-2.0-SNAPSHOT.jar` in to the `build\libs` directory. It is also possible to install the plugin in to your local Maven repository using `gradlew install`.
+This will download Gradle and then build the plugin `liberty-gradle-plugin-2.0.jar` in to the `build\libs` directory. It is also possible to install the plugin in to your local Maven repository using `gradlew install`.
 
 To build the plugin and run the integration tests execute the following commands in the root directory.
 
 1. To run the integration tests using an existing Liberty server installation.
  ```bash
- $ gradlew build -Prunit=offline -DwlpInstallDir=<liberty_install_directory>
+ $ ./gradlew build -Prunit=offline -DwlpInstallDir=<liberty_install_directory>
  ```
 
 2. To run the integration tests against an automatically downloaded and installed Liberty server. The `wlpLicense` parameter is only needed for Liberty packaged as a JAR file.
  ```bash
- $ gradlew build -Prunit=online -DwlpLicense=<liberty_licesnse_code> -DwlpVersion=<liberty_version>
+ $ ./gradlew build -Prunit=online -DwlpLicense=<liberty_licesnse_code> -DwlpVersion=<liberty_version>
  ```
 
 ## Usage
@@ -64,7 +64,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.0-SNAPSHOT'
+        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.1-SNAPSHOT'
     }
 }
 ```
@@ -113,3 +113,11 @@ The Liberty plugin provides the following tasks for your project:
 | [deploy](docs/deploy.md#deploy-task) | Deploys a supported file to a running Liberty server. |
 | [undeploy](docs/undeploy.md#undeploy-task) | Removes an application from the Liberty server. |
 | [compileJsp](docs/compileJsp.md) | Compiles the JSP files from the src/main/webapp directory into the build/classes directory. |
+
+### Task ordering
+
+The Liberty Gradle plugin defines a built-in task order to allow a user to call an end task without worrying about calling the necessary tasks in between. By having the plugin manage tasks and their order of execution we can easily avoid some simple human errors. For example, in order to have a majority of the tasks function, the principal task `installLiberty` must be called, which our plugin would do for you.  
+  
+The most appealing benefit from defining a task order is the ability to allow the user to call an end task directly. For example, if the user calls `libertyStart` out of the box, Gradle will recognize that it must call `installLiberty -> libertyCreate -> installFeature -> installApps` to get a server with features and apps properly running.
+  
+Click on a [task](#tasks) to view what it depends on.

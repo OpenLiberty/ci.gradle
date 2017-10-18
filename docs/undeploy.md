@@ -2,6 +2,9 @@
 
 The `undeploy` task supports undeployment of one or more applications from the WebSphere Liberty server.
 
+### dependsOn
+`undeploy` depends on `libertyStart` for a running server. 
+
 ### Properties
 
 See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.

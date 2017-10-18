@@ -2,6 +2,10 @@
 
 The `libertyCreate` task is used to create a named Liberty server instance.
 
+### dependsOn
+
+`libertyCreate` depends on `installLiberty`.
+
 ### Properties
 
 Server configuration parameters were added to the [server extension](libertyExtensions.md#liberty-server-configuration) for flexible configuration. Running `libertyCreate` will update the configuration files if the server already exists.

@@ -33,9 +33,9 @@ class LibertyPackage_archiveZip_Test extends AbstractIntegrationTest{
         createDir(buildDir)
         if (test_mode == "offline"){
             WLP_DIR.replace("\\","/")
-            copyFile(buildFilename, new File(buildDir, 'build.gradle'))
+            copyBuildFiles(buildFilename, buildDir)
         } else if (test_mode == "online"){
-            copyFile(buildFilename, new File(buildDir, 'build.gradle'))
+            copyBuildFiles(buildFilename, buildDir)
             try {
                 runTasks(buildDir, 'installLiberty')
                 runTasks(buildDir, 'libertyStart')
