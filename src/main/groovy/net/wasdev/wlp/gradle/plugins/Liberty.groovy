@@ -59,6 +59,15 @@ class Liberty implements Plugin<Project> {
             Liberty.checkServerEnvProperties(project.liberty.server)
             //Server objects need to be set per task after the project configuration phase
             setServersForTasks(project)
+
+            if (!dependsOnApps(project.liberty.server)) {
+                if (project.plugins.hasPlugin('war')) {
+                    def tasks = project.tasks
+                    tasks.getByName('libertyRun').dependsOn 'installApps'
+                    tasks.getByName('libertyStart').dependsOn 'installApps'
+                    tasks.getByName('libertyPackage').dependsOn 'installApps'
+                }
+            }
         }
 
         project.task('compileJSP', type: CompileJSPTask) {
@@ -266,15 +275,8 @@ class Liberty implements Plugin<Project> {
     }
 
     private boolean dependsOnApps(ServerExtension server) {
-        boolean configuredApps = ((server.apps != null && !server.apps.isEmpty()) ||
-                                  (server.dropins != null && !server.dropins.isEmpty()))
-        if (!configuredApps) {
-            if (project.plugins.hasPlug('war')) {
-                server.apps = [project.war]
-                return true
-            }
-        }
-        return configuredApps
+        return ((server.apps != null && !server.apps.isEmpty()) ||
+                (server.dropins != null && !server.dropins.isEmpty()))
     }
 
     private boolean dependsOnFeature(ServerExtension server) {
