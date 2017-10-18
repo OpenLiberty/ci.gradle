@@ -50,9 +50,10 @@ class Liberty implements Plugin<Project> {
         project.configurations.create('libertyRuntime')
 
         //Create expected server extension from liberty extension data
-        project.afterEvaluate{
-            project.liberty.server = (project.liberty.server) ?: copyProperties(project.liberty)
-
+        project.afterEvaluate {
+            if (project.liberty.server == null) {
+                project.liberty.server = copyProperties(project.liberty)
+            }
             //Checking serverEnv files for server properties
             Liberty.checkEtcServerEnvProperties(project)
             Liberty.checkServerEnvProperties(project.liberty.server)
@@ -171,7 +172,6 @@ class Liberty implements Plugin<Project> {
             description 'Uninstall a feature from the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO
             group 'Liberty'
-            dependsOn 'libertyCreate'
         }
 
         project.task('cleanDirs', type: CleanTask) {
@@ -266,8 +266,15 @@ class Liberty implements Plugin<Project> {
     }
 
     private boolean dependsOnApps(ServerExtension server) {
-        return ((server.apps != null || server.dropins != null) ||
-                (server.bootstrapProperties != null && server.bootstrapProperties.containsKey('testAppLocation')))
+        boolean configuredApps = ((server.apps != null && !server.apps.isEmpty()) ||
+                                  (server.dropins != null && !server.dropins.isEmpty()))
+        if (!configuredApps) {
+            if (project.plugins.hasPlug('war')) {
+                server.apps = [project.war]
+                return true
+            }
+        }
+        return configuredApps
     }
 
     private boolean dependsOnFeature(ServerExtension server) {
