@@ -49,6 +49,9 @@ class Liberty implements Plugin<Project> {
         project.configurations.create('libertyLicense')
         project.configurations.create('libertyRuntime')
 
+        //Used to set project facets in Eclipse
+        project.pluginManager.apply('eclipse-wtp')
+
         //Create expected server extension from liberty extension data
         project.afterEvaluate{
             if (project.liberty.server == null) {
