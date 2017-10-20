@@ -17,11 +17,14 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import net.wasdev.wlp.gradle.plugins.extensions.DeployExtension
 import net.wasdev.wlp.gradle.plugins.extensions.LibertyExtension
+import net.wasdev.wlp.gradle.plugins.utils.*
 import org.gradle.api.GradleException
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import groovy.xml.MarkupBuilder
+import org.gradle.api.tasks.bundling.War
 
 abstract class AbstractServerTask extends AbstractTask {
 
@@ -211,6 +214,107 @@ abstract class AbstractServerTask extends AbstractTask {
         }
     }
 
+    protected void writePluginConfigXml(Project project) {
+        new File(project.buildDir, 'liberty-plugin-config.xml').withWriter { writer ->
+            def xml = new MarkupBuilder(writer)
+            xml.mkp.xmlDeclaration(version: "1.0", encoding: "UTF-8")
+            xml.'liberty-plugin-config' {
+                installDirectory (getInstallDir(project).toString())
+                serverDirectory (getServerDir(project).toString())
+                userDirectory (getUserDir(project).toString())
+
+                File serverOutputDir = getServerOutputDir(project)
+                if (serverOutputDir != null && serverOutputDir.exists()) {
+                    serverOutputDirectory (serverOutputDir.toString())
+                } else {
+                    serverOutputDirectory (getServerDir(project).toString())
+                }
+
+                serverName (server.name)
+
+                if (server.configDirectory != null && server.configDirectory.exists()) {
+                    configDirectory (server.configDirectory.toString())
+                }
+
+                if (server.configFile != null && server.configFile.exists()) {
+                    configFile (server.configFile.toString())
+                }
+
+                if (server.bootstrapProperties != null && !server.bootstrapProperties.isEmpty()) {
+                    bootstrapProperties {
+                        server.bootstrapProperties.collect { k, v ->
+                            "$k" (v.toString())
+                        }
+                    }
+                } else if (server.bootstrapPropertiesFile != null && server.bootstrapPropertiesFile.exists()) {
+                    bootstrapPropertiesFile (server.bootStrapPropertiesFile.toString())
+                }
+
+                if (server.jvmOptions != null && !server.jvmOptions.isEmpty()) {
+                    jvmOptions {
+                        server.jvmOptions.collect { v ->
+                            "params" (v.toString())
+                        }
+                    }
+                } else if (server.jvmOptionsFile != null && server.jvmOptionsFile.exists()) {
+                    jvmOptionsFile (server.jvmOptionsFile.toString())
+                }
+
+                if (server.serverEnv != null && server.serverEnv.exists()) {
+                    serverEnv (server.serverEnv.toString())
+                }
+
+                appsDirectory (server.appsDirectory)
+                looseApplication (server.looseApplication)
+                stripVersion (server.stripVersion)
+                installAppPackages ('project')
+
+                if (project.plugins.hasPlugin("war")) {
+                    if (server.looseApplication) {
+                        applicationFileName (project.war.archiveName + '.xml')
+                    } else {
+                        applicationFileName (project.war.archiveName)
+                    }
+                    warSourceDirectory (project.webAppDirName)
+                }
+
+                if (project.configurations.libertyRuntime != null) {
+                    project.configurations.libertyRuntime.dependencies.each { libertyArtifact ->
+                        assemblyArtifact {
+                            groupId (libertyArtifact.group)
+                            artifactId (libertyArtifact.name)
+                            version (libertyArtifact.version)
+                            type ('zip')
+                        }
+
+                        assemblyArchive (project.configurations.libertyRuntime.resolvedConfiguration.resolvedArtifacts.getAt(0).file.toString())
+                    }
+                }
+
+                assemblyInstallDirectory (project.liberty.install.baseDir ?: project.buildDir)
+
+                File installAppsConfigDropinsFile = ApplicationXmlDocument.getApplicationXmlFile(getServerDir(project))
+                if (installAppsConfigDropinsFile.exists()) {
+                    installAppsConfigDropins (installAppsConfigDropinsFile.toString())
+                }
+
+                projectType (getPackagingType())
+
+                Project parent = project.getParent()
+                if (parent != null) {
+                    aggregatorParentId (parent.getName())
+                    aggregatorParentBaseDir (parent.getProjectDir())
+                }
+
+                if (!project.configurations.compile.dependencies.isEmpty()) {
+                    project.configurations.compile.dependencies.each { dependency ->
+                        projectCompileDepenency (dependency.group + ':' + dependency.name + ':' + dependency.version)
+                    }
+                }
+            }
+        }
+    }
+
     private void writeBootstrapProperties(File file, Map<String, Object> properties) throws IOException {
         makeParentDirectory(file)
         PrintWriter writer = null
@@ -252,7 +356,7 @@ abstract class AbstractServerTask extends AbstractTask {
         }
     }
 
-    private String getPackagingType() throws Exception{
+    protected String getPackagingType() throws Exception{
       if (project.plugins.hasPlugin("war") || !project.tasks.withType(War).isEmpty()) {
           return "war"
       }
