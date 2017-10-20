@@ -25,6 +25,7 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import groovy.xml.MarkupBuilder
 import org.gradle.api.tasks.bundling.War
+import org.gradle.plugins.ear.Ear
 
 abstract class AbstractServerTask extends AbstractTask {
 
@@ -223,9 +224,9 @@ abstract class AbstractServerTask extends AbstractTask {
                 serverDirectory (getServerDir(project).toString())
                 userDirectory (getUserDir(project).toString())
 
-                File serverOutputDir = getServerOutputDir(project)
-                if (serverOutputDir != null && serverOutputDir.exists()) {
-                    serverOutputDirectory (serverOutputDir.toString())
+                String serverOutputDir = getServerOutputDir(project)
+                if (serverOutputDir != null && !serverOutputDir.isEmpty()) {
+                    serverOutputDirectory (serverOutputDir)
                 } else {
                     serverOutputDirectory (getServerDir(project).toString())
                 }
@@ -247,7 +248,7 @@ abstract class AbstractServerTask extends AbstractTask {
                         }
                     }
                 } else if (server.bootstrapPropertiesFile != null && server.bootstrapPropertiesFile.exists()) {
-                    bootstrapPropertiesFile (server.bootStrapPropertiesFile.toString())
+                    bootstrapPropertiesFile (server.bootstrapPropertiesFile.toString())
                 }
 
                 if (server.jvmOptions != null && !server.jvmOptions.isEmpty()) {
@@ -298,7 +299,9 @@ abstract class AbstractServerTask extends AbstractTask {
                     installAppsConfigDropins (installAppsConfigDropinsFile.toString())
                 }
 
-                projectType (getPackagingType())
+                if (project.plugins.hasPlugin("war") || project.plugins.hasPlugin("ear")) {
+                    projectType (getPackagingType())
+                }
 
                 Project parent = project.getParent()
                 if (parent != null) {
@@ -306,7 +309,7 @@ abstract class AbstractServerTask extends AbstractTask {
                     aggregatorParentBaseDir (parent.getProjectDir())
                 }
 
-                if (!project.configurations.compile.dependencies.isEmpty()) {
+                if (project.configurations.findByName('compile') && !project.configurations.compile.dependencies.isEmpty()) {
                     project.configurations.compile.dependencies.each { dependency ->
                         projectCompileDepenency (dependency.group + ':' + dependency.name + ':' + dependency.version)
                     }
