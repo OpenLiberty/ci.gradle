@@ -215,105 +215,119 @@ abstract class AbstractServerTask extends AbstractTask {
         }
     }
 
+    protected void outputProjectDirectoriesToXml(MarkupBuilder xmlDoc) {
+        xmlDoc.installDirectory (getInstallDir(project).toString())
+        xmlDoc.serverDirectory (getServerDir(project).toString())
+        xmlDoc.userDirectory (getUserDir(project).toString())
+
+        String serverOutputDir = getServerOutputDir(project)
+        if (serverOutputDir != null && !serverOutputDir.isEmpty()) {
+            xmlDoc.serverOutputDirectory (serverOutputDir)
+        } else {
+            xmlDoc.serverOutputDirectory (getServerDir(project).toString())
+        }
+    }
+
+    protected void outputServerPropertiesToXml(MarkupBuilder xmlDoc) {
+        xmlDoc.serverName (server.name)
+
+        if (server.configDirectory != null && server.configDirectory.exists()) {
+            xmlDoc.configDirectory (server.configDirectory.toString())
+        }
+
+        if (server.configFile != null && server.configFile.exists()) {
+            xmlDoc.configFile (server.configFile.toString())
+        }
+
+        if (server.bootstrapProperties != null && !server.bootstrapProperties.isEmpty()) {
+            xmlDoc.bootstrapProperties {
+                server.bootstrapProperties.collect { k, v ->
+                    "$k" (v.toString())
+                }
+            }
+        } else if (server.bootstrapPropertiesFile != null && server.bootstrapPropertiesFile.exists()) {
+            xmlDoc.bootstrapPropertiesFile (server.bootstrapPropertiesFile.toString())
+        }
+
+        if (server.jvmOptions != null && !server.jvmOptions.isEmpty()) {
+            xmlDoc.jvmOptions {
+                server.jvmOptions.collect { v ->
+                    "params" (v.toString())
+                }
+            }
+        } else if (server.jvmOptionsFile != null && server.jvmOptionsFile.exists()) {
+            xmlDoc.jvmOptionsFile (server.jvmOptionsFile.toString())
+        }
+
+        if (server.serverEnv != null && server.serverEnv.exists()) {
+            xmlDoc.serverEnv (server.serverEnv.toString())
+        }
+
+        xmlDoc.appsDirectory (server.appsDirectory)
+        xmlDoc.looseApplication (server.looseApplication)
+        xmlDoc.stripVersion (server.stripVersion)
+    }
+
+    protected void outputArchivePropertiesToXml(MarkupBuilder xmlDoc) {
+        xmlDoc.installAppPackages ('project')
+
+        if (project.plugins.hasPlugin("war")) {
+            if (server.looseApplication) {
+                xmlDoc.applicationFileName (project.war.archiveName + '.xml')
+            } else {
+                xmlDoc.applicationFileName (project.war.archiveName)
+            }
+            xmlDoc.warSourceDirectory (project.webAppDirName)
+        }
+
+        if (project.configurations.libertyRuntime != null) {
+            project.configurations.libertyRuntime.dependencies.each { libertyArtifact ->
+                xmlDoc.assemblyArtifact {
+                    groupId (libertyArtifact.group)
+                    artifactId (libertyArtifact.name)
+                    version (libertyArtifact.version)
+                    type ('zip')
+                }
+
+                xmlDoc.assemblyArchive (project.configurations.libertyRuntime.resolvedConfiguration.resolvedArtifacts.getAt(0).file.toString())
+            }
+        }
+
+        xmlDoc.assemblyInstallDirectory (project.liberty.install.baseDir ?: project.buildDir)
+
+        File installAppsConfigDropinsFile = ApplicationXmlDocument.getApplicationXmlFile(getServerDir(project))
+        if (installAppsConfigDropinsFile.exists()) {
+            xmlDoc.installAppsConfigDropins (installAppsConfigDropinsFile.toString())
+        }
+
+        if (project.plugins.hasPlugin("war") || project.plugins.hasPlugin("ear")) {
+            xmlDoc.projectType (getPackagingType())
+        }
+    }
+
+    protected void outputDependenciesToXml(MarkupBuilder xmlDoc) {
+        Project parent = project.getParent()
+        if (parent != null) {
+            xmlDoc.aggregatorParentId (parent.getName())
+            xmlDoc.aggregatorParentBaseDir (parent.getProjectDir())
+        }
+
+        if (project.configurations.findByName('compile') && !project.configurations.compile.dependencies.isEmpty()) {
+            project.configurations.compile.dependencies.each { dependency ->
+                xmlDoc.projectCompileDepenency (dependency.group + ':' + dependency.name + ':' + dependency.version)
+            }
+        }
+    }
+
     protected void writePluginConfigXml(Project project) {
         new File(project.buildDir, 'liberty-plugin-config.xml').withWriter { writer ->
-            def xml = new MarkupBuilder(writer)
-            xml.mkp.xmlDeclaration(version: "1.0", encoding: "UTF-8")
-            xml.'liberty-plugin-config' {
-                installDirectory (getInstallDir(project).toString())
-                serverDirectory (getServerDir(project).toString())
-                userDirectory (getUserDir(project).toString())
-
-                String serverOutputDir = getServerOutputDir(project)
-                if (serverOutputDir != null && !serverOutputDir.isEmpty()) {
-                    serverOutputDirectory (serverOutputDir)
-                } else {
-                    serverOutputDirectory (getServerDir(project).toString())
-                }
-
-                serverName (server.name)
-
-                if (server.configDirectory != null && server.configDirectory.exists()) {
-                    configDirectory (server.configDirectory.toString())
-                }
-
-                if (server.configFile != null && server.configFile.exists()) {
-                    configFile (server.configFile.toString())
-                }
-
-                if (server.bootstrapProperties != null && !server.bootstrapProperties.isEmpty()) {
-                    bootstrapProperties {
-                        server.bootstrapProperties.collect { k, v ->
-                            "$k" (v.toString())
-                        }
-                    }
-                } else if (server.bootstrapPropertiesFile != null && server.bootstrapPropertiesFile.exists()) {
-                    bootstrapPropertiesFile (server.bootstrapPropertiesFile.toString())
-                }
-
-                if (server.jvmOptions != null && !server.jvmOptions.isEmpty()) {
-                    jvmOptions {
-                        server.jvmOptions.collect { v ->
-                            "params" (v.toString())
-                        }
-                    }
-                } else if (server.jvmOptionsFile != null && server.jvmOptionsFile.exists()) {
-                    jvmOptionsFile (server.jvmOptionsFile.toString())
-                }
-
-                if (server.serverEnv != null && server.serverEnv.exists()) {
-                    serverEnv (server.serverEnv.toString())
-                }
-
-                appsDirectory (server.appsDirectory)
-                looseApplication (server.looseApplication)
-                stripVersion (server.stripVersion)
-                installAppPackages ('project')
-
-                if (project.plugins.hasPlugin("war")) {
-                    if (server.looseApplication) {
-                        applicationFileName (project.war.archiveName + '.xml')
-                    } else {
-                        applicationFileName (project.war.archiveName)
-                    }
-                    warSourceDirectory (project.webAppDirName)
-                }
-
-                if (project.configurations.libertyRuntime != null) {
-                    project.configurations.libertyRuntime.dependencies.each { libertyArtifact ->
-                        assemblyArtifact {
-                            groupId (libertyArtifact.group)
-                            artifactId (libertyArtifact.name)
-                            version (libertyArtifact.version)
-                            type ('zip')
-                        }
-
-                        assemblyArchive (project.configurations.libertyRuntime.resolvedConfiguration.resolvedArtifacts.getAt(0).file.toString())
-                    }
-                }
-
-                assemblyInstallDirectory (project.liberty.install.baseDir ?: project.buildDir)
-
-                File installAppsConfigDropinsFile = ApplicationXmlDocument.getApplicationXmlFile(getServerDir(project))
-                if (installAppsConfigDropinsFile.exists()) {
-                    installAppsConfigDropins (installAppsConfigDropinsFile.toString())
-                }
-
-                if (project.plugins.hasPlugin("war") || project.plugins.hasPlugin("ear")) {
-                    projectType (getPackagingType())
-                }
-
-                Project parent = project.getParent()
-                if (parent != null) {
-                    aggregatorParentId (parent.getName())
-                    aggregatorParentBaseDir (parent.getProjectDir())
-                }
-
-                if (project.configurations.findByName('compile') && !project.configurations.compile.dependencies.isEmpty()) {
-                    project.configurations.compile.dependencies.each { dependency ->
-                        projectCompileDepenency (dependency.group + ':' + dependency.name + ':' + dependency.version)
-                    }
-                }
+            def xmlDoc = new MarkupBuilder(writer)
+            xmlDoc.mkp.xmlDeclaration(version: "1.0", encoding: "UTF-8")
+            xmlDoc.'liberty-plugin-config'() {
+                outputProjectDirectoriesToXml(xmlDoc)
+                outputServerPropertiesToXml(xmlDoc)
+                outputArchivePropertiesToXml(xmlDoc)
+                outputDependenciesToXml(xmlDoc)
             }
         }
     }
