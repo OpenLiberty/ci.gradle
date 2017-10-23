@@ -24,6 +24,7 @@ class CreateTask extends AbstractServerTask {
     void create() {
         //Checking etc/server.env for outputDirs
         Liberty.checkEtcServerEnvProperties(project)
+        writePluginConfigXml(project)
         if(!getServerDir(project).exists()){
             def params = buildLibertyMap(project);
             if (project.liberty.server.template != null && project.liberty.server.template.length() != 0) {

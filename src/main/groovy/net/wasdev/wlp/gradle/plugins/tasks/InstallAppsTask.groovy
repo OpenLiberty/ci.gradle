@@ -57,7 +57,6 @@ class InstallAppsTask extends AbstractServerTask {
             installMultipleApps(dropinsLists[0], 'dropins')
             installFileList(dropinsLists[1], 'dropins')
         }
-
         if (applicationXml.hasChildElements()) {
             logger.warn("At least one application is not defined in the server configuration but the build file indicates it should be installed in the apps folder. Application configuration is being added to the target server configuration dropins folder by the plug-in.");
             applicationXml.writeApplicationXmlDocument(getServerDir(project));
@@ -210,18 +209,6 @@ class InstallAppsTask extends AbstractServerTask {
     }
     private String getLooseConfigFileName(Task task){
       return getArchiveName(task) + ".xml"
-    }
-
-    private String getPackagingType() throws Exception{
-      if (project.plugins.hasPlugin("war") || !project.tasks.withType(War).isEmpty()) {
-          return "war"
-      }
-      else if (project.plugins.hasPlugin("ear") || !project.tasks.withType(Ear).isEmpty()) {
-          return "ear"
-      }
-      else {
-          throw new GradleException("Archive path not found. Supported formats are jar, war, and ear.")
-      }
     }
 
     //Cleans up the application if the install style is switched from loose application to archive and vice versa
