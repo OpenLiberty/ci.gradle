@@ -17,7 +17,7 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import net.wasdev.wlp.gradle.plugins.extensions.DeployExtension
 import net.wasdev.wlp.gradle.plugins.extensions.LibertyExtension
-import net.wasdev.wlp.gradle.plugins.utils.*
+import net.wasdev.wlp.gradle.plugins.utils.ApplicationXmlDocument
 import org.gradle.api.GradleException
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
