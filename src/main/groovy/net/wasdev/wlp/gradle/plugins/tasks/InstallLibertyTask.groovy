@@ -19,6 +19,8 @@ import javax.xml.parsers.*
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
+import net.wasdev.wlp.gradle.plugins.utils.ApplicationXmlDocument
+import groovy.xml.MarkupBuilder
 
 class InstallLibertyTask extends AbstractTask {
 
@@ -41,6 +43,8 @@ class InstallLibertyTask extends AbstractTask {
         } else {
             logger.info ("Liberty is already installed at: " + getInstallDir(project))
         }
+
+        createPluginXmlFile(project)
     }
 
     private Map<String, String> buildInstallLibertyMap(Project project) {
@@ -92,6 +96,44 @@ class InstallLibertyTask extends AbstractTask {
         result.put('offline', project.gradle.startParameter.offline)
 
         return result
+    }
+
+    protected void outputLibertyPropertiesToXml(MarkupBuilder xmlDoc) {
+        xmlDoc.userDirectory (getUserDir(project).toString())
+        xmlDoc.installDirectory (getInstallDir(project).toString())
+        xmlDoc.installAppPackages ('project')
+
+        if (project.configurations.libertyRuntime != null) {
+            project.configurations.libertyRuntime.dependencies.each { libertyArtifact ->
+                xmlDoc.assemblyArtifact {
+                    groupId (libertyArtifact.group)
+                    artifactId (libertyArtifact.name)
+                    version (libertyArtifact.version)
+                    type ('zip')
+                }
+
+                xmlDoc.assemblyArchive (project.configurations.libertyRuntime.resolvedConfiguration.resolvedArtifacts.getAt(0).file.toString())
+            }
+        }
+
+        xmlDoc.assemblyInstallDirectory (project.liberty.install.baseDir ?: project.buildDir)
+
+
+        if (project.plugins.hasPlugin("war")) {
+            xmlDoc.projectType ('war')
+        } else if (project.plugins.hasPlugin("ear")) {
+            xmlDoc.projectType ('ear')
+        }
+    }
+
+    protected void createPluginXmlFile(Project project) {
+        new File(project.buildDir, 'liberty-plugin-config.xml').withWriter { writer ->
+            def xmlDoc = new MarkupBuilder(writer)
+            xmlDoc.mkp.xmlDeclaration(version: "1.0", encoding: "UTF-8")
+            xmlDoc.'liberty-plugin-config'() {
+                outputLibertyPropertiesToXml(xmlDoc)
+            }
+        }
     }
 
 }
