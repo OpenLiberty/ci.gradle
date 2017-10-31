@@ -129,9 +129,8 @@ abstract class AbstractServerTask extends AbstractTask {
         if (server.configDirectory != null) {
             if(server.configDirectory.exists()){
                 // copy configuration files from configuration directory to server directory if end-user set it
-                def copyAnt = new AntBuilder()
-                copyAnt.copy(todir: serverDirectory) {
-                    fileset(dir: server.configDirectory.getCanonicalPath())
+                server.configDirectory.listFiles().each { file ->
+                    Files.copy(file.toPath(), new File(serverDirectory, file.name).toPath(), StandardCopyOption.REPLACE_EXISTING)
                 }
 
                 File configDirServerXML = new File(server.configDirectory, "server.xml")
