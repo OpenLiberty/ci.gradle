@@ -379,7 +379,6 @@ public class ServerConfigDocument {
                 if(pair.getKey().equals(key)) {
                     return pair.getValue().toString();
                 }
-                it.remove(); // avoids a ConcurrentModificationException
             }
         }
         return nodeValue;
