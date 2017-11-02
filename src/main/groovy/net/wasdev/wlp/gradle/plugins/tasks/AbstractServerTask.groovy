@@ -129,7 +129,7 @@ abstract class AbstractServerTask extends AbstractTask {
 
         if (server.configDirectory != null) {
             if(server.configDirectory.exists()){
-
+                // copy configuration files from configuration directory to server directory if end-user set it
                 FileUtils.copyDirectory(server.configDirectory, getServerDir(project))
 
                 File configDirServerXML = new File(server.configDirectory, "server.xml")
