@@ -24,7 +24,7 @@ import org.gradle.api.Project
 import java.io.PrintWriter
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
-import groovy.xml.MarkupBuilder
+import groovy.xml.StreamingMarkupBuilder
 import groovy.util.XmlParser
 import groovy.util.XmlNodePrinter
 import groovy.util.slurpersupport.GPathResult
@@ -276,7 +276,7 @@ abstract class AbstractServerTask extends AbstractTask {
     protected void createApplicationElements(Node applicationsNode, List<Objects> appList, String appDir) {
         appList.each { Object appObj ->
             Node application = new Node(null, 'application')
-            if (appObj instanceof Task) { //Assuming these tasks are going to be war tasks so project.webAppDirName should be okay but it's not super tight
+            if (appObj instanceof Task) {
                 application.appendNode('appsDirectory', appDir)
                 if (server.looseApplication) {
                     application.appendNode('applicationFileName', appObj.archiveName + '.xml')
@@ -337,7 +337,6 @@ abstract class AbstractServerTask extends AbstractTask {
 
     protected void writeServerPropertiesToXml(Project project) {
         XmlParser pluginXmlParser = new XmlParser()
-        //Do we need to check the file first?
         Node libertyPluginConfig = pluginXmlParser.parse(new File(project.buildDir, 'liberty-plugin-config.xml'))
         if (libertyPluginConfig.getAt('servers').isEmpty()) {
             libertyPluginConfig.appendNode('servers')
@@ -351,10 +350,11 @@ abstract class AbstractServerTask extends AbstractTask {
 
         libertyPluginConfig.getAt('servers')[0].append(serverNode)
 
-        new File( project.buildDir, 'liberty-plugin-config.xml' ).withWriter { output ->
-          XmlNodePrinter printer = new XmlNodePrinter( new PrintWriter(output) )
-          printer.preserveWhitespace = true //need to figure out how to keep comments, if we need that comment line
-          printer.print( libertyPluginConfig )
+        new File( project.buildDir, 'liberty-plugin-config.xml' ).withWriter('UTF-8') { output ->
+            output << new StreamingMarkupBuilder().bind { mkp.xmlDeclaration(encoding: 'UTF-8', version: '1.0' ) }
+            XmlNodePrinter printer = new XmlNodePrinter( new PrintWriter(output) )
+            printer.preserveWhitespace = true
+            printer.print( libertyPluginConfig )
         }
     }
 
