@@ -402,18 +402,21 @@ public class ServerConfigDocument {
     private static String getResolvedVariable(String nodeValue) {
         final String VARIABLE_NAME_PATTERN = "\\$\\{(.*?)\\}";
 
-        String resolved = nodeValue;
         Pattern varNamePattern = Pattern.compile(VARIABLE_NAME_PATTERN);
         Matcher varNameMatcher = varNamePattern.matcher(nodeValue);
 
         while (varNameMatcher.find()) {
-            String variable = getProperties().getProperty(varNameMatcher.group(1));
-
-            if (variable != null && !variable.isEmpty()) {
-                resolved = resolved.replaceAll("\\$\\{" +  varNameMatcher.group(1) + "\\}", variable);
+            String key = varNameMatcher.group(1);
+            String variable = getProperties().getProperty(key);
+            java.util.Iterator it = getProperties().entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry)it.next();
+                if(pair.getKey().equals(key)) {
+                    return pair.getValue().toString();
+                }
             }
         }
-        return resolved;
+        return nodeValue;
     }
 
     private static void parseVariables(Document doc) throws XPathExpressionException {
