@@ -21,12 +21,16 @@ import net.wasdev.wlp.gradle.plugins.utils.ApplicationXmlDocument
 import org.gradle.api.GradleException
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import java.io.PrintWriter
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import groovy.xml.StreamingMarkupBuilder
+import groovy.util.XmlParser
+import groovy.util.XmlNodePrinter
 import org.apache.commons.io.FileUtils
-import groovy.xml.MarkupBuilder
 import org.gradle.api.tasks.bundling.War
 import org.gradle.plugins.ear.Ear
+import org.gradle.api.Task
 
 abstract class AbstractServerTask extends AbstractTask {
 
@@ -213,120 +217,146 @@ abstract class AbstractServerTask extends AbstractTask {
         }
     }
 
-    protected void outputProjectDirectoriesToXml(MarkupBuilder xmlDoc) {
-        xmlDoc.installDirectory (getInstallDir(project).toString())
-        xmlDoc.serverDirectory (getServerDir(project).toString())
-        xmlDoc.userDirectory (getUserDir(project).toString())
-
+    protected void setServerDirectoryNodes(Project project, Node serverNode) {
+        serverNode.appendNode('serverDirectory', getServerDir(project).toString())
         String serverOutputDir = getServerOutputDir(project)
         if (serverOutputDir != null && !serverOutputDir.isEmpty()) {
-            xmlDoc.serverOutputDirectory (serverOutputDir)
+            serverNode.appendNode('serverOutputDirectory', serverOutputDir)
         } else {
-            xmlDoc.serverOutputDirectory (getServerDir(project).toString())
+            serverNode.appendNode('serverOutputDirectory', getServerDir(project).toString())
         }
     }
 
-    protected void outputServerPropertiesToXml(MarkupBuilder xmlDoc) {
-        xmlDoc.serverName (server.name)
-
+    protected void setServerPropertyNodes(Project project, Node serverNode) {
+        serverNode.appendNode('serverName', server.name)
         if (server.configDirectory != null && server.configDirectory.exists()) {
-            xmlDoc.configDirectory (server.configDirectory.toString())
+            serverNode.appendNode('configDirectory', server.configDirectory.toString())
         }
 
         if (server.configFile != null && server.configFile.exists()) {
-            xmlDoc.configFile (server.configFile.toString())
+            serverNode.appendNode('configFile', server.configFile.toString())
         }
 
         if (server.bootstrapProperties != null && !server.bootstrapProperties.isEmpty()) {
-            xmlDoc.bootstrapProperties {
-                server.bootstrapProperties.collect { k, v ->
-                    "$k" (v.toString())
-                }
+            Node bootstrapProperties = new Node(null, 'bootstrapProperties')
+            server.bootstrapProperties.each { k, v ->
+                bootstrapProperties.appendNode(k, v.toString())
             }
+            serverNode.append(bootstrapProperties)
         } else if (server.bootstrapPropertiesFile != null && server.bootstrapPropertiesFile.exists()) {
-            xmlDoc.bootstrapPropertiesFile (server.bootstrapPropertiesFile.toString())
+            serverNode.appendNode('bootstrapPropertiesFile', server.bootstrapPropertiesFile.toString())
         }
 
         if (server.jvmOptions != null && !server.jvmOptions.isEmpty()) {
-            xmlDoc.jvmOptions {
-                server.jvmOptions.collect { v ->
-                    "params" (v.toString())
-                }
+            Node jvmOptions = new Node(null, 'jvmOptions')
+            server.jvmOptions.each { v ->
+                jvmOptions.appendNode('params', v.toString())
             }
+            serverNode.append(jvmOptions)
         } else if (server.jvmOptionsFile != null && server.jvmOptionsFile.exists()) {
-            xmlDoc.jvmOptionsFile (server.jvmOptionsFile.toString())
+            serverNode.appendNode('jvmOptionsFile', server.jvmOptionsFile.toString())
         }
 
         if (server.serverEnv != null && server.serverEnv.exists()) {
-            xmlDoc.serverEnv (server.serverEnv.toString())
+            serverNode.appendNode('serverEnv', server.serverEnv.toString())
         }
 
-        xmlDoc.appsDirectory (server.appsDirectory)
-        xmlDoc.looseApplication (server.looseApplication)
-        xmlDoc.stripVersion (server.stripVersion)
-    }
-
-    protected void outputArchivePropertiesToXml(MarkupBuilder xmlDoc) {
-        xmlDoc.installAppPackages ('project')
-
-        if (project.plugins.hasPlugin("war")) {
-            if (server.looseApplication) {
-                xmlDoc.applicationFileName (project.war.archiveName + '.xml')
-            } else {
-                xmlDoc.applicationFileName (project.war.archiveName)
-            }
-            xmlDoc.warSourceDirectory (project.webAppDirName)
-        }
-
-        if (project.configurations.libertyRuntime != null) {
-            project.configurations.libertyRuntime.dependencies.each { libertyArtifact ->
-                xmlDoc.assemblyArtifact {
-                    groupId (libertyArtifact.group)
-                    artifactId (libertyArtifact.name)
-                    version (libertyArtifact.version)
-                    type ('zip')
-                }
-
-                xmlDoc.assemblyArchive (project.configurations.libertyRuntime.resolvedConfiguration.resolvedArtifacts.getAt(0).file.toString())
-            }
-        }
-
-        xmlDoc.assemblyInstallDirectory (project.liberty.install.baseDir ?: project.buildDir)
+        serverNode.appendNode('looseApplication', server.looseApplication)
+        serverNode.appendNode('stripVersion', server.stripVersion)
 
         File installAppsConfigDropinsFile = ApplicationXmlDocument.getApplicationXmlFile(getServerDir(project))
         if (installAppsConfigDropinsFile.exists()) {
-            xmlDoc.installAppsConfigDropins (installAppsConfigDropinsFile.toString())
-        }
-
-        if (project.plugins.hasPlugin("war") || project.plugins.hasPlugin("ear")) {
-            xmlDoc.projectType (getPackagingType())
+            serverNode.appendNode('installAppsConfigDropins', installAppsConfigDropinsFile.toString())
         }
     }
 
-    protected void outputDependenciesToXml(MarkupBuilder xmlDoc) {
+    protected void createApplicationElements(Node applicationsNode, List<Objects> appList, String appDir) {
+        appList.each { Object appObj ->
+            Node application = new Node(null, 'application')
+            if (appObj instanceof Task) {
+                application.appendNode('appsDirectory', appDir)
+                if (server.looseApplication) {
+                    application.appendNode('applicationFileName', appObj.archiveName + '.xml')
+                } else {
+                    application.appendNode('applicationFileName', appObj.archiveName)
+                }
+                if (appObj instanceof War) {
+                    application.appendNode('warSourceDirectory', project.webAppDirName)
+                }
+            } else if (appObj instanceof File) {
+                application.appendNode('appsDirectory', appDir)
+                if (server.looseApplication) {
+                    application.appendNode('applicationFileName', appObj.name + '.xml')
+                } else {
+                    application.appendNode('applicationFileName', appObj.name)
+                }
+            }
+
+            if(!application.children().isEmpty()) {
+                if (project.plugins.hasPlugin("war")) {
+                    application.appendNode('projectType', 'war')
+                } else if (project.plugins.hasPlugin("ear")) {
+                    application.appendNode('projectType', 'ear')
+                }
+                applicationsNode.append(application)
+            }
+        }
+    }
+
+    protected void setApplicationPropertyNodes(Project project, Node serverNode) {
+        Node applicationsNode;
+        if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
+            if (project.plugins.hasPlugin('war')) {
+                applicationsNode = new Node(null, 'applications')
+                createApplicationElements(applicationsNode, [project.tasks.war], 'apps')
+                serverNode.append(applicationsNode)
+            }
+        } else {
+            applicationsNode = new Node(null, 'applications')
+            if (server.apps != null && !server.apps.isEmpty()) {
+                createApplicationElements(applicationsNode, server.apps, 'apps')
+            }
+            if (server.dropins != null && !server.dropins.isEmpty()) {
+                createApplicationElements(applicationsNode, server.dropins, 'dropins')
+            }
+            serverNode.append(applicationsNode)
+        }
+    }
+
+    protected void setDependencyNodes(Project project, Node serverNode) {
         Project parent = project.getParent()
         if (parent != null) {
-            xmlDoc.aggregatorParentId (parent.getName())
-            xmlDoc.aggregatorParentBaseDir (parent.getProjectDir())
+            serverNode.appendNode('aggregatorParentId', parent.getName())
+            serverNode.appendNode('aggregatorParentBaseDir', parent.getProjectDir())
         }
 
         if (project.configurations.findByName('compile') && !project.configurations.compile.dependencies.isEmpty()) {
             project.configurations.compile.dependencies.each { dependency ->
-                xmlDoc.projectCompileDepenency (dependency.group + ':' + dependency.name + ':' + dependency.version)
+                serverNode.appendNode('projectCompileDepenency', dependency.group + ':' + dependency.name + ':' + dependency.version)
             }
         }
     }
 
-    protected void writePluginConfigXml(Project project) {
-        new File(project.buildDir, 'liberty-plugin-config.xml').withWriter { writer ->
-            def xmlDoc = new MarkupBuilder(writer)
-            xmlDoc.mkp.xmlDeclaration(version: "1.0", encoding: "UTF-8")
-            xmlDoc.'liberty-plugin-config'() {
-                outputProjectDirectoriesToXml(xmlDoc)
-                outputServerPropertiesToXml(xmlDoc)
-                outputArchivePropertiesToXml(xmlDoc)
-                outputDependenciesToXml(xmlDoc)
-            }
+    protected void writeServerPropertiesToXml(Project project) {
+        XmlParser pluginXmlParser = new XmlParser()
+        Node libertyPluginConfig = pluginXmlParser.parse(new File(project.buildDir, 'liberty-plugin-config.xml'))
+        if (libertyPluginConfig.getAt('servers').isEmpty()) {
+            libertyPluginConfig.appendNode('servers')
+        }
+        Node serverNode = new Node(null, 'server')
+
+        setServerDirectoryNodes(project, serverNode)
+        setServerPropertyNodes(project, serverNode)
+        setApplicationPropertyNodes(project, serverNode)
+        setDependencyNodes(project, serverNode)
+
+        libertyPluginConfig.getAt('servers')[0].append(serverNode)
+
+        new File( project.buildDir, 'liberty-plugin-config.xml' ).withWriter('UTF-8') { output ->
+            output << new StreamingMarkupBuilder().bind { mkp.xmlDeclaration(encoding: 'UTF-8', version: '1.0' ) }
+            XmlNodePrinter printer = new XmlNodePrinter( new PrintWriter(output) )
+            printer.preserveWhitespace = true
+            printer.print( libertyPluginConfig )
         }
     }
 
