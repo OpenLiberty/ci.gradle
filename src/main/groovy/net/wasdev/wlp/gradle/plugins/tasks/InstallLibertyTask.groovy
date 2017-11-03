@@ -111,18 +111,8 @@ class InstallLibertyTask extends AbstractTask {
                     version (libertyArtifact.version)
                     type ('zip')
                 }
-
                 xmlDoc.assemblyArchive (project.configurations.libertyRuntime.resolvedConfiguration.resolvedArtifacts.getAt(0).file.toString())
             }
-        }
-
-        xmlDoc.assemblyInstallDirectory (project.liberty.install.baseDir ?: project.buildDir)
-
-
-        if (project.plugins.hasPlugin("war")) {
-            xmlDoc.projectType ('war')
-        } else if (project.plugins.hasPlugin("ear")) {
-            xmlDoc.projectType ('ear')
         }
     }
 
@@ -130,10 +120,9 @@ class InstallLibertyTask extends AbstractTask {
         new File(project.buildDir, 'liberty-plugin-config.xml').withWriter { writer ->
             def xmlDoc = new MarkupBuilder(writer)
             xmlDoc.mkp.xmlDeclaration(version: "1.0", encoding: "UTF-8")
-            xmlDoc.'liberty-plugin-config'() {
+            xmlDoc.'liberty-plugin-config'('version':'2.0') {
                 outputLibertyPropertiesToXml(xmlDoc)
             }
         }
     }
-
 }

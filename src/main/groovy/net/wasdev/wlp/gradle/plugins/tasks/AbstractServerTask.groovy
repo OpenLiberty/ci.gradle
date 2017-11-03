@@ -27,7 +27,6 @@ import java.nio.file.StandardCopyOption
 import groovy.xml.StreamingMarkupBuilder
 import groovy.util.XmlParser
 import groovy.util.XmlNodePrinter
-import groovy.util.slurpersupport.GPathResult
 import org.gradle.api.tasks.bundling.War
 import org.gradle.plugins.ear.Ear
 import org.gradle.api.Task
@@ -296,6 +295,11 @@ abstract class AbstractServerTask extends AbstractTask {
             }
 
             if(!application.children().isEmpty()) {
+                if (project.plugins.hasPlugin("war")) {
+                    application.appendNode('projectType', 'war')
+                } else if (project.plugins.hasPlugin("ear")) {
+                    application.appendNode('projectType', 'ear')
+                }
                 applicationsNode.append(application)
             }
         }
