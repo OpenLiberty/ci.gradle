@@ -23,6 +23,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import org.apache.commons.io.FileUtils
 import groovy.xml.MarkupBuilder
 import org.gradle.api.tasks.bundling.War
 import org.gradle.plugins.ear.Ear
@@ -129,10 +130,7 @@ abstract class AbstractServerTask extends AbstractTask {
         if (server.configDirectory != null) {
             if(server.configDirectory.exists()){
                 // copy configuration files from configuration directory to server directory if end-user set it
-                def copyAnt = new AntBuilder()
-                copyAnt.copy(todir: serverDirectory) {
-                    fileset(dir: server.configDirectory.getCanonicalPath())
-                }
+                FileUtils.copyDirectory(server.configDirectory, getServerDir(project))
 
                 File configDirServerXML = new File(server.configDirectory, "server.xml")
                 if (configDirServerXML.exists()) {
