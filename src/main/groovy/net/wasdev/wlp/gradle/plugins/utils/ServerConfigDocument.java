@@ -43,16 +43,16 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class ServerConfigDocument {
-    private static ServerConfigDocument instance;
-    private static DocumentBuilder docBuilder;
+    private  ServerConfigDocument instance;
+    private  DocumentBuilder docBuilder;
 
-    private static File configDirectory;
-    private static File serverFile;
+    private  File configDirectory;
+    private  File serverFile;
 
-    private static Set<String> locations;
-    private static Set<String> names;
-    private static Set<String> namelessLocations;
-    private static Properties props;
+    private  Set<String> locations;
+    private  Set<String> names;
+    private  Set<String> namelessLocations;
+    private  Properties props;
 
     private static final XPathExpression XPATH_SERVER_APPLICATION;
     private static final XPathExpression XPATH_SERVER_WEB_APPLICATION;
@@ -74,11 +74,11 @@ public class ServerConfigDocument {
             }
     }
 
-    public static Set<String> getLocations() {
+    public  Set<String> getLocations() {
         return locations;
     }
 
-    public static Set<String> getNames() {
+    public  Set<String> getNames() {
         return names;
     }
 
@@ -86,11 +86,11 @@ public class ServerConfigDocument {
         return namelessLocations;
     }
 
-    public static Properties getProperties() {
+    public  Properties getProperties() {
         return props;
     }
 
-    private static File getServerFile() {
+    private  File getServerFile() {
         return serverFile;
     }
 
@@ -99,7 +99,7 @@ public class ServerConfigDocument {
         initializeAppsLocation(serverXML, configDir, bootstrapFile, bootstrapProp, serverEnvFile);
     }
 
-    private static DocumentBuilder getDocumentBuilder() {
+    private  DocumentBuilder getDocumentBuilder() {
         if (docBuilder == null) {
             // get input XML Document
             DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -181,7 +181,7 @@ public class ServerConfigDocument {
         }
     }
 
-    private static void parseApplication(Document doc, XPathExpression expression) throws XPathExpressionException {
+    private  void parseApplication(Document doc, XPathExpression expression) throws XPathExpressionException {
 
         NodeList nodeList = (NodeList) expression.evaluate(doc, XPathConstants.NODESET);
 
@@ -198,7 +198,7 @@ public class ServerConfigDocument {
         }
     }
 
-    private static void parseInclude(Document doc) throws XPathExpressionException, IOException, SAXException {
+    private  void parseInclude(Document doc) throws XPathExpressionException, IOException, SAXException {
         // parse include document in source server xml
         NodeList nodeList = (NodeList) XPATH_SERVER_INCLUDE.evaluate(doc, XPathConstants.NODESET);
 
@@ -251,7 +251,7 @@ public class ServerConfigDocument {
         }
     }
 
-     private static void parseConfigDropinsDir() throws XPathExpressionException, IOException, SAXException {
+     private void parseConfigDropinsDir() throws XPathExpressionException, IOException, SAXException {
         File configDropins = null;
 
         // if configDirectory exists and contains configDropins directory,
@@ -278,7 +278,7 @@ public class ServerConfigDocument {
         }
     }
 
-    private static void parseDropinsFiles(File[] files) throws XPathExpressionException, IOException, SAXException {
+    private void parseDropinsFiles(File[] files) throws XPathExpressionException, IOException, SAXException {
         for (int i = 0; i < files.length; i++) {
             if (files[i].isFile()) {
                 parseDropinsFile(files[i]);
@@ -286,7 +286,7 @@ public class ServerConfigDocument {
         }
     }
 
-    private static Document parseDropinsXMLFile(File file) throws FileNotFoundException, IOException {
+    private Document parseDropinsXMLFile(File file) throws FileNotFoundException, IOException {
         try {
 
             FileInputStream is = new FileInputStream(file);
@@ -300,7 +300,7 @@ public class ServerConfigDocument {
             }
     }
 
-    private static void parseDropinsFile(File file) throws IOException, XPathExpressionException, SAXException {
+    private void parseDropinsFile(File file) throws IOException, XPathExpressionException, SAXException {
         // get input XML Document
         Document doc = parseDropinsXMLFile(file);
         if (doc != null) {
@@ -311,7 +311,7 @@ public class ServerConfigDocument {
         }
     }
 
-    private static Document getIncludeDoc(String loc) throws IOException, SAXException {
+    private Document getIncludeDoc(String loc) throws IOException, SAXException {
 
         Document doc = null;
         File locFile = null;
@@ -362,7 +362,7 @@ public class ServerConfigDocument {
         return doc;
     }
 
-    private static Document parseDocument(InputStream in) throws SAXException, IOException {
+    private Document parseDocument(InputStream in) throws SAXException, IOException {
          try { //ins will be auto-closed
             InputStream ins = in;
             Document d = getDocumentBuilder().parse(ins);
@@ -388,7 +388,7 @@ public class ServerConfigDocument {
         return props;
     }
 
-    private static boolean isValidURL(String url) {
+    private boolean isValidURL(String url) {
         try {
             URL testURL = new URL(url);
             testURL.toURI();
@@ -399,7 +399,7 @@ public class ServerConfigDocument {
         }
     }
 
-    private static String getResolvedVariable(String nodeValue) {
+    private String getResolvedVariable(String nodeValue) {
         final String VARIABLE_NAME_PATTERN = "\\$\\{(.*?)\\}";
 
         Pattern varNamePattern = Pattern.compile(VARIABLE_NAME_PATTERN);
@@ -419,7 +419,7 @@ public class ServerConfigDocument {
         return nodeValue;
     }
 
-    private static void parseVariables(Document doc) throws XPathExpressionException {
+    private void parseVariables(Document doc) throws XPathExpressionException {
         // parse input document
         NodeList nodeList = (NodeList) XPATH_SERVER_VARIABLE.evaluate(doc, XPathConstants.NODESET);
 
@@ -433,7 +433,7 @@ public class ServerConfigDocument {
         }
     }
 
-    private static void parseIncludeVariables(Document doc) throws XPathExpressionException, IOException, SAXException {
+    private void parseIncludeVariables(Document doc) throws XPathExpressionException, IOException, SAXException {
         // parse include document in source server xml
         NodeList nodeList = (NodeList) XPATH_SERVER_INCLUDE.evaluate(doc, XPathConstants.NODESET);
 
@@ -450,7 +450,7 @@ public class ServerConfigDocument {
         }
     }
 
- private static void parseConfigDropinsDirVariables(String inDir) throws XPathExpressionException, SAXException, IOException {
+ private void parseConfigDropinsDirVariables(String inDir) throws XPathExpressionException, SAXException, IOException {
         File configDropins = null;
 
         // if configDirectory exists and contains configDropins directory,
@@ -478,7 +478,7 @@ public class ServerConfigDocument {
         }
     }
 
-    private static void parseDropinsFilesVariables(File file) throws SAXException, IOException, XPathExpressionException {
+    private void parseDropinsFilesVariables(File file) throws SAXException, IOException, XPathExpressionException {
         // get input XML Document
         Document doc = parseDropinsXMLFile(file);
         if (doc != null) {
