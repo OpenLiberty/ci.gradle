@@ -240,7 +240,7 @@ abstract class AbstractServerTask extends AbstractTask {
         if (server.bootstrapProperties != null && !server.bootstrapProperties.isEmpty()) {
             Node bootstrapProperties = new Node(null, 'bootstrapProperties')
             server.bootstrapProperties.each { k, v ->
-                bootstrapProperties.appendNode("$k", v.toString())
+                bootstrapProperties.appendNode(k, v.toString())
             }
             serverNode.append(bootstrapProperties)
         } else if (server.bootstrapPropertiesFile != null && server.bootstrapPropertiesFile.exists()) {
