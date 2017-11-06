@@ -28,6 +28,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -295,7 +296,8 @@ public class ServerConfigDocument {
             return d;
             } catch (SAXException ex) {
                 //If the file was not valid XML, assume it was some other non XML file in dropins.
-                System.out.println("Dropins file " + file.getAbsolutePath() + " was not parseable as XML");
+                Logger logger = Logger.getLogger("");
+                logger.info("Dropins file " + file.getAbsolutePath() + " is not XML and is not evaluated for application configuration.");
                 return null;
             }
     }
@@ -369,8 +371,9 @@ public class ServerConfigDocument {
             ins.close();
             return d;
          }
-        catch(Exception e){}
-        return null;
+        catch(Exception e){
+            throw new NullPointerException();
+        }
     }
 
     private Properties parseProperties(InputStream ins) throws Exception {
