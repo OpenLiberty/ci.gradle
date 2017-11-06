@@ -365,14 +365,9 @@ public class ServerConfigDocument {
     }
 
     private Document parseDocument(InputStream in) throws SAXException, IOException {
-         try { //ins will be auto-closed
-            InputStream ins = in;
-            Document d = getDocumentBuilder().parse(ins);
-            ins.close();
-            return d;
-         }
-        catch(Exception e){
-            throw new NullPointerException();
+        try (InputStream ins = in) {
+            //ins will be auto-closed
+            return getDocumentBuilder().parse(ins);
         }
     }
 
