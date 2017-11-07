@@ -27,7 +27,6 @@ class PackageTask extends AbstractServerTask {
 
         def archive = server.packageLiberty.archive
 
-        copyConfigFiles()
         if (archive != null && archive.length() != 0) {
             def archiveFile = new File(archive)
 
