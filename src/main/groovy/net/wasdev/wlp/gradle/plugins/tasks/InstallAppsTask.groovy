@@ -133,7 +133,7 @@ class InstallAppsTask extends AbstractServerTask {
       LooseConfigData config = new LooseConfigData()
       switch(getPackagingType()){
         case "war":
-            validateAppConfig(application, application.take(getArchiveName(task).lastIndexOf('.')), appsDir)
+            validateAppConfig(application, task.baseName, appsDir)
             logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFile.getAbsolutePath()))
             installLooseConfigWar(config, task)
             deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
