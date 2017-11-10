@@ -177,9 +177,14 @@ class InstallAppsTask extends AbstractServerTask {
       File parentProjectDir = new File(task.getProject().getRootProject().rootDir.getAbsolutePath())
       for (File dep: deps) {
         String projectPath = getProjectPath(parentProjectDir, dep)
-        if(!projectPath.isEmpty() && project.getRootProject().findProject(projectPath) != null){
+        boolean isCurrentProject = ((task.getProject().toString()).contains(projectPath))
+        if(!projectPath.isEmpty() && project.getRootProject().findProject(projectPath) != null && !isCurrentProject){
             Element archive = looseApp.addArchive(parent, "/WEB-INF/lib/"+ dep.getName());
             looseApp.addOutputDirectory(archive, project.getRootProject().findProject(projectPath), "/");
+            Task resourceTask = project.getRootProject().findProject(projectPath).getTasks().findByPath(":"+projectPath+":processResources");
+            if (resourceTask.getDestinationDir() != null){
+                looseApp.addOutputDir(archive, resourceTask.getDestinationDir(), "/");
+            }
             looseApp.addManifestFile(archive, project.getRootProject().findProject(projectPath), "gradle-jar-plugin");
         } else if(FilenameUtils.getExtension(dep.getAbsolutePath()).equalsIgnoreCase("jar")){
             looseApp.getConfig().addFile(parent, dep.getAbsolutePath() , "/WEB-INF/lib/" + dep.getName());

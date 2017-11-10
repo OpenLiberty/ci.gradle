@@ -33,7 +33,7 @@ public class LooseApplication {
     }
 
     public void addOutputDir(Element parent, File proj, String target) {
-        config.addDir(parent, task.getProject().getAbsolutePath(), target);
+        config.addDir(parent, proj.getAbsolutePath(), target);
     }
 
     public void addOutputDirectory(Element parent, Project project, String target) {
