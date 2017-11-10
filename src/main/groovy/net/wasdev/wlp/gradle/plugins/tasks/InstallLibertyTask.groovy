@@ -98,7 +98,6 @@ class InstallLibertyTask extends AbstractTask {
     }
 
     protected void outputLibertyPropertiesToXml(MarkupBuilder xmlDoc) {
-        xmlDoc.userDirectory (getUserDir(project).toString())
         xmlDoc.installDirectory (getInstallDir(project).toString())
         xmlDoc.installAppPackages ('project')
 
