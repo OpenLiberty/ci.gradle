@@ -98,9 +98,7 @@ class InstallLibertyTask extends AbstractTask {
     }
 
     protected void outputLibertyPropertiesToXml(MarkupBuilder xmlDoc) {
-        xmlDoc.userDirectory (getUserDir(project).toString())
         xmlDoc.installDirectory (getInstallDir(project).toString())
-        xmlDoc.installAppPackages ('project')
 
         if (project.configurations.libertyRuntime != null) {
             project.configurations.libertyRuntime.dependencies.each { libertyArtifact ->

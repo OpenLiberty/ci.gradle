@@ -51,6 +51,7 @@ class Liberty implements Plugin<Project> {
 
         //Used to set project facets in Eclipse
         project.pluginManager.apply('eclipse-wtp')
+        project.tasks.getByName('eclipseWtpFacet').finalizedBy 'installApps'
 
         //Create expected server extension from liberty extension data
         project.afterEvaluate {

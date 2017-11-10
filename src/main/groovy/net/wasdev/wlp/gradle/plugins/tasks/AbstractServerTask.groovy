@@ -218,6 +218,7 @@ abstract class AbstractServerTask extends AbstractTask {
     }
 
     protected void setServerDirectoryNodes(Project project, Node serverNode) {
+        serverNode.appendNode('userDirectory', getUserDir(project).toString())
         serverNode.appendNode('serverDirectory', getServerDir(project).toString())
         String serverOutputDir = getServerOutputDir(project)
         if (serverOutputDir != null && !serverOutputDir.isEmpty()) {
@@ -276,9 +277,9 @@ abstract class AbstractServerTask extends AbstractTask {
             if (appObj instanceof Task) {
                 application.appendNode('appsDirectory', appDir)
                 if (server.looseApplication) {
-                    application.appendNode('applicationFileName', appObj.archiveName + '.xml')
+                    application.appendNode('applicationFilename', appObj.archiveName + '.xml')
                 } else {
-                    application.appendNode('applicationFileName', appObj.archiveName)
+                    application.appendNode('applicationFilename', appObj.archiveName)
                 }
                 if (appObj instanceof War) {
                     application.appendNode('warSourceDirectory', project.webAppDirName)
@@ -286,9 +287,9 @@ abstract class AbstractServerTask extends AbstractTask {
             } else if (appObj instanceof File) {
                 application.appendNode('appsDirectory', appDir)
                 if (server.looseApplication) {
-                    application.appendNode('applicationFileName', appObj.name + '.xml')
+                    application.appendNode('applicationFilename', appObj.name + '.xml')
                 } else {
-                    application.appendNode('applicationFileName', appObj.name)
+                    application.appendNode('applicationFilename', appObj.name)
                 }
             }
 
@@ -332,7 +333,7 @@ abstract class AbstractServerTask extends AbstractTask {
 
         if (project.configurations.findByName('compile') && !project.configurations.compile.dependencies.isEmpty()) {
             project.configurations.compile.dependencies.each { dependency ->
-                serverNode.appendNode('projectCompileDepenency', dependency.group + ':' + dependency.name + ':' + dependency.version)
+                serverNode.appendNode('projectCompileDependency', dependency.group + ':' + dependency.name + ':' + dependency.version)
             }
         }
     }
