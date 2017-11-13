@@ -23,6 +23,7 @@ import org.gradle.api.GradleException
 import groovy.util.XmlParser
 import groovy.lang.Tuple
 import org.gradle.api.artifacts.ProjectDependency
+import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
 import org.apache.commons.io.FilenameUtils
@@ -176,10 +177,10 @@ class InstallAppsTask extends AbstractServerTask {
       }
       File parentProjectDir = new File(task.getProject().getRootProject().rootDir.getAbsolutePath())
       for (File dep: deps) {
-        String dependentProjectName = getProjectPath(parentProjectDir, dep)
-        String siblingProject = project.getRootProject().findProject(dependentProjectName)
-        boolean isCurrentProject = ((task.getProject().toString()).contains(dependentProjectName))
-        if ((!isCurrentProject) && !dependentProjectName.isEmpty() && siblingProject != null ){
+        String dependentProjectName = "project ':"+getProjectPath(parentProjectDir, dep)+"'"
+        Project siblingProject = project.getRootProject().findProject(dependentProjectName)
+        boolean isCurrentProject = ((task.getProject().toString()).equals(dependentProjectName))
+        if (!isCurrentProject && siblingProject != null){
             Element archive = looseApp.addArchive(parent, "/WEB-INF/lib/"+ dep.getName());
             looseApp.addOutputDirectory(archive, siblingProject, "/");
             Task resourceTask = siblingProject.getTasks().findByPath(":"+dependentProjectName+":processResources");
