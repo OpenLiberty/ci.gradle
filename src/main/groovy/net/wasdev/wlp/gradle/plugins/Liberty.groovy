@@ -51,7 +51,7 @@ class Liberty implements Plugin<Project> {
 
         //Used to set project facets in Eclipse
         project.pluginManager.apply('eclipse-wtp')
-        project.tasks.getByName('eclipseWtpFacet').finalizedBy 'installApps'
+        project.tasks.getByName('eclipseWtpFacet').finalizedBy 'libertyCreate'
 
         //Create expected server extension from liberty extension data
         project.afterEvaluate {
@@ -85,6 +85,10 @@ class Liberty implements Plugin<Project> {
             description 'Installs Liberty from a repository'
             logging.level = LogLevel.INFO
             group 'Liberty'
+
+            project.afterEvaluate {
+                outputs.dir { getInstallDir(project) }
+            }
         }
 
         project.task('libertyRun', type: RunTask) {
