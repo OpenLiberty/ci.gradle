@@ -113,6 +113,9 @@ class Liberty implements Plugin<Project> {
             dependsOn 'installLiberty'
 
             project.afterEvaluate{
+                if (!project.liberty.server.configFile.toString().equals('default')) {
+                    inputs.file { project.liberty.server.configFile }
+                }
                 outputs.file { new File(getUserDir(project), "servers/${project.liberty.server.name}/server.xml") }
             }
         }
