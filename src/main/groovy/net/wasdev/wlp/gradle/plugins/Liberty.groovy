@@ -116,12 +116,23 @@ class Liberty implements Plugin<Project> {
                 // Defining files set in build.gradle as inputs
                 if (!project.liberty.server.configFile.toString().equals('default')) {
                     inputs.file { project.liberty.server.configFile }
+                } else if (new File("${projectDir}/src/main/liberty/config/server.xml").exists()) {
+                    inputs.file { new File("${projectDir}/src/main/liberty/config/server.xml") }
                 }
                 if (!project.liberty.server.bootstrapPropertiesFile.toString().equals('default')) {
                     inputs.file { project.liberty.server.bootstrapPropertiesFile }
+                } else if (new File("${projectDir}/src/main/liberty/config/bootstrap.properties").exists()) {
+                    inputs.file { new File("${projectDir}/src/main/liberty/config/bootstrap.properties") }
                 }
                 if (!project.liberty.server.jvmOptionsFile.toString().equals('default')) {
                     inputs.file { project.liberty.server.jvmOptionsFile }
+                } else if (new File("${projectDir}/src/main/liberty/config/jvm.options").exists()) {
+                    inputs.file { new File("${projectDir}/src/main/liberty/config/jvm.options") }
+                }
+                if (!project.liberty.server.serverEnv.toString().equals('default')) {
+                    inputs.file { project.liberty.server.serverEnv }
+                } else if (new File("${projectDir}/src/main/liberty/config/server.env").exists()) {
+                    inputs.file { new File("${projectDir}/src/main/liberty/config/server.env") }
                 }
                 if (project.liberty.server.configDirectory.exists()) {
                     inputs.dir { project.liberty.server.configDirectory }
