@@ -113,8 +113,18 @@ class Liberty implements Plugin<Project> {
             dependsOn 'installLiberty'
 
             project.afterEvaluate{
+                // Defining files set in build.gradle as inputs
                 if (!project.liberty.server.configFile.toString().equals('default')) {
                     inputs.file { project.liberty.server.configFile }
+                }
+                if (!project.liberty.server.bootstrapPropertiesFile.toString().equals('default')) {
+                    inputs.file { project.liberty.server.bootstrapPropertiesFile }
+                }
+                if (!project.liberty.server.jvmOptionsFile.toString().equals('default')) {
+                    inputs.file { project.liberty.server.jvmOptionsFile }
+                }
+                if (project.liberty.server.configDirectory.exists()) {
+                    inputs.dir { project.liberty.server.configDirectory }
                 }
                 outputs.file { new File(getUserDir(project), "servers/${project.liberty.server.name}/server.xml") }
             }
