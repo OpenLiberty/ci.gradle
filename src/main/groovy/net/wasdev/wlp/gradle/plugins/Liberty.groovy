@@ -136,7 +136,7 @@ class Liberty implements Plugin<Project> {
                 } else if (new File(defaultPath + 'server.env').exists()) {
                     inputs.file { new File(defaultPath + 'server.env') }
                 }
-                if (project.liberty.server.configDirectory != null || project.liberty.server.configDirectory.exists()) {
+                if (project.liberty.server.configDirectory != null && project.liberty.server.configDirectory.exists()) {
                     inputs.dir { project.liberty.server.configDirectory }
                 }
                 outputs.file { new File(getUserDir(project), "servers/${project.liberty.server.name}/server.xml") }
