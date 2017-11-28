@@ -112,7 +112,33 @@ class Liberty implements Plugin<Project> {
             group 'Liberty'
             dependsOn 'installLiberty'
 
-            project.afterEvaluate{
+            project.afterEvaluate {
+                String defaultPath = project.projectDir.toString() + '/src/main/liberty/config/'
+
+                // Defining files set in build.gradle and check their default paths as inputs
+                if (!project.liberty.server.configFile.toString().equals('default')) {
+                    inputs.file { project.liberty.server.configFile }
+                } else if (new File(defaultPath + 'server.xml').exists()) {
+                    inputs.file { new File(defaultPath + 'server.xml') }
+                }
+                if (!project.liberty.server.bootstrapPropertiesFile.toString().equals('default')) {
+                    inputs.file { project.liberty.server.bootstrapPropertiesFile }
+                } else if (new File(defaultPath + 'bootstrap.properties').exists()) {
+                    inputs.file { new File(defaultPath + 'bootstrap.properties') }
+                }
+                if (!project.liberty.server.jvmOptionsFile.toString().equals('default')) {
+                    inputs.file { project.liberty.server.jvmOptionsFile }
+                } else if (new File(defaultPath + 'jvm.options').exists()) {
+                    inputs.file { new File(defaultPath + 'jvm.options') }
+                }
+                if (!project.liberty.server.serverEnv.toString().equals('default')) {
+                    inputs.file { project.liberty.server.serverEnv }
+                } else if (new File(defaultPath + 'server.env').exists()) {
+                    inputs.file { new File(defaultPath + 'server.env') }
+                }
+                if (project.liberty.server.configDirectory != null || project.liberty.server.configDirectory.exists()) {
+                    inputs.dir { project.liberty.server.configDirectory }
+                }
                 outputs.file { new File(getUserDir(project), "servers/${project.liberty.server.name}/server.xml") }
             }
         }
