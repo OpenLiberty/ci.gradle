@@ -28,8 +28,8 @@ class InstallLibertyTask extends AbstractTask {
             def params = buildInstallLibertyMap(project)
 
             project.ant.taskdef(name: 'installLiberty',
-                                classname: 'net.wasdev.wlp.ant.install.InstallLibertyTask',
-                                classpath: project.buildscript.configurations.classpath.asPath)
+                                classname: net.wasdev.wlp.ant.install.InstallLibertyTask.name,
+                                classpath: project.rootProject.buildscript.configurations.classpath.asPath)
             project.ant.installLiberty(params)
 
             String licenseFilePath = project.configurations.getByName('libertyLicense').getAsPath()

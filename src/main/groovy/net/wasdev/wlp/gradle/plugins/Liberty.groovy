@@ -71,6 +71,7 @@ class Liberty implements Plugin<Project> {
     public static final String LIBERTY_DEPLOY_CONFIGURATION = "libertyDeploy"
 
     public static final String TASK_LIBERTY_START = "libertyStart"
+    public static final String TASK_LIBERTY_STOP = "libertyStop"
     public static final String TASK_LIBERTY_CREATE = "libertyCreate"
     public static final String TASK_LIBERTY_CREATE_CONFIG = "libertyCreateConfig"
     public static final String TASK_LIBERTY_CREATE_ANT = "libertyCreateAnt"
@@ -97,7 +98,9 @@ class Liberty implements Plugin<Project> {
         project.configurations.create('libertyLicense')
         project.configurations.create('libertyRuntime')
 
-        project.configurations.create(LIBERTY_DEPLOY_CONFIGURATION)
+        project.configurations.create(LIBERTY_DEPLOY_CONFIGURATION) {
+            description: "Configuration that allows for deploying projects to liberty via dependency"
+        }
 
         String groupName = "Liberty"
 
@@ -197,7 +200,7 @@ class Liberty implements Plugin<Project> {
         }
 
 
-        def libertyStart = project.tasks.create([name: TASK_LIBERTY_START,
+        project.tasks.create([name: TASK_LIBERTY_START,
                               type: StartTask,
                               description: 'Starts the WebSphere Liberty Profile server.',
                               group: groupName]) {
@@ -207,17 +210,21 @@ class Liberty implements Plugin<Project> {
             project.afterEvaluate {
                 dependsOn installAppsDependsOn(server, TASK_LIBERTY_CREATE)
             }
-        }
-
-        libertyStart.onlyIf {
+        }.onlyIf {
             !LibertyIntstallController.isServerRunning(project)
         }
 
-        project.task('libertyStop', type: StopTask) {
-            description 'Stops the WebSphere Liberty Profile server.'
+        project.tasks.create([name: TASK_LIBERTY_STOP,
+                              type: StopTask,
+                              description: 'Stops the WebSphere Liberty Profile server.',
+                              group: groupName]) {
+
             logging.level = LogLevel.INFO
-            group groupName
+
+        }.onlyIf {
+            LibertyIntstallController.isServerRunning(project)
         }
+
 
         project.task('libertyPackage', type: PackageTask) {
             description 'Generates a WebSphere Liberty Profile server archive.'
@@ -286,7 +293,7 @@ class Liberty implements Plugin<Project> {
             description 'Deletes files from some directories from the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO
             group groupName
-            dependsOn 'libertyStop'
+            dependsOn TASK_LIBERTY_STOP
         }
 
         project.task('installApps', type: InstallAppsTask) {
@@ -334,7 +341,7 @@ class Liberty implements Plugin<Project> {
 
         new DslObject(newSrcSet).getConvention().getPlugins().put(sourceSetName, libertyConfigSourceSet)
 
-        libertyConfigSourceSet.getLibertyConfig().srcDir("/src/main/liberty/config/")
+        libertyConfigSourceSet.getLibertyConfig().srcDir("/src/main/libertyConfig/")
 
         newSrcSet.getResources().getFilter().exclude(new Spec<FileTreeElement>() {
             boolean isSatisfiedBy(FileTreeElement element) {
@@ -356,7 +363,7 @@ class Liberty implements Plugin<Project> {
 
         new DslObject(newSrcSet).getConvention().getPlugins().put(sourceSetName, libertyBaseSourceSet)
 
-        libertyBaseSourceSet.getLibertyBase().srcDir("/src/main/liberty/")
+        libertyBaseSourceSet.getLibertyBase().srcDir("/src/main/libertyBase/")
 
         newSrcSet.getResources().getFilter().exclude(new Spec<FileTreeElement>() {
             boolean isSatisfiedBy(FileTreeElement element) {

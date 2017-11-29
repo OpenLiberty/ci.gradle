@@ -15,18 +15,14 @@
  */
 package net.wasdev.wlp.gradle.plugins.tasks
 
-import net.wasdev.wlp.gradle.plugins.extensions.DeployExtension
+import net.wasdev.wlp.ant.ServerTask
 import net.wasdev.wlp.gradle.plugins.extensions.LibertyExtension
 import net.wasdev.wlp.gradle.plugins.extensions.ServerExtension
 import net.wasdev.wlp.gradle.plugins.utils.LibertyIntstallController
 import org.gradle.api.GradleException
-import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.plugins.WarPlugin
 import org.gradle.plugins.ear.EarPlugin
-
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
 
 abstract class AbstractServerTask extends AbstractTask {
 
@@ -48,8 +44,8 @@ abstract class AbstractServerTask extends AbstractTask {
 
     protected void executeServerCommand(Project project, String command, Map<String, String> params) {
         project.ant.taskdef(name: 'server',
-                            classname: 'net.wasdev.wlp.ant.ServerTask',
-                            classpath: project.buildscript.configurations.classpath.asPath)
+                            classname: ServerTask.name,
+                            classpath: project.rootProject.buildscript.configurations.classpath.asPath)
         params.put('operation', command)
         project.ant.server(params)
     }
