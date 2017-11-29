@@ -1,0 +1,45 @@
+description = 'Adapter Module'
+
+dependencies {
+   compile project(':helloworld-impl')
+}
+
+apply plugin: 'java'
+
+sourceSets {
+     main {
+        java {
+           srcDir "$project.name/connectorModule"
+         }
+     }
+}
+//variable for the name of the resource adapter jar that will be included in rar file.
+project.ext.set("connectorFile","ra.jar")
+
+//This task creates the connector jar i.e. classes for the resource adapter.
+//The connector jar will be included in the rar file
+task rarjar(type: Jar) {
+    archiveName connectorFile
+        from ('build/classes/main') {
+            include '**/*'
+        }
+}
+
+jar {
+    // Change the archive extension so that the application ear project includes
+    //resource adapter as a .rar file instead of .jar
+    extension="rar"
+    // The connector classes are packaged into the ra.jar file, they can be excluded from the rar file.
+    // also suppress empty directories from being included.
+    includeEmptyDirs=false
+    exclude("**/*.class")
+        into('/META-INF'){
+            from "$project.name/connectorModule/META-INF/ra.xml"
+        }
+        into('/'){
+            from "build/libs"
+            include connectorFile
+        }
+}
+
+jar.dependsOn 'rarjar'

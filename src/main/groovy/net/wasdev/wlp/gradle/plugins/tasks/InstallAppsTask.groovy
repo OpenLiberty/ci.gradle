@@ -24,8 +24,10 @@ import groovy.util.XmlParser
 import groovy.lang.Tuple
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.Dependency
-import org.gradle.api.artifacts.DependencySet
+import org.gradle.api.artifacts.PublishArtifact
 import org.apache.commons.io.FilenameUtils
 import org.gradle.api.file.FileCollection
 import org.w3c.dom.Element;
@@ -143,6 +145,12 @@ class InstallAppsTask extends AbstractServerTask {
             config.toXmlFile(looseConfigFile)
             break
         case "ear":
+            validateAppConfig(application, task.baseName, appsDir)
+            logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFile.getAbsolutePath()))
+            installLooseConfigEar(config, task)
+            deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
+            deleteApplication(new File(getServerDir(project), "dropins"), looseConfigFile)
+            config.toXmlFile(looseConfigFile)
             break
         default:
             logger.info(MessageFormat.format(("Loose application configuration is not supported for packaging type {0}. The project artifact will be installed as an archive file."),
@@ -210,6 +218,23 @@ class InstallAppsTask extends AbstractServerTask {
             looseApp.addOutputDir(looseApp.getDocumentRoot(), dep.getAbsolutePath() , "/WEB-INF/classes/");
         }
       }
+    }
+
+    protected void installLooseConfigEar(LooseConfigData config, Task task) throws Exception{
+        LooseEarApplication looseEar = new LooseEarApplication(task, config);
+        looseEar.addSourceDir();
+        looseEar.addApplicationXmlFile();
+
+        //ArrayList<Dependency> artifacts = new ArrayList<Dependency>();
+        Configuration c = task.getProject().configurations.runtime
+        logger.info(MessageFormat.format("Number of compile dependencies for " + task.project.name + " : " + c.size()))
+
+        for(Dependency d : c.getAllDependencies()) {
+            println(d.getName())
+        }
+
+        File manifestFile = new File(project.sourceSets.main.getOutput().getResourcesDir().getParentFile().getAbsolutePath() + "/META-INF/MANIFEST.MF")
+        looseEar.addManifestFile(manifestFile, "gradle-ear-plugin")
     }
 
     private String getProjectPath(File parentProjectDir, File dep){

@@ -1,0 +1,5 @@
+
+description = 'Adapter implementation'
+dependencies {
+    compileOnly group: 'javax.resource', name: 'javax.resource-api', version:'1.7'
+}
