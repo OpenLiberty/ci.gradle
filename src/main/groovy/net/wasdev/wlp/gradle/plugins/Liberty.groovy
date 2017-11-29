@@ -87,7 +87,7 @@ class Liberty implements Plugin<Project> {
             group 'Liberty'
 
             project.afterEvaluate {
-                outputs.dir { getInstallDir(project) }
+                outputs.upToDateWhen { getInstallDir(project).exists() }
             }
         }
 
@@ -139,7 +139,7 @@ class Liberty implements Plugin<Project> {
                 if (project.liberty.server.configDirectory != null && project.liberty.server.configDirectory.exists()) {
                     inputs.dir { project.liberty.server.configDirectory }
                 }
-                outputs.file { new File(getUserDir(project), "servers/${project.liberty.server.name}/server.xml") }
+                outputs.upToDateWhen { new File(getUserDir(project), "servers/${project.liberty.server.name}/server.xml").exists() }
             }
         }
 
