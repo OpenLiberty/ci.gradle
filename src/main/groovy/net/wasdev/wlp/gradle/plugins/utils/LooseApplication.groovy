@@ -20,6 +20,10 @@ public class LooseApplication {
       config.addDir(parent, task.classpath.getFiles().toArray()[0].getCanonicalPath(), target);
     }
 
+    public void addOutputDir(Element parent, String path, String target) {
+      config.addDir(parent, path, target);
+    }
+
     public Element getDocumentRoot() {
       return config.getDocumentRoot();
     }
@@ -29,11 +33,11 @@ public class LooseApplication {
     }
 
     public void addOutputDir(Element parent, File proj, String target) {
-        config.addDir(parent, task.getProject().getAbsolutePath(), target);
+        config.addDir(parent, proj.getAbsolutePath(), target);
     }
 
-    public void addOutputDirectory(Element parent, Task task, String target) {
-        config.addDir(parent, task.getProject().sourceSets.main.getOutput().getClassesDirs().getSingleFile().getAbsolutePath(), target);
+    public void addOutputDirectory(Element parent, Project project, String target) {
+        config.addDir(parent, project.sourceSets.main.getOutput().getClassesDirs().getSingleFile().getAbsolutePath(), target);
     }
 
     public void addManifestFile(File mf, String pluginId) throws Exception {
@@ -43,9 +47,9 @@ public class LooseApplication {
         }
     }
 
-    public void addManifestFile(Element parent, Task task, String pluginId) throws Exception {
+    public void addManifestFile(Element parent, Project project, String pluginId) throws Exception {
         if(task.getManifest() != null)
-          config.addFile(parent, task.getProject().sourceSets.main.getOutput().getResourcesDir().getParentFile().getAbsolutePath() + "/META-INF/MANIFEST.MF", "/META-INF/MANIFEST.MF");
+          config.addFile(parent, project.sourceSets.main.getOutput().getResourcesDir().getParentFile().getAbsolutePath() + "/META-INF/MANIFEST.MF", "/META-INF/MANIFEST.MF");
     }
 
     public Element addArchive(Element parent, String target) {

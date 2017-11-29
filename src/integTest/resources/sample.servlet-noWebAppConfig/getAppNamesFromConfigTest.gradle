@@ -11,7 +11,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:1.1-SNAPSHOT'
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
     }
 }
 
@@ -66,8 +66,8 @@ liberty {
             archive = packageFile
             include = packagingType
         }
-      looseApplication = false
-    	apps = [war2, war3]
+        looseApplication = false
+        apps = [war2, war3]
         dropins = [war, war4]
 
         verifyAppStartTimeout = 30

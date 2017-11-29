@@ -119,17 +119,4 @@ class CompileJSPTask extends AbstractServerTask {
           }
           return sb.toString();
       }
-
-      private String getPackagingType() throws Exception {
-        if (project.plugins.hasPlugin("war") || !project.tasks.withType(War).isEmpty()) {
-            return "war"
-        }
-        else if (project.plugins.hasPlugin("ear") || !project.tasks.withType(Ear).isEmpty()) {
-            return "ear"
-        }
-        else {
-            throw new GradleException("Archive path not found. Supported formats are jar, war, and ear.")
-        }
-    }
-
 }

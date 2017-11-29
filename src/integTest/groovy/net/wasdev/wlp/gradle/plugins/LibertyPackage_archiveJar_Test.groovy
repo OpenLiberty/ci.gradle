@@ -36,9 +36,9 @@ class LibertyPackage_archiveJar_Test extends AbstractIntegrationTest{
         createDir(buildDir)
         if (test_mode == "offline"){
             WLP_DIR.replace("\\","/")
-            copyFile(buildFilename, new File(buildDir, 'build.gradle'))
+            copyBuildFiles(buildFilename, buildDir)
         } else if (test_mode == "online"){
-            copyFile(buildFilename, new File(buildDir, 'build.gradle'))
+            copyBuildFiles(buildFilename, buildDir)
             try {
                 runTasks(buildDir, 'installLiberty')
                 runTasks(buildDir, 'libertyStart')
@@ -58,10 +58,9 @@ class LibertyPackage_archiveJar_Test extends AbstractIntegrationTest{
 
            assert file.exists() : "file not found"
            assert file.canRead() : "file cannot be read"
-           
+
         } catch (Exception e) {
            throw new AssertionError ("Fail on task libertyPackage. "+e)
         }
     }
 }
-

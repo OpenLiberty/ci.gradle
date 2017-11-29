@@ -2,6 +2,9 @@
 
 The `deploy` task supports deployment of one or more applications to the Liberty server.
 
+### dependsOn
+`deploy` depends on `libertyStart` for a running server.
+
 ### Properties
 
 See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.

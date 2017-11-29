@@ -19,6 +19,7 @@ import javax.xml.parsers.*
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
+import groovy.xml.MarkupBuilder
 
 class InstallLibertyTask extends AbstractTask {
 
@@ -38,7 +39,11 @@ class InstallLibertyTask extends AbstractTask {
                 def process = command.execute()
                 process.waitFor()
             }
+        } else {
+            logger.info ("Liberty is already installed at: " + getInstallDir(project))
         }
+
+        createPluginXmlFile(project)
     }
 
     private Map<String, String> buildInstallLibertyMap(Project project) {
@@ -92,4 +97,29 @@ class InstallLibertyTask extends AbstractTask {
         return result
     }
 
+    protected void outputLibertyPropertiesToXml(MarkupBuilder xmlDoc) {
+        xmlDoc.installDirectory (getInstallDir(project).toString())
+
+        if (project.configurations.libertyRuntime != null) {
+            project.configurations.libertyRuntime.dependencies.each { libertyArtifact ->
+                xmlDoc.assemblyArtifact {
+                    groupId (libertyArtifact.group)
+                    artifactId (libertyArtifact.name)
+                    version (libertyArtifact.version)
+                    type ('zip')
+                }
+                xmlDoc.assemblyArchive (project.configurations.libertyRuntime.resolvedConfiguration.resolvedArtifacts.getAt(0).file.toString())
+            }
+        }
+    }
+
+    protected void createPluginXmlFile(Project project) {
+        new File(project.buildDir, 'liberty-plugin-config.xml').withWriter { writer ->
+            def xmlDoc = new MarkupBuilder(writer)
+            xmlDoc.mkp.xmlDeclaration(version: "1.0", encoding: "UTF-8")
+            xmlDoc.'liberty-plugin-config'('version':'2.0') {
+                outputLibertyPropertiesToXml(xmlDoc)
+            }
+        }
+    }
 }
