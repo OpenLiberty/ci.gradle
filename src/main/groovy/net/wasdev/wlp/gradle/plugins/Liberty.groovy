@@ -112,6 +112,7 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
     setTaskWorkflow(project)
     setTaskAfterEvalWorkflow(project)
   }
+
   static void setTaskAfterEvalWorkflow(Project project) {
     project.afterEvaluate {
       ServerExtension server = project.liberty.server
