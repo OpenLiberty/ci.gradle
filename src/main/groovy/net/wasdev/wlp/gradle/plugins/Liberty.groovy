@@ -54,6 +54,7 @@ class Liberty implements Plugin<Project> {
         project.tasks.getByName('eclipseWtpFacet').finalizedBy 'libertyCreate'
         project.tasks.getByName('eclipseWtpFacet').facet.facet(name:'jst.web', version: '3.0')
 
+        //Create expected server extension from liberty extension data
         project.afterEvaluate {
             if (project.liberty.server == null) {
                 project.liberty.server = copyProperties(project.liberty)
