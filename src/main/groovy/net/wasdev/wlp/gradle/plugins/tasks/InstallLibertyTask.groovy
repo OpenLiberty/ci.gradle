@@ -15,6 +15,9 @@
  */
 package net.wasdev.wlp.gradle.plugins.tasks
 
+import net.wasdev.wlp.gradle.plugins.extensions.LibertyExtension
+import net.wasdev.wlp.gradle.plugins.utils.LibertyIntstallController
+
 import javax.xml.parsers.*
 
 import org.gradle.api.Project
@@ -40,7 +43,7 @@ class InstallLibertyTask extends AbstractTask {
                 process.waitFor()
             }
         } else {
-            logger.info ("Liberty is already installed at: " + getInstallDir(project))
+            logger.info ("Liberty is already installed at: ${LibertyIntstallController.getInstallDir(project)}")
         }
 
         createPluginXmlFile(project)
@@ -48,17 +51,18 @@ class InstallLibertyTask extends AbstractTask {
 
     private Map<String, String> buildInstallLibertyMap(Project project) {
 
+        LibertyExtension liberty = project.getExtensions().getByType(LibertyExtension)
         Map<String, String> result = new HashMap();
         if (project.liberty.install.licenseCode != null) {
-           result.put('licenseCode', project.liberty.install.licenseCode)
+           result.put('licenseCode', liberty.install.licenseCode)
         }
 
         if (project.liberty.install.version != null) {
-            result.put('version', project.liberty.install.version)
+            result.put('version', liberty.install.version)
         }
 
         if (project.liberty.install.type != null) {
-            result.put('type', project.liberty.install.type)
+            result.put('type', liberty.install.type)
         }
 
         String runtimeFilePath = project.configurations.getByName('libertyRuntime').getAsPath()
@@ -69,36 +73,36 @@ class InstallLibertyTask extends AbstractTask {
 
             if (localFile.exists()) {
                 logger.debug 'Getting WebSphere Liberty archive file from the local Gradle repository.'
-                result.put('runtimeUrl', localFile.toURI().toURL())
+                result.put('runtimeUrl', localFile.toURI().toURL().toString())
             }
         } else if (project.liberty.install.runtimeUrl != null) {
-            result.put('runtimeUrl', project.liberty.install.runtimeUrl)
+            result.put('runtimeUrl', liberty.install.runtimeUrl)
         }
 
         if (project.liberty.install.baseDir == null) {
-           result.put('baseDir', project.buildDir)
+           result.put('baseDir', project.buildDir.absolutePath)
         } else {
-           result.put('baseDir', project.liberty.install.baseDir)
+           result.put('baseDir', liberty.install.baseDir)
         }
 
         if (project.liberty.install.cacheDir != null) {
-            result.put('cacheDir', project.liberty.install.cacheDir)
+            result.put('cacheDir', liberty.install.cacheDir)
         }
 
         if (project.liberty.install.username != null) {
-            result.put('username', project.liberty.install.username)
-            result.put('password', project.liberty.install.password)
+            result.put('username', liberty.install.username)
+            result.put('password', liberty.install.password)
         }
 
-        result.put('maxDownloadTime', project.liberty.install.maxDownloadTime)
+        result.put('maxDownloadTime', liberty.install.maxDownloadTime)
 
-        result.put('offline', project.gradle.startParameter.offline)
+        result.put('offline', project.gradle.startParameter.offline.toString())
 
         return result
     }
 
     protected void outputLibertyPropertiesToXml(MarkupBuilder xmlDoc) {
-        xmlDoc.installDirectory (getInstallDir(project).toString())
+        xmlDoc.installDirectory (LibertyIntstallController.getInstallDir(project).toString())
 
         if (project.configurations.libertyRuntime != null) {
             project.configurations.libertyRuntime.dependencies.each { libertyArtifact ->
