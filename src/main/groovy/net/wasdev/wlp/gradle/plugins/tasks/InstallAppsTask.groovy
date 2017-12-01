@@ -154,10 +154,12 @@ class InstallAppsTask extends AbstractServerTask {
 
     protected void installLooseConfigWar(LooseConfigData config, Task task) throws Exception {
         Task compileJava = task.getProject().tasks.findByPath(':compileJava')
+
         File outputDir;
         if(compileJava != null){
             outputDir = compileJava.destinationDir
         }
+
         if (outputDir != null && !outputDir.exists() && hasJavaSourceFiles(task.classpath, outputDir)) {
           logger.warn(MessageFormat.format("Installed loose application from project {0}, but the project has not been compiled.", project.name))
         }
@@ -175,7 +177,6 @@ class InstallAppsTask extends AbstractServerTask {
 
     private boolean hasJavaSourceFiles(FileCollection classpath, File outputDir){
         for(File f: classpath) {
-            println(f.getAbsolutePath())
             if(f.getAbsolutePath().equals(outputDir.getCanonicalPath())) {
                 return true;
             }
