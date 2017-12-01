@@ -153,9 +153,13 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
     protected void installLooseConfigWar(LooseConfigData config, Task task) throws Exception {
-        File outputDir = task.getProject().tasks.findByPath(':compileJava').destinationDir
+        Task compileJava = task.getProject().tasks.findByPath(':compileJava')
+        File outputDir;
+        if(compileJava != null){
+            outputDir = compileJava.destinationDir
+        }
         if (outputDir != null && !outputDir.exists() && hasJavaSourceFiles(task.classpath, outputDir)) {
-          logger.warn(MessageFormat.format("Failed to install loose application from project {0}. The project has not been compiled.", project.name))
+          logger.warn(MessageFormat.format("Installed loose application from project {0}, but the project has not been compiled.", project.name))
         }
         LooseWarApplication looseWar = new LooseWarApplication(task, config)
         looseWar.addSourceDir()
