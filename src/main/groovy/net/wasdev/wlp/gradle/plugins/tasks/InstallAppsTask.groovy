@@ -153,8 +153,8 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
     protected void installLooseConfigWar(LooseConfigData config, Task task) throws Exception {
-        File outputDir = project.buildDir
-        if (!outputDir.exists() && hasJavaSourceFiles(task.classpath)) {
+        File outputDir = task.getProject().tasks.findByPath(':compileJava').destinationDir
+        if (outputDir != null && !outputDir.exists() && hasJavaSourceFiles(task.classpath, outputDir)) {
           throw new GradleException(MessageFormat.format("Failed to install loose application from project {0}. The project has not been compiled.", project.name))
         }
         LooseWarApplication looseWar = new LooseWarApplication(task, config)
@@ -169,9 +169,9 @@ class InstallAppsTask extends AbstractServerTask {
         looseWar.addManifestFile(manifestFile, "gradle-war-plugin")
     }
 
-    private boolean hasJavaSourceFiles(FileCollection classpath){
+    private boolean hasJavaSourceFiles(FileCollection classpath, File outputDir){
         for(File f: classpath) {
-            if(f.getAbsolutePath().endsWith('/build/classes/java/main')) {
+            if(f.getAbsolutePath().equals(outputDir.getCanonicalPath())) {
                 return true;
             }
         }
