@@ -156,6 +156,10 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn 'libertyCreate'
+
+            project.afterEvaluate {
+                if (dependsOnApps(server)) dependsOn 'installApps'
+            }
         }
 
         project.task('libertyStop', type: StopTask) {
