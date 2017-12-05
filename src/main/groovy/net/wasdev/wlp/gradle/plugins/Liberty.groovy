@@ -287,7 +287,7 @@ class Liberty implements Plugin<Project> {
 
     private static void setLibertyOutputDir(Project project, String envOutputDir){
         if (envOutputDir != null) {
-            project.liberty.outputDir = envOutputDir
+            project.liberty.outputDir = envOutputDir.replace("\\", "/")
         }
     }
 
