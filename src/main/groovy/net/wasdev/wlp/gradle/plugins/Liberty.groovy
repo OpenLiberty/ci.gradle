@@ -119,9 +119,11 @@ class Liberty implements Plugin<Project> {
             dependsOn 'installLiberty'
 
             project.afterEvaluate {
-                String defaultPath = project.projectDir.toString() + '/src/main/liberty/config/'
+                // Run install features if configured
+                if (dependsOnFeature(server)) finalizedBy 'installFeature'
 
                 // Defining files set in build.gradle and check their default paths as inputs
+                String defaultPath = project.projectDir.toString() + '/src/main/liberty/config/'
                 if (!project.liberty.server.configFile.toString().equals('default')) {
                     inputs.file { project.liberty.server.configFile }
                 } else if (new File(defaultPath + 'server.xml').exists()) {
@@ -153,8 +155,11 @@ class Liberty implements Plugin<Project> {
             description 'Starts the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
+            dependsOn 'libertyCreate'
 
-            project.afterEvaluate { dependsOn installDependsOn(server, 'libertyCreate') }
+            project.afterEvaluate {
+                if (dependsOnApps(server)) dependsOn 'installApps'
+            }
         }
 
         project.task('libertyStop', type: StopTask) {
