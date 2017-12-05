@@ -293,7 +293,7 @@ class Liberty implements Plugin<Project> {
 
     private static void setServerOutputDir(ServerExtension server, String envOutputDir){
         if (envOutputDir != null) {
-            server.outputDir = envOutputDir
+            server.outputDir = envOutputDir.replace("\\", "/")
         }
     }
 
