@@ -101,8 +101,11 @@ class Liberty implements Plugin<Project> {
             description = "Runs a Websphere Liberty Profile server under the Gradle process."
             logging.level = LogLevel.INFO
             group 'Liberty'
+            dependsOn 'libertyCreate'
 
-            project.afterEvaluate { dependsOn installDependsOn(server, 'libertyCreate') }
+            project.afterEvaluate { 
+                if (dependsOnApps(server)) dependsOn 'installApps'
+            }
         }
 
         project.task('libertyStatus', type: StatusTask) {
