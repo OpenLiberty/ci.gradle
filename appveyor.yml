@@ -1,0 +1,11 @@
+environment:
+  matrix:
+        - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
+
+build_script:
+  # Build the compiled extension
+  - "gradlew.bat install check -Prunit=online -DwlpVersion=17.0.0.3 --stacktrace --info"
+
+artifacts:
+  # Archive the generated packages in the ci.appveyor.com build report.
+- path: build\*
