@@ -267,6 +267,7 @@ class Liberty implements Plugin<Project> {
             //check etc/server.env and set liberty.outputDir
             File serverEnvFile = new File(Liberty.getInstallDir(project), 'etc/server.env')
             if (serverEnvFile.exists()) {
+                serverEnvFile.text = serverEnvFile.text.replace("\\", "/")
                 envProperties.load(new FileInputStream(serverEnvFile))
                 Liberty.setLibertyOutputDir(project, (String) envProperties.get("WLP_OUTPUT_DIR"))
             }
@@ -280,10 +281,12 @@ class Liberty implements Plugin<Project> {
             if (server.configDirectory != null) {
                 File serverEnvFile = new File(server.configDirectory, 'server.env')
                 if (serverEnvFile.exists()) {
+                    serverEnvFile.text = serverEnvFile.text.replace("\\", "/")
                     envProperties.load(new FileInputStream(serverEnvFile))
                     Liberty.setServerOutputDir(server, (String) envProperties.get("WLP_OUTPUT_DIR"))
                 }
             } else if (server.serverEnv.exists()) {
+                server.serverEnv.text = server.serverEnv.text.replace("\\", "/")
                 envProperties.load(new FileInputStream(server.serverEnv))
                 Liberty.setServerOutputDir(server, (String) envProperties.get("WLP_OUTPUT_DIR"))
             }
