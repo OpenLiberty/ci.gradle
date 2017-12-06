@@ -6,6 +6,10 @@ The `libertyCreate` task is used to create a named Liberty server instance.
 
 `libertyCreate` depends on `installLiberty`.
 
+### finalizedBy
+
+`libertyCreate` is finalized by `installFeature` if features are configured in the `build.gradle` file.
+
 ### Properties
 
 Server configuration parameters were added to the [server extension](libertyExtensions.md#liberty-server-configuration) for flexible configuration. Running `libertyCreate` will update the configuration files if the server already exists.
