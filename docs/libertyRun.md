@@ -6,9 +6,7 @@ gradle libertyRun --no-daemon
 ```
 
 ### dependsOn
-`libertyRun` depends on `libertyCreate`, and `installApps` if configured.  
-  
-**Note**: The 2.0 plugin is missing a depends on `installFeature` if `installApps` is not called. If this applies to you, you may need to add `libertyRun.dependsOn 'installFeature'` to your `build.gradle`.
+`libertyRun` depends on `libertyCreate`, and `installApps` or `installFeature` if configured.  
 
 ### What is the Gradle Daemon and why --no-daemon?
 The Gradle Daemon is a long-running background process designed to help speed up the build process. It does so by caching project information and staying alive, avoiding constant JVM startup costs. This behavior is default until specified otherwise.  
