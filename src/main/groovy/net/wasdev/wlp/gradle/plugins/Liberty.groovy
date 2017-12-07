@@ -60,7 +60,7 @@ class Liberty implements Plugin<Project> {
         }
 
         //Create expected server extension from liberty extension data
-        project.afterEvaluate {
+        project.afterEvaluate { 
             if (project.liberty.server == null) {
                 project.liberty.server = copyProperties(project.liberty)
             }
