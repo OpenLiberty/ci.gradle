@@ -343,6 +343,9 @@ abstract class AbstractServerTask extends AbstractTask {
         Node libertyPluginConfig = pluginXmlParser.parse(new File(project.buildDir, 'liberty-plugin-config.xml'))
         if (libertyPluginConfig.getAt('servers').isEmpty()) {
             libertyPluginConfig.appendNode('servers')
+        } else {
+            //removes the server nodes from the servers element
+            libertyPluginConfig.getAt('servers')[0].value = ""
         }
         Node serverNode = new Node(null, 'server')
 
