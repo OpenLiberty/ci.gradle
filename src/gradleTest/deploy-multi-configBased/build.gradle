@@ -1,0 +1,51 @@
+
+apply plugin: 'maven'
+apply plugin: 'war'
+apply plugin: 'liberty'
+
+group = 'liberty.gradle'
+version = '1'
+
+compileJava.options.encoding = 'UTF-8'
+
+ext {
+  // Liberty server properties
+  wlpServerName = 'LibertyProjectServer'
+  serverDirectory = "${project.buildDir}/wlp/usr/servers/${wlpServerName}"
+  testServerHttpPort = 9080
+  testServerHttpsPort = 9443
+
+  // This is set in the ibm-web-ext.xml file
+  warContext = 'myLibertyApp'
+  appName = 'LibertyProject'
+  packageFile = "${project.buildDir}/${appName}.zip"
+  packagingType = 'usr'
+
+}
+
+liberty {
+  install {
+    runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/17.0.0.1/wlp-webProfile7-17.0.0.1.zip"
+  }
+  server{
+    name = wlpServerName
+    looseApplication = false
+    packageLiberty {
+      archive = packageFile
+      include = packagingType
+    }
+    verifyAppStartTimeout = 30
+  }
+}
+
+task printMessageAboutRunningServer {
+  doLast {
+    println "The server is now running at http://localhost:${testServerHttpPort}/${warContext}"
+    println "To stop the server run 'gradle libertyStop'"
+  }
+}
+
+libertyStart.finalizedBy 'printMessageAboutRunningServer'
+
+// This triggers gradleTest
+task runGradleTest( dependsOn : ['libertyStart', 'libertyStop'] )

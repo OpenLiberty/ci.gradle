@@ -19,19 +19,22 @@ class CreateServerEnvTask extends AbstractServerTask {
   File getServerEnvFile() {
     if (!server.serverEnv.exists()) {
       logger.warn("The server.env was configured but was not found at: ${server.serverEnv}")
+      return null
     }
     return server.serverEnv
   }
 
   @TaskAction
   void createServerConfig() {
-    if (serverEnvFile.exists()) {
-      project.copy {
-        from serverEnvFile
-        into getServerDir(project)
-        rename { String fileName ->
-          if (fileName != configFilename) {
-            fileName.replace(fileName, configFilename)
+    if (serverEnvFile != null){
+      if (serverEnvFile.exists()) {
+        project.copy {
+          from serverEnvFile
+          into getServerDir(project)
+          rename { String fileName ->
+            if (fileName != configFilename) {
+              fileName.replace(fileName, configFilename)
+            }
           }
         }
       }

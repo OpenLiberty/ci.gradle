@@ -1,6 +1,23 @@
-apply plugin: 'groovy'
-apply plugin: 'maven'
-apply plugin: 'signing'
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "com.gradle.publish:plugin-publish-plugin:0.9.7"
+  }
+}
+
+plugins {
+  id 'org.ysb33r.gradletest' version '1.1'
+  id 'org.ysb33r.gradletest.base' version '1.1'
+  id 'org.ysb33r.gradlerunner' version '1.1'
+  id 'groovy'
+  id 'maven'
+  id 'signing'
+}
+
 apply plugin: "com.gradle.plugin-publish"
 
 repositories {
@@ -15,19 +32,17 @@ repositories {
   }
 }
 
-buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-  }
-  dependencies {
-    classpath "com.gradle.publish:plugin-publish-plugin:0.9.7"
-  }
-}
 
 configurations {
   provided
+}
+
+gradleTest {
+  versions '4.3.1'
+
+  beforeTest {
+    println "  ${it.name}"
+  }
 }
 
 compileJava {
@@ -59,6 +74,7 @@ dependencies {
   compile localGroovy()
   provided group: 'com.ibm.websphere.appserver.api', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
   testCompile 'junit:junit:4.11'
+  testCompile gradleTestKit()
 }
 
 sourceSets {
@@ -67,7 +83,7 @@ sourceSets {
     resources.srcDir file('src/integTest/resources')
     compileClasspath = sourceSets.main.output + configurations.testRuntime
     runtimeClasspath = output + compileClasspath
-    output.classesDir = new File(buildDir, 'classes/java/integrationTest')
+//    output.classesDirs = new File(buildDir, 'classes/java/integrationTest')
   }
 }
 
@@ -98,7 +114,7 @@ task wrapper(type: Wrapper) {
 
 archivesBaseName = 'liberty-gradle-plugin'
 group = 'net.wasdev.wlp.gradle.plugins'
-version = '2.0.2-SNAPSHOT'
+version = '3.0-SNAPSHOT'
 
 task sourcesJar(type: Jar) {
   classifier = 'sources'

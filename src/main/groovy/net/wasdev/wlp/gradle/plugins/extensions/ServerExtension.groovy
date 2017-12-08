@@ -54,7 +54,8 @@ class ServerExtension{
                 throw new GradleException("More than one ${configFile} found in config sourceset".toString())
                 break
             default:
-                return new File(configDirectory, "/config/${configFile}")
+                Set<File> srcDirs = project.sourceSets.libertyConfig.allLibertyConfig.getSrcDirs()
+                return new File(srcDirs[0], configFile)
                 break
         }
     }
