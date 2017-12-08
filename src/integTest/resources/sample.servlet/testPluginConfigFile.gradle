@@ -1,6 +1,5 @@
 /*
-	This test checks whether the application was successfully installed without the version number in the package
-	when installApps is called and stripVersion is set to true.
+	Testing that liberty-plugin-config.xml is getting generated correctly.
 */
 group = 'liberty.gradle'
 version = '1'
