@@ -27,6 +27,7 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
 import org.apache.commons.io.FilenameUtils
+import org.gradle.api.file.FileCollection
 import org.w3c.dom.Element;
 import java.util.regex.Pattern
 import java.util.regex.Matcher
@@ -152,9 +153,15 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
     protected void installLooseConfigWar(LooseConfigData config, Task task) throws Exception {
-        File dir = getServerDir(project)
-        if (!dir.exists() && !task.sourceSets.allJava.getSrcDirs().isEmpty()) {
-          throw new GradleException(MessageFormat.format("Failed to install loose application from project {0}. The project has not been compiled.", project.name))
+        Task compileJava = task.getProject().tasks.findByPath(':compileJava')
+
+        File outputDir;
+        if(compileJava != null){
+            outputDir = compileJava.destinationDir
+        }
+
+        if (outputDir != null && !outputDir.exists() && hasJavaSourceFiles(task.classpath, outputDir)) {
+          logger.warn(MessageFormat.format("Installed loose application from project {0}, but the project has not been compiled.", project.name))
         }
         LooseWarApplication looseWar = new LooseWarApplication(task, config)
         looseWar.addSourceDir()
@@ -168,11 +175,20 @@ class InstallAppsTask extends AbstractServerTask {
         looseWar.addManifestFile(manifestFile, "gradle-war-plugin")
     }
 
+    private boolean hasJavaSourceFiles(FileCollection classpath, File outputDir){
+        for(File f: classpath) {
+            if(f.getAbsolutePath().equals(outputDir.getCanonicalPath())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void addWarEmbeddedLib(Element parent, LooseWarApplication looseApp, Task task) throws Exception {
       ArrayList<File> deps = new ArrayList<File>();
       task.classpath.each {deps.add(it)}
       //Removes WEB-INF/lib/main directory since it is not rquired in the xml
-      if(deps != null && !deps.isEmpty()){
+      if(deps != null && !deps.isEmpty()) {
         deps.remove(0)
       }
       File parentProjectDir = new File(task.getProject().getRootProject().rootDir.getAbsolutePath())

@@ -158,3 +158,5 @@ if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')
     }
   }
 }
+
+groovydoc.enabled = false
