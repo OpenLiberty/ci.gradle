@@ -67,7 +67,7 @@ sourceSets {
         resources.srcDir file('src/integTest/resources')
         compileClasspath = sourceSets.main.output + configurations.testRuntime
         runtimeClasspath = output + compileClasspath
-        output.classesDir = new File(buildDir, 'classes/java/integrationTest')
+        output.dir(files(new File(buildDir, 'classes/java/integrationTest')))
     }
 }
 
@@ -75,9 +75,9 @@ task integrationTest(type: Test) {
     logging.level = LogLevel.INFO
     description = 'Runs the integration tests.' + gradle.gradleVersion
     if (!gradle.gradleVersion.startsWith('4.')) {
-        testClassesDir = sourceSets.integrationTest.output.classesDir
+        testClassesDir = sourceSets.integrationTest.output.getDirs().getSingleFile()
     } else {
-        testClassesDirs = fileTree(dir: sourceSets.integrationTest.output.classesDir)
+        testClassesDirs = fileTree(dir: sourceSets.integrationTest.output.getDirs().getSingleFile())
     }
     classpath = sourceSets.integrationTest.runtimeClasspath
     if (!(project.hasProperty('runit'))) {
