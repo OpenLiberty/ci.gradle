@@ -35,6 +35,8 @@ dependencies {
     compile localGroovy()
     compile ('net.wasdev.wlp.ant:wlp-anttasks:1.4-SNAPSHOT')
     compile group: 'commons-io', name: 'commons-io', version: '2.5'
+    compile gradleApi()
+    compile localGroovy()
     provided group: 'com.ibm.websphere.appserver.api', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
     testCompile 'junit:junit:4.11'
 }
@@ -45,18 +47,18 @@ sourceSets {
         resources.srcDir file('src/integTest/resources')
         compileClasspath = sourceSets.main.output + configurations.testRuntime
         runtimeClasspath = output + compileClasspath
-        //output.classesDirs = new File(buildDir, 'classes/java/integrationTest')
+        output.classesDir = new File(buildDir, 'classes/java/integrationTest')
     }
 }
 
 task integrationTest(type: Test) {
     logging.level = LogLevel.INFO
     description = 'Runs the integration tests.' + gradle.gradleVersion
-    //if (!gradle.gradleVersion.startsWith('4.')) {
-        testClassesDirs = sourceSets.integrationTest.output.classesDirs
-//    } else {
-//        testClassesDirs = fileTree(dir: sourceSets.integrationTest.output.classesDirs)
-//    }
+    if (!gradle.gradleVersion.startsWith('4.')) {
+        testClassesDir = sourceSets.integrationTest.output.classesDir
+    } else {
+        testClassesDirs = fileTree(dir: sourceSets.integrationTest.output.classesDir)
+    }
     classpath = sourceSets.integrationTest.runtimeClasspath
     if (!(project.hasProperty('runit'))) {
         enabled = false
