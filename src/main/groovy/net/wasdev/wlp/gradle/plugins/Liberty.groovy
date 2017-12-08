@@ -60,7 +60,7 @@ class Liberty implements Plugin<Project> {
         }
 
         //Create expected server extension from liberty extension data
-        project.afterEvaluate {
+        project.afterEvaluate { 
             if (project.liberty.server == null) {
                 project.liberty.server = copyProperties(project.liberty)
             }
@@ -103,7 +103,7 @@ class Liberty implements Plugin<Project> {
             group 'Liberty'
             dependsOn 'libertyCreate'
 
-            project.afterEvaluate { 
+            project.afterEvaluate {
                 if (dependsOnApps(server)) dependsOn 'installApps'
             }
         }
