@@ -74,9 +74,7 @@ sourceSets {
 task integrationTest(type: Test) {
     logging.level = LogLevel.INFO
     description = 'Runs the integration tests.' + gradle.gradleVersion
-    println(":::"+sourceSets.integrationTest.output.getDirs().getSingleFile().getAbsolutePath())
     if (!gradle.gradleVersion.startsWith('4.')) {
-        println(":::"+sourceSets.integrationTest.output.getDirs().getSingleFile().getAbsolutePath())
         testClassesDir = sourceSets.integrationTest.output.getDirs().getSingleFile()
     } else {
         testClassesDirs = fileTree(dir: sourceSets.integrationTest.output.getDirs().getSingleFile())
