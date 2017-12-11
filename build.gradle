@@ -67,7 +67,7 @@ sourceSets {
         resources.srcDir file('src/integTest/resources')
         compileClasspath = sourceSets.main.output + configurations.testRuntime
         runtimeClasspath = output + compileClasspath
-        output.dir(files(new File(buildDir, 'classes/java/integrationTest')))
+        output.dir(files(new File(buildDir, 'classes/groovy/integrationTest')))
     }
 }
 
