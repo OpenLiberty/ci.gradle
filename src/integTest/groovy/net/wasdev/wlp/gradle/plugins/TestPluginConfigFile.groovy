@@ -82,6 +82,6 @@ public class TestPluginConfigFile extends AbstractIntegrationTest{
       nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
       Assert.assertEquals("Number of <configFile/> element ==>", 1, nodes.getLength());
 
-      Assert.assertTrue("correct configFile value", nodes.item(0).getTextContent().contains("/src/main/liberty/config/server-apps-test.xml"));
+      Assert.assertTrue("correct configFile value", nodes.item(0).getTextContent().replace("\\", "/").contains("/src/main/liberty/config/server-apps-test.xml"));
     }
 }
