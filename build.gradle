@@ -69,7 +69,7 @@ sourceSets {
         resources.srcDir file('src/integTest/resources')
         compileClasspath = sourceSets.main.output + configurations.testRuntime
         runtimeClasspath = output + compileClasspath
-        output.dir(files(new File(buildDir, 'classes/java/integrationTest')))
+        output.dir(files(new File(buildDir, 'classes/groovy/integrationTest')))
     }
 }
 
@@ -100,7 +100,7 @@ task wrapper(type: Wrapper) {
 
 archivesBaseName = 'liberty-gradle-plugin'
 group = 'net.wasdev.wlp.gradle.plugins'
-version = '2.0.2-SNAPSHOT'
+version = '2.1.1-SNAPSHOT'
 
 task sourcesJar(type: Jar) {
     classifier = 'sources'
