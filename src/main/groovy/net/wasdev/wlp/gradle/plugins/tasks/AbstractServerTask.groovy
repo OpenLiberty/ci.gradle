@@ -238,7 +238,7 @@ abstract class AbstractServerTask extends AbstractTask {
             printer.print( libertyPluginConfig )
         }
     }
-    private String getPackagingType() throws Exception{
+    String getPackagingType() throws Exception{
       if (project.plugins.hasPlugin("war") || !project.tasks.withType(WarPlugin).isEmpty()) {
           return "war"
       }

@@ -22,10 +22,14 @@ import org.gradle.api.Project
 import org.gradle.api.file.FileTree
 import org.gradle.util.ConfigureUtil
 
+import java.nio.file.Paths
+
 class ServerExtension{
 
     ServerExtension(Project project){
-        configDirectory =         new File(project.projectDir, '/src/main/liberty')
+        Set<File> srcDirs = project.sourceSets.libertyConfig.allLibertyConfig.getSrcDirs()
+
+        configDirectory =         srcDirs[0]
 
         bootstrapPropertiesFile = findInConfigSourceset("bootstrap.properties", project)
         configFile =              findInConfigSourceset("server.xml", project)
@@ -41,11 +45,12 @@ class ServerExtension{
      * @return
      */
     private File findInConfigSourceset(String configFile, Project project){
-
+        println "biteme3"
         FileTree filtered = project.sourceSets.libertyConfig.allLibertyConfig.matching {
             include configFile
         }
-
+        println "biteme4"
+        println filtered
         switch (filtered.files.size()) {
             case 1:
                 return filtered.files.getAt(0)
@@ -54,8 +59,10 @@ class ServerExtension{
                 throw new GradleException("More than one ${configFile} found in config sourceset".toString())
                 break
             default:
+                println "biteme"
                 Set<File> srcDirs = project.sourceSets.libertyConfig.allLibertyConfig.getSrcDirs()
-                return new File(srcDirs[0], configFile)
+                println "biteme2"
+                return Paths.get(project.projectDir.absolutePath, srcDirs[0].absolutePath, configFile).toFile()
                 break
         }
     }

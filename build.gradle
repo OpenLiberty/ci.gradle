@@ -1,24 +1,25 @@
 buildscript {
   repositories {
+    mavenLocal()
     maven {
       url "https://plugins.gradle.org/m2/"
     }
   }
   dependencies {
-    classpath "com.gradle.publish:plugin-publish-plugin:0.9.7"
+    classpath 'org.ysb33r.gradle:gradletest:1.2'
   }
 }
 
 plugins {
-  id 'org.ysb33r.gradletest' version '1.1'
-  id 'org.ysb33r.gradletest.base' version '1.1'
-  id 'org.ysb33r.gradlerunner' version '1.1'
   id 'groovy'
   id 'maven'
+  id 'maven-publish'
   id 'signing'
+  id 'java-gradle-plugin'
+  id "com.gradle.plugin-publish" version "0.9.9"
 }
 
-apply plugin: "com.gradle.plugin-publish"
+apply plugin: "org.ysb33r.gradletest"
 
 repositories {
   mavenCentral()
@@ -31,7 +32,6 @@ repositories {
     url = 'https://oss.sonatype.org/content/repositories/snapshots/'
   }
 }
-
 
 configurations {
   provided
@@ -133,6 +133,21 @@ artifacts {
 if (!version.endsWith("SNAPSHOT")) {
   signing {
     sign configurations.archives
+  }
+}
+
+gradlePlugin {
+  //noinspection GroovyAssignabilityCheck
+  plugins {
+    liberty {
+      id = 'liberty'
+      implementationClass = 'net.wasdev.wlp.gradle.plugins.Liberty'
+    }
+
+    cigradle {
+      id = 'net.wasdev.wlp.gradle.plugins.Liberty'
+      implementationClass = 'net.wasdev.wlp.gradle.plugins.Liberty'
+    }
   }
 }
 
