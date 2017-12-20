@@ -1,0 +1,101 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+    }
+}
+
+apply plugin: 'war'
+apply plugin: 'liberty'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+repositories {
+     mavenCentral()
+}
+
+ext {
+    // Liberty server properties
+    wlpServerName = 'LibertyProjectServer'
+    serverDirectory = "${project.buildDir}/wlp/usr/servers/${wlpServerName}"
+    testServerHttpPort = 9080
+    testServerHttpsPort = 9443
+
+    // This is set in the ibm-web-ext.xml file
+    warContext = 'test-configure-arquillian'
+}
+
+war {
+    archiveName = warContext + '.' + extension
+}
+
+liberty {
+    server {
+        configFile = file("src/main/liberty/config/server.xml")
+        bootstrapProperties = ['build.directory': buildDir, 'default.http.port': "${testServerHttpPort}" , 'default.https.port': "${testServerHttpsPort}", 'appContext': "${warContext}", 'appLocation': "${war.archiveName}"]
+        name = 'LibertyProjectServer'
+        apps = [war]
+        looseApplication = true
+        verifyAppStartTimeout = 30
+     }
+}
+
+configurations {
+    h2
+    h2.transitive = true
+    compile.extendsFrom(h2)
+}
+
+dependencies {
+    h2 "com.h2database:h2:1.4.195"
+
+    providedCompile "javax.json:javax.json-api:1.0"
+    providedCompile "javax.ejb:javax.ejb-api:3.2"
+    providedCompile ('javax.ws.rs:javax.ws.rs-api:2.0.1')
+    providedCompile ('com.ibm.websphere.appserver.api:com.ibm.websphere.appserver.api.jaxrs20:1.0.18')
+    providedCompile ('com.ibm.websphere.appserver.api:com.ibm.websphere.appserver.api.persistence:1.0.18')
+    providedCompile ('org.eclipse.persistence:javax.persistence:2.1.0')
+
+    testCompile "junit:junit:4.12"
+    testCompile "org.jboss.shrinkwrap.resolver:shrinkwrap-resolver-impl-maven:2.2.4"
+    testCompile "org.jboss.arquillian.junit:arquillian-junit-container:1.1.13.Final"
+    testCompile "org.jboss.arquillian.container:arquillian-wlp-managed-8.5:1.0.0.Beta2"
+    testCompile "org.jboss.shrinkwrap:shrinkwrap-api:1.2.6"
+    testCompile files("${System.properties['java.home']}/../lib/tools.jar")
+
+    libertyRuntime "com.ibm.websphere.appserver.runtime:wlp-webProfile7:17.0.0.2"
+}
+
+task copyH2 {
+    doLast {
+        copy {
+            from configurations.h2
+            into "$buildDir/wlp/usr/shared/resources/h2"
+            include "*.jar"
+        }
+    }
+}
+
+configureArquillian {
+    arquillianProperties = ['outputToConsole': 'true']
+    skipIfArquillianXmlExists = true
+}
+
+test {
+    reports.html.destination = file("$buildDir/reports/it")
+    reports.junitXml.destination = file("$buildDir/test-results/it")
+    include '**/*IT*'
+    exclude '**/unit/**'
+    systemProperties = ['liberty.test.port': testServerHttpPort, 'war.context': warContext]
+    testLogging.showStandardStreams = true
+    dependsOn 'installApps', 'testClasses', 'configureArquillian'
+}
+
+libertyCreate.finalizedBy 'copyH2'

@@ -247,7 +247,7 @@ class Liberty implements Plugin<Project> {
         }
 				
 		project.task('configureArquillian', type: ConfigureArquillianTask) {
-			description "Automatically generates arquillian.xml for projects that use Arquillian WLP Managed or Remote containers."
+			description "Automatically generates arquillian.xml for projects that use Arquillian Liberty Managed or Remote containers."
 			logging.level = LogLevel.INFO
 			group 'Liberty'
 			dependsOn 'libertyCreate', 'processTestResources'
