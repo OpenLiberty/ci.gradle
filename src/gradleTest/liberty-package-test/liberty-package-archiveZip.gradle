@@ -1,0 +1,33 @@
+apply plugin: 'liberty'
+
+ext {
+    // Liberty server properties
+    libertyVersion = project.property("libertyVersion")
+}
+
+liberty {
+    install {
+        runtimeUrl = 'https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2017-09-16_2214/openliberty-17.0.0.3-RC.zip'
+    }
+
+    server{
+        name = 'libertyOnline'
+        packageLiberty {
+            archive = 'testPackage.zip'
+        }
+    }
+}
+
+task ('runGradleTest') {
+    dependsOn 'clean', 'libertyStart', 'libertyPackage'
+    finalizedBy 'libertyStop', 'validateTasks'
+}
+
+task ('validateTasks') {
+    doLast {
+        def file = new File(projectDir, "testPackage.zip")
+
+        assert file.exists() : "file not found"
+        assert file.canRead() : "file cannot be read"
+    }
+}

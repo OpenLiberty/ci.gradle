@@ -45,12 +45,9 @@ class ServerExtension{
      * @return
      */
     private File findInConfigSourceset(String configFile, Project project){
-        println "biteme3"
         FileTree filtered = project.sourceSets.libertyConfig.allLibertyConfig.matching {
             include configFile
         }
-        println "biteme4"
-        println filtered
         switch (filtered.files.size()) {
             case 1:
                 return filtered.files.getAt(0)
@@ -59,9 +56,7 @@ class ServerExtension{
                 throw new GradleException("More than one ${configFile} found in config sourceset".toString())
                 break
             default:
-                println "biteme"
                 Set<File> srcDirs = project.sourceSets.libertyConfig.allLibertyConfig.getSrcDirs()
-                println "biteme2"
                 return Paths.get(project.projectDir.absolutePath, srcDirs[0].absolutePath, configFile).toFile()
                 break
         }

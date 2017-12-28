@@ -26,7 +26,7 @@ import java.nio.file.StandardCopyOption
 abstract class AbstractTask extends DefaultTask {
 
     //params that get built with installLiberty
-    def params
+    protected def params
 
     protected File getUserDir(Project project) {
         return getUserDir(project, LibertyIntstallController.getInstallDir(project))
