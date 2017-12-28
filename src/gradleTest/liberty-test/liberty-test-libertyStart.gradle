@@ -1,0 +1,14 @@
+apply from: "gradle/build.gradle"
+
+task ('runGradleTest') {
+  dependsOn 'clean', 'libertyStart'
+  finalizedBy 'libertyStop'
+
+  doLast {
+    def configFile = new File("${buildDir}/wlp/usr/servers/libertyOnline/server.xml")
+
+    assert configFile.exists() : "file not found"
+    assert configFile.canRead() : "file cannot be read"
+  }
+}
+

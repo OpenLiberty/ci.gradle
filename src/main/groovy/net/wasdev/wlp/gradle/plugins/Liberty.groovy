@@ -171,13 +171,6 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
       }
     }
 
-    Task taskStop = project.tasks.findByName(TASK_LIBERTY_STOP)
-    if (taskStop != null) {
-      taskStop.onlyIf {
-        LibertyIntstallController.isServerRunning(project)
-      }
-    }
-
     a_dependsOn_b(project, TASK_LIBERTY_PACKAGE, TASK_LIBERTY_CREATE_CONFIG)
 
     a_dependsOn_b(project, TASK_DEPLOY, TASK_LIBERTY_START)

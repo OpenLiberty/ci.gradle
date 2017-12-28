@@ -15,7 +15,9 @@
  */
 package net.wasdev.wlp.gradle.plugins.tasks
 
+import net.wasdev.wlp.gradle.plugins.extensions.DeployExtension
 import org.gradle.api.tasks.TaskAction
+import org.gradle.util.ConfigureUtil
 
 import static net.wasdev.wlp.gradle.plugins.Liberty.LIBERTY_DEPLOY_CONFIGURATION
 
@@ -31,10 +33,10 @@ class DeployTask extends AbstractServerTask {
                                 classpath: project.rootProject.buildscript.configurations.classpath.asPath)
 
         // deploys the list of deploy closures
-        server.deploy.listOfClosures.add(project.liberty.deploy)
-        for (Object deployable :  server.deploy.listOfClosures) {
+        for (DeployExtension deployable :  server.deploys) {
             def params = buildLibertyMap(project)
             def fileToDeploy = deployable.file
+
             if (fileToDeploy != null) {
                 deployClosureDeclared = true
                 params.put('file', fileToDeploy)

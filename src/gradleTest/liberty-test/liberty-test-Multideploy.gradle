@@ -1,0 +1,55 @@
+apply plugin: 'liberty'
+
+ext {
+  // Liberty server properties
+  libertyVersion = project.property("libertyVersion")
+}
+
+liberty {
+  install {
+    runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/${libertyVersion}/wlp-webProfile7-${libertyVersion}.zip"
+  }
+
+  server{
+    name = 'libertyOnline'
+    deploy {
+      file = "${projectDir}/war/test-war.war"
+    }
+
+    deploy {
+      file = "${projectDir}/war/test-war2.war"
+    }
+
+    deploy {
+      dir = "${projectDir}/war/wars"
+      include = 'test-war3.war'
+    }
+
+    packageLiberty {
+      include = 'minify'
+      os='Linux'
+    }
+
+    features {
+      name= ['mongodb-2.0']
+      acceptLicense = true
+    }
+
+    uninstallfeatures {
+      name= ['mongodb-2.0']
+    }
+  }
+}
+
+
+
+task ('runGradleTest') {
+  dependsOn 'clean', 'deploy'
+  finalizedBy 'libertyStop'
+
+  doLast {
+    assert new File(buildDir, "/wlp/usr/servers/libertyOnline/dropins/test-war.war") : "test-war.war not found"
+    assert new File(buildDir, "/wlp/usr/servers/libertyOnline/dropins/test-war2.war") : "test-war2.war not found"
+    assert new File(buildDir, "/wlp/usr/servers/libertyOnline/dropins/test-war3.war") : "test-war3.war not found"
+  }
+}

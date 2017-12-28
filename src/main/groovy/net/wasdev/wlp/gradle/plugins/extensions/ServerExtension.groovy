@@ -94,7 +94,8 @@ class ServerExtension{
     UninstallFeatureExtension uninstallfeatures = new UninstallFeatureExtension()
     CleanExtension cleanDir = new CleanExtension()
 
-    DeployExtension deploy = new DeployExtension()
+    private List<DeployExtension> deploys = new ArrayList<DeployExtension>()
+
     UndeployExtension undeploy = new UndeployExtension()
 
     PackageAndDumpExtension packageLiberty = new PackageAndDumpExtension()
@@ -114,12 +115,13 @@ class ServerExtension{
     }
 
     def deploy(Closure closure) {
-        if (numberOfClosures > 0){
-            deploy.listOfClosures.add(deploy.clone())
-            deploy.file = null
-        }
+        DeployExtension deploy = new DeployExtension()
         ConfigureUtil.configure(closure, deploy)
-        numberOfClosures++
+        deploys << deploy
+    }
+
+    def getDeploys() {
+        return deploys
     }
 
     def undeploy(Closure closure) {
