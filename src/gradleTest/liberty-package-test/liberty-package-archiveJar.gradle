@@ -4,9 +4,6 @@ ext {
     libertyVersion = project.property("libertyVersion")
 }
 
-def test_mode = System.getProperty('runit')
-def wlpLicense = System.getProperty('wlpLicense')
-
 liberty {
     install {
         runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/${libertyVersion}/wlp-webProfile7-${libertyVersion}.zip"

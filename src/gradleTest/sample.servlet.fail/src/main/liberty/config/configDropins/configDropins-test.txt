@@ -1,0 +1,2 @@
+This file and the jvm.options file in the same directory are testing to make sure that
+non-xml documents do not break the build.

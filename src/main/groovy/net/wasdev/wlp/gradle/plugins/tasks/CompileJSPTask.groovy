@@ -53,70 +53,70 @@ class CompileJSPTask extends AbstractServerTask {
 
   protected void perTaskCompileJSP(Task task) throws Exception {
 
-          CompileJSPs compileJsp = new CompileJSPs()
-          compileJsp.setInstallDir(LibertyIntstallController.getInstallDir(project))
-          compileJsp.setTempdir(project.buildDir)
-          compileJsp.setDestdir(new File(project.buildDir.getAbsolutePath()+"/classes/java"))
-          compileJsp.setTimeout(project.liberty.jspCompileTimeout)
-          // don't delete temporary server dir
-          compileJsp.setCleanup(false)
-          compileJsp.setProject(ant)
-          compileJsp.setTaskName('antlib:net/wasdev/wlp/ant:compileJSPs')
+      CompileJSPs compileJsp = new CompileJSPs()
+      compileJsp.setInstallDir(LibertyIntstallController.getInstallDir(project))
+      compileJsp.setTempdir(project.buildDir)
+      compileJsp.setDestdir(new File(project.buildDir.getAbsolutePath()+"/classes/java"))
+      compileJsp.setTimeout(project.liberty.jspCompileTimeout)
+      // don't delete temporary server dir
+      compileJsp.setCleanup(false)
+      compileJsp.setProject(ant)
+      compileJsp.setTaskName('antlib:net/wasdev/wlp/ant:compileJSPs')
 
-          if(project.convention.plugins.war.webAppDirName != null){
-            compileJsp.setSrcdir(project.convention.plugins.war.webAppDir)
-          }
-          else{
-            compileJsp.setSrcdir(new File("src/main/webapp"))
-          }
-          Set<String> classpath = new HashSet<String>();
+      if(project.convention.plugins.war.webAppDirName != null){
+        compileJsp.setSrcdir(project.convention.plugins.war.webAppDir)
+      }
+      else{
+        compileJsp.setSrcdir(new File("src/main/webapp"))
+      }
+      Set<String> classpath = new HashSet<String>();
 
-          // first add target/classes (or whatever is configured)
-          classpath.add(getServerDir(project).absolutePath)
-          for(File f : task.classpath)
-            classpath.add(f.getAbsolutePath())
-          setCompileDependencies(task, classpath)
+      // first add target/classes (or whatever is configured)
+      classpath.add(getServerDir(project).absolutePath)
+      for(File f : task.classpath)
+        classpath.add(f.getAbsolutePath())
+      setCompileDependencies(task, classpath)
 
-          String classpathStr = join(classpath, File.pathSeparator);
-          logger.debug("Classpath: " + classpathStr)
-          compileJsp.setClasspath(classpathStr)
+      String classpathStr = join(classpath, File.pathSeparator);
+      logger.debug("Classpath: " + classpathStr)
+      compileJsp.setClasspath(classpathStr)
 
-          if (project.liberty.jspVersion != null) {
-              compileJsp.setJspVersion(project.liberty.jspVersion)
-          }
-
-          compileJsp.init()
-          compileJsp.execute()
+      if (project.liberty.jspVersion != null) {
+          compileJsp.setJspVersion(project.liberty.jspVersion)
       }
 
-      protected void setCompileDependencies(Task task, Set<String> classpaths) {
-        ArrayList<File> deps = new ArrayList<File>();
-        task.classpath.each {deps.add(it)}
+      compileJsp.init()
+      compileJsp.execute()
+  }
 
-        //Removes WEB-INF/lib/main directory since it is not a dependency
-        if(deps != null && !deps.isEmpty()){
-          deps.remove(0)
-        }
+  protected void setCompileDependencies(Task task, Set<String> classpaths) {
+    ArrayList<File> deps = new ArrayList<File>();
+    task.classpath.each {deps.add(it)}
 
-        for (File dep: deps) {
-          if (dep != null) {
-              if (!classpaths.add(dep.getAbsolutePath())) {
-                  logger.debug("Duplicate dependency: " + dep.getName());
-              }
-          } else {
-              logger.debug("Could not find: " + dep.getName());
+    //Removes WEB-INF/lib/main directory since it is not a dependency
+    if(deps != null && !deps.isEmpty()){
+      deps.remove(0)
+    }
+
+    for (File dep: deps) {
+      if (dep != null) {
+          if (!classpaths.add(dep.getAbsolutePath())) {
+              logger.debug("Duplicate dependency: " + dep.getName());
           }
-        }
+      } else {
+          logger.debug("Could not find: " + dep.getName());
       }
+    }
+  }
 
-      protected String join(Set<String> depPathes, String sep) {
-          StringBuilder sb = new StringBuilder();
-          for (String str : depPathes) {
-              if (sb.length() != 0) {
-                  sb.append(sep);
-              }
-              sb.append(str);
+  protected String join(Set<String> depPathes, String sep) {
+      StringBuilder sb = new StringBuilder();
+      for (String str : depPathes) {
+          if (sb.length() != 0) {
+              sb.append(sep);
           }
-          return sb.toString();
+          sb.append(str);
       }
+      return sb.toString();
+  }
 }

@@ -48,7 +48,9 @@ gradleTest {
 //  versions '2.7','2.6','2.5'
 //  versions '2.4','2.3','2.2','2.1','2.0'
 
-  gradleArguments = ["-PlibertyVersion=17.0.0.2"]
+  gradleArguments = ["-PlibertyVersion=17.0.0.2", "--stacktrace"]
+
+  expectFailure ~/sample.servlet.fail/
 
   beforeTest {
     println "  ${it.name}"

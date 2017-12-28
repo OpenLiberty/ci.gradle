@@ -1,20 +1,6 @@
 group = 'liberty.gradle'
 version = '1'
 
-buildscript {
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        maven {
-            name = 'Sonatype Nexus Snapshots'
-            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
-        }
-    }
-    dependencies {
-        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
-    }
-}
-
 apply plugin: 'maven'
 apply plugin: 'war'
 apply plugin: 'liberty'
@@ -36,12 +22,12 @@ ext {
     appName = 'LibertyProject'
     packageFile = "${project.buildDir}/${appName}.zip"
     packagingType = 'usr'
-
+    libertyVersion = project.property("libertyVersion")
 }
 
 liberty {
     install {
-        runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/17.0.0.1/wlp-webProfile7-17.0.0.1.zip"
+        runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/${libertyVersion}/wlp-webProfile7-${libertyVersion}.zip"
     }
     server{
         name = wlpServerName
@@ -50,6 +36,8 @@ liberty {
             archive = packageFile
             include = packagingType
         }
+        dropins = [war]
+        configFile = file("src/main/liberty/config/server-apps-test.xml")
         verifyAppStartTimeout = 30
     }
 }
@@ -60,8 +48,6 @@ repositories {
 
 dependencies {
     testCompile 'junit:junit:4.12'
-    testCompile 'org.apache.cxf:cxf-rt-rs-client:3.1.1'
-    testCompile 'org.glassfish:javax.json:1.0.4'
     providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
 }
 
@@ -91,9 +77,10 @@ task printMessageAboutRunningServer {
     }
 }
 
-check.dependsOn 'integrationTest'
 installApps.dependsOn 'war'
-libertyStart.dependsOn 'installApps'
-integrationTest.dependsOn 'libertyStart', 'testClasses'
-integrationTest.finalizedBy 'libertyStop'
 libertyStart.finalizedBy 'printMessageAboutRunningServer'
+
+task ('runGradleTest') {
+    dependsOn 'clean', 'installApps'
+    finalizedBy 'libertyStop'
+}

@@ -1,3 +1,5 @@
+package sample.servlet
+
 group = 'liberty.gradle'
 version = '1'
 
