@@ -6,7 +6,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'org.ysb33r.gradle:gradletest:1.2'
+    classpath 'org.ysb33r.gradle:gradletest:1.2-SNAPSHOT'
   }
 }
 
