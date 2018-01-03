@@ -15,275 +15,332 @@
  */
 package net.wasdev.wlp.gradle.plugins
 
-import org.gradle.api.*
-
+import net.wasdev.wlp.gradle.plugins.definition.DefaultLibertyBaseSourceSet
+import net.wasdev.wlp.gradle.plugins.definition.DefaultLibertyConfigSourceSet
+import net.wasdev.wlp.gradle.plugins.definition.LibertyBaseSourceSet
+import net.wasdev.wlp.gradle.plugins.definition.LibertyConfigSourceSet
 import net.wasdev.wlp.gradle.plugins.extensions.LibertyExtension
 import net.wasdev.wlp.gradle.plugins.extensions.ServerExtension
-import net.wasdev.wlp.gradle.plugins.tasks.StartTask
-import net.wasdev.wlp.gradle.plugins.tasks.StopTask
-import net.wasdev.wlp.gradle.plugins.tasks.StatusTask
-import net.wasdev.wlp.gradle.plugins.tasks.CreateTask
-import net.wasdev.wlp.gradle.plugins.tasks.RunTask
-import net.wasdev.wlp.gradle.plugins.tasks.PackageTask
-import net.wasdev.wlp.gradle.plugins.tasks.DumpTask
-import net.wasdev.wlp.gradle.plugins.tasks.JavaDumpTask
-import net.wasdev.wlp.gradle.plugins.tasks.DebugTask
-import net.wasdev.wlp.gradle.plugins.tasks.DeployTask
-import net.wasdev.wlp.gradle.plugins.tasks.UndeployTask
-import net.wasdev.wlp.gradle.plugins.tasks.InstallFeatureTask
-import net.wasdev.wlp.gradle.plugins.tasks.InstallLibertyTask
-import net.wasdev.wlp.gradle.plugins.tasks.UninstallFeatureTask
-import net.wasdev.wlp.gradle.plugins.tasks.CleanTask
-import net.wasdev.wlp.gradle.plugins.tasks.InstallAppsTask
 import net.wasdev.wlp.gradle.plugins.tasks.AbstractServerTask
-import net.wasdev.wlp.gradle.plugins.tasks.CompileJSPTask
-import org.gradle.api.tasks.bundling.War
+import net.wasdev.wlp.gradle.plugins.utils.LibertyIntstallController
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.file.FileTreeElement
+import org.gradle.api.internal.classpath.ModuleRegistry
+import org.gradle.api.internal.file.SourceDirectorySetFactory
+import org.gradle.api.internal.plugins.DslObject
+import org.gradle.api.internal.tasks.DefaultSourceSet
 import org.gradle.api.logging.LogLevel
-import java.util.Properties
+import org.gradle.api.plugins.GroovyPlugin
+import org.gradle.api.plugins.JavaBasePlugin
+import org.gradle.api.plugins.JavaPluginConvention
+import org.gradle.api.plugins.WarPlugin
+import org.gradle.api.plugins.scala.ScalaPlugin
+import org.gradle.api.specs.Spec
+import org.gradle.api.tasks.bundling.War
+import org.gradle.plugins.ear.Ear
 
-class Liberty implements Plugin<Project> {
+import javax.inject.Inject
 
-    void apply(Project project) {
+class Liberty extends LibertyTrait implements Plugin<Project> {
 
-        project.extensions.create('liberty', LibertyExtension)
-        project.configurations.create('libertyLicense')
-        project.configurations.create('libertyRuntime')
+  private final SourceDirectorySetFactory sourceDirectorySetFactory
+  private final ModuleRegistry moduleRegistry
+  Project project
 
-        //Create expected server extension from liberty extension data
-        project.afterEvaluate{
-            if (project.liberty.server == null) {
-                project.liberty.server = copyProperties(project.liberty)
-            }
-            //Checking serverEnv files for server properties
-            Liberty.checkEtcServerEnvProperties(project)
-            Liberty.checkServerEnvProperties(project.liberty.server)
-            //Server objects need to be set per task after the project configuration phase
-            setServersForTasks(project)
-        }
+  public static final String LIBERTY_DEPLOY_CONFIGURATION = "libertyDeploy"
 
-        project.task('compileJSP', type: CompileJSPTask) {
-            description 'Compile the JSP files in the src/main/webapp directory. '
-            logging.level = LogLevel.INFO
-            dependsOn 'installLiberty', 'compileJava'
-            group 'Liberty'
-        }
+  public static final String TASK_CORE_EAR = "ear"
+  public static final String TASK_CORE_WAR = "war"
 
-        project.task('installLiberty', type: InstallLibertyTask) {
-            description 'Installs Liberty from a repository'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
-        }
 
-        project.task('libertyRun', type: RunTask) {
-            description = "Runs a Websphere Liberty Profile server under the Gradle process."
-            logging.level = LogLevel.INFO
-            group 'Liberty'
+  @Inject
+  Liberty(SourceDirectorySetFactory sourceDirectorySetFactory, ModuleRegistry moduleRegistry) {
+    this.sourceDirectorySetFactory = sourceDirectorySetFactory
+    this.moduleRegistry = moduleRegistry
 
-            project.afterEvaluate {
-                dependsOn installAppsDependsOn(server, 'libertyCreate')
-            }
-        }
+    initTaskDefMap()
+  }
 
-        project.task('libertyStatus', type: StatusTask) {
-            description 'Checks if the Liberty server is running.'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
-            dependsOn 'libertyCreate'
-        }
+  void apply(Project project) {
+    this.project = project
+    project.plugins.apply(JavaBasePlugin)
 
-        project.task('libertyCreate', type: CreateTask) {
-            description 'Creates a WebSphere Liberty Profile server.'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
-            dependsOn 'installLiberty'
-            project.afterEvaluate{
-                outputs.file { new File(getUserDir(project), "servers/${project.liberty.server.name}/server.xml") }
-            }
-        }
+    configureSourceSetDefaults()
 
-        project.task('libertyStart', type: StartTask) {
-            description 'Starts the WebSphere Liberty Profile server.'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
+    project.extensions.create('liberty', LibertyExtension, project)
+    project.configurations.create('libertyLicense')
+    project.configurations.create('libertyRuntime')
 
-            project.afterEvaluate {
-                dependsOn installAppsDependsOn(server, 'libertyCreate')
-            }
-        }
+    //Used to set project facets in Eclipse
+    project.pluginManager.apply('eclipse-wtp')
+    //project.tasks.getByName('eclipseWtpFacet').finalizedBy 'libertyCreate'
 
-        project.task('libertyStop', type: StopTask) {
-            description 'Stops the WebSphere Liberty Profile server.'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
-        }
-
-        project.task('libertyPackage', type: PackageTask) {
-            description 'Generates a WebSphere Liberty Profile server archive.'
-            logging.level = LogLevel.DEBUG
-            group 'Liberty'
-
-            project.afterEvaluate {
-                dependsOn installAppsDependsOn(server, 'installLiberty')
-            }
-        }
-
-        project.task('libertyDump', type: DumpTask) {
-            description 'Dumps diagnostic information from the Liberty Profile server into an archive.'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
-        }
-
-        project.task('libertyJavaDump', type: JavaDumpTask) {
-            description 'Dumps diagnostic information from the Liberty Profile server JVM.'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
-        }
-
-        project.task('libertyDebug', type: DebugTask) {
-            description 'Runs the Liberty Profile server in the console foreground after a debugger connects to the debug port (default: 7777).'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
-        }
-
-        project.task('deploy', type: DeployTask) {
-            description 'Deploys a supported file to the WebSphere Liberty Profile server.'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
-            dependsOn 'libertyStart'
-        }
-
-        project.task('undeploy', type: UndeployTask) {
-             description 'Removes an application from the WebSphere Liberty Profile server.'
-             logging.level = LogLevel.INFO
-             group 'Liberty'
-             dependsOn 'libertyStart'
-        }
-
-        project.task('installFeature', type: InstallFeatureTask) {
-            description 'Install a new feature to the WebSphere Liberty Profile server'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
-
-            project.afterEvaluate {
-                if (server.features.name != null && !server.features.name.empty) {
-                    dependsOn 'libertyCreate'
-                } else {
-                    dependsOn 'installLiberty'
-                }
-            }
-        }
-        project.task('uninstallFeature', type: UninstallFeatureTask) {
-            description 'Uninstall a feature from the WebSphere Liberty Profile server'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
-            dependsOn 'libertyCreate'
-        }
-
-        project.task('cleanDirs', type: CleanTask) {
-            description 'Deletes files from some directories from the WebSphere Liberty Profile server'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
-            dependsOn 'libertyStop'
-        }
-
-        project.task('installApps', type: InstallAppsTask) {
-            description "Copy applications generated by the Gradle project to a Liberty server's dropins or apps directory."
-            logging.level = LogLevel.INFO
-            group 'Liberty'
-            dependsOn project.tasks.withType(War)
-
-            project.afterEvaluate {
-                if (server.features.name != null && !server.features.name.empty) {
-                    dependsOn 'installFeature'
-                } else {
-                    dependsOn 'libertyCreate'
-                }
-           }
-        }
+    project.configurations.create(LIBERTY_DEPLOY_CONFIGURATION) {
+      description: "Configuration that allows for deploying projects to liberty via dependency"
     }
 
-    private ServerExtension copyProperties(LibertyExtension liberty) {
-        def serverMap = new ServerExtension().getProperties()
-        def libertyMap = liberty.getProperties()
+    //Create expected server extension from liberty extension data
+    project.afterEvaluate {
+      if (project.liberty.server == null) {
+        project.liberty.server = copyProperties(project.liberty)
+      }
 
-        serverMap.keySet().each { String element ->
-            if (element.equals("name")) {
-                serverMap.put(element, libertyMap.get("serverName"))
-            }
-            else {
-                serverMap.put(element, libertyMap.get(element))
-            }
+      // set logging level for all tasks
+      for (String sTask in taskDefMap.keySet()) {
+        Task tTask = project.tasks.findByName(sTask)
+        if (tTask != null) {
+          tTask.configure {
+            logging.level = LogLevel.INFO
+          }
         }
-        serverMap.remove('class')
-        serverMap.remove('outputDir')
+      }
 
-        return ServerExtension.newInstance(serverMap)
+      //Checking serverEnv files for server properties
+      checkEtcServerEnvProperties(project)
+      checkServerEnvProperties(project.liberty.server)
+
+      //Server objects need to be set per task after the project configuration phase
+      setServersForTasks(project)
     }
 
-    public static void checkEtcServerEnvProperties(Project project) {
-        if (project.liberty.outputDir == null) {
-            Properties envProperties = new Properties()
-            //check etc/server.env and set liberty.outputDir
-            File serverEnvFile = new File(Liberty.getInstallDir(project), 'etc/server.env')
-            if (serverEnvFile.exists()) {
-                envProperties.load(new FileInputStream(serverEnvFile))
-                Liberty.setLibertyOutputDir(project, (String) envProperties.get("WLP_OUTPUT_DIR"))
-            }
-        }
+    for (String sTask in taskDefMap.keySet()) {
+      project.tasks.create(taskDefMap[sTask])
     }
 
-    public static void checkServerEnvProperties(ServerExtension server) {
-        if (server.outputDir == null) {
-            Properties envProperties = new Properties()
-            //check server.env files and set liberty.server.outputDir
-            if (server.configDirectory != null) {
-                File serverEnvFile = new File(server.configDirectory, 'server.env')
-                if (serverEnvFile.exists()) {
-                    envProperties.load(new FileInputStream(serverEnvFile))
-                    Liberty.setServerOutputDir(server, (String) envProperties.get("WLP_OUTPUT_DIR"))
-                }
-            } else if (server.serverEnv.exists()) {
-                envProperties.load(new FileInputStream(server.serverEnv))
-                Liberty.setServerOutputDir(server, (String) envProperties.get("WLP_OUTPUT_DIR"))
-            }
+    setTaskWorkflow(project)
+    setTaskAfterEvalWorkflow(project)
+  }
+
+  static void setTaskAfterEvalWorkflow(Project project) {
+    project.afterEvaluate {
+      ServerExtension server = project.liberty.server
+
+      a_dependsOn_b(project, TASK_LIBERTY_RUN, installAppsDependsOn(server, TASK_LIBERTY_CREATE))
+      a_dependsOn_b(project, TASK_LIBERTY_START, installAppsDependsOn(server, TASK_LIBERTY_CREATE))
+      a_dependsOn_b(project, TASK_LIBERTY_PACKAGE, installAppsDependsOn(server, TASK_INSTALL_LIBERTY))
+
+      if (dependsOnFeature(server)) {
+        a_dependsOn_b(project, TASK_INSTALL_FEATURE, TASK_LIBERTY_CREATE)
+      } else {
+        a_dependsOn_b(project, TASK_INSTALL_FEATURE, TASK_INSTALL_LIBERTY)
+      }
+
+      if (!dependsOnApps(server)) {
+        if (project.plugins.hasPlugin(WarPlugin)) {
+          a_dependsOn_b(project, TASK_LIBERTY_RUN, TASK_INSTALL_APPS)
+          a_dependsOn_b(project, TASK_LIBERTY_START, TASK_INSTALL_APPS)
+          a_dependsOn_b(project, TASK_LIBERTY_PACKAGE, TASK_INSTALL_APPS)
         }
+      }
+
+    }
+  }
+
+  static void setTaskWorkflow(Project project) {
+    a_dependsOn_b(project, TASK_COMPILE_JSP, TASK_INSTALL_LIBERTY)
+    a_dependsOn_b(project, TASK_COMPILE_JSP, 'compileJava')
+
+    a_dependsOn_b(project, TASK_LIBERTY_STATUS, TASK_LIBERTY_CREATE)
+
+    a_dependsOn_b(project, TASK_LIBERTY_CREATE, TASK_LIBERTY_CREATE_ANT)
+    a_dependsOn_b(project, TASK_LIBERTY_CREATE, TASK_LIBERTY_CREATE_CONFIG)
+
+    a_dependsOn_b(project, TASK_LIBERTY_CREATE_ANT, TASK_INSTALL_LIBERTY)
+
+    a_mustRunAfter_b(project, TASK_LIBERTY_CREATE_CONFIG, TASK_LIBERTY_CREATE_ANT)
+
+    a_dependsOn_b(project, TASK_LIBERTY_CREATE_CONFIG, TASK_LIBERTY_CREATE_BOOTSTRAP)
+    a_dependsOn_b(project, TASK_LIBERTY_CREATE_CONFIG, TASK_LIBERTY_CREATE_SERVER_XML)
+    a_dependsOn_b(project, TASK_LIBERTY_CREATE_CONFIG, TASK_LIBERTY_CREATE_JVM_OPTIONS)
+    a_dependsOn_b(project, TASK_LIBERTY_CREATE_CONFIG, TASK_LIBERTY_CREATE_SERVER_ENV)
+
+    a_dependsOn_b(project, TASK_LIBERTY_CREATE_BOOTSTRAP, TASK_INSTALL_LIBERTY)
+
+    a_dependsOn_b(project, TASK_LIBERTY_CREATE_JVM_OPTIONS, TASK_INSTALL_LIBERTY)
+
+    a_dependsOn_b(project, TASK_LIBERTY_CREATE_SERVER_XML, TASK_INSTALL_LIBERTY)
+
+    a_dependsOn_b(project, TASK_LIBERTY_CREATE_SERVER_ENV, TASK_INSTALL_LIBERTY)
+
+    Task taskStart = project.tasks.findByName(TASK_LIBERTY_START)
+    if (taskStart != null) {
+      taskStart.onlyIf {
+        !LibertyIntstallController.isServerRunning(project)
+      }
     }
 
-    private static void setLibertyOutputDir(Project project, String envOutputDir){
-        if (envOutputDir != null) {
-            project.liberty.outputDir = envOutputDir
-        }
+    a_dependsOn_b(project, TASK_LIBERTY_PACKAGE, TASK_LIBERTY_CREATE_CONFIG)
+
+    a_dependsOn_b(project, TASK_DEPLOY, TASK_LIBERTY_START)
+
+    a_dependsOn_b(project, TASK_UNDEPLOY, TASK_LIBERTY_START)
+
+    a_dependsOn_b(project, TASK_UNINSTALL_FEATURE, TASK_LIBERTY_CREATE)
+
+    a_dependsOn_b(project, TASK_CLEAN_DIRS, TASK_LIBERTY_STOP)
+
+    Task taskATask = project.tasks.findByName(TASK_INSTALL_APPS)
+    taskATask.dependsOn(project.tasks.withType(War))
+    taskATask.dependsOn(project.tasks.withType(Ear))
+    a_dependsOn_b(project, TASK_INSTALL_APPS, TASK_LIBERTY_CREATE)
+
+  }
+
+  private void configureSourceSetDefaults() {
+    configureLibertyBaseSourceset("libertyBase")
+    configureLibertyConfigSourceset("libertyConfig")
+  }
+
+  private blankSourcesetLanguages(def newSrcSet) {
+    newSrcSet.with {
+      java.setSrcDirs([])
+      resources.setSrcDirs([])
     }
 
-    private static void setServerOutputDir(ServerExtension server, String envOutputDir){
-        if (envOutputDir != null) {
-            server.outputDir = envOutputDir
-        }
+    if (project.plugins.hasPlugin(GroovyPlugin)) {
+      newSrcSet.groovy.setSrcDirs([])
     }
 
-    private void setServersForTasks(Project project){
-        project.tasks.withType(AbstractServerTask).each {task ->
-            task.server = project.liberty.server
-        }
+    if (project.plugins.hasPlugin(ScalaPlugin)) {
+      newSrcSet.scala.setSrcDirs([])
     }
+  }
 
-    private String installAppsDependsOn(ServerExtension server, String elseDepends) {
-        if (server.apps != null || server.dropins != null) {
-            return 'installApps'
-        } else {
-            return elseDepends
-        }
-    }
+  private void configureLibertyConfigSourceset(String sourceSetName) {
+    def newSrcSet = project.getConvention().getPlugin(JavaPluginConvention).getSourceSets().create(sourceSetName)
+    blankSourcesetLanguages(newSrcSet)
 
-    private static File getInstallDir(Project project) {
-        if (project.liberty.installDir == null) {
-           if (project.liberty.install.baseDir == null) {
-               return new File(project.buildDir, 'wlp')
-           } else {
-               return new File(project.liberty.install.baseDir, 'wlp')
-           }
-        } else {
-           return new File(project.liberty.installDir)
-        }
+    final LibertyConfigSourceSet libertyConfigSourceSet = new DefaultLibertyConfigSourceSet(((DefaultSourceSet) newSrcSet)
+        .getDisplayName(), sourceDirectorySetFactory)
+
+    new DslObject(newSrcSet).getConvention().getPlugins().put(sourceSetName, libertyConfigSourceSet)
+
+    libertyConfigSourceSet.getLibertyConfig().srcDir("/src/main/libertyConfig/")
+
+    newSrcSet.getResources().getFilter().exclude(new Spec<FileTreeElement>() {
+      boolean isSatisfiedBy(FileTreeElement element) {
+        return libertyConfigSourceSet.getLibertyConfig().contains(element.getFile())
+      }
+    })
+
+    newSrcSet.getAllJava().source(libertyConfigSourceSet.libertyConfig)
+    newSrcSet.getAllSource().source(libertyConfigSourceSet.libertyConfig)
+
+  }
+
+  private void configureLibertyBaseSourceset(String sourceSetName) {
+    def newSrcSet = project.getConvention().getPlugin(JavaPluginConvention).getSourceSets().create(sourceSetName)
+    blankSourcesetLanguages(newSrcSet)
+
+    final LibertyBaseSourceSet libertyBaseSourceSet = new DefaultLibertyBaseSourceSet(((DefaultSourceSet) newSrcSet)
+        .getDisplayName(), sourceDirectorySetFactory)
+
+    new DslObject(newSrcSet).getConvention().getPlugins().put(sourceSetName, libertyBaseSourceSet)
+
+    libertyBaseSourceSet.getLibertyBase().srcDir("/src/main/libertyBase/")
+
+    newSrcSet.getResources().getFilter().exclude(new Spec<FileTreeElement>() {
+      boolean isSatisfiedBy(FileTreeElement element) {
+        return libertyBaseSourceSet.getLibertyBase().contains(element.getFile())
+      }
+    })
+
+    newSrcSet.getAllJava().source(libertyBaseSourceSet.libertyBase)
+    newSrcSet.getAllSource().source(libertyBaseSourceSet.libertyBase)
+  }
+
+  private ServerExtension copyProperties(LibertyExtension liberty) {
+    def serverMap = new ServerExtension().getProperties()
+    def libertyMap = liberty.getProperties()
+
+    serverMap.keySet().each { String element ->
+      if (element.equals("name")) {
+        serverMap.put(element, libertyMap.get("serverName"))
+      } else {
+        serverMap.put(element, libertyMap.get(element))
+      }
     }
+    serverMap.remove('class')
+    serverMap.remove('outputDir')
+
+    return ServerExtension.newInstance(serverMap)
+  }
+
+  static void checkEtcServerEnvProperties(Project project) {
+    if (project.liberty.outputDir == null) {
+      Properties envProperties = new Properties()
+      //check etc/server.env and set liberty.outputDir
+      File serverEnvFile = new File(getInstallDir(project), 'etc/server.env')
+      if (serverEnvFile.exists()) {
+        envProperties.load(new FileInputStream(serverEnvFile))
+        setLibertyOutputDir(project, (String) envProperties.get("WLP_OUTPUT_DIR"))
+      }
+    }
+  }
+
+  static void checkServerEnvProperties(ServerExtension server) {
+    if (server.outputDir == null) {
+      Properties envProperties = new Properties()
+      //check server.env files and set liberty.server.outputDir
+      if (server.configDirectory != null) {
+        File serverEnvFile = new File(server.configDirectory, 'server.env')
+        if (serverEnvFile.exists()) {
+          envProperties.load(new FileInputStream(serverEnvFile))
+          setServerOutputDir(server, (String) envProperties.get("WLP_OUTPUT_DIR"))
+        }
+      } else if (server.serverEnv.exists()) {
+        envProperties.load(new FileInputStream(server.serverEnv))
+        setServerOutputDir(server, (String) envProperties.get("WLP_OUTPUT_DIR"))
+      }
+    }
+  }
+
+  private static void setLibertyOutputDir(Project project, String envOutputDir) {
+    if (envOutputDir != null) {
+      project.liberty.outputDir = envOutputDir
+    }
+  }
+
+  private static void setServerOutputDir(ServerExtension server, String envOutputDir) {
+    if (envOutputDir != null) {
+      server.outputDir = envOutputDir
+    }
+  }
+
+  private void setServersForTasks(Project project) {
+    project.tasks.withType(AbstractServerTask).each { task ->
+      task.server = project.liberty.server
+    }
+  }
+
+  static String installAppsDependsOn(ServerExtension server, String elseDepends) {
+    if (server.apps != null || server.dropins != null) {
+      return TASK_INSTALL_APPS
+    } else {
+      return elseDepends
+    }
+  }
+
+  static boolean dependsOnApps(ServerExtension server) {
+    return ((server.apps != null && !server.apps.isEmpty()) ||
+        (server.dropins != null && !server.dropins.isEmpty()))
+  }
+
+  static boolean dependsOnFeature(ServerExtension server) {
+    return (server.features.name != null && !server.features.name.isEmpty())
+  }
+
+  private static File getInstallDir(Project project) {
+    if (project.liberty.installDir == null) {
+      if (project.liberty.install.baseDir == null) {
+        return new File(project.buildDir, 'wlp')
+      } else {
+        return new File(project.liberty.install.baseDir, 'wlp')
+      }
+    } else {
+      return new File(project.liberty.installDir)
+    }
+  }
 }

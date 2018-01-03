@@ -24,8 +24,8 @@ class UndeployTask extends AbstractServerTask {
         def params = buildLibertyMap(project);
 
         project.ant.taskdef(name: 'undeploy',
-                            classname: 'net.wasdev.wlp.ant.UndeployTask',
-                            classpath: project.buildscript.configurations.classpath.asPath)
+                            classname: net.wasdev.wlp.ant.UndeployTask.name,
+                            classpath: project.rootProject.buildscript.configurations.classpath.asPath)
 
         def application = server.undeploy.application
         def include = server.undeploy.include

@@ -1,0 +1,29 @@
+apply plugin: 'liberty'
+
+ext {
+    libertyVersion = project.property("libertyVersion")
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-javaee7', version: libertyVersion
+}
+
+liberty {
+    server{
+        name = 'libertyOnline'
+    }
+}
+
+task ('runGradleTest') {
+    dependsOn 'clean', 'installLiberty'
+    finalizedBy 'libertyStop'
+
+    doLast {
+        def file = new File(buildDir, "/wlp/lib/features/com.ibm.websphere.appserver.javaee-7.0.mf")
+        assert file.exists() : "com.ibm.websphere.appserver.javaee-7.0.mf is not installed"
+    }
+}

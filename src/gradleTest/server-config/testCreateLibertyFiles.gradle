@@ -1,0 +1,79 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'liberty'
+
+group = 'liberty.gradle'
+version = '1'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+compileJava.options.encoding = 'UTF-8'
+
+ext {
+    // Liberty server properties
+    wlpServerName = 'LibertyProjectServer'
+    libertyVersion = project.property("libertyVersion")
+}
+
+liberty {
+    install {
+        runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/${libertyVersion}/wlp-webProfile7-${libertyVersion}.zip"
+    }
+    server{
+        name = wlpServerName
+
+        bootstrapPropertiesFile = file("src/main/libertyConfig/bootstrap.test.properties")
+        jvmOptionsFile = file("src/main/libertyConfig/jvm.options")
+        serverEnv = file("src/main/libertyConfig/server.env")
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+task ('runGradleTest') {
+    dependsOn 'clean', 'libertyCreate'
+    finalizedBy 'validateTasks'
+}
+
+task ('validateTasks') {
+    doLast {
+        def bootstrapFile = new File("${buildDir}/wlp/usr/servers/LibertyProjectServer/bootstrap.properties")
+        def jvmOptionsFile = new File("${buildDir}/wlp/usr/servers/LibertyProjectServer/jvm.options")
+        def configFile = new File("${buildDir}/wlp/usr/servers/LibertyProjectServer/server.xml")
+        def serverEnvFile = new File("${buildDir}/wlp/usr/servers/LibertyProjectServer/server.env")
+
+        assert bootstrapFile.exists() : "file not found"
+        assert jvmOptionsFile.exists() : "file not found"
+        assert configFile.exists() : "file not found"
+        assert serverEnvFile.exists() : "file not found"
+
+        def srcBootMap = loadPropertiesToMap(new File("${projectDir}/src/main/libertyConfig/bootstrap.test.properties"))
+        def deployBootMap = loadPropertiesToMap(bootstrapFile)
+
+        assert deployBootMap == srcBootMap : "bootstrap.test.properties file did not copy properly"
+        assert configFile.text.equals(new File("${projectDir}/src/main/libertyConfig/server.xml").text) : "server.xml file did not copy properly"
+
+    }
+}
+
+Map<String, Object> loadPropertiesToMap(File propFile) {
+    try {
+        ResourceBundle resources = new PropertyResourceBundle(propFile.newDataInputStream())
+        Map<String, Object> map = new HashMap<String, Object>()
+
+        //convert ResourceBundle to Map
+        Enumeration<String> keys = resources.getKeys()
+        while (keys.hasMoreElements()) {
+            String key = keys.nextElement()
+            map.put(key, resources.getString(key))
+        }
+        return map
+    } catch (FileNotFoundException e) {
+        e.printStackTrace()
+    } catch (IOException e) {
+        e.printStackTrace()
+    }
+}

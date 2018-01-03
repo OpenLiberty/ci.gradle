@@ -45,6 +45,11 @@ abstract class AbstractIntegrationTest {
         }
     }
 
+    protected static File copyBuildFiles(File buildFilename, File buildDir) {
+            copyFile(buildFilename, new File(buildDir, 'build.gradle'))
+            copyFile(new File("build/resources/integrationTest/gradle.properties"), new File(buildDir, 'gradle.properties'))
+    }
+
     protected static File createTestProject(File parent, File sourceDir, String buildFilename) {
         if (!sourceDir.exists()){
             throw new AssertionError("The source file '${sourceDir.canonicalPath}' doesn't exist.")
@@ -59,11 +64,10 @@ abstract class AbstractIntegrationTest {
                }
             });
 
-            // copy the needed gradle file
+            // copy the needed gradle build and property files
             File sourceFile = new File(sourceDir, buildFilename)
-            File targetFile = new File(parent, "build.gradle")
-            copyFile(sourceFile, targetFile)
-
+            copyBuildFiles(sourceFile, parent)
+            
         } catch (IOException e) {
             throw new AssertionError("Unable to copy directory '${parent.canonicalPath}'.")
         }

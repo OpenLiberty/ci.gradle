@@ -1,0 +1,39 @@
+apply plugin: 'liberty'
+
+ext {
+    libertyVersion = project.property("libertyVersion")
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-webProfile7', version: libertyVersion
+}
+
+liberty {
+
+    server{
+        name = 'libertyOnline'
+        features {
+            name = ["mongodb-2.0"]
+            acceptLicense = true
+            to = "usr"
+        }
+
+        uninstallfeatures {
+            name = ["mongodb-2.0"]
+        }
+    }
+}
+
+task ('runGradleTest') {
+    dependsOn 'clean', 'libertyStart', 'installFeature', 'uninstallFeature'
+    finalizedBy 'libertyStop'
+
+    doLast {
+        def file = new File("${buildDir}/wlp/lib/features/com.ibm.websphere.appserver.mongodb-2.0.mf")
+        assert !file.exists() : "com.ibm.websphere.appserver.mongodb-2.0.mf is not uninstalled"
+    }
+}

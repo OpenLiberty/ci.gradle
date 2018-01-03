@@ -2,6 +2,9 @@
 ---
 The `compileJsp` task compiles the JSP files in the src/main/webapp directory so that they can be packaged with the application.
 
+### dependsOn
+`compileJsp` depends on `installLiberty` and `compileJava`.
+
 ### Parameters
 
 See the [Liberty general runtime properties.](libertyExtensions.md#general-runtime-properties) properties for common server configuration.

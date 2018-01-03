@@ -21,11 +21,20 @@ class DeployExtension implements Cloneable{
     String include = ""
     String exclude
     String file
-    List<Object> listOfClosures = new ArrayList<Object>()
 
     @Override
     protected Object clone() throws CloneNotSupportedException {
         super.clone()
+    }
+
+    @Override
+    String toString() {
+        return """
+            | dir: ${dir}
+            | include: ${include}
+            | exclude: ${exclude}
+            | file: ${file}
+            |""".stripMargin().stripIndent()
     }
 }
 

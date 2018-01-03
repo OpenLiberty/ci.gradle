@@ -1,0 +1,52 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'liberty'
+
+group = 'liberty.gradle'
+version = '1'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+compileJava.options.encoding = 'UTF-8'
+
+ext {
+    // Liberty server properties
+    wlpServerName = 'LibertyProjectServer'
+    libertyVersion = project.property("libertyVersion")
+}
+
+liberty {
+    install {
+        runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/${libertyVersion}/wlp-webProfile7-${libertyVersion}.zip"
+    }
+    server{
+        name = wlpServerName
+
+        bootstrapProperties = ['default.http.port':'9083', 'default.https.port':'9474']
+        jvmOptions = ['-Xms128m', '-Xmx512m']
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        name 'liberty-starter-maven-repo'
+        url 'http://liberty-starter.wasdev.developer.ibm.com/start/api/v1/repo'
+    }
+}
+
+task ('runGradleTest') {
+    dependsOn 'clean', 'libertyCreate'
+    finalizedBy 'validateTasks'
+}
+
+task ('validateTasks') {
+    doLast {
+        def bootstrapFile = new File("${buildDir}/wlp/usr/servers/LibertyProjectServer/bootstrap.properties")
+        def jvmOptionsFile = new File("${buildDir}/wlp/usr/servers/LibertyProjectServer/jvm.options")
+
+        assert bootstrapFile.exists() : "file not found"
+        assert jvmOptionsFile.exists() : "file not found"
+    }
+}

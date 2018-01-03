@@ -1,0 +1,42 @@
+apply plugin: 'maven'
+apply plugin: 'war'
+apply plugin: 'liberty'
+
+group = 'liberty.gradle'
+version = '1'
+
+compileJava.options.encoding = 'UTF-8'
+
+ext {
+  testServerHttpPort = 9080
+  testServerHttpsPort = 9443
+  warContext = 'myLibertyApp'
+  appName = 'LibertyProject'
+
+  libertyVersion = project.property("libertyVersion")
+}
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  testCompile 'junit:junit:4.12'
+  providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+}
+
+liberty {
+  install {
+    runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/${libertyVersion}/wlp-webProfile7-${libertyVersion}.zip"
+  }
+  server{
+    name = 'LibertyProjectServer'
+    looseApplication = false
+    verifyAppStartTimeout = 30
+  }
+}
+
+task ('runGradleTest') {
+  dependsOn 'clean', 'libertyStart', 'libertyStop'
+}
+

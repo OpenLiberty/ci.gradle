@@ -31,7 +31,7 @@ class CreateTask extends AbstractServerTask {
             }
             executeServerCommand(project, 'create', params)
         }
-        copyConfigFiles();
+        writeServerPropertiesToXml(project)
     }
 
 }

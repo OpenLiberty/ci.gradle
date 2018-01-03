@@ -17,6 +17,7 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import net.wasdev.wlp.gradle.plugins.extensions.DeployExtension
 import net.wasdev.wlp.gradle.plugins.extensions.LibertyExtension
+import net.wasdev.wlp.gradle.plugins.utils.LibertyIntstallController
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import java.nio.file.Files
@@ -25,22 +26,10 @@ import java.nio.file.StandardCopyOption
 abstract class AbstractTask extends DefaultTask {
 
     //params that get built with installLiberty
-    def params
-
-    protected File getInstallDir(Project project) {
-        if (project.liberty.installDir == null) {
-            if (project.liberty.install.baseDir == null) {
-                return new File(project.buildDir, 'wlp')
-            } else {
-                return new File(project.liberty.install.baseDir, 'wlp')
-            }
-        } else {
-            return new File(project.liberty.installDir)
-        }
-    }
+    protected def params
 
     protected File getUserDir(Project project) {
-        return getUserDir(project, getInstallDir(project))
+        return getUserDir(project, LibertyIntstallController.getInstallDir(project))
     }
 
     protected File getUserDir(Project project, File installDir) {
@@ -56,7 +45,26 @@ abstract class AbstractTask extends DefaultTask {
     }
 
     protected boolean isLibertyInstalled(Project project) {
-        File installDir = getInstallDir(project)
+        File installDir = LibertyIntstallController.getInstallDir(project)
         return (installDir.exists() && new File(installDir, "lib/ws-launch.jar").exists())
+    }
+
+    Map<String, Object> loadPropertiesToMap(File propFile) {
+        try {
+            ResourceBundle resources = new PropertyResourceBundle(propFile.newDataInputStream())
+            Map<String, Object> map = new HashMap<String, Object>()
+
+            //convert ResourceBundle to Map
+            Enumeration<String> keys = resources.getKeys()
+            while (keys.hasMoreElements()) {
+                String key = keys.nextElement()
+                map.put(key, resources.getString(key))
+            }
+            return map
+        } catch (FileNotFoundException e) {
+            e.printStackTrace()
+        } catch (IOException e) {
+            e.printStackTrace()
+        }
     }
 }

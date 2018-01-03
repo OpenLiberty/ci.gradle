@@ -34,8 +34,8 @@ class InstallFeatureTask extends AbstractServerTask {
         }
         params.remove('timeout')
         project.ant.taskdef(name: 'installFeature',
-                            classname: 'net.wasdev.wlp.ant.InstallFeatureTask',
-                            classpath: project.buildscript.configurations.classpath.asPath)
+                            classname: net.wasdev.wlp.ant.InstallFeatureTask.name,
+                            classpath: project.rootProject.buildscript.configurations.classpath.asPath)
         project.ant.installFeature(params)
     }
 

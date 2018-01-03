@@ -1,59 +1,41 @@
-/*
-	This test checks whether the compileJsp task was able to compile the index.jsp file from the test
-  project
-*/
-group = 'liberty.gradle'
+package sampleJSP.servlet
 
-buildscript {
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        maven {
-            name = 'Sonatype Nexus Snapshots'
-            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
-        }
-    }
-    dependencies {
-        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:1.1-SNAPSHOT'
-    }
-}
-
-apply plugin: 'war'
 apply plugin: 'liberty'
+apply plugin: 'war'
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
-
-compileJava.options.encoding = 'UTF-8'
+group = 'liberty.gradle'
 
 ext {
     // Liberty server properties
-    wlpServerName = 'LibertyProjectServer'
-    serverDirectory = "${project.buildDir}/wlp/usr/servers/${wlpServerName}"
     testServerHttpPort = 9080
     testServerHttpsPort = 9443
 
     // This is set in the ibm-web-ext.xml file
     warContext = 'sampleJSP.servlet'
 
+    // Liberty server properties
+    libertyVersion = project.property("libertyVersion")
 }
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+compileJava.options.encoding = 'UTF-8'
 
 liberty {
     install {
-        runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/17.0.0.1/wlp-webProfile7-17.0.0.1.zip"
+        runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/${libertyVersion}/wlp-webProfile7-${libertyVersion}.zip"
     }
     server{
-        configFile = file("src/resources/server.xml")
         name = 'LibertyProjectServer'
         apps = [war]
         looseApplication = false
         stripVersion = true
-     }
-     jspCompileTimeout = 35
+    }
+    jspCompileTimeout = 35
 }
 
 repositories {
-		maven { url "http://repo.maven.apache.org/maven2" }
     mavenCentral()
 }
 
@@ -84,16 +66,15 @@ task integrationTest(type: Test) {
     systemProperties = ['liberty.test.port': testServerHttpPort, 'war.name': warContext]
 }
 
-task printMessageAboutRunningServer {
-    doLast {
-        println "The server is now running at http://localhost:${testServerHttpPort}/${warContext}"
-        println "To stop the server run 'gradle libertyStop'"
-    }
-}
+task ('runGradleTest') {
+    dependsOn 'clean', 'libertyCreate', 'compileJSP'
 
-installApps.dependsOn 'war'
-war.dependsOn 'compileJSP'
-libertyStart.dependsOn 'installApps'
-integrationTest.dependsOn 'libertyStart', 'testClasses'
-integrationTest.finalizedBy 'libertyStop'
-libertyStart.finalizedBy 'printMessageAboutRunningServer'
+    println("  name ${project.name}")
+//    finalizedBy 'libertyStop'
+
+//    doLast {
+//        assert new File("${projectDir}/src/main/webapp/index.jsp").exists() : 'index.jsp not found!'
+//        assert new File("${buildDir}/compileJsp").exists() : 'compileJsp Directory not found!'
+//        assert new File("${buildDir}/classes/java/_index.class").exists() : '_index.class not found!'
+//    }
+}

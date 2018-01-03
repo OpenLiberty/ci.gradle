@@ -1,3 +1,4 @@
+package sample.servlet
 /*
 	This test checks whether the application was successfully installed without the version number in the package
 	when installApps is called and stripVersion is set to true.
@@ -15,7 +16,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:1.1-SNAPSHOT'
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
     }
 }
 

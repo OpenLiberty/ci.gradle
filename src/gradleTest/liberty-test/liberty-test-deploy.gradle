@@ -1,0 +1,13 @@
+apply from: "gradle/build.gradle"
+
+task ('runGradleTest') {
+  dependsOn 'clean', 'deploy'
+  finalizedBy 'libertyStop'
+
+  doLast {
+    def file = new File(buildDir, "/wlp/usr/servers/libertyOnline/dropins/test-war.war")
+
+    assert file.exists() : "test-war.war not found"
+    assert file.canRead() : "test-war.war cannot be read"
+  }
+}

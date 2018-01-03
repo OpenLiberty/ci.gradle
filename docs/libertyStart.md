@@ -1,6 +1,9 @@
 ## libertyStart task  
 Start a Liberty server in the background. The server instance is automatically created if it does not exist.  
 
+### dependsOn
+`libertyStart` depends on `libertyCreate`, and `installApps` if configured.  
+
 ### Parameters
 
 See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.

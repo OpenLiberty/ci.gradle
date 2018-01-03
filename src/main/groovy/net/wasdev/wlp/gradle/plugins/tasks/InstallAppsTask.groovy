@@ -23,8 +23,11 @@ import org.gradle.api.GradleException
 import groovy.util.XmlParser
 import groovy.lang.Tuple
 import org.gradle.api.artifacts.ProjectDependency
+import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
+import org.apache.commons.io.FilenameUtils
+import org.gradle.api.file.FileCollection
 import org.w3c.dom.Element;
 import java.util.regex.Pattern
 import java.util.regex.Matcher
@@ -56,7 +59,6 @@ class InstallAppsTask extends AbstractServerTask {
             installMultipleApps(dropinsLists[0], 'dropins')
             installFileList(dropinsLists[1], 'dropins')
         }
-
         if (applicationXml.hasChildElements()) {
             logger.warn("At least one application is not defined in the server configuration but the build file indicates it should be installed in the apps folder. Application configuration is being added to the target server configuration dropins folder by the plug-in.");
             applicationXml.writeApplicationXmlDocument(getServerDir(project));
@@ -133,7 +135,7 @@ class InstallAppsTask extends AbstractServerTask {
       LooseConfigData config = new LooseConfigData()
       switch(getPackagingType()){
         case "war":
-            validateAppConfig(application, application.take(getArchiveName(task).lastIndexOf('.')), appsDir)
+            validateAppConfig(application, task.baseName, appsDir)
             logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFile.getAbsolutePath()))
             installLooseConfigWar(config, task)
             deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
@@ -151,9 +153,15 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
     protected void installLooseConfigWar(LooseConfigData config, Task task) throws Exception {
-        File dir = getServerDir(project)
-        if (!dir.exists() && !task.sourceSets.allJava.getSrcDirs().isEmpty()) {
-          throw new GradleException(MessageFormat.format("Failed to install loose application from project {0}. The project has not been compiled.", project.name))
+        Task compileJava = task.getProject().tasks.findByPath(':compileJava')
+
+        File outputDir;
+        if(compileJava != null){
+            outputDir = compileJava.destinationDir
+        }
+
+        if (outputDir != null && !outputDir.exists() && hasJavaSourceFiles(task.classpath, outputDir)) {
+          logger.warn(MessageFormat.format("Installed loose application from project {0}, but the project has not been compiled.", project.name))
         }
         LooseWarApplication looseWar = new LooseWarApplication(task, config)
         looseWar.addSourceDir()
@@ -167,22 +175,39 @@ class InstallAppsTask extends AbstractServerTask {
         looseWar.addManifestFile(manifestFile, "gradle-war-plugin")
     }
 
-    private void addWarEmbeddedLib(Element parent, LooseApplication looseApp, Task task) throws Exception {
+    private boolean hasJavaSourceFiles(FileCollection classpath, File outputDir){
+        for(File f: classpath) {
+            if(f.getAbsolutePath().equals(outputDir.getCanonicalPath())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void addWarEmbeddedLib(Element parent, LooseWarApplication looseApp, Task task) throws Exception {
       ArrayList<File> deps = new ArrayList<File>();
       task.classpath.each {deps.add(it)}
       //Removes WEB-INF/lib/main directory since it is not rquired in the xml
-      if(deps != null && !deps.isEmpty()){
+      if(deps != null && !deps.isEmpty()) {
         deps.remove(0)
       }
       File parentProjectDir = new File(task.getProject().getRootProject().rootDir.getAbsolutePath())
       for (File dep: deps) {
-        String projectPath = getProjectPath(parentProjectDir, dep)
-        if(!projectPath.isEmpty() && project.getRootProject().findProject(projectPath) != null){
+        String dependentProjectName = "project ':"+getProjectPath(parentProjectDir, dep)+"'"
+        Project siblingProject = project.getRootProject().findProject(dependentProjectName)
+        boolean isCurrentProject = ((task.getProject().toString()).equals(dependentProjectName))
+        if (!isCurrentProject && siblingProject != null){
             Element archive = looseApp.addArchive(parent, "/WEB-INF/lib/"+ dep.getName());
-            looseApp.addOutputDirectory(archive, project.getRootProject().findProject(projectPath), "/");
-            looseApp.addManifestFile(archive, project.getRootProject().findProject(projectPath), "gradle-jar-plugin");
-        } else{
+            looseApp.addOutputDirectory(archive, siblingProject, "/");
+            Task resourceTask = siblingProject.getTasks().findByPath(":"+dependentProjectName+":processResources");
+            if (resourceTask.getDestinationDir() != null){
+                looseApp.addOutputDir(archive, resourceTask.getDestinationDir(), "/");
+            }
+            looseApp.addManifestFile(archive, siblingProject, "gradle-jar-plugin");
+        } else if(FilenameUtils.getExtension(dep.getAbsolutePath()).equalsIgnoreCase("jar")){
             looseApp.getConfig().addFile(parent, dep.getAbsolutePath() , "/WEB-INF/lib/" + dep.getName());
+        } else {
+            looseApp.addOutputDir(looseApp.getDocumentRoot(), dep.getAbsolutePath() , "/WEB-INF/classes/");
         }
       }
     }
@@ -207,18 +232,6 @@ class InstallAppsTask extends AbstractServerTask {
     }
     private String getLooseConfigFileName(Task task){
       return getArchiveName(task) + ".xml"
-    }
-
-    private String getPackagingType() throws Exception{
-      if (project.plugins.hasPlugin("war") || !project.tasks.withType(War).isEmpty()) {
-          return "war"
-      }
-      else if (project.plugins.hasPlugin("ear") || !project.tasks.withType(Ear).isEmpty()) {
-          return "ear"
-      }
-      else {
-          throw new GradleException("Archive path not found. Supported formats are jar, war, and ear.")
-      }
     }
 
     //Cleans up the application if the install style is switched from loose application to archive and vice versa

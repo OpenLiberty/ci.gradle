@@ -21,16 +21,20 @@ class UninstallFeatureTask extends AbstractServerTask {
 
     @TaskAction
     void uninstallFeature() {
-        def params = buildLibertyMap(project);
-        if (server.uninstallfeatures.name != null) {
-            params.put('name', server.uninstallfeatures.name.join(","))
-        }
-        params.remove('timeout')
+        if (isLibertyInstalled(project)) {
+            def params = buildLibertyMap(project);
+            if (server.uninstallfeatures.name != null) {
+                params.put('name', server.uninstallfeatures.name.join(","))
+            }
+            params.remove('timeout')
 
-        project.ant.taskdef(name: 'uninstallFeature',
-                            classname: 'net.wasdev.wlp.ant.UninstallFeatureTask',
-                            classpath: project.buildscript.configurations.classpath.asPath)
-        project.ant.uninstallFeature(params)
+            project.ant.taskdef(name: 'uninstallFeature',
+                              classname: net.wasdev.wlp.ant.UninstallFeatureTask.name,
+                              classpath: project.rootProject.buildscript.configurations.classpath.asPath)
+            project.ant.uninstallFeature(params)
+        } else {
+            logger.error ('The runtime has not been installed.')
+        }
     }
 
 }
