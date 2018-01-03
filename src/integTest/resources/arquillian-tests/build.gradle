@@ -4,32 +4,48 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: '2.1.1-SNAPSHOT'
     }
 }
 
 apply plugin: 'war'
-apply plugin: 'liberty'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-}
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'liberty'
 
-repositories {
-     mavenCentral()
-}
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
 
-ext {
-    // Liberty server properties
-    wlpServerName = 'LibertyProjectServer'
-    serverDirectory = "${project.buildDir}/wlp/usr/servers/${wlpServerName}"
-    testServerHttpPort = 9080
-    testServerHttpsPort = 9443
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    
+    ext {
+        // Liberty server properties
+        wlpServerName = 'LibertyProjectServer'
+        serverDirectory = "${project.buildDir}/wlp/usr/servers/${wlpServerName}"
+        testServerHttpPort = 9080
+        testServerHttpsPort = 9443
 
-    // This is set in the ibm-web-ext.xml file
-    warContext = 'test-configure-arquillian'
+        // This is set in the ibm-web-ext.xml file
+        warContext = 'test-configure-arquillian'
+    }
+    
+    check.dependsOn.remove(test)
+    
+    task copyArquillianXml(type: Copy) {
+        from '../src/test-profile-resources'
+        into '../build/resources/test'
+    }
+    
+    task deleteArquillianXml (type:Delete) {
+        delete '../build/resources/test/arquillian.xml'
+    }
 }
 
 war {
@@ -40,7 +56,7 @@ liberty {
     server {
         configFile = file("src/main/liberty/config/server.xml")
         bootstrapProperties = ['build.directory': buildDir, 'default.http.port': "${testServerHttpPort}" , 'default.https.port': "${testServerHttpsPort}", 'appContext': "${warContext}", 'appLocation': "${war.archiveName}"]
-        name = 'LibertyProjectServer'
+        name = wlpServerName
         apps = [war]
         looseApplication = true
         verifyAppStartTimeout = 30
@@ -51,6 +67,9 @@ configurations {
     h2
     h2.transitive = true
     compile.extendsFrom(h2)
+    
+    arqManaged.extendsFrom runtime
+    arqRemote.extendsFrom runtime
 }
 
 dependencies {
@@ -63,10 +82,13 @@ dependencies {
     providedCompile ('com.ibm.websphere.appserver.api:com.ibm.websphere.appserver.api.persistence:1.0.18')
     providedCompile ('org.eclipse.persistence:javax.persistence:2.1.0')
 
+    arqManaged "org.jboss.arquillian.container:arquillian-wlp-managed-8.5:1.0.0.Final-SNAPSHOT"
+    arqRemote "org.jboss.arquillian.container:arquillian-wlp-remote-8.5:1.0.0.Beta2"
+
+    testCompile "net.wasdev.wlp.common:ci.common:1.0-SNAPSHOT"
     testCompile "junit:junit:4.12"
     testCompile "org.jboss.shrinkwrap.resolver:shrinkwrap-resolver-impl-maven:2.2.4"
     testCompile "org.jboss.arquillian.junit:arquillian-junit-container:1.1.13.Final"
-    testCompile "org.jboss.arquillian.container:arquillian-wlp-managed-8.5:1.0.0.Beta2"
     testCompile "org.jboss.shrinkwrap:shrinkwrap-api:1.2.6"
     testCompile files("${System.properties['java.home']}/../lib/tools.jar")
 
@@ -83,19 +105,61 @@ task copyH2 {
     }
 }
 
-configureArquillian {
-    arquillianProperties = ['outputToConsole': 'true']
-    skipIfArquillianXmlExists = true
-}
-
-test {
-    reports.html.destination = file("$buildDir/reports/it")
-    reports.junitXml.destination = file("$buildDir/test-results/it")
-    include '**/*IT*'
-    exclude '**/unit/**'
-    systemProperties = ['liberty.test.port': testServerHttpPort, 'war.context': warContext]
-    testLogging.showStandardStreams = true
-    dependsOn 'installApps', 'testClasses', 'configureArquillian'
-}
-
 libertyCreate.finalizedBy 'copyH2'
+
+check.dependsOn 'verifyMainAppManaged'
+
+tasks.withType(Test) {
+    group 'Verification'
+    testLogging.showStandardStreams = true
+    dependsOn 'installApps', 'testClasses'
+}
+
+task verifyMainAppManaged (type:Test) {
+    description 'Tests that the main app is ready before the test app when verifyApps is set properly'
+    reports.html.destination = file("$buildDir/reports/verify-main-app-managed")
+    reports.junitXml.destination = file("$buildDir/test-results/verify-main-app-managed")
+    include '**/VerifyMainAppIT*', '**/RestEndpointIT*'
+    classpath += configurations.arqManaged
+    dependsOn ':verifyMainAppManaged:configArq'
+    finalizedBy 'skipWithXmlManaged'
+}
+
+task skipWithXmlManaged (type:Test) {
+    description 'For the managed container, tests the task is skipped when the skipIfArquillianXmlExists flag is set to true and arquillian.xml exists in src/test/resources.'
+    reports.html.destination = file("$buildDir/reports/skip-with-xml-managed")
+    reports.junitXml.destination = file("$buildDir/test-results/skip-with-xml-managed")
+    include '**/SkipWithXmlIT*', '**/RestEndpointIT*'
+    classpath += configurations.arqManaged
+    dependsOn ':skipWithXmlManaged:configArq'
+    finalizedBy 'skipWithoutXmlManaged'
+}
+
+task skipWithoutXmlManaged (type:Test) {
+    description 'For the managed container, tests the task is run when the skipIfArquillianXmlExists flag is set to true and arquillian.xml does not exist in src/test/resources'
+    reports.html.destination = file("$buildDir/reports/skip-without-xml-managed")
+    reports.junitXml.destination = file("$buildDir/test-results/skip-without-xml-managed")
+    include '**/SkipWithoutXmlIT*', '**/RestEndpointIT*'
+    classpath += configurations.arqManaged
+    dependsOn ':skipWithoutXmlManaged:configArq'
+    finalizedBy 'skipWithXmlRemote'
+}
+
+task skipWithXmlRemote (type:Test) {
+    description 'For the remote container, tests the task is run when the skipIfArquillianXmlExists flag is set to true and arquillian.xml does not exist in src/test/resources'
+    reports.html.destination = file("$buildDir/reports/skip-with-xml-remote")
+    reports.junitXml.destination = file("$buildDir/test-results/skip-with-xml-remote")
+    include '**/SkipWithXmlIT*'
+    classpath += configurations.arqRemote
+    dependsOn ':skipWithXmlRemote:configArq'
+    finalizedBy 'skipWithoutXmlRemote'
+}
+
+task skipWithoutXmlRemote (type:Test) {
+    description 'For the remote container, tests the task is run when the skipIfArquillianXmlExists flag is set to true and arquillian.xml does not exist in src/test/resources'
+    reports.html.destination = file("$buildDir/reports/skip-without-xml-remote")
+    reports.junitXml.destination = file("$buildDir/test-results/skip-without-xml-remote")
+    include '**/SkipWithoutXmlIT*'
+    classpath += configurations.arqRemote
+    dependsOn ':skipWithoutXmlRemote:configArq'
+}

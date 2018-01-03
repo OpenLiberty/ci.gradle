@@ -1,0 +1,28 @@
+import net.wasdev.wlp.gradle.plugins.tasks.extensions.arquillian.ConfigureArquillianTask
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: '2.1.1-SNAPSHOT'
+    }
+}
+
+project.buildDir = '../build'
+
+dependencies {
+    compile "org.jboss.arquillian.container:arquillian-wlp-remote-8.5:1.0.0.Beta2"
+}
+
+liberty {
+    server {
+        name = wlpServerName
+    }
+}
+
+task configArq (type:ConfigureArquillianTask) {
+    skipIfArquillianXmlExists = true
+    dependsOn 'deleteArquillianXml'
+}

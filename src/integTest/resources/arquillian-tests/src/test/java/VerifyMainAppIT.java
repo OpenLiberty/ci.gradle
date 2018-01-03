@@ -22,21 +22,22 @@ public class VerifyMainAppIT {
 		// Arquillian test application by looking at the build.log console
 		// output.
 
-		String mainAppOutput = "[AUDIT   ] CWWKT0016I: Web application available (default_host): http://localhost:9080/myLibertyApp/";
+		String mainAppOutput = "Web application available (default_host): http://localhost:9080/myLibertyApp/";
 		String testAppOutput = // The test app name is randomly generated, so we
 								// don't know it here. Instead just make sure
 								// that another app is started after the main
 								// app.
-				"[AUDIT   ] CWWKT0016I: Web application available (default_host): http://localhost:9080/";
+				"Web application available (default_host): http://localhost:9080/";
 
 		boolean foundMainApp = false;
-
-		File buildLog = new File("build.log");
+		
+		File buildLog = new File("build/wlp/usr/servers/LibertyProjectServer/logs/messages.log");
 		InputStream is = new FileInputStream(buildLog);
 		BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
 		String line;
 		while ((line = br.readLine()) != null) {
+		    System.out.println(line);
 			if (!foundMainApp) {
 				if (line.contains(mainAppOutput)) {
 					foundMainApp = true;

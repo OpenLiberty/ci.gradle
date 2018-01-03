@@ -47,7 +47,7 @@ class ConfigureArquillianTask extends AbstractServerTask {
         }
 
         if(type == TypeProperty.NOTFOUND) {
-            log.warn("Arquillian Liberty Managed and Remote dependencies were not found. Defaulting to use the Liberty Managed container.");
+            logger.warn("Arquillian Liberty Managed and Remote dependencies were not found. Defaulting to use the Liberty Managed container.");
             type = TypeProperty.MANAGED;
         }
 
