@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2017.
+ * (C) Copyright IBM Corporation 2014, 2018
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -268,7 +268,7 @@ class Liberty implements Plugin<Project> {
     }
 
     public static void checkEtcServerEnvProperties(Project project) {
-        if (project.liberty.outputDir == null) {
+        if (project.liberty.server.outputDir == null) {
             Properties envProperties = new Properties()
             //check etc/server.env and set liberty.outputDir
             File serverEnvFile = new File(Liberty.getInstallDir(project), 'etc/server.env')
@@ -301,7 +301,7 @@ class Liberty implements Plugin<Project> {
 
     private static void setLibertyOutputDir(Project project, String envOutputDir){
         if (envOutputDir != null) {
-            project.liberty.outputDir = envOutputDir
+            project.liberty.server.outputDir = envOutputDir
         }
     }
 

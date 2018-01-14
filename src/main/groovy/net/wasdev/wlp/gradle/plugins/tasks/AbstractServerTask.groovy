@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017.
+ * (C) Copyright IBM Corporation 2017, 2018
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ abstract class AbstractServerTask extends AbstractTask {
         if (server.outputDir != null) {
             return server.outputDir
         } else {
-            return project.liberty.outputDir
+            return project.liberty.server.outputDir
         }
     }
 
@@ -157,7 +157,7 @@ abstract class AbstractServerTask extends AbstractTask {
                 }
             }
             else{
-                println('WARNING: The configDirectory attribute was configured but the directory is not found: ' + project.liberty.configDirectory.getCanonicalPath())
+                println('WARNING: The configDirectory attribute was configured but the directory is not found: ' + project.liberty.server.configDirectory)
             }
         }
 

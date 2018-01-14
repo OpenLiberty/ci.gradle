@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2017.
+ * (C) Copyright IBM Corporation 2014, 2018
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,22 +20,7 @@ import org.gradle.util.ConfigureUtil
 class LibertyExtension {
 
     String installDir
-    String outputDir
     String userDir
-    String serverName = "defaultServer"
-
-    String appsDirectory = "apps"
-    boolean stripVersion = false
-    boolean looseApplication = true
-
-    File configDirectory
-    File configFile = new File("default")
-    File bootstrapPropertiesFile = new File("default")
-    File jvmOptionsFile = new File("default")
-    File serverEnv = new File("default")
-
-    Map<String, Object> bootstrapProperties
-    List<String> jvmOptions
 
     boolean clean = false
     String timeout
