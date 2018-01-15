@@ -123,6 +123,7 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn 'installLiberty'
+            dependsOn 'libertyStop'
 
             project.afterEvaluate {
                 // Run install features if configured
@@ -178,6 +179,7 @@ class Liberty implements Plugin<Project> {
             description 'Generates a WebSphere Liberty Profile server archive.'
             logging.level = LogLevel.DEBUG
             group 'Liberty'
+            dependsOn 'libertyStop'
 
             project.afterEvaluate { dependsOn installDependsOn(server, 'installLiberty') }
         }
