@@ -57,11 +57,14 @@ class Liberty implements Plugin<Project> {
         //Uplift the jst.web facet version to 3.0 if less than 3.0 so WDT can deploy properly to Liberty.
         //There is a known bug in the wtp plugin that will add duplicate facets, the first of the duplicates is honored.
         project.tasks.getByName('eclipseWtpFacet').facet.file.whenMerged {
-	        facets.find { it.type.name() == 'installed' && it.name == 'jst.web' && Double.parseDouble(it.version) < 3.0 }.version = '3.0'
+	        def jstFacet = facets.find { it.type.name() == 'installed' && it.name == 'jst.web' && Double.parseDouble(it.version) < 3.0 }
+            if (jstFacet != null) {
+                jstFacet.version = '3.0'
+            }
         }
 
         //Create expected server extension from liberty extension data
-        project.afterEvaluate { 
+        project.afterEvaluate {
             if (project.liberty.server == null) {
                 project.liberty.server = copyProperties(project.liberty)
             }
