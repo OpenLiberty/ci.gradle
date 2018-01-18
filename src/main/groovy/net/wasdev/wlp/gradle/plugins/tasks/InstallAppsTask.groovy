@@ -28,12 +28,18 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.PublishArtifact
+import org.gradle.plugins.ear.descriptor.EarModule
+import org.gradle.api.artifacts.ModuleDependency
+import org.gradle.api.artifacts.ExternalModuleDependency
+import org.gradle.api.artifacts.ProjectDependency
+import org.gradle.api.artifacts.DependencySet
 import org.apache.commons.io.FilenameUtils
 import org.gradle.api.file.FileCollection
 import org.w3c.dom.Element;
 import java.util.regex.Pattern
 import java.util.regex.Matcher
 import java.text.MessageFormat
+import org.apache.commons.io.FilenameUtils
 
 import org.gradle.api.Task
 import org.gradle.api.tasks.bundling.War
@@ -224,20 +230,87 @@ class InstallAppsTask extends AbstractServerTask {
         LooseEarApplication looseEar = new LooseEarApplication(task, config);
         looseEar.addSourceDir();
         looseEar.addApplicationXmlFile();
-
-        //ArrayList<Dependency> artifacts = new ArrayList<Dependency>();
-        Configuration c = task.getProject().configurations.runtime
-        logger.info(MessageFormat.format("Number of compile dependencies for " + task.project.name + " : " + c.size()))
-
-        for(Dependency d : c.getAllDependencies()) {
-            println(d.getName())
+        //ArrayList<EarModule> artifacts = new ArrayList<EarModule>();
+        File[] filesAsDeps = task.getProject().configurations.deploy.getFiles().toArray()
+        Dependency[] deps = task.getProject().configurations.deploy.getAllDependencies().toArray()
+        HashMap<File, Dependency> completeDeps = new HashMap<File, Dependency>();
+        if(filesAsDeps.size() == deps.size()){
+            for(int i = 0; i<filesAsDeps.size(); i++) {
+                completeDeps.put(filesAsDeps[i], deps[i])
+            }
         }
 
+        logger.info(MessageFormat.format("Number of compile dependencies for " + task.project.name + " : " + completeDeps.size()))
+        for (Map.Entry<File, Dependency> entry : completeDeps){
+            Dependency dependency = entry.getValue();
+            File dependancyFile = entry.getKey();
+            
+            if (dependency instanceof ProjectDependency) {
+                Project dependencyProject = dependency.getDependencyProject()
+                String projectType = FilenameUtils.getExtension(dependancyFile.toString())
+                switch (projectType) {
+                        case "jar":
+                            looseEar.addJarModule(dependencyProject, dependency);
+                            break;
+                        case "ejb":
+                            //looseEar.addEjbModule(dependencyProject);
+                            break;
+                        case "war":
+                            println("\n\n\n::::: it should be adding the warArchive")
+                            Element warArchive = looseEar.addWarModule(dependencyProject,
+                                        "TempElement till I figure Out", dependency);
+                            addEmbeddedLib(warArchive, dependencyProject, looseEar, "/WEB-INF/lib/");
+                            break;
+                        default:
+                            // use the artifact from local .m2 repo
+                            //looseEar.addModuleFromM2(resolveArtifact(artifact));
+                            println("not supported type!!")
+                            break;
+                    }
+            }
+            else if (dependency instanceof ExternalModuleDependency) {
+                String dependencyName = dependency.getName() + "-" + dependency.getVersion()
+                task.getProject().configurations.deploy.getFiles().each {
+                    if( dependencyName.equals(FilenameUtils.removeExtension(it.getName()))) {
+                        looseEar.getConfig().addFile(it.getAbsolutePath(), "/WEB-INF/lib/" + it.getName())
+                    }
+                }
+            }
+            else if (dependency instanceof ModuleDependency){
+                println("Module Dependency!!!" + d)
+            }
+        }
         File manifestFile = new File(project.sourceSets.main.getOutput().getResourcesDir().getParentFile().getAbsolutePath() + "/META-INF/MANIFEST.MF")
         looseEar.addManifestFile(manifestFile, "gradle-ear-plugin")
     }
+    private void addEmbeddedLib(Element parent, Project proj, LooseApplication looseApp, String dir) throws Exception {
+        ArrayList<Dependency> deps = new ArrayList<Dependency>();
+        proj.configurations.providedRuntime.getAllDependencies().each {deps.add(it)}
+        //Removes WEB-INF/lib/main directory since it is not rquired in the xml
+        if(deps != null && !deps.isEmpty()) {
+          deps.remove(0)
+        }
+        for (Dependency dep : deps){
+            addlibrary(parent, looseApp, dir, dep);
+        }
+    }
+    private void addlibrary(Element parent, LooseApplication looseApp, String dir, Dependency dependency)
+            throws Exception {
+            if (dependency instanceof ProjectDependency) {
+                println("\n\n\n::::: Its actually going through the project Dependency?!?!")
+                Project dependProject = dependency.getDependencyProject()
+                Element archive = looseApp.addArchive(parent, dir + dependProject.sourceSets.main.getOutput().getResourcesDir().getParentFile().getAbsolutePath() + ".jar");
+                //looseApp.addOutputDir(archive, dependProject, "/");
+                //looseApp.addManifestFile(archive, dependProject, "gradle-jar-plugin");
+            } else {
+                //resolveArtifact(artifact);
+                println("\n\n\n::::: It should be going through this else!")
+                looseApp.getConfig().addFile(parent, "artifact.getFile().getAbsolutePath()",
+                        dir + "artifact.getFile().getName()");
+            }
+    }
 
-    private String getProjectPath(File parentProjectDir, File dep){
+    private String getProjectPath(File parentProjectDir, File dep) {
       String dependencyPathPortion = dep.getAbsolutePath().replace(parentProjectDir.getAbsolutePath()+"/","")
       String projectPath = dep.getAbsolutePath().replace(dependencyPathPortion,"")
       Pattern pattern = Pattern.compile("/build/.*")

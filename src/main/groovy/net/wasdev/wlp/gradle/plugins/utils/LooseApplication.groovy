@@ -46,10 +46,18 @@ public class LooseApplication {
           config.addFile(mf.getAbsolutePath(), "/META-INF/MANIFEST.MF");
         }
     }
+        
+    public void addManifestFile(Element parent, File mf, String pluginId) throws Exception {
+        if(mf.exists()){
+          //task.manifest.writeTo(mf.getAbsolutePath())
+          config.addFile(parent, mf.getAbsolutePath(), "/META-INF/MANIFEST.MF");
+        }
+    }
 
     public void addManifestFile(Element parent, Project project, String pluginId) throws Exception {
-        if(task.getManifest() != null)
+        if(task.getManifest() != null){
           config.addFile(parent, project.sourceSets.main.getOutput().getResourcesDir().getParentFile().getAbsolutePath() + "/META-INF/MANIFEST.MF", "/META-INF/MANIFEST.MF");
+        }
     }
 
     public Element addArchive(Element parent, String target) {
