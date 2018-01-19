@@ -13,7 +13,7 @@ buildscript {
 project.buildDir = '../build'
 
 dependencies {
-    compile "org.jboss.arquillian.container:arquillian-wlp-remote-8.5:1.0.0.Beta2"
+    compile "org.jboss.arquillian.container:arquillian-liberty-remote:1.0.0.Final-SNAPSHOT"
 }
 
 liberty {
