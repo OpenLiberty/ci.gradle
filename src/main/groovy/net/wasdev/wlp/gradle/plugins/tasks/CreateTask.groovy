@@ -43,8 +43,8 @@ class CreateTask extends AbstractServerTask {
 
 	@InputFile
 	File getConfigFile() {
-		File configFile = project.liberty.server.configFile
-		File configDir = project.liberty.server.configDirectory
+		File configFile = server.configFile
+		File configDir = server.configDirectory
 
 		if(!server.configFile.toString().equals('default')) {
 			return configFile;

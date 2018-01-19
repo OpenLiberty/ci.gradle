@@ -90,7 +90,7 @@ abstract class AbstractServerTask extends AbstractTask {
         if (server.outputDir != null) {
             return server.outputDir
         } else {
-            return project.liberty.server.outputDir
+            return project.liberty.outputDir
         }
     }
 

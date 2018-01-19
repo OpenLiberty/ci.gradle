@@ -270,7 +270,7 @@ class Liberty implements Plugin<Project> {
     }
 
     public static void checkEtcServerEnvProperties(Project project) {
-        if (project.liberty.server.outputDir == null) {
+        if (project.liberty.outputDir == null) {
             Properties envProperties = new Properties()
             //check etc/server.env and set liberty.outputDir
             File serverEnvFile = new File(Liberty.getInstallDir(project), 'etc/server.env')
@@ -303,7 +303,7 @@ class Liberty implements Plugin<Project> {
 
     private static void setLibertyOutputDir(Project project, String envOutputDir){
         if (envOutputDir != null) {
-            project.liberty.server.outputDir = envOutputDir
+            project.liberty.outputDir = envOutputDir
         }
     }
 
