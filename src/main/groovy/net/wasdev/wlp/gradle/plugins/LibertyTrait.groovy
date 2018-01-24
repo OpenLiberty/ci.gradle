@@ -56,6 +56,13 @@ abstract class LibertyTrait implements ILibertyDefinitions {
                                                   description: 'Creates the server.xml file',
                                                   group      : GROUP_NAME,
                                                   type       : CreateServerXmlTask]
+    taskDefMap[TASK_LIBERTY_CREATE_SERVER_DEFAULT_XML] = [name       : TASK_LIBERTY_CREATE_SERVER_DEFAULT_XML,
+                                                  description: 'Creates the default server.xml file',
+                                                  group      : GROUP_NAME,
+                                                  type       : CreateServerDefaultXmlTask]
+
+
+
 
     taskDefMap[TASK_LIBERTY_CREATE_SERVER_ENV] = [name       : TASK_LIBERTY_CREATE_SERVER_ENV,
                                                   description: 'Creates the server.evn file',

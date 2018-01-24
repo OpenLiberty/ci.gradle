@@ -16,6 +16,7 @@ interface ILibertyDefinitions {
   public static final String TASK_LIBERTY_CREATE_BOOTSTRAP = "libertyCreateBootstrap"
   public static final String TASK_LIBERTY_CREATE_JVM_OPTIONS = "libertyCreateJvmOptions"
   public static final String TASK_LIBERTY_CREATE_SERVER_XML = "libertyCreateServerXml"
+  public static final String TASK_LIBERTY_CREATE_SERVER_DEFAULT_XML = "libertyCreateDefaultServerXml"
   public static final String TASK_LIBERTY_CREATE_SERVER_ENV = "libertyCreateServerEnv"
   public static final String TASK_LIBERTY_START = "libertyStart"
   public static final String TASK_LIBERTY_STOP = "libertyStop"

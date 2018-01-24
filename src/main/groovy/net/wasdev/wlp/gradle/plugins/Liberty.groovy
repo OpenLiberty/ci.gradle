@@ -135,6 +135,23 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
         }
       }
 
+      Task serverxml = project.tasks.findByPath(TASK_LIBERTY_CREATE_SERVER_XML)
+
+      if (serverxml != null) {
+        serverxml.onlyIf { server.configFile.exists() }
+      }
+
+      Task defserverxml = project.tasks.findByPath(TASK_LIBERTY_CREATE_SERVER_DEFAULT_XML)
+
+      if (defserverxml != null) {
+        defserverxml.onlyIf { !server.configFile.exists() }
+      }
+
+      Task serverenv = project.tasks.findByPath(TASK_LIBERTY_CREATE_SERVER_ENV)
+
+      if (serverenv != null) {
+        serverenv.onlyIf { server.serverEnv.exists() }
+      }
     }
   }
 
@@ -152,6 +169,7 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
     a_mustRunAfter_b(project, TASK_LIBERTY_CREATE_CONFIG, TASK_LIBERTY_CREATE_ANT)
 
     a_dependsOn_b(project, TASK_LIBERTY_CREATE_CONFIG, TASK_LIBERTY_CREATE_BOOTSTRAP)
+    a_dependsOn_b(project, TASK_LIBERTY_CREATE_CONFIG, TASK_LIBERTY_CREATE_SERVER_DEFAULT_XML)
     a_dependsOn_b(project, TASK_LIBERTY_CREATE_CONFIG, TASK_LIBERTY_CREATE_SERVER_XML)
     a_dependsOn_b(project, TASK_LIBERTY_CREATE_CONFIG, TASK_LIBERTY_CREATE_JVM_OPTIONS)
     a_dependsOn_b(project, TASK_LIBERTY_CREATE_CONFIG, TASK_LIBERTY_CREATE_SERVER_ENV)
@@ -168,6 +186,13 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
     if (taskStart != null) {
       taskStart.onlyIf {
         !LibertyIntstallController.isServerRunning(project)
+      }
+    }
+
+    Task taskStop = project.tasks.findByName(TASK_LIBERTY_STOP)
+    if (taskStop != null) {
+      taskStop.onlyIf {
+        LibertyIntstallController.isServerRunning(project)
       }
     }
 

@@ -56,7 +56,7 @@ abstract class AbstractServerTask extends AbstractTask {
     }
 
     protected Map<String, String> buildLibertyMap(Project project) {
-        Map<String, String> result = new HashMap();
+        Map<String, String> result = new HashMap()
         result.put('serverName', server.name)
 
         def installDir = LibertyIntstallController.getInstallDir(project)
@@ -72,7 +72,7 @@ abstract class AbstractServerTask extends AbstractTask {
             result.put('timeout', server.timeout)
         }
 
-        return result;
+        return result
     }
 
     protected File getServerDir(Project project){

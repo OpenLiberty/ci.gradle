@@ -16,11 +16,13 @@ class CreateBootstrapTask extends AbstractServerTask {
   @Optional
   Map<String, Object> getBootStrapData() {
     if (server.bootstrapProperties) {
+      logger.info("Using the bootstrap.properties in the build file")
       return server.bootstrapProperties
     } else if (server.bootstrapPropertiesFile.exists()) {
+      logger.info("Using the bootstrap.properties at: ${server.bootstrapPropertiesFile}")
       return loadPropertiesToMap(server.bootstrapPropertiesFile)
     } else {
-      logger.warn("Default bootstrap.properties file not found at: ${server.bootstrapPropertiesFile}")
+      logger.info("No bootstrap.properties configured")
     }
 
     return [:]

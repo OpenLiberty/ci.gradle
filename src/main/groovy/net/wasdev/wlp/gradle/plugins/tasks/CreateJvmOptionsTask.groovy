@@ -19,7 +19,6 @@ class CreateJvmOptionsTask extends AbstractServerTask {
   @Optional
   File getJvmOptionsFile() {
     if (!server.jvmOptionsFile.exists()) {
-      logger.warn("The jvm.options was configured but was not found at: ${server.jvmOptionsFile}")
       return null
     }
     return server.jvmOptionsFile
@@ -34,8 +33,10 @@ class CreateJvmOptionsTask extends AbstractServerTask {
   @TaskAction
   void createJvmOptions() {
     if (jvmOptionsData) {
+      logger.info("Using the jvm.options in the build file")
       writeJvmOptions(getJvmOptionsOutFile(), jvmOptionsData)
     } else if (jvmOptionsFile != null) {
+      logger.info("Using the jvm.options at: ${jvmOptionsFile}")
       project.copy {
         from jvmOptionsFile
         into getServerDir(project)
@@ -45,6 +46,8 @@ class CreateJvmOptionsTask extends AbstractServerTask {
           }
         }
       }
+    } else {
+      logger.info("No jvm.options configured")
     }
   }
 
