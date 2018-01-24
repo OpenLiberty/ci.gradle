@@ -24,6 +24,6 @@
 
     </httpEndpoint>
 
-    <application name="sample.servlet" context-root="sample.servlet-1" location="sample.servlet-1.war" type="war"></application>
+    <application name="sample.servlet" context-root="sample.servlet-1" location="sample.servlet.war" type="war"></application>
 
 </server>
