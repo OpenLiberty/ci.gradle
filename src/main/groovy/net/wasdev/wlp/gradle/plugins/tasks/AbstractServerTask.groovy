@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017.
+ * (C) Copyright IBM Corporation 2017, 2018
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,7 +157,7 @@ abstract class AbstractServerTask extends AbstractTask {
                 }
             }
             else{
-                println('WARNING: The configDirectory attribute was configured but the directory is not found: ' + project.liberty.configDirectory.getCanonicalPath())
+                println('WARNING: The configDirectory attribute was configured but the directory is not found: ' + project.liberty.server.configDirectory)
             }
         }
 
@@ -340,6 +340,7 @@ abstract class AbstractServerTask extends AbstractTask {
 
     protected void writeServerPropertiesToXml(Project project) {
         XmlParser pluginXmlParser = new XmlParser()
+        	project.getBuildDir().mkdirs()
         Node libertyPluginConfig = pluginXmlParser.parse(new File(project.buildDir, 'liberty-plugin-config.xml'))
         if (libertyPluginConfig.getAt('servers').isEmpty()) {
             libertyPluginConfig.appendNode('servers')
