@@ -38,6 +38,9 @@ import net.wasdev.wlp.gradle.plugins.tasks.InstallAppsTask
 import net.wasdev.wlp.gradle.plugins.tasks.AbstractServerTask
 import net.wasdev.wlp.gradle.plugins.tasks.CompileJSPTask
 import org.gradle.api.tasks.bundling.War
+import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.ProjectDependency
+import org.gradle.api.execution.TaskExecutionGraph
 import org.gradle.api.logging.LogLevel
 import java.util.Properties
 
@@ -49,18 +52,7 @@ class Liberty implements Plugin<Project> {
         project.configurations.create('libertyLicense')
         project.configurations.create('libertyRuntime')
 
-        //Used to set project facets in Eclipse
-        project.pluginManager.apply('eclipse-wtp')
-        project.tasks.getByName('eclipseWtpFacet').finalizedBy 'libertyCreate'
-
-        //Uplift the jst.web facet version to 3.0 if less than 3.0 so WDT can deploy properly to Liberty.
-        //There is a known bug in the wtp plugin that will add duplicate facets, the first of the duplicates is honored.
-        project.tasks.getByName('eclipseWtpFacet').facet.file.whenMerged {
-	        def jstFacet = facets.find { it.type.name() == 'installed' && it.name == 'jst.web' && Double.parseDouble(it.version) < 3.0 }
-            if (jstFacet != null) {
-                jstFacet.version = '3.0'
-            }
-        }
+        setEclipseFacets(project)
 
         //Create expected server extension from liberty extension data
         project.afterEvaluate {
@@ -246,6 +238,47 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn project.tasks.withType(War), 'libertyCreate'
+        }
+    }
+
+    private void setEclipseFacets(Project project) {
+        //Used to set project facets in Eclipse
+        project.pluginManager.apply('eclipse-wtp')
+        project.tasks.getByName('eclipseWtpFacet').finalizedBy 'libertyCreate'
+
+        //Uplift the jst.web facet version to 3.0 if less than 3.0 so WDT can deploy properly to Liberty.
+        //There is a known bug in the wtp plugin that will add duplicate facets, the first of the duplicates is honored.
+        project.tasks.getByName('eclipseWtpFacet').facet.file.whenMerged {
+            if(project.plugins.hasPlugin('war')) {
+                setFacetVersion(project, 'jst.web', '3.0')
+            } else if(project.plugins.hasPlugin('ear')) {
+                setFacetVersion(project, 'jst.ear', '6.0')
+            }
+        }
+
+        if (project.plugins.hasPlugin('ear')) {
+            project.getGradle().getTaskGraph().whenReady {
+                Dependency[] deps = project.configurations.deploy.getAllDependencies().toArray()
+                deps.each { Dependency dep ->
+                    if (dep instanceof ProjectDependency) {
+                        def projectDep = dep.getDependencyProject()
+                        if (projectDep.plugins.hasPlugin('war')) {
+                            setFacetVersion(projectDep, 'jst.web', '3.0')
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    protected void setFacetVersion(Project project, String facetName, String version) {
+        if(project.plugins.hasPlugin('eclipse-wtp')) {
+            project.tasks.getByName('eclipseWtpFacet').facet.file.whenMerged {
+                def jstFacet = facets.find { it.type.name() == 'installed' && it.name == facetName && Double.parseDouble(it.version) < Double.parseDouble(version) }
+                if (jstFacet != null) {
+                    jstFacet.version = version
+                }
+            }
         }
     }
 
