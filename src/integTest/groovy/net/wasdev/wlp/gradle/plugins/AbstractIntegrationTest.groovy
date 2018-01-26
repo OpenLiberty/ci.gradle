@@ -60,7 +60,8 @@ abstract class AbstractIntegrationTest {
             FileUtils.copyDirectory(sourceDir, parent, new FileFilter() {
                public boolean accept (File pathname) {
                    return (pathname.getPath().endsWith("settings.gradle") ||
-                           !pathname.getPath().endsWith(".gradle"))
+                           !pathname.getPath().endsWith(".gradle") ||
+                            pathname.getPath().endsWith("build.gradle"))
                }
             });
 

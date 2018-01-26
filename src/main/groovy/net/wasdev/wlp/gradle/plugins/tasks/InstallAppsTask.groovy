@@ -185,7 +185,7 @@ class InstallAppsTask extends AbstractServerTask {
         addWarEmbeddedLib(looseWar.getDocumentRoot(), looseWar, task);
 
         //add Manifest file
-        File manifestFile = new File(project.sourceSets.main.getOutput().getResourcesDir().getParentFile().getAbsolutePath() + "/META-INF/MANIFEST.MF")
+        File manifestFile = new File(project.buildDir.getAbsolutePath() + "/tmp/war/MANIFEST.MF")
         looseWar.addManifestFile(manifestFile, "gradle-war-plugin")
     }
 
@@ -230,7 +230,7 @@ class InstallAppsTask extends AbstractServerTask {
         LooseEarApplication looseEar = new LooseEarApplication(task, config);
         looseEar.addSourceDir();
         looseEar.addApplicationXmlFile();
-        //ArrayList<EarModule> artifacts = new ArrayList<EarModule>();
+
         File[] filesAsDeps = task.getProject().configurations.deploy.getFiles().toArray()
         Dependency[] deps = task.getProject().configurations.deploy.getAllDependencies().toArray()
         HashMap<File, Dependency> completeDeps = new HashMap<File, Dependency>();
@@ -250,21 +250,15 @@ class InstallAppsTask extends AbstractServerTask {
                 String projectType = FilenameUtils.getExtension(dependancyFile.toString())
                 switch (projectType) {
                         case "jar":
-                            looseEar.addJarModule(dependencyProject, dependency);
-                            break;
                         case "ejb":
-                            //looseEar.addEjbModule(dependencyProject);
+                            looseEar.addJarModule(dependencyProject)
                             break;
                         case "war":
-                            println("\n\n\n::::: it should be adding the warArchive")
-                            Element warArchive = looseEar.addWarModule(dependencyProject,
-                                        "TempElement till I figure Out", dependency);
-                            addEmbeddedLib(warArchive, dependencyProject, looseEar, "/WEB-INF/lib/");
+                            Element warElement = looseEar.addWarModule(dependencyProject)
+                            addEmbeddedLib(warElement, dependencyProject, looseEar, "/WEB-INF/lib/")
                             break;
                         default:
-                            // use the artifact from local .m2 repo
-                            //looseEar.addModuleFromM2(resolveArtifact(artifact));
-                            println("not supported type!!")
+                            logger.warn('Application ' + dependencyProject.getName() + ' is expressed as ' + projectType + ' which is not a supported input type. Define applications using Task or File objects of type war, ear, or jar.')
                             break;
                     }
             }
@@ -276,47 +270,32 @@ class InstallAppsTask extends AbstractServerTask {
                     }
                 }
             }
-            else if (dependency instanceof ModuleDependency){
-                println("Module Dependency!!!" + d)
+            else {
+                logger.warn("Dependency " + dependency.getName() + "could not be added to the looseApplication, as it is neither a ProjectDependency or ExternalModuleDependency")
             }
         }
-        File manifestFile = new File(project.sourceSets.main.getOutput().getResourcesDir().getParentFile().getAbsolutePath() + "/META-INF/MANIFEST.MF")
+        File manifestFile = new File(project.buildDir.getAbsolutePath() + "/tmp/ear/MANIFEST.MF")
         looseEar.addManifestFile(manifestFile, "gradle-ear-plugin")
     }
     private void addEmbeddedLib(Element parent, Project proj, LooseApplication looseApp, String dir) throws Exception {
-        ArrayList<Dependency> deps = new ArrayList<Dependency>();
-        proj.configurations.providedRuntime.getAllDependencies().each {deps.add(it)}
-        //Removes WEB-INF/lib/main directory since it is not rquired in the xml
-        if(deps != null && !deps.isEmpty()) {
-          deps.remove(0)
-        }
-        for (Dependency dep : deps){
-            addlibrary(parent, looseApp, dir, dep);
-        }
-    }
-    private void addlibrary(Element parent, LooseApplication looseApp, String dir, Dependency dependency)
-            throws Exception {
-            if (dependency instanceof ProjectDependency) {
-                println("\n\n\n::::: Its actually going through the project Dependency?!?!")
-                Project dependProject = dependency.getDependencyProject()
-                Element archive = looseApp.addArchive(parent, dir + dependProject.sourceSets.main.getOutput().getResourcesDir().getParentFile().getAbsolutePath() + ".jar");
-                //looseApp.addOutputDir(archive, dependProject, "/");
-                //looseApp.addManifestFile(archive, dependProject, "gradle-jar-plugin");
-            } else {
-                //resolveArtifact(artifact);
-                println("\n\n\n::::: It should be going through this else!")
-                looseApp.getConfig().addFile(parent, "artifact.getFile().getAbsolutePath()",
-                        dir + "artifact.getFile().getName()");
+        //Get only the compile dependencies that are included in the war
+        File[] filesAsDeps = proj.configurations.compile.minus(proj.configurations.providedCompile).getFiles().toArray()
+        for (File f : filesAsDeps){
+            String extension = FilenameUtils.getExtension(f.getAbsolutePath())
+            if(extension.equals("jar")){
+                looseApp.getConfig().addFile(parent, f.getAbsolutePath(),
+                        dir + f.getName());
             }
+        }
     }
 
     private String getProjectPath(File parentProjectDir, File dep) {
-      String dependencyPathPortion = dep.getAbsolutePath().replace(parentProjectDir.getAbsolutePath()+"/","")
-      String projectPath = dep.getAbsolutePath().replace(dependencyPathPortion,"")
-      Pattern pattern = Pattern.compile("/build/.*")
-      Matcher matcher = pattern.matcher(dependencyPathPortion)
-      projectPath = matcher.replaceAll("")
-      return projectPath;
+        String dependencyPathPortion = dep.getAbsolutePath().replace(parentProjectDir.getAbsolutePath()+"/","")
+        String projectPath = dep.getAbsolutePath().replace(dependencyPathPortion,"")
+        Pattern pattern = Pattern.compile("/build/.*")
+        Matcher matcher = pattern.matcher(dependencyPathPortion)
+        projectPath = matcher.replaceAll("")
+        return projectPath;
     }
 
     private boolean isSupportedType(){

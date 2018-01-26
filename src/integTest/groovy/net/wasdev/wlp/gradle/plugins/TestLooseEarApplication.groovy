@@ -19,9 +19,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
 public class TestLooseEarApplication extends AbstractIntegrationTest{
-    static File resourceDir = new File("build/resources/integrationTest/sample.servlet")
+    static File resourceDir = new File("build/resources/integrationTest/loose-ear-test")
     static File buildDir = new File(integTestDir, "/test-loose-ear-application")
-    static String buildFilename = "testLooseEarApplication.gradle"
+    static String buildFilename = "build.gradle"
 
     @BeforeClass
     public static void setup() {
@@ -44,20 +44,30 @@ public class TestLooseEarApplication extends AbstractIntegrationTest{
         } catch (Exception e) {
             throw new AssertionError ("Fail on task installApps. " + e)
         }
-        assert new File('build/testBuilds/test-loose-ear-application/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war.xml').exists() : 'looseApplication config file was not copied over to the liberty runtime'
+        assert new File('build/testBuilds/test-loose-ear-application/ejb-ear/build/wlp/usr/servers/ejbServer/apps/ejb-ear.ear.xml').exists() : 'looseApplication config file was not copied over to the liberty runtime'
     }
 /*
   Expected output to the XML
   <?xml version="1.0" encoding="UTF-8"?>
   <archive>
-    ...
+      <file sourceOnDisk="/Users/jjvilleg/Desktop/ci.gradle/build/testBuilds/test-loose-ear-application/ejb-ear/build/tmp/ear/application.xml" targetInArchive="/META-INF/application.xml"/>
+      <archive targetInArchive="/ejb-ejb.jar">
+          <dir sourceOnDisk="/Users/jjvilleg/Desktop/ci.gradle/build/testBuilds/test-loose-ear-application/ejb-ejb/build/classes/java/main" targetInArchive="/"/>
+          <file sourceOnDisk="/Users/jjvilleg/Desktop/ci.gradle/build/testBuilds/test-loose-ear-application/ejb-ejb/build/tmp/jar/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
+      </archive>
+      <archive targetInArchive="/ejb-war.war">
+          <dir sourceOnDisk="/Users/jjvilleg/Desktop/ci.gradle/build/testBuilds/test-loose-ear-application/ejb-war/build/classes/java/main" targetInArchive="/WEB-INF/classes"/>
+          <file sourceOnDisk="/Users/jjvilleg/Desktop/ci.gradle/build/testBuilds/test-loose-ear-application/ejb-war/build/tmp/jar/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
+      </archive>
+      <file sourceOnDisk="/Users/jjvilleg/Desktop/ci.gradle/build/testBuilds/test-loose-ear-application/ejb-ear/build/tmp/ear/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
   </archive>
+
 */
     @Test
     public void test_loose_config_file_contents_are_correct(){
-      File on = new File("build/testBuilds/test-loose-application/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war.xml");
+      File on = new File("build/testBuilds/test-loose-ear-application/ejb-ear/build/wlp/usr/servers/ejbServer/apps/ejb-ear.ear.xml");
       FileInputStream input = new FileInputStream(on);
-      /*
+
       // get input XML Document
       DocumentBuilderFactory inputBuilderFactory = DocumentBuilderFactory.newInstance();
       inputBuilderFactory.setIgnoringComments(true);
@@ -71,21 +81,20 @@ public class TestLooseEarApplication extends AbstractIntegrationTest{
       XPath xPath = XPathFactory.newInstance().newXPath();
       String expression = "/archive/dir";
       NodeList nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
-      Assert.assertEquals("Number of <dir/> element ==>", 2, nodes.getLength());
+      Assert.assertEquals("Number of <dir/> element ==>", 0, nodes.getLength());
 
       expression = "/archive/archive";
       nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
-      Assert.assertEquals("Number of <archive/> element ==>", 0, nodes.getLength());
+      Assert.assertEquals("Number of <archive/> element ==>", 2, nodes.getLength());
+      Assert.assertEquals("archive targetInArchive attribute value", "/ejb-ejb.jar",
+              nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue());
+      Assert.assertEquals("archive targetInArchive attribute value", "/ejb-war.war",
+              nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue());
 
       expression = "/archive/file";
       nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
-      Assert.assertEquals("Number of <file/> element ==>", 3, nodes.getLength());
+      Assert.assertEquals("Number of <file/> element ==>", 2, nodes.getLength());
 
-      Assert.assertEquals("archive targetInArchive attribute value", "/WEB-INF/lib/commons-text-1.1.jar",
-              nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue());
-
-      Assert.assertEquals("archive targetInArchive attribute value", "/WEB-INF/lib/commons-lang3-3.5.jar",
-              nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue());*/
     }
 
 

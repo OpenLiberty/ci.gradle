@@ -84,7 +84,7 @@ public class VerifyLooseAppTestTimeoutSuccess extends AbstractIntegrationTest{
 
       expression = "/archive/file";
       nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
-      Assert.assertEquals("Number of <file/> element ==>", 2, nodes.getLength());
+      Assert.assertEquals("Number of <file/> element ==>", 3, nodes.getLength());
 
       Assert.assertEquals("archive targetInArchive attribute value", "/WEB-INF/lib/commons-text-1.1.jar",
               nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue());

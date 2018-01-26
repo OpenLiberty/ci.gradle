@@ -8,7 +8,7 @@ import org.gradle.plugins.ear.Ear
 import org.gradle.api.internal.file.FileResolver
 import org.gradle.api.artifacts.Dependency
 import org.w3c.dom.Element;
-
+import org.apache.commons.io.FilenameUtils
 
 
 public class LooseEarApplication extends LooseApplication {
@@ -29,52 +29,41 @@ public class LooseEarApplication extends LooseApplication {
             config.addFile(applicationXmlFile.getCanonicalPath(), "/META-INF/application.xml");
         }
         else {
-            //task.getProject().getConvention().getPlugin(EarPluginConvention.class).getDeploymentDescriptor().writeTo(task.destinationDir.getParentFile().getAbsolutePath() + applicationName)
-            applicationXmlFile = new File(task.destinationDir.getParentFile().getAbsolutePath() + applicationName);
+            applicationXmlFile = new File(task.destinationDir.getParentFile().getAbsolutePath() + "/tmp/ear" + applicationName);
             config.addFile(applicationXmlFile.getCanonicalPath(), "/META-INF/application.xml");
         }
     }
-    //addWarMoudule
-    /*
-    public Element addJarModule(Project proj) throws Exception {
-        return addModule(proj, "gradle-jar-plugin");
-    }
     
-    public Element addEjbModule(Project proj) throws Exception {
-        return addModule(proj, "gradle-ejb-plugin");
-    }
-    
-    public Element addModule(Project proj, String pluginId) throws Exception {
-        Element moduleArchive = config.addArchive("tempUntilIFigureItOut");
-        config.addDir(moduleArchive, proj.compileJava.destinationDir, "/");
-        // add manifest.mf
-        addManifestFile(moduleArchive, proj, pluginId);
-        return moduleArchive;
-    }*/
-    
-    public Element addJarModule(Project proj, Dependency dep) throws Exception {
-            return addModule(proj, "gradle-jar-plugin", dep.getName());
-    }
-    
-    public Element addWarModule(Project proj, String warSourceDir, Dependency dep) throws Exception {
-        Element warArchive = config.addArchive(dep.getName());
-        config.addDir(warArchive, warSourceDir, "/");
+    public Element addWarModule(Project proj) throws Exception {
+        Element warArchive = config.addArchive("/" + proj.war.archiveName);
         config.addDir(warArchive, proj.sourceSets.main.getOutput().getClassesDirs().getSingleFile().getAbsolutePath(), "/WEB-INF/classes");
-        // add Manifest file
-        addWarManifestFile(warArchive, proj);
+        addModules(warArchive,proj)
         return warArchive;
     }
     
-    public Element addModule(Project proj, String pluginId, String uri) throws Exception {
-        Element moduleArchive = config.addArchive(uri);
+    public Element addJarModule(Project proj) throws Exception {
+        Element moduleArchive = config.addArchive("/" + proj.jar.archiveName);
         config.addDir(moduleArchive, proj.sourceSets.main.getOutput().getClassesDirs().getSingleFile().getAbsolutePath(), "/");
-        // add manifest.mf
-        File manifestFile = new File(proj.sourceSets.main.getOutput().getResourcesDir().getParentFile().getAbsolutePath() + "/META-INF/MANIFEST.MF")
-        addManifestFile(moduleArchive, manifestFile, "gradle-jar-plugin")
+        addModules(moduleArchive, proj)
         return moduleArchive;
     }
     
-    public void addWarManifestFile(Element parent, Project proj) throws Exception {
-        //config.addFile(parent, getManifestFile(proj, "gradle-war-plugin", "gradle-war-plugin"), "/META-INF/MANIFEST.MF");
+    private void addModules(Element moduleArchive, Project proj) {
+        for (File f : proj.jar.source.getFiles()) {
+            String extension = FilenameUtils.getExtension(f.getAbsolutePath())
+            switch(extension) {
+                case "jar":
+                case "war":
+                    config.addFile(moduleArchive, f.getAbsolutePath(), "/WEB-INF/lib/" + f.getName());
+                    break
+                case "MF":
+                    config.addFile(moduleArchive, f.getAbsolutePath(), "/META-INF/MANIFEST.MF");
+                    break
+                case "class":
+                default:
+                    break
+            }
+        }
     }
+    
 }

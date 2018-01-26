@@ -1,9 +1,0 @@
-rootProject.name = 'ear-project-it'
-include ':helloworld-ear'
-include ':helloworld-impl'
-include ':helloworld-ra'
-
-
-project(':helloworld-ear').projectDir = "$rootDir/helloworld-ear" as File
-project(':helloworld-impl').projectDir = "$rootDir/helloworld-impl" as File
-project(':helloworld-ra').projectDir = "$rootDir/helloworld-ra" as File
