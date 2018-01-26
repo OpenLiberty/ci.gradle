@@ -1,8 +1,0 @@
-target/
-.classpath
-.project
-.settings/
-.DS_Store
-.apt_generated/
-.gradle/
-build/
