@@ -46,6 +46,9 @@ import java.util.Properties
 
 class Liberty implements Plugin<Project> {
 
+    final String JST_WEB_FACET_VERSION = '3.0'
+    final String JST_EAR_FACET_VERSION = '6.0'
+
     void apply(Project project) {
 
         project.extensions.create('liberty', LibertyExtension)
@@ -252,9 +255,9 @@ class Liberty implements Plugin<Project> {
         //There is a known bug in the wtp plugin that will add duplicate facets, the first of the duplicates is honored.
         project.tasks.getByName('eclipseWtpFacet').facet.file.whenMerged {
             if(project.plugins.hasPlugin('war')) {
-                setFacetVersion(project, 'jst.web', '3.0')
+                setFacetVersion(project, 'jst.web', JST_WEB_FACET_VERSION)
             } else if(project.plugins.hasPlugin('ear')) {
-                setFacetVersion(project, 'jst.ear', '6.0')
+                setFacetVersion(project, 'jst.ear', JST_EAR_FACET_VERSION)
             }
         }
 
@@ -265,7 +268,7 @@ class Liberty implements Plugin<Project> {
                     if (dep instanceof ProjectDependency) {
                         def projectDep = dep.getDependencyProject()
                         if (projectDep.plugins.hasPlugin('war')) {
-                            setFacetVersion(projectDep, 'jst.web', '3.0')
+                            setFacetVersion(projectDep, 'jst.web', JST_WEB_FACET_VERSION)
                         }
                     }
                 }
