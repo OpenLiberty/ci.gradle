@@ -328,7 +328,7 @@ abstract class AbstractServerTask extends AbstractTask {
         Project parent = project.getParent()
         if (parent != null) {
             serverNode.appendNode('aggregatorParentId', parent.getName())
-            serverNode.appendNode('aggregatorParentBaseDir', parent.getProjectDir())
+            serverNode.appendNode('aggregatorParentBasedir', parent.getProjectDir())
         }
 
         if (project.configurations.findByName('compile') && !project.configurations.compile.dependencies.isEmpty()) {
