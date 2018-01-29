@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2018
+ * (C) Copyright IBM Corporation 2014, 2017.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,7 +118,6 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn 'installLiberty'
-            dependsOn 'libertyStop'
 
             project.afterEvaluate {
                 // Run install features if configured
@@ -174,7 +173,6 @@ class Liberty implements Plugin<Project> {
             description 'Generates a WebSphere Liberty Profile server archive.'
             logging.level = LogLevel.DEBUG
             group 'Liberty'
-            dependsOn 'libertyStop'
 
             project.afterEvaluate { dependsOn installDependsOn(server, 'installLiberty') }
         }
