@@ -114,7 +114,6 @@ class InstallLibertyTask extends AbstractTask {
     }
 
     protected void createPluginXmlFile(Project project) {
-    	    project.getBuildDir().mkdirs()
         new File(project.buildDir, 'liberty-plugin-config.xml').withWriter { writer ->
             def xmlDoc = new MarkupBuilder(writer)
             xmlDoc.mkp.xmlDeclaration(version: "1.0", encoding: "UTF-8")
