@@ -26,6 +26,8 @@ import net.wasdev.wlp.gradle.plugins.utils.LibertyIntstallController
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.file.FileTreeElement
 import org.gradle.api.internal.classpath.ModuleRegistry
 import org.gradle.api.internal.file.SourceDirectorySetFactory
@@ -63,19 +65,19 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
     initTaskDefMap()
   }
 
+  final String JST_WEB_FACET_VERSION = '3.0'
+  final String JST_EAR_FACET_VERSION = '6.0'
+
   void apply(Project project) {
     this.project = project
     project.plugins.apply(JavaBasePlugin)
-
     configureSourceSetDefaults()
 
     project.extensions.create('liberty', LibertyExtension, project)
     project.configurations.create('libertyLicense')
     project.configurations.create('libertyRuntime')
 
-    //Used to set project facets in Eclipse
-    project.pluginManager.apply('eclipse-wtp')
-    //project.tasks.getByName('eclipseWtpFacet').finalizedBy 'libertyCreate'
+    setEclipseFacets(project)
 
     project.configurations.create(LIBERTY_DEPLOY_CONFIGURATION) {
       description: "Configuration that allows for deploying projects to liberty via dependency"
@@ -274,6 +276,49 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
 
     newSrcSet.getAllJava().source(libertyBaseSourceSet.libertyBase)
     newSrcSet.getAllSource().source(libertyBaseSourceSet.libertyBase)
+  }
+
+  private void setEclipseFacets(Project project) {
+    //Used to set project facets in Eclipse
+    project.pluginManager.apply('eclipse-wtp')
+    project.tasks.getByName('eclipseWtpFacet').finalizedBy 'libertyCreate'
+
+    //Uplift the jst.web facet version to 3.0 if less than 3.0 so WDT can deploy properly to Liberty.
+    //There is a known bug in the wtp plugin that will add duplicate facets, the first of the duplicates is honored.
+    project.tasks.getByName('eclipseWtpFacet').facet.file.whenMerged {
+      if (project.plugins.hasPlugin('war')) {
+        setFacetVersion(project, 'jst.web', JST_WEB_FACET_VERSION)
+      } else if (project.plugins.hasPlugin('ear')) {
+        setFacetVersion(project, 'jst.ear', JST_EAR_FACET_VERSION)
+      }
+    }
+
+    if (project.plugins.hasPlugin('ear')) {
+      project.getGradle().getTaskGraph().whenReady {
+        Dependency[] deps = project.configurations.deploy.getAllDependencies().toArray()
+        deps.each { Dependency dep ->
+          if (dep instanceof ProjectDependency) {
+            def projectDep = dep.getDependencyProject()
+            if (projectDep.plugins.hasPlugin('war')) {
+              setFacetVersion(projectDep, 'jst.web', JST_WEB_FACET_VERSION)
+            }
+          }
+        }
+      }
+    }
+  }
+
+  protected void setFacetVersion(Project project, String facetName, String version) {
+    if (project.plugins.hasPlugin('eclipse-wtp')) {
+      project.tasks.getByName('eclipseWtpFacet').facet.file.whenMerged {
+        def jstFacet = facets.find {
+          it.type.name() == 'installed' && it.name == facetName && Double.parseDouble(it.version) < Double.parseDouble(version)
+        }
+        if (jstFacet != null) {
+          jstFacet.version = version
+        }
+      }
+    }
   }
 
   private ServerExtension copyProperties(LibertyExtension liberty) {

@@ -74,31 +74,31 @@ dependencies {
 }
 
 sourceSets {
-  integrationTest {
-    groovy.srcDir file('src/integTest/groovy')
-    resources.srcDir file('src/integTest/resources')
-    compileClasspath = sourceSets.main.output + configurations.testRuntime
-    runtimeClasspath = output + compileClasspath
-//    output.classesDirs = new File(buildDir, 'classes/java/integrationTest')
-  }
+    integrationTest {
+        groovy.srcDir file('src/integTest/groovy')
+        resources.srcDir file('src/integTest/resources')
+        compileClasspath = sourceSets.main.output + configurations.testRuntime
+        runtimeClasspath = output + compileClasspath
+        output.dir(files(new File(buildDir, 'classes/groovy/integrationTest')))
+    }
 }
 
 task integrationTest(type: Test) {
-  logging.level = LogLevel.INFO
-  description = 'Runs the integration tests.' + gradle.gradleVersion
-  if (!gradle.gradleVersion.startsWith('4.')) {
-    testClassesDir = sourceSets.integrationTest.output.classesDir
-  } else {
-    testClassesDirs = fileTree(dir: sourceSets.integrationTest.output.classesDir)
-  }
-  classpath = sourceSets.integrationTest.runtimeClasspath
-  if (!(project.hasProperty('runit'))) {
-    enabled = false
-  } else {
-    systemProperties System.getProperties()
-    systemProperty 'runit',runit
-  }
-  mustRunAfter test
+    logging.level = LogLevel.INFO
+    description = 'Runs the integration tests.' + gradle.gradleVersion
+    if (!gradle.gradleVersion.startsWith('4.')) {
+        testClassesDir = sourceSets.integrationTest.output.getDirs().getSingleFile()
+    } else {
+        testClassesDirs = fileTree(dir: sourceSets.integrationTest.output.getDirs().getSingleFile())
+    }
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    if (!(project.hasProperty('runit'))) {
+        enabled = false
+    } else {
+        systemProperties System.getProperties()
+        systemProperty 'runit',runit
+    }
+    mustRunAfter test
 }
 
 check.dependsOn integrationTest
