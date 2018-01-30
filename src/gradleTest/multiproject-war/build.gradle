@@ -1,0 +1,69 @@
+group = 'liberty.gradle'
+version = '1'
+
+allprojects {
+  ext {
+    libertyVersion = project.property("libertyVersion")
+  }
+}
+
+project(':app-ejb'){
+  apply plugin: 'java'
+
+// In this section you declare the dependencies for your production and test code
+  dependencies {
+    compile 'org.slf4j:slf4j-api:1.7.21'
+    compile group: 'org.eclipse.persistence', name: 'javax.persistence', version: '2.0.0'
+    compile group: 'org.glassfish', name: 'javax.ejb', version: '3.1.1'
+
+    testCompile group: 'org.eclipse.persistence', name: 'eclipselink', version: '2.5.0'
+    testCompile group: 'org.apache.derby', name: 'derby', version: '10.13.1.1'
+  }
+}
+
+project(':app-war'){
+  apply plugin: 'war'
+
+// In this section you declare the dependencies for your production and test code
+  dependencies {
+    compile project(':app-ejb')
+
+    compile 'org.slf4j:slf4j-api:1.7.21'
+    compile 'javax.servlet:javax.servlet-api:3.1.0'
+  }
+}
+
+project(':app-liberty'){
+  apply plugin: 'liberty'
+
+  dependencies {
+    libertyDeploy project(path: ":app-war", configuration: "archives")
+  }
+
+  liberty {
+    install {
+      runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/${libertyVersion}/wlp-webProfile7-${libertyVersion}.zip"
+    }
+
+    server {
+      name = 'libertyOnline'
+      bootstrapProperties = [
+          'default.http.port':'9888',
+          'default.https.port':'9443',
+
+      ]
+    }
+  }
+}
+
+task ('runGradleTest') {
+  dependsOn 'clean', ':app-war:war', ':app-liberty:libertyDeploy'
+  finalizedBy ':app-liberty:libertyStop'
+
+  doLast {
+    def file = new File(projectDir, 'testPackage.jar')
+
+    assert file.exists() : "file not found"
+    assert file.canRead() : "file cannot be read"
+  }
+}

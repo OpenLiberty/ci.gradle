@@ -1,0 +1,123 @@
+import org.w3c.dom.Document
+import org.w3c.dom.NodeList
+
+import javax.xml.parsers.DocumentBuilder
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.xpath.XPath
+import javax.xml.xpath.XPathConstants
+import javax.xml.xpath.XPathFactory
+
+group = 'liberty.gradle'
+version = '1'
+
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'war'
+apply plugin: 'liberty'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+compileJava.options.encoding = 'UTF-8'
+
+ext {
+    libertyVersion = project.property("libertyVersion")
+    // Liberty server properties
+    wlpServerName = 'LibertyProjectServer'
+    serverDirectory = "${project.buildDir}/wlp/usr/servers/${wlpServerName}"
+    testServerHttpPort = 9080
+    testServerHttpsPort = 9443
+
+    // This is set in the ibm-web-ext.xml file
+    warContext = 'sample.servlet-1'
+    appName = 'LibertyProject'
+    packageFile = "${project.buildDir}/${appName}.zip"
+    packagingType = 'usr'
+
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+  war2.extendsFrom runtime
+}
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+    compile 'org.apache.commons:commons-text:1.1'
+    war2 'org.apache.commons:commons-proxy:1.0'
+}
+
+task war1(type:War){
+    baseName = 'sample.servlet1'
+}
+
+task war2(type:War){
+    baseName = 'sample.servlet2'
+    classpath = configurations.war2
+}
+
+liberty {
+    install {
+        runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/${libertyVersion}/wlp-webProfile7-${libertyVersion}.zip"
+    }
+    server{
+        name = wlpServerName
+        looseApplication = true
+        stripVersion = true
+        configFile = file("src/main/liberty/config/server-list-test.xml")
+        packageLiberty {
+            archive = packageFile
+            include = packagingType
+        }
+    	apps = [war1, war2]
+      verifyAppStartTimeout = 30
+    }
+}
+
+task ('runGradleTest') {
+    dependsOn 'clean', 'libertyStart'
+    finalizedBy 'libertyStop'
+
+    doLast {
+        assert new File("${buildDir}/wlp/usr/servers/LibertyProjectServer/apps/${project.name}1.war.xml").exists() : 'application not installed on server'
+
+        File on = new File("${buildDir}/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet1.war.xml")
+        FileInputStream input = new FileInputStream(on)
+
+        // get input XML Document
+        DocumentBuilderFactory inputBuilderFactory = DocumentBuilderFactory.newInstance()
+        inputBuilderFactory.setIgnoringComments(true)
+        inputBuilderFactory.setCoalescing(true)
+        inputBuilderFactory.setIgnoringElementContentWhitespace(true)
+        inputBuilderFactory.setValidating(false)
+        DocumentBuilder inputBuilder = inputBuilderFactory.newDocumentBuilder()
+        Document inputDoc=inputBuilder.parse(input)
+
+        // parse input XML Document
+        XPath xPath = XPathFactory.newInstance().newXPath()
+        String expression = "/archive/dir"
+        NodeList nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET)
+        assert nodes.getLength() == 2 : "Number of <dir/> element ==>"
+
+        expression = "/archive/archive";
+        nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET)
+        assert nodes.getLength() == 0 : "Number of <archive/> element ==>"
+
+        expression = "/archive/file";
+        nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET)
+        assert nodes.getLength() == 3 : "Number of <file/> element ==>"
+
+        assert nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue() ==
+            "/WEB-INF/lib/commons-text-1.1.jar" :
+            "archive targetInArchive attribute value"
+
+        assert nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue() ==
+            "/WEB-INF/lib/commons-lang3-3.5.jar" :
+            "archive targetInArchive attribute value"
+    }
+}
