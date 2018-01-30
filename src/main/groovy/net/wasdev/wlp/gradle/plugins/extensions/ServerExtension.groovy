@@ -69,6 +69,7 @@ class ServerExtension{
     String appsDirectory = "apps"
     boolean stripVersion = false
     boolean looseApplication = true
+    boolean autoConfigure = true
 
     File configDirectory
     File configFile

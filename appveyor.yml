@@ -4,6 +4,6 @@ environment:
 
 build_script:
   # Build the compiled extension
-  - "gradlew.bat install check gradletest-DwlpVersion=17.0.0.3 --stacktrace --info"
+  - "gradlew.bat install check gradletest -Pci_server=true -DwlpVersion=17.0.0.3 --stacktrace --info"
 
 test: off
