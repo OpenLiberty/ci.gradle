@@ -41,4 +41,4 @@ liberty {
 
 clean.dependsOn 'libertyStop'
 installApps.dependsOn 'ear'
-ear.dependsOn ':ejb-war:war', ':ejb-war:jar'
+ear.dependsOn ':ejb-war:jar', ':ejb-war:war'
