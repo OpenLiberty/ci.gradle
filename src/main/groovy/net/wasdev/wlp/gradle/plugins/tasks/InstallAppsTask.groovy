@@ -186,7 +186,7 @@ class InstallAppsTask extends AbstractServerTask {
 
         //add Manifest file
         File manifestFile = new File(project.buildDir.getAbsolutePath() + "/tmp/war/MANIFEST.MF")
-        looseWar.addManifestFile(manifestFile, "gradle-war-plugin")
+        looseWar.addManifestFile(manifestFile)
     }
 
     private boolean hasJavaSourceFiles(FileCollection classpath, File outputDir){
@@ -217,7 +217,7 @@ class InstallAppsTask extends AbstractServerTask {
             if (resourceTask.getDestinationDir() != null){
                 looseApp.addOutputDir(archive, resourceTask.getDestinationDir(), "/");
             }
-            looseApp.addManifestFile(archive, siblingProject, "gradle-jar-plugin");
+            looseApp.addManifestFile(archive, siblingProject);
         } else if(FilenameUtils.getExtension(dep.getAbsolutePath()).equalsIgnoreCase("jar")){
             looseApp.getConfig().addFile(parent, dep.getAbsolutePath() , "/WEB-INF/lib/" + dep.getName());
         } else {
@@ -243,14 +243,15 @@ class InstallAppsTask extends AbstractServerTask {
         logger.info(MessageFormat.format("Number of compile dependencies for " + task.project.name + " : " + completeDeps.size()))
         for (Map.Entry<File, Dependency> entry : completeDeps){
             Dependency dependency = entry.getValue();
-            File dependancyFile = entry.getKey();
+            File dependencyFile = entry.getKey();
             
             if (dependency instanceof ProjectDependency) {
                 Project dependencyProject = dependency.getDependencyProject()
-                String projectType = FilenameUtils.getExtension(dependancyFile.toString())
+                String projectType = FilenameUtils.getExtension(dependencyFile.toString())
                 switch (projectType) {
                         case "jar":
                         case "ejb":
+                        case "rar":
                             looseEar.addJarModule(dependencyProject)
                             break;
                         case "war":
@@ -263,19 +264,14 @@ class InstallAppsTask extends AbstractServerTask {
                     }
             }
             else if (dependency instanceof ExternalModuleDependency) {
-                String dependencyName = dependency.getName() + "-" + dependency.getVersion()
-                task.getProject().configurations.deploy.getFiles().each {
-                    if( dependencyName.equals(FilenameUtils.removeExtension(it.getName()))) {
-                        looseEar.getConfig().addFile(it.getAbsolutePath(), "/WEB-INF/lib/" + it.getName())
-                    }
-                }
+                looseEar.getConfig().addFile(dependencyFile.getAbsolutePath(), "/WEB-INF/lib/" + it.getName())
             }
             else {
                 logger.warn("Dependency " + dependency.getName() + "could not be added to the looseApplication, as it is neither a ProjectDependency or ExternalModuleDependency")
             }
         }
         File manifestFile = new File(project.buildDir.getAbsolutePath() + "/tmp/ear/MANIFEST.MF")
-        looseEar.addManifestFile(manifestFile, "gradle-ear-plugin")
+        looseEar.addManifestFile(manifestFile)
     }
     private void addEmbeddedLib(Element parent, Project proj, LooseApplication looseApp, String dir) throws Exception {
         //Get only the compile dependencies that are included in the war

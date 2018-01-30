@@ -36,14 +36,14 @@ public class LooseEarApplication extends LooseApplication {
     
     public Element addWarModule(Project proj) throws Exception {
         Element warArchive = config.addArchive("/" + proj.war.archiveName);
-        config.addDir(warArchive, proj.sourceSets.main.getOutput().getClassesDirs().getSingleFile().getAbsolutePath(), "/WEB-INF/classes");
+        proj.sourceSets.main.getOutput().getClassesDirs().each{config.addDir(warArchive, it.getAbsolutePath(), "/WEB-INF/classes");}
         addModules(warArchive,proj)
         return warArchive;
     }
     
     public Element addJarModule(Project proj) throws Exception {
         Element moduleArchive = config.addArchive("/" + proj.jar.archiveName);
-        config.addDir(moduleArchive, proj.sourceSets.main.getOutput().getClassesDirs().getSingleFile().getAbsolutePath(), "/");
+        proj.sourceSets.main.getOutput().getClassesDirs().each{config.addDir(moduleArchive, it.getAbsolutePath(), "/WEB-INF/classes");}
         addModules(moduleArchive, proj)
         return moduleArchive;
     }
@@ -54,12 +54,12 @@ public class LooseEarApplication extends LooseApplication {
             switch(extension) {
                 case "jar":
                 case "war":
+                case "rar":
                     config.addFile(moduleArchive, f.getAbsolutePath(), "/WEB-INF/lib/" + f.getName());
                     break
                 case "MF":
                     config.addFile(moduleArchive, f.getAbsolutePath(), "/META-INF/MANIFEST.MF");
                     break
-                case "class":
                 default:
                     break
             }

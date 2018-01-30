@@ -96,6 +96,14 @@ public class TestLooseEarApplication extends AbstractIntegrationTest{
       Assert.assertEquals("Number of <file/> element ==>", 2, nodes.getLength());
 
     }
-
+    
+    @Test
+    public void test_start_with_timeout_success() {
+        try {
+            runTasks(buildDir, 'libertyStart')
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task libertyStart. "+ e)
+        }
+    }
 
 }

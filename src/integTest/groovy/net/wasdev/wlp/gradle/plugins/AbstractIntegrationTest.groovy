@@ -59,9 +59,9 @@ abstract class AbstractIntegrationTest {
             // Do copy settings.gradle.
             FileUtils.copyDirectory(sourceDir, parent, new FileFilter() {
                public boolean accept (File pathname) {
-                   return (pathname.getPath().endsWith("settings.gradle") ||
-                           !pathname.getPath().endsWith(".gradle") ||
-                            pathname.getPath().endsWith("build.gradle"))
+                   return (!pathname.getPath().endsWith(".gradle") ||
+                    pathname.getPath().endsWith("settings.gradle") ||
+                        pathname.getPath().endsWith("build.gradle"))
                }
             });
 
