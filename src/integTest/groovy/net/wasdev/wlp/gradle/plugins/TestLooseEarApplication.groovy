@@ -86,11 +86,11 @@ public class TestLooseEarApplication extends AbstractIntegrationTest{
       expression = "/archive/archive";
       nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
       Assert.assertEquals("Number of <archive/> element ==>", 2, nodes.getLength());
-      Assert.assertEquals("archive targetInArchive attribute value", "/ejb-ejb.jar",
+      /*Assert.assertEquals("archive targetInArchive attribute value", "/ejb-ejb.jar",
               nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue());
       Assert.assertEquals("archive targetInArchive attribute value", "/ejb-war.war",
               nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue());
-
+    */
       expression = "/archive/file";
       nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
       Assert.assertEquals("Number of <file/> element ==>", 2, nodes.getLength());
