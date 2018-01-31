@@ -147,23 +147,9 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
 
       setOnlyIf(project, TASK_INSTALL_APPS_AUTOCONFIG, { server.autoConfigure })
 
-      Task serverxml = project.tasks.findByPath(TASK_LIBERTY_CREATE_SERVER_XML)
-
-      if (serverxml != null) {
-        serverxml.onlyIf { server.configFile.exists() }
-      }
-
-      Task defserverxml = project.tasks.findByPath(TASK_LIBERTY_CREATE_SERVER_DEFAULT_XML)
-
-      if (defserverxml != null) {
-        defserverxml.onlyIf { !server.configFile.exists() }
-      }
-
-      Task serverenv = project.tasks.findByPath(TASK_LIBERTY_CREATE_SERVER_ENV)
-
-      if (serverenv != null) {
-        serverenv.onlyIf { server.serverEnv.exists() }
-      }
+      setOnlyIf(project, TASK_LIBERTY_CREATE_SERVER_XML, { server.configFile.exists() })
+      setOnlyIf(project, TASK_LIBERTY_CREATE_SERVER_DEFAULT_XML, { !server.configFile.exists() })
+      setOnlyIf(project, TASK_LIBERTY_CREATE_SERVER_ENV, { server.serverEnv.exists() })
     }
   }
 

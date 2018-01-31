@@ -36,6 +36,9 @@ configurations {
   provided
 }
 
+// hard coding this exclude because gradleTest has an issue that won't let it run
+project.properties.put("gradleTest.glob.exclude", "Sample.servlet.fail_*.*")
+
 gradleTest {
   versions '4.3.1'
 
