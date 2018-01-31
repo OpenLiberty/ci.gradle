@@ -1,3 +1,13 @@
+buildscript {
+  repositories {
+    mavenLocal()
+    mavenCentral()
+  }
+  dependencies {
+    classpath "org.ysb33r.gradle:gradletest:2.0-alpha-3-SNAPSHOT"
+  }
+}
+
 plugins {
   id 'groovy'
   id 'maven'
@@ -5,7 +15,7 @@ plugins {
   id 'signing'
   id 'java-gradle-plugin'
   id "com.gradle.plugin-publish" version "0.9.9"
-  id "org.ysb33r.gradletest" version "2.0-alpha-1"
+//  id "org.ysb33r.gradletest" version "2.0-alpha-2"
 }
 
 apply plugin: "org.ysb33r.gradletest"
