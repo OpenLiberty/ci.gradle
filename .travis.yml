@@ -2,7 +2,7 @@ sudo: required
 language: java
 matrix:
   include:
-    - jdk: openjdk7
+    - jdk: openjdk8
       env: WLP_VERSION=17.0.0.3
     - jdk: openjdk8
       env: WLP_VERSION=17.0.0.4
