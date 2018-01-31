@@ -18,8 +18,6 @@ package net.wasdev.wlp.gradle.plugins.tasks
 import net.wasdev.wlp.gradle.plugins.extensions.LibertyExtension
 import net.wasdev.wlp.gradle.plugins.utils.LibertyIntstallController
 
-import javax.xml.parsers.*
-
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 import groovy.xml.MarkupBuilder

@@ -52,6 +52,7 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
   Project project
 
   public static final String LIBERTY_DEPLOY_CONFIGURATION = "libertyDeploy"
+  public static final String LIBERTY_DEPLOY_APP_CONFIGURATION = "libertyDeployApp"
 
   public static final String TASK_CORE_EAR = "ear"
   public static final String TASK_CORE_WAR = "war"
@@ -80,7 +81,11 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
     setEclipseFacets(project)
 
     project.configurations.create(LIBERTY_DEPLOY_CONFIGURATION) {
-      description: "Configuration that allows for deploying projects to liberty via dependency"
+      description: "Configuration that allows for deploying projects to liberty dropins folder"
+    }
+
+    project.configurations.create(LIBERTY_DEPLOY_APP_CONFIGURATION) {
+      description: "Configuration that allows for deploying projects to liberty apps folder"
     }
 
     //Create expected server extension from liberty extension data
@@ -111,11 +116,11 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
       project.tasks.create(taskDefMap[sTask])
     }
 
-    setTaskWorkflow(project)
-    setTaskAfterEvalWorkflow(project)
+    setTaskWorkflow()
+    setTaskAfterEvalWorkflow()
   }
 
-  static void setTaskAfterEvalWorkflow(Project project) {
+   void setTaskAfterEvalWorkflow() {
     project.afterEvaluate {
       ServerExtension server = project.liberty.server
 
@@ -137,6 +142,11 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
         }
       }
 
+      setOnlyIf(project, TASK_INSTALL_APPS_ARCHIVE, { !server.looseApplication })
+      setOnlyIf(project, TASK_INSTALL_APPS_LOOSE, { server.looseApplication })
+
+      setOnlyIf(project, TASK_INSTALL_APPS_AUTOCONFIG, { server.autoConfigure })
+
       Task serverxml = project.tasks.findByPath(TASK_LIBERTY_CREATE_SERVER_XML)
 
       if (serverxml != null) {
@@ -157,7 +167,7 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
     }
   }
 
-  static void setTaskWorkflow(Project project) {
+  void setTaskWorkflow() {
     a_dependsOn_b(project, TASK_COMPILE_JSP, TASK_INSTALL_LIBERTY)
     a_dependsOn_b(project, TASK_COMPILE_JSP, 'compileJava')
 
@@ -184,19 +194,8 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
 
     a_dependsOn_b(project, TASK_LIBERTY_CREATE_SERVER_ENV, TASK_INSTALL_LIBERTY)
 
-    Task taskStart = project.tasks.findByName(TASK_LIBERTY_START)
-    if (taskStart != null) {
-      taskStart.onlyIf {
-        !LibertyIntstallController.isServerRunning(project)
-      }
-    }
-
-    Task taskStop = project.tasks.findByName(TASK_LIBERTY_STOP)
-    if (taskStop != null) {
-      taskStop.onlyIf {
-        LibertyIntstallController.isServerRunning(project)
-      }
-    }
+    setOnlyIf(project, TASK_LIBERTY_START, { !LibertyIntstallController.isServerRunning(project) })
+    setOnlyIf(project, TASK_LIBERTY_STOP, { LibertyIntstallController.isServerRunning(project) })
 
     a_dependsOn_b(project, TASK_LIBERTY_PACKAGE, TASK_LIBERTY_CREATE_CONFIG)
 
@@ -212,6 +211,17 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
     taskATask.dependsOn(project.tasks.withType(War))
     taskATask.dependsOn(project.tasks.withType(Ear))
     a_dependsOn_b(project, TASK_INSTALL_APPS, TASK_LIBERTY_CREATE)
+    a_dependsOn_b(project, TASK_INSTALL_APPS, TASK_INSTALL_APPS_AUTOCONFIG)
+
+    a_mustRunAfter_b(project, TASK_INSTALL_APPS_AUTOCONFIG, TASK_INSTALL_APPS_SANITY)
+
+    a_dependsOn_b(project, TASK_INSTALL_APPS_SANITY, TASK_INSTALL_APPS_ARCHIVE)
+    a_dependsOn_b(project, TASK_INSTALL_APPS_SANITY, TASK_INSTALL_APPS_LOOSE)
+
+    a_dependsOn_b(project, TASK_INSTALL_APPS, TASK_INSTALL_APPS_SANITY)
+
+    a_mustRunAfter_b(project, TASK_INSTALL_APPS_ARCHIVE, TASK_LIBERTY_CREATE)
+    a_mustRunAfter_b(project, TASK_INSTALL_APPS_LOOSE, TASK_LIBERTY_CREATE)
 
   }
 

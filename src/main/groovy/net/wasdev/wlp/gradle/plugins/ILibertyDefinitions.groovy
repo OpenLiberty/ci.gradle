@@ -6,6 +6,9 @@ interface ILibertyDefinitions {
 
   public static final String GROUP_NAME = "Liberty"
 
+  public static final String DEPLOY_FOLDER_DROPINS = "dropins"
+  public static final String DEPLOY_FOLDER_APPS = 'apps'
+
   public static final String TASK_COMPILE_JSP = "compileJSP"
   public static final String TASK_INSTALL_LIBERTY = "installLiberty"
   public static final String TASK_LIBERTY_RUN = "libertyRun"
@@ -30,4 +33,9 @@ interface ILibertyDefinitions {
   public static final String TASK_UNINSTALL_FEATURE = "uninstallFeature"
   public static final String TASK_CLEAN_DIRS = "cleanDirs"
   public static final String TASK_INSTALL_APPS = "installApps"
+  public static final String TASK_INSTALL_APPS_ARCHIVE = "installAppsArchive"
+  public static final String TASK_INSTALL_APPS_LOOSE = "installAppsLoose"
+  public static final String TASK_INSTALL_APPS_SANITY = "installAppsSanity"
+  public static final String TASK_INSTALL_APPS_AUTOCONFIG = "installAppsAutoConfig"
+
 }
