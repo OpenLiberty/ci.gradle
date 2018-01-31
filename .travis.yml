@@ -3,9 +3,9 @@ language: java
 matrix:
   include:
     - jdk: oraclejdk7
-      env: WLP_VERSION=17.0.0.1
-    - jdk: oraclejdk8
       env: WLP_VERSION=17.0.0.2
+    - jdk: oraclejdk8
+      env: WLP_VERSION=17.0.0.3
 script:
   - travis_wait ./gradlew install check -Prunit=online -DwlpVersion=$WLP_VERSION --stacktrace --info
-dist: precise
+dist: trusty
