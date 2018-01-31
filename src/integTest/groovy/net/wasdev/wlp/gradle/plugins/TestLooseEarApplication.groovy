@@ -87,17 +87,17 @@ public class TestLooseEarApplication extends AbstractIntegrationTest{
       nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
       Assert.assertEquals("Number of <archive/> element ==>", 2, nodes.getLength());
     
-      String ejbWar = "/ejb-ejb.jar"
-      String ejbJar = "/ejb-war.war"
-
+      String ejbJar = "/ejb-ejb.jar"
+      String ejbWar = "/ejb-war.war"
+    
       Assert.assertTrue(
-            ejbWar.equals(nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue())) ||
-              ejbJar.equals(nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue())
+            ejbWar.equals(nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue()) ||
+              ejbJar.equals(nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue()))
 
       
       Assert.assertTrue(
-            ejbWar.equals(nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue())) ||
-              ejbJar.equals(nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue())
+            ejbWar.equals(nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue()) ||
+              ejbJar.equals(nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue()))
                       
 
     
