@@ -340,7 +340,6 @@ abstract class AbstractServerTask extends AbstractTask {
 
     protected void writeServerPropertiesToXml(Project project) {
         XmlParser pluginXmlParser = new XmlParser()
-        	project.getBuildDir().mkdirs()
         Node libertyPluginConfig = pluginXmlParser.parse(new File(project.buildDir, 'liberty-plugin-config.xml'))
         if (libertyPluginConfig.getAt('servers').isEmpty()) {
             libertyPluginConfig.appendNode('servers')

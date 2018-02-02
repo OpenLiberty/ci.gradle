@@ -30,35 +30,68 @@ import groovy.lang.Closure;
 
 class CreateTask extends AbstractServerTask {
 
+    String defaultPath = project.projectDir.toString() + '/src/main/liberty/config/'
+
+    CreateTask() {
+        outputs.upToDateWhen {
+            getServerDir(project).exists() && new File(getServerDir(project), 'server.xml')
+        }
+    }
+
     @InputDirectory @Optional
     File getConfigDir() {
-        if(project.liberty.server.configDirectory != null && project.liberty.server.configDirectory)
-            return project.liberty.server.configDirectory;
+        if(server.configDirectory != null && server.configDirectory.exists()) {
+            return server.configDirectory
+        }
     }
 
-    @OutputDirectory
-    File getOutputConfigDir() {
-        return getServerDir(project);
-    }
-
-    @InputFile
+    @InputFile @Optional
     File getConfigFile() {
-        File configFile = server.configFile
-        File configDir = server.configDirectory
-
-        if(!server.configFile.toString().equals('default')) {
-            return configFile;
-        } else if(configDir != null && new File(configDir, "server.xml").exists()) {
-            return new File(configDir, "server.xml");
-        } else {
-            // Return the default value wether or not it exists, if nothing else is configured
+        if(!server.configFile.toString().equals('default') && server.configFile.exists()) {
+            return server.configFile
+        } else if (server.configDirectory != null && new File(server.configDirectory, 'server.xml').exists()) {
+            return new File(server.configDirectory, 'server.xml')
+        } else if (new File(defaultPath + 'server.xml').exists()) {
             return new File(project.projectDir.toString() + '/src/main/liberty/config/server.xml')
         }
     }
 
+    @InputFile @Optional
+    File getBootstrapPropertiesFile() {
+        if (!server.bootstrapPropertiesFile.toString().equals('default') && server.bootstrapPropertiesFile.exists()) {
+            return server.bootstrapPropertiesFile
+        } else if (server.configDirectory != null && new File(server.configDirectory, 'bootstrap.properties').exists()) {
+            return new File(server.configDirectory, 'bootstrap.properties')
+        } else if (new File(defaultPath + 'bootstrap.properties').exists()) {
+            return new File(defaultPath + 'bootstrap.properties')
+        }
+    }
+
+    @InputFile @Optional
+    File getJvmOptionsFile() {
+        if (!server.jvmOptionsFile.toString().equals('default') && server.jvmOptionsFile.exists()) {
+            return server.jvmOptionsFile
+        } else if (server.configDirectory != null && new File(server.configDirectory, 'jvm.options').exists()) {
+            return new File(server.configDirectory, 'jvm.options')
+        } else if (new File(defaultPath + 'jvm.options').exists()) {
+            return new File(defaultPath + 'jvm.options')
+        }
+    }
+
+    @InputFile @Optional
+    File getServerEnvFile() {
+        if (!server.serverEnv.toString().equals('default') && server.serverEnv.exists()) {
+            return server.serverEnv
+        } else if (server.configDirectory != null && new File(server.configDirectory, 'server.env').exists()) {
+            return new File(server.configDirectory, 'server.env')
+        } else if (new File(defaultPath + 'server.env').exists()) {
+            return new File(defaultPath + 'server.env')
+        }
+    }
+
     @OutputFile
-    File getOutputConfigFile() {
-        return new File(getServerDir(project), "server.xml")
+    File getPluginConfigXml() {
+        return new File(project.buildDir, 'liberty-plugin-config.xml')
     }
 
     @TaskAction

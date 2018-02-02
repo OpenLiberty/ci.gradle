@@ -23,6 +23,17 @@ import groovy.xml.MarkupBuilder
 
 class InstallLibertyTask extends AbstractTask {
 
+    InstallLibertyTask() {
+        outputs.upToDateWhen {
+            getInstallDir(project).exists()
+        }
+    }
+
+    @OutputFile
+    File getPluginConfigXml() {
+        return new File(project.buildDir, 'liberty-plugin-config.xml')
+    }
+
     @TaskAction
     void install() {
         if (!isLibertyInstalled(project)) {
@@ -114,7 +125,6 @@ class InstallLibertyTask extends AbstractTask {
     }
 
     protected void createPluginXmlFile(Project project) {
-    	    project.getBuildDir().mkdirs()
         new File(project.buildDir, 'liberty-plugin-config.xml').withWriter { writer ->
             def xmlDoc = new MarkupBuilder(writer)
             xmlDoc.mkp.xmlDeclaration(version: "1.0", encoding: "UTF-8")
