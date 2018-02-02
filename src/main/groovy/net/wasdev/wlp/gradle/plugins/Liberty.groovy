@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2017.
+ * (C) Copyright IBM Corporation 2014, 2018.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,10 +89,6 @@ class Liberty implements Plugin<Project> {
             description 'Installs Liberty from a repository'
             logging.level = LogLevel.INFO
             group 'Liberty'
-
-            project.afterEvaluate {
-                outputs.upToDateWhen { getInstallDir(project).exists() }
-            }
         }
 
         project.task('libertyRun', type: RunTask) {
@@ -122,33 +118,6 @@ class Liberty implements Plugin<Project> {
             project.afterEvaluate {
                 // Run install features if configured
                 if (dependsOnFeature(server)) finalizedBy 'installFeature'
-
-                // Defining files set in build.gradle and check their default paths as inputs
-                String defaultPath = project.projectDir.toString() + '/src/main/liberty/config/'
-                if (!project.liberty.server.configFile.toString().equals('default')) {
-                    inputs.file { project.liberty.server.configFile }
-                } else if (new File(defaultPath + 'server.xml').exists()) {
-                    inputs.file { new File(defaultPath + 'server.xml') }
-                }
-                if (!project.liberty.server.bootstrapPropertiesFile.toString().equals('default')) {
-                    inputs.file { project.liberty.server.bootstrapPropertiesFile }
-                } else if (new File(defaultPath + 'bootstrap.properties').exists()) {
-                    inputs.file { new File(defaultPath + 'bootstrap.properties') }
-                }
-                if (!project.liberty.server.jvmOptionsFile.toString().equals('default')) {
-                    inputs.file { project.liberty.server.jvmOptionsFile }
-                } else if (new File(defaultPath + 'jvm.options').exists()) {
-                    inputs.file { new File(defaultPath + 'jvm.options') }
-                }
-                if (!project.liberty.server.serverEnv.toString().equals('default')) {
-                    inputs.file { project.liberty.server.serverEnv }
-                } else if (new File(defaultPath + 'server.env').exists()) {
-                    inputs.file { new File(defaultPath + 'server.env') }
-                }
-                if (project.liberty.server.configDirectory != null && project.liberty.server.configDirectory.exists()) {
-                    inputs.dir { project.liberty.server.configDirectory }
-                }
-                outputs.upToDateWhen { new File(getUserDir(project), "servers/${project.liberty.server.name}/server.xml").exists() }
             }
         }
 
