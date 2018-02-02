@@ -30,36 +30,36 @@ import groovy.lang.Closure;
 
 class CreateTask extends AbstractServerTask {
 
-	@InputDirectory @Optional
-	File getConfigDir() {
-		if(project.liberty.server.configDirectory != null && project.liberty.server.configDirectory)
-			return project.liberty.server.configDirectory;
-	}
+    @InputDirectory @Optional
+    File getConfigDir() {
+        if(project.liberty.server.configDirectory != null && project.liberty.server.configDirectory)
+            return project.liberty.server.configDirectory;
+    }
 
-	@OutputDirectory
-	File getOutputConfigDir() {
-		return getServerDir(project);
-	}
+    @OutputDirectory
+    File getOutputConfigDir() {
+        return getServerDir(project);
+    }
 
-	@InputFile
-	File getConfigFile() {
-		File configFile = server.configFile
-		File configDir = server.configDirectory
+    @InputFile
+    File getConfigFile() {
+        File configFile = server.configFile
+        File configDir = server.configDirectory
 
-		if(!server.configFile.toString().equals('default')) {
-			return configFile;
-		} else if(configDir != null && new File(configDir, "server.xml").exists()) {
-			return new File(configDir, "server.xml");
-		} else {
-			// Return the default value wether or not it exists, if nothing else is configured
-			return new File(project.projectDir.toString() + '/src/main/liberty/config/server.xml')
-		}
-	}
+        if(!server.configFile.toString().equals('default')) {
+            return configFile;
+        } else if(configDir != null && new File(configDir, "server.xml").exists()) {
+            return new File(configDir, "server.xml");
+        } else {
+            // Return the default value wether or not it exists, if nothing else is configured
+            return new File(project.projectDir.toString() + '/src/main/liberty/config/server.xml')
+        }
+    }
 
-	@OutputFile
-	File getOutputConfigFile() {
-		return new File(getServerDir(project), "server.xml")
-	}
+    @OutputFile
+    File getOutputConfigFile() {
+        return new File(getServerDir(project), "server.xml")
+    }
 
     @TaskAction
     void create() {
