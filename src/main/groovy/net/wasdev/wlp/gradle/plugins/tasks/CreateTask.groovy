@@ -25,7 +25,7 @@ import org.gradle.api.tasks.TaskAction
 
 class CreateTask extends AbstractServerTask {
 
-    String defaultPath = project.projectDir.toString() + '/src/main/liberty/config/'
+    final String DEFAULT_PATH = project.projectDir.toString() + '/src/main/liberty/config/'
 
     CreateTask() {
         outputs.upToDateWhen {
@@ -42,46 +42,22 @@ class CreateTask extends AbstractServerTask {
 
     @InputFile @Optional
     File getConfigFile() {
-        if(!server.configFile.toString().equals('default') && server.configFile.exists()) {
-            return server.configFile
-        } else if (server.configDirectory != null && new File(server.configDirectory, 'server.xml').exists()) {
-            return new File(server.configDirectory, 'server.xml')
-        } else if (new File(defaultPath + 'server.xml').exists()) {
-            return new File(project.projectDir.toString() + '/src/main/liberty/config/server.xml')
-        }
+        return getLibertyPropertyFile(server.configFile, 'server.xml')
     }
 
     @InputFile @Optional
     File getBootstrapPropertiesFile() {
-        if (!server.bootstrapPropertiesFile.toString().equals('default') && server.bootstrapPropertiesFile.exists()) {
-            return server.bootstrapPropertiesFile
-        } else if (server.configDirectory != null && new File(server.configDirectory, 'bootstrap.properties').exists()) {
-            return new File(server.configDirectory, 'bootstrap.properties')
-        } else if (new File(defaultPath + 'bootstrap.properties').exists()) {
-            return new File(defaultPath + 'bootstrap.properties')
-        }
+        return getLibertyPropertyFile(server.bootstrapPropertiesFile, 'bootstrap.properties')
     }
 
     @InputFile @Optional
     File getJvmOptionsFile() {
-        if (!server.jvmOptionsFile.toString().equals('default') && server.jvmOptionsFile.exists()) {
-            return server.jvmOptionsFile
-        } else if (server.configDirectory != null && new File(server.configDirectory, 'jvm.options').exists()) {
-            return new File(server.configDirectory, 'jvm.options')
-        } else if (new File(defaultPath + 'jvm.options').exists()) {
-            return new File(defaultPath + 'jvm.options')
-        }
+        return getLibertyPropertyFile(server.jvmOptionsFile, 'jvm.options')
     }
 
     @InputFile @Optional
     File getServerEnvFile() {
-        if (!server.serverEnv.toString().equals('default') && server.serverEnv.exists()) {
-            return server.serverEnv
-        } else if (server.configDirectory != null && new File(server.configDirectory, 'server.env').exists()) {
-            return new File(server.configDirectory, 'server.env')
-        } else if (new File(defaultPath + 'server.env').exists()) {
-            return new File(defaultPath + 'server.env')
-        }
+        return getLibertyPropertyFile(server.serverEnv, 'server.env')
     }
 
     @OutputFile
@@ -104,4 +80,13 @@ class CreateTask extends AbstractServerTask {
         writeServerPropertiesToXml(project)
     }
 
+    File getLibertyPropertyFile(File libertyPropertyFile, String fileName) {
+        if (!libertyPropertyFile.toString().equals('default') && libertyPropertyFile.exists()) {
+            return libertyPropertyFile
+        } else if (server.configDirectory != null && new File(server.configDirectory, fileName).exists()) {
+            return new File(server.configDirectory, fileName)
+        } else if (new File(DEFAULT_PATH + fileName).exists()) {
+            return new File(DEFAULT_PATH + fileName)
+        }
+    }
 }
