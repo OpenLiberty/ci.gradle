@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2018
+ * (C) Copyright IBM Corporation 2014, 2017.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,7 @@
 package net.wasdev.wlp.gradle.plugins.tasks
 
 import net.wasdev.wlp.gradle.plugins.Liberty
-
-import java.io.File;
-
-import org.gradle.api.tasks.InputDirectory;
-import org.gradle.api.tasks.InputFile;
-import org.gradle.api.tasks.Optional;
-import org.gradle.api.tasks.OutputDirectory;
-import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction
-
-import groovy.lang.Closure;
 
 class CreateTask extends AbstractServerTask {
 

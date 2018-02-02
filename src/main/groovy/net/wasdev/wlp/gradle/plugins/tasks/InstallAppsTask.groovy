@@ -24,7 +24,14 @@ import groovy.util.XmlParser
 import groovy.lang.Tuple
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.PublishArtifact
+import org.gradle.plugins.ear.descriptor.EarModule
+import org.gradle.api.artifacts.ModuleDependency
+import org.gradle.api.artifacts.ExternalModuleDependency
+import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.DependencySet
 import org.apache.commons.io.FilenameUtils
 import org.gradle.api.file.FileCollection
@@ -32,6 +39,7 @@ import org.w3c.dom.Element;
 import java.util.regex.Pattern
 import java.util.regex.Matcher
 import java.text.MessageFormat
+import org.apache.commons.io.FilenameUtils
 
 import org.gradle.api.Task
 import org.gradle.api.tasks.bundling.War
@@ -143,6 +151,12 @@ class InstallAppsTask extends AbstractServerTask {
             config.toXmlFile(looseConfigFile)
             break
         case "ear":
+            validateAppConfig(application, task.baseName, appsDir)
+            logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFile.getAbsolutePath()))
+            installLooseConfigEar(config, task)
+            deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
+            deleteApplication(new File(getServerDir(project), "dropins"), looseConfigFile)
+            config.toXmlFile(looseConfigFile)
             break
         default:
             logger.info(MessageFormat.format(("Loose application configuration is not supported for packaging type {0}. The project artifact will be installed as an archive file."),
@@ -171,8 +185,8 @@ class InstallAppsTask extends AbstractServerTask {
         addWarEmbeddedLib(looseWar.getDocumentRoot(), looseWar, task);
 
         //add Manifest file
-        File manifestFile = new File(project.sourceSets.main.getOutput().getResourcesDir().getParentFile().getAbsolutePath() + "/META-INF/MANIFEST.MF")
-        looseWar.addManifestFile(manifestFile, "gradle-war-plugin")
+        File manifestFile = new File(project.buildDir.getAbsolutePath() + "/tmp/war/MANIFEST.MF")
+        looseWar.addManifestFile(manifestFile)
     }
 
     private boolean hasJavaSourceFiles(FileCollection classpath, File outputDir){
@@ -203,7 +217,7 @@ class InstallAppsTask extends AbstractServerTask {
             if (resourceTask.getDestinationDir() != null){
                 looseApp.addOutputDir(archive, resourceTask.getDestinationDir(), "/");
             }
-            looseApp.addManifestFile(archive, siblingProject, "gradle-jar-plugin");
+            looseApp.addManifestFile(archive, siblingProject);
         } else if(FilenameUtils.getExtension(dep.getAbsolutePath()).equalsIgnoreCase("jar")){
             looseApp.getConfig().addFile(parent, dep.getAbsolutePath() , "/WEB-INF/lib/" + dep.getName());
         } else {
@@ -212,13 +226,72 @@ class InstallAppsTask extends AbstractServerTask {
       }
     }
 
-    private String getProjectPath(File parentProjectDir, File dep){
-      String dependencyPathPortion = dep.getAbsolutePath().replace(parentProjectDir.getAbsolutePath()+"/","")
-      String projectPath = dep.getAbsolutePath().replace(dependencyPathPortion,"")
-      Pattern pattern = Pattern.compile("/build/.*")
-      Matcher matcher = pattern.matcher(dependencyPathPortion)
-      projectPath = matcher.replaceAll("")
-      return projectPath;
+    protected void installLooseConfigEar(LooseConfigData config, Task task) throws Exception{
+        LooseEarApplication looseEar = new LooseEarApplication(task, config);
+        looseEar.addSourceDir();
+        looseEar.addApplicationXmlFile();
+
+        File[] filesAsDeps = task.getProject().configurations.deploy.getFiles().toArray()
+        Dependency[] deps = task.getProject().configurations.deploy.getAllDependencies().toArray()
+        HashMap<File, Dependency> completeDeps = new HashMap<File, Dependency>();
+        if(filesAsDeps.size() == deps.size()){
+            for(int i = 0; i<filesAsDeps.size(); i++) {
+                completeDeps.put(filesAsDeps[i], deps[i])
+            }
+        }
+
+        logger.info(MessageFormat.format("Number of compile dependencies for " + task.project.name + " : " + completeDeps.size()))
+        for (Map.Entry<File, Dependency> entry : completeDeps){
+            Dependency dependency = entry.getValue();
+            File dependencyFile = entry.getKey();
+            
+            if (dependency instanceof ProjectDependency) {
+                Project dependencyProject = dependency.getDependencyProject()
+                String projectType = FilenameUtils.getExtension(dependencyFile.toString())
+                switch (projectType) {
+                        case "jar":
+                        case "ejb":
+                        case "rar":
+                            looseEar.addJarModule(dependencyProject)
+                            break;
+                        case "war":
+                            Element warElement = looseEar.addWarModule(dependencyProject)
+                            addEmbeddedLib(warElement, dependencyProject, looseEar, "/WEB-INF/lib/")
+                            break;
+                        default:
+                            logger.warn('Application ' + dependencyProject.getName() + ' is expressed as ' + projectType + ' which is not a supported input type. Define applications using Task or File objects of type war, ear, or jar.')
+                            break;
+                    }
+            }
+            else if (dependency instanceof ExternalModuleDependency) {
+                looseEar.getConfig().addFile(dependencyFile.getAbsolutePath(), "/WEB-INF/lib/" + it.getName())
+            }
+            else {
+                logger.warn("Dependency " + dependency.getName() + "could not be added to the looseApplication, as it is neither a ProjectDependency or ExternalModuleDependency")
+            }
+        }
+        File manifestFile = new File(project.buildDir.getAbsolutePath() + "/tmp/ear/MANIFEST.MF")
+        looseEar.addManifestFile(manifestFile)
+    }
+    private void addEmbeddedLib(Element parent, Project proj, LooseApplication looseApp, String dir) throws Exception {
+        //Get only the compile dependencies that are included in the war
+        File[] filesAsDeps = proj.configurations.compile.minus(proj.configurations.providedCompile).getFiles().toArray()
+        for (File f : filesAsDeps){
+            String extension = FilenameUtils.getExtension(f.getAbsolutePath())
+            if(extension.equals("jar")){
+                looseApp.getConfig().addFile(parent, f.getAbsolutePath(),
+                        dir + f.getName());
+            }
+        }
+    }
+
+    private String getProjectPath(File parentProjectDir, File dep) {
+        String dependencyPathPortion = dep.getAbsolutePath().replace(parentProjectDir.getAbsolutePath()+"/","")
+        String projectPath = dep.getAbsolutePath().replace(dependencyPathPortion,"")
+        Pattern pattern = Pattern.compile("/build/.*")
+        Matcher matcher = pattern.matcher(dependencyPathPortion)
+        projectPath = matcher.replaceAll("")
+        return projectPath;
     }
 
     private boolean isSupportedType(){
