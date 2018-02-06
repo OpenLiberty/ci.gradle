@@ -1,0 +1,89 @@
+group = 'liberty.gradle'
+version = '1'
+
+apply plugin: 'maven'
+apply plugin: 'war'
+apply plugin: 'liberty'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+compileJava.options.encoding = 'UTF-8'
+
+ext {
+    libertyVersion = project.property("libertyVersion")
+
+    // Liberty server properties
+    wlpServerName = 'LibertyProjectServer'
+    serverDirectory = "${project.buildDir}/wlp/usr/servers/${wlpServerName}"
+    testServerHttpPort = 9080
+    testServerHttpsPort = 9443
+
+    warContext = 'sample.servlet-1'
+    appName = 'LibertyProject'
+    packageFile = "${project.buildDir}/${appName}.zip"
+    packagingType = 'usr'
+
+
+
+}
+task war2(type:War){
+    baseName = 'test.servlet'
+    println 'war2 archiveName = ' + archiveName
+}
+
+task war3(type:War){
+    baseName = 'servlet.test'
+    println 'war3 archiveName = ' + archiveName
+}
+
+task war4(type:War){
+    baseName = 'sample.test'
+    println 'war4 archiveName = ' + archiveName
+}
+
+liberty {
+    install {
+        runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/${libertyVersion}/wlp-webProfile7-${libertyVersion}.zip"
+    }
+    server{
+        name = wlpServerName
+        configFile = file("src/main/liberty/config/app-names-test.xml")
+        bootstrapProperties = ['testAppLocation':'test.servlet-1.war']
+        packageLiberty {
+            archive = packageFile
+            include = packagingType
+        }
+        looseApplication = false
+        apps = [war2, file(war3.archivePath)]
+        dropins = [war, file(war4.archivePath)]
+
+        verifyAppStartTimeout = 30
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.apache.cxf:cxf-rt-rs-client:3.1.1'
+    testCompile 'org.glassfish:javax.json:1.0.4'
+    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+}
+
+installApps.dependsOn tasks.withType(War)
+
+task ('runGradleTest') {
+    dependsOn 'clean', 'installApps', 'libertyStart'
+    finalizedBy 'libertyStop'
+
+    doLast {
+        assert new File("${buildDir}/wlp/usr/servers/LibertyProjectServer/dropins/sample.servlet-1.war").exists() : 'application not installed on server'
+        assert new File("${buildDir}/wlp/usr/servers/LibertyProjectServer/dropins/sample.test-1.war").exists() : 'application not installed on server'
+
+        assert new File("${buildDir}/wlp/usr/servers/LibertyProjectServer/apps/test.servlet-1.war").exists() : 'application not installed on server'
+        assert new File("${buildDir}/wlp/usr/servers/LibertyProjectServer/apps/servlet.test-1.war").exists() : 'application not installed on server'
+    }
+}

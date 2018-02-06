@@ -1,0 +1,94 @@
+import org.w3c.dom.Document
+import org.w3c.dom.NodeList
+
+import javax.xml.parsers.DocumentBuilder
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.xpath.XPath
+import javax.xml.xpath.XPathConstants
+import javax.xml.xpath.XPathFactory
+
+allprojects  {
+    apply plugin: 'maven'
+
+    group = 'sample'
+    version = '1.0'
+}
+
+subprojects {
+    apply plugin: 'java'
+    
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+    
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+task ('runGradleTest') {
+    dependsOn 'clean', 'libertyCreate', 'libertyStart'
+
+    println("  name ${project.name}")
+    finalizedBy 'libertyStop'
+
+    /*
+  Expected output to the XML
+  <?xml version="1.0" encoding="UTF-8"?>
+  <archive>
+      <file sourceOnDisk="/Users/jjvilleg/Desktop/ci.gradle/build/testBuilds/test-loose-ear-application/ejb-ear/build/tmp/ear/application.xml" targetInArchive="/META-INF/application.xml"/>
+      <archive targetInArchive="/ejb-ejb.jar">
+          <dir sourceOnDisk="/Users/jjvilleg/Desktop/ci.gradle/build/testBuilds/test-loose-ear-application/ejb-ejb/build/classes/java/main" targetInArchive="/"/>
+          <file sourceOnDisk="/Users/jjvilleg/Desktop/ci.gradle/build/testBuilds/test-loose-ear-application/ejb-ejb/build/tmp/jar/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
+      </archive>
+      <archive targetInArchive="/ejb-war.war">
+          <dir sourceOnDisk="/Users/jjvilleg/Desktop/ci.gradle/build/testBuilds/test-loose-ear-application/ejb-war/build/classes/java/main" targetInArchive="/WEB-INF/classes"/>
+          <file sourceOnDisk="/Users/jjvilleg/Desktop/ci.gradle/build/testBuilds/test-loose-ear-application/ejb-war/build/tmp/jar/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
+      </archive>
+      <file sourceOnDisk="/Users/jjvilleg/Desktop/ci.gradle/build/testBuilds/test-loose-ear-application/ejb-ear/build/tmp/ear/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
+  </archive>
+
+*/
+    doLast {
+        File on = new File("${buildDir}/wlp/usr/servers/ejbServer/apps/ejb-ear.ear.xml")
+        FileInputStream input = new FileInputStream(on)
+
+        // get input XML Document
+        DocumentBuilderFactory inputBuilderFactory = DocumentBuilderFactory.newInstance()
+        inputBuilderFactory.setIgnoringComments(true)
+        inputBuilderFactory.setCoalescing(true)
+        inputBuilderFactory.setIgnoringElementContentWhitespace(true)
+        inputBuilderFactory.setValidating(false)
+        DocumentBuilder inputBuilder = inputBuilderFactory.newDocumentBuilder()
+        Document inputDoc=inputBuilder.parse(input)
+
+        // parse input XML Document
+        XPath xPath = XPathFactory.newInstance().newXPath()
+        String expression = "/archive/dir"
+        NodeList nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET)
+        assert nodes.getLength() == 0 : "Number of <dir/> element ==>"
+
+        expression = "/archive/archive"
+        nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET)
+        assert nodes.getLength() == 2 : "Number of <archive/> element ==>"
+
+        String ejbJar = "/ejb-ejb.jar"
+        String ejbWar = "/ejb-war.war"
+
+        assert ejbWar.equals(nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue()) ||
+                ejbJar.equals(nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue())
+
+
+        assert ejbWar.equals(nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue()) ||
+                ejbJar.equals(nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue())
+
+
+
+        expression = "/archive/file";
+        nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET)
+        assert nodes.getLength() == 2 : "Number of <file/> element ==>"
+    }
+}

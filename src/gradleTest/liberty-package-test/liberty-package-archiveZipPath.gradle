@@ -1,0 +1,34 @@
+
+ext {
+    // Liberty server properties
+    libertyVersion = project.property("libertyVersion")
+}
+
+apply plugin: 'liberty'
+
+liberty {
+    install {
+        runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/${libertyVersion}/wlp-webProfile7-${libertyVersion}.zip"
+    }
+
+    server{
+        name = 'libertyOnline'
+        packageLiberty {
+            archive = 'build/testPackage'
+        }
+    }
+}
+
+task ('runGradleTest') {
+    dependsOn 'clean', 'libertyStart', 'libertyPackage'
+    finalizedBy 'libertyStop', 'validateTasks'
+}
+
+task ('validateTasks') {
+    doLast {
+        def file = new File(buildDir, "testPackage.zip")
+
+        assert file.exists() : "file not found"
+        assert file.canRead() : "file cannot be read"
+    }
+}

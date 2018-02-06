@@ -1,0 +1,81 @@
+group = 'liberty.gradle'
+version = '1'
+
+apply plugin: 'maven'
+apply plugin: 'war'
+apply plugin: 'liberty'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+compileJava.options.encoding = 'UTF-8'
+
+ext {
+    libertyVersion = project.property("libertyVersion")
+    // Liberty server properties
+    wlpServerName = 'LibertyProjectServer'
+    serverDirectory = "${project.buildDir}/wlp/usr/servers/${wlpServerName}"
+    testServerHttpPort = 9080
+    testServerHttpsPort = 9443
+
+    warContext = 'sample.servlet-1'
+    appName = 'LibertyProject'
+    packageFile = "${project.buildDir}/${appName}.zip"
+    packagingType = 'usr'
+}
+
+task testWar(type:War){
+    baseName = 'testWar'
+}
+
+task createServerEnv{
+    def serverEnvFile = file("src/main/libertyConfig/testOutputDir-server.env")
+    if (!serverEnvFile.exists()) {
+        serverEnvFile.write("WLP_OUTPUT_DIR=${project.buildDir}/testOutputDir")
+    }
+}
+
+liberty {
+
+    install {
+        runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/${libertyVersion}/wlp-webProfile7-${libertyVersion}.zip"
+    }
+
+    server{
+        name = wlpServerName
+
+        packageLiberty {
+            archive = packageFile
+            include = packagingType
+        }
+        configFile = file("src/main/libertyConfig/server-apps-test.xml")
+        serverEnv = file("src/main/libertyConfig/testOutputDir-server.env")
+        looseApplication = false
+        apps = [file('src/test/resources/sample.servlet.war')]
+
+        verifyAppStartTimeout = 30
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.apache.cxf:cxf-rt-rs-client:3.1.1'
+    testCompile 'org.glassfish:javax.json:1.0.4'
+    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+}
+
+libertyCreate.dependsOn 'createServerEnv'
+
+task ('runGradleTest') {
+    dependsOn 'clean', 'libertyStart'
+    finalizedBy 'libertyStop'
+
+    doLast {
+        assert new File("${buildDir}/testOutputDir").exists() : 'Could not find the outputDir specified in the build file.'
+        assert new File("${buildDir}/testOutputDir/LibertyProjectServer").exists() : 'Could not find the outputDir specified in the build file.'
+    }
+}

@@ -29,8 +29,8 @@ class UninstallFeatureTask extends AbstractServerTask {
             params.remove('timeout')
 
             project.ant.taskdef(name: 'uninstallFeature',
-                                classname: 'net.wasdev.wlp.ant.UninstallFeatureTask',
-                                classpath: project.buildscript.configurations.classpath.asPath)
+                              classname: net.wasdev.wlp.ant.UninstallFeatureTask.name,
+                              classpath: project.rootProject.buildscript.configurations.classpath.asPath)
             project.ant.uninstallFeature(params)
         } else {
             logger.error ('The runtime has not been installed.')

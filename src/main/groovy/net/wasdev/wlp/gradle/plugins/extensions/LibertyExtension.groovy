@@ -15,9 +15,14 @@
  */
 package net.wasdev.wlp.gradle.plugins.extensions
 
+import org.gradle.api.Project
 import org.gradle.util.ConfigureUtil
 
 class LibertyExtension {
+
+    LibertyExtension(Project project) {
+        server = new ServerExtension(project)
+    }
 
     String installDir
     String outputDir
@@ -105,7 +110,6 @@ class LibertyExtension {
     }
 
     def server(Closure closure){
-        server = new ServerExtension()
         ConfigureUtil.configure(closure, server)
     }
 

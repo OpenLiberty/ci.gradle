@@ -15,13 +15,14 @@
  */
 package net.wasdev.wlp.gradle.plugins.tasks
 
+import net.wasdev.wlp.gradle.plugins.utils.LibertyIntstallController
 import org.gradle.api.tasks.TaskAction
 
 class RunTask extends AbstractServerTask {
 
     @TaskAction
     void run() {
-        List<String> command = buildCommand("run")
+        List<String> command = LibertyIntstallController.buildCommand(project, "run")
         if (project.liberty.clean) {
             command.add("--clean")
         }

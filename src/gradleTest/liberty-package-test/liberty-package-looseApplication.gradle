@@ -1,0 +1,96 @@
+/*
+	This test checks whether pakcageLiberty successfully packages the server with a looseApplication that requires
+    files from the src/resrouces folder.
+*/
+group = 'liberty.gradle'
+
+
+apply plugin: 'war'
+apply plugin: 'liberty'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+compileJava.options.encoding = 'UTF-8'
+
+ext {
+    // Liberty server properties
+    wlpServerName = 'LibertyProjectServer'
+    testServerHttpPort = 9080
+    testServerHttpsPort = 9443
+
+    warContext = 'jpaApp'
+    libertyVersion = project.property("libertyVersion")
+}
+
+war {
+    archiveName = baseName + '.' + extension
+}
+
+liberty {
+    server{
+        bootstrapProperties = ['default.http.port': "${testServerHttpPort}" ,
+                               'default.https.port': "${testServerHttpsPort}",
+                               'appContext': "${warContext}",
+                               'appLocation': "${war.archiveName}"]
+
+        name = 'LibertyProjectServer'
+        apps = [war]
+        features {
+            name = ['servlet-3.1', 'jdbc-4.1', 'jpa-2.0', 'localConnector-1.0']
+            acceptLicense = true
+        }
+        packageLiberty {
+            archive = 'testPackage.zip'
+        }
+     }
+}
+
+
+repositories {
+    mavenCentral()
+}
+
+configurations{
+     derby { transitive = true }
+}
+
+dependencies {
+    compile group: 'javax.persistence', name: 'persistence-api', version:'1.0.2'
+    compile group: 'javax.transaction', name: 'javax.transaction-api', version:'1.2'
+    testCompile group: 'junit', name: 'junit', version:'4.12'
+    testCompile group: 'org.apache.cxf', name: 'cxf-rt-rs-client', version:'3.1.1'
+    testCompile group: 'org.glassfish', name: 'javax.json', version:'1.0.4'
+    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+    derby group: 'org.apache.derby', name: 'derby', version: '10.13.1.1'
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-kernel', version: libertyVersion
+}
+
+
+task copyDerby {
+    doLast {
+        copy {
+            from configurations.derby
+            into "$buildDir/wlp/usr/shared/resources"
+            include '*.jar'
+        }
+    }
+}
+
+task ('runGradleTest') {
+    dependsOn 'clean', 'libertyStart', 'libertyPackage'
+    finalizedBy 'libertyStop', 'validateTasks'
+}
+
+task ('validateTasks') {
+    doLast {
+        def file = new File(projectDir, "testPackage.zip")
+
+        assert file.exists() : "file not found"
+        assert file.canRead() : "file cannot be read"
+
+        def looseFile = new File(buildDir, "/wlp/usr/servers/LibertyProjectServer/apps/${project.name}.war.xml")
+        assert looseFile.exists() : "loose file not found"
+        assert looseFile.canRead() : "loose file cannot be read"
+    }
+}

@@ -1,0 +1,102 @@
+import org.w3c.dom.Document
+import org.w3c.dom.NodeList
+
+import javax.xml.parsers.DocumentBuilder
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.xpath.XPath
+import javax.xml.xpath.XPathConstants
+import javax.xml.xpath.XPathFactory
+
+/*
+	Testing that liberty-plugin-config.xml is getting generated correctly.
+*/
+group = 'liberty.gradle'
+version = '1'
+
+apply plugin: 'maven'
+apply plugin: 'war'
+apply plugin: 'liberty'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+compileJava.options.encoding = 'UTF-8'
+
+ext {
+    libertyVersion = project.property("libertyVersion")
+
+    // Liberty server properties
+    wlpServerName = 'LibertyProjectServer'
+    serverDirectory = "${project.buildDir}/wlp/usr/servers/${wlpServerName}"
+    testServerHttpPort = 9080
+    testServerHttpsPort = 9443
+
+    // This is set in the ibm-web-ext.xml file
+    warContext = 'myLibertyApp'
+
+}
+
+liberty {
+    install {
+        runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/${libertyVersion}/wlp-webProfile7-${libertyVersion}.zip"
+    }
+    server{
+        configFile = file("src/main/libertyConfig/server-apps-test.xml")
+        name = wlpServerName
+        apps = [war]
+        stripVersion = true
+        looseApplication = true
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+    compile 'org.apache.commons:commons-text:1.1'
+}
+
+installApps.dependsOn 'war'
+
+task ('runGradleTest') {
+    dependsOn 'clean', 'installApps'
+    finalizedBy 'libertyStop'
+    doLast {
+        File on = new File("${buildDir}/liberty-plugin-config.xml")
+        FileInputStream input = new FileInputStream(on)
+
+        // get input XML Document
+        DocumentBuilderFactory inputBuilderFactory = DocumentBuilderFactory.newInstance()
+        inputBuilderFactory.setIgnoringComments(true)
+        inputBuilderFactory.setCoalescing(true)
+        inputBuilderFactory.setIgnoringElementContentWhitespace(true)
+        inputBuilderFactory.setValidating(false)
+        DocumentBuilder inputBuilder = inputBuilderFactory.newDocumentBuilder()
+        Document inputDoc=inputBuilder.parse(input)
+
+        // parse input XML Document
+        XPath xPath = XPathFactory.newInstance().newXPath()
+        String expression = "/liberty-plugin-config/servers"
+        NodeList nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET)
+        assert nodes.getLength() == 1 : "Number of <servers/> element ==>"
+
+        expression = "/liberty-plugin-config/servers/server"
+        nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET)
+        assert nodes.getLength() == 1 : "Number of <server/> element ==>"
+
+        expression = "/liberty-plugin-config/servers/server/serverName"
+        nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET)
+        assert nodes.getLength() == 1 : "Number of <serverName/> element ==>"
+
+        assert nodes.item(0).getTextContent() == "LibertyProjectServer" : "correct serverName value"
+
+        expression = "/liberty-plugin-config/servers/server/configFile"
+        nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET)
+        assert nodes.getLength() == 1 : "Number of <configFile/> element ==>"
+
+        assert nodes.item(0).getTextContent().replace("\\", "/").contains("/src/main/liberty/config/server-apps-test.xml") : "correct configFile value"
+    }
+}

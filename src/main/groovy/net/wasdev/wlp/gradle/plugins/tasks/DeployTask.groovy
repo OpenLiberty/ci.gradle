@@ -15,7 +15,11 @@
  */
 package net.wasdev.wlp.gradle.plugins.tasks
 
+import net.wasdev.wlp.gradle.plugins.extensions.DeployExtension
 import org.gradle.api.tasks.TaskAction
+import org.gradle.util.ConfigureUtil
+
+import static net.wasdev.wlp.gradle.plugins.Liberty.LIBERTY_DEPLOY_CONFIGURATION
 
 class DeployTask extends AbstractServerTask {
 
@@ -25,13 +29,14 @@ class DeployTask extends AbstractServerTask {
         def deployClosureDeclared = false
 
         project.ant.taskdef(name: 'deploy',
-                                classname: 'net.wasdev.wlp.ant.DeployTask',
-                                classpath: project.buildscript.configurations.classpath.asPath)
+                                classname: net.wasdev.wlp.ant.DeployTask.name,
+                                classpath: project.rootProject.buildscript.configurations.classpath.asPath)
 
-        server.deploy.listOfClosures.add(project.liberty.deploy)
-        for (Object deployable :  server.deploy.listOfClosures) {
-            def params = buildLibertyMap(project);
+        // deploys the list of deploy closures
+        for (DeployExtension deployable :  server.deploys) {
+            def params = buildLibertyMap(project)
             def fileToDeploy = deployable.file
+
             if (fileToDeploy != null) {
                 deployClosureDeclared = true
                 params.put('file', fileToDeploy)
@@ -50,9 +55,12 @@ class DeployTask extends AbstractServerTask {
             }
         }
 
+        deployConfigurationBased()
+
+        // Deploys war or ear from current project
         if (!deployClosureDeclared) {
             if (project.plugins.hasPlugin("war")) {
-                def params = buildLibertyMap(project);
+                def params = buildLibertyMap(project)
                 def warFile = project.war.archivePath
                 if (warFile.exists()) {
                     params.put('file', warFile)
@@ -61,13 +69,25 @@ class DeployTask extends AbstractServerTask {
             }
 
             if (project.plugins.hasPlugin("ear")) {
-                def params = buildLibertyMap(project);
+                def params = buildLibertyMap(project)
                 def earFile = project.ear.archivePath
                 if (earFile.exists()) {
                     params.put('file', earFile)
                     project.ant.deploy(params)
                 }
             }
+        }
+    }
+
+    private void deployConfigurationBased() {
+        // Deploys from the subproject configuration
+        def deployConf = project.configurations.findByName(LIBERTY_DEPLOY_CONFIGURATION)
+        def deployArtifacts = deployConf.incoming.resolutionResult.allDependencies as List
+        def artifacts = deployConf.resolvedConfiguration.resolvedArtifacts as List
+        artifacts.each {
+            def params = buildLibertyMap(project)
+            params.put('file', it.file.absolutePath)
+            project.ant.deploy(params)
         }
     }
 }
