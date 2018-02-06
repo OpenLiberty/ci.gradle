@@ -34,7 +34,7 @@ ear {
 liberty {
     server {
         name = "ejbServer"
-        configFile = file('src/main/liberty/config/server.xml')
+        configFile = file('src/main/libertyConfig/server.xml')
         apps = [ear]
         looseApplication = true
     }

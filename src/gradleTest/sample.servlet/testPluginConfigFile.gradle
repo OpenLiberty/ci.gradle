@@ -97,6 +97,6 @@ task ('runGradleTest') {
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET)
         assert nodes.getLength() == 1 : "Number of <configFile/> element ==>"
 
-        assert nodes.item(0).getTextContent().replace("\\", "/").contains("/src/main/liberty/config/server-apps-test.xml") : "correct configFile value"
+        assert nodes.item(0).getTextContent().replace("\\", "/").contains("/src/main/libertyConfig/server-apps-test.xml") : "correct configFile value"
     }
 }

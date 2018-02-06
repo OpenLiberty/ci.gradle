@@ -9,6 +9,8 @@ interface ILibertyDefinitions {
   public static final String DEPLOY_FOLDER_DROPINS = "dropins"
   public static final String DEPLOY_FOLDER_APPS = 'apps'
 
+  public static final String TASK_CORE_WAR = "war"
+
   public static final String TASK_COMPILE_JSP = "compileJSP"
   public static final String TASK_INSTALL_LIBERTY = "installLiberty"
   public static final String TASK_LIBERTY_RUN = "libertyRun"

@@ -10,7 +10,7 @@ import org.gradle.api.internal.artifacts.dependencies.DefaultProjectDependency
  * config method using gradle configurations
  *
  */
-class LooseInstallerByConfig implements LooseInstaller{
+class LooseInstallerByConfig implements ApplicationInstaller{
 
   DependencySet depSet
 

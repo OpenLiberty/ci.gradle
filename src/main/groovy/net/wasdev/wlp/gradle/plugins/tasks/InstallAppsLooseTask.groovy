@@ -1,7 +1,7 @@
 package net.wasdev.wlp.gradle.plugins.tasks
 
 
-import net.wasdev.wlp.gradle.plugins.loose.LooseInstaller
+import net.wasdev.wlp.gradle.plugins.loose.ApplicationInstaller
 import net.wasdev.wlp.gradle.plugins.loose.LooseInstallerByConfig
 import net.wasdev.wlp.gradle.plugins.loose.LooseInstallerByLibertyBlock
 
@@ -38,13 +38,13 @@ class InstallAppsLooseTask extends InstallAppsTask {
     DependencySet depSet = deployAppConfig()
 
     if (depSet?.size() > 0){
-      LooseInstaller configInstaller = new LooseInstallerByConfig(project, depSet, appsDir(), getServerDir(project))
+      ApplicationInstaller configInstaller = new LooseInstallerByConfig(project, depSet, appsDir(), getServerDir(project))
       configInstaller.installArchives()
     }
 
     // install any apps that are defined in the liberty config block
     if (server.apps?.size() > 0){
-      LooseInstaller configInstaller = new LooseInstallerByLibertyBlock(project, appsDir(), getServerDir(project))
+      ApplicationInstaller configInstaller = new LooseInstallerByLibertyBlock(project, appsDir(), getServerDir(project))
       configInstaller.installArchives()
     }
   }

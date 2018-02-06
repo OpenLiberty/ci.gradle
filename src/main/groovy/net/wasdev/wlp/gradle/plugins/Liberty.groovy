@@ -201,6 +201,7 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
     taskBTask.dependsOn(project.tasks.withType(War))
     taskBTask.dependsOn(project.tasks.withType(Ear))
 
+    a_dependsOn_b(project, TASK_INSTALL_APPS, TASK_CORE_WAR)
     a_dependsOn_b(project, TASK_INSTALL_APPS, TASK_LIBERTY_CREATE)
     a_dependsOn_b(project, TASK_INSTALL_APPS, TASK_INSTALL_APPS_AUTOCONFIG)
 

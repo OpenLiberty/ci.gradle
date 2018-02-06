@@ -45,7 +45,7 @@ liberty {
     }
     server{
         name = wlpServerName
-        configFile = file("src/main/liberty/config/app-names-test.xml")
+        configFile = file("src/main/libertyConfig/app-names-test.xml")
         bootstrapProperties = ['testAppLocation':'test.servlet-1.war']
         packageLiberty {
             archive = packageFile
