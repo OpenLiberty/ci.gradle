@@ -64,9 +64,9 @@ task ('runGradleTest') {
     finalizedBy 'libertyStop'
 
     doLast {
-        assert new File("${buildDir}/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war.xml").exists() : 'looseApplication config file was not copied over to the liberty runtime'
+        assert new File("${buildDir}/wlp/usr/servers/${wlpServerName}/apps/${war.archiveName}.xml").exists() : 'looseApplication config file was not copied over to the liberty runtime'
 
-        File on = new File("${buildDir}/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war.xml")
+        File on = new File("${buildDir}/wlp/usr/servers/${wlpServerName}/apps/${war.archiveName}.xml")
         FileInputStream input = new FileInputStream(on)
 
         // get input XML Document

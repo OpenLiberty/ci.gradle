@@ -8,11 +8,8 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Dependency
-import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.internal.artifacts.dependencies.DefaultProjectDependency
 import org.gradle.api.plugins.WarPlugin
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.plugins.ear.EarPlugin
 import org.w3c.dom.Element
@@ -23,9 +20,6 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 import static net.wasdev.wlp.gradle.plugins.Liberty.*
-import static net.wasdev.wlp.gradle.plugins.Liberty.LIBERTY_DEPLOY_APP_CONFIGURATION
-import static net.wasdev.wlp.gradle.plugins.Liberty.LIBERTY_DEPLOY_CONFIGURATION
-
 
 class InstallAppsLooseTask extends InstallAppsTask {
 

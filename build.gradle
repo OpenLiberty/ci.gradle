@@ -1,12 +1,12 @@
-buildscript {
-  repositories {
-    mavenLocal()
-    mavenCentral()
-  }
-  dependencies {
-    classpath "org.ysb33r.gradle:gradletest:2.0-alpha-3-SNAPSHOT"
-  }
-}
+//buildscript {
+//  repositories {
+//    mavenLocal()
+//    mavenCentral()
+//  }
+//  dependencies {
+//    classpath "org.ysb33r.gradle:gradletest:2.0-alpha-3-SNAPSHOT"
+//  }
+//}
 
 plugins {
   id 'groovy'
@@ -15,10 +15,10 @@ plugins {
   id 'signing'
   id 'java-gradle-plugin'
   id "com.gradle.plugin-publish" version "0.9.9"
-//  id "org.ysb33r.gradletest" version "2.0-alpha-2"
+  id "org.ysb33r.gradletest" version "2.0-alpha-3"
 }
 
-apply plugin: "org.ysb33r.gradletest"
+//apply plugin: "org.ysb33r.gradletest"
 
 repositories {
   mavenCentral()
@@ -35,9 +35,6 @@ repositories {
 configurations {
   provided
 }
-
-// hard coding this exclude because gradleTest has an issue that won't let it run
-project.properties.put("gradleTest.glob.exclude", "Sample.servlet.fail_*.*")
 
 gradleTest {
   versions '4.3.1'
@@ -82,42 +79,11 @@ dependencies {
   compile localGroovy()
   compile ('net.wasdev.wlp.ant:wlp-anttasks:1.3')
   compile group: 'commons-io', name: 'commons-io', version: '2.5'
-  compile gradleApi()
-  compile localGroovy()
   provided group: 'com.ibm.websphere.appserver.api', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
   testCompile 'junit:junit:4.11'
   testCompile gradleTestKit()
 }
 
-sourceSets {
-    integrationTest {
-        groovy.srcDir file('src/integTest/groovy')
-        resources.srcDir file('src/integTest/resources')
-        compileClasspath = sourceSets.main.output + configurations.testRuntime
-        runtimeClasspath = output + compileClasspath
-        output.dir(files(new File(buildDir, 'classes/groovy/integrationTest')))
-    }
-}
-
-task integrationTest(type: Test) {
-    logging.level = LogLevel.INFO
-    description = 'Runs the integration tests.' + gradle.gradleVersion
-    if (!gradle.gradleVersion.startsWith('4.')) {
-        testClassesDir = sourceSets.integrationTest.output.getDirs().getSingleFile()
-    } else {
-        testClassesDirs = fileTree(dir: sourceSets.integrationTest.output.getDirs().getSingleFile())
-    }
-    classpath = sourceSets.integrationTest.runtimeClasspath
-    if (!(project.hasProperty('runit'))) {
-        enabled = false
-    } else {
-        systemProperties System.getProperties()
-        systemProperty 'runit',runit
-    }
-    mustRunAfter test
-}
-
-check.dependsOn integrationTest
 sourceSets.main.compileClasspath += configurations.provided
 
 task wrapper(type: Wrapper) {

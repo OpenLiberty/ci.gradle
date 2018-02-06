@@ -193,9 +193,14 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
 
     a_dependsOn_b(project, TASK_CLEAN_DIRS, TASK_LIBERTY_STOP)
 
-    Task taskATask = project.tasks.findByName(TASK_INSTALL_APPS)
+    Task taskATask = project.tasks.findByName(TASK_INSTALL_APPS_ARCHIVE)
     taskATask.dependsOn(project.tasks.withType(War))
     taskATask.dependsOn(project.tasks.withType(Ear))
+
+    Task taskBTask = project.tasks.findByName(TASK_INSTALL_APPS_LOOSE)
+    taskBTask.dependsOn(project.tasks.withType(War))
+    taskBTask.dependsOn(project.tasks.withType(Ear))
+
     a_dependsOn_b(project, TASK_INSTALL_APPS, TASK_LIBERTY_CREATE)
     a_dependsOn_b(project, TASK_INSTALL_APPS, TASK_INSTALL_APPS_AUTOCONFIG)
 

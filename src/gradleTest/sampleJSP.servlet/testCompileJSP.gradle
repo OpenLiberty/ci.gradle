@@ -1,11 +1,13 @@
-package sampleJSP.servlet
+
 
 apply plugin: 'liberty'
 apply plugin: 'war'
 
 group = 'liberty.gradle'
+version = '1'
 
 ext {
+    libertyVersion = project.property("libertyVersion")
     // Liberty server properties
     testServerHttpPort = 9080
     testServerHttpsPort = 9443
@@ -47,34 +49,15 @@ dependencies {
     providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
 }
 
-test {
-    println 'inside the test block'
-    reports.html.destination = file("$buildDir/reports/unit")
-    reports.junitXml.destination = file("$buildDir/test-results/unit")
-    exclude '**/it/**'
-}
-
-
-task integrationTest(type: Test) {
-    group 'Verification'
-    description 'Runs the integration tests.'
-    reports.html.destination = file("$buildDir/reports/it")
-    reports.junitXml.destination = file("$buildDir/test-results/it")
-    include '**/it/**'
-    exclude '**/unit/**'
-
-    systemProperties = ['liberty.test.port': testServerHttpPort, 'war.name': warContext]
-}
-
 task ('runGradleTest') {
     dependsOn 'clean', 'libertyCreate', 'compileJSP'
 
     println("  name ${project.name}")
-//    finalizedBy 'libertyStop'
+    finalizedBy 'libertyStop'
 
-//    doLast {
-//        assert new File("${projectDir}/src/main/webapp/index.jsp").exists() : 'index.jsp not found!'
-//        assert new File("${buildDir}/compileJsp").exists() : 'compileJsp Directory not found!'
-//        assert new File("${buildDir}/classes/java/_index.class").exists() : '_index.class not found!'
-//    }
+    doLast {
+        assert new File("${projectDir}/src/main/webapp/index.jsp").exists() : 'index.jsp not found!'
+        assert new File("${buildDir}/compileJsp").exists() : 'compileJsp Directory not found!'
+        assert new File("${buildDir}/classes/java/_index.class").exists() : '_index.class not found!'
+    }
 }
