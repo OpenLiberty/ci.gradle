@@ -9,7 +9,7 @@ import org.gradle.api.tasks.TaskAction
 import static net.wasdev.wlp.gradle.plugins.Liberty.LIBERTY_DEPLOY_CONFIGURATION
 import static net.wasdev.wlp.gradle.plugins.Liberty.LIBERTY_DEPLOY_APP_CONFIGURATION
 
-class InstallAppsArchiveTask extends InstallAppsTask implements ILibertyDefinitions {
+class InstallAppsArchiveTask extends AbstractServerTask implements ILibertyDefinitions {
 
   @Input
   @Optional
@@ -36,7 +36,7 @@ class InstallAppsArchiveTask extends InstallAppsTask implements ILibertyDefiniti
 
   @TaskAction
   void installApps() {
-    deployArtifact(deployDropinConfig(),dropinsDir())
+    deployArtifact(deployDropinConfig(), dropinsDir())
     deployArtifact(deployAppConfig(), appsDir())
   }
 
