@@ -29,6 +29,7 @@ liberty {
         uninstallfeatures {
             name= ['mongodb-2.0']
         }
+        verifyAppStartTimeout = 90
     }
 }
 

@@ -21,7 +21,7 @@ import org.gradle.util.ConfigureUtil
 
 import static net.wasdev.wlp.gradle.plugins.Liberty.LIBERTY_DEPLOY_CONFIGURATION
 
-class DeployTask extends AbstractServerTask {
+class DeployTask extends InstallAppsTask {
 
     @TaskAction
     void deploy() {
@@ -35,19 +35,24 @@ class DeployTask extends AbstractServerTask {
         // deploys the list of deploy closures
         for (DeployExtension deployable :  server.deploys) {
             def params = buildLibertyMap(project)
+            params.put('timeout', (server.verifyAppStartTimeout * 1000).toString())
+
             def fileToDeploy = deployable.file
 
             if (fileToDeploy != null) {
                 deployClosureDeclared = true
                 params.put('file', fileToDeploy)
+                println("1")
                 project.ant.deploy(params)
             } else {
+                println("2")
                 def deployDir = deployable.dir
                 def include = deployable.include
                 def exclude = deployable.exclude
 
                 if (deployDir != null) {
                     deployClosureDeclared = true
+                    println("3")
                     project.ant.deploy(params) {
                         fileset(dir:deployDir, includes: include, excludes: exclude)
                     }

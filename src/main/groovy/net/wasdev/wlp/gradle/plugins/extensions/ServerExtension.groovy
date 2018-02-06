@@ -87,7 +87,7 @@ class ServerExtension{
     String timeout
     String template
 
-    int verifyAppStartTimeout = 0
+    int verifyAppStartTimeout = 30
 
     def numberOfClosures = 0
 

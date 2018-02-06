@@ -45,7 +45,7 @@ gradleTest {
     versions '3.3', '3.2.1', '3.1', '3.0'
   }
 
-  gradleArguments = ["-PlibertyVersion=17.0.0.2", "--stacktrace"]
+  gradleArguments = ["-PlibertyVersion=17.0.0.2", "--info", "--stacktrace"]
 
   expectFailure 'sample.servlet.fail'
 
