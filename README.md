@@ -121,3 +121,11 @@ The Liberty Gradle plugin defines a built-in task order to allow a user to call 
 The most appealing benefit from defining a task order is the ability to allow the user to call an end task directly. For example, if the user calls `libertyStart` out of the box, Gradle will recognize that it must call `installLiberty -> libertyCreate -> installFeature -> installApps` to get a server with features and apps properly running.
 
 Click on a [task](#tasks) to view what it depends on.
+
+## Extensions
+
+Extensions are tasks that improve the compatibility or user experience of third party libraries used with Liberty. The `liberty-gradle-plugin` provides the following extensions:
+
+| Extension | Description |
+| --------- | ------------ |
+| [configureArquillian](docs/configureArquillian.md) | Integrates `arquillian.xml` configuration for the Liberty Managed and Remote Arquillian containers in the `liberty-gradle-plugin`. Automatically configures required `arquillian.xml` parameters for the Liberty Managed container. |
