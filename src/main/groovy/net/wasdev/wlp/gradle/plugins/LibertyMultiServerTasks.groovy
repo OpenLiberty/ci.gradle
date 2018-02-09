@@ -73,7 +73,7 @@ class LibertyMultiServerTasks extends LibertyTasks {
             group 'Liberty'
 
             List<String> libertyCreateTasks = getTaskList('libertyCreate')
-            dependsOn libertyCreateTasks
+            dependsOn 'installLiberty', libertyCreateTasks
 
             outputs.upToDateWhen {
                 tasksUpToDate(libertyCreateTasks)

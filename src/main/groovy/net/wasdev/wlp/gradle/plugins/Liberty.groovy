@@ -50,7 +50,7 @@ class Liberty implements Plugin<Project> {
             } else if (isMultiServerProject(project)) {
                 new LibertyMultiServerTasks(project).applyTasks()
             } else if (project.liberty.server != null && !project.liberty.servers.isEmpty()){
-                logger.error('Both a \'server\' and \'servers\' closure were found in a build.gradle file that uses the liberty plugin. Please define multiple servers inside of the Liberty \'servers\' closure in your build.gradle file.')
+                //logger.error('Both a \'server\' and \'servers\' closure were found in a build.gradle file that uses the liberty plugin. Please define multiple servers inside of the Liberty \'servers\' closure in your build.gradle file.')
             }
             if (project.liberty.server == null && project.liberty.servers.isEmpty()) {
                 project.liberty.server = copyProperties(project.liberty)
