@@ -330,7 +330,7 @@ class InstallAppsTask extends AbstractServerTask {
         Files.copy(file.toPath(), new File(getServerDir(project).toString() + '/' + appsDir + '/' + file.name).toPath(), StandardCopyOption.REPLACE_EXISTING)
         validateAppConfig(file.name, file.name.take(file.name.lastIndexOf('.')), appsDir)
         if (server.looseApplication) {
-            logger.warn('Application ' + file.getName() + ' was installed as a file as specified. To install as a loose application, specify the plugin or task generting the archive. ')
+            logger.warn('Application ' + file.getName() + ' was installed as a file as specified. To install as a loose application, specify the plugin or task generating the archive. ')
         }
     }
 
