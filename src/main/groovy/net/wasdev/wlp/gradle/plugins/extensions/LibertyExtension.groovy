@@ -109,7 +109,7 @@ class LibertyExtension {
     def server(Closure closure){
         server = new ServerExtension()
         ConfigureUtil.configure(closure, server)
-}
+    }
 
     def servers(Closure configurationClosure){
         servers.configure(configurationClosure)
