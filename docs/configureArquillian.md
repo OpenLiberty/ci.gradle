@@ -13,7 +13,7 @@ For more convenient integration with the Arquillian Liberty Managed/Remote conta
 
 For both Arquillian Liberty Managed and Remote containers, the `configureArquillian` task can automatically generate and configure the `arquillian.xml` that usually exists in the `src/test/resources` directory, eliminating the need for the user to manually create the file in projects with only a single Arquillian container. 
 
-Furthermore, when using the Arquillian Liberty Managed container, `configureArquillian` will also automatically specify the three required configuration parameters: `wlpHome`, `serverName`, and `httpPort`. These are set to values specified in the `liberty-maven-plugin`. 
+Furthermore, when using the Arquillian Liberty Managed container, `configureArquillian` will also automatically specify the three required configuration parameters: `wlpHome`, `serverName`, and `httpPort`. These are set to values specified in the `liberty-gradle-plugin`. 
 
 The `configureArquillian` task will perform configuration for the Liberty Managed or Remote container based on which container exists on the classpath. Arquillian does not allow for more than one container on the classpath. In the event of neither container existing on the classpath, the `configureArquillian` task will default to providing configuration for the Liberty Managed container. 
 
@@ -27,7 +27,7 @@ Here is a list of common configuration parameters for the Arquillian Liberty Man
 
 | Property | Type | Description | Default |
 -----------| ------------ | ------- | ------- |
-| `arquillianProperties` | Dictionary | Used to set key/value pairs of configuration parameters in `arquillian.xml`. | **Managed:** A dictionary containing values for `wlpHome`, `serverName`, and `httpPort` as specified in the `liberty-maven-plugin`.<br>**Remote:** An empty dictionary when using the Arquillian Liberty Remote container. |
+| `arquillianProperties` | Dictionary | Used to set key/value pairs of configuration parameters in `arquillian.xml`. | **Managed:** A dictionary containing values for `wlpHome`, `serverName`, and `httpPort` as specified in the `liberty-gradle-plugin`.<br>**Remote:** An empty dictionary when using the Arquillian Liberty Remote container. |
 | `skipIfArquillianXmlExists` | Boolean | Skips the `configureArquillian` task if `arquillian.xml` already exists in the `build` directory. | False |
 
 TODO: Add link to JBoss documentation of configuration parameters. These links might be outdated due to container name change...
