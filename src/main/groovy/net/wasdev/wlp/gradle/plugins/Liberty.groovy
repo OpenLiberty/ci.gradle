@@ -336,7 +336,8 @@ class Liberty implements Plugin<Project> {
     }
 
     private boolean dependsOnFeature(ServerExtension server) {
-        return (server.features.name != null && !server.features.name.isEmpty())
+        return ((server.features.name != null && !server.features.name.isEmpty()) 
+            || server.features.acceptLicense)
     }
 
     private static File getInstallDir(Project project) {
