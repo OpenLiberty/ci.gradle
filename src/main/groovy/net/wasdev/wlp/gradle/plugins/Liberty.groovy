@@ -220,15 +220,12 @@ class Liberty implements Plugin<Project> {
 
         //Uplift the jst.web facet version to 3.0 if less than 3.0 so WDT can deploy properly to Liberty.
         //There is a known bug in the wtp plugin that will add duplicate facets, the first of the duplicates is honored.
-        project.tasks.getByName('eclipseWtpFacet').facet.file.whenMerged {
-            if(project.plugins.hasPlugin('war')) {
-                setFacetVersion(project, 'jst.web', JST_WEB_FACET_VERSION)
-            } else if(project.plugins.hasPlugin('ear')) {
-                setFacetVersion(project, 'jst.ear', JST_EAR_FACET_VERSION)
-            }
+        if(project.plugins.hasPlugin('war')) {
+            setFacetVersion(project, 'jst.web', JST_WEB_FACET_VERSION)
         }
 
         if (project.plugins.hasPlugin('ear')) {
+            setFacetVersion(project, 'jst.ear', JST_EAR_FACET_VERSION)
             project.getGradle().getTaskGraph().whenReady {
                 Dependency[] deps = project.configurations.deploy.getAllDependencies().toArray()
                 deps.each { Dependency dep ->
@@ -339,7 +336,8 @@ class Liberty implements Plugin<Project> {
     }
 
     private boolean dependsOnFeature(ServerExtension server) {
-        return (server.features.name != null && !server.features.name.isEmpty())
+        return ((server.features.name != null && !server.features.name.isEmpty()) 
+            || server.features.acceptLicense)
     }
 
     private static File getInstallDir(Project project) {
