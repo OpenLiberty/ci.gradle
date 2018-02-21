@@ -6,6 +6,7 @@ The Liberty Gradle plugin supports install and operational control of Liberty ru
 * [Usage](#usage)
 * [Plugin Configuration](#plugin-configuration)
 * [Tasks](#tasks)
+* [Extensions](#extensions)
 
 
 ## Build
