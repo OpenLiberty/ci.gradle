@@ -21,7 +21,7 @@ import org.gradle.api.tasks.OutputDirectory
 
 import java.nio.file.Paths
 
-abstract class InstallAppsTask extends AbstractServerTask {
+abstract class AbstractInstallAppsTask extends AbstractServerTask {
 
   @OutputDirectory
   File appsDir() {

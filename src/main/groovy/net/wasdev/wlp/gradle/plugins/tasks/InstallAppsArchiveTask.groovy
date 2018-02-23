@@ -11,7 +11,7 @@ import org.gradle.api.tasks.TaskAction
 import static net.wasdev.wlp.gradle.plugins.Liberty.LIBERTY_DEPLOY_CONFIGURATION
 import static net.wasdev.wlp.gradle.plugins.Liberty.LIBERTY_DEPLOY_APP_CONFIGURATION
 
-class InstallAppsArchiveTask extends InstallAppsTask implements ILibertyDefinitions {
+class InstallAppsArchiveTask extends AbstractInstallAppsTask implements ILibertyDefinitions {
 
   @Input
   @Optional
@@ -40,10 +40,18 @@ class InstallAppsArchiveTask extends InstallAppsTask implements ILibertyDefiniti
   void installApps() {
     // install archive by Liberty Block
     ApplicationInstaller configInstaller = new ArchiveInstallerByLibertyBlock(project, appsDir(), getServerDir(project))
-    configInstaller.searchLocalAppsWar()
 
-    println(server.apps)
-    configInstaller.installServerAppsConfig()
+    if ((server.apps?.size() == 0) && (server.dropins?.size() == 0)) {
+      println ("Trying to install local wars only")
+      configInstaller.searchLocalAppsWar()
+    } else {
+      println ("trying to install configured liberty block")
+      configInstaller.appsDir = appsDir()
+      configInstaller.installServerAppsConfig()
+
+      configInstaller.appsDir = dropinsDir()
+      configInstaller.installServerDropinsConfig()
+    }
 
     // install archive by configuration
     deployArtifact(deployDropinConfig(), dropinsDir())

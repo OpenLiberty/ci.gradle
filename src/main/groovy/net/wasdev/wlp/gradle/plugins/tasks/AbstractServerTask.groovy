@@ -64,17 +64,16 @@ abstract class AbstractServerTask extends AbstractTask implements ILibertyDefini
         result.put('serverName', server.name)
 
         def installDir = LibertyIntstallController.getInstallDir(project)
-        result.put('installDir', installDir)
+        result.put('installDir', installDir.absolutePath)
 
         def userDir = getUserDir(project, installDir)
-        result.put('userDir', userDir)
+        result.put('userDir', userDir.absolutePath)
 
         if (getServerOutputDir(project) != null) {
             result.put('outputDir', getServerOutputDir(project))
         }
-        if (server.timeout != null && !server.timeout.isEmpty()) {
-            result.put('timeout', server.timeout)
-        }
+
+        result.put('timeout', (server.verifyAppStartTimeout * 1000).toString())
 
         return result
     }
@@ -97,6 +96,7 @@ abstract class AbstractServerTask extends AbstractTask implements ILibertyDefini
             parentDir.mkdirs()
         }
     }
+
     protected void setServerDirectoryNodes(Project project, Node serverNode) {
         serverNode.appendNode('userDirectory', getUserDir(project).toString())
         serverNode.appendNode('serverDirectory', getServerDir(project).toString())

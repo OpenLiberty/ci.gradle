@@ -84,7 +84,6 @@ class ServerExtension{
     List<Object> dropins
 
     boolean clean = false
-    String timeout
     String template
 
     int verifyAppStartTimeout = 30

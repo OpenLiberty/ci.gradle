@@ -3,6 +3,7 @@ apply plugin: 'liberty'
 ext {
   // Liberty server properties
   libertyVersion = project.property("libertyVersion")
+  wlpServerName = 'libertyOnline'
 }
 
 liberty {
@@ -11,7 +12,7 @@ liberty {
   }
 
   server{
-    name = 'libertyOnline'
+    name = wlpServerName
     deploy {
       file = "${projectDir}/war/test-war.war"
     }
@@ -21,26 +22,16 @@ liberty {
       os='Linux'
     }
 
-    features {
-      name= ['mongodb-2.0']
-      acceptLicense = true
-    }
-
-    uninstallfeatures {
-      name= ['mongodb-2.0']
-    }
-    verifyAppStartTimeout = 90
+    verifyAppStartTimeout = 45
   }
 }
 
-
-
 task ('runGradleTest') {
   dependsOn 'clean', 'deploy'
-//  finalizedBy 'libertyStop'
+  finalizedBy 'libertyStop'
 
   doLast {
-    def file = new File(buildDir, "/wlp/usr/servers/libertyOnline/dropins/test-war.war")
+    def file = new File(buildDir, "/wlp/usr/servers/${wlpServerName}/dropins/test-war.war")
 
     assert file.exists() : "test-war.war not found"
     assert file.canRead() : "test-war.war cannot be read"

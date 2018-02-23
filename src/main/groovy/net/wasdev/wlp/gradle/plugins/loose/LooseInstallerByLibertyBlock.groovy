@@ -25,8 +25,14 @@ class LooseInstallerByLibertyBlock implements ApplicationInstaller {
   }
 
   void installArchives() {
-    searchLocalAppsWar()
-    installServerAppsConfig()
+    if ((server.apps?.size() == 0) && (server.dropins?.size() == 0)) {
+      println ("Trying to install local wars only")
+      searchLocalAppsWar()
+    } else {
+      println ("trying to install configured liberty block")
+      installServerAppsConfig()
+      installServerDropinsConfig()
+    }
 
 //    if (server.dropins != null && !server.dropins.isEmpty()) {
 //      Tuple dropinsLists = splitAppList(server.dropins)

@@ -14,19 +14,28 @@ class CreateServerDefaultXmlTask extends AbstractServerTask {
     return new File(getServerDir(project), configFilename)
   }
 
+  @Input
+  def xmlFile = """
+    <server description="new server">
+
+    <!-- Enable features -->
+    <featureManager>
+        <feature>jsp-2.3</feature>
+    </featureManager>
+
+    <!-- To access this server from a remote client add a host attribute to the following element, e.g. host="*" -->
+    <httpEndpoint id="defaultHttpEndpoint"
+                  httpPort="9080"
+                  httpsPort="9443" />
+                  
+    <!-- Automatically expand WAR files and EAR files -->
+    <applicationManager autoExpand="true"/>
+
+    </server>"""
+
   @TaskAction
   void createServerConfig() {
 
-    serverXmlFile.write """
-    <server description="Default Liberty server">
-
-    <featureManager>
-    </featureManager>
-
-    <httpEndpoint httpPort="9081" httpsPort="9444" id="defaultHttpEndpoint">
-    <tcpOptions soReuseAddr="true"/>
-    </httpEndpoint>
-    
-    </server>"""
+    serverXmlFile.write xmlFile
   }
 }

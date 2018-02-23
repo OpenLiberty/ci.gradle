@@ -33,10 +33,22 @@ trait ApplicationInstaller {
    * @return
    */
   def searchLocalAppsWar() {
-    if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
+    if ((server.apps?.size() > 0) && (server.dropins?.size() > 0)) {
       if (project.plugins.hasPlugin('war')) {
-        server.apps = [project.war]
+        if (server.apps == null) {
+          server.apps = []
+        }
+        server.apps << project.war
       }
+    }
+  }
+
+  def installServerDropinsConfig(){
+    if (server.dropins?.size() > 0) {
+      Tuple appsLists = splitAppList(server.dropins)
+
+      installMultipleApps(appsLists[0] as List<Task>)
+      installFileList(appsLists[1] as List<File>)
     }
   }
 
@@ -56,7 +68,9 @@ trait ApplicationInstaller {
   void installMultipleApps(List<Task> applications) {
     applications.each { Task task ->
       InstallDTO dto = getPackagingType(task, project)
-      println(dto)
+
+      println(dto.toString())
+
       if (dto.installType != InstallType.NONE) {
         if(server.looseApplication) {
           installLooseApplication(dto)
@@ -86,11 +100,12 @@ trait ApplicationInstaller {
 
   void installLooseApplication(InstallDTO installDTO) throws Exception {
 
-    println ("appsDir: ${appsDir}")
-    println ("serverDir: ${serverDir}")
+    println("appsDir: ${appsDir}")
+    println("serverDir: ${serverDir}")
 
-    String looseConfigFileName = getLooseConfigFileName(project, installDTO.installType)
-    println looseConfigFileName
+    String looseConfigFileName = getLooseConfigFileName(project, installDTO)
+    println("Loose file name: ${looseConfigFileName}")
+
     String application = looseConfigFileName.substring(0, looseConfigFileName.length() - 4)
     File looseConfigFile = new File(appsDir, looseConfigFileName)
     LooseConfigData config = new LooseConfigData()
@@ -132,16 +147,16 @@ trait ApplicationInstaller {
     return new InstallDTO(InstallType.NONE, null, project)
   }
 
-  String getLooseConfigFileName(Project proj, InstallType installType){
+  String getLooseConfigFileName(Project proj, InstallDTO installDTO){
     Project intProj = proj as Project
     Task task
 
-    switch (installType) {
+    switch (installDTO.installType) {
       case InstallType.WAR:
-        task = intProj.tasks.findByName(TASK_CORE_WAR)
+        task = installDTO.task
         break
       case InstallType.EAR:
-        task = intProj.tasks.findByName(TASK_CORE_EAR)
+        task = installDTO.task
         break
     }
     assert task != null : "Could not find appropriate deployable task type"
@@ -149,6 +164,7 @@ trait ApplicationInstaller {
   }
 
   String getArchiveName(Task task) {
+    println("Task ${task.name} Basename: ${task.baseName}: archiveName: ${task.archiveName}")
 
     if (server.stripVersion){
       return task.baseName + "." + task.extension
