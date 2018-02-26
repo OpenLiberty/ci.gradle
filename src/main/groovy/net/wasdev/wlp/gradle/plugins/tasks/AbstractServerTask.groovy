@@ -168,7 +168,6 @@ abstract class AbstractServerTask extends AbstractTask {
         }
     
 
-        println("serverXmlPath: " + serverXMLPath)
         if (server.configDirectory != null) {
             if(server.configDirectory.exists()){
                 // copy configuration files from configuration directory to server directory if end-user set it
@@ -199,7 +198,6 @@ abstract class AbstractServerTask extends AbstractTask {
             }
         }
         
-        println("serverXmlPath: " + serverXMLPath)
 
         // log info on the configuration files that get used
         if (serverXMLPath != null && !serverXMLPath.isEmpty()) {
