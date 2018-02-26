@@ -28,7 +28,7 @@ class ServerExtension{
     boolean stripVersion = false
     boolean looseApplication = true
 
-    File configDirectory
+    File configDirectory = new File("default")
     File configFile = new File("default")
     File bootstrapPropertiesFile = new File("default")
     File jvmOptionsFile = new File("default")

@@ -65,7 +65,6 @@ liberty {
         serverEnv = file("src/main/liberty/config/testOutputDir-server.env")
         looseApplication = false
         apps = [file('build/libs/testWar-1.war')]
-
         verifyAppStartTimeout = 30
     }
 }
@@ -107,8 +106,8 @@ task printMessageAboutRunningServer {
     }
 }
 
-check.dependsOn 'integrationTest'
+//check.dependsOn 'integrationTest'
 libertyCreate.dependsOn 'createServerEnv'
-integrationTest.dependsOn 'libertyStart', 'testClasses'
-integrationTest.finalizedBy 'libertyStop'
+//integrationTest.dependsOn 'libertyStart', 'testClasses'
+//integrationTest.finalizedBy 'libertyStop'
 libertyStart.finalizedBy 'printMessageAboutRunningServer'

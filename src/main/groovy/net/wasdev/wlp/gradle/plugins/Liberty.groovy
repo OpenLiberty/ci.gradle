@@ -285,18 +285,20 @@ class Liberty implements Plugin<Project> {
     public static void checkServerEnvProperties(ServerExtension server) {
         if (server.outputDir == null) {
             Properties envProperties = new Properties()
+            
+            if (server.serverEnv.exists()) {
+                server.serverEnv.text = server.serverEnv.text.replace("\\", "/")
+                envProperties.load(new FileInputStream(server.serverEnv))
+                Liberty.setServerOutputDir(server, (String) envProperties.get("WLP_OUTPUT_DIR"))
+            }
             //check server.env files and set liberty.server.outputDir
-            if (server.configDirectory != null) {
+            else if (server.configDirectory != null) {
                 File serverEnvFile = new File(server.configDirectory, 'server.env')
                 if (serverEnvFile.exists()) {
                     serverEnvFile.text = serverEnvFile.text.replace("\\", "/")
                     envProperties.load(new FileInputStream(serverEnvFile))
                     Liberty.setServerOutputDir(server, (String) envProperties.get("WLP_OUTPUT_DIR"))
                 }
-            } else if (server.serverEnv.exists()) {
-                server.serverEnv.text = server.serverEnv.text.replace("\\", "/")
-                envProperties.load(new FileInputStream(server.serverEnv))
-                Liberty.setServerOutputDir(server, (String) envProperties.get("WLP_OUTPUT_DIR"))
             }
         }
     }
@@ -336,7 +338,7 @@ class Liberty implements Plugin<Project> {
     }
 
     private boolean dependsOnFeature(ServerExtension server) {
-        return ((server.features.name != null && !server.features.name.isEmpty()) 
+        return ((server.features.name != null && !server.features.name.isEmpty())
             || server.features.acceptLicense)
     }
 

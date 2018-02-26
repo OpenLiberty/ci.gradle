@@ -115,6 +115,11 @@ abstract class AbstractServerTask extends AbstractTask {
         } else if (!server.serverEnv.exists()) {
             logger.warn("The server serverEnv was configured but was not found at: ${server.serverEnv}")
         }
+        if (server.configDirectory.toString().equals('default')) {
+            server.configDirectory = new File(server.configFile.getParent())
+        } else if (server.configDirectory != null && !server.configDirectory.exists()) {
+            logger.warn("The server configDirectory was configured but was not found at: ${server.configDirectory}")
+        }
     }
 
     /**
@@ -128,31 +133,64 @@ abstract class AbstractServerTask extends AbstractTask {
         String jvmOptionsPath = null
         String bootStrapPropertiesPath = null
         String serverEnvPath = null
-
+        
         setDefaults(project)
 
+
+        // copy configuration file to server directory if end-user set it.
+        if (server.configFile != null && server.configFile.exists()) {
+            Files.copy(server.configFile.toPath(), new File(serverDirectory, "server.xml").toPath(), StandardCopyOption.REPLACE_EXISTING)
+            serverXMLPath = server.configFile.getCanonicalPath()
+        }
+
+        File optionsFile = new File(serverDirectory, "jvm.options")
+        if(server.jvmOptions != null && !server.jvmOptions.isEmpty()){
+            writeJvmOptions(optionsFile, server.jvmOptions)
+            jvmOptionsPath = "inlined configuration"
+        } else if (server.jvmOptionsFile != null && server.jvmOptionsFile.exists()) {
+            Files.copy(server.jvmOptionsFile.toPath(), optionsFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            jvmOptionsPath = server.jvmOptionsFile.getCanonicalPath()
+        }
+
+
+        File bootstrapFile = new File(serverDirectory, "bootstrap.properties")
+        if(server.bootstrapProperties != null && !server.bootstrapProperties.isEmpty()){
+            writeBootstrapProperties(bootstrapFile, server.bootstrapProperties)
+            bootStrapPropertiesPath = "inlined configuration"
+        } else if (server.bootstrapPropertiesFile != null && server.bootstrapPropertiesFile.exists()) {
+            Files.copy(server.bootstrapPropertiesFile.toPath(), bootstrapFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            bootStrapPropertiesPath = server.bootstrapPropertiesFile.getCanonicalPath()
+        }
+
+        if (server.serverEnv != null && server.serverEnv.exists()) {
+            Files.copy(server.serverEnv.toPath(), new File(serverDirectory, "server.env").toPath(), StandardCopyOption.REPLACE_EXISTING)
+            serverEnvPath = server.serverEnv.getCanonicalPath()
+        }
+    
+
+        println("serverXmlPath: " + serverXMLPath)
         if (server.configDirectory != null) {
             if(server.configDirectory.exists()){
                 // copy configuration files from configuration directory to server directory if end-user set it
                 FileUtils.copyDirectory(server.configDirectory, getServerDir(project))
 
                 File configDirServerXML = new File(server.configDirectory, "server.xml")
-                if (configDirServerXML.exists()) {
+                if (configDirServerXML.exists() && serverXMLPath == null) {
                     serverXMLPath = configDirServerXML.getCanonicalPath()
                 }
 
                 File configDirJvmOptionsFile = new File(server.configDirectory, "jvm.options")
-                if (configDirJvmOptionsFile.exists()) {
+                if (configDirJvmOptionsFile.exists() && jvmOptionsPath == null) {
                     jvmOptionsPath = configDirJvmOptionsFile.getCanonicalPath()
                 }
 
                 File configDirBootstrapFile = new File(server.configDirectory, "bootstrap.properties")
-                if (configDirBootstrapFile.exists()) {
+                if (configDirBootstrapFile.exists() && bootStrapPropertiesPath == null) {
                     bootStrapPropertiesPath = configDirBootstrapFile.getCanonicalPath()
                 }
 
                 File configDirServerEnv = new File(server.configDirectory, "server.env")
-                if (configDirServerEnv.exists()) {
+                if (configDirServerEnv.exists() && serverEnvPath == null) {
                     serverEnvPath = configDirServerEnv.getCanonicalPath()
                 }
             }
@@ -160,47 +198,8 @@ abstract class AbstractServerTask extends AbstractTask {
                 println('WARNING: The configDirectory attribute was configured but the directory is not found: ' + project.liberty.configDirectory.getCanonicalPath())
             }
         }
-
-        // handle server.xml if not overwritten by server.xml from configDirectory
-        if (serverXMLPath == null || serverXMLPath.isEmpty()) {
-            // copy configuration file to server directory if end-user set it.
-            if (server.configFile != null && server.configFile.exists()) {
-                Files.copy(server.configFile.toPath(), new File(serverDirectory, "server.xml").toPath(), StandardCopyOption.REPLACE_EXISTING)
-                serverXMLPath = server.configFile.getCanonicalPath()
-            }
-        }
-
-        // handle jvm.options if not overwritten by jvm.options from configDirectory
-        if (jvmOptionsPath == null || jvmOptionsPath.isEmpty()) {
-            File optionsFile = new File(serverDirectory, "jvm.options")
-            if(server.jvmOptions != null && !server.jvmOptions.isEmpty()){
-                writeJvmOptions(optionsFile, server.jvmOptions)
-                jvmOptionsPath = "inlined configuration"
-            } else if (server.jvmOptionsFile != null && server.jvmOptionsFile.exists()) {
-                Files.copy(server.jvmOptionsFile.toPath(), optionsFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
-                jvmOptionsPath = server.jvmOptionsFile.getCanonicalPath()
-            }
-        }
-
-        // handle bootstrap.properties if not overwritten by bootstrap.properties from configDirectory
-        if (bootStrapPropertiesPath == null || bootStrapPropertiesPath.isEmpty()) {
-            File bootstrapFile = new File(serverDirectory, "bootstrap.properties")
-            if(server.bootstrapProperties != null && !server.bootstrapProperties.isEmpty()){
-                writeBootstrapProperties(bootstrapFile, server.bootstrapProperties)
-                bootStrapPropertiesPath = "inlined configuration"
-            } else if (server.bootstrapPropertiesFile != null && server.bootstrapPropertiesFile.exists()) {
-                Files.copy(server.bootstrapPropertiesFile.toPath(), bootstrapFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
-                bootStrapPropertiesPath = server.bootstrapPropertiesFile.getCanonicalPath()
-            }
-        }
-
-        // handle server.env if not overwritten by server.env from configDirectory
-        if (serverEnvPath == null || serverEnvPath.isEmpty()) {
-            if (server.serverEnv != null && server.serverEnv.exists()) {
-                Files.copy(server.serverEnv.toPath(), new File(serverDirectory, "server.env").toPath(), StandardCopyOption.REPLACE_EXISTING)
-                serverEnvPath = server.serverEnv.getCanonicalPath()
-            }
-        }
+        
+        println("serverXmlPath: " + serverXMLPath)
 
         // log info on the configuration files that get used
         if (serverXMLPath != null && !serverXMLPath.isEmpty()) {

@@ -35,7 +35,6 @@ class StartTask extends AbstractServerTask {
             params.put('timeout', server.timeout)
         }
         executeServerCommand(project, 'start', params)
-
         if (server != null && server.verifyAppStartTimeout > 0) {
             ServerTask serverTask = new ServerTask()
             serverTask.setInstallDir(params.get('installDir'))

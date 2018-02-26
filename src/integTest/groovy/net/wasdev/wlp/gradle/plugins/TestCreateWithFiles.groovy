@@ -34,7 +34,7 @@ public class TestCreateWithFiles extends AbstractIntegrationTest{
         assert configFile.exists() : "file not found"
         assert serverEnvFile.exists() : "file not found"
 
-        assert bootstrapFile.text.equals(new File("build/testBuilds/test-create-with-files/src/main/liberty/config/bootstrap.test.properties").text) : "bootstrap.test.properties file did not copy properly"
+        assert bootstrapFile.text.equals(new File("build/testBuilds/test-create-with-files/src/main/liberty/config/bootstrap.properties").text) : "bootstrap.test.properties file did not copy properly"
         assert configFile.text.equals(new File("build/testBuilds/test-create-with-files/src/main/liberty/config/server.xml").text) : "server.xml file did not copy properly"
     }
 }
