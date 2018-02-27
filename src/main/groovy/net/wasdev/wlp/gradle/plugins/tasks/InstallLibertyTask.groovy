@@ -26,7 +26,8 @@ class InstallLibertyTask extends AbstractTask {
 
     InstallLibertyTask() {
         outputs.upToDateWhen {
-            getInstallDir(project).exists()
+            getInstallDir(project).exists() &&
+                (new File(liberty.install.baseDir + "wlp/lib/versions/WebSphereApplicationServer.properties"))
         }
     }
 
