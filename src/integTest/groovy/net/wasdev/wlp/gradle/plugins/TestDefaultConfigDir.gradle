@@ -4,10 +4,10 @@ import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
 
-public class TestOutputDirs extends AbstractIntegrationTest{
+public class TestDefaultConfigDir extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/integrationTest/sample.servlet")
-    static File buildDir = new File(integTestDir, "/test-output-dirs")
-    static String buildFilename = "testOutputDirs.gradle"
+    static File buildDir = new File(integTestDir, "/test-default-config-dir")
+    static String buildFilename = "TestDefaultConfigDir.gradle"
 
     @BeforeClass
     public static void setup() {
@@ -30,6 +30,6 @@ public class TestOutputDirs extends AbstractIntegrationTest{
         } catch (Exception e) {
             throw new AssertionError ("Fail on task libertyStart. "+ e)
         }
-        assert new File('build/testBuilds/test-output-dirs/build/testOutputDir/LibertyProjectServer').exists() : 'Could not find the outputDir specified in the build file.'
+        assert new File('build/testBuilds/test-default-config-dir/build/wlp/usr/servers/LibertyProjectServer/defaultConfigDir.txt').exists() : 'Config directory contents were not copied over successfully.'
     }
 }
