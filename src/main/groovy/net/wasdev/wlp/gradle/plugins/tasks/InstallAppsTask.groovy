@@ -151,8 +151,8 @@ class InstallAppsTask extends AbstractServerTask {
             config.toXmlFile(looseConfigFile)
             break
         case "ear":
-            if ((project.getGradle().getGradleVersion().charAt(0) as Integer) < 4) {
-                logger.error(MessageFormat.format(("Loose Ear is only supported by Gradle 4.0 or higher")))
+            if ((String.valueOf(project.getGradle().getGradleVersion().charAt(0)) as int) < 4) {
+                throw new Exception(MessageFormat.format(("Loose Ear is only supported by Gradle 4.0 or higher")))
             }
             validateAppConfig(application, task.baseName, appsDir)
             logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFile.getAbsolutePath()))
