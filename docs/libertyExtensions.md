@@ -30,7 +30,7 @@ The following properties are supported for server configuration.
 
 | Attribute | Type  | Since | Description | Required |
 | --------- | ----- | ----- | ----------- | -------- |
-| apps | List | 2.0 | List of `war` task objects used to create applications to copy to the `apps` folder. If no `apps` or `dropins` are configured and this project applies the `war` plugin, the default application is installed using the `installApps` task. If the application is not configured in the server.xml file, application configuration is added to the `configDropins` folder. | No |
+| apps | List | 2.0 | List of `war` and `ear` task objects used to create applications to copy to the `apps` folder. If no `apps` or `dropins` are configured and this project applies the `war` or `ear` plugin, the default application is installed using the `installApps` task. If the application is not configured in the server.xml file, application configuration is added to the `configDropins` folder. | No |
 | clean | boolean | 1.0 | Clean all cached information on server start up. It deletes every file in the `${wlp_output_dir}/logs`, `${wlp_output_dir}/workarea`, `${wlp_user_dir}/dropins` or `${wlp_user_dir}/apps`. The default value is `false`. Only used with the `libertyStart` and `libertyRun` tasks. | No |
 | dropins | List | 2.0 | List of `war` objects used to create applications to copy to the `dropins` folder. | No |
 | outputDir | String | 1.0 | Value of the `${wlp_output_dir}` variable. The default value is `${installDir}/usr/servers/${serverName}`. | No |
