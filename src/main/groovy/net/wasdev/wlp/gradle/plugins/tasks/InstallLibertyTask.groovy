@@ -26,8 +26,7 @@ class InstallLibertyTask extends AbstractTask {
 
     InstallLibertyTask() {
         outputs.upToDateWhen {
-            getInstallDir(project).exists() &&
-                (new File(liberty.install.baseDir + "wlp/lib/versions/WebSphereApplicationServer.properties"))
+            getInstallDir(project).exists()
         }
     }
 
@@ -112,8 +111,7 @@ class InstallLibertyTask extends AbstractTask {
 
     protected void outputLibertyPropertiesToXml(MarkupBuilder xmlDoc) {
         xmlDoc.installDirectory (getInstallDir(project).toString())
-
-        if (project.configurations.libertyRuntime != null) {
+        if (project.configurations.libertyRuntime != null && !project.configurations.libertyRuntime.dependencies.isEmpty()) {
             project.configurations.libertyRuntime.dependencies.each { libertyArtifact ->
                 xmlDoc.assemblyArtifact {
                     groupId (libertyArtifact.group)
@@ -123,6 +121,8 @@ class InstallLibertyTask extends AbstractTask {
                 }
                 xmlDoc.assemblyArchive (project.configurations.libertyRuntime.resolvedConfiguration.resolvedArtifacts.getAt(0).file.toString())
             }
+        } else if (project.liberty.install.runtimeUrl != null) {
+            xmlDoc.runtimeUrl (project.liberty.install.runtimeUrl)
         }
     }
 
@@ -134,5 +134,20 @@ class InstallLibertyTask extends AbstractTask {
                 outputLibertyPropertiesToXml(xmlDoc)
             }
         }
+    }
+    
+    protected boolean isInstallationUpToDate() {
+        if(project.configurations.libertyRuntime != null && !project.configurations.libertyRuntime.dependencies.isEmpty()) {
+            var artifactId
+            var version
+            project.configurations.libertyRuntime.dependencies.each { libertyArtifact ->
+                artifactId = libertyArtifact.name
+                version = libertyArtifact.version
+            }
+        }
+        else if (project.liberty.install.runtimeUrl != null) {
+
+        }
+        return false;
     }
 }
