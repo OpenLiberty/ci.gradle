@@ -40,7 +40,7 @@ The following properties are supported for server configuration.
 | configFile| File | 2.0 | Location of the `server.xml` file used by the server instance. The default value is `/src/main/liberty/config/server.xml`. After the | No|
 | jvmOptions| List | 2.0 | Inline `List` of jvm options that is written to the jvm.options file in the server directory. These properties take precedence over a specified jvm.options file.| No|
 | jvmOptionsFile| File | 2.0 | Location of the file containing JVM options to copy to the jvm.options file in the server instance. The default value is `/src/main/liberty/config/jvm.options`.| No|
-| looseApplication | boolean | 2.0 | Indicates to install application using loose application configuration so that war or ear files do not need to be regenerated for every application update. Loose Application is only supported by Gradle 4.0 or higher when generating loose ear files.  The default is `true`. | No |
+| looseApplication | boolean | 2.0 | Indicates to install application using loose application configuration so that war or ear files do not need to be regenerated for every application update. The loose application support for ear files requires Gradle 4.0 or higher.  The default is `true`. | No |
 | name | String | 2.0 | The name of the server instance to create. The default value is `defaultServer`. | No |
 | serverEnv| File | 2.0 | Location of the file containing server environment variables to copy to the server.env file in the server instance. The default value is `/src/main/liberty/config/server.env`.| No |
 | stripVersion | boolean | 2.0 | Remove the artifact version when copying the application to Liberty runtime's application directory. The default value is false.  | No |
