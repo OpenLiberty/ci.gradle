@@ -40,12 +40,11 @@ class LibertyMultiServerTasks extends LibertyTasks {
             dependsOn getTaskList('compileJSP')
         }
 
-        project.tasks.getByName('installLiberty') {
-            type: InstallLibertyTask
+        overwriteTask('installLiberty', InstallLibertyTask, {
             description 'Installs Liberty from a repository'
             logging.level = LogLevel.INFO
             group 'Liberty'
-        }
+        })
 
         //This is a hard one
         //Might just want to run the first server in the list or not run multiple, only as single
@@ -291,8 +290,8 @@ class LibertyMultiServerTasks extends LibertyTasks {
             if (taskName.startsWith(name)) {
                 project.task(taskName, type: taskType) {
                     server = project.liberty.servers.getByName(taskName - "${name}-")
-                    ConfigureUtil.configure(configureClosure, it)
-                }
+                    //ConfigureUtil.configure(configureClosure, it)
+                }.configure(configureClosure)
             }
         }
     }

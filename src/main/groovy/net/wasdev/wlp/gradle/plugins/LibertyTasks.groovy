@@ -3,6 +3,8 @@ package net.wasdev.wlp.gradle.plugins
 import net.wasdev.wlp.gradle.plugins.extensions.ServerExtension
 
 import org.gradle.api.Project
+import org.gradle.api.tasks.TaskDependency
+import org.gradle.api.Task
 
 abstract class LibertyTasks {
     Project project
@@ -32,6 +34,27 @@ abstract class LibertyTasks {
     protected boolean dependsOnFeature(ServerExtension server) {
         return (server.features.name != null && !server.features.name.isEmpty())
     }
+
+    //Need to overwrite existing task with new task to add a task type
+    protected void overwriteTask(String taskName, Class taskType, Closure configureClosure) {
+        Task oldTask = project.tasks.getByName(taskName)
+
+        //Getting task dependencies set inside of build.gradle files
+        Set<Object> dependsOnList, finalizedByList, shouldRunAfterList, mustRunAfterList
+        dependsOnList = oldTask.getDependsOn()
+        finalizedByList = oldTask.getFinalizedBy().getDependencies(oldTask)
+        shouldRunAfterList = oldTask.getShouldRunAfter().getDependencies(oldTask)
+        mustRunAfterList = oldTask.getMustRunAfter().getDependencies(oldTask)
+
+        //Creating new task with task type, the passed in closure, and setting dependencies
+        Task newTask = project.task(taskName, type: taskType, overwrite: true)
+        newTask.setDependsOn(dependsOnList)
+        newTask.setFinalizedBy(finalizedByList)
+        newTask.setShouldRunAfter(shouldRunAfterList)
+        newTask.setMustRunAfter(mustRunAfterList)
+        newTask.configure(configureClosure)
+    }
+
 
     public void checkServerEnvProperties(ServerExtension server) {
         if (server.outputDir == null) {
