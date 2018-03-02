@@ -12,5 +12,5 @@ script:
 after_failure:
   - cat /home/travis/build/WASdev/ci.gradle/build/testBuilds/arquillian-tests/build/reports/verify-main-app-managed/index.html 
   - cat /home/travis/build/WASdev/ci.gradle/build/reports/tests/integrationTest/index.html
-  - cat /home/travis/build/WASdev/ci.gradle/build/testBuilds/arquillian-tests/build/wlp/usr/servers/LibertyProjectServer/logs/messages.log
+  - cat /home/travis/ci.gradle/build/testBuilds/arquillian-tests/build/test-results/verify-main-app-managed/TEST-VerifyMainAppIT.xml
 dist: trusty

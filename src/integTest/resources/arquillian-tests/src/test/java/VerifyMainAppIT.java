@@ -47,24 +47,27 @@ public class VerifyMainAppIT {
 
 		boolean foundMainApp = false;
 		
-		File buildLog = new File("build/wlp/usr/servers/LibertyProjectServer/logs/messages.log");
+		File buildLog = new File("./build/wlp/usr/servers/LibertyProjectServer/logs/messages.log").getCanonicalFile();
 		System.out.println("Verifying apps in " + buildLog.getCanonicalPath());
-		InputStream is = new FileInputStream(buildLog);
-		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		if(buildLog.exists()) {
+			InputStream is = new FileInputStream(buildLog);
+			BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
-		String line;
-		while ((line = br.readLine()) != null) {
-		    System.out.println(line);
-			if (!foundMainApp) {
-				if (line.contains(mainAppOutput)) {
-					foundMainApp = true;
+			String line;
+			while ((line = br.readLine()) != null) {
+			    System.out.println(line);
+				if (!foundMainApp) {
+					if (line.contains(mainAppOutput)) {
+						foundMainApp = true;
+					}
+				} else if (line.contains(testAppOutput)) {
+					return;
 				}
-			} else if (line.contains(testAppOutput)) {
-				return;
 			}
-		}
 
-		fail("Should have returned in the while loop if the test passed.");
+			fail("Should have returned in the while loop if the test passed.");
+		}
+		fail("The messages.log file does not exist.");
 	}
 
 }
