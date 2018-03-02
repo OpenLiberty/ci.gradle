@@ -10,7 +10,7 @@ script:
   - export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs='-XX:MaxPermSize=1024m -XX:+CMSClassUnloadingEnabled -XX:+HeapDumpOnOutOfMemoryError -Xmx2048m'"
   - travis_wait ./gradlew install check -Prunit=online -DwlpVersion=$WLP_VERSION --stacktrace --info --no-daemon
 after_failure:
-  - cat file:///home/travis/build/WASdev/ci.gradle/build/testBuilds/arquillian-tests/build/reports/verify-main-app-managed/index.html 
-  - cat file:///home/travis/build/WASdev/ci.gradle/build/reports/tests/integrationTest/index.html
-  - ls -R . | awk '/:$/&&f{s=$0;f=0}/:$/&&!f{sub(/:$/,"");s=$0;f=1;next}NF&&f{ print s"/"$0 }'
+  - cat /home/travis/build/WASdev/ci.gradle/build/testBuilds/arquillian-tests/build/reports/verify-main-app-managed/index.html 
+  - cat /home/travis/build/WASdev/ci.gradle/build/reports/tests/integrationTest/index.html
+  - cat /home/travis/build/WASdev/ci.gradle/build/testBuilds/arquillian-tests/build/wlp/usr/servers/LibertyProjectServer/logs/messages.log
 dist: trusty
