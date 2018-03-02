@@ -36,8 +36,10 @@ class ConfigureArquillianTest extends AbstractIntegrationTest {
 
             try {
                 BuildLauncher build = connection.newBuild()
-                build.withArguments("-i")
+                build.withArguments("-i", "-s")
                 build.forTasks("build")
+                build.setStandardOutput(System.out)
+                build.setStandardError(System.out)
                 build.run()
             }
             finally {
