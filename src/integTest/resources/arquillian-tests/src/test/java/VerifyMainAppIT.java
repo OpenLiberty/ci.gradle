@@ -47,7 +47,7 @@ public class VerifyMainAppIT {
 
 		boolean foundMainApp = false;
 		
-		File buildLog = new File("build/wlp/usr/servers/LibertyProjectServer/logs/messages.log");
+		File buildLog = new File("build/testBuilds/arquillian-tests/build/wlp/usr/servers/LibertyProjectServer/logs/messages.log");
 		InputStream is = new FileInputStream(buildLog);
 		BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
@@ -63,7 +63,7 @@ public class VerifyMainAppIT {
 			}
 		}
 
-		assertTrue(false); // Should have returned in the while loop if the test passed
+		fail("Should have returned in the while loop if the test passed.");
 	}
 
 }
