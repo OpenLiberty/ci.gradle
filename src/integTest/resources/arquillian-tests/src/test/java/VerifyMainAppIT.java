@@ -48,6 +48,7 @@ public class VerifyMainAppIT {
 		boolean foundMainApp = false;
 		
 		File buildLog = new File("build/wlp/usr/servers/LibertyProjectServer/logs/messages.log");
+		System.out.println("Verifying apps in " + buildLog.getCanonicalPath());
 		InputStream is = new FileInputStream(buildLog);
 		BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
