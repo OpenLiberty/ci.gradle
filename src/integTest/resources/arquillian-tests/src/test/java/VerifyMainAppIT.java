@@ -1,3 +1,4 @@
+
 /**
  * (C) Copyright IBM Corporation 2017, 2018.
  *
@@ -21,6 +22,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.junit.Test;
 
@@ -46,16 +49,16 @@ public class VerifyMainAppIT {
 				"Web application available (default_host): http://localhost:9080/";
 
 		boolean foundMainApp = false;
-		
+
 		File buildLog = new File("./build/wlp/usr/servers/LibertyProjectServer/logs/messages.log").getCanonicalFile();
 		System.out.println("Verifying apps in " + buildLog.getCanonicalPath());
-		if(buildLog.exists()) {
+		if (buildLog.exists()) {
 			InputStream is = new FileInputStream(buildLog);
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
 			String line;
 			while ((line = br.readLine()) != null) {
-			    System.out.println(line);
+				System.out.println(line);
 				if (!foundMainApp) {
 					if (line.contains(mainAppOutput)) {
 						foundMainApp = true;
@@ -67,6 +70,14 @@ public class VerifyMainAppIT {
 
 			fail("Should have returned in the while loop if the test passed.");
 		}
+
+		File b = buildLog;
+		while (!b.exists()) {
+			b = b.getParentFile();
+		}
+
+		Files.walk(Paths.get(b.toURI())).filter(Files::isRegularFile).forEach(System.out::println);
+
 		fail("The messages.log file does not exist.");
 	}
 
