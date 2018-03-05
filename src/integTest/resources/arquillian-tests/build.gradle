@@ -125,7 +125,16 @@ task verifyMainAppManaged (type:Test) {
     description 'Tests that the main app is ready before the test app when verifyApps is set properly'
     reports.html.destination = file("$buildDir/reports/verify-main-app-managed")
     reports.junitXml.destination = file("$buildDir/test-results/verify-main-app-managed")
-    include '**/VerifyMainAppIT*', '**/RestEndpointIT*'
+    include '**/RestEndpointIT*'
+    classpath += configurations.arqManaged
+    dependsOn ':verifyMainAppManaged:configArq'
+    finalizedBy 'verifyMainAppManagedValidation'
+}
+
+task verifyMainAppManagedValidation (type:Test) {
+    reports.html.destination = file("$buildDir/reports/verify-main-app-managed-rest-endpoint-it")
+    reports.junitXml.destination = file("$buildDir/test-results/verify-main-app-managed-rest-endpoint-it")
+    include '**/VerifyMainAppIT*'
     classpath += configurations.arqManaged
     dependsOn ':verifyMainAppManaged:configArq'
     finalizedBy 'skipWithXmlManaged'
@@ -135,7 +144,16 @@ task skipWithXmlManaged (type:Test) {
     description 'For the managed container, tests the task is skipped when the skipIfArquillianXmlExists flag is set to true and arquillian.xml exists in src/test/resources.'
     reports.html.destination = file("$buildDir/reports/skip-with-xml-managed")
     reports.junitXml.destination = file("$buildDir/test-results/skip-with-xml-managed")
-    include '**/SkipWithXmlIT*', '**/RestEndpointIT*'
+    include '**/SkipWithXmlIT*'
+    classpath += configurations.arqManaged
+    dependsOn ':skipWithXmlManaged:configArq'
+    finalizedBy 'skipWithXmlManagedRestEndpointIT'
+}
+
+task skipWithXmlManagedRestEndpointIT (type:Test) {
+    reports.html.destination = file("$buildDir/reports/skip-with-xml-managed-rest-endpoint-it")
+    reports.junitXml.destination = file("$buildDir/test-results/skip-with-xml-managed-rest-endpoint-it")
+    include '**/RestEndpointIT*'
     classpath += configurations.arqManaged
     dependsOn ':skipWithXmlManaged:configArq'
     finalizedBy 'skipWithoutXmlManaged'
@@ -145,7 +163,16 @@ task skipWithoutXmlManaged (type:Test) {
     description 'For the managed container, tests the task is run when the skipIfArquillianXmlExists flag is set to true and arquillian.xml does not exist in src/test/resources'
     reports.html.destination = file("$buildDir/reports/skip-without-xml-managed")
     reports.junitXml.destination = file("$buildDir/test-results/skip-without-xml-managed")
-    include '**/SkipWithoutXmlIT*', '**/RestEndpointIT*'
+    include '**/SkipWithoutXmlIT*'
+    classpath += configurations.arqManaged
+    dependsOn ':skipWithoutXmlManaged:configArq'
+    finalizedBy 'skipWithoutXmlManagedRestEndpointIT'
+}
+
+task skipWithoutXmlManagedRestEndpointIT (type:Test) {
+    reports.html.destination = file("$buildDir/reports/skip-without-xml-managed-rest-endpoint-it")
+    reports.junitXml.destination = file("$buildDir/test-results/skip-without-xml-managed-rest-endpoint-it")
+    include '**/RestEndpointIT*'
     classpath += configurations.arqManaged
     dependsOn ':skipWithoutXmlManaged:configArq'
     finalizedBy 'skipWithXmlRemote'
