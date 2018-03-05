@@ -26,7 +26,7 @@ class InstallLibertyTask extends AbstractTask {
 
     InstallLibertyTask() {
         outputs.upToDateWhen {
-            getInstallDir(project).exists()
+            getInstallDir(project).exists() && isInstallationUpToDate()
         }
     }
 
@@ -136,18 +136,37 @@ class InstallLibertyTask extends AbstractTask {
         }
     }
     
+    
     protected boolean isInstallationUpToDate() {
+        boolean isUpToDate = false;
+
+        File f = new File(project.buildDir, 'liberty-plugin-config.xml')
+        if (f == null || !f.exists()) {
+            return isUpToDate;
+        }
+
+        XmlParser pluginXmlParser = new XmlParser()
+        Node libertyPluginConfig = pluginXmlParser.parse(f)
+
         if(project.configurations.libertyRuntime != null && !project.configurations.libertyRuntime.dependencies.isEmpty()) {
-            var artifactId
-            var version
-            project.configurations.libertyRuntime.dependencies.each { libertyArtifact ->
-                artifactId = libertyArtifact.name
-                version = libertyArtifact.version
+            if (!libertyPluginConfig.getAt('assemblyArtifact').isEmpty()) {
+                project.configurations.libertyRuntime.dependencies.each { libertyArtifact ->
+                    if(libertyPluginConfig.getAt('assemblyArtifact').getAt('artifactId').text().equals(libertyArtifact.name)
+                        && libertyPluginConfig.getAt('assemblyArtifact').getAt('version').text().equals(libertyArtifact.version)
+                        && libertyPluginConfig.getAt('assemblyArtifact').getAt('groupId').text().equals(libertyArtifact.group)) {
+                            isUpToDate = true;
+                    }
+                }
             }
         }
         else if (project.liberty.install.runtimeUrl != null) {
-
+            if (!libertyPluginConfig.getAt('runtimeUrl').isEmpty()) {
+                if( project.liberty.install.runtimeUrl.equals(libertyPluginConfig.getAt('runtimeUrl').text())) {
+                    isUpToDate = true;
+                }
+            }
+            
         }
-        return false;
+        return isUpToDate;
     }
 }
