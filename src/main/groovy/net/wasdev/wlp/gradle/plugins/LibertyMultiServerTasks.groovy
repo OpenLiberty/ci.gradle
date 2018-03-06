@@ -178,14 +178,13 @@ class LibertyMultiServerTasks extends LibertyTasks {
             group 'Liberty'
             dependsOn 'installLiberty'
 
-            if (dependsOnFeature(server)) finalizedBy 'installFeature' + server.name
+            if (dependsOnFeature(server)) finalizedBy 'installFeature-' + server.name
         })
 
         addTaskRule('Pattern: libertyStop-<Server Name>', 'libertyStop', StopTask, {
             description 'Stops the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
-            dependsOn getTaskList('libertyStop')
         })
 
         addTaskRule('Pattern: libertyStart-<Server Name>', 'libertyStart', StartTask, {
@@ -270,7 +269,7 @@ class LibertyMultiServerTasks extends LibertyTasks {
             dependsOn 'libertyStart-' + server.name
         })
 
-        addTaskRule('Pattern: undeploy-<Server Name>', 'deploy', DeployTask, {
+        addTaskRule('Pattern: undeploy-<Server Name>', 'undeploy', UndeployTask, {
             description 'Removes an application from the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
@@ -281,17 +280,16 @@ class LibertyMultiServerTasks extends LibertyTasks {
             description 'Deletes files from some directories from the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO
             group 'Liberty'
-            dependsOn 'cleanDirs-' + server.name
         })
     }
 
     void addTaskRule (String pattern, String name, Class taskType, Closure configureClosure) {
         project.tasks.addRule(pattern) { String taskName ->
             if (taskName.startsWith(name)) {
-                project.task(taskName, type: taskType) {
+                project.task(taskName, type: taskType, overwrite:true) {
                     server = project.liberty.servers.getByName(taskName - "${name}-")
-                    //ConfigureUtil.configure(configureClosure, it)
-                }.configure(configureClosure)
+                    ConfigureUtil.configure(configureClosure, it)
+                }//.configure(configureClosure)
             }
         }
     }
