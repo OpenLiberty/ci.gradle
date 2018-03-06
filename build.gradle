@@ -69,9 +69,6 @@ sourceSets {
 }
 
 task integrationTest(type: Test) {
-    testLogging {
-        exceptionFormat = 'full'
-    }
     logging.level = LogLevel.INFO
     description = 'Runs the integration tests.' + gradle.gradleVersion
     if (!gradle.gradleVersion.startsWith('4.')) {
