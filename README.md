@@ -1,4 +1,4 @@
-# ci.gradle [![Build Status](https://travis-ci.org/WASdev/ci.gradle.svg?branch=master)](https://travis-ci.org/WASdev/ci.gradle) [![Maven Central Latest](https://maven-badges.herokuapp.com/maven-central/net.wasdev.wlp.gradle.plugins/liberty-gradle-plugin/badge.svg)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22net.wasdev.wlp.gradle.plugins%22%20AND%20a%3A%22liberty-gradle-plugin%22) [![Build status](https://ci.appveyor.com/api/projects/status/ebq1a5qtt8ndhc57/branch/master?svg=true)](https://ci.appveyor.com/project/wasdevb1/ci-gradle-6hm2g)
+# ci.gradle [![Maven Central Latest](https://maven-badges.herokuapp.com/maven-central/net.wasdev.wlp.gradle.plugins/liberty-gradle-plugin/badge.svg)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22net.wasdev.wlp.gradle.plugins%22%20AND%20a%3A%22liberty-gradle-plugin%22) [![Build Status](https://travis-ci.org/WASdev/ci.gradle.svg?branch=master)](https://travis-ci.org/WASdev/ci.gradle) [![Build status](https://ci.appveyor.com/api/projects/status/ebq1a5qtt8ndhc57/branch/master?svg=true)](https://ci.appveyor.com/project/wasdevb1/ci-gradle-6hm2g) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/9fa7d434945c452cae1c4958bfda8010)](https://www.codacy.com/app/wasdevb1/ci.gradle?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=WASdev/ci.gradle&amp;utm_campaign=Badge_Grade)
 
 The Liberty Gradle plugin supports install and operational control of Liberty runtime and servers. Use it to manage your application on Liberty for integration test and to create Liberty server packages.
 
@@ -6,6 +6,7 @@ The Liberty Gradle plugin supports install and operational control of Liberty ru
 * [Usage](#usage)
 * [Plugin Configuration](#plugin-configuration)
 * [Tasks](#tasks)
+* [Extensions](#extensions)
 
 
 ## Build
@@ -96,3 +97,11 @@ The Liberty Gradle plugin defines a built-in task order to allow a user to call 
 The most appealing benefit from defining a task order is the ability to allow the user to call an end task directly. For example, if the user calls `libertyStart` out of the box, Gradle will recognize that it must call `installLiberty -> libertyCreate -> installFeature -> installApps` to get a server with features and apps properly running.
 
 Click on a [task](#tasks) to view what it depends on.
+
+## Extensions
+
+Extensions are tasks that improve the compatibility or user experience of third party libraries used with Liberty. The `liberty-gradle-plugin` provides the following extensions:
+
+| Extension | Description |
+| --------- | ------------ |
+| [configureArquillian](docs/configureArquillian.md) | Integrates `arquillian.xml` configuration for the Liberty Managed and Remote Arquillian containers in the `liberty-gradle-plugin`. Automatically configures required `arquillian.xml` parameters for the Liberty Managed container. |

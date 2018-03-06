@@ -1,0 +1,31 @@
+import net.wasdev.wlp.gradle.plugins.tasks.extensions.arquillian.ConfigureArquillianTask
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+    }
+}
+
+project.buildDir = '../build'
+
+dependencies {
+    compile "org.jboss.arquillian.container:arquillian-wlp-managed-8.5:1.0.0.CR1"
+}
+
+liberty {
+    server {
+        name = wlpServerName
+    }
+}
+
+task configArq (type:ConfigureArquillianTask) {
+    arquillianProperties = ['verifyApps': 'arquillian-tests']
+    dependsOn 'deleteArquillianXml'
+}
