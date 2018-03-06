@@ -20,6 +20,7 @@ import javax.xml.parsers.*
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.artifacts.Dependency
 import groovy.xml.MarkupBuilder
 
 class InstallLibertyTask extends AbstractTask {
@@ -73,6 +74,9 @@ class InstallLibertyTask extends AbstractTask {
             result.put('type', project.liberty.install.type)
         }
 
+        if(project.configurations.libertyRuntime.getFiles().size() > 1) {
+            throw new GradleException("The liberty gradle plugin only supports one libertyRuntime, but more than one was specified. Please set only one libertyRuntime.")
+        }
         String runtimeFilePath = project.configurations.getByName('libertyRuntime').getAsPath()
         if (runtimeFilePath) {
             logger.debug 'Liberty archive file Path to the local Gradle repository  : ' + runtimeFilePath
@@ -112,15 +116,14 @@ class InstallLibertyTask extends AbstractTask {
     protected void outputLibertyPropertiesToXml(MarkupBuilder xmlDoc) {
         xmlDoc.installDirectory (getInstallDir(project).toString())
         if (project.configurations.libertyRuntime != null && !project.configurations.libertyRuntime.dependencies.isEmpty()) {
-            project.configurations.libertyRuntime.dependencies.each { libertyArtifact ->
-                xmlDoc.assemblyArtifact {
-                    groupId (libertyArtifact.group)
-                    artifactId (libertyArtifact.name)
-                    version (libertyArtifact.version)
-                    type ('zip')
-                }
-                xmlDoc.assemblyArchive (project.configurations.libertyRuntime.resolvedConfiguration.resolvedArtifacts.getAt(0).file.toString())
+            Dependency libertyArtifact = project.configurations.libertyRuntime.dependencies.toArray()[0]
+            xmlDoc.assemblyArtifact {
+                groupId (libertyArtifact.group)
+                artifactId (libertyArtifact.name)
+                version (libertyArtifact.version)
+                type ('zip')
             }
+            xmlDoc.assemblyArchive (project.configurations.libertyRuntime.resolvedConfiguration.resolvedArtifacts.getAt(0).file.toString())
         } else if (project.liberty.install.runtimeUrl != null) {
             xmlDoc.runtimeUrl (project.liberty.install.runtimeUrl)
         }
@@ -150,22 +153,17 @@ class InstallLibertyTask extends AbstractTask {
 
         if(project.configurations.libertyRuntime != null && !project.configurations.libertyRuntime.dependencies.isEmpty()) {
             if (!libertyPluginConfig.getAt('assemblyArtifact').isEmpty()) {
-                project.configurations.libertyRuntime.dependencies.each { libertyArtifact ->
-                    if(libertyPluginConfig.getAt('assemblyArtifact').getAt('artifactId').text().equals(libertyArtifact.name)
-                        && libertyPluginConfig.getAt('assemblyArtifact').getAt('version').text().equals(libertyArtifact.version)
-                        && libertyPluginConfig.getAt('assemblyArtifact').getAt('groupId').text().equals(libertyArtifact.group)) {
-                            isUpToDate = true;
-                    }
+                Dependency libertyArtifact = project.configurations.libertyRuntime.dependencies.toArray()[0]
+                if(libertyPluginConfig.getAt('assemblyArtifact').getAt('artifactId').text().equals(libertyArtifact.name)
+                    && libertyPluginConfig.getAt('assemblyArtifact').getAt('version').text().equals(libertyArtifact.version)
+                    && libertyPluginConfig.getAt('assemblyArtifact').getAt('groupId').text().equals(libertyArtifact.group)) {
+                        isUpToDate = true;
                 }
             }
         }
-        else if (project.liberty.install.runtimeUrl != null) {
-            if (!libertyPluginConfig.getAt('runtimeUrl').isEmpty()) {
-                if( project.liberty.install.runtimeUrl.equals(libertyPluginConfig.getAt('runtimeUrl').text())) {
-                    isUpToDate = true;
-                }
-            }
-            
+        else if (project.liberty.install.runtimeUrl != null && !libertyPluginConfig.getAt('runtimeUrl').isEmpty()
+            && project.liberty.install.runtimeUrl.equals(libertyPluginConfig.getAt('runtimeUrl').text())) {
+                isUpToDate = true;
         }
         return isUpToDate;
     }
