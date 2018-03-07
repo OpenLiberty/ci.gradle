@@ -56,10 +56,9 @@ class Liberty implements Plugin<Project> {
         project.configurations.create('libertyLicense')
         project.configurations.create('libertyRuntime')
 
-        setEclipseFacets(project)
-
         //Create expected server extension from liberty extension data
         project.afterEvaluate {
+            setEclipseFacets(project)
             if (project.liberty.server == null) {
                 project.liberty.server = copyProperties(project.liberty)
             }
@@ -212,7 +211,7 @@ class Liberty implements Plugin<Project> {
             group 'Liberty'
             dependsOn project.tasks.withType(War), 'libertyCreate'
         }
-				
+
 		project.task('configureArquillian', type: ConfigureArquillianTask) {
 			description "Automatically generates arquillian.xml for projects that use Arquillian Liberty Managed or Remote containers."
 			logging.level = LogLevel.INFO
@@ -348,7 +347,7 @@ class Liberty implements Plugin<Project> {
     }
 
     private boolean dependsOnFeature(ServerExtension server) {
-        return ((server.features.name != null && !server.features.name.isEmpty()) 
+        return ((server.features.name != null && !server.features.name.isEmpty())
             || server.features.acceptLicense)
     }
 
