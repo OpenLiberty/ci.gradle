@@ -1,0 +1,59 @@
+apply plugin: 'liberty'
+
+group = 'liberty.gradle'
+version = '1'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+    }
+}
+
+def test_mode = System.getProperty('runit')
+def wlpLicense = System.getProperty('wlpLicense')
+def wlpVersion = System.getProperty('wlpVersion')
+def WLP_DIR = System.getProperty('wlpInstallDir')
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    // Liberty server properties
+    wlpServerName = 'LibertyProjectServer'
+    testServerHttpPort = 9080
+    testServerHttpsPort = 9443
+
+    // This is set in the ibm-web-ext.xml file
+    warContext = 'servlet'
+}
+
+dependencies {
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-webProfile7', version: '17.0.0.2'
+}
+
+liberty {
+    if (test_mode == 'online') {
+        server{
+            name ='libertyOnline'
+        }
+    } else {
+        installDir = WLP_DIR
+        server{
+            name = 'libertyOffline'
+        }
+    }
+    install {
+        // use 1 liberty install for the whole repo
+        baseDir = rootProject.buildDir
+        runtimeUrl = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/17.0.0.4/wlp-webProfile7-17.0.0.4.zip"
+    }
+}

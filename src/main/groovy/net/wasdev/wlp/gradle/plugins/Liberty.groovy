@@ -89,6 +89,9 @@ class Liberty implements Plugin<Project> {
             description 'Installs Liberty from a repository'
             logging.level = LogLevel.INFO
             group 'Liberty'
+            project.afterEvaluate {
+                finalizedBy 'libertyCreate'
+            }
         }
 
         project.task('libertyRun', type: RunTask) {
@@ -336,7 +339,7 @@ class Liberty implements Plugin<Project> {
     }
 
     private boolean dependsOnFeature(ServerExtension server) {
-        return ((server.features.name != null && !server.features.name.isEmpty()) 
+        return ((server.features.name != null && !server.features.name.isEmpty())
             || server.features.acceptLicense)
     }
 

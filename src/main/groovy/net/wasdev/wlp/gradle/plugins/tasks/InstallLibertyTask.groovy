@@ -40,22 +40,23 @@ class InstallLibertyTask extends AbstractTask {
 
     @TaskAction
     void install() {
-        if (!isLibertyInstalled(project)) {
-            def params = buildInstallLibertyMap(project)
+        File wlpDirectory = new File(project.buildDir,"wlp")
+        if (wlpDirectory.exists()) {
+            FileUtils.deleteDirectory(wlpDirectory);
+        }
 
-            project.ant.taskdef(name: 'installLiberty',
-                                classname: 'net.wasdev.wlp.ant.install.InstallLibertyTask',
-                                classpath: project.buildscript.configurations.classpath.asPath)
-            project.ant.installLiberty(params)
+        def params = buildInstallLibertyMap(project)
 
-            String licenseFilePath = project.configurations.getByName('libertyLicense').getAsPath()
-            if (licenseFilePath) {
-                def command = "java -jar " + licenseFilePath + " --acceptLicense " + project.buildDir
-                def process = command.execute()
-                process.waitFor()
-            }
-        } else {
-            logger.info ("Liberty is already installed at: " + getInstallDir(project))
+        project.ant.taskdef(name: 'installLiberty',
+                            classname: 'net.wasdev.wlp.ant.install.InstallLibertyTask',
+                            classpath: project.buildscript.configurations.classpath.asPath)
+        project.ant.installLiberty(params)
+
+        String licenseFilePath = project.configurations.getByName('libertyLicense').getAsPath()
+        if (licenseFilePath) {
+            def command = "java -jar " + licenseFilePath + " --acceptLicense " + project.buildDir
+            def process = command.execute()
+            process.waitFor()
         }
 
         createPluginXmlFile(project)
@@ -165,6 +166,7 @@ class InstallLibertyTask extends AbstractTask {
         }
         else if (project.liberty.install.runtimeUrl != null && !libertyPluginConfig.getAt('runtimeUrl').isEmpty()
             && project.liberty.install.runtimeUrl.equals(libertyPluginConfig.getAt('runtimeUrl').text())) {
+                println("::::::::true")
                 isUpToDate = true;
         }
         return isUpToDate;
