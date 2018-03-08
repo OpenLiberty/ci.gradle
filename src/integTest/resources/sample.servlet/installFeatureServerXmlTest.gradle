@@ -1,0 +1,44 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+    }
+}
+
+def test_mode = System.getProperty('runit')
+def wlpLicense = System.getProperty('wlpLicense')
+def wlpVersion = System.getProperty('wlpVersion')
+def WLP_DIR = System.getProperty('wlpInstallDir')
+
+apply plugin: 'liberty'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-javaee7', version: wlpVersion
+}
+
+liberty {
+    if (test_mode == 'online') {
+        serverName = 'libertyOnline'
+    } else {
+        installDir = WLP_DIR
+        serverName = 'libertyOffline'
+    }
+    server{
+        configFile = file("src/main/liberty/config/server-installFeature-test.xml")
+        name = serverName
+        features {
+            acceptLicense = true
+        }
+    }
+}
