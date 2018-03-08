@@ -52,7 +52,7 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
     compile ('net.wasdev.wlp.ant:wlp-anttasks:1.3')
-    compile ('net.wasdev.wlp.common:ci.common:1.0-SNAPSHOT')
+    compile ('net.wasdev.wlp.common:ci.common:1.0')
     compile group: 'commons-io', name: 'commons-io', version: '2.5'
     provided group: 'com.ibm.websphere.appserver.api', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
     testCompile 'junit:junit:4.11'
