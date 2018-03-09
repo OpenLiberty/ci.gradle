@@ -57,7 +57,11 @@ class ServerExtension{
                 break
             default:
                 Set<File> srcDirs = project.sourceSets.libertyConfig.allLibertyConfig.getSrcDirs()
-                return Paths.get(project.projectDir.absolutePath, srcDirs[0].absolutePath, configFile).toFile()
+                if(System.properties['os.name'].toLowerCase().contains('windows')) {
+                    return Paths.get(srcDirs[0].absolutePath, configFile).toFile()
+                } else {
+                    return Paths.get(project.projectDir.absolutePath, srcDirs[0].absolutePath, configFile).toFile()
+                }
                 break
         }
     }
