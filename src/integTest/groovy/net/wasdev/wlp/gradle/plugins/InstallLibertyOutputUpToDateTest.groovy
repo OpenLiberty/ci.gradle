@@ -21,6 +21,7 @@ import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runners.MethodSorters
 import org.junit.FixMethodOrder
+import org.apache.commons.io.FileUtils;
 import static org.junit.Assert.*
 
 import java.io.File
@@ -50,6 +51,8 @@ class InstallLIbertyOutputUpToDateTest extends AbstractIntegrationTest{
     @Test
     public void test_installLiberty() {
         try{
+           File file = new File("build/wlp/lib/versions/WebSphereApplicationServer.properties");
+            
            buildFilename = new File(resourceDir, "install_liberty_upToDate2.gradle")
            copyBuildFiles(buildFilename, buildDir)
            runTasks(buildDir, 'installLiberty')

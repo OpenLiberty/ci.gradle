@@ -23,6 +23,7 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.artifacts.Dependency
 import groovy.xml.MarkupBuilder
 import org.gradle.api.GradleException
+import org.apache.commons.io.FileUtils;
 
 
 class InstallLibertyTask extends AbstractTask {
@@ -33,10 +34,11 @@ class InstallLibertyTask extends AbstractTask {
         }
     }
 
+    /*
     @OutputFile
     File getPluginConfigXml() {
         return new File(project.buildDir, 'liberty-plugin-config.xml')
-    }
+    }*/
 
     @TaskAction
     void install() {
@@ -166,7 +168,6 @@ class InstallLibertyTask extends AbstractTask {
         }
         else if (project.liberty.install.runtimeUrl != null && !libertyPluginConfig.getAt('runtimeUrl').isEmpty()
             && project.liberty.install.runtimeUrl.equals(libertyPluginConfig.getAt('runtimeUrl').text())) {
-                println("::::::::true")
                 isUpToDate = true;
         }
         return isUpToDate;

@@ -53,7 +53,7 @@ class LibertyTest extends AbstractIntegrationTest{
             throw new AssertionError ("Fail on task libertyStart. "+e)
         }
     }
-
+    
     @Test
     public void test2_executeDeployTask() {
         try {
@@ -62,7 +62,7 @@ class LibertyTest extends AbstractIntegrationTest{
             throw new AssertionError ("Fail on task deploy. "+e)
         }
     }
-
+    
     @Test
     public void test3_executeUndeployTask() {
         try {

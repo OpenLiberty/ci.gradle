@@ -51,16 +51,3 @@ repositories {
 dependencies {
     testCompile 'junit:junit:4.12'
 }
-
-task integrationTest(type: Test) {
-    group 'Verification'
-    description 'Runs the integration tests.'
-    reports.html.destination = file("$buildDir/reports/it")
-    reports.junitXml.destination = file("$buildDir/test-results/it")
-    include '**/it/**'
-    exclude '**/unit/**'
-}
-
-check.dependsOn 'integrationTest'
-libertyCreate.dependsOn 'installLiberty'
-integrationTest.dependsOn 'libertyCreate'

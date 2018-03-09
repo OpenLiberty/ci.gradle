@@ -89,9 +89,6 @@ class Liberty implements Plugin<Project> {
             description 'Installs Liberty from a repository'
             logging.level = LogLevel.INFO
             group 'Liberty'
-            project.afterEvaluate {
-                finalizedBy 'libertyCreate'
-            }
         }
 
         project.task('libertyRun', type: RunTask) {
@@ -146,7 +143,7 @@ class Liberty implements Plugin<Project> {
             logging.level = LogLevel.DEBUG
             group 'Liberty'
 
-            project.afterEvaluate { dependsOn installDependsOn(server, 'installLiberty') }
+            project.afterEvaluate { dependsOn installDependsOn(server, 'libertyCreate') }
         }
 
         project.task('libertyDump', type: DumpTask) {

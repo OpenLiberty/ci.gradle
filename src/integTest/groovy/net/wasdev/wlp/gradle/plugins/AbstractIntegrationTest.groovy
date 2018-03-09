@@ -82,7 +82,7 @@ abstract class AbstractIntegrationTest {
         try {
             BuildLauncher build = connection.newBuild()
             build.setJvmArguments("-DWLP_DIR=$WLP_DIR")
-            build.withArguments("-i");
+            build.withArguments("-Prunit=online");
             build.forTasks(tasks)
             build.run()
         }

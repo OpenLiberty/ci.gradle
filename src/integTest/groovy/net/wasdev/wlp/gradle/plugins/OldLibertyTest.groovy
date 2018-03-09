@@ -62,7 +62,7 @@ class OldLibertyTest extends AbstractIntegrationTest{
             throw new AssertionError ("Fail on task deploy. "+e)
         }
     }
-
+    
     @Test
     public void test3_executeUndeployTask() {
         try {
