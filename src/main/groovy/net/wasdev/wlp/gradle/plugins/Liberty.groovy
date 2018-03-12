@@ -56,10 +56,6 @@ class Liberty implements Plugin<Project> {
         project.configurations.create('libertyLicense')
         project.configurations.create('libertyRuntime')
 
-        //Used to set project facets in Eclipse
-        project.pluginManager.apply('eclipse-wtp')
-        project.tasks.getByName('eclipseWtpFacet').finalizedBy 'libertyCreate'
-
         //Create expected server extension from liberty extension data
         project.afterEvaluate {
             setEclipseFacets(project)
@@ -229,6 +225,10 @@ class Liberty implements Plugin<Project> {
     }
 
     private void setEclipseFacets(Project project) {
+        //Used to set project facets in Eclipse
+        project.pluginManager.apply('eclipse-wtp')
+        project.tasks.getByName('eclipseWtpFacet').finalizedBy 'libertyCreate'
+
         //Uplift the jst.web facet version to 3.0 if less than 3.0 so WDT can deploy properly to Liberty.
         //There is a known bug in the wtp plugin that will add duplicate facets, the first of the duplicates is honored.
         if(project.plugins.hasPlugin('war')) {
