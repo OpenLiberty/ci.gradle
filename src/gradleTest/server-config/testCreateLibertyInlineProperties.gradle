@@ -18,8 +18,7 @@ ext {
 
 liberty {
     install {
-        //runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/${libertyVersion}/wlp-webProfile7-${libertyVersion}.zip"
-        runtimeUrl = "https://artifactory.highmark.com/artifactory/dist/websphere/liberty/${libertyVersion}/wlp-base-all-${libertyVersion}.jar"
+        runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/${libertyVersion}/wlp-webProfile7-${libertyVersion}.zip"
     }
     server{
         name = wlpServerName
