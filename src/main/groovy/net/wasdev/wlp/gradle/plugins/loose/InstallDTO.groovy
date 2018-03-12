@@ -9,4 +9,13 @@ class InstallDTO {
   InstallType installType
   Task task
   Project parentProject
+
+  @Override
+  String toString() {
+    return """
+    InstallType: ${installType.toString()}
+    Task: ${task.name}
+    Parent Project: ${parentProject.name}
+    """.stripIndent().normalize()
+  }
 }

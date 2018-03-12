@@ -40,7 +40,7 @@ liberty {
         runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/${libertyVersion}/wlp-webProfile7-${libertyVersion}.zip"
     }
     server{
-        configFile = file("src/main/liberty/config/server-loose-config-test.xml")
+        configFile = file("src/main/libertyConfig/server-loose-config-test.xml")
 
         name = wlpServerName
         stripVersion = true

@@ -150,6 +150,19 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
       setOnlyIf(project, TASK_LIBERTY_CREATE_SERVER_XML, { server.configFile.exists() })
       setOnlyIf(project, TASK_LIBERTY_CREATE_SERVER_DEFAULT_XML, { !server.configFile.exists() })
       setOnlyIf(project, TASK_LIBERTY_CREATE_SERVER_ENV, { server.serverEnv.exists() })
+
+      setOnlyIf(project, TASK_DEPLOY_CONFIG, { isDeployConfigFilled() })
+      setOnlyIf(project, TASK_DEPLOY_LIBERTY, { server.deploys?.size() > 0 })
+      setOnlyIf(project, TASK_DEPLOY_LOCAL, { (server.deploys?.size() == 0 ) && (!isDeployConfigFilled())})
+    }
+  }
+
+  def isDeployConfigFilled() {
+    def config = project.configurations.getByName(LIBERTY_DEPLOY_CONFIGURATION)
+    if (config != null) {
+      config.dependencies.size() > 0
+    } else {
+      false
     }
   }
 
@@ -185,6 +198,14 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
 
     a_dependsOn_b(project, TASK_LIBERTY_PACKAGE, TASK_LIBERTY_CREATE_CONFIG)
 
+    a_dependsOn_b(project, TASK_DEPLOY, TASK_DEPLOY_CONFIG)
+    a_dependsOn_b(project, TASK_DEPLOY, TASK_DEPLOY_LIBERTY)
+    a_dependsOn_b(project, TASK_DEPLOY, TASK_DEPLOY_LOCAL)
+
+    a_mustRunAfter_b(project, TASK_DEPLOY_CONFIG, TASK_LIBERTY_START)
+    a_mustRunAfter_b(project, TASK_DEPLOY_LIBERTY, TASK_LIBERTY_START)
+    a_mustRunAfter_b(project, TASK_DEPLOY_LOCAL, TASK_LIBERTY_START)
+
     a_dependsOn_b(project, TASK_DEPLOY, TASK_LIBERTY_START)
 
     a_dependsOn_b(project, TASK_UNDEPLOY, TASK_LIBERTY_START)
@@ -201,6 +222,7 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
     taskBTask.dependsOn(project.tasks.withType(War))
     taskBTask.dependsOn(project.tasks.withType(Ear))
 
+    a_dependsOn_b(project, TASK_INSTALL_APPS, TASK_CORE_WAR)
     a_dependsOn_b(project, TASK_INSTALL_APPS, TASK_LIBERTY_CREATE)
     a_dependsOn_b(project, TASK_INSTALL_APPS, TASK_INSTALL_APPS_AUTOCONFIG)
 
@@ -395,8 +417,7 @@ class Liberty extends LibertyTrait implements Plugin<Project> {
   }
 
   static boolean dependsOnApps(ServerExtension server) {
-    return ((server.apps != null && !server.apps.isEmpty()) ||
-        (server.dropins != null && !server.dropins.isEmpty()))
+    return ((server.apps?.size() > 0) || (server.dropins?.size() > 0))
   }
 
   static boolean dependsOnFeature(ServerExtension server) {

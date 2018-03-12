@@ -48,18 +48,24 @@ configurations {
 dependencies {
     testCompile 'junit:junit:4.12'
     providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+    providedCompile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.1'
+
     compile 'org.apache.commons:commons-text:1.1'
     war2 'org.apache.commons:commons-proxy:1.0'
 }
 
-task war1(type:War){
+Task war1 = project.tasks.create([name: "war1", type: War]) {
     baseName = 'sample.servlet1'
 }
 
-task war2(type:War){
+Task war2 = project.tasks.create([name: "war2", type: War]) {
     baseName = 'sample.servlet2'
     classpath = configurations.war2
 }
+
+war.dependsOn(war1)
+war.dependsOn(war2)
+installApps.dependsOn tasks.withType(War)
 
 liberty {
     install {
@@ -69,7 +75,7 @@ liberty {
         name = wlpServerName
         looseApplication = true
         stripVersion = true
-        configFile = file("src/main/liberty/config/server-list-test.xml")
+        configFile = file("src/main/libertyConfig/server-list-test.xml")
         packageLiberty {
             archive = packageFile
             include = packagingType
@@ -80,44 +86,58 @@ liberty {
 }
 
 task ('runGradleTest') {
-    dependsOn 'clean', 'libertyStart'
+    dependsOn  'clean', 'libertyStart'
     finalizedBy 'libertyStop'
 
     doLast {
-        assert new File("${buildDir}/wlp/usr/servers/LibertyProjectServer/apps/${project.name}1.war.xml").exists() : 'application not installed on server'
+        checkFiles("sample.servlet1.war.xml", ["/WEB-INF/lib/commons-text-1.1.jar",
+                                               "/WEB-INF/lib/commons-lang3-3.5.jar"],
+        2, 0, 2)
 
-        File on = new File("${buildDir}/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet1.war.xml")
-        FileInputStream input = new FileInputStream(on)
-
-        // get input XML Document
-        DocumentBuilderFactory inputBuilderFactory = DocumentBuilderFactory.newInstance()
-        inputBuilderFactory.setIgnoringComments(true)
-        inputBuilderFactory.setCoalescing(true)
-        inputBuilderFactory.setIgnoringElementContentWhitespace(true)
-        inputBuilderFactory.setValidating(false)
-        DocumentBuilder inputBuilder = inputBuilderFactory.newDocumentBuilder()
-        Document inputDoc=inputBuilder.parse(input)
-
-        // parse input XML Document
-        XPath xPath = XPathFactory.newInstance().newXPath()
-        String expression = "/archive/dir"
-        NodeList nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET)
-        assert nodes.getLength() == 2 : "Number of <dir/> element ==>"
-
-        expression = "/archive/archive";
-        nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET)
-        assert nodes.getLength() == 0 : "Number of <archive/> element ==>"
-
-        expression = "/archive/file";
-        nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET)
-        assert nodes.getLength() == 3 : "Number of <file/> element ==>"
-
-        assert nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue() ==
-            "/WEB-INF/lib/commons-text-1.1.jar" :
-            "archive targetInArchive attribute value"
-
-        assert nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue() ==
-            "/WEB-INF/lib/commons-lang3-3.5.jar" :
-            "archive targetInArchive attribute value"
+        checkFiles("sample.servlet2.war.xml", ["/WEB-INF/lib/javax.servlet-api-3.1.0.jar",
+                                               "/WEB-INF/lib/javax.ws.rs-api-2.1.jar",
+                                               "/WEB-INF/lib/commons-proxy-1.0.jar",
+                                               "/WEB-INF/lib/commons-lang3-3.5.jar"],
+        2, 0, 4)
     }
+
+}
+
+def checkFiles(String filename, def libraries, def dircount, def archivecount, def filecount){
+    // remember that strip version is true
+    String fname = "${buildDir}/wlp/usr/servers/${wlpServerName}/apps/${filename}"
+    println fname
+
+    assert file(fname).exists() : 'application not installed on server'
+
+    File on = file(fname)
+    FileInputStream input = new FileInputStream(on)
+
+    // get input XML Document
+    DocumentBuilderFactory inputBuilderFactory = DocumentBuilderFactory.newInstance()
+    inputBuilderFactory.setIgnoringComments(true)
+    inputBuilderFactory.setCoalescing(true)
+    inputBuilderFactory.setIgnoringElementContentWhitespace(true)
+    inputBuilderFactory.setValidating(false)
+    DocumentBuilder inputBuilder = inputBuilderFactory.newDocumentBuilder()
+    Document inputDoc=inputBuilder.parse(input)
+
+    // parse input XML Document
+    XPath xPath = XPathFactory.newInstance().newXPath()
+    String expression = "/archive/dir"
+    NodeList nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET)
+    assert nodes.getLength() == dircount : "Number of <dir/> element ==>"
+
+    expression = "/archive/archive";
+    nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET)
+    assert nodes.getLength() == archivecount : "Number of <archive/> element ==>"
+
+    expression = "/archive/file";
+    nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET)
+    assert nodes.getLength() == filecount : "Number of <file/> element ==>"
+
+    for (def item in nodes) {
+        assert item.getAttributes().getNamedItem("targetInArchive").getNodeValue() in libraries
+    }
+
 }

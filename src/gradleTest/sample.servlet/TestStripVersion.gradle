@@ -28,7 +28,7 @@ liberty {
         runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/${libertyVersion}/wlp-webProfile7-${libertyVersion}.zip"
     }
     server{
-        configFile = file("src/main/liberty/config/server-apps-test.xml")
+        configFile = file("src/main/libertyConfig/server-apps-test.xml")
 
         name = wlpServerName
 
@@ -54,5 +54,4 @@ task ('runGradleTest') {
         assert new File("${buildDir}/wlp/usr/servers/${wlpServerName}/apps/sample.servlet.war").exists() : 'version was NOT removed properly when stripVersion was set to true'
     }
 }
-installApps.dependsOn 'war'
 

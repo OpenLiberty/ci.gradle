@@ -31,42 +31,39 @@ class StartTask extends AbstractServerTask {
 
         params = buildLibertyMap(project);
         params.put('clean', server.clean)
-        if (server.timeout != null && server.timeout.length() != 0) {
-            params.put('timeout', server.timeout)
-        }
         executeServerCommand(project, 'start', params)
 
         if (server != null && server.verifyAppStartTimeout > 0) {
             ServerTask serverTask = new ServerTask()
-            serverTask.setInstallDir(params.get('installDir'))
+            serverTask.setInstallDir(new File(params.get('installDir')))
             serverTask.setServerName(params.get('serverName'))
-            serverTask.setUserDir(params.get('userDir'))
+            serverTask.setUserDir(new File(params.get('userDir')))
             serverTask.setOutputDir(getOutputDir(params))
             serverTask.initTask()
 
-            def verifyAppStartTimeout = server.verifyAppStartTimeout
-
-            long timeout = verifyAppStartTimeout * 1000
+            long timeout = server.verifyAppStartTimeout * 1000
             long endTime = System.currentTimeMillis() + timeout;
 
             Set<String> appsToVerify = getAppNamesFromServerXml()
 
-            if (server.dropins != null && !server.dropins.isEmpty()) {
-                server.dropins.each { Object dropinObj ->
-                    if (dropinObj instanceof Task) {
-                        appsToVerify += dropinObj.baseName
-                    } else if (dropinObj instanceof File) {
-                        appsToVerify += getBaseName(dropinObj.name)
-                    }
-                }
-            }
+//            if (server.dropins != null && !server.dropins.isEmpty()) {
+//                server.dropins.each { Object dropinObj ->
+//                    if (dropinObj instanceof Task) {
+//                        appsToVerify += dropinObj.baseName
+//                    } else if (dropinObj instanceof File) {
+//                        appsToVerify += getBaseName(dropinObj.name)
+//                    }
+//                }
+//            }
+
+//            println appsToVerify
 
             def verifyAppStartedThreads = appsToVerify.collect { String archiveName ->
                 Thread.start {
                     String verify = serverTask.waitForStringInLog(START_APP_MESSAGE_REGEXP + archiveName, timeout, serverTask.getLogFile())
                     if (!verify) {
                         executeServerCommand(project, 'stop', buildLibertyMap(project))
-                        throw new GradleException("The server has been stopped. Unable to verify if the server was started after ${verifyAppStartTimeout} seconds.")
+                        throw new GradleException("The server has been stopped. Unable to verify if the server was started after ${timeout/1000} seconds.")
                     }
                 }
             }

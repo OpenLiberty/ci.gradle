@@ -99,8 +99,22 @@ abstract class LibertyTrait implements ILibertyDefinitions {
                                       description: 'Runs the Liberty Profile server in the console foreground after a debugger connects to the debug port (default: 7777).',
                                       group      : GROUP_NAME]
 
+    taskDefMap[TASK_DEPLOY_CONFIG] = [name       : TASK_DEPLOY_CONFIG,
+                               type       : DeployConfigTask,
+                               description: 'Deploys a supported file to the WebSphere Liberty Profile server using Gradle configuration method.',
+                               group      : GROUP_NAME]
+
+    taskDefMap[TASK_DEPLOY_LIBERTY] = [name       : TASK_DEPLOY_LIBERTY,
+                               type       : DeployLibertyBlockTask,
+                               description: 'Deploys a supported file to the WebSphere Liberty Profile server using Liberty Config Block method.',
+                               group      : GROUP_NAME]
+
+    taskDefMap[TASK_DEPLOY_LOCAL] = [name       : TASK_DEPLOY_LOCAL,
+                               type       : DeployLocalTask,
+                               description: 'Deploys a supported file to the WebSphere Liberty Profile server from local project.',
+                               group      : GROUP_NAME]
+
     taskDefMap[TASK_DEPLOY] = [name       : TASK_DEPLOY,
-                               type       : DeployTask,
                                description: 'Deploys a supported file to the WebSphere Liberty Profile server.',
                                group      : GROUP_NAME]
 

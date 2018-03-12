@@ -8,7 +8,7 @@ import org.gradle.api.tasks.TaskAction
 
 import java.text.MessageFormat
 
-class InstallAppsAutoConfigureTask extends InstallAppsTask implements ILibertyDefinitions {
+class InstallAppsAutoConfigureTask extends AbstractInstallAppsTask implements ILibertyDefinitions {
 
   protected ApplicationXmlDocument applicationXml = new ApplicationXmlDocument()
 

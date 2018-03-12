@@ -15,71 +15,35 @@
  */
 package net.wasdev.wlp.gradle.plugins.tasks
 
+import net.wasdev.wlp.ant.DeployTask
 import net.wasdev.wlp.gradle.plugins.extensions.DeployExtension
+import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
-import org.gradle.util.ConfigureUtil
 
 import static net.wasdev.wlp.gradle.plugins.Liberty.LIBERTY_DEPLOY_CONFIGURATION
 
-class DeployTask extends AbstractServerTask {
-
-    @TaskAction
-    void deploy() {
-
-        def deployClosureDeclared = false
+/**
+ * InstallAppsArchiveConfigTask
+ * InstallAppsArchiveLibertyBlockTask
+ * InstallAppsArchiveLocalTask
+ * InstallAppsLooseConfigTask
+ * InstallAppsLooseLibertyBlockTask
+ * InstallAppsLooseLocalTask
+ */
+trait DeployBase {
+    def initAntTask(Project project){
 
         project.ant.taskdef(name: 'deploy',
-                                classname: net.wasdev.wlp.ant.DeployTask.name,
-                                classpath: project.rootProject.buildscript.configurations.classpath.asPath)
-
-        // deploys the list of deploy closures
-        for (DeployExtension deployable :  server.deploys) {
-            def params = buildLibertyMap(project)
-            def fileToDeploy = deployable.file
-
-            if (fileToDeploy != null) {
-                deployClosureDeclared = true
-                params.put('file', fileToDeploy)
-                project.ant.deploy(params)
-            } else {
-                def deployDir = deployable.dir
-                def include = deployable.include
-                def exclude = deployable.exclude
-
-                if (deployDir != null) {
-                    deployClosureDeclared = true
-                    project.ant.deploy(params) {
-                        fileset(dir:deployDir, includes: include, excludes: exclude)
-                    }
-                }
-            }
-        }
-
-        deployConfigurationBased()
-
-        // Deploys war or ear from current project
-        if (!deployClosureDeclared) {
-            if (project.plugins.hasPlugin("war")) {
-                def params = buildLibertyMap(project)
-                def warFile = project.war.archivePath
-                if (warFile.exists()) {
-                    params.put('file', warFile)
-                    project.ant.deploy(params)
-                }
-            }
-
-            if (project.plugins.hasPlugin("ear")) {
-                def params = buildLibertyMap(project)
-                def earFile = project.ear.archivePath
-                if (earFile.exists()) {
-                    params.put('file', earFile)
-                    project.ant.deploy(params)
-                }
-            }
-        }
+            classname: DeployTask.name,
+            classpath: project.rootProject.buildscript.configurations.classpath.asPath)
     }
+}
 
-    private void deployConfigurationBased() {
+class DeployConfigTask extends AbstractInstallAppsTask implements DeployBase {
+    @TaskAction
+    void deploy() {
+        initAntTask(project)
+
         // Deploys from the subproject configuration
         def deployConf = project.configurations.findByName(LIBERTY_DEPLOY_CONFIGURATION)
         def deployArtifacts = deployConf.incoming.resolutionResult.allDependencies as List
@@ -88,6 +52,65 @@ class DeployTask extends AbstractServerTask {
             def params = buildLibertyMap(project)
             params.put('file', it.file.absolutePath)
             project.ant.deploy(params)
+        }
+    }
+}
+
+class DeployLibertyBlockTask extends AbstractInstallAppsTask implements DeployBase {
+    @TaskAction
+    void deploy() {
+        initAntTask(project)
+
+        // deploys the list of deploy closures
+        for (DeployExtension deployable :  server.deploys) {
+            def params = buildLibertyMap(project)
+
+            def fileToDeploy = deployable.file
+            println ("Deploying file: ${fileToDeploy}")
+
+            if (fileToDeploy != null) {
+                params.put('file', fileToDeploy)
+                project.ant.deploy(params)
+            } else {
+                println("2")
+                def deployDir = deployable.dir
+                def include = deployable.include
+                def exclude = deployable.exclude
+
+                if (deployDir != null) {
+                    println("3")
+                    project.ant.deploy(params) {
+                        fileset(dir:deployDir, includes: include, excludes: exclude)
+                    }
+                }
+            }
+        }
+    }
+}
+
+class DeployLocalTask extends AbstractInstallAppsTask implements DeployBase {
+
+    @TaskAction
+    void deploy() {
+        initAntTask(project)
+
+        // Deploys war or ear from current project
+        if (project.plugins.hasPlugin("war")) {
+            def params = buildLibertyMap(project)
+            def warFile = project.war.archivePath
+            if (warFile.exists()) {
+                params.put('file', warFile)
+                project.ant.deploy(params)
+            }
+        }
+
+        if (project.plugins.hasPlugin("ear")) {
+            def params = buildLibertyMap(project)
+            def earFile = project.ear.archivePath
+            if (earFile.exists()) {
+                params.put('file', earFile)
+                project.ant.deploy(params)
+            }
         }
     }
 }

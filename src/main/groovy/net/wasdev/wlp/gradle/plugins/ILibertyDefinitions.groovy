@@ -9,6 +9,8 @@ interface ILibertyDefinitions {
   public static final String DEPLOY_FOLDER_DROPINS = "dropins"
   public static final String DEPLOY_FOLDER_APPS = 'apps'
 
+  public static final String TASK_CORE_WAR = "war"
+
   public static final String TASK_COMPILE_JSP = "compileJSP"
   public static final String TASK_INSTALL_LIBERTY = "installLiberty"
   public static final String TASK_LIBERTY_RUN = "libertyRun"
@@ -28,6 +30,9 @@ interface ILibertyDefinitions {
   public static final String TASK_LIBERTY_JAVA_DUMP = "libertyJavaDump"
   public static final String TASK_LIBERTY_DEBUG = "libertyDebug"
   public static final String TASK_DEPLOY = "deploy"
+  public static final String TASK_DEPLOY_CONFIG = "deployConfig"
+  public static final String TASK_DEPLOY_LIBERTY = "deployLibertyBlock"
+  public static final String TASK_DEPLOY_LOCAL = "deployLocal"
   public static final String TASK_UNDEPLOY = "undeploy"
   public static final String TASK_INSTALL_FEATURE = "installFeature"
   public static final String TASK_UNINSTALL_FEATURE = "uninstallFeature"
