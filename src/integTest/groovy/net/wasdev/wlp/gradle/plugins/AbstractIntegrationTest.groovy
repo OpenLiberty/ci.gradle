@@ -56,7 +56,7 @@ abstract class AbstractIntegrationTest {
         }
         try {
             // Copy all resources except the individual test .gradle files
-            // Do copy settings.gradle.
+            // Do copy settings.gradle
             FileUtils.copyDirectory(sourceDir, parent, new FileFilter() {
                public boolean accept (File pathname) {
                    return (!pathname.getPath().endsWith(".gradle") ||
@@ -78,7 +78,6 @@ abstract class AbstractIntegrationTest {
         GradleConnector gradleConnector = GradleConnector.newConnector()
         gradleConnector.forProjectDirectory(projectDir)
         ProjectConnection connection = gradleConnector.connect()
-
         try {
             BuildLauncher build = connection.newBuild()
             build.setJvmArguments("-DWLP_DIR=$WLP_DIR")

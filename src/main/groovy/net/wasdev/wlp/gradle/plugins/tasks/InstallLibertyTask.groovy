@@ -34,12 +34,6 @@ class InstallLibertyTask extends AbstractTask {
         }
     }
 
-    /*
-    @OutputFile
-    File getPluginConfigXml() {
-        return new File(project.buildDir, 'liberty-plugin-config.xml')
-    }*/
-
     @TaskAction
     void install() {
         File wlpDirectory = new File(project.buildDir,"wlp")
