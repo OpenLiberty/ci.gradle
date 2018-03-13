@@ -73,7 +73,7 @@ class InstallLibertyTask extends AbstractTask {
             result.put('type', project.liberty.install.type)
         }
 
-        if(project.configurations.libertyRuntime.getFiles().size() > 1) {
+        if(project.configurations.libertyRuntime.getFiles() != null && project.configurations.libertyRuntime.getFiles().size() > 1) {
             throw new GradleException("The liberty gradle plugin only supports one libertyRuntime, but more than one was specified. Please set only one libertyRuntime.")
         }
         String runtimeFilePath = project.configurations.getByName('libertyRuntime').getAsPath()
