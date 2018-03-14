@@ -134,35 +134,4 @@ class LibertyMultiServerTest extends AbstractIntegrationTest{
            throw new AssertionError ("Fail on task InstallApps. "+e)
         }
     } 
-
-    // @Test
-    // public void test10_run() {
-    //     final int timeout = 30000     // 30 sec
-    //     final String START_SERVER_MESSAGE_REGEXP = "CWWKF0011I.*"
-
-    //     ServerTask st = new ServerTask()
-    //     def installDir = new File(buildDir.getAbsolutePath() + "/build/wlp")
-    //     st.setInstallDir(installDir)
-    //     st.setServerName((test_mode == "offline") ? "libertyOffline" : "libertyOnline")
-    //     st.initTask()
-
-    //     try{
-    //         def stop_thread = Thread.start {
-    //             String verify = st.waitForStringInLog(START_SERVER_MESSAGE_REGEXP, timeout, st.getLogFile())
-    //             try {
-    //                 if (verify) {
-    //                     runTasks(buildDir, 'libertyStop')
-    //                 } else {
-    //                     throw new AssertionError ("Fail to start server for libertyRun.")
-    //                 }
-    //             } catch (Exception e) {
-    //                 throw new AssertionError ("Fail on task libertyStop for libertyRun. "+e)
-    //             }
-    //         }
-    //         runTasks(buildDir, 'libertyRun')
-    //     } catch (Exception e) {
-    //         throw new AssertionError ("Fail on task libertyRun. "+e)
-    //     }
-    // }
-
 }

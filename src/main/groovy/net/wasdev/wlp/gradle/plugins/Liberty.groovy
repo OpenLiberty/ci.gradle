@@ -23,6 +23,7 @@ import net.wasdev.wlp.gradle.plugins.extensions.ServerExtension
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.execution.TaskExecutionGraph
+import org.gradle.api.GradleException
 
 import java.util.Properties
 
@@ -50,7 +51,7 @@ class Liberty implements Plugin<Project> {
             } else if (isMultiServerProject(project)) {
                 new LibertyMultiServerTasks(project).applyTasks()
             } else if (project.liberty.server != null && !project.liberty.servers.isEmpty()){
-                //logger.error('Both a \'server\' and \'servers\' closure were found in a build.gradle file that uses the liberty plugin. Please define multiple servers inside of the Liberty \'servers\' closure in your build.gradle file.')
+                throw new GradleException('Both a \'server\' and \'servers\' closure were found in a build.gradle file that uses the liberty plugin. Please define multiple servers inside of the Liberty \'servers\' closure in your build.gradle file.')
             }
             if (project.liberty.server == null && project.liberty.servers.isEmpty()) {
                 project.liberty.server = copyProperties(project.liberty)

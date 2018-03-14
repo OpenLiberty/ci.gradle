@@ -52,11 +52,6 @@ class InstallAppsTask extends AbstractServerTask {
 
     @TaskAction
     void installApps() {
-        if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
-            if (project.plugins.hasPlugin('war')) {
-                server.apps = [project.war]
-            }
-        }
         if (server.apps != null && !server.apps.isEmpty()) {
             Tuple appsLists = splitAppList(server.apps)
             installMultipleApps(appsLists[0], 'apps')
@@ -244,7 +239,7 @@ class InstallAppsTask extends AbstractServerTask {
         for (Map.Entry<File, Dependency> entry : completeDeps){
             Dependency dependency = entry.getValue();
             File dependencyFile = entry.getKey();
-            
+
             if (dependency instanceof ProjectDependency) {
                 Project dependencyProject = dependency.getDependencyProject()
                 String projectType = FilenameUtils.getExtension(dependencyFile.toString())

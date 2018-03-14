@@ -4,7 +4,7 @@ import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
 
-public class VerifyTimeoutSuccessDropinsTest extends AbstractIntegrationTest{
+public class VerifyTimeoutSuccessMultiServerTest extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/integrationTest/sample.servlet")
     static File buildDir = new File(integTestDir, "/verify-timeout-success-multi-server-test")
     static String buildFilename = "verifyTimeoutSuccessMultiServerTest.gradle"

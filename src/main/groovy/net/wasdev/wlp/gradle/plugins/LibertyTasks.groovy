@@ -27,8 +27,15 @@ abstract class LibertyTasks {
     }
 
     protected boolean dependsOnApps(ServerExtension server) {
-        return ((server.apps != null && !server.apps.isEmpty()) ||
-                (server.dropins != null && !server.dropins.isEmpty()))
+        if ((server.apps != null && !server.apps.isEmpty()) || (server.dropins != null && !server.dropins.isEmpty())) {
+            return true
+        } else if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
+            if (project.plugins.hasPlugin('war')) {
+                server.apps = [project.war]
+                return true
+            }
+        }
+        return false
     }
 
     protected boolean dependsOnFeature(ServerExtension server) {

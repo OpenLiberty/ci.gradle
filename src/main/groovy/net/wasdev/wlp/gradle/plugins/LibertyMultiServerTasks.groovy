@@ -23,7 +23,6 @@ import net.wasdev.wlp.gradle.plugins.tasks.CompileJSPTask
 import org.gradle.api.Project
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.bundling.War
-import org.gradle.util.ConfigureUtil
 
 class LibertyMultiServerTasks extends LibertyTasks {
     LibertyMultiServerTasks(Project project) {
@@ -46,17 +45,13 @@ class LibertyMultiServerTasks extends LibertyTasks {
             group 'Liberty'
         })
 
-        //This is a hard one
-        //Might just want to run the first server in the list or not run multiple, only as single
         project.tasks.getByName('libertyRun') {
             description = "Runs a Websphere Liberty Profile server under the Gradle process."
             logging.level = LogLevel.INFO
             group 'Liberty'
-            // dependsOn 'libertyCreate'
-            //
-            //
-            //  if (dependsOnApps(server)) dependsOn 'installApps'
-            //
+            doLast {
+                logger.warn('Please specify a server to run. Use the command \'libertyRun-<Server Name>\'.')
+            }
         }
 
         project.tasks.getByName('libertyStatus') {
@@ -114,12 +109,13 @@ class LibertyMultiServerTasks extends LibertyTasks {
             dependsOn getTaskList('libertyJavaDump')
         }
 
-        //Might only run this task if all, or all but one, of the servers have server.env files defined
         project.tasks.getByName('libertyDebug') {
             description 'Runs the Liberty Profile server in the console foreground after a debugger connects to the debug port (default: 7777).'
             logging.level = LogLevel.INFO
             group 'Liberty'
-            //This one is kinda tricky. We run it on 7777 unless that is configured so it can't be run at the same time for multiple servers
+            doLast {
+                logger.warn('Please specify a server to debug. Use the command \'libertyDebug-<Server Name>\'.')
+            }
         }
 
         project.tasks.getByName('deploy') {
@@ -196,6 +192,15 @@ class LibertyMultiServerTasks extends LibertyTasks {
             if (dependsOnApps(server)) dependsOn 'installApps-' + server.name
         })
 
+        addTaskRule('Pattern: libertyRun-<Server Name>', 'libertyRun', RunTask, {
+            description 'Runs a Websphere Liberty Profile server under the Gradle process.'
+            logging.level = LogLevel.INFO
+            group 'Liberty'
+            dependsOn 'libertyCreate-' + server.name
+
+            if (dependsOnApps(server)) dependsOn 'installApps-' + server.name
+        })
+
         addTaskRule('Pattern: installApps-<Server Name>', 'installApps', InstallAppsTask, {
             dependsOn 'libertyCreate-' + server.name, project.tasks.withType(War)
 
@@ -243,6 +248,13 @@ class LibertyMultiServerTasks extends LibertyTasks {
             group 'Liberty'
         })
 
+        addTaskRule('Pattern: libertyDebug-<Server Name>', 'libertyDebug', DebugTask, {
+            description 'Runs the Liberty Profile server in the console foreground after a debugger connects to the debug port (default: 7777).'
+            logging.level = LogLevel.INFO
+            group 'Liberty'
+            dependsOn 'libertyCreate-' + server.name
+        })
+
         addTaskRule('Pattern: libertyPackage-<Server Name>', 'libertyPackage', PackageTask, {
             description 'Generates a WebSphere Liberty Profile server archive.'
             logging.level = LogLevel.DEBUG
@@ -288,8 +300,7 @@ class LibertyMultiServerTasks extends LibertyTasks {
             if (taskName.startsWith(name)) {
                 project.task(taskName, type: taskType, overwrite:true) {
                     server = project.liberty.servers.getByName(taskName - "${name}-")
-                    ConfigureUtil.configure(configureClosure, it)
-                }//.configure(configureClosure)
+                }.configure(configureClosure)
             }
         }
     }
