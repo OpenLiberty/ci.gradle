@@ -30,9 +30,9 @@ The following properties are supported for server configuration.
 
 | Attribute | Type  | Since | Description | Required |
 | --------- | ----- | ----- | ----------- | -------- |
-| apps | List | 2.0 | List of `war` task objects used to create applications to copy to the `apps` folder. If no `apps` or `dropins` are configured and this project applys the `war` plugin, the default application is installed using the `installApps` task. If the application is not configured in the server.xml file, application configuration is added to the `configDropins` folder. | No |
+| apps | List | 2.0 | List of `war` and `ear` task objects used to create applications to copy to the `apps` folder. If no `apps` or `dropins` are configured and this project applies the `war` or `ear` plugin, the default application is installed using the `installApps` task. If the application is not configured in the server.xml file, application configuration is added to the `configDropins` folder. | No |
 | clean | boolean | 1.0 | Clean all cached information on server start up. It deletes every file in the `${wlp_output_dir}/logs`, `${wlp_output_dir}/workarea`, `${wlp_user_dir}/dropins` or `${wlp_user_dir}/apps`. The default value is `false`. Only used with the `libertyStart` and `libertyRun` tasks. | No |
-| dropins | List | 2.0 | List of `war` objects used to create applications to copy to the `dropins` folder. | No |
+| dropins | List | 2.0 | List of `war` or `ear` objects used to create applications to copy to the `dropins` folder. | No |
 | outputDir | String | 1.0 | Value of the `${wlp_output_dir}` variable. The default value is `${installDir}/usr/servers/${serverName}`. | No |
 | bootstrapProperties| Map | 2.0 | Inline `Map` of bootstrap properties that is written to the bootstrap.properties file in the server directory. These properties take precedence over a specified bootstrap.properties file.| No|
 | bootstrapPropertiesFile| File | 2.0 | Location of the file containing server properties to copy to the bootstrap.properties file in the server instance. The default value is `/src/main/liberty/config/bootstrap.properties`.| No |
@@ -40,7 +40,7 @@ The following properties are supported for server configuration.
 | configFile| File | 2.0 | Location of the `server.xml` file used by the server instance. The default value is `/src/main/liberty/config/server.xml`. After the | No|
 | jvmOptions| List | 2.0 | Inline `List` of jvm options that is written to the jvm.options file in the server directory. These properties take precedence over a specified jvm.options file.| No|
 | jvmOptionsFile| File | 2.0 | Location of the file containing JVM options to copy to the jvm.options file in the server instance. The default value is `/src/main/liberty/config/jvm.options`.| No|
-| looseApplication | boolean | 2.0 | Indicates to install application using loose application configuration so that war files do not need to be regenerated for every application update. The default is `true`. | No |
+| looseApplication | boolean | 2.0 | Indicates to install application using loose application configuration so that war or ear files do not need to be regenerated for every application update. The loose application support for ear files requires Gradle 4.0 or higher.  The default is `true`. | No |
 | name | String | 2.0 | The name of the server instance to create. The default value is `defaultServer`. | No |
 | serverEnv| File | 2.0 | Location of the file containing server environment variables to copy to the server.env file in the server instance. The default value is `/src/main/liberty/config/server.env`.| No |
 | stripVersion | boolean | 2.0 | Remove the artifact version when copying the application to Liberty runtime's application directory. The default value is false.  | No |

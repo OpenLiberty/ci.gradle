@@ -26,5 +26,6 @@ class LibertyTaskFactory {
         project.task('uninstallFeature')
         project.task('cleanDirs')
         project.task('installApps')
+        project.task('configureArquillian')
     }
 }

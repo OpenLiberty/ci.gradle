@@ -19,6 +19,7 @@ import net.wasdev.wlp.gradle.plugins.tasks.CleanTask
 import net.wasdev.wlp.gradle.plugins.tasks.InstallAppsTask
 import net.wasdev.wlp.gradle.plugins.tasks.AbstractServerTask
 import net.wasdev.wlp.gradle.plugins.tasks.CompileJSPTask
+import net.wasdev.wlp.gradle.plugins.tasks.extensions.arquillian.ConfigureArquillianTask
 
 import org.gradle.api.Project
 import org.gradle.api.logging.LogLevel

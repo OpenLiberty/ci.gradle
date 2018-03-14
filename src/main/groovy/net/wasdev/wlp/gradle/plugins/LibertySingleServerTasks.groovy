@@ -19,6 +19,7 @@ import net.wasdev.wlp.gradle.plugins.tasks.CleanTask
 import net.wasdev.wlp.gradle.plugins.tasks.InstallAppsTask
 import net.wasdev.wlp.gradle.plugins.tasks.AbstractServerTask
 import net.wasdev.wlp.gradle.plugins.tasks.CompileJSPTask
+import net.wasdev.wlp.gradle.plugins.tasks.extensions.arquillian.ConfigureArquillianTask
 
 import org.gradle.api.Project
 import org.gradle.api.logging.LogLevel
@@ -155,6 +156,15 @@ class LibertySingleServerTasks extends LibertyTasks {
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn project.tasks.withType(War), 'libertyCreate'
+        })
+
+        overwriteTask('configureArquillian', ConfigureArquillianTask, {
+            description "Automatically generates arquillian.xml for projects that use Arquillian Liberty Managed or Remote containers."
+            logging.level = LogLevel.INFO
+            group 'Liberty'
+            dependsOn 'libertyCreate', 'processTestResources'
+            skipIfArquillianXmlExists = project.configureArquillian.skipIfArquillianXmlExists
+            arquillianProperties = project.configureArquillian.arquillianProperties
         })
 
         if (!dependsOnApps(project.liberty.server)) {
