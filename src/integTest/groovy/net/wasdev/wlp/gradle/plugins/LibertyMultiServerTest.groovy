@@ -125,13 +125,4 @@ class LibertyMultiServerTest extends AbstractIntegrationTest{
            throw new AssertionError ("Fail on task Clean. "+e)
         }
     }
-
-    @Test
-    public void test11_installApps() {
-        try{
-           runTasks(buildDir, 'installApps')
-        } catch (Exception e) {
-           throw new AssertionError ("Fail on task InstallApps. "+e)
-        }
-    } 
 }

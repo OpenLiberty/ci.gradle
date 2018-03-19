@@ -42,6 +42,8 @@ liberty {
     }
     servers {
         libertyServer1 {
+            apps = [war]
+
             configFile = file("src/main/liberty/config/multi-server-test.xml")
 
             bootstrapProperties = ['httpPort': '9080', 'httpsPort': '9443']
@@ -51,6 +53,8 @@ liberty {
             verifyAppStartTimeout = 30
         }
         libertyServer2 {
+            apps = [war]
+
             configFile = file("src/main/liberty/config/multi-server-test.xml")
 
             bootstrapProperties = ['httpPort': '9081', 'httpsPort': '9444']
@@ -60,6 +64,8 @@ liberty {
             verifyAppStartTimeout = 30
         }
         libertyServer3 {
+            apps = [war]
+
             configFile = file("src/main/liberty/config/multi-server-test.xml")
 
             bootstrapProperties = ['httpPort': '9082', 'httpsPort': '9445']
@@ -68,5 +74,5 @@ liberty {
 
             verifyAppStartTimeout = 30
         }
-    } 
+    }
 }

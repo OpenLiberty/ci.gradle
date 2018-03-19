@@ -22,17 +22,11 @@ def wlpUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/
 apply plugin: 'liberty'
 
 liberty {
-    if (test_mode == 'online') {
-        install {
-            runtimeUrl = wlpUrl
-        }
-    } else {
-        installDir = WLP_DIR
+    install {
+        runtimeUrl = wlpUrl
     }
     servers {
         libertyServer1 {
-
-            apps = [file('../../resources/integrationTest/test-war.war')]
 
             deploy {
                 file = '../../resources/integrationTest/test-war.war'
@@ -53,8 +47,6 @@ liberty {
             }
         }
         libertyServer2 {
-            
-            apps = [file('../../resources/integrationTest/test-war.war')]
 
             deploy {
                 file = '../../resources/integrationTest/test-war.war'
@@ -75,8 +67,6 @@ liberty {
             }
         }
         libertyServer3 {
-
-            apps = [file('../../resources/integrationTest/test-war.war')]
 
             deploy {
                 file = '../../resources/integrationTest/test-war.war'

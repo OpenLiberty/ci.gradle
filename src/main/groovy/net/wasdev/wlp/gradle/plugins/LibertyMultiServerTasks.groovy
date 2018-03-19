@@ -260,7 +260,7 @@ class LibertyMultiServerTasks extends LibertyTasks {
             description 'Generates a WebSphere Liberty Profile server archive.'
             logging.level = LogLevel.DEBUG
             group 'Liberty'
-            dependsOn installDependsOn(server, 'installLiberty')
+            dependsOn installDependsOn(server, 'libertyCreate')
         })
 
         addTaskRule('Pattern: libertyDump-<Server Name>', 'libertyDump', DumpTask, {
@@ -293,6 +293,15 @@ class LibertyMultiServerTasks extends LibertyTasks {
             description 'Deletes files from some directories from the WebSphere Liberty Profile server'
             logging.level = LogLevel.INFO
             group 'Liberty'
+        })
+
+        addTaskRule('configureArquillian', ConfigureArquillianTask, {
+            description "Automatically generates arquillian.xml for projects that use Arquillian Liberty Managed or Remote containers."
+            logging.level = LogLevel.INFO
+            group 'Liberty'
+            dependsOn 'libertyCreate', 'processTestResources'
+            skipIfArquillianXmlExists = project.configureArquillian.skipIfArquillianXmlExists
+            arquillianProperties = project.configureArquillian.arquillianProperties
         })
     }
 

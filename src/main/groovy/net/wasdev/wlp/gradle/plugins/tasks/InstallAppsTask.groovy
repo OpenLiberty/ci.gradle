@@ -52,6 +52,11 @@ class InstallAppsTask extends AbstractServerTask {
 
     @TaskAction
     void installApps() {
+        if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
+            if (project.plugins.hasPlugin('war')) {
+                server.apps = [project.war]
+            }
+        }
         if (server.apps != null && !server.apps.isEmpty()) {
             Tuple appsLists = splitAppList(server.apps)
             installMultipleApps(appsLists[0], 'apps')

@@ -91,7 +91,7 @@ class LibertySingleServerTasks extends LibertyTasks {
             logging.level = LogLevel.DEBUG
             group 'Liberty'
 
-            dependsOn installDependsOn(project.liberty.server, 'installLiberty')
+            dependsOn installDependsOn(project.liberty.server, 'libertyCreate')
         })
 
         overwriteTask('libertyDump', DumpTask, {
