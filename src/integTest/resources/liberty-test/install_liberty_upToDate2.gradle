@@ -17,9 +17,8 @@ buildscript {
     }
 }
 
-def test_mode = findProperty('runit')
+def test_mode = runit
 def wlpLicense = System.getProperty('wlpLicense')
-def wlpVersion = System.getProperty('wlpVersion')
 def WLP_DIR = System.getProperty('wlpInstallDir')
 
 repositories {
@@ -37,7 +36,7 @@ ext {
 }
 
 dependencies {
-    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-webProfile7', version: '17.0.0.2'
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-webProfile7', version: wlpVersion
 }
 
 liberty {

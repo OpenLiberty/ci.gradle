@@ -47,7 +47,7 @@ abstract class AbstractIntegrationTest {
 
     protected static File copyBuildFiles(File buildFilename, File buildDir) {
             copyFile(buildFilename, new File(buildDir, 'build.gradle'))
-            copyFile(new File("build/resources/integrationTest/gradle.properties"), new File(buildDir, 'gradle.properties'))
+            copyFile(new File("gradle.properties"), new File(buildDir, 'gradle.properties'))
     }
 
     protected static File createTestProject(File parent, File sourceDir, String buildFilename) {
@@ -68,7 +68,7 @@ abstract class AbstractIntegrationTest {
             // copy the needed gradle build and property files
             File sourceFile = new File(sourceDir, buildFilename)
             copyBuildFiles(sourceFile, parent)
-            
+
         } catch (IOException e) {
             throw new AssertionError("Unable to copy directory '${parent.canonicalPath}'.")
         }
@@ -81,7 +81,7 @@ abstract class AbstractIntegrationTest {
         try {
             BuildLauncher build = connection.newBuild()
             build.setJvmArguments("-DWLP_DIR=$WLP_DIR")
-            build.withArguments("-Prunit=online");
+            build.withArguments("-i")
             build.forTasks(tasks)
             build.run()
         }

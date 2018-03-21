@@ -67,12 +67,17 @@ class InstallAppsTask extends AbstractServerTask {
             installMultipleApps(dropinsLists[0], 'dropins')
             installFileList(dropinsLists[1], 'dropins')
         }
+
+        File libertyConfigDropinsAppXml = ApplicationXmlDocument.getApplicationXmlFile(getServerDir(project))
+
         if (applicationXml.hasChildElements()) {
-            logger.warn("At least one application is not defined in the server configuration but the build file indicates it should be installed in the apps folder. Application configuration is being added to the target server configuration dropins folder by the plug-in.");
-            applicationXml.writeApplicationXmlDocument(getServerDir(project));
+            logger.warn("At least one application is not defined in the server configuration but the build file indicates it should be installed in the apps folder. Application configuration is being added to the target server configuration dropins folder by the plug-in.")
+            applicationXml.writeApplicationXmlDocument(getServerDir(project))
+        } else if (hasConfiguredApp(libertyConfigDropinsAppXml)) {
+            logger.warn("At least one application is not defined in the server configuration but the build file indicates it should be installed in the apps folder. Liberty will use additional application configuration added to the the target server configuration dropins folder by the plug-in.")
         } else {
-            if (ApplicationXmlDocument.getApplicationXmlFile(getServerDir(project)).exists()) {
-                ApplicationXmlDocument.getApplicationXmlFile(getServerDir(project)).delete();
+            if (libertyConfigDropinsAppXml.exists()){
+                libertyConfigDropinsAppXml.delete()
             }
         }
     }
@@ -151,6 +156,9 @@ class InstallAppsTask extends AbstractServerTask {
             config.toXmlFile(looseConfigFile)
             break
         case "ear":
+            if ((String.valueOf(project.getGradle().getGradleVersion().charAt(0)) as int) < 4) {
+                throw new Exception(MessageFormat.format(("Loose Ear is only supported by Gradle 4.0 or higher")))
+            }
             validateAppConfig(application, task.baseName, appsDir)
             logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFile.getAbsolutePath()))
             installLooseConfigEar(config, task)
@@ -244,7 +252,7 @@ class InstallAppsTask extends AbstractServerTask {
         for (Map.Entry<File, Dependency> entry : completeDeps){
             Dependency dependency = entry.getValue();
             File dependencyFile = entry.getKey();
-            
+
             if (dependency instanceof ProjectDependency) {
                 Project dependencyProject = dependency.getDependencyProject()
                 String projectType = FilenameUtils.getExtension(dependencyFile.toString())
@@ -355,5 +363,15 @@ class InstallAppsTask extends AbstractServerTask {
         }
 
         return new Tuple(appTasks, appFiles)
+    }
+
+    //Checks if there is an app configured in an existing configDropins application xml file
+    private boolean hasConfiguredApp(File applicationXmlFile) {
+        if (applicationXmlFile.exists()) {
+            ApplicationXmlDocument appXml = new ApplicationXmlDocument()
+            appXml.createDocument(applicationXmlFile)
+            return appXml.hasChildElements()
+        }
+        return false
     }
 }

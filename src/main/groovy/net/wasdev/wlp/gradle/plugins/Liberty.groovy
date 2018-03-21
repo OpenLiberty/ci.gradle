@@ -33,6 +33,7 @@ import net.wasdev.wlp.gradle.plugins.tasks.UndeployTask
 import net.wasdev.wlp.gradle.plugins.tasks.InstallFeatureTask
 import net.wasdev.wlp.gradle.plugins.tasks.InstallLibertyTask
 import net.wasdev.wlp.gradle.plugins.tasks.UninstallFeatureTask
+import net.wasdev.wlp.gradle.plugins.tasks.extensions.arquillian.ConfigureArquillianTask
 import net.wasdev.wlp.gradle.plugins.tasks.CleanTask
 import net.wasdev.wlp.gradle.plugins.tasks.InstallAppsTask
 import net.wasdev.wlp.gradle.plugins.tasks.AbstractServerTask
@@ -55,10 +56,13 @@ class Liberty implements Plugin<Project> {
         project.configurations.create('libertyLicense')
         project.configurations.create('libertyRuntime')
 
-        setEclipseFacets(project)
+        //Used to set project facets in Eclipse
+        project.pluginManager.apply('eclipse-wtp')
+        project.tasks.getByName('eclipseWtpFacet').finalizedBy 'libertyCreate'
 
         //Create expected server extension from liberty extension data
         project.afterEvaluate {
+            setEclipseFacets(project)
             if (project.liberty.server == null) {
                 project.liberty.server = copyProperties(project.liberty)
             }
@@ -193,13 +197,13 @@ class Liberty implements Plugin<Project> {
         }
 
         project.task('uninstallFeature', type: UninstallFeatureTask) {
-            description 'Uninstall a feature from the WebSphere Liberty Profile server'
+            description 'Uninstall a feature from the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
         }
 
         project.task('cleanDirs', type: CleanTask) {
-            description 'Deletes files from some directories from the WebSphere Liberty Profile server'
+            description 'Deletes files from some directories from the WebSphere Liberty Profile server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn 'libertyStop'
@@ -211,13 +215,20 @@ class Liberty implements Plugin<Project> {
             group 'Liberty'
             dependsOn project.tasks.withType(War), 'libertyCreate'
         }
+
+		project.task('configureArquillian', type: ConfigureArquillianTask) {
+			description "Automatically generates arquillian.xml for projects that use Arquillian Liberty Managed or Remote containers."
+			logging.level = LogLevel.INFO
+			group 'Liberty'
+			dependsOn 'libertyCreate', 'processTestResources'
+			project.afterEvaluate {
+				skipIfArquillianXmlExists = project.configureArquillian.skipIfArquillianXmlExists
+				arquillianProperties = project.configureArquillian.arquillianProperties
+			}
+		}
     }
 
     private void setEclipseFacets(Project project) {
-        //Used to set project facets in Eclipse
-        project.pluginManager.apply('eclipse-wtp')
-        project.tasks.getByName('eclipseWtpFacet').finalizedBy 'libertyCreate'
-
         //Uplift the jst.web facet version to 3.0 if less than 3.0 so WDT can deploy properly to Liberty.
         //There is a known bug in the wtp plugin that will add duplicate facets, the first of the duplicates is honored.
         if(project.plugins.hasPlugin('war')) {

@@ -1,4 +1,4 @@
-# ci.gradle [![Build Status](https://travis-ci.org/WASdev/ci.gradle.svg?branch=master)](https://travis-ci.org/WASdev/ci.gradle) [![Maven Central Latest](https://maven-badges.herokuapp.com/maven-central/net.wasdev.wlp.gradle.plugins/liberty-gradle-plugin/badge.svg)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22net.wasdev.wlp.gradle.plugins%22%20AND%20a%3A%22liberty-gradle-plugin%22) [![Build status](https://ci.appveyor.com/api/projects/status/ebq1a5qtt8ndhc57/branch/master?svg=true)](https://ci.appveyor.com/project/wasdevb1/ci-gradle-6hm2g)
+# ci.gradle [![Maven Central Latest](https://maven-badges.herokuapp.com/maven-central/net.wasdev.wlp.gradle.plugins/liberty-gradle-plugin/badge.svg)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22net.wasdev.wlp.gradle.plugins%22%20AND%20a%3A%22liberty-gradle-plugin%22) [![Build Status](https://travis-ci.org/WASdev/ci.gradle.svg?branch=master)](https://travis-ci.org/WASdev/ci.gradle) [![Build status](https://ci.appveyor.com/api/projects/status/ebq1a5qtt8ndhc57/branch/master?svg=true)](https://ci.appveyor.com/project/wasdevb1/ci-gradle-6hm2g) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/9fa7d434945c452cae1c4958bfda8010)](https://www.codacy.com/app/wasdevb1/ci.gradle?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=WASdev/ci.gradle&amp;utm_campaign=Badge_Grade)
 
 The Liberty Gradle plugin supports install and operational control of Liberty runtime and servers. Use it to manage your application on Liberty for integration test and to create Liberty server packages.
 
@@ -6,6 +6,7 @@ The Liberty Gradle plugin supports install and operational control of Liberty ru
 * [Usage](#usage)
 * [Plugin Configuration](#plugin-configuration)
 * [Tasks](#tasks)
+* [Extensions](#extensions)
 
 
 ## Build
@@ -31,24 +32,10 @@ To build the plugin and run the integration tests execute the following commands
  ```
 
 ## Usage
-### Configuring your dependencies
 
-####  Adding the Ant plugin to the build script
-This plugin needs the `wlp-anttasks.jar`file as a dependency, this file can be downloaded from the [snapshot repository](https://oss.sonatype.org/content/repositories/snapshots/net/wasdev/wlp/ant/wlp-anttasks/) or the [Maven central repository](http://repo1.maven.org/maven2/net/wasdev/wlp/ant/wlp-anttasks/).
+### Adding the plugin to the build script
 
-The following code snippet shows an example for how to set up your build script correctly.
-```groovy
-buildscript {
-    dependencies {
-        classpath files('gradle/wlp-anttasks.jar')
-    }
-}
-```
-
-
-### Adding the binary plugin to the build script
-
-Within your Gradle build script, you need to set up the classpath to include the Liberty Gradle plugin. You also need to define the Maven Central repository to find the plugin or its dependencies.
+Within your Gradle build script, you need to set up the classpath to include the Liberty Gradle plugin. You also need to define the Maven Central repository to find the plugin and its dependencies.
 
 If you are using a snapshot version of the plugin make sure to define the Sonatype Nexus Snapshots repository in addition to the Maven Central repository.
 
@@ -64,23 +51,12 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.1-SNAPSHOT'
+        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.1.1-SNAPSHOT'
     }
 }
 ```
 
-Alternatively, you might choose to include the plugin JAR file. For example:
-
-```groovy
-buildscript {
-    dependencies {
-        classpath files('gradle/liberty-gradle-plugin.jar')
-        classpath files('gradle/wlp-anttasks.jar')
-    }
-}
-```
 To use the Liberty Gradle Plugin, include the following code in your build script:
-
 
 ```groovy
 apply plugin: 'liberty'
@@ -121,3 +97,11 @@ The Liberty Gradle plugin defines a built-in task order to allow a user to call 
 The most appealing benefit from defining a task order is the ability to allow the user to call an end task directly. For example, if the user calls `libertyStart` out of the box, Gradle will recognize that it must call `installLiberty -> libertyCreate -> installFeature -> installApps` to get a server with features and apps properly running.
 
 Click on a [task](#tasks) to view what it depends on.
+
+## Extensions
+
+Extensions are tasks that improve the compatibility or user experience of third party libraries used with Liberty. The `liberty-gradle-plugin` provides the following extensions:
+
+| Extension | Description |
+| --------- | ------------ |
+| [configureArquillian](docs/configureArquillian.md) | Integrates `arquillian.xml` configuration for the Liberty Managed and Remote Arquillian containers in the `liberty-gradle-plugin`. Automatically configures required `arquillian.xml` parameters for the Liberty Managed container. |

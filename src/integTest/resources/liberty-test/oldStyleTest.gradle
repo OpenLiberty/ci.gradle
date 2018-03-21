@@ -13,9 +13,8 @@ buildscript {
     }
 }
 
-def test_mode = project.findProperty('runit')
+def test_mode = runit
 def wlpLicense = System.getProperty('wlpLicense')
-def wlpVersion = System.getProperty('wlpVersion')
 def WLP_DIR = System.getProperty('wlpInstallDir')
 def wlpUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/" + wlpVersion + "/wlp-webProfile7-" + wlpVersion + ".zip"
 

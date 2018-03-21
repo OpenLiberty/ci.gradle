@@ -1,0 +1,3 @@
+---
+exclude_paths:
+    - src/integTest/resources/arquillian-tests/**
