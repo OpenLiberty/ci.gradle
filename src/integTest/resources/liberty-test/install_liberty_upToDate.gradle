@@ -50,9 +50,4 @@ liberty {
             name = 'libertyOffline'
         }
     }
-    install {
-        // use 1 liberty install for the whole repo
-        baseDir = rootProject.buildDir
-        runtimeUrl = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/17.0.0.4/wlp-webProfile7-17.0.0.4.zip"
-    }
 }

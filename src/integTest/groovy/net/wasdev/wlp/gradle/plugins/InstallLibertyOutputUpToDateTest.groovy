@@ -66,4 +66,23 @@ class InstallLIbertyOutputUpToDateTest extends AbstractIntegrationTest{
            throw new AssertionError ("Fail on task installLiberty. " + e)
         }
     }
+    @Test
+    public void test2_installLiberty() {
+        copyBuildFiles(new File(resourceDir, "install_liberty_upToDate2.gradle"), buildDir)
+        try{
+           File file = new File("build/testBuilds/install-liberty-output-upToDateTest/build/wlp/lib/versions/WebSphereApplicationServer.properties");
+           assert file.exists() : 'Liberty was not successfully installed'
+           BufferedReader br = new BufferedReader(new FileReader(file));
+           String st;
+           boolean versionIsCorrect = false;
+           while ((st = br.readLine()) != null) {
+             if(st.equals("com.ibm.websphere.productVersion=17.0.0.2")){
+                 versionIsCorrect = true;
+             }
+           }
+           br.close();
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task installLiberty. " + e)
+        }
+    }
 }
