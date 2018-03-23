@@ -14,7 +14,6 @@ buildscript {
 
 def test_mode = System.getProperty('runit')
 def wlpLicense = System.getProperty('wlpLicense')
-def wlpVersion = System.getProperty('wlpVersion')
 def WLP_DIR = System.getProperty('wlpInstallDir')
 
 apply plugin: 'liberty'

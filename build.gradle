@@ -77,12 +77,10 @@ task integrationTest(type: Test) {
         testClassesDirs = fileTree(dir: sourceSets.integrationTest.output.getDirs().getSingleFile())
     }
     classpath = sourceSets.integrationTest.runtimeClasspath
-    if (!(project.hasProperty('runit'))) {
-        enabled = false
-    } else {
-        systemProperties System.getProperties()
-        systemProperty 'runit',runit
-    }
+
+    systemProperties System.getProperties()
+    systemProperty 'runit', project.getProperty('runit')
+
     mustRunAfter test
 }
 

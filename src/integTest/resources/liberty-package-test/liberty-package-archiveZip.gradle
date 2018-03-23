@@ -13,7 +13,7 @@ buildscript {
     }
 }
 
-def test_mode = System.getProperty('runit')
+def test_mode = runit
 def WLP_DIR = System.getProperty('wlpInstallDir')
 
 apply plugin: 'liberty'
