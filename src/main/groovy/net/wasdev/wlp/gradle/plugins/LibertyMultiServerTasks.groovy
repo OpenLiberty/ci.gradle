@@ -295,7 +295,7 @@ class LibertyMultiServerTasks extends LibertyTasks {
             group 'Liberty'
         })
 
-        addTaskRule('configureArquillian', ConfigureArquillianTask, {
+        addTaskRule('Pattern: configureArquillian-<Server Name>', 'configureArquillian', ConfigureArquillianTask, {
             description "Automatically generates arquillian.xml for projects that use Arquillian Liberty Managed or Remote containers."
             logging.level = LogLevel.INFO
             group 'Liberty'
