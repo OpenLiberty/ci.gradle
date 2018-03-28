@@ -18,6 +18,9 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 public class TestLooseEarApplication extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/integrationTest/loose-ear-test")
     static File buildDir = new File(integTestDir, "/test-loose-ear-application")
@@ -111,6 +114,12 @@ public class TestLooseEarApplication extends AbstractIntegrationTest{
     public void test_start_with_timeout_success() {
         try {
             runTasks(buildDir, 'libertyStart')
+            URL url = new URL("http://localhost:9080/ejb-war");
+            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.connect();
+            int code = connection.getResponseCode();
+            Assert.assertTrue(code == 200);
         } catch (Exception e) {
             throw new AssertionError ("Fail on task libertyStart. "+ e)
         }

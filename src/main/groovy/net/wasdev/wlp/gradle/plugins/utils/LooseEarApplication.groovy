@@ -43,7 +43,7 @@ public class LooseEarApplication extends LooseApplication {
     
     public Element addJarModule(Project proj) throws Exception {
         Element moduleArchive = config.addArchive("/" + proj.jar.archiveName);
-        proj.sourceSets.main.getOutput().getClassesDirs().each{config.addDir(moduleArchive, it.getAbsolutePath(), "/WEB-INF/classes");}
+        proj.sourceSets.main.getOutput().getClassesDirs().each{config.addDir(moduleArchive, it.getAbsolutePath(), "/");}
         addModules(moduleArchive, proj)
         return moduleArchive;
     }
