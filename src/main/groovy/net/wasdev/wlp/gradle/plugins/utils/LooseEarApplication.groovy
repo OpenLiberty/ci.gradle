@@ -53,8 +53,6 @@ public class LooseEarApplication extends LooseApplication {
             String extension = FilenameUtils.getExtension(f.getAbsolutePath())
             switch(extension) {
                 case "jar":
-                    config.addFile(moduleArchive, f.getAbsolutePath(), "/" + f.getName());
-                    break
                 case "war":
                 case "rar":
                     config.addFile(moduleArchive, f.getAbsolutePath(), "/WEB-INF/lib/" + f.getName());
