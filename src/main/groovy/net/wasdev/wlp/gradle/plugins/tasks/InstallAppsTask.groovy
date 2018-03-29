@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2017.
+ * (C) Copyright IBM Corporation 2014, 2018.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,8 @@ class InstallAppsTask extends AbstractServerTask {
         if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
             if (project.plugins.hasPlugin('war')) {
                 server.apps = [project.war]
+            } else if (project.plugins.hasPlugin('ear')) {
+                server.apps = [project.ear]
             }
         }
         if (server.apps != null && !server.apps.isEmpty()) {

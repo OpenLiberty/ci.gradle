@@ -63,7 +63,7 @@ class LibertyMultiServerTasks extends LibertyTasks {
         })
 
         project.tasks.getByName('libertyRun') {
-            description = "Runs a Websphere Liberty Profile server under the Gradle process."
+            description = "Runs a Liberty server under the Gradle process."
             logging.level = LogLevel.INFO
             group 'Liberty'
             doLast {
@@ -79,7 +79,7 @@ class LibertyMultiServerTasks extends LibertyTasks {
         }
 
         project.tasks.getByName('libertyCreate') {
-            description 'Creates a WebSphere Liberty Profile server.'
+            description 'Creates a Liberty server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
 
@@ -92,42 +92,42 @@ class LibertyMultiServerTasks extends LibertyTasks {
         }
 
         project.tasks.getByName('libertyStart') {
-            description 'Starts the WebSphere Liberty Profile server.'
+            description 'Starts the Liberty server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn getTaskList('libertyStart')
         }
 
         project.tasks.getByName('libertyStop') {
-            description 'Stops the WebSphere Liberty Profile server.'
+            description 'Stops the Liberty server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn getTaskList('libertyStop')
         }
 
         project.tasks.getByName('libertyPackage') {
-            description 'Generates a WebSphere Liberty Profile server archive.'
+            description 'Generates a Liberty server archive.'
             logging.level = LogLevel.DEBUG
             group 'Liberty'
             dependsOn getTaskList('libertyPackage')
         }
 
         project.tasks.getByName('libertyDump') {
-            description 'Dumps diagnostic information from the Liberty Profile server into an archive.'
+            description 'Dumps diagnostic information from the Liberty server into an archive.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn getTaskList('libertyDump')
         }
 
         project.tasks.getByName('libertyJavaDump') {
-            description 'Dumps diagnostic information from the Liberty Profile server JVM.'
+            description 'Dumps diagnostic information from the Liberty server JVM.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn getTaskList('libertyJavaDump')
         }
 
         project.tasks.getByName('libertyDebug') {
-            description 'Runs the Liberty Profile server in the console foreground after a debugger connects to the debug port (default: 7777).'
+            description 'Runs the Liberty server in the console foreground after a debugger connects to the debug port (default: 7777).'
             logging.level = LogLevel.INFO
             group 'Liberty'
             doLast {
@@ -136,35 +136,35 @@ class LibertyMultiServerTasks extends LibertyTasks {
         }
 
         project.tasks.getByName('deploy') {
-            description 'Deploys a supported file to the WebSphere Liberty Profile server.'
+            description 'Deploys a supported file to the Liberty server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn getTaskList('deploy')
         }
 
         project.tasks.getByName('undeploy') {
-            description 'Removes an application from the WebSphere Liberty Profile server.'
+            description 'Removes an application from the Liberty server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn getTaskList('undeploy')
         }
 
         project.tasks.getByName('installFeature') {
-            description 'Install a new feature to the WebSphere Liberty Profile server'
+            description 'Install a new feature to the Liberty server'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn getTaskList('installFeature')
         }
 
         project.tasks.getByName('uninstallFeature') {
-            description 'Uninstall a feature from the WebSphere Liberty Profile server'
+            description 'Uninstall a feature from the Liberty server'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn getTaskList('uninstallFeature')
         }
 
         project.tasks.getByName('cleanDirs') {
-            description 'Deletes files from some directories from the WebSphere Liberty Profile server'
+            description 'Deletes files from some directories from the Liberty server'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn getTaskList('cleanDirs')
@@ -186,7 +186,7 @@ class LibertyMultiServerTasks extends LibertyTasks {
 
     void addTaskRules() {
         addTaskRule('Pattern: libertyCreate-<Server Name>', 'libertyCreate', CreateTask, {
-            description 'Creates a WebSphere Liberty Profile server.'
+            description 'Creates a Liberty server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn 'installLiberty'
@@ -195,13 +195,13 @@ class LibertyMultiServerTasks extends LibertyTasks {
         })
 
         addTaskRule('Pattern: libertyStop-<Server Name>', 'libertyStop', StopTask, {
-            description 'Stops the WebSphere Liberty Profile server.'
+            description 'Stops the Liberty server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
         })
 
         addTaskRule('Pattern: libertyStart-<Server Name>', 'libertyStart', StartTask, {
-            description 'Starts the WebSphere Liberty Profile server.'
+            description 'Starts the Liberty server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn 'libertyCreate-' + server.name
@@ -210,7 +210,7 @@ class LibertyMultiServerTasks extends LibertyTasks {
         })
 
         addTaskRule('Pattern: libertyRun-<Server Name>', 'libertyRun', RunTask, {
-            description 'Runs a Websphere Liberty Profile server under the Gradle process.'
+            description 'Runs a Liberty server under the Gradle process.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn 'libertyCreate-' + server.name
@@ -227,7 +227,7 @@ class LibertyMultiServerTasks extends LibertyTasks {
         })
 
         addTaskRule('Pattern: installFeature-<Server Name>', 'installFeature', InstallFeatureTask, {
-            description 'Install a new feature to the WebSphere Liberty Profile server'
+            description 'Install a new feature to the Liberty server'
             logging.level = LogLevel.INFO
             group 'Liberty'
 
@@ -239,7 +239,7 @@ class LibertyMultiServerTasks extends LibertyTasks {
         })
 
         addTaskRule('Pattern: uninstallFeature-<Server Name>', 'uninstallFeature', UninstallFeatureTask, {
-            description 'Uninstall a feature from the WebSphere Liberty Profile server'
+            description 'Uninstall a feature from the Liberty server'
             logging.level = LogLevel.INFO
             group 'Liberty'
         })
@@ -252,7 +252,7 @@ class LibertyMultiServerTasks extends LibertyTasks {
         })
 
         addTaskRule('Pattern: libertyRun-<Server Name>', 'libertyRun', RunTask, {
-            description = "Runs a Websphere Liberty Profile server under the Gradle process."
+            description = "Runs a Liberty server under the Gradle process."
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn 'libertyCreate-' + server.name
@@ -266,47 +266,47 @@ class LibertyMultiServerTasks extends LibertyTasks {
         })
 
         addTaskRule('Pattern: libertyDebug-<Server Name>', 'libertyDebug', DebugTask, {
-            description 'Runs the Liberty Profile server in the console foreground after a debugger connects to the debug port (default: 7777).'
+            description 'Runs the Liberty server in the console foreground after a debugger connects to the debug port (default: 7777).'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn 'libertyCreate-' + server.name
         })
 
         addTaskRule('Pattern: libertyPackage-<Server Name>', 'libertyPackage', PackageTask, {
-            description 'Generates a WebSphere Liberty Profile server archive.'
+            description 'Generates a Liberty server archive.'
             logging.level = LogLevel.DEBUG
             group 'Liberty'
             dependsOn installDependsOn(server, 'libertyCreate')
         })
 
         addTaskRule('Pattern: libertyDump-<Server Name>', 'libertyDump', DumpTask, {
-            description 'Dumps diagnostic information from the Liberty Profile server into an archive.'
+            description 'Dumps diagnostic information from the Liberty server into an archive.'
             logging.level = LogLevel.INFO
             group 'Liberty'
         })
 
         addTaskRule('Pattern: libertyJavaDump-<Server Name>', 'libertyJavaDump', JavaDumpTask, {
-            description 'Dumps diagnostic information from the Liberty Profile server JVM.'
+            description 'Dumps diagnostic information from the Liberty server JVM.'
             logging.level = LogLevel.INFO
             group 'Liberty'
         })
 
         addTaskRule('Pattern: deploy-<Server Name>', 'deploy', DeployTask, {
-            description 'Deploys a supported file to the WebSphere Liberty Profile server.'
+            description 'Deploys a supported file to the Liberty server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn 'libertyStart-' + server.name
         })
 
         addTaskRule('Pattern: undeploy-<Server Name>', 'undeploy', UndeployTask, {
-            description 'Removes an application from the WebSphere Liberty Profile server.'
+            description 'Removes an application from the Liberty server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn 'libertyStart-' + server.name
         })
 
         addTaskRule('Pattern: cleanDirs-<Server Name>', 'cleanDirs', CleanTask, {
-            description 'Deletes files from some directories from the WebSphere Liberty Profile server'
+            description 'Deletes files from some directories from the Liberty server'
             logging.level = LogLevel.INFO
             group 'Liberty'
         })
@@ -315,9 +315,9 @@ class LibertyMultiServerTasks extends LibertyTasks {
             description "Automatically generates arquillian.xml for projects that use Arquillian Liberty Managed or Remote containers."
             logging.level = LogLevel.INFO
             group 'Liberty'
-            dependsOn 'libertyCreate', 'processTestResources'
-            skipIfArquillianXmlExists = project.configureArquillian.skipIfArquillianXmlExists
-            arquillianProperties = project.configureArquillian.arquillianProperties
+            dependsOn 'installApps-' + server.name, 'processTestResources'
+            skipIfArquillianXmlExists = project.arquillianConfiguration.skipIfArquillianXmlExists
+            arquillianProperties = project.arquillianConfiguration.arquillianProperties
         })
     }
 
@@ -332,12 +332,13 @@ class LibertyMultiServerTasks extends LibertyTasks {
     }
 
     boolean tasksUpToDate (List<String> taskList) {
+        boolean allUpToDate = true
         taskList.each {
             if(!project.tasks.getByName(it).getUpToDate()){
-                return false
+                allUpToDate = false
             }
         }
-        return true
+        return allUpToDate
     }
 
     private List<String> getTaskList (String taskName) {

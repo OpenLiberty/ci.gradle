@@ -40,4 +40,4 @@ To call a task for a certain server you need to specify the server at the end of
 ```gradle libertyStart-libertyServer1```
 
 To run the `libertyRun` or `libertyDebug` tasks there must be a server specified in the task name when multiple servers are defined.
-The `installLiberty` task is not server specific and should not have a server name applied to the end of the task name.
+The `installLiberty` task should not have a server name applied to the end of the task name. It is a Liberty runtime specific task.

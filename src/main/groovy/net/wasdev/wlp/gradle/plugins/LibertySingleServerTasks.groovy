@@ -61,7 +61,7 @@ class LibertySingleServerTasks extends LibertyTasks {
         })
 
         overwriteTask('libertyRun', RunTask, {
-            description = "Runs a Websphere Liberty Profile server under the Gradle process."
+            description = "Runs a Liberty server under the Gradle process."
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn 'libertyCreate'
@@ -77,7 +77,7 @@ class LibertySingleServerTasks extends LibertyTasks {
         })
 
         overwriteTask('libertyCreate', CreateTask, {
-            description 'Creates a WebSphere Liberty Profile server.'
+            description 'Creates a Liberty server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn 'installLiberty'
@@ -87,7 +87,7 @@ class LibertySingleServerTasks extends LibertyTasks {
         })
 
         overwriteTask('libertyStart', StartTask, {
-            description 'Starts the WebSphere Liberty Profile server.'
+            description 'Starts the Liberty server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn 'libertyCreate'
@@ -96,13 +96,13 @@ class LibertySingleServerTasks extends LibertyTasks {
         })
 
         overwriteTask('libertyStop', StopTask, {
-            description 'Stops the WebSphere Liberty Profile server.'
+            description 'Stops the Liberty server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
         })
 
         overwriteTask('libertyPackage', PackageTask, {
-            description 'Generates a WebSphere Liberty Profile server archive.'
+            description 'Generates a Liberty server archive.'
             logging.level = LogLevel.DEBUG
             group 'Liberty'
 
@@ -110,39 +110,39 @@ class LibertySingleServerTasks extends LibertyTasks {
         })
 
         overwriteTask('libertyDump', DumpTask, {
-            description 'Dumps diagnostic information from the Liberty Profile server into an archive.'
+            description 'Dumps diagnostic information from the Liberty server into an archive.'
             logging.level = LogLevel.INFO
             group 'Liberty'
         })
 
         overwriteTask('libertyJavaDump', JavaDumpTask, {
-            description 'Dumps diagnostic information from the Liberty Profile server JVM.'
+            description 'Dumps diagnostic information from the Liberty server JVM.'
             logging.level = LogLevel.INFO
             group 'Liberty'
         })
 
         overwriteTask('libertyDebug', DebugTask, {
-            description 'Runs the Liberty Profile server in the console foreground after a debugger connects to the debug port (default: 7777).'
+            description 'Runs the Liberty server in the console foreground after a debugger connects to the debug port (default: 7777).'
             logging.level = LogLevel.INFO
             group 'Liberty'
         })
 
         overwriteTask('deploy', DeployTask, {
-            description 'Deploys a supported file to the WebSphere Liberty Profile server.'
+            description 'Deploys a supported file to the Liberty server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn 'libertyStart'
         })
 
         overwriteTask('undeploy', UndeployTask, {
-            description 'Removes an application from the WebSphere Liberty Profile server.'
+            description 'Removes an application from the Liberty server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn 'libertyStart'
         })
 
         overwriteTask('installFeature', InstallFeatureTask, {
-            description 'Install a new feature to the WebSphere Liberty Profile server'
+            description 'Install a new feature to the Liberty server'
             logging.level = LogLevel.INFO
             group 'Liberty'
 
@@ -154,13 +154,13 @@ class LibertySingleServerTasks extends LibertyTasks {
         })
 
         overwriteTask('uninstallFeature', UninstallFeatureTask, {
-            description 'Uninstall a feature from the WebSphere Liberty Profile server'
+            description 'Uninstall a feature from the Liberty server'
             logging.level = LogLevel.INFO
             group 'Liberty'
         })
 
         overwriteTask('cleanDirs', CleanTask, {
-            description 'Deletes files from some directories from the WebSphere Liberty Profile server'
+            description 'Deletes files from some directories from the Liberty server'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn 'libertyStop'
@@ -177,13 +177,13 @@ class LibertySingleServerTasks extends LibertyTasks {
             description "Automatically generates arquillian.xml for projects that use Arquillian Liberty Managed or Remote containers."
             logging.level = LogLevel.INFO
             group 'Liberty'
-            dependsOn 'libertyCreate', 'processTestResources'
-            skipIfArquillianXmlExists = project.configureArquillian.skipIfArquillianXmlExists
-            arquillianProperties = project.configureArquillian.arquillianProperties
+            dependsOn 'installApps', 'processTestResources'
+            skipIfArquillianXmlExists = project.arquillianConfiguration.skipIfArquillianXmlExists
+            arquillianProperties = project.arquillianConfiguration.arquillianProperties
         })
 
         if (!dependsOnApps(project.liberty.server)) {
-            if (project.plugins.hasPlugin('war')) {
+            if (project.plugins.hasPlugin('war') || project.plugins.hasPlugin('ear')) {
                 def tasks = project.tasks
                 tasks.getByName('libertyRun').dependsOn 'installApps'
                 tasks.getByName('libertyStart').dependsOn 'installApps'
