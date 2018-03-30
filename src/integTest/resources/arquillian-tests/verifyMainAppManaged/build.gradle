@@ -19,13 +19,10 @@ dependencies {
     compile "org.jboss.arquillian.container:arquillian-wlp-managed-8.5:1.0.0.CR1"
 }
 
-liberty {
-    server {
-        name = wlpServerName
-    }
-}
-
 task configArq (type:ConfigureArquillianTask) {
     arquillianProperties = ['verifyApps': 'arquillian-tests']
     dependsOn 'deleteArquillianXml'
+    doFirst {
+        server = rootProject.liberty.server
+    }
 }

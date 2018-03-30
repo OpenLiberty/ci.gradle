@@ -39,7 +39,7 @@ class ConfigureArquillianTask extends AbstractServerTask {
     public enum TypeProperty {
         MANAGED, REMOTE, NOTFOUND;
     }
-    
+
     @Input
     public boolean skipIfArquillianXmlExists = false;
 
@@ -83,7 +83,7 @@ class ConfigureArquillianTask extends AbstractServerTask {
 
     private void configureArquillianManaged(File arquillianXml) throws GradleException {
         try {
-            LibertyManagedObject arquillianManaged = new LibertyManagedObject(getInstallDir(project).getCanonicalPath(), getServer().name,
+            LibertyManagedObject arquillianManaged = new LibertyManagedObject(getInstallDir(project).getCanonicalPath(), server.name,
                     getHttpPort(), LibertyProperty.getArquillianProperties(arquillianProperties, LibertyManagedObject.LibertyManagedProperty.class));
             arquillianManaged.build(arquillianXml);
         } catch (Exception e) {

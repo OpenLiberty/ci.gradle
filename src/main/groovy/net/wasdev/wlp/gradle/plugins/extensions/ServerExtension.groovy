@@ -59,6 +59,10 @@ class ServerExtension{
     PackageAndDumpExtension dumpLiberty = new PackageAndDumpExtension()
     PackageAndDumpExtension javaDumpLiberty = new PackageAndDumpExtension()
 
+    public ServerExtension(String name) {
+        this.name = name
+    }
+
     def uninstallfeatures(Closure closure) {
         ConfigureUtil.configure(closure, uninstallfeatures)
     }

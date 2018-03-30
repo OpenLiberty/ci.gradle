@@ -1,0 +1,89 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath fileTree(dir: '../libs', include: '*.jar', exclude: ['*-groovydoc.jar', '*-sources.jar'])
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+    }
+}
+
+def test_mode = runit
+def wlpLicense = System.getProperty('wlpLicense')
+def WLP_DIR = System.getProperty('wlpInstallDir')
+def wlpUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/" + wlpVersion + "/wlp-webProfile7-" + wlpVersion + ".zip"
+
+apply plugin: 'liberty'
+
+liberty {
+    install {
+        runtimeUrl = wlpUrl
+    }
+    servers {
+        libertyServer1 {
+
+            deploy {
+                file = '../../resources/integrationTest/test-war.war'
+            }
+
+            packageLiberty {
+                include = 'minify'
+                os ='Linux'
+            }
+
+            features {
+                name = ['mongodb-2.0']
+                acceptLicense = true
+            }
+
+            uninstallfeatures {
+                name = ['mongodb-2.0']
+            }
+        }
+        libertyServer2 {
+
+            deploy {
+                file = '../../resources/integrationTest/test-war.war'
+            }
+
+            packageLiberty {
+                include = 'minify'
+                os ='Linux'
+            }
+
+            features {
+                name = ['mongodb-2.0']
+                acceptLicense = true
+            }
+
+            uninstallfeatures {
+                name = ['mongodb-2.0']
+            }
+        }
+        libertyServer3 {
+
+            deploy {
+                file = '../../resources/integrationTest/test-war.war'
+            }
+
+            packageLiberty {
+                include = 'minify'
+                os ='Linux'
+            }
+
+            features {
+                name = ['mongodb-2.0']
+                acceptLicense = true
+            }
+
+            uninstallfeatures {
+                name = ['mongodb-2.0']
+            }
+        }
+    }
+}

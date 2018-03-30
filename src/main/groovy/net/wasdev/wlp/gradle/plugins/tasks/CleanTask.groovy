@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2015.
+ * (C) Copyright IBM Corporation 2015, 2018.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ class CleanTask extends AbstractServerTask {
     @TaskAction
     void cleanDirectories() {
         def params = buildLibertyMap(project);
-        params.put('logs', project.liberty.server.cleanDir.logs)
-        params.put('workarea', project.liberty.server.cleanDir.workarea)
-        params.put('dropins', project.liberty.server.cleanDir.dropins)
-        params.put('apps', project.liberty.server.cleanDir.apps)
+        params.put('logs', server.cleanDir.logs)
+        params.put('workarea', server.cleanDir.workarea)
+        params.put('dropins', server.cleanDir.dropins)
+        params.put('apps', server.cleanDir.apps)
         params.remove('timeout')
         project.ant.taskdef(name: 'cleanDir',
                             classname: 'net.wasdev.wlp.ant.CleanTask',

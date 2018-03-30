@@ -35,6 +35,11 @@ class InstallFeature_acceptLicense extends AbstractIntegrationTest{
             WLP_DIR.replace("\\","/")
         }
         createTestProject(buildDir, resourceDir, buildFilename)
+        try {
+            runTasks(buildDir, 'libertyCreate')
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task libertyCreate. " + e)
+        }
     }
 
     @Test

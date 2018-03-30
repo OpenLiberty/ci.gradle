@@ -16,6 +16,7 @@
 package net.wasdev.wlp.gradle.plugins.extensions
 
 import org.gradle.util.ConfigureUtil
+import org.gradle.api.NamedDomainObjectContainer
 
 class LibertyExtension {
 
@@ -60,6 +61,7 @@ class LibertyExtension {
     PackageAndDumpExtension dumpLiberty = new PackageAndDumpExtension()
     PackageAndDumpExtension javaDumpLiberty = new PackageAndDumpExtension()
 
+    NamedDomainObjectContainer<ServerExtension> servers
 
     ServerExtension server
 
@@ -107,6 +109,10 @@ class LibertyExtension {
     def server(Closure closure){
         server = new ServerExtension()
         ConfigureUtil.configure(closure, server)
+    }
+
+    def servers(Closure configurationClosure){
+        servers.configure(configurationClosure)
     }
 
 }

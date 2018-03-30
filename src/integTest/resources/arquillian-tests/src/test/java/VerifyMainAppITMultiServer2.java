@@ -1,6 +1,6 @@
 
 /**
- * (C) Copyright IBM Corporation 2017, 2018.
+ * (C) Copyright IBM Corporation 2018.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@
  * @author ctianus.ibm.com
  *
  */
-public class VerifyMainAppIT extends AbstractVerifyAppIT {
+public class VerifyMainAppITMultiServer2 extends AbstractVerifyAppIT {
 
-    public VerifyMainAppIT() {
-        super("LibertyProjectServer");
+    public VerifyMainAppITMultiServer2() {
+        super("libertyProjectServer2");
     }
 }

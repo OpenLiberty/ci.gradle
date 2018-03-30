@@ -1,6 +1,5 @@
-
 /**
- * (C) Copyright IBM Corporation 2017, 2018.
+ * (C) Copyright IBM Corporation 2018.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package net.wasdev.wlp.gradle.plugins.tasks.extensions.arquillian
 
-/**
- * Only included in the verify-main-app Maven profile.
- *
- * @author ctianus.ibm.com
- *
- */
-public class VerifyMainAppIT extends AbstractVerifyAppIT {
-
-    public VerifyMainAppIT() {
-        super("LibertyProjectServer");
-    }
+class ArquillianExtension {
+    boolean skipIfArquillianXmlExists = false
+    Map<String, String> arquillianProperties = null
 }
