@@ -21,7 +21,7 @@
  * @author ctianus.ibm.com
  *
  */
-public class VerifyMainAppITMultiServer1 extends AbstractVerifyAppIT{
+public class VerifyMainAppITMultiServer1 extends AbstractVerifyAppIT {
 
     public VerifyMainAppITMultiServer1() {
         super("libertyProjectServer1");

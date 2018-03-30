@@ -41,50 +41,50 @@ public abstract class AbstractVerifyAppIT {
         this.serverName = serverName;
     }
 
-	@Test
-	public void testVerifyMainApp() throws Exception {
-		// This test verifies that the main app should start before the
-		// Arquillian test application by looking at the build.log console
-		// output.
+    @Test
+    public void testVerifyMainApp() throws Exception {
+        // This test verifies that the main app should start before the
+        // Arquillian test application by looking at the build.log console
+        // output.
 
-		String mainAppOutput = "Web application available (default_host): http://localhost:9080/myLibertyApp/";
-		String testAppOutput = // The test app name is randomly generated, so we
-								// don't know it here. Instead just make sure
-								// that another app is started after the main
-								// app.
-				"Web application available (default_host): http://localhost:9080/";
+        String mainAppOutput = "Web application available (default_host): http://localhost:9080/myLibertyApp/";
+        String testAppOutput = // The test app name is randomly generated, so we
+                               // don't know it here. Instead just make sure
+                               // that another app is started after the main
+                               // app.
+                "Web application available (default_host): http://localhost:9080/";
 
-		boolean foundMainApp = false;
+        boolean foundMainApp = false;
 
-		File buildLog = new File("./build/wlp/usr/servers/" + serverName + "/logs/messages.log").getCanonicalFile();
-		System.out.println("Verifying apps in " + buildLog.getCanonicalPath());
-		if (buildLog.exists()) {
-			InputStream is = new FileInputStream(buildLog);
-			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        File buildLog = new File("./build/wlp/usr/servers/" + serverName + "/logs/messages.log").getCanonicalFile();
+        System.out.println("Verifying apps in " + buildLog.getCanonicalPath());
+        if (buildLog.exists()) {
+            InputStream is = new FileInputStream(buildLog);
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
-			String line;
-			while ((line = br.readLine()) != null) {
-				System.out.println(line);
-				if (!foundMainApp) {
-					if (line.contains(mainAppOutput)) {
-						foundMainApp = true;
-					}
-				} else if (line.contains(testAppOutput)) {
-					return;
-				}
-			}
+            String line;
+            while ((line = br.readLine()) != null) {
+                System.out.println(line);
+                if (!foundMainApp) {
+                    if (line.contains(mainAppOutput)) {
+                        foundMainApp = true;
+                    }
+                } else if (line.contains(testAppOutput)) {
+                    return;
+                }
+            }
 
-			fail("Should have returned in the while loop if the test passed.");
-		}
+            fail("Should have returned in the while loop if the test passed.");
+        }
 
-		File b = buildLog;
-		while (!b.exists()) {
-			b = b.getParentFile();
-		}
+        File b = buildLog;
+        while (!b.exists()) {
+            b = b.getParentFile();
+        }
 
-		Files.walk(Paths.get(b.toURI())).filter(Files::isRegularFile).forEach(System.out::println);
+        Files.walk(Paths.get(b.toURI())).filter(Files::isRegularFile).forEach(System.out::println);
 
-		fail("The messages.log file does not exist.");
-	}
+        fail("The messages.log file does not exist.");
+    }
 
 }
