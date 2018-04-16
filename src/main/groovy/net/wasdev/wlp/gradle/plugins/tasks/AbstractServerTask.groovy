@@ -360,7 +360,7 @@ abstract class AbstractServerTask extends AbstractTask {
           if (server.looseApplication){
             String looseConfigFileName = getLooseConfigFileName(task)
             String application = looseConfigFileName.substring(0, looseConfigFileName.length()-4)
-            if (!sAppConfiguredInSourceServerXml(application)) {
+            if (!isAppConfiguredInSourceServerXml(application)) {
                 serverNode.appendNode('installAppsConfigDropins', installAppsConfigDropinsFile.toString())
             }
           } else {
