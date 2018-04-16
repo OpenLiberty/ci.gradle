@@ -52,22 +52,16 @@ class InstallAppsTask extends AbstractServerTask {
 
     @TaskAction
     void installApps() {
-        if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
-            if (project.plugins.hasPlugin('war')) {
-                server.apps = [project.war]
-            } else if (project.plugins.hasPlugin('ear')) {
-                server.apps = [project.ear]
-            }
-        }
-
-        createApplicationFolders()
+        configureApps(project)
 
         if (server.apps != null && !server.apps.isEmpty()) {
+            createApplicationFolder('apps')
             Tuple appsLists = splitAppList(server.apps)
             installMultipleApps(appsLists[0], 'apps')
             installFileList(appsLists[1], 'apps')
         }
         if (server.dropins != null && !server.dropins.isEmpty()) {
+            createApplicationFolder('dropins')
             Tuple dropinsLists = splitAppList(server.dropins)
             installMultipleApps(dropinsLists[0], 'dropins')
             installFileList(dropinsLists[1], 'dropins')
@@ -98,41 +92,6 @@ class InstallAppsTask extends AbstractServerTask {
     private void installProjectArchive(Task task, String appsDir){
       Files.copy(task.archivePath.toPath(), new File(getServerDir(project), "/" + appsDir + "/" + getArchiveName(task)).toPath(), StandardCopyOption.REPLACE_EXISTING)
       validateAppConfig(getArchiveName(task), task.baseName, appsDir)
-    }
-
-    protected void validateAppConfig(String fileName, String artifactId, String dir) throws Exception {
-        String appsDir = dir
-        if (appsDir.equalsIgnoreCase('apps') && !isAppConfiguredInSourceServerXml(fileName)) {
-            applicationXml.createApplicationElement(fileName, artifactId)
-        }
-        else if (appsDir.equalsIgnoreCase('dropins') && isAppConfiguredInSourceServerXml(fileName)) {
-            throw new GradleException("The application, " + artifactId + ", is configured in the server.xml and the plug-in is configured to install the application in the dropins folder. A configured application must be installed to the apps folder.")
-        }
-    }
-
-    protected boolean isAppConfiguredInSourceServerXml(String fileName) {
-        boolean configured = false;
-        File serverConfigFile = new File(getServerDir(project), 'server.xml')
-        if (serverConfigFile != null && serverConfigFile.exists()) {
-            try {
-                ServerConfigDocument scd = new ServerConfigDocument(serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, server.bootstrapProperties, server.serverEnv)
-                if (scd != null && scd.getLocations().contains(fileName)) {
-                    logger.debug("Application configuration is found in server.xml : " + fileName)
-                    configured = true
-                }
-            }
-            catch (Exception e) {
-                logger.warn(e.getLocalizedMessage())
-            }
-        }
-        return configured
-    }
-
-    protected String getArchiveName(Task task){
-        if (server.stripVersion){
-            return task.baseName + "." + task.extension
-        }
-        return task.archiveName;
     }
 
     protected void installProject(Task task, String appsDir) throws Exception {
@@ -355,23 +314,6 @@ class InstallAppsTask extends AbstractServerTask {
         }
     }
 
-    private Tuple splitAppList(List<Object> allApps) {
-        List<File> appFiles = new ArrayList<File>()
-        List<Task> appTasks = new ArrayList<Task>()
-
-        allApps.each { Object appObj ->
-            if (appObj instanceof Task) {
-                appTasks.add((Task)appObj)
-            } else if (appObj instanceof File) {
-                appFiles.add((File)appObj)
-            } else {
-                logger.warn('Application ' + appObj.getClass.name + ' is expressed as ' + appObj.toString() + ' which is not a supported input type. Define applications using Task or File objects.')
-            }
-        }
-
-        return new Tuple(appTasks, appFiles)
-    }
-
     //Checks if there is an app configured in an existing configDropins application xml file
     private boolean hasConfiguredApp(File applicationXmlFile) {
         if (applicationXmlFile.exists()) {
@@ -382,21 +324,16 @@ class InstallAppsTask extends AbstractServerTask {
         return false
     }
 
-    void createApplicationFolders() {
+    void createApplicationFolder(String appDir) {
         File serverDir = getServerDir(project)
-        File appsDirectory = new File(serverDir, 'apps')
-        File dropinsDirectory = new File(serverDir, 'dropins')
+        File applicationDirectory = new File(serverDir, appDir)
 
         try {
-            if (!appsDirectory.exists()) {
-                appsDirectory.mkdir()
-            }
-
-            if (!dropinsDirectory.exists()) {
-                dropinsDirectory.mkdir()
+            if (!applicationDirectory.exists()) {
+                applicationDirectory.mkdir()
             }
         } catch (Exception e) {
-            throw new GradleException('There was a problem creating the apps or dropins folder in the server directory.', e)
+            throw new GradleException("There was a problem creating ${applicationDirectory.getCanonicalPath()}.", e)
         }
     }
 }
