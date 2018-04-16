@@ -267,7 +267,7 @@ abstract class AbstractServerTask extends AbstractTask {
         serverNode.appendNode('looseApplication', server.looseApplication)
         serverNode.appendNode('stripVersion', server.stripVersion)
 
-        configureMultipeAppsConfigDropins(serverNode)
+        configureMultipleAppsConfigDropins(serverNode)
     }
 
     protected void validateAppConfig(String fileName, String artifactId, String dir) throws Exception {
@@ -315,7 +315,7 @@ abstract class AbstractServerTask extends AbstractTask {
         }
     }
     
-    protected void configureMultipeAppsConfigDropins(Node serverNode) {
+    protected void configureMultipleAppsConfigDropins(Node serverNode) {
         if (server.apps != null && !server.apps.isEmpty()) {
             Tuple applications = splitAppList(server.apps)
             applications[0].each{ Task task ->
