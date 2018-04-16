@@ -75,7 +75,6 @@ class CreateTask extends AbstractServerTask {
                 params.put('template', server.template)
             }
             executeServerCommand(project, 'create', params)
-            createApplicationFolders()
         }
         copyConfigFiles()
         writeServerPropertiesToXml(project)
@@ -88,20 +87,6 @@ class CreateTask extends AbstractServerTask {
             return new File(server.configDirectory, fileName)
         } else if (new File(DEFAULT_PATH + fileName).exists()) {
             return new File(DEFAULT_PATH + fileName)
-        }
-    }
-
-    void createApplicationFolders() {
-        File serverDir = getServerDir(project)
-        File appsDirectory = new File(serverDir, 'apps')
-        File dropinsDirectory = new File(serverDir, 'dropins')
-
-        if (!appsDirectory.exists()) {
-            appsDirectory.mkdir()
-        }
-
-        if (!dropinsDirectory.exists()) {
-            dropinsDirectory.mkdir()
         }
     }
 }

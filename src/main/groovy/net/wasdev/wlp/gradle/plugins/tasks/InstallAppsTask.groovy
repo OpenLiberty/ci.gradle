@@ -59,6 +59,9 @@ class InstallAppsTask extends AbstractServerTask {
                 server.apps = [project.ear]
             }
         }
+
+        createApplicationFolders()
+
         if (server.apps != null && !server.apps.isEmpty()) {
             Tuple appsLists = splitAppList(server.apps)
             installMultipleApps(appsLists[0], 'apps')
@@ -377,5 +380,23 @@ class InstallAppsTask extends AbstractServerTask {
             return appXml.hasChildElements()
         }
         return false
+    }
+
+    void createApplicationFolders() {
+        File serverDir = getServerDir(project)
+        File appsDirectory = new File(serverDir, 'apps')
+        File dropinsDirectory = new File(serverDir, 'dropins')
+
+        try {
+            if (!appsDirectory.exists()) {
+                appsDirectory.mkdir()
+            }
+
+            if (!dropinsDirectory.exists()) {
+                dropinsDirectory.mkdir()
+            }
+        } catch (Exception e) {
+            throw new GradleException('There was a problem creating the apps or dropins folder in the server directory.', e)
+        }
     }
 }
