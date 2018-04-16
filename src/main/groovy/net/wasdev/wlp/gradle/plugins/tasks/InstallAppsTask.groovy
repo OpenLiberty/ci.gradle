@@ -52,15 +52,16 @@ class InstallAppsTask extends AbstractServerTask {
 
     @TaskAction
     void installApps() {
-
         configureApps(project)
 
         if (server.apps != null && !server.apps.isEmpty()) {
+            createApplicationFolder('apps')
             Tuple appsLists = splitAppList(server.apps)
             installMultipleApps(appsLists[0], 'apps')
             installFileList(appsLists[1], 'apps')
         }
         if (server.dropins != null && !server.dropins.isEmpty()) {
+            createApplicationFolder('dropins')
             Tuple dropinsLists = splitAppList(server.dropins)
             installMultipleApps(dropinsLists[0], 'dropins')
             installFileList(dropinsLists[1], 'dropins')
@@ -321,5 +322,18 @@ class InstallAppsTask extends AbstractServerTask {
             return appXml.hasChildElements()
         }
         return false
+    }
+
+    void createApplicationFolder(String appDir) {
+        File serverDir = getServerDir(project)
+        File applicationDirectory = new File(serverDir, appDir)
+
+        try {
+            if (!applicationDirectory.exists()) {
+                applicationDirectory.mkdir()
+            }
+        } catch (Exception e) {
+            throw new GradleException("There was a problem creating ${applicationDirectory.getCanonicalPath()}.", e)
+        }
     }
 }
