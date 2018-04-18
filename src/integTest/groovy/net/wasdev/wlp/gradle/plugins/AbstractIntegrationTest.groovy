@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package net.wasdev.wlp.gradle.plugins
+
+import java.io.File
 
 import static org.junit.Assert.*
 
@@ -22,8 +24,7 @@ import org.apache.commons.io.FileUtils
 import org.gradle.tooling.BuildLauncher
 import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.ProjectConnection
-import java.io.File
-
+import org.gradle.api.GradleException
 
 abstract class AbstractIntegrationTest {
 
@@ -31,6 +32,8 @@ abstract class AbstractIntegrationTest {
     public static final String LIBERTY_PROPERTIES_FILENAME_2 = 'liberty2.properties'
     public static final String OPEN_LIBERTY_PROPERTIES_FILENAME_1 = 'openliberty1.properties'
     public static final String OPEN_LIBERTY_PROPERTIES_FILENAME_2 = 'openliberty2.properties'
+
+    public static final String PROPERTY_FILE_DIRECTORY = "src/integTest/properties"
 
     static File integTestDir = new File('build/testBuilds')
     static final String test_mode = System.getProperty("runit")
@@ -59,19 +62,24 @@ abstract class AbstractIntegrationTest {
     }
 
     protected static void copyPropertyFile(File buildDir) {
-        File propertyFile = new File ("src/integTest/properties", LIBERTY_PROPERTIES_FILENAME_1)
+        File propertyFile
         if (libertyProperties != null) {
             switch (libertyProperties) {
                 case LIBERTY_PROPERTIES_FILENAME_2:
-                    propertyFile = new File("src/integTest/properties", LIBERTY_PROPERTIES_FILENAME_2)
+                    propertyFile = new File(PROPERTY_FILE_DIRECTORY, LIBERTY_PROPERTIES_FILENAME_2)
                     break;
                 case OPEN_LIBERTY_PROPERTIES_FILENAME_1:
-                    propertyFile = new File("src/integTest/properties", OPEN_LIBERTY_PROPERTIES_FILENAME_1)
+                    propertyFile = new File(PROPERTY_FILE_DIRECTORY, OPEN_LIBERTY_PROPERTIES_FILENAME_1)
                     break;
                 case OPEN_LIBERTY_PROPERTIES_FILENAME_2:
-                    propertyFile = new File("src/integTest/properties", OPEN_LIBERTY_PROPERTIES_FILENAME_2)
+                    propertyFile = new File(PROPERTY_FILE_DIRECTORY, OPEN_LIBERTY_PROPERTIES_FILENAME_2)
+                    break;
+                default:
+                    propertyFile = new File(PROPERTY_FILE_DIRECTORY, LIBERTY_PROPERTIES_FILENAME_1)
                     break;
             }
+        } else {
+            throw new GradleException('Tests could not be run. Please specify a properties file.')
         }
         copyFile(propertyFile, new File(buildDir, 'gradle.properties'))
     }

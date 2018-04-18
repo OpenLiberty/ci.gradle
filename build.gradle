@@ -82,6 +82,13 @@ task integrationTest(type: Test) {
     systemProperty 'runit', 'online'
 
     mustRunAfter test
+
+    String libertyPropertiesFile = System.getProperty('propertiesFile')
+    doFirst {
+        if (libertyPropertiesFile == null || libertyPropertiesFile.isEmpty()) {
+            throw new GradleException('Tests could not be run. Please specify a properties file.')
+        }
+    }
 }
 
 check.dependsOn integrationTest
