@@ -23,5 +23,5 @@ repositories {
 }
 
 dependencies {
-    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-webProfile7', version: wlpVersion
+    libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
 }

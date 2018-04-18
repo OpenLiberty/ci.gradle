@@ -30,9 +30,6 @@ ext {
 }
 
 liberty {
-    install {
-        runtimeUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/17.0.0.2/wlp-webProfile7-17.0.0.2.zip"
-    }
     server{
         name = wlpServerName
 
@@ -50,6 +47,7 @@ repositories {
 
 dependencies {
     testCompile 'junit:junit:4.12'
+    libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
 }
 
 task integrationTest(type: Test) {

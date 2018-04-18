@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2015, 2017.
+ * (C) Copyright IBM Corporation 2015, 2018.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ 
 package net.wasdev.wlp.gradle.plugins
 
 import static org.junit.Assert.*
@@ -25,9 +26,16 @@ import java.io.File
 
 
 abstract class AbstractIntegrationTest {
+
+    public static final String LIBERTY_PROPERTIES_FILENAME_1 = 'liberty1.properties'
+    public static final String LIBERTY_PROPERTIES_FILENAME_2 = 'liberty2.properties'
+    public static final String OPEN_LIBERTY_PROPERTIES_FILENAME_1 = 'openliberty1.properties'
+    public static final String OPEN_LIBERTY_PROPERTIES_FILENAME_2 = 'openliberty2.properties'
+
     static File integTestDir = new File('build/testBuilds')
     static final String test_mode = System.getProperty("runit")
     static String WLP_DIR = System.getProperty("wlpInstallDir")
+    static String libertyProperties = System.getProperty("propertiesFile")
 
     protected static void deleteDir(File dir) {
         if (dir.exists()) {
@@ -46,8 +54,26 @@ abstract class AbstractIntegrationTest {
     }
 
     protected static File copyBuildFiles(File buildFilename, File buildDir) {
-            copyFile(buildFilename, new File(buildDir, 'build.gradle'))
-            copyFile(new File("gradle.properties"), new File(buildDir, 'gradle.properties'))
+        copyFile(buildFilename, new File(buildDir, 'build.gradle'))
+        copyPropertyFile(buildDir)
+    }
+
+    protected static void copyPropertyFile(File buildDir) {
+        File propertyFile = new File ("src/integTest/properties", LIBERTY_PROPERTIES_FILENAME_1)
+        if (libertyProperties != null) {
+            switch (libertyProperties) {
+                case LIBERTY_PROPERTIES_FILENAME_2:
+                    propertyFile = new File("src/integTest/properties", LIBERTY_PROPERTIES_FILENAME_2)
+                    break;
+                case OPEN_LIBERTY_PROPERTIES_FILENAME_1:
+                    propertyFile = new File("src/integTest/properties", OPEN_LIBERTY_PROPERTIES_FILENAME_1)
+                    break;
+                case OPEN_LIBERTY_PROPERTIES_FILENAME_2:
+                    propertyFile = new File("src/integTest/properties", OPEN_LIBERTY_PROPERTIES_FILENAME_2)
+                    break;
+            }
+        }
+        copyFile(propertyFile, new File(buildDir, 'gradle.properties'))
     }
 
     protected static File createTestProject(File parent, File sourceDir, String buildFilename) {

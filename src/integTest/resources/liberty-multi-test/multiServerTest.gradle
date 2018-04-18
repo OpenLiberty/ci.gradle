@@ -16,7 +16,7 @@ buildscript {
 def test_mode = runit
 def wlpLicense = System.getProperty('wlpLicense')
 def WLP_DIR = System.getProperty('wlpInstallDir')
-def wlpUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/" + wlpVersion + "/wlp-webProfile7-" + wlpVersion + ".zip"
+def wlpUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/" + runtimeVersion + "/wlp-webProfile7-" + runtimeVersion + ".zip"
 
 apply plugin: 'liberty'
 

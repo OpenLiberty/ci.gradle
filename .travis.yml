@@ -3,10 +3,14 @@ language: java
 matrix:
   include:
     - jdk: openjdk8
-      env: WLP_VERSION=17.0.0.3
+      env: propertiesFile=liberty1.properties
     - jdk: openjdk8
-      env: WLP_VERSION=17.0.0.4
+      env: propertiesFile=liberty2.properties
+    - jdk: openjdk8
+      env: propertiesFile=openliberty1.properties
+    - jdk: openjdk8
+      env: propertiesFile=openliberty2.properties
 script:
   - export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs='-XX:MaxPermSize=1024m -XX:+CMSClassUnloadingEnabled -XX:+HeapDumpOnOutOfMemoryError -Xmx2048m'"
-  - travis_wait ./gradlew install check -Prunit=online -DwlpVersion=$WLP_VERSION --stacktrace --info --no-daemon
+  - travis_wait ./gradlew install check -DpropertiesFile=${propertiesFile} --stacktrace --info --no-daemon
 dist: trusty

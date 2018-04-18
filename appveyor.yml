@@ -1,9 +1,16 @@
 environment:
-  matrix:
+    matrix:
         - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
+          PROPERTIES_FILE: liberty1.properties
+        - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
+          PROPERTIES_FILE: liberty2.properties
+        - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
+          PROPERTIES_FILE: openliberty1.properties
+        - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
+          PROPERTIES_FILE: openliberty2.properties
 
 build_script:
   # Build the compiled extension
-  - "gradlew.bat install check -Prunit=online -DwlpVersion=17.0.0.3 --stacktrace --info --no-daemon"
+  - "gradlew.bat install check -DpropertiesFile=%PROPERTIES_FILE% --stacktrace --info --no-daemon"
 
 test: off
