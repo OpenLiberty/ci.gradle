@@ -31,6 +31,8 @@ import org.apache.commons.io.FileUtils
 import org.gradle.api.tasks.bundling.War
 import org.gradle.plugins.ear.Ear
 import org.gradle.api.Task
+import net.wasdev.wlp.gradle.plugins.utils.*
+
 
 abstract class AbstractServerTask extends AbstractTask {
 
@@ -265,9 +267,107 @@ abstract class AbstractServerTask extends AbstractTask {
         serverNode.appendNode('looseApplication', server.looseApplication)
         serverNode.appendNode('stripVersion', server.stripVersion)
 
+        configureMultipleAppsConfigDropins(serverNode)
+    }
+
+    protected void validateAppConfig(String fileName, String artifactId, String dir) throws Exception {
+        String appsDir = dir
+        if (appsDir.equalsIgnoreCase('apps') && !isAppConfiguredInSourceServerXml(fileName)) {
+            applicationXml.createApplicationElement(fileName, artifactId)
+        }
+        else if (appsDir.equalsIgnoreCase('dropins') && isAppConfiguredInSourceServerXml(fileName)) {
+            throw new GradleException("The application, " + artifactId + ", is configured in the server.xml and the plug-in is configured to install the application in the dropins folder. A configured application must be installed to the apps folder.")
+        }
+    }
+
+    protected boolean isAppConfiguredInSourceServerXml(String fileName) {
+        boolean configured = false;
+        File serverConfigFile = new File(getServerDir(project), 'server.xml')
+        if (serverConfigFile != null && serverConfigFile.exists()) {
+            try {
+                ServerConfigDocument scd = new ServerConfigDocument(serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, server.bootstrapProperties, server.serverEnv)
+                if (scd != null && scd.getLocations().contains(fileName)) {
+                    logger.debug("Application configuration is found in server.xml : " + fileName)
+                    configured = true
+                }
+            }
+            catch (Exception e) {
+                logger.warn(e.getLocalizedMessage())
+            }
+        }
+        return configured
+    }
+    
+    protected String getArchiveName(Task task){
+        if (server.stripVersion){
+            return task.baseName + "." + task.extension
+        }
+        return task.archiveName;
+    }
+    
+    protected void configureApps(Project project) {
+        if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
+            if (project.plugins.hasPlugin('war')) {
+                server.apps = [project.war]
+            } else if (project.plugins.hasPlugin('ear')) {
+                server.apps = [project.ear]
+            }
+        }
+    }
+    
+    protected void configureMultipleAppsConfigDropins(Node serverNode) {
+        if (server.apps != null && !server.apps.isEmpty()) {
+            Tuple applications = splitAppList(server.apps)
+            applications[0].each{ Task task ->
+              isConfigDropinsRequired(task, 'apps', serverNode)
+            }
+        }
+    }
+    
+    protected Tuple splitAppList(List<Object> allApps) {
+        List<File> appFiles = new ArrayList<File>()
+        List<Task> appTasks = new ArrayList<Task>()
+
+        allApps.each { Object appObj ->
+            if (appObj instanceof Task) {
+                appTasks.add((Task)appObj)
+            } else if (appObj instanceof File) {
+                appFiles.add((File)appObj)
+            } else {
+                logger.warn('Application ' + appObj.getClass.name + ' is expressed as ' + appObj.toString() + ' which is not a supported input type. Define applications using Task or File objects.')
+            }
+        }
+
+        return new Tuple(appTasks, appFiles)
+    }
+    
+    private boolean isSupportedType(){
+      switch (getPackagingType()) {
+        case "ear":
+        case "war":
+            return true;
+        default:
+            return false;
+        }
+    }
+    private String getLooseConfigFileName(Task task){
+      return getArchiveName(task) + ".xml"
+    }
+    
+    protected void isConfigDropinsRequired(Task task, String appsDir, Node serverNode) {
         File installAppsConfigDropinsFile = ApplicationXmlDocument.getApplicationXmlFile(getServerDir(project))
-        if (installAppsConfigDropinsFile.exists()) {
-            serverNode.appendNode('installAppsConfigDropins', installAppsConfigDropinsFile.toString())
+        if (isSupportedType()) {
+          if (server.looseApplication){
+            String looseConfigFileName = getLooseConfigFileName(task)
+            String application = looseConfigFileName.substring(0, looseConfigFileName.length()-4)
+            if (!isAppConfiguredInSourceServerXml(application)) {
+                serverNode.appendNode('installAppsConfigDropins', installAppsConfigDropinsFile.toString())
+            }
+          } else {
+                if (!isAppConfiguredInSourceServerXml(getArchiveName(task))) {
+                    serverNode.appendNode('installAppsConfigDropins', installAppsConfigDropinsFile.toString())
+                }
+            }
         }
     }
 
