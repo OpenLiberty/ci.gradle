@@ -81,8 +81,6 @@ task integrationTest(type: Test) {
     systemProperties System.getProperties()
     systemProperty 'runit', 'online'
 
-    mustRunAfter test
-
     String libertyPropertiesFile = System.getProperty('propertiesFile')
     doFirst {
         if (libertyPropertiesFile == null || libertyPropertiesFile.isEmpty()) {
@@ -91,7 +89,6 @@ task integrationTest(type: Test) {
     }
 }
 
-check.dependsOn integrationTest
 sourceSets.main.compileClasspath += configurations.provided
 
 task wrapper(type: Wrapper) {

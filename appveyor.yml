@@ -11,6 +11,6 @@ environment:
 
 build_script:
   # Build the compiled extension
-  - "gradlew.bat install check -DpropertiesFile=%PROPERTIES_FILE% --stacktrace --info --no-daemon"
+  - "gradlew.bat install integrationTest -DpropertiesFile=%PROPERTIES_FILE% --stacktrace --info --no-daemon"
 
 test: off
