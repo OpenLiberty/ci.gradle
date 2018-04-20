@@ -28,10 +28,10 @@ import org.gradle.api.GradleException
 
 abstract class AbstractIntegrationTest {
 
-    public static final String LIBERTY_PROPERTIES_FILENAME_1 = 'liberty1.properties'
-    public static final String LIBERTY_PROPERTIES_FILENAME_2 = 'liberty2.properties'
-    public static final String OPEN_LIBERTY_PROPERTIES_FILENAME_1 = 'openliberty1.properties'
-    public static final String OPEN_LIBERTY_PROPERTIES_FILENAME_2 = 'openliberty2.properties'
+    public static final String LIBERTY_PROPERTIES_FILENAME_1 = 'wlp1.properties'
+    public static final String LIBERTY_PROPERTIES_FILENAME_2 = 'wlp2.properties'
+    public static final String OPEN_LIBERTY_PROPERTIES_FILENAME_1 = 'ol1.properties'
+    public static final String OPEN_LIBERTY_PROPERTIES_FILENAME_2 = 'ol2.properties'
 
     public static final String PROPERTY_FILE_DIRECTORY = "src/integTest/properties"
 
