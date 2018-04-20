@@ -29,9 +29,6 @@ public class TestLooseEarApplication extends AbstractIntegrationTest{
     @BeforeClass
     public static void setup() {
         createDir(buildDir)
-        if(test_mode == "offline"){
-            WLP_DIR.replace("\\","/")
-        }
         createTestProject(buildDir, resourceDir, buildFilename)
     }
 
@@ -89,27 +86,24 @@ public class TestLooseEarApplication extends AbstractIntegrationTest{
       expression = "/archive/archive";
       nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
       Assert.assertEquals("Number of <archive/> element ==>", 2, nodes.getLength());
-    
+
       String ejbJar = "/ejb-ejb.jar"
       String ejbWar = "/ejb-war.war"
-    
+
       Assert.assertTrue(
             ejbWar.equals(nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue()) ||
               ejbJar.equals(nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue()))
 
-      
       Assert.assertTrue(
             ejbWar.equals(nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue()) ||
               ejbJar.equals(nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue()))
-                      
 
-    
       expression = "/archive/file";
       nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
       Assert.assertEquals("Number of <file/> element ==>", 2, nodes.getLength());
 
     }
-    
+
     @Test
     public void test_start_with_timeout_success() {
         try {

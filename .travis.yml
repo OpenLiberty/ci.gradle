@@ -1,15 +1,13 @@
 sudo: required
 language: java
-matrix:
-  include:
-    - jdk: openjdk8
-      env: propertiesFile=wlp1.properties
-    - jdk: openjdk8
-      env: propertiesFile=wlp2.properties
-    - jdk: openjdk8
-      env: propertiesFile=ol1.properties
-    - jdk: openjdk8
-      env: propertiesFile=ol2.properties
+jdk:
+    - openjdk7
+    - openjdk8
+env:
+    - propertiesFile=wlp1.properties
+    - propertiesFile=wlp2.properties
+    - propertiesFile=ol1.properties
+    - propertiesFile=ol2.properties
 script:
   - export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs='-XX:MaxPermSize=1024m -XX:+CMSClassUnloadingEnabled -XX:+HeapDumpOnOutOfMemoryError -Xmx2048m'"
   - travis_wait ./gradlew install integrationTest -DpropertiesFile=${propertiesFile} --stacktrace --info --no-daemon

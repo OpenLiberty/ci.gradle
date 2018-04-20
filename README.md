@@ -22,7 +22,7 @@ This will download Gradle and then build the plugin `liberty-gradle-plugin-2.3-S
 To build the plugin and run the integration tests execute the following commands in the root directory. The `propertiesFile` parameter is used to select the Liberty runtime that will be used to run the tests. The `wlpLicense` parameter is only needed for Liberty packaged as a JAR file.
 
  ```bash
- $ ./gradlew install integrationTest -DpropertiesFile=<property_file_name> -DwlpLicense=<liberty_licesnse_code>
+ $ ./gradlew install integrationTest -DpropertiesFile=<property_file_name> -DwlpLicense=<liberty_license_code>
  ```
 
 ## Usage

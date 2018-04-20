@@ -29,9 +29,6 @@ public class TestEclipseFacetsEar extends AbstractIntegrationTest{
     @BeforeClass
     public static void setup() {
         createDir(buildDir)
-        if(test_mode == "offline"){
-            WLP_DIR.replace("\\","/")
-        }
         createTestProject(buildDir, resourceDir, buildFilename)
 
         try {
@@ -54,7 +51,7 @@ public class TestEclipseFacetsEar extends AbstractIntegrationTest{
         NodeList facets = eclipseFacets.getAt('installed')
         boolean hasJstEarFacet = false
 
-        facets.each { facet -> 
+        facets.each { facet ->
             HashMap attributes = facet.attributes()
             if (attributes.getAt('facet').equals('jst.ear') && attributes.getAt('version').equals('6.0')) {
                 hasJstEarFacet = true

@@ -12,10 +12,6 @@ buildscript {
     }
 }
 
-def test_mode = runit
-def wlpLicense = System.getProperty('wlpLicense')
-def WLP_DIR = System.getProperty('wlpInstallDir')
-
 apply plugin: 'liberty'
 
 repositories {
@@ -28,7 +24,7 @@ dependencies {
 
 liberty {
     server{
-        name = 'libertyOnline'
+        name = 'LibertyProjectServer'
         features {
             name = ["mongodb-2.0, adminCenter-1.0"]
             acceptLicense = true

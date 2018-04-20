@@ -36,8 +36,6 @@ abstract class AbstractIntegrationTest {
     public static final String PROPERTY_FILE_DIRECTORY = "src/integTest/properties"
 
     static File integTestDir = new File('build/testBuilds')
-    static final String test_mode = System.getProperty("runit")
-    static String WLP_DIR = System.getProperty("wlpInstallDir")
     static String libertyProperties = System.getProperty("propertiesFile")
 
     protected static void deleteDir(File dir) {
@@ -115,7 +113,6 @@ abstract class AbstractIntegrationTest {
 
         try {
             BuildLauncher build = connection.newBuild()
-            build.setJvmArguments("-DWLP_DIR=$WLP_DIR")
             build.withArguments("-i");
             build.forTasks(tasks)
             build.run()

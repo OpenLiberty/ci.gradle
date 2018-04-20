@@ -13,12 +13,9 @@ public class TestCreateWithInlineProperties extends AbstractIntegrationTest{
     @BeforeClass
     public static void setup() {
         createDir(testBuildDir)
-        if(test_mode == "offline"){
-            WLP_DIR.replace("\\","/")
-        }
         createTestProject(testBuildDir, sourceDir, buildFilename)
     }
-    
+
     @Test
     public void test_create_with_inline_properties() {
 

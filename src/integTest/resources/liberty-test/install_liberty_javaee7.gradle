@@ -12,10 +12,6 @@ buildscript {
     }
 }
 
-def test_mode = runit
-def wlpLicense = System.getProperty('wlpLicense')
-def WLP_DIR = System.getProperty('wlpInstallDir')
-
 apply plugin: 'liberty'
 
 repositories {
@@ -28,6 +24,6 @@ dependencies {
 
 liberty {
     server{
-        name ='libertyOnline'
+        name ='LibertyProjectServer'
     }
 }

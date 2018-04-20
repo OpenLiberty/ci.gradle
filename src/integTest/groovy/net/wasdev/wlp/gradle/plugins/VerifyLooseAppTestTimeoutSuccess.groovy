@@ -28,9 +28,6 @@ public class VerifyLooseAppTestTimeoutSuccess extends AbstractIntegrationTest{
     @BeforeClass
     public static void setup() {
         createDir(buildDir)
-        if(test_mode == "offline"){
-            WLP_DIR.replace("\\","/")
-        }
         createTestProject(buildDir, resourceDir, buildFilename)
     }
 

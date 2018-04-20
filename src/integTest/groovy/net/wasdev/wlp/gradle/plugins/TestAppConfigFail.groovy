@@ -14,9 +14,6 @@ public class TestAppConfigFail extends AbstractIntegrationTest{
     @BeforeClass
     public static void setup() {
         createDir(buildDir)
-        if(test_mode == "offline"){
-            WLP_DIR.replace("\\","/")
-        }
         createTestProject(buildDir, resourceDir, buildFilename)
     }
 
@@ -24,7 +21,7 @@ public class TestAppConfigFail extends AbstractIntegrationTest{
     public static void tearDown() throws Exception {
         runTasks(buildDir, 'libertyStop')
     }
-    
+
     //Should throw a GradleException when validating the app configuration which resolves as a BuildException.
     @Test(expected = BuildException.class)
     public void test_smart_config_fail() {

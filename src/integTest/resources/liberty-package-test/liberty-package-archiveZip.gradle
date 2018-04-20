@@ -26,7 +26,7 @@ dependencies {
 
 liberty {
     server{
-        name = 'libertyOnline'
+        name = 'LibertyProjectServer'
         name = serverName
         packageLiberty {
             archive = 'testPackage.zip'
