@@ -3,13 +3,13 @@ language: java
 matrix:
   include:
     - jdk: openjdk8
-      env: propertiesFile=liberty1.properties
+      env: propertiesFile=wlp1.properties
     - jdk: openjdk8
-      env: propertiesFile=liberty2.properties
+      env: propertiesFile=wlp2.properties
     - jdk: openjdk8
-      env: propertiesFile=openliberty1.properties
+      env: propertiesFile=ol1.properties
     - jdk: openjdk8
-      env: propertiesFile=openliberty2.properties
+      env: propertiesFile=ol2.properties
 script:
   - export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs='-XX:MaxPermSize=1024m -XX:+CMSClassUnloadingEnabled -XX:+HeapDumpOnOutOfMemoryError -Xmx2048m'"
   - travis_wait ./gradlew install integrationTest -DpropertiesFile=${propertiesFile} --stacktrace --info --no-daemon

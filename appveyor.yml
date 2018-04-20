@@ -1,13 +1,13 @@
 environment:
     matrix:
         - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
-          PROPERTIES_FILE: liberty1.properties
+          PROPERTIES_FILE: wlp1.properties
         - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
-          PROPERTIES_FILE: liberty2.properties
+          PROPERTIES_FILE: wlp2.properties
         - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
-          PROPERTIES_FILE: openliberty1.properties
+          PROPERTIES_FILE: ol1.properties
         - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
-          PROPERTIES_FILE: openliberty2.properties
+          PROPERTIES_FILE: ol2.properties
 
 build_script:
   # Build the compiled extension
