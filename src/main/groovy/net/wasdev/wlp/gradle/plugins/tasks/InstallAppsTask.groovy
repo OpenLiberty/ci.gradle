@@ -72,13 +72,11 @@ class InstallAppsTask extends AbstractServerTask {
         if (applicationXml.hasChildElements()) {
             logger.warn("At least one application is not defined in the server configuration but the build file indicates it should be installed in the apps folder. Application configuration is being added to the target server configuration dropins folder by the plug-in.")
             applicationXml.writeApplicationXmlDocument(getServerDir(project))
-            writeServerPropertiesToXml(project)
         } else if (hasConfiguredApp(libertyConfigDropinsAppXml)) {
             logger.warn("At least one application is not defined in the server configuration but the build file indicates it should be installed in the apps folder. Liberty will use additional application configuration added to the the target server configuration dropins folder by the plug-in.")
         } else {
             if (libertyConfigDropinsAppXml.exists()){
                 libertyConfigDropinsAppXml.delete()
-                writeServerPropertiesToXml(project)
             }
         }
     }
