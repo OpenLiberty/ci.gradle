@@ -12,9 +12,6 @@ public class TestAppConfig extends AbstractIntegrationTest{
     @BeforeClass
     public static void setup() {
         createDir(buildDir)
-        if(test_mode == "offline"){
-            WLP_DIR.replace("\\","/")
-        }
         createTestProject(buildDir, resourceDir, buildFilename)
     }
 
@@ -22,7 +19,7 @@ public class TestAppConfig extends AbstractIntegrationTest{
     public static void tearDown() throws Exception {
         runTasks(buildDir, 'libertyStop')
     }
-    
+
     @Test
     public void test_start_with_timeout_success() {
         try {

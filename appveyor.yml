@@ -1,9 +1,16 @@
 environment:
-  matrix:
+    matrix:
         - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
+          PROPERTIES_FILE: wlp1.properties
+        - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
+          PROPERTIES_FILE: wlp2.properties
+        - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
+          PROPERTIES_FILE: ol1.properties
+        - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
+          PROPERTIES_FILE: ol2.properties
 
 build_script:
   # Build the compiled extension
-  - "gradlew.bat install check -Prunit=online -DwlpVersion=17.0.0.3 --stacktrace --info --no-daemon"
+  - "gradlew.bat install integrationTest -DpropertiesFile=%PROPERTIES_FILE% --stacktrace --info --no-daemon"
 
 test: off

@@ -32,16 +32,11 @@ class LibertyTest extends AbstractIntegrationTest{
     @BeforeClass
     public static void setup() {
         createDir(buildDir)
-        if(test_mode == "offline"){
-            WLP_DIR.replace("\\","/")
-            createTestProject(buildDir, resourceDir, buildFilename)
-        }else if(test_mode == "online"){
-            createTestProject(buildDir, resourceDir, buildFilename)
-            try {
-                runTasks(buildDir, 'installLiberty')
-            } catch (Exception e) {
-                throw new AssertionError ("Fail on task installLiberty. "+ e)
-            }
+        createTestProject(buildDir, resourceDir, buildFilename)
+        try {
+            runTasks(buildDir, 'installLiberty')
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task installLiberty. "+ e)
         }
     }
 
@@ -134,7 +129,7 @@ class LibertyTest extends AbstractIntegrationTest{
         ServerTask st = new ServerTask()
         def installDir = new File(buildDir.getAbsolutePath() + "/build/wlp")
         st.setInstallDir(installDir)
-        st.setServerName((test_mode == "offline") ? "libertyOffline" : "libertyOnline")
+        st.setServerName('LibertyProjectServer')
         st.initTask()
 
         try{

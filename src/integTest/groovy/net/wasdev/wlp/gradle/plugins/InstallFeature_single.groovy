@@ -31,9 +31,6 @@ class InstallFeature_single extends AbstractIntegrationTest{
     @BeforeClass
     public static void setup() {
         createDir(buildDir)
-        if (test_mode == "offline"){
-            WLP_DIR.replace("\\","/")
-        }
         copyBuildFiles(buildFilename, buildDir)
     }
 
@@ -43,10 +40,8 @@ class InstallFeature_single extends AbstractIntegrationTest{
             def file = new File(buildDir, "build/wlp/lib/features/com.ibm.websphere.appserver.mongodb-2.0.mf")
             runTasks(buildDir, 'installFeature')
 
-            if (test_mode == "online") {
-                assert file.exists() : "com.ibm.websphere.appserver.mongodb-2.0.mf is not installed"
-                assert file.canRead() : "com.ibm.websphere.appserver.mongodb-2.0.mf cannot be read"
-            }
+            assert file.exists() : "com.ibm.websphere.appserver.mongodb-2.0.mf is not installed"
+            assert file.canRead() : "com.ibm.websphere.appserver.mongodb-2.0.mf cannot be read"
         } catch (Exception e) {
             throw new AssertionError ("Fail on task installFeature. "+e)
         }
@@ -58,9 +53,7 @@ class InstallFeature_single extends AbstractIntegrationTest{
             def file = new File(buildDir, "build/wlp/lib/features/com.ibm.websphere.appserver.mongodb-2.0.mf")
             runTasks(buildDir, 'uninstallFeature')
 
-            if (test_mode == "online") {
-                assert !file.exists() : "com.ibm.websphere.appserver.mongodb-2.0.mf is not uninstalled"
-            }
+            assert !file.exists() : "com.ibm.websphere.appserver.mongodb-2.0.mf is not uninstalled"
         } catch (Exception e) {
             throw new AssertionError ("Fail on task uninstallFeature. "+e)
         }

@@ -27,24 +27,18 @@ class LibertyPackage_noAttrib_Test extends AbstractIntegrationTest{
     static resourceDir = new File("build/resources/integrationTest/liberty-package-test")
     static File buildDir = new File(integTestDir, "/liberty-package-noAttrib-test")
     static File buildFilename = new File(resourceDir, "liberty-package-noAttrib.gradle")
-    
+
     @BeforeClass
     public static void setup() {
         createDir(buildDir)
-        if (test_mode == "offline"){
-            WLP_DIR.replace("\\","/")
-            copyBuildFiles(buildFilename, buildDir)
-        } else if (test_mode == "online"){
-            copyBuildFiles(buildFilename, buildDir)
-            try {
-                runTasks(buildDir, 'installLiberty')
-                runTasks(buildDir, 'libertyStart')
-                runTasks(buildDir, 'libertyStop')
-            } catch (Exception e) {
-                throw new AssertionError ("Fail on task installLiberty. "+ e)
-            }
+        copyBuildFiles(buildFilename, buildDir)
+        try {
+            runTasks(buildDir, 'installLiberty')
+            runTasks(buildDir, 'libertyStart')
+            runTasks(buildDir, 'libertyStop')
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task installLiberty. "+ e)
         }
-        
     }
 
     @Test
@@ -56,7 +50,7 @@ class LibertyPackage_noAttrib_Test extends AbstractIntegrationTest{
 
            assert file.exists() : "file not found"
            assert file.canRead() : "file cannot be read"
-           
+
         } catch (Exception e) {
            throw new AssertionError ("Fail on task libertyPackage. "+e)
         }

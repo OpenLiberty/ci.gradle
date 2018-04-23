@@ -12,9 +12,6 @@ public class TestEtcOutputDir extends AbstractIntegrationTest{
     @BeforeClass
     public static void setup() {
         createDir(buildDir)
-        if(test_mode == "offline"){
-            WLP_DIR.replace("\\","/")
-        }
         createTestProject(buildDir, resourceDir, buildFilename)
     }
 
@@ -30,7 +27,7 @@ public class TestEtcOutputDir extends AbstractIntegrationTest{
         } catch (Exception e) {
             throw new AssertionError ("Fail on task libertyStart. "+ e)
         }
-        
+
         assert new File('build/testBuilds/test-etc-output-dir/build/testEtcOutputDir').exists() : 'Could not find the outputDir specified in the build file.'
         assert new File('build/testBuilds/test-etc-output-dir/build/testEtcOutputDir/LibertyProjectServer').exists() : 'Could not find the outputDir specified in the build file.'
     }

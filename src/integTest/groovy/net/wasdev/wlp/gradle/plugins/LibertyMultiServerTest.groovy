@@ -32,16 +32,11 @@ class LibertyMultiServerTest extends AbstractIntegrationTest{
     @BeforeClass
     public static void setup() {
         createDir(buildDir)
-        if(test_mode == "offline"){
-            WLP_DIR.replace("\\","/")
-            createTestProject(buildDir, resourceDir, buildFilename)
-        }else if(test_mode == "online"){
-            createTestProject(buildDir, resourceDir, buildFilename)
-            try {
-                runTasks(buildDir, 'installLiberty')
-            } catch (Exception e) {
-                throw new AssertionError ("Fail on task installLiberty. "+ e)
-            }
+        createTestProject(buildDir, resourceDir, buildFilename)
+        try {
+            runTasks(buildDir, 'installLiberty')
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task installLiberty. "+ e)
         }
     }
 

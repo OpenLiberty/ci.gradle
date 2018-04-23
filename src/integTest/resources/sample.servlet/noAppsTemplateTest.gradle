@@ -32,7 +32,7 @@ dependencies {
     testCompile 'org.apache.cxf:cxf-rt-rs-client:3.1.1'
     testCompile 'org.glassfish:javax.json:1.0.4'
     providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
-    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-webProfile7', version: wlpVersion
+    libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
 }
 
 liberty {

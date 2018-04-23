@@ -29,9 +29,6 @@ public class TestEclipseFacetsWar extends AbstractIntegrationTest{
     @BeforeClass
     public static void setup() {
         createDir(buildDir)
-        if(test_mode == "offline"){
-            WLP_DIR.replace("\\","/")
-        }
         createTestProject(buildDir, resourceDir, buildFilename)
 
         try {
@@ -55,7 +52,7 @@ public class TestEclipseFacetsWar extends AbstractIntegrationTest{
         boolean hasJstWebFacet = false
         boolean hasJavaFacet = false
 
-        facets.each { facet -> 
+        facets.each { facet ->
             HashMap attributes = facet.attributes()
             if (attributes.getAt('facet').equals('jst.web') && attributes.getAt('version').equals('3.0')) {
                 hasJstWebFacet = true

@@ -98,7 +98,7 @@ dependencies {
     testCompile "org.jboss.shrinkwrap:shrinkwrap-api:1.2.6"
     testCompile files("${System.properties['java.home']}/../lib/tools.jar")
 
-    libertyRuntime "com.ibm.websphere.appserver.runtime:wlp-webProfile7:17.0.0.4"
+    libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
 }
 
 task copyH2 {

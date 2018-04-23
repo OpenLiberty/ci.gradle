@@ -31,9 +31,6 @@ class InstallFeature_multiple extends AbstractIntegrationTest{
     @BeforeClass
     public static void setup() {
         createDir(buildDir)
-        if (test_mode == "offline"){
-            WLP_DIR.replace("\\","/")
-        }
         copyBuildFiles(buildFilename, buildDir)
     }
 
@@ -44,12 +41,10 @@ class InstallFeature_multiple extends AbstractIntegrationTest{
             def file_2 = new File(buildDir, "build/wlp/lib/features/com.ibm.websphere.appserver.adminCenter-1.0.mf")
             runTasks(buildDir, 'installFeature')
 
-            if (test_mode == "online") {
-                assert file.exists() : "com.ibm.websphere.appserver.mongodb-2.0.mf is not installed"
-                assert file.canRead() : "com.ibm.websphere.appserver.mongodb-2.0.mf cannot be read"
-                assert file_2.exists() : "com.ibm.websphere.appserver.adminCenter-1.0.mf is not installed"
-                assert file_2.canRead() : "com.ibm.websphere.appserver.adminCenter-1.0.mf cannot be read"
-            }
+            assert file.exists() : "com.ibm.websphere.appserver.mongodb-2.0.mf is not installed"
+            assert file.canRead() : "com.ibm.websphere.appserver.mongodb-2.0.mf cannot be read"
+            assert file_2.exists() : "com.ibm.websphere.appserver.adminCenter-1.0.mf is not installed"
+            assert file_2.canRead() : "com.ibm.websphere.appserver.adminCenter-1.0.mf cannot be read"
         } catch (Exception e) {
             throw new AssertionError ("Fail on task installFeature. "+e)
         }
@@ -62,10 +57,8 @@ class InstallFeature_multiple extends AbstractIntegrationTest{
             def file2 = new File(buildDir, "build/wlp/lib/features/com.ibm.websphere.appserver.adminCenter-1.0.mf")
             runTasks(buildDir, 'uninstallFeature')
 
-            if (test_mode == "online") {
-                assert !file.exists() : "com.ibm.websphere.appserver.mongodb-2.0.mf is not uninstalled"
-                assert !file2.exists() : "com.ibm.websphere.appserver.adminCenter-1.0.mf is not installed"
-            }
+            assert !file.exists() : "com.ibm.websphere.appserver.mongodb-2.0.mf is not uninstalled"
+            assert !file2.exists() : "com.ibm.websphere.appserver.adminCenter-1.0.mf is not installed"
         } catch (Exception e) {
             throw new AssertionError ("Fail on task uninstallFeature. "+e)
         }

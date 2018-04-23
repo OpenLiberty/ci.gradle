@@ -1,3 +1,5 @@
+apply plugin: 'liberty'
+
 buildscript {
     repositories {
         mavenLocal()
@@ -13,17 +15,16 @@ buildscript {
     }
 }
 
-def test_mode = runit
-def wlpLicense = System.getProperty('wlpLicense')
-def WLP_DIR = System.getProperty('wlpInstallDir')
-def wlpUrl = "http://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/" + wlpVersion + "/wlp-webProfile7-" + wlpVersion + ".zip"
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
 
-apply plugin: 'liberty'
+dependencies {
+    libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
+}
 
 liberty {
-    install {
-        runtimeUrl = wlpUrl
-    }
     servers {
         libertyServer1 {
 

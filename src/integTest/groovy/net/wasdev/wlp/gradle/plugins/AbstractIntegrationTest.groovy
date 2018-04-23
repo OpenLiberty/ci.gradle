@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2015, 2017.
+ * (C) Copyright IBM Corporation 2015, 2018.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.wasdev.wlp.gradle.plugins
+
+import java.io.File
 
 import static org.junit.Assert.*
 
@@ -21,13 +24,19 @@ import org.apache.commons.io.FileUtils
 import org.gradle.tooling.BuildLauncher
 import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.ProjectConnection
-import java.io.File
-
+import org.gradle.api.GradleException
 
 abstract class AbstractIntegrationTest {
+
+    public static final String LIBERTY_PROPERTIES_FILENAME_1 = 'wlp1.properties'
+    public static final String LIBERTY_PROPERTIES_FILENAME_2 = 'wlp2.properties'
+    public static final String OPEN_LIBERTY_PROPERTIES_FILENAME_1 = 'ol1.properties'
+    public static final String OPEN_LIBERTY_PROPERTIES_FILENAME_2 = 'ol2.properties'
+
+    public static final String PROPERTY_FILE_DIRECTORY = "src/integTest/properties"
+
     static File integTestDir = new File('build/testBuilds')
-    static final String test_mode = System.getProperty("runit")
-    static String WLP_DIR = System.getProperty("wlpInstallDir")
+    static String libertyProperties = System.getProperty("propertiesFile")
 
     protected static void deleteDir(File dir) {
         if (dir.exists()) {
@@ -46,8 +55,31 @@ abstract class AbstractIntegrationTest {
     }
 
     protected static File copyBuildFiles(File buildFilename, File buildDir) {
-            copyFile(buildFilename, new File(buildDir, 'build.gradle'))
-            copyFile(new File("gradle.properties"), new File(buildDir, 'gradle.properties'))
+        copyFile(buildFilename, new File(buildDir, 'build.gradle'))
+        copyPropertyFile(buildDir)
+    }
+
+    protected static void copyPropertyFile(File buildDir) {
+        File propertyFile
+        if (libertyProperties != null) {
+            switch (libertyProperties) {
+                case LIBERTY_PROPERTIES_FILENAME_2:
+                    propertyFile = new File(PROPERTY_FILE_DIRECTORY, LIBERTY_PROPERTIES_FILENAME_2)
+                    break;
+                case OPEN_LIBERTY_PROPERTIES_FILENAME_1:
+                    propertyFile = new File(PROPERTY_FILE_DIRECTORY, OPEN_LIBERTY_PROPERTIES_FILENAME_1)
+                    break;
+                case OPEN_LIBERTY_PROPERTIES_FILENAME_2:
+                    propertyFile = new File(PROPERTY_FILE_DIRECTORY, OPEN_LIBERTY_PROPERTIES_FILENAME_2)
+                    break;
+                default:
+                    propertyFile = new File(PROPERTY_FILE_DIRECTORY, LIBERTY_PROPERTIES_FILENAME_1)
+                    break;
+            }
+        } else {
+            throw new GradleException('Tests could not be run. Please specify a properties file.')
+        }
+        copyFile(propertyFile, new File(buildDir, 'gradle.properties'))
     }
 
     protected static File createTestProject(File parent, File sourceDir, String buildFilename) {
@@ -81,7 +113,6 @@ abstract class AbstractIntegrationTest {
 
         try {
             BuildLauncher build = connection.newBuild()
-            build.setJvmArguments("-DWLP_DIR=$WLP_DIR")
             build.withArguments("-i");
             build.forTasks(tasks)
             build.run()

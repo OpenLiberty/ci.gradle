@@ -31,33 +31,22 @@ class InstallLiberty_javaee7 extends AbstractIntegrationTest{
     @BeforeClass
     public static void setup() {
         createDir(buildDir)
-        if(test_mode == "offline"){
-            WLP_DIR.replace("\\","/")
-            createTestProject(buildDir, resourceDir, buildFilename)
-        }else if(test_mode == "online"){
-            createTestProject(buildDir, resourceDir, buildFilename)
-            try {
-                runTasks(buildDir, 'installLiberty')
-            } catch (Exception e) {
-                throw new AssertionError ("Fail on task installLiberty. "+ e)
-            }
+        createTestProject(buildDir, resourceDir, buildFilename)
+        try {
+            runTasks(buildDir, 'installLiberty')
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task installLiberty. "+ e)
         }
     }
-    
+
     @Test
     public void test_installLiberty_javaee7() {
         try {
             def file = new File(buildDir, "build/wlp/lib/features/com.ibm.websphere.appserver.javaee-7.0.mf")
-            
-            if (test_mode == "online") {
-                assert file.exists() : "file not found"
-                assert file.canRead() : "file cannot be read"
-            } else {
-                logger.debug "Skipping test_installLiberty_javaee7 in offline test mode"
-            }
+            assert file.exists() : "file not found"
+            assert file.canRead() : "file cannot be read"
         } catch (Exception e) {
             throw new AssertionError ("Fail on task installLiberty. "+e)
         }
     }
 }
-

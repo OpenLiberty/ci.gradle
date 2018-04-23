@@ -12,10 +12,6 @@ buildscript {
     }
 }
 
-def test_mode = runit
-def wlpLicense = System.getProperty('wlpLicense')
-def WLP_DIR = System.getProperty('wlpInstallDir')
-
 apply plugin: 'liberty'
 
 repositories {
@@ -23,18 +19,12 @@ repositories {
 }
 
 dependencies {
-    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-javaee7', version: wlpVersion
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-javaee7', version: runtimeVersion
 }
 
 liberty {
-    if (test_mode == 'online') {
-        serverName = 'libertyOnline'
-    } else {
-        installDir = WLP_DIR
-        serverName = 'libertyOffline'
-    }
     server{
-        name = serverName
+        name = 'LibertyProjectServer'
         features {
             name = ["mongodb-2.0"]
             acceptLicense = true

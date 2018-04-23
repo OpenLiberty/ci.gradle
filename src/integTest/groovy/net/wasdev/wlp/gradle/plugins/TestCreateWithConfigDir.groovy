@@ -13,12 +13,9 @@ public class TestCreateWithConfigDir extends AbstractIntegrationTest{
     @BeforeClass
     public static void setup() {
         createDir(testBuildDir)
-        if(test_mode == "offline"){
-            WLP_DIR.replace("\\","/")
-        }
         createTestProject(testBuildDir, sourceDir, buildFilename)
     }
-    
+
     @Test
     public void test_create_with_configDir() {
 

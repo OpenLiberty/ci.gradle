@@ -1,3 +1,5 @@
+apply plugin: 'liberty'
+
 buildscript {
     repositories {
         mavenLocal()
@@ -13,22 +15,18 @@ buildscript {
     }
 }
 
-def test_mode = runit
-def WLP_DIR = System.getProperty('wlpInstallDir')
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
 
-apply plugin: 'liberty'
+dependencies {
+    libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
+}
 
 liberty {
-    if (test_mode == 'online') {
-        install {
-            runtimeUrl = 'https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2017-09-16_2214/openliberty-17.0.0.3-RC.zip'
-        }
-        serverName = 'libertyOnline'
-    } else {
-        installDir = WLP_DIR
-        serverName = 'libertyOffline'
-    }
     server{
+        name = 'LibertyProjectServer'
         name = serverName
         packageLiberty {
             archive = 'testPackage.zip'
