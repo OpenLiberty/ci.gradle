@@ -313,7 +313,7 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
     void createApplicationFolder(String appDir) {
-        File applicationDirectory = new File(serverDir, appDir)
+        File applicationDirectory = new File(getServerDir(project), appDir)
         try {
             if (!applicationDirectory.exists()) {
                 applicationDirectory.mkdir()
