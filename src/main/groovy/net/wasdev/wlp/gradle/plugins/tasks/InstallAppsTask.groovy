@@ -312,20 +312,8 @@ class InstallAppsTask extends AbstractServerTask {
         }
     }
 
-    //Checks if there is an app configured in an existing configDropins application xml file
-    private boolean hasConfiguredApp(File applicationXmlFile) {
-        if (applicationXmlFile.exists()) {
-            ApplicationXmlDocument appXml = new ApplicationXmlDocument()
-            appXml.createDocument(applicationXmlFile)
-            return appXml.hasChildElements()
-        }
-        return false
-    }
-
     void createApplicationFolder(String appDir) {
-        File serverDir = getServerDir(project)
         File applicationDirectory = new File(serverDir, appDir)
-
         try {
             if (!applicationDirectory.exists()) {
                 applicationDirectory.mkdir()

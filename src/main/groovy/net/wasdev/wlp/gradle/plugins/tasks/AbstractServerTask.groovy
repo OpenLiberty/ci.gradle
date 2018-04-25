@@ -364,7 +364,7 @@ abstract class AbstractServerTask extends AbstractTask {
                 serverNode.appendNode('installAppsConfigDropins', installAppsConfigDropinsFile.toString())
             }
           } else {
-                if (!isAppConfiguredInSourceServerXml(getArchiveName(task))) {
+                if (!isAppConfiguredInSourceServerXml(getArchiveName(task)) || hasConfiguredApp(ApplicationXmlDocument.getApplicationXmlFile(getServerDir(project)))) {
                     serverNode.appendNode('installAppsConfigDropins', installAppsConfigDropinsFile.toString())
                 }
             }
@@ -515,5 +515,15 @@ abstract class AbstractServerTask extends AbstractTask {
       else {
           throw new GradleException("Archive path not found. Supported formats are jar, war, and ear.")
       }
-  }
+    }
+
+    //Checks if there is an app configured in an existing configDropins application xml file
+    protected boolean hasConfiguredApp(File applicationXmlFile) {
+      if (applicationXmlFile.exists()) {
+          ApplicationXmlDocument appXml = new ApplicationXmlDocument()
+          appXml.createDocument(applicationXmlFile)
+          return appXml.hasChildElements()
+      }
+      return false
+    }
 }
