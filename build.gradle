@@ -97,7 +97,7 @@ task wrapper(type: Wrapper) {
 
 archivesBaseName = 'liberty-gradle-plugin'
 group = 'net.wasdev.wlp.gradle.plugins'
-version = '2.3'
+version = '2.4-SNAPSHOT'
 
 task sourcesJar(type: Jar) {
     classifier = 'sources'
@@ -157,7 +157,7 @@ if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')
             connection 'scm:git:git@github.com:WASdev/ci.gradle.git'
             developerConnection 'scm:git:git@github.com:WASdev/ci.gradle.git'
             url 'git@github.com:WASdev/ci.gradle.git'
-            tag 'liberty-gradle-plugin-2.3'
+            tag 'HEAD'
           }
 
           licenses {
