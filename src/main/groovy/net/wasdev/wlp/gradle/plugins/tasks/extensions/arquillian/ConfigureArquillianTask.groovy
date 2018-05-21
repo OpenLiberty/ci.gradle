@@ -24,6 +24,7 @@ import javax.xml.xpath.XPathExpressionException
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.logging.LogLevel
 import org.xml.sax.SAXException
 import net.wasdev.wlp.common.arquillian.objects.LibertyProperty;
 import net.wasdev.wlp.common.arquillian.objects.LibertyRemoteObject
@@ -38,6 +39,14 @@ class ConfigureArquillianTask extends AbstractServerTask {
     public TypeProperty type = TypeProperty.NOTFOUND
     public enum TypeProperty {
         MANAGED, REMOTE, NOTFOUND;
+    }
+
+    ConfigureArquillianTask() {
+        configure({
+            description "Automatically generates arquillian.xml for projects that use Arquillian Liberty Managed or Remote containers."
+            logging.level = LogLevel.INFO
+            group 'Liberty'
+        })
     }
 
     @Input

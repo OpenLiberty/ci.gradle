@@ -60,6 +60,7 @@ abstract class LibertyTasks {
         shouldRunAfterList = oldTask.getShouldRunAfter().getDependencies(oldTask)
         mustRunAfterList = oldTask.getMustRunAfter().getDependencies(oldTask)
 
+        project.tasks.remove(oldTask)
         //Creating new task with task type, the passed in closure, and setting dependencies
         Task newTask = project.task(taskName, type: taskType, overwrite: true)
         newTask.setDependsOn(dependsOnList)

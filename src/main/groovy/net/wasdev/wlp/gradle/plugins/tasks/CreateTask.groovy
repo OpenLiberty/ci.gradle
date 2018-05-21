@@ -22,12 +22,18 @@ import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.logging.LogLevel
 
 class CreateTask extends AbstractServerTask {
 
     final String DEFAULT_PATH = project.projectDir.toString() + '/src/main/liberty/config/'
 
     CreateTask() {
+        configure({
+            description 'Creates a Liberty server.'
+            logging.level = LogLevel.INFO
+            group 'Liberty'
+        })
         outputs.upToDateWhen {
             getServerDir(project).exists() && new File(getServerDir(project), 'server.xml')
         }

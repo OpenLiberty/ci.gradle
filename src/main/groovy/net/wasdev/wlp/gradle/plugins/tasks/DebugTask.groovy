@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2015.
+ * (C) Copyright IBM Corporation 2015, 2018.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,17 @@
 package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.logging.LogLevel
 
 class DebugTask extends AbstractServerTask {
+
+    DebugTask() {
+        configure({
+            description = 'Runs the Liberty server in the console foreground after a debugger connects to the debug port (default: 7777).'
+            logging.level = LogLevel.INFO
+            group = 'Liberty'
+        })
+    }
 
     @TaskAction
     void debug() {

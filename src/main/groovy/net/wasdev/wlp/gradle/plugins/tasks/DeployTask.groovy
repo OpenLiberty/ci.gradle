@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2015.
+ * (C) Copyright IBM Corporation 2014, 2018.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,17 @@
 package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.logging.LogLevel
 
 class DeployTask extends AbstractServerTask {
+
+    DeployTask() {
+        configure({
+            description 'Deploys a supported file to the Liberty server.'
+            logging.level = LogLevel.INFO
+            group 'Liberty'
+        })
+    }
 
     @TaskAction
     void deploy() {

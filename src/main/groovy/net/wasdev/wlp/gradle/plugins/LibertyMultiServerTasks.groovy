@@ -38,6 +38,7 @@ import net.wasdev.wlp.gradle.plugins.tasks.CompileJSPTask
 import net.wasdev.wlp.gradle.plugins.tasks.extensions.arquillian.ConfigureArquillianTask
 
 import org.gradle.api.Project
+import org.gradle.api.DefaultTask
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.bundling.War
 
@@ -49,36 +50,30 @@ class LibertyMultiServerTasks extends LibertyTasks {
     void applyTasks() {
         addTaskRules()
 
-        project.tasks.getByName('compileJSP') {
+        overwriteTask('compileJSP', DefaultTask, {
             description 'Compile the JSP files in the src/main/webapp directory. '
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn getTaskList('compileJSP')
-        }
-
-        overwriteTask('installLiberty', InstallLibertyTask, {
-            description 'Installs Liberty from a repository'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
         })
 
-        project.tasks.getByName('libertyRun') {
+        overwriteTask('libertyRun', DefaultTask, {
             description = "Runs a Liberty server under the Gradle process."
             logging.level = LogLevel.INFO
             group 'Liberty'
             doLast {
                 logger.warn('Please specify a server to run. Use the command \'libertyRun-<Server Name>\'.')
             }
-        }
+        })
 
-        project.tasks.getByName('libertyStatus') {
+        overwriteTask('libertyStatus', DefaultTask, {
             description 'Checks if the Liberty server is running.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn getTaskList('libertyStatus')
-        }
+        })
 
-        project.tasks.getByName('libertyCreate') {
+        overwriteTask('libertyCreate', DefaultTask, {
             description 'Creates a Liberty server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
@@ -89,88 +84,88 @@ class LibertyMultiServerTasks extends LibertyTasks {
             outputs.upToDateWhen {
                 tasksUpToDate(libertyCreateTasks)
             }
-        }
+        })
 
-        project.tasks.getByName('libertyStart') {
+        overwriteTask('libertyStart', DefaultTask, {
             description 'Starts the Liberty server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn getTaskList('libertyStart')
-        }
+        })
 
-        project.tasks.getByName('libertyStop') {
+        overwriteTask('libertyStop', DefaultTask, {
             description 'Stops the Liberty server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn getTaskList('libertyStop')
-        }
+        })
 
-        project.tasks.getByName('libertyPackage') {
+        overwriteTask('libertyPackage', DefaultTask, {
             description 'Generates a Liberty server archive.'
             logging.level = LogLevel.DEBUG
             group 'Liberty'
             dependsOn getTaskList('libertyPackage')
-        }
+        })
 
-        project.tasks.getByName('libertyDump') {
+        overwriteTask('libertyDump', DefaultTask, {
             description 'Dumps diagnostic information from the Liberty server into an archive.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn getTaskList('libertyDump')
-        }
+        })
 
-        project.tasks.getByName('libertyJavaDump') {
+        overwriteTask('libertyJavaDump', DefaultTask, {
             description 'Dumps diagnostic information from the Liberty server JVM.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn getTaskList('libertyJavaDump')
-        }
+        })
 
-        project.tasks.getByName('libertyDebug') {
+        overwriteTask('libertyDebug', DefaultTask, {
             description 'Runs the Liberty server in the console foreground after a debugger connects to the debug port (default: 7777).'
             logging.level = LogLevel.INFO
             group 'Liberty'
             doLast {
                 logger.warn('Please specify a server to debug. Use the command \'libertyDebug-<Server Name>\'.')
             }
-        }
+        })
 
-        project.tasks.getByName('deploy') {
+        overwriteTask('deploy', DefaultTask, {
             description 'Deploys a supported file to the Liberty server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn getTaskList('deploy')
-        }
+        })
 
-        project.tasks.getByName('undeploy') {
+        overwriteTask('undeploy', DefaultTask, {
             description 'Removes an application from the Liberty server.'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn getTaskList('undeploy')
-        }
+        })
 
-        project.tasks.getByName('installFeature') {
+        overwriteTask('installFeature', DefaultTask, {
             description 'Install a new feature to the Liberty server'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn getTaskList('installFeature')
-        }
+        })
 
-        project.tasks.getByName('uninstallFeature') {
+        overwriteTask('uninstallFeature', DefaultTask, {
             description 'Uninstall a feature from the Liberty server'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn getTaskList('uninstallFeature')
-        }
+        })
 
-        project.tasks.getByName('cleanDirs') {
+        overwriteTask('cleanDirs', DefaultTask, {
             description 'Deletes files from some directories from the Liberty server'
             logging.level = LogLevel.INFO
             group 'Liberty'
             dependsOn getTaskList('cleanDirs')
-        }
+        })
 
-        project.tasks.getByName('installApps') {
+        overwriteTask('installApps', DefaultTask, {
             description "Copy applications generated by the Gradle project to a Liberty server's dropins or apps directory."
             logging.level = LogLevel.INFO
             group 'Liberty'
@@ -179,40 +174,27 @@ class LibertyMultiServerTasks extends LibertyTasks {
             outputs.upToDateWhen {
                 tasksUpToDate(installAppsTasks)
             }
-        }
+        })
 
         project.liberty.servers.each { checkServerEnvProperties(it) }
     }
 
     void addTaskRules() {
         addTaskRule('Pattern: libertyCreate-<Server Name>', 'libertyCreate', CreateTask, {
-            description 'Creates a Liberty server.'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
             dependsOn 'installLiberty'
 
             if (dependsOnFeature(server)) finalizedBy 'installFeature-' + server.name
         })
 
-        addTaskRule('Pattern: libertyStop-<Server Name>', 'libertyStop', StopTask, {
-            description 'Stops the Liberty server.'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
-        })
+        addTaskRule('Pattern: libertyStop-<Server Name>', 'libertyStop', StopTask, {})
 
         addTaskRule('Pattern: libertyStart-<Server Name>', 'libertyStart', StartTask, {
-            description 'Starts the Liberty server.'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
             dependsOn 'libertyCreate-' + server.name
 
             if (dependsOnApps(server)) dependsOn 'installApps-' + server.name
         })
 
         addTaskRule('Pattern: libertyRun-<Server Name>', 'libertyRun', RunTask, {
-            description 'Runs a Liberty server under the Gradle process.'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
             dependsOn 'libertyCreate-' + server.name
 
             if (dependsOnApps(server)) dependsOn 'installApps-' + server.name
@@ -220,17 +202,9 @@ class LibertyMultiServerTasks extends LibertyTasks {
 
         addTaskRule('Pattern: installApps-<Server Name>', 'installApps', InstallAppsTask, {
             dependsOn 'libertyCreate-' + server.name, project.tasks.withType(War)
-
-            description "Copy applications generated by the Gradle project to a Liberty server's dropins or apps directory."
-            logging.level = LogLevel.INFO
-            group 'Liberty'
         })
 
         addTaskRule('Pattern: installFeature-<Server Name>', 'installFeature', InstallFeatureTask, {
-            description 'Install a new feature to the Liberty server'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
-
             if (dependsOnFeature(server)) {
                 dependsOn 'libertyCreate-' + server.name
             } else {
@@ -238,83 +212,42 @@ class LibertyMultiServerTasks extends LibertyTasks {
             }
         })
 
-        addTaskRule('Pattern: uninstallFeature-<Server Name>', 'uninstallFeature', UninstallFeatureTask, {
-            description 'Uninstall a feature from the Liberty server'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
-        })
+        addTaskRule('Pattern: uninstallFeature-<Server Name>', 'uninstallFeature', UninstallFeatureTask, {})
 
         addTaskRule('Pattern: compileJSP-<Server Name>', 'compileJSP', CompileJSPTask, {
-            description 'Compile the JSP files in the src/main/webapp directory. '
-            logging.level = LogLevel.INFO
-            group 'Liberty'
             dependsOn 'installLiberty', 'compileJava'
         })
 
         addTaskRule('Pattern: libertyRun-<Server Name>', 'libertyRun', RunTask, {
-            description = "Runs a Liberty server under the Gradle process."
-            logging.level = LogLevel.INFO
-            group 'Liberty'
             dependsOn 'libertyCreate-' + server.name
             if (dependsOnApps(server)) dependsOn 'installApps-' + server.name
         })
 
-        addTaskRule('Pattern: libertyStatus-<Server Name>', 'libertyStatus', StatusTask, {
-            description 'Checks if the Liberty server is running.'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
-        })
+        addTaskRule('Pattern: libertyStatus-<Server Name>', 'libertyStatus', StatusTask, {})
 
         addTaskRule('Pattern: libertyDebug-<Server Name>', 'libertyDebug', DebugTask, {
-            description 'Runs the Liberty server in the console foreground after a debugger connects to the debug port (default: 7777).'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
             dependsOn 'libertyCreate-' + server.name
         })
 
         addTaskRule('Pattern: libertyPackage-<Server Name>', 'libertyPackage', PackageTask, {
-            description 'Generates a Liberty server archive.'
-            logging.level = LogLevel.DEBUG
-            group 'Liberty'
             dependsOn installDependsOn(server, 'libertyCreate')
         })
 
-        addTaskRule('Pattern: libertyDump-<Server Name>', 'libertyDump', DumpTask, {
-            description 'Dumps diagnostic information from the Liberty server into an archive.'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
-        })
+        addTaskRule('Pattern: libertyDump-<Server Name>', 'libertyDump', DumpTask, {})
 
-        addTaskRule('Pattern: libertyJavaDump-<Server Name>', 'libertyJavaDump', JavaDumpTask, {
-            description 'Dumps diagnostic information from the Liberty server JVM.'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
-        })
+        addTaskRule('Pattern: libertyJavaDump-<Server Name>', 'libertyJavaDump', JavaDumpTask, {})
 
         addTaskRule('Pattern: deploy-<Server Name>', 'deploy', DeployTask, {
-            description 'Deploys a supported file to the Liberty server.'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
             dependsOn 'libertyStart-' + server.name
         })
 
         addTaskRule('Pattern: undeploy-<Server Name>', 'undeploy', UndeployTask, {
-            description 'Removes an application from the Liberty server.'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
             dependsOn 'libertyStart-' + server.name
         })
 
-        addTaskRule('Pattern: cleanDirs-<Server Name>', 'cleanDirs', CleanTask, {
-            description 'Deletes files from some directories from the Liberty server'
-            logging.level = LogLevel.INFO
-            group 'Liberty'
-        })
+        addTaskRule('Pattern: cleanDirs-<Server Name>', 'cleanDirs', CleanTask, {})
 
         addTaskRule('Pattern: configureArquillian-<Server Name>', 'configureArquillian', ConfigureArquillianTask, {
-            description "Automatically generates arquillian.xml for projects that use Arquillian Liberty Managed or Remote containers."
-            logging.level = LogLevel.INFO
-            group 'Liberty'
             dependsOn 'installApps-' + server.name, 'processTestResources'
             skipIfArquillianXmlExists = project.arquillianConfiguration.skipIfArquillianXmlExists
             arquillianProperties = project.arquillianConfiguration.arquillianProperties

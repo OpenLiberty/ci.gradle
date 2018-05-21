@@ -16,8 +16,17 @@
 package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.logging.LogLevel
 
 class CleanTask extends AbstractServerTask {
+    CleanTask() {
+        configure({
+            description 'Deletes files from some directories from the Liberty server'
+            logging.level = LogLevel.INFO
+            group 'Liberty'
+        })
+    }
+
 
     @TaskAction
     void cleanDirectories() {
