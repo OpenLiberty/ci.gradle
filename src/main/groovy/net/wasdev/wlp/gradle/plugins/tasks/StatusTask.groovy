@@ -21,9 +21,11 @@ import org.gradle.api.tasks.TaskAction
 class StatusTask extends AbstractServerTask {
 
     StatusTask() {
-        description 'Checks if the Liberty server is running.'
-        logging.level = LogLevel.INFO
-        group 'Liberty'
+        configure({
+            description 'Checks if the Liberty server is running.'
+            logging.level = LogLevel.INFO
+            group 'Liberty'
+        })
     }
 
     @TaskAction

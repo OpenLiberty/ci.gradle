@@ -21,9 +21,11 @@ import org.gradle.api.logging.LogLevel
 class PackageTask extends AbstractServerTask {
 
     PackageTask() {
-        description 'Generates a Liberty server archive.'
-        logging.level = LogLevel.DEBUG
-        group 'Liberty'
+        configure({
+            description 'Generates a Liberty server archive.'
+            logging.level = LogLevel.DEBUG
+            group 'Liberty'
+        })
     }
 
     @TaskAction

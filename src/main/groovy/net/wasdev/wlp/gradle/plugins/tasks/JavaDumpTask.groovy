@@ -21,9 +21,11 @@ import org.gradle.api.logging.LogLevel
 class JavaDumpTask extends AbstractServerTask {
 
     JavaDumpTask() {
-        description 'Dumps diagnostic information from the Liberty server JVM.'
-        logging.level = LogLevel.INFO
-        group 'Liberty'
+        configure({
+            description 'Dumps diagnostic information from the Liberty server JVM.'
+            logging.level = LogLevel.INFO
+            group 'Liberty'
+        })
     }
 
     @TaskAction

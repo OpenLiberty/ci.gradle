@@ -28,9 +28,11 @@ class StartTask extends AbstractServerTask {
     protected final String START_APP_MESSAGE_REGEXP = "CWWKZ0001I.*"
 
     StartTask() {
-        description 'Starts the Liberty server.'
-        logging.level = LogLevel.INFO
-        group 'Liberty'
+        configure({
+            description 'Starts the Liberty server.'
+            logging.level = LogLevel.INFO
+            group 'Liberty'
+        })
     }
 
     @TaskAction
