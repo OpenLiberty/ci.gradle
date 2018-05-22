@@ -20,11 +20,17 @@ import javax.xml.parsers.*
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.logging.LogLevel
 import groovy.xml.MarkupBuilder
 
 class InstallLibertyTask extends AbstractTask {
 
     InstallLibertyTask() {
+        configure({
+            description 'Installs Liberty from a repository'
+            logging.level = LogLevel.INFO
+            group 'Liberty'
+        })
         outputs.upToDateWhen {
             getInstallDir(project).exists()
         }

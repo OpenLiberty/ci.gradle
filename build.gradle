@@ -97,7 +97,7 @@ task wrapper(type: Wrapper) {
 
 archivesBaseName = 'liberty-gradle-plugin'
 group = 'net.wasdev.wlp.gradle.plugins'
-version = '2.4-SNAPSHOT'
+version = '2.3.1-SNAPSHOT'
 
 task sourcesJar(type: Jar) {
     classifier = 'sources'

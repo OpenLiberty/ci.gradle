@@ -17,6 +17,25 @@ package net.wasdev.wlp.gradle.plugins
 
 import org.gradle.api.Project
 
+import net.wasdev.wlp.gradle.plugins.tasks.StartTask
+import net.wasdev.wlp.gradle.plugins.tasks.StopTask
+import net.wasdev.wlp.gradle.plugins.tasks.StatusTask
+import net.wasdev.wlp.gradle.plugins.tasks.CreateTask
+import net.wasdev.wlp.gradle.plugins.tasks.RunTask
+import net.wasdev.wlp.gradle.plugins.tasks.PackageTask
+import net.wasdev.wlp.gradle.plugins.tasks.DumpTask
+import net.wasdev.wlp.gradle.plugins.tasks.JavaDumpTask
+import net.wasdev.wlp.gradle.plugins.tasks.DebugTask
+import net.wasdev.wlp.gradle.plugins.tasks.DeployTask
+import net.wasdev.wlp.gradle.plugins.tasks.UndeployTask
+import net.wasdev.wlp.gradle.plugins.tasks.InstallFeatureTask
+import net.wasdev.wlp.gradle.plugins.tasks.InstallLibertyTask
+import net.wasdev.wlp.gradle.plugins.tasks.UninstallFeatureTask
+import net.wasdev.wlp.gradle.plugins.tasks.CleanTask
+import net.wasdev.wlp.gradle.plugins.tasks.InstallAppsTask
+import net.wasdev.wlp.gradle.plugins.tasks.CompileJSPTask
+import net.wasdev.wlp.gradle.plugins.tasks.extensions.arquillian.ConfigureArquillianTask
+
 class LibertyTaskFactory {
     Project project
     LibertyTaskFactory(Project project) {
@@ -24,23 +43,23 @@ class LibertyTaskFactory {
     }
 
     void createTasks() {
-        project.task('compileJSP')
-        project.task('installLiberty')
-        project.task('libertyRun')
-        project.task('libertyStatus')
-        project.task('libertyCreate')
-        project.task('libertyStart')
-        project.task('libertyStop')
-        project.task('libertyPackage')
-        project.task('libertyDump')
-        project.task('libertyJavaDump')
-        project.task('libertyDebug')
-        project.task('deploy')
-        project.task('undeploy')
-        project.task('installFeature')
-        project.task('uninstallFeature')
-        project.task('cleanDirs')
-        project.task('installApps')
-        project.task('configureArquillian')
+        project.tasks.create('compileJSP', CompileJSPTask)
+        project.tasks.create('installLiberty', InstallLibertyTask)
+        project.tasks.create('libertyRun', RunTask)
+        project.tasks.create('libertyStatus', StatusTask)
+        project.tasks.create('libertyCreate', CreateTask)
+        project.tasks.create('libertyStart', StartTask)
+        project.tasks.create('libertyStop', StopTask)
+        project.tasks.create('libertyPackage', PackageTask)
+        project.tasks.create('libertyDump', DumpTask)
+        project.tasks.create('libertyJavaDump', JavaDumpTask)
+        project.tasks.create('libertyDebug', DebugTask)
+        project.tasks.create('deploy', DeployTask)
+        project.tasks.create('undeploy', UndeployTask)
+        project.tasks.create('installFeature', InstallFeatureTask)
+        project.tasks.create('uninstallFeature', UninstallFeatureTask)
+        project.tasks.create('cleanDirs', CleanTask)
+        project.tasks.create('installApps', InstallAppsTask)
+        project.tasks.create('configureArquillian', ConfigureArquillianTask)
     }
 }

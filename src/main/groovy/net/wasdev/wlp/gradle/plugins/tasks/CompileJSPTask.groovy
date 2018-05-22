@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017.
+ * (C) Copyright IBM Corporation 2017, 2018.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,95 +26,102 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.Task
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.bundling.War
+import org.gradle.api.logging.LogLevel
 
 import org.apache.tools.ant.Project;
 import net.wasdev.wlp.ant.jsp.CompileJSPs;
 
 class CompileJSPTask extends AbstractServerTask {
+    protected Project ant = new Project();
 
-  protected Project ant = new Project();
-
-  @TaskAction
-  protected void compileJSP(){
-    if(getPackagingType().equals('war')){
-      if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
-          perTaskCompileJSP(project.war)
-      }
-      else if (server.apps != null && !server.apps.isEmpty()) {
-        perTaskCompileJSP(server.apps[0])
-      }
-      else if (server.dropins != null && !server.dropins.isEmpty()) {
-        perTaskCompileJSP(server.dropins[0])
-      }
+    CompileJSPTask() {
+        configure({
+            description 'Compile the JSP files in the src/main/webapp directory. '
+            logging.level = LogLevel.INFO
+            group 'Liberty'
+        })
     }
-  }
 
-  protected void perTaskCompileJSP(Task task) throws Exception {
+    @TaskAction
+    protected void compileJSP(){
+        if(getPackagingType().equals('war')){
+            if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
+                perTaskCompileJSP(project.war)
+            }
+            else if (server.apps != null && !server.apps.isEmpty()) {
+                perTaskCompileJSP(server.apps[0])
+            }
+            else if (server.dropins != null && !server.dropins.isEmpty()) {
+                perTaskCompileJSP(server.dropins[0])
+            }
+        }
+    }
 
-          CompileJSPs compileJsp = new CompileJSPs()
-          compileJsp.setInstallDir(getInstallDir(project))
-          compileJsp.setTempdir(project.buildDir)
-          compileJsp.setDestdir(new File(project.buildDir.getAbsolutePath()+"/classes/java"))
-          compileJsp.setTimeout(project.liberty.jspCompileTimeout)
-          // don't delete temporary server dir
-          compileJsp.setCleanup(false)
-          compileJsp.setProject(ant)
-          compileJsp.setTaskName('antlib:net/wasdev/wlp/ant:compileJSPs')
+    protected void perTaskCompileJSP(Task task) throws Exception {
+        CompileJSPs compileJsp = new CompileJSPs()
+        compileJsp.setInstallDir(getInstallDir(project))
+        compileJsp.setTempdir(project.buildDir)
+        compileJsp.setDestdir(new File(project.buildDir.getAbsolutePath()+"/classes/java"))
+        compileJsp.setTimeout(project.liberty.jspCompileTimeout)
+        // don't delete temporary server dir
+        compileJsp.setCleanup(false)
+        compileJsp.setProject(ant)
+        compileJsp.setTaskName('antlib:net/wasdev/wlp/ant:compileJSPs')
 
-          if(project.convention.plugins.war.webAppDirName != null){
+        if (project.convention.plugins.war.webAppDirName != null) {
             compileJsp.setSrcdir(project.convention.plugins.war.webAppDir)
-          }
-          else{
+        } else {
             compileJsp.setSrcdir(new File("src/main/webapp"))
-          }
-          Set<String> classpath = new HashSet<String>();
+        }
+        Set<String> classpath = new HashSet<String>();
 
-          // first add target/classes (or whatever is configured)
-          classpath.add(getServerDir(project))
-          for(File f : task.classpath)
+        // first add target/classes (or whatever is configured)
+        classpath.add(getServerDir(project))
+        for (File f : task.classpath) {
             classpath.add(f.getAbsolutePath())
-          setCompileDependencies(task, classpath)
+        }
+        setCompileDependencies(task, classpath)
 
-          String classpathStr = join(classpath, File.pathSeparator);
-          logger.debug("Classpath: " + classpathStr)
-          compileJsp.setClasspath(classpathStr)
+        String classpathStr = join(classpath, File.pathSeparator);
+        logger.debug("Classpath: " + classpathStr)
+        compileJsp.setClasspath(classpathStr)
 
-          if (project.liberty.jspVersion != null) {
-              compileJsp.setJspVersion(project.liberty.jspVersion)
-          }
+        if (project.liberty.jspVersion != null) {
+            compileJsp.setJspVersion(project.liberty.jspVersion)
+        }
 
-          compileJsp.init()
-          compileJsp.execute()
-      }
+        compileJsp.init()
+        compileJsp.execute()
+    }
 
-      protected void setCompileDependencies(Task task, Set<String> classpaths) {
+    protected void setCompileDependencies(Task task, Set<String> classpaths) {
         ArrayList<File> deps = new ArrayList<File>();
         task.classpath.each {deps.add(it)}
 
         //Removes WEB-INF/lib/main directory since it is not a dependency
-        if(deps != null && !deps.isEmpty()){
-          deps.remove(0)
+        if(deps != null && !deps.isEmpty()) {
+            deps.remove(0)
         }
 
         for (File dep: deps) {
-          if (dep != null) {
-              if (!classpaths.add(dep.getAbsolutePath())) {
-                  logger.debug("Duplicate dependency: " + dep.getName());
-              }
-          } else {
-              logger.debug("Could not find: " + dep.getName());
-          }
+            if (dep != null) {
+                if (!classpaths.add(dep.getAbsolutePath())) {
+                    logger.debug("Duplicate dependency: " + dep.getName());
+                }
+            } else {
+                logger.debug("Could not find: " + dep.getName());
+            }
         }
-      }
+    }
 
-      protected String join(Set<String> depPathes, String sep) {
-          StringBuilder sb = new StringBuilder();
-          for (String str : depPathes) {
-              if (sb.length() != 0) {
-                  sb.append(sep);
-              }
-              sb.append(str);
-          }
-          return sb.toString();
-      }
+    protected String join(Set<String> depPathes, String sep) {
+        StringBuilder sb = new StringBuilder();
+        for (String str : depPathes) {
+            if (sb.length() != 0) {
+                sb.append(sep);
+            }
+            sb.append(str);
+        }
+        return sb.toString();
+    }
 }
