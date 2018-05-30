@@ -30,11 +30,10 @@ Here is a list of common configuration parameters for the Arquillian Liberty Man
 | `arquillianProperties` | Dictionary | Used to set key/value pairs of configuration parameters in `arquillian.xml`. | **Managed:** A dictionary containing values for `wlpHome`, `serverName`, and `httpPort` as specified in the `liberty-gradle-plugin`.<br>**Remote:** An empty dictionary when using the Arquillian Liberty Remote container. |
 | `skipIfArquillianXmlExists` | Boolean | Skips the `configureArquillian` task if `arquillian.xml` already exists in the `build` directory. | False |
 
-TODO: Add link to JBoss documentation of configuration parameters. These links might be outdated due to container name change...
+For documentation of the Liberty Arquillian Containers, please see the following links:
 
-https://docs.jboss.org/author/display/ARQ/WLP+V8.5+-+Managed
-
-https://docs.jboss.org/author/display/ARQ/WLP+V8.5+-+Remote
+- [Liberty Managed Container Documentation](https://github.com/OpenLiberty/liberty-arquillian/blob/master/liberty-managed/README.md)
+- [Liberty Remote Container Documentation](https://github.com/OpenLiberty/liberty-arquillian/blob/master/liberty-remote/README.md)
 
 ### Examples
 
