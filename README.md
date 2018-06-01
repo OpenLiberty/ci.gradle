@@ -17,12 +17,12 @@ Clone this repository and then, with a JRE on the path, execute the following co
 $ ./gradlew build
 ```
 
-This will download Gradle and then build the plugin `liberty-gradle-plugin-2.3-SNAPSHOT.jar` in to the `build\libs` directory. It is also possible to install the plugin in to your local Maven repository using `./gradlew install`.
+This will download Gradle, build the plugin, and install it in to the `build\libs` directory. It is also possible to install the plugin in to your local Maven repository using `./gradlew install`.
 
-To build the plugin and run the integration tests execute the following commands in the root directory. The `propertiesFile` parameter is used to select the Liberty runtime that will be used to run the tests. The `wlpLicense` parameter is only needed for Liberty packaged as a JAR file.
+To build the plugin and run the integration tests execute the following commands in the root directory. The `runtime` and `runtimeVersion` parameters are used to select the Liberty runtime that will be used to run the tests. The `wlpLicense` parameter is only needed for Liberty packaged as a JAR file.
 
  ```bash
- $ ./gradlew install integrationTest -DpropertiesFile=<property_file_name> -DwlpLicense=<liberty_license_code>
+ $ ./gradlew install integrationTest -Druntime=<wlp|ol> -DruntimeVersion=<runtime_version> -DwlpLicense=<liberty_license_code>
  ```
 
 ## Usage

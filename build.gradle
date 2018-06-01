@@ -1,3 +1,8 @@
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.OutputStream
+import java.util.Properties
+
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'signing'
@@ -81,10 +86,54 @@ task integrationTest(type: Test) {
     systemProperties System.getProperties()
     systemProperty 'runit', 'online'
 
-    String libertyPropertiesFile = System.getProperty('propertiesFile')
     doFirst {
-        if (libertyPropertiesFile == null || libertyPropertiesFile.isEmpty()) {
-            throw new GradleException('Tests could not be run. Please specify a properties file.')
+
+        String runtimeGroup
+        String runtimeArtifactId
+        String libertyRuntime = System.getProperty('runtime')
+        String runtimeVersion = System.getProperty('runtimeVersion')
+
+        if (libertyRuntime == null || libertyRuntime.isEmpty()) {
+            throw new GradleException('Tests could not be run. Please specify a Liberty runtime. Choose either wlp or ol.')
+        }
+        if (runtimeVersion == null || runtimeVersion.isEmpty()) {
+            throw new GradleException('Tests could not be run. Please specify a Liberty runtime version.')
+        }
+        
+        Properties prop = new Properties()
+        OutputStream output = null
+
+        try {
+
+        output = new FileOutputStream("${buildDir}/gradle.properties");
+
+        if (libertyRuntime == "ol") {
+            runtimeGroup = "io.openliberty"
+            runtimeArtifactId = "openliberty-runtime"
+        } else {
+            runtimeGroup = "com.ibm.websphere.appserver.runtime"
+            runtimeArtifactId = "wlp-javaee7"
+        }
+
+        // set the properties value
+        prop.setProperty("lgpVersion", version)
+        prop.setProperty("runtimeGroup", runtimeGroup)
+        prop.setProperty("runtimeArtifactId", runtimeArtifactId)
+        prop.setProperty("runtimeVersion", runtimeVersion)
+
+        // save properties to project root folder
+        prop.store(output, null)
+
+        } catch (IOException io) {
+            io.printStackTrace()
+        } finally {
+            if (output != null) {
+                try {
+                    output.close()
+                } catch (IOException e) {
+                    e.printStackTrace()
+                }
+            }
         }
     }
 }
