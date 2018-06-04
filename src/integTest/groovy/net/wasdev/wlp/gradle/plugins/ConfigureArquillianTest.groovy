@@ -40,7 +40,7 @@ class ConfigureArquillianTest extends AbstractIntegrationTest {
     public static void setup() {
         createDir(buildDir)
         FileUtils.copyDirectory(resourceDir, buildDir);
-        copyPropertyFile(buildDir)
+        copyFile(new File("build/gradle.properties"), new File(buildDir, 'gradle.properties'))
     }
 
     @Test

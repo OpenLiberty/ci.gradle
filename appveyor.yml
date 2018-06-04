@@ -1,16 +1,20 @@
 environment:
     matrix:
         - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
-          PROPERTIES_FILE: wlp1.properties
+          RUNTIME: wlp
+          RUNTIME_VERSION: 17.0.0.4
         - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
-          PROPERTIES_FILE: wlp2.properties
+          RUNTIME: wlp
+          RUNTIME_VERSION: 18.0.0.1
         - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
-          PROPERTIES_FILE: ol1.properties
+          RUNTIME: ol
+          RUNTIME_VERSION: 17.0.0.4
         - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
-          PROPERTIES_FILE: ol2.properties
+          RUNTIME: ol
+          RUNTIME_VERSION: 18.0.0.1
 
 build_script:
   # Build the compiled extension
-  - "gradlew.bat install integrationTest -DpropertiesFile=%PROPERTIES_FILE% --stacktrace --info --no-daemon"
+  - "gradlew.bat install integrationTest -Druntime=%RUNTIME% -DruntimeVersion=%RUNTIME_VERSION% --stacktrace --info --no-daemon"
 
 test: off
