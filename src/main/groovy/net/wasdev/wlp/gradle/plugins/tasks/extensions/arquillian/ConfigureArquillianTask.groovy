@@ -30,6 +30,7 @@ import net.wasdev.wlp.common.arquillian.objects.LibertyProperty;
 import net.wasdev.wlp.common.arquillian.objects.LibertyRemoteObject
 import net.wasdev.wlp.common.arquillian.objects.LibertyManagedObject
 import net.wasdev.wlp.common.arquillian.util.ArquillianConfigurationException
+import net.wasdev.wlp.common.arquillian.util.ArtifactCoordinates;
 import net.wasdev.wlp.common.arquillian.util.Constants
 import net.wasdev.wlp.common.arquillian.util.HttpPortUtil
 import net.wasdev.wlp.gradle.plugins.tasks.AbstractServerTask
@@ -59,14 +60,21 @@ class ConfigureArquillianTask extends AbstractServerTask {
     void doExecute() throws GradleException {
         File arquillianXml = new File(project.getBuildDir(), "resources/test/arquillian.xml");
         project.configurations.testCompile.find {
-
-            if (it.toString().contains(Constants.ARQUILLIAN_REMOTE_DEPENDENCY)) {
-                type = TypeProperty.REMOTE;
-                return true;
+            for(ArtifactCoordinates coors : Constants.ARQUILLIAN_REMOTE_DEPENDENCY) {
+                String artifactId = coors.getArtifactId();
+                if (it.toString().contains(artifactId)) {
+                    type = TypeProperty.REMOTE;
+                    logger.info("Automatically detected the Arquillian Liberty Remote container artifact: " + artifactId + ".")
+                    return true;
+                }
             }
-            if (it.toString().contains(Constants.ARQUILLIAN_MANAGED_DEPENDENCY)) {
-                type = TypeProperty.MANAGED
-                return true;
+            for(ArtifactCoordinates coors : Constants.ARQUILLIAN_MANAGED_DEPENDENCY) {
+                String artifactId = coors.getArtifactId();
+                if (it.toString().contains(artifactId)) {
+                    type = TypeProperty.MANAGED
+                    logger.info("Automatically detected the Arquillian Liberty Managed container artifact: " + artifactId + ".")
+                    return true;
+                }
             }
             return false;
         }
@@ -77,8 +85,7 @@ class ConfigureArquillianTask extends AbstractServerTask {
         }
 
         if (skipIfArquillianXmlExists && arquillianXml.exists()) {
-            logger.info(
-                    "Skipping configure-arquillian task because arquillian.xml already exists in \"build/resources/test\".");
+            logger.info("Skipping configure-arquillian task because arquillian.xml already exists in \"build/resources/test\".");
         } else {
             switch (type) {
                 case TypeProperty.REMOTE:
