@@ -1,0 +1,39 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+    }
+}
+
+apply plugin: 'liberty'
+
+repositories {
+    maven {
+        url file("features-repo").toURI().toURL().toString()
+    }
+    mavenCentral()
+}
+
+dependencies {
+    libertyFeature 'io.openliberty.features:a-1.0:18.0.0.2'
+}
+
+liberty {
+    install {
+        runtimeUrl=file("${project.buildDir}/openliberty-kernel.zip").toURI().toURL().toString()
+    }
+    server{
+        name = 'dummy'
+        features {
+            name = ['b-1.0']
+            acceptLicense = true
+        }
+    }
+}

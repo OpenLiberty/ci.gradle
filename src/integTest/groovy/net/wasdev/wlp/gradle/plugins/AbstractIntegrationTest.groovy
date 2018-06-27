@@ -32,7 +32,7 @@ abstract class AbstractIntegrationTest {
 
     protected static void deleteDir(File dir) {
         if (dir.exists()) {
-            if (!integTestDir.deleteDir()) {
+            if (!dir.deleteDir()) {
                 throw new AssertionError("Unable to delete directory '$dir.canonicalPath'.")
             }
         }

@@ -1,0 +1,52 @@
+apply plugin: 'liberty'
+
+buildscript {
+    repositories{
+      mavenLocal()
+      mavenCentral()
+      maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+      }
+    }
+    dependencies {
+        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.5-SNAPSHOT'
+    }
+}
+
+repositories {
+      mavenLocal()
+      mavenCentral()
+       
+      ivy {
+          url 'https://public.dhe.ibm.com/ibmdl/export/pub/software/'
+          layout 'pattern', {
+              artifact '/[organisation]/runtime/nightly/[revision]/[module].[ext]'
+          }
+      }
+      
+}
+
+dependencies {
+    libertyRuntime 'openliberty:openliberty-all-20180612-0500:2018-06-12_0629@zip'
+}
+
+liberty {
+    server {
+        name = "dummy"
+        packageLiberty {
+            archive = "${buildDir}/openliberty-kernel.zip"
+            include = "minify"
+            os = "Linux"
+        }
+    }
+}
+
+task overwriteServer(type: Copy) {
+    def replacementServer = file("server.xml")
+    def existingServerDir = file("${buildDir}/wlp/usr/servers/dummy")
+  
+    from replacementServer
+    into existingServerDir
+    
+  }
