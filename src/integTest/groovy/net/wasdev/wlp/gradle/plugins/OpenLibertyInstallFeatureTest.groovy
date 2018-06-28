@@ -19,7 +19,7 @@ import static junit.framework.Assert.assertFalse
 import static junit.framework.Assert.assertTrue
 import static org.junit.Assert.*
 
-import org.junit.After
+import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 
@@ -36,15 +36,17 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
         createTestProject(buildDir, resourceDir, buildFilename)
         try {
             runTasks(buildDir, "installLiberty", "overwriteServer", "libertyPackage")
-            deleteDir(new File(buildDir, "build/wlp"));
+            deleteDir(new File(buildDir, "build/wlp"))
         } catch (Exception e) {
             throw new AssertionError("Failed to package Open Liberty kernel.", e)
         }
     }
     
-    @After
-    public void tearDown() {
-        deleteDir(new File(buildDir, "build/wlp"));
+    @Before
+    public void before() {
+        runTasks(buildDir, "libertyCreate")
+        copyServer("server_empty.xml")
+        deleteDir(new File(buildDir, "build/wlp/lib/features"))
     }
     
     @Test
@@ -86,34 +88,6 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
         
         // sanity check
         assertFalse("Feature b-1.0 should not have been installed", getFeatureInfo().contains("b-1.0"));
-    }
-    
-    @Test
-    /**
-     * Install with dependencies and an empty server.xml
-     */
-    public void testInstallFeaturesDependenciesEmptyServer() {
-        copyBuildFiles(new File(resourceDir, "install_features_dependencies.gradle"), buildDir)
-        runTasks(buildDir, "libertyCreate")
-        copyServer("server_empty.xml")
-        runTasks(buildDir, 'installFeature')
-        assertInstalled("a-1.0")
-        
-        // sanity check
-        assertFalse("Feature b-1.0 should not have been installed", getFeatureInfo().contains("b-1.0"));
-    }
-    
-    @Test
-    /**
-     * Install with dependencies and plugin listed features, and an empty server.xml
-     */
-    public void testInstallFeaturesDependenciesPluginListEmptyServer() {
-        copyBuildFiles(new File(resourceDir, "install_features_dependencies_pluginlist.gradle"), buildDir)
-        runTasks(buildDir, "libertyCreate")
-        copyServer("server_empty.xml")
-        runTasks(buildDir, 'installFeature')
-        assertInstalled("a-1.0")
-        assertInstalled("b-1.0")
     }
     
     @Test
