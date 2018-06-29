@@ -88,8 +88,8 @@ dependencies {
     providedCompile ('com.ibm.websphere.appserver.api:com.ibm.websphere.appserver.api.persistence:1.0.18')
     providedCompile ('org.eclipse.persistence:javax.persistence:2.1.0')
 
-    arqManaged "org.jboss.arquillian.container:arquillian-wlp-managed-8.5:1.0.0.CR1"
-    arqRemote "org.jboss.arquillian.container:arquillian-wlp-remote-8.5:1.0.0.CR1"
+    arqManaged "io.openliberty.arquillian:arquillian-liberty-managed:1.0.1"
+    arqRemote "io.openliberty.arquillian:arquillian-liberty-remote:1.0.1"
 
     testCompile "junit:junit:4.12"
     testCompile "net.wasdev.wlp.common:ci.common:1.0"
