@@ -17,18 +17,10 @@ buildscript {
 repositories {
       mavenLocal()
       mavenCentral()
-       
-      ivy {
-          url 'https://public.dhe.ibm.com/ibmdl/export/pub/software/'
-          layout 'pattern', {
-              artifact '/[organisation]/runtime/nightly/[revision]/[module].[ext]'
-          }
-      }
-      
 }
 
 dependencies {
-    libertyRuntime 'openliberty:openliberty-all-20180612-0500:2018-06-12_0629@zip'
+    libertyRuntime 'io.openliberty:openliberty-runtime:18.0.0.2'
 }
 
 liberty {
