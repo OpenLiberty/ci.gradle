@@ -1,6 +1,8 @@
 ## uninstallFeature task
 The `uninstallFeature` task uninstalls a feature from the Liberty runtime.
 
+This task will be skipped in versions of the Open Liberty runtime that do not include `bin/installUtility`. A warning message will be displayed. The Open Liberty runtime versions 18.0.0.1 and below are bundled with all applicable features, so there is no need to install or uninstall additional features. In version 18.0.0.2, Open Liberty is available as different [runtime artifacts](installLiberty.md#using-maven-artifact) with their corresponding features and does not support uninstalling features.
+
 ### dependsOn
 `uninstallFeature` depends on `libertyCreate` to make sure a server exists. 
 
