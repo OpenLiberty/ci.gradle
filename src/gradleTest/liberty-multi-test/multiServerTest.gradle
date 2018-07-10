@@ -1,0 +1,136 @@
+apply plugin: 'liberty'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath fileTree(dir: '../libs', include: '*.jar', exclude: ['*-groovydoc.jar', '*-sources.jar'])
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
+}
+
+liberty {
+    servers {
+        libertyServer1 {
+
+            deploy {
+                file = "$projectDir/../../../resources/test/test-war.war"
+            }
+
+            packageLiberty {
+                include = 'minify'
+                os ='Linux'
+            }
+
+            features {
+                name = ['mongodb-2.0']
+                acceptLicense = true
+            }
+
+            uninstallfeatures {
+                name = ['mongodb-2.0']
+            }
+        }
+        libertyServer2 {
+
+            deploy {
+                file = "$projectDir/../../../resources/test/test-war.war"
+            }
+
+            packageLiberty {
+                include = 'minify'
+                os ='Linux'
+            }
+
+            features {
+                name = ['mongodb-2.0']
+                acceptLicense = true
+            }
+
+            uninstallfeatures {
+                name = ['mongodb-2.0']
+            }
+        }
+        libertyServer3 {
+
+            deploy {
+                file = "$projectDir/../../../resources/test/test-war.war"
+            }
+
+            packageLiberty {
+                include = 'minify'
+                os ='Linux'
+            }
+
+            features {
+                name = ['mongodb-2.0']
+                acceptLicense = true
+            }
+
+            uninstallfeatures {
+                name = ['mongodb-2.0']
+            }
+        }
+    }
+}
+
+project.afterEvaluate {
+    libertyStop.finalizedBy libertyPackage
+    deploy.finalizedBy undeploy
+    libertyStart.finalizedBy libertyStop
+    libertyStop.dependsOn deploy
+    //only executing one uninstallFeature task as the feature can only be uninstalled once
+    libertyPackage.finalizedBy 'uninstallFeature-libertyServer1'
+    tasks.getByName('uninstallFeature-libertyServer1').finalizedBy cleanDirs
+    taskTests.dependsOn libertyStatus, libertyStart
+}
+
+task taskTests {
+    doLast {
+        assert installLiberty.getState().getExecuted()
+        assert tasks.getByName('uninstallFeature-libertyServer1').getState().getExecuted()
+        assert tasks.getByName('libertyCreate-libertyServer1').getState().getExecuted()
+        assert tasks.getByName('libertyCreate-libertyServer2').getState().getExecuted()
+        assert tasks.getByName('libertyCreate-libertyServer3').getState().getExecuted()
+        assert tasks.getByName('installFeature-libertyServer1').getState().getExecuted()
+        assert tasks.getByName('installFeature-libertyServer2').getState().getExecuted()
+        assert tasks.getByName('installFeature-libertyServer3').getState().getExecuted()
+        assert tasks.getByName('undeploy-libertyServer1').getState().getExecuted()
+        assert tasks.getByName('undeploy-libertyServer2').getState().getExecuted()
+        assert tasks.getByName('undeploy-libertyServer3').getState().getExecuted()
+        assert tasks.getByName('deploy-libertyServer1').getState().getExecuted()
+        assert tasks.getByName('deploy-libertyServer2').getState().getExecuted()
+        assert tasks.getByName('deploy-libertyServer3').getState().getExecuted()
+        assert tasks.getByName('libertyStart-libertyServer1').getState().getExecuted()
+        assert tasks.getByName('libertyStart-libertyServer2').getState().getExecuted()
+        assert tasks.getByName('libertyStart-libertyServer3').getState().getExecuted()
+        assert tasks.getByName('libertyStop-libertyServer1').getState().getExecuted()
+        assert tasks.getByName('libertyStop-libertyServer2').getState().getExecuted()
+        assert tasks.getByName('libertyStop-libertyServer3').getState().getExecuted()
+        assert tasks.getByName('libertyPackage-libertyServer1').getState().getExecuted()
+        assert tasks.getByName('libertyPackage-libertyServer2').getState().getExecuted()
+        assert tasks.getByName('libertyPackage-libertyServer3').getState().getExecuted()
+        assert tasks.getByName('cleanDirs-libertyServer1').getState().getExecuted()
+        assert tasks.getByName('cleanDirs-libertyServer2').getState().getExecuted()
+        assert tasks.getByName('cleanDirs-libertyServer3').getState().getExecuted()
+    }
+}
+
+task runGradleTest {
+    dependsOn 'taskTests'
+}

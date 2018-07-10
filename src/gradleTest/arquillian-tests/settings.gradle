@@ -1,0 +1,3 @@
+include 'verifyMainAppManaged', 'skipWithXmlManaged', 'skipWithoutXmlManaged', 'skipWithXmlRemote', 'skipWithoutXmlRemote', 'verifyMainAppManagedMultiServer'
+
+rootProject.name = 'arquillian-tests'

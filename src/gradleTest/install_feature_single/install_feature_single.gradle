@@ -1,0 +1,69 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+    }
+}
+
+apply plugin: 'liberty'
+apply plugin: 'groovy'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+sourceSets {
+    testUninstallFeature {
+        groovy {
+            srcDir file('src/testUninstallFeature/groovy')
+        }
+    }
+}
+
+configurations {
+    testUninstallFeatureCompile.extendsFrom testCompile
+    testUninstallFeatureRuntime.extendsFrom testRuntime
+}
+
+dependencies {
+    testCompile localGroovy()
+    testCompile 'junit:junit:4.12'
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-javaee7', version: runtimeVersion
+}
+
+liberty {
+    server{
+        name = 'LibertyProjectServer'
+        features {
+            name = ["mongodb-2.0"]
+            acceptLicense = true
+        }
+
+        uninstallfeatures {
+            name = ["mongodb-2.0"]
+        }
+    }
+}
+
+test {
+    dependsOn 'installFeature'
+    finalizedBy 'testUninstallFeature'
+}
+
+task testUninstallFeature(type: Test) {
+    testClassesDirs = sourceSets.testUninstallFeature.output.classesDirs
+    classpath = sourceSets.testUninstallFeature.runtimeClasspath
+    dependsOn 'uninstallFeature'
+}
+
+task runGradleTest {
+    dependsOn 'test'
+}

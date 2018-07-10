@@ -1,0 +1,108 @@
+/*
+	This test checks whether pakcageLiberty successfully packages the server with a looseApplication that requires
+    files from the src/resrouces folder.
+*/
+group = 'liberty.gradle'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+    }
+}
+
+apply plugin: 'liberty'
+apply plugin: 'groovy'
+apply plugin: 'war'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+compileJava.options.encoding = 'UTF-8'
+
+sourceSets {
+    main {
+        java {
+            srcDir "${project.projectDir}/../../../resources/test/liberty-package-test/src/main/java"
+        }
+    }
+}
+
+project.webAppDirName = "${project.projectDir}/../../../resources/test/liberty-package-test/src/main/webapp"
+
+ext {
+    // Liberty server properties
+    wlpServerName = 'LibertyProjectServer'
+    serverDirectory = "${project.buildDir}/wlp/usr/servers/${wlpServerName}"
+    testServerHttpPort = 9080
+    testServerHttpsPort = 9443
+
+    warContext = 'jpaApp'
+
+}
+
+war {
+    archiveName = baseName + '.' + extension
+}
+
+liberty {
+    server{
+        configFile = file("${project.projectDir}/../../../resources/test/liberty-package-test/src/main/liberty/config/server.xml")
+        bootstrapProperties = ['default.http.port': "${testServerHttpPort}" , 'default.https.port': "${testServerHttpsPort}", 'appContext': "${warContext}",'appLocation': "${war.archiveName}"]
+        name = 'LibertyProjectServer'
+        apps = [war]
+        features {
+            name = ['servlet-3.1', 'jdbc-4.1', 'jpa-2.0', 'localConnector-1.0']
+            acceptLicense = true
+        }
+        packageLiberty {
+            archive = 'testPackage.zip'
+        }
+     }
+}
+
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+configurations{
+     derby { transitive = true }
+}
+
+dependencies {
+    compile group: 'javax.persistence', name: 'persistence-api', version:'1.0.2'
+    compile group: 'javax.transaction', name: 'javax.transaction-api', version:'1.2'
+    testCompile localGroovy()
+    testCompile group: 'junit', name: 'junit', version:'4.12'
+    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+    derby group: 'org.apache.derby', name: 'derby', version: '10.13.1.1'
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-kernel', version: runtimeVersion
+}
+
+
+task copyDerby {
+    doLast {
+        copy {
+            from configurations.derby
+            into "$buildDir/wlp/usr/shared/resources"
+            include '*.jar'
+        }
+    }
+}
+
+test {
+    dependsOn 'libertyPackage'
+}
+
+task runGradleTest {
+    dependsOn 'test'
+}

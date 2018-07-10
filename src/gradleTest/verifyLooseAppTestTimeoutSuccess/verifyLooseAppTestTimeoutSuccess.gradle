@@ -1,0 +1,92 @@
+group = 'liberty.gradle'
+version = '1'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'war'
+apply plugin: 'liberty'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+compileJava.options.encoding = 'UTF-8'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    testCompile localGroovy()
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.apache.cxf:cxf-rt-rs-client:3.1.1'
+    testCompile 'org.glassfish:javax.json:1.0.4'
+    testCompile group: 'commons-io', name: 'commons-io', version: '2.5'
+    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+    compile 'org.apache.commons:commons-text:1.1'
+    libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "${project.projectDir}/../../../resources/test/sample.servlet/src/main/java"
+        }
+    }
+}
+
+project.webAppDirName = "../../../resources/test/sample.servlet/src/main/webapp"
+
+ext {
+    // Liberty server properties
+    wlpServerName = 'LibertyProjectServer'
+    serverDirectory = "${project.buildDir}/wlp/usr/servers/${wlpServerName}"
+    testServerHttpPort = 9080
+    testServerHttpsPort = 9443
+
+    // This is set in the ibm-web-ext.xml file
+    warContext = 'sample.servlet'
+    appName = 'LibertyProject'
+    packageFile = "${project.buildDir}/${appName}.zip"
+    packagingType = 'usr'
+
+}
+
+liberty {
+    server{
+        configFile = file("${project.projectDir}/../../../resources/test/sample.servlet/src/main/liberty/config/server-loose-config-test.xml")
+
+        name = wlpServerName
+        stripVersion = true
+        looseApplication = true
+        packageLiberty {
+            archive = packageFile
+            include = packagingType
+        }
+
+        verifyAppStartTimeout = 30
+    }
+}
+
+test {
+    dependsOn 'libertyStart'
+    finalizedBy 'libertyStop'
+}
+
+task runGradleTest {
+    dependsOn 'test'
+}

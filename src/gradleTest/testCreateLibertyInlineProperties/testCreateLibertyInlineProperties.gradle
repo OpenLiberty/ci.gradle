@@ -1,0 +1,50 @@
+group = 'liberty.gradle'
+version = '1'
+
+buildscript {
+    repositories {
+        mavenCentral()
+		mavenLocal()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+    }
+}
+
+apply plugin: 'groovy'
+apply plugin: 'liberty'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile localGroovy()
+    libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+ext {
+    // Liberty server properties
+    wlpServerName = 'LibertyProjectServer'
+}
+
+liberty {
+    server{
+        name = wlpServerName
+
+        bootstrapProperties = ['default.http.port':'9083', 'default.https.port':'9474']
+        jvmOptions = ['-Xms128m', '-Xmx512m']
+    }
+}
+
+test.dependsOn 'libertyCreate'
+
+task runGradleTest {
+    dependsOn 'test'
+}

@@ -7,6 +7,11 @@ apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: "com.gradle.plugin-publish"
+apply plugin: 'org.ysb33r.gradletest'
+
+archivesBaseName = 'liberty-gradle-plugin'
+group = 'net.wasdev.wlp.gradle.plugins'
+version = '2.5-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -20,12 +25,14 @@ repositories {
 
 buildscript {
     repositories {
+        mavenCentral()
         maven {
             url "https://plugins.gradle.org/m2/"
         }
     }
     dependencies {
         classpath "com.gradle.publish:plugin-publish-plugin:0.9.7"
+        classpath 'gradle.plugin.org.ysb33r.gradle:gradletest:2.0-alpha-6'
     }
 }
 
@@ -61,33 +68,14 @@ dependencies {
     compile group: 'commons-io', name: 'commons-io', version: '2.5'
     provided group: 'com.ibm.websphere.appserver.api', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
     testCompile 'junit:junit:4.11'
+    testCompile gradleTestKit()
 }
 
-sourceSets {
-    integrationTest {
-        groovy.srcDir file('src/integTest/groovy')
-        resources.srcDir file('src/integTest/resources')
-        compileClasspath = sourceSets.main.output + configurations.testRuntime
-        runtimeClasspath = output + compileClasspath
-        output.dir(files(new File(buildDir, 'classes/groovy/integrationTest')))
-    }
-}
-
-task integrationTest(type: Test) {
-    logging.level = LogLevel.INFO
-    description = 'Runs the integration tests.' + gradle.gradleVersion
-    if (!gradle.gradleVersion.startsWith('4.')) {
-        testClassesDir = sourceSets.integrationTest.output.getDirs().getSingleFile()
-    } else {
-        testClassesDirs = fileTree(dir: sourceSets.integrationTest.output.getDirs().getSingleFile())
-    }
-    classpath = sourceSets.integrationTest.runtimeClasspath
-
-    systemProperties System.getProperties()
-    systemProperty 'runit', 'online'
+task integrationTest {
+    dependsOn 'processTestResources'
+    finalizedBy 'gradleTest'
 
     doFirst {
-
         String runtimeGroup
         String runtimeArtifactId
         String libertyRuntime = System.getProperty('runtime')
@@ -100,42 +88,38 @@ task integrationTest(type: Test) {
             throw new GradleException('Tests could not be run. Please specify a Liberty runtime version.')
         }
 
-        Properties prop = new Properties()
-        OutputStream output = null
-
-        try {
-
-        output = new FileOutputStream("${buildDir}/gradle.properties");
+        project.setProperty('runtimeVersion', runtimeVersion)
 
         if (libertyRuntime == "ol") {
-            runtimeGroup = "io.openliberty"
-            runtimeArtifactId = "openliberty-runtime"
+            runtimeGroup = 'io.openliberty'
+            runtimeArtifactId = 'openliberty-runtime'
+            project.setProperty('runtimeGroup', "$runtimeGroup")
+            project.setProperty('runtimeArtifactId', "$runtimeArtifactId")
         } else {
-            runtimeGroup = "com.ibm.websphere.appserver.runtime"
-            runtimeArtifactId = "wlp-javaee7"
+            runtimeGroup = 'com.ibm.websphere.appserver.runtime'
+            runtimeArtifactId = 'wlp-javaee7'
+            project.setProperty('runtimeGroup', "$runtimeGroup")
+            project.setProperty('runtimeArtifactId', "$runtimeArtifactId")
         }
 
-        // set the properties value
-        prop.setProperty("lgpVersion", version)
-        prop.setProperty("runtimeGroup", runtimeGroup)
-        prop.setProperty("runtimeArtifactId", runtimeArtifactId)
-        prop.setProperty("runtimeVersion", runtimeVersion)
-
-        // save properties to project root folder
-        prop.store(output, null)
-
-        } catch (IOException io) {
-            io.printStackTrace()
-        } finally {
-            if (output != null) {
-                try {
-                    output.close()
-                } catch (IOException e) {
-                    e.printStackTrace()
-                }
-            }
-        }
+        project.dependencies.add(gradleTest.name, "$runtimeGroup:$runtimeArtifactId:$runtimeVersion")
     }
+}
+
+gradleTest {
+    versions '4.8'
+
+    gradleArguments =  ["-PlgpVersion=${project.version}",
+                        "-PruntimeGroup=${runtimeGroup}",
+                        "-PruntimeArtifactId=${runtimeArtifactId}",
+                        "-PruntimeVersion=${runtimeVersion}",
+                        "-i", "-s"]
+
+    beforeTest {
+        println "Running test: ${it.name}"
+    }
+
+    expectFailure 'TestAppConfigFail'
 }
 
 sourceSets.main.compileClasspath += configurations.provided
@@ -143,10 +127,6 @@ sourceSets.main.compileClasspath += configurations.provided
 task wrapper(type: Wrapper) {
     gradleVersion = '3.5'
 }
-
-archivesBaseName = 'liberty-gradle-plugin'
-group = 'net.wasdev.wlp.gradle.plugins'
-version = '2.5-SNAPSHOT'
 
 task sourcesJar(type: Jar) {
     classifier = 'sources'

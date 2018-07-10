@@ -1,1 +1,0 @@
-include 'verifyMainAppManaged', 'skipWithXmlManaged', 'skipWithoutXmlManaged', 'skipWithXmlRemote', 'skipWithoutXmlRemote', 'verifyMainAppManagedMultiServer'

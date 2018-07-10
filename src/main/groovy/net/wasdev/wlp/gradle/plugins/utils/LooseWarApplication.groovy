@@ -13,7 +13,13 @@ public class LooseWarApplication extends LooseApplication {
     }
 
     public void addSourceDir() throws Exception {
-        WarPluginConvention wpc = new WarPluginConvention(task.getProject())
+        Project project = task.getProject()
+        WarPluginConvention wpc = new WarPluginConvention(project)
+
+        if (project.webAppDirName != null) {
+            wpc.setWebAppDirName(project.webAppDirName)
+        }
+
         File sourceDir = new File(wpc.getWebAppDir().getAbsolutePath());
         config.addDir(sourceDir.getCanonicalPath(), "/");
     }

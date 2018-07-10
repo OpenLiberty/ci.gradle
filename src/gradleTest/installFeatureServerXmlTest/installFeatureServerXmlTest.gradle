@@ -1,0 +1,49 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+    }
+}
+
+def wlpLicense = System.getProperty('wlpLicense')
+
+apply plugin: 'groovy'
+apply plugin: 'liberty'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    testCompile localGroovy()
+    testCompile 'junit:junit:4.12'
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-javaee7', version: runtimeVersion
+}
+
+liberty {
+    server{
+        name = 'LibertyProjectServer'
+        configFile = file("${project.projectDir}/../../../resources/test/sample.servlet/src/main/liberty/config/server-installFeature-test.xml")
+        features {
+            acceptLicense = true
+        }
+    }
+}
+
+installFeature.dependsOn 'libertyCreate'
+
+test {
+    dependsOn 'libertyCreate', 'installFeature'
+}
+
+task runGradleTest {
+    dependsOn 'test'
+}
