@@ -14,7 +14,7 @@ Note: Use the `libertyRuntime` dependency to install Liberty from The Central Re
 
 ### Dependencies
 
-The Liberty Gradle plugin defines two dependency configurations for the `installLiberty` task: `libertyRuntime` and `libertyLicense`.  `libertyRuntime` defines which [WebSphere Liberty runtime](#using-maven-artifact) to download from The Central Repository. `libertyLicense` [configures](#license-configuration) a license artifact so that your license JAR archive can be identified and used during the `installLiberty` task. Make sure to properly [setup](#installing-your-upgrade-license) your license JAR to prevent a missing dependency failure.
+The Liberty Gradle plugin defines two dependency configurations for the `installLiberty` task: `libertyRuntime` and `libertyLicense`.  `libertyRuntime` defines which [Liberty runtime](#using-maven-artifact) to download from The Central Repository. `libertyLicense` [configures](#license-configuration) a license artifact so that your license JAR archive can be identified and used during the `installLiberty` task. Make sure to properly [setup](#installing-your-upgrade-license) your license JAR to prevent a missing dependency failure.
 
 You need to include `group`, `name`, and `version` values that describes the artifacts to use. An `ext` value for a specific archive type can be used but is not required.
 
