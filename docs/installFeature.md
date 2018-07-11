@@ -12,7 +12,7 @@ In Open Liberty runtime versions 18.0.0.1 and below, this task will be skipped. 
 
 ### Dependencies
 
-The Liberty Gradle plugin defines the `libertyFeature` dependency configuration for installing features. If the `java` plugin is applied in the build, then the `libertyFeature` configuration extends from the `java` plugin's `compileOnly` configuration to provide WebSphere Application Server Liberty API, SPI, and  Java specification dependencies.
+The Liberty Gradle plugin defines the `libertyFeature` dependency configuration for installing features. If the `java` plugin is applied in the build, then the `libertyFeature` configuration extends from the `java` plugin's `compileOnly` configuration to provide Liberty API, SPI, and  Java specification dependencies.
 
 The `libertyFeature` dependency configuration can install features in Liberty runtime versions 18.0.0.2 and above. Use the `io.openliberty.features` group for Open Liberty features, or the `com.ibm.websphere.appserver.features` group for WebSphere Liberty features.
 
