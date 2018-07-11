@@ -17,7 +17,7 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import java.util.Set
 
-import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.ResolveException
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.TaskAction
 
@@ -77,10 +77,14 @@ class InstallFeatureTask extends AbstractServerTask {
             def config = project.configurations.detachedConfiguration(dep)
 
             Set<File> files = new HashSet<File>()
-            config.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-                File artifactFile = artifact.file
-                files.add(artifactFile)
-                debug(artifactFile.toString())
+            try {
+                config.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+                    File artifactFile = artifact.file
+                    files.add(artifactFile)
+                    debug(artifactFile.toString())
+                }
+            } catch (ResolveException e) {
+                throw new PluginExecutionException("Could not find artifact with coordinates " + coordinates, e)
             }
 
             if (!files) {
