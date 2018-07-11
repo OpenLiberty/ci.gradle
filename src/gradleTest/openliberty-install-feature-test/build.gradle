@@ -1,0 +1,72 @@
+apply plugin: 'liberty'
+apply plugin: 'groovy'
+
+buildscript {
+    repositories{
+      mavenLocal()
+      mavenCentral()
+      maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+      }
+    }
+    dependencies {
+        classpath "net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+repositories {
+    maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+    }
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    testCompile gradleApi()
+    testCompile localGroovy()
+    testCompile 'junit:junit:4.12'
+    testCompile 'net.wasdev.wlp.common:ci.common:1.2-SNAPSHOT'
+    testCompile group: 'commons-io', name: 'commons-io', version: '2.5'
+    libertyRuntime 'io.openliberty:openliberty-runtime:18.0.0.2'
+}
+
+liberty {
+    server {
+        name = "dummy"
+        configFile = file('src/test/resources/server_empty.xml')
+        packageLiberty {
+            archive = "${buildDir}/openliberty-kernel.zip"
+            include = "minify"
+            os = "Linux"
+        }
+    }
+}
+
+task overwriteServer(type: Copy) {
+    dependsOn 'libertyCreate'
+
+    def replacementServer = file("server.xml")
+    def existingServerDir = file("${buildDir}/wlp/usr/servers/dummy")
+  
+    from replacementServer
+    into existingServerDir
+}
+
+task deleteFeaturesDir(type:Delete) {
+    delete 'build/wlp/lib/features'
+}
+
+task createPropertiesFile {
+    doLast {
+        new File("${projectDir}/gradle.properties").text = "lgpVersion=$lgpVersion"
+    }
+}
+
+test.dependsOn "createPropertiesFile", "installLiberty", "overwriteServer", "libertyPackage"
+
+task runGradleTest {
+    dependsOn 'test'
+}
