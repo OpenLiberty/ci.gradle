@@ -1,0 +1,4 @@
+rootProject.name = 'liberty-gradle-plugin'
+include ':integrationTest'
+
+project(':integrationTest').projectDir = "$rootDir/src/integrationTest" as File

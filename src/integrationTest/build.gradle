@@ -1,0 +1,62 @@
+apply plugin: 'liberty'
+apply plugin: 'org.ysb33r.gradletest'
+
+buildDir = "$rootDir/build" as File
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+        classpath 'gradle.plugin.org.ysb33r.gradle:gradletest:2.0-alpha-7'
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+configurations {
+    gradleTest.extendsFrom libertyRuntime
+}
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+    testCompile gradleTestKit()
+    libertyRuntime group:runtimeGroup, name:runtimeArtifactId, version:runtimeVersion
+}
+
+gradleTest {
+    gradleTest.gradleArguments = ["-PlgpVersion=$lgpVersion",
+                                  "-PruntimeGroup=$runtimeGroup",
+                                  "-PruntimeArtifactId=$runtimeArtifactId",
+                                  "-PruntimeVersion=$runtimeVersion",
+                                  "-i", "-s"]
+
+    dependsOn 'installLiberty'
+    versions '4.8'
+
+    maxParallelForks = 8
+
+    beforeTest {
+        println "Running test: ${it.name}"
+    }
+
+    expectFailure 'TestAppConfigFail'
+}
+
+clean {
+    delete 'build'
+}
+
+liberty {}

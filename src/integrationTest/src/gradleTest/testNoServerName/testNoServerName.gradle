@@ -1,0 +1,49 @@
+group = 'liberty.gradle'
+version = '1'
+
+apply plugin: 'liberty'
+apply plugin: 'groovy'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    testCompile localGroovy()
+    testCompile 'junit:junit:4.12'
+}
+
+test {
+    dependsOn 'libertyCreate'
+}
+
+task runGradleTest {
+    dependsOn 'test'
+}
+
+task copyWlpDir(type:Copy) {
+    from "${project.projectDir}/../../../wlp"
+    into "$buildDir"
+}
+
+installLiberty.dependsOn 'copyWlpDir'
+
+liberty {
+
+    installDir = "$buildDir/wlp"
+}

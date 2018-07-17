@@ -1,0 +1,69 @@
+apply plugin: 'groovy'
+apply plugin: 'ear'
+apply plugin: 'liberty'
+
+description = 'EAR Module'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile localGroovy()
+    deploy project(':ejb-ejb')
+    deploy project(path:':ejb-war', configuration:'archives')
+    testCompile group: 'commons-httpclient', name: 'commons-httpclient', version:'3.1'
+    testCompile group: 'junit', name: 'junit', version:'4.12'
+}
+
+ear {
+    archiveName = baseName + '.' + extension
+}
+
+task copyWlpDir(type:Copy) {
+    from "${project.projectDir}/../../../wlp"
+    into "$buildDir"
+}
+
+installLiberty.dependsOn 'copyWlpDir'
+
+liberty {
+
+    installDir = "$buildDir/wlp"
+    
+    server {
+        name = "ejbServer"
+        configFile = file('src/main/liberty/config/server.xml')
+        apps = [ear]
+        looseApplication = true
+    }
+}
+
+task testLooseEar {
+    dependsOn 'test'
+}
+
+test {
+    dependsOn 'libertyStart'
+    finalizedBy 'libertyStop'
+}
+
+libertyCreate.dependsOn 'eclipseWtpFacet'
+clean.dependsOn 'libertyStop'
+installApps.dependsOn 'ear'
+ear.dependsOn ':ejb-war:jar', ':ejb-war:war'

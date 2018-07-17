@@ -1,0 +1,79 @@
+group = 'liberty.gradle'
+version = '1'
+
+apply plugin: 'groovy'
+apply plugin: 'war'
+apply plugin: 'liberty'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    testCompile localGroovy()
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.apache.cxf:cxf-rt-rs-client:3.1.1'
+    testCompile 'org.glassfish:javax.json:1.0.4'
+    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "${project.projectDir}/../../../resources/test/sample.servlet/src/main/java"
+        }
+    }
+}
+
+project.webAppDirName = "../../../resources/test/sample.servlet/src/main/webapp"
+
+task war2 (type: War) {
+    baseName = 'sample.servlet2'
+}
+
+task copyWlpDir(type:Copy) {
+    from "${project.projectDir}/../../../wlp"
+    into "$buildDir"
+}
+
+installLiberty.dependsOn 'copyWlpDir'
+
+liberty {
+
+    installDir = "$buildDir/wlp"
+    
+    server {
+        configFile = file("${project.projectDir}/../../../resources/test/sample.servlet/src/main/liberty/config/server-apps-test.xml")
+        bootstrapProperties = ['testHttpPort':'9084', 'testHttpsPort':'9446']
+        name = 'testServer'
+        looseApplication = false
+
+        template = 'webProfile7'
+
+        apps = [war]
+        dropins = [war2]
+    }
+}
+
+test {
+    dependsOn 'installApps'
+}
+
+task runGradleTest {
+    dependsOn 'test'
+}

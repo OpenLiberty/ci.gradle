@@ -1,0 +1,92 @@
+/*
+	This test checks whether the application was successfully installed without the version number in the package
+	when installApps is called and stripVersion is set to true.
+*/
+group = 'liberty.gradle'
+version = '1'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+    }
+}
+
+apply plugin: 'groovy'
+apply plugin: 'java'
+apply plugin: 'war'
+apply plugin: 'liberty'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+compileJava.options.encoding = 'UTF-8'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    testCompile localGroovy()
+    testCompile 'junit:junit:4.12'
+    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "${project.projectDir}/../../../resources/test/sample.servlet/src/main/java"
+        }
+    }
+}
+
+project.webAppDirName = "../../../resources/test/sample.servlet/src/main/webapp"
+
+ext {
+    // Liberty server properties
+    wlpServerName = 'LibertyProjectServer'
+    serverDirectory = "${project.buildDir}/wlp/usr/servers/${wlpServerName}"
+    testServerHttpPort = 9080
+    testServerHttpsPort = 9443
+
+    // This is set in the ibm-web-ext.xml file
+    warContext = 'myLibertyApp'
+
+}
+
+task copyWlpDir(type:Copy) {
+    from "${project.projectDir}/../../../wlp"
+    into "$buildDir"
+}
+
+installLiberty.dependsOn 'copyWlpDir'
+
+liberty {
+
+    installDir = "$buildDir/wlp"
+    
+    server{
+        configFile = file("${project.projectDir}/../../../resources/test/sample.servlet/src/main/liberty/config/server-apps-test.xml")
+
+        name = wlpServerName
+
+        looseApplication = false
+        stripVersion = true
+     }
+}
+
+test {
+    dependsOn 'installApps'
+}
+
+task runGradleTest {
+    dependsOn 'test'
+}

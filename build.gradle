@@ -1,15 +1,10 @@
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.OutputStream
-import java.util.Properties
-
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: "com.gradle.plugin-publish"
 apply plugin: 'org.ysb33r.gradletest'
 
-archivesBaseName = 'liberty-gradle-plugin'
+archivesBaseName = rootProject.name
 group = 'net.wasdev.wlp.gradle.plugins'
 version = '2.5-SNAPSHOT'
 
@@ -68,58 +63,48 @@ dependencies {
     compile group: 'commons-io', name: 'commons-io', version: '2.5'
     provided group: 'com.ibm.websphere.appserver.api', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
     testCompile 'junit:junit:4.11'
-    testCompile gradleTestKit()
 }
 
-task integrationTest {
-    dependsOn 'processTestResources'
-    finalizedBy 'gradleTest'
+task addTestProperties {
 
-    doFirst {
-        String runtimeGroup
-        String runtimeArtifactId
-        String libertyRuntime = System.getProperty('runtime')
-        String runtimeVersion = System.getProperty('runtimeVersion')
+    String runtimeGroup
+    String runtimeArtifactId
+    String libertyRuntime = System.getProperty('runtime')
+    String runtimeVersion = System.getProperty('runtimeVersion')
 
+    project(':integrationTest').setProperty('lgpVersion', project.version)
+
+    if (System.getProperty('runtime') != null) {
+
+        if (libertyRuntime == "ol") {
+            runtimeGroup = "io.openliberty"
+            runtimeArtifactId = "openliberty-runtime"
+        } else {
+            runtimeGroup = "com.ibm.websphere.appserver.runtime"
+            runtimeArtifactId = "wlp-javaee7"
+        }
+
+        project(':integrationTest').setProperty('runtimeArtifactId', runtimeArtifactId)
+        project(':integrationTest').setProperty('runtimeGroup', runtimeGroup)
+    }
+
+    if (runtimeVersion != null) {
+        project(':integrationTest').setProperty('runtimeVersion', runtimeVersion)
+    }
+
+    doLast {
         if (libertyRuntime == null || libertyRuntime.isEmpty()) {
             throw new GradleException('Tests could not be run. Please specify a Liberty runtime. Choose either wlp or ol.')
         }
         if (runtimeVersion == null || runtimeVersion.isEmpty()) {
             throw new GradleException('Tests could not be run. Please specify a Liberty runtime version.')
         }
-
-        project.setProperty('runtimeVersion', runtimeVersion)
-
-        if (libertyRuntime == "ol") {
-            runtimeGroup = 'io.openliberty'
-            runtimeArtifactId = 'openliberty-runtime'
-            project.setProperty('runtimeGroup', "$runtimeGroup")
-            project.setProperty('runtimeArtifactId', "$runtimeArtifactId")
-        } else {
-            runtimeGroup = 'com.ibm.websphere.appserver.runtime'
-            runtimeArtifactId = 'wlp-javaee7'
-            project.setProperty('runtimeGroup', "$runtimeGroup")
-            project.setProperty('runtimeArtifactId', "$runtimeArtifactId")
-        }
-
-        project.dependencies.add(gradleTest.name, "$runtimeGroup:$runtimeArtifactId:$runtimeVersion")
     }
 }
 
-gradleTest {
-    versions '4.8'
-    
-    gradleArguments =  ["-PlgpVersion=${project.version}",
-                        "-PruntimeGroup=${runtimeGroup}",
-                        "-PruntimeArtifactId=${runtimeArtifactId}",
-                        "-PruntimeVersion=${runtimeVersion}",
-                        "-i", "-s"]
-
-    beforeTest {
-        println "Running test: ${it.name}"
-    }
-
-    expectFailure 'TestAppConfigFail'
+task integrationTest {
+    dependsOn 'processTestResources', 'addTestProperties'
+    finalizedBy ':integrationTest:gradleTest'
 }
 
 sourceSets.main.compileClasspath += configurations.provided
