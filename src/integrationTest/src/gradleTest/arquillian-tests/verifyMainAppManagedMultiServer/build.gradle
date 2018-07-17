@@ -20,8 +20,8 @@ dependencies {
 }
 
 liberty{
-    installDir = "${project.projectDir}/../../../../wlp"
-    userDir = "${rootProject.projectDir}/build/wlp/usr/"
+    installDir = "$buildDir/wlp"
+    userDir = "$buildDir/wlp/usr"
     servers {
         libertyProjectServer1 {
             configFile = file("${rootProject.projectDir}/src/main/liberty/config/server.xml")

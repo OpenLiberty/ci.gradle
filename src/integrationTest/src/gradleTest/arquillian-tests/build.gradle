@@ -68,6 +68,7 @@ installLiberty.dependsOn 'copyWlpDir'
 liberty {
 
     installDir = "$buildDir/wlp"
+    userDir = "$buildDir/wlp/usr"
 
     server {
         configFile = file("src/main/liberty/config/server.xml")
