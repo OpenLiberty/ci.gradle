@@ -82,7 +82,7 @@ public class TestLooseEarApplication {
     @Test
     public void test_start_with_timeout_success() {
         try {
-            URL url = new URL("http://localhost:9080/ejb-war");
+            URL url = new URL("http://localhost:9083/ejb-war");
             HttpURLConnection connection = (HttpURLConnection)url.openConnection();
             connection.setRequestMethod("GET");
             connection.connect();

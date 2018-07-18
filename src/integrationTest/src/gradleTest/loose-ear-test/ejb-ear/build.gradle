@@ -36,8 +36,8 @@ ear {
 }
 
 task copyWlpDir(type:Copy) {
-    from "${project.projectDir}/../../../wlp"
-    into "$buildDir"
+    from file("${project.projectDir}/../../../../wlp")
+    into file("$buildDir/wlp")
 }
 
 installLiberty.dependsOn 'copyWlpDir'

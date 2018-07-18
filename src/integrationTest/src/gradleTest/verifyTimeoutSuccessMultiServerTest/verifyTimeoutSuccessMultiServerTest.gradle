@@ -51,7 +51,7 @@ project.webAppDirName = "../../../resources/test/sample.servlet/src/main/webapp"
 
 task copyWlpDir(type:Copy) {
     from "${project.projectDir}/../../../wlp"
-    into "$buildDir"
+    into "$buildDir/wlp"
 }
 
 installLiberty.dependsOn 'copyWlpDir'
@@ -88,7 +88,7 @@ liberty {
 
             configFile = file("${project.projectDir}/../../../resources/test/sample.servlet/src/main/liberty/config/multi-server-test.xml")
 
-            bootstrapProperties = ['httpPort': '9099', 'httpsPort': '9451']
+            bootstrapProperties = ['httpPort': '9099', 'httpsPort': '9461']
 
             looseApplication = false
 

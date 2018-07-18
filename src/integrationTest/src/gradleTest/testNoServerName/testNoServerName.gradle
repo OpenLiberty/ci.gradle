@@ -38,7 +38,7 @@ task runGradleTest {
 
 task copyWlpDir(type:Copy) {
     from "${project.projectDir}/../../../wlp"
-    into "$buildDir"
+    into "$buildDir/wlp"
 }
 
 installLiberty.dependsOn 'copyWlpDir'
