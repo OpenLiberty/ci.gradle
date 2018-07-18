@@ -55,7 +55,7 @@ public class RestEndpointIT {
 	@Test
 	public void testDataExistsAtEndpoint() throws Exception {
         Thread.sleep(10000);
-		URL endpoint = new URL("http://localhost:9080/myLibertyApp/api/transactions");
+		URL endpoint = new URL("http://localhost:9100/myLibertyApp/api/transactions");
 		String body = readAllAndClose(endpoint.openStream());
 		int bodyLength = body.length();
 		assertTrue(bodyLength > 0);

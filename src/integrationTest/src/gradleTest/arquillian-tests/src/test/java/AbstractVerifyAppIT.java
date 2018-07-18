@@ -52,7 +52,7 @@ public abstract class AbstractVerifyAppIT {
                                // don't know it here. Instead just make sure
                                // that another app is started after the main
                                // app.
-                "Web application available (default_host): http://localhost:9080/";
+                "Web application available (default_host): http://localhost:9100/";
 
         boolean foundMainApp = false;
 
