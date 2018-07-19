@@ -10,7 +10,7 @@ buildscript {
       }
     }
     dependencies {
-        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.5-SNAPSHOT'
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
     }
 }
 
@@ -20,25 +20,5 @@ repositories {
 }
 
 dependencies {
-    libertyRuntime 'io.openliberty:openliberty-runtime:18.0.0.2'
+    libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: '18.0.0.2'
 }
-
-liberty {
-    server {
-        name = "dummy"
-        packageLiberty {
-            archive = "${buildDir}/openliberty-kernel.zip"
-            include = "minify"
-            os = "Linux"
-        }
-    }
-}
-
-task overwriteServer(type: Copy) {
-    def replacementServer = file("server.xml")
-    def existingServerDir = file("${buildDir}/wlp/usr/servers/dummy")
-  
-    from replacementServer
-    into existingServerDir
-    
-  }

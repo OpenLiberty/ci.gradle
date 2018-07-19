@@ -90,6 +90,7 @@ task integrationTest(type: Test) {
 
         String runtimeGroup
         String runtimeArtifactId
+        String kernelArtifactId
         String libertyRuntime = System.getProperty('runtime')
         String runtimeVersion = System.getProperty('runtimeVersion')
 
@@ -110,15 +111,18 @@ task integrationTest(type: Test) {
         if (libertyRuntime == "ol") {
             runtimeGroup = "io.openliberty"
             runtimeArtifactId = "openliberty-runtime"
+            kernelArtifactId = "openliberty-kernel"
         } else {
             runtimeGroup = "com.ibm.websphere.appserver.runtime"
             runtimeArtifactId = "wlp-javaee7"
+            kernelArtifactId = "wlp-kernel"
         }
 
         // set the properties value
         prop.setProperty("lgpVersion", version)
         prop.setProperty("runtimeGroup", runtimeGroup)
         prop.setProperty("runtimeArtifactId", runtimeArtifactId)
+        prop.setProperty("kernelArtifactId", kernelArtifactId)
         prop.setProperty("runtimeVersion", runtimeVersion)
 
         // save properties to project root folder

@@ -34,12 +34,6 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
     public static void setup() {
         createDir(buildDir)
         createTestProject(buildDir, resourceDir, buildFilename)
-        try {
-            runTasks(buildDir, "installLiberty", "overwriteServer", "libertyPackage")
-            deleteDir(new File(buildDir, "build/wlp"))
-        } catch (Exception e) {
-            throw new AssertionError("Failed to package Open Liberty kernel.", e)
-        }
     }
     
     @Before
