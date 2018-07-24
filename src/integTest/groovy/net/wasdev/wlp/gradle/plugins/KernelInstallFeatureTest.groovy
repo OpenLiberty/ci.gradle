@@ -25,9 +25,9 @@ import org.junit.Test
 
 import net.wasdev.wlp.common.plugins.util.InstallFeatureUtil
 
-class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
-    static File resourceDir = new File("build/resources/integrationTest/openliberty-install-feature-test")
-    static File buildDir = new File(integTestDir, "/openliberty-install-feature-test")
+class KernelInstallFeatureTest extends AbstractIntegrationTest{
+    static File resourceDir = new File("build/resources/integrationTest/kernel-install-feature-test")
+    static File buildDir = new File(integTestDir, "/kernel-install-feature-test")
     static String buildFilename = "build.gradle"
 
     @BeforeClass
