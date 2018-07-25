@@ -50,7 +50,7 @@ gradleTest {
     dependsOn 'installLiberty'
     versions '4.8'
 
-    maxParallelForks = 2
+    //maxParallelForks = 2
 
     beforeTest {
         println "Running test: ${it.name}"
