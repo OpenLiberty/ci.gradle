@@ -56,8 +56,6 @@ gradleTest {
         println "Running test: ${it.name}"
     }
 
-    exclude '*loose-ear-test*', '*arquillian-tests*'
-
     expectFailure 'TestAppConfigFail'
 }
 
