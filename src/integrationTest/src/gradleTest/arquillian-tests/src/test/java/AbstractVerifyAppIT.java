@@ -47,7 +47,7 @@ public abstract class AbstractVerifyAppIT {
         // Arquillian test application by looking at the build.log console
         // output.
 
-        String mainAppOutput = "Web application available (default_host): http://localhost:9080/myLibertyApp/";
+        String mainAppOutput = "Web application available (default_host): http://localhost:9100/myLibertyApp/";
         String testAppOutput = // The test app name is randomly generated, so we
                                // don't know it here. Instead just make sure
                                // that another app is started after the main

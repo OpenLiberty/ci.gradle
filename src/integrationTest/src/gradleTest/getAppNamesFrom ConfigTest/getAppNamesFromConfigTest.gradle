@@ -91,7 +91,7 @@ liberty {
     server{
         name = wlpServerName
         configFile = file("${project.projectDir}/../../../resources/test/sample.servlet-noWebAppConfig/src/main/liberty/config/app-names-test.xml")
-        bootstrapProperties = ['testAppLocation':'test.servlet-1.war']
+        bootstrapProperties = ['testAppLocation':'test.servlet-1.war', 'testHttpPort':testServerHttpPort, 'testHttpsPort':testServerHttpsPort]
         packageLiberty {
             archive = packageFile
             include = packagingType

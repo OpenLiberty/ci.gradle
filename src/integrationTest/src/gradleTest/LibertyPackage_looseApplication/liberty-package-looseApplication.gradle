@@ -52,16 +52,7 @@ war {
     archiveName = baseName + '.' + extension
 }
 
-task copyWlpDir(type:Copy) {
-    from "${project.projectDir}/../../../wlp"
-    into "$buildDir/wlp"
-}
-
-installLiberty.dependsOn 'copyWlpDir'
-
 liberty {
-
-    installDir = "$buildDir/wlp"
     
     server{
         configFile = file("${project.projectDir}/../../../resources/test/liberty-package-test/src/main/liberty/config/server.xml")
