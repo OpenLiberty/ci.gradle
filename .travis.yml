@@ -2,6 +2,8 @@ sudo: required
 language: java
 jdk:
     - openjdk8
+global:
+    - cache: false
 env:
     - RUNTIME=wlp RUNTIME_VERSION=17.0.0.4
     - RUNTIME=wlp RUNTIME_VERSION=18.0.0.1
