@@ -208,7 +208,7 @@ class KernelInstallFeatureTest extends AbstractIntegrationTest{
 
         features = featuresDir.listFiles(new FilenameFilter() {
                     public boolean accept(File dir, String name) {
-                        return name.toLowerCase().endsWith("." + feature + ".mf");
+                        return name.toLowerCase().endsWith("." + feature.toLowerCase() + ".mf");
                     }
                 });
 
