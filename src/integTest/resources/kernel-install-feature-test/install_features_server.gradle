@@ -15,9 +15,6 @@ buildscript {
 apply plugin: 'liberty'
 
 repositories {
-    maven {
-        url file("features-repo").toURI().toURL().toString()
-    }
     mavenCentral()
 }
 

@@ -15,15 +15,12 @@ buildscript {
 apply plugin: 'liberty'
 
 repositories {
-    maven {
-        url file("features-repo").toURI().toURL().toString()
-    }
     mavenCentral()
 }
 
 dependencies {
     libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: '18.0.0.2'
-    libertyFeature 'io.openliberty.features:a-1.0:18.0.0.2'
+    libertyFeature 'io.openliberty.features:appSecurityClient-1.0:18.0.0.2'
 }
 
 liberty {

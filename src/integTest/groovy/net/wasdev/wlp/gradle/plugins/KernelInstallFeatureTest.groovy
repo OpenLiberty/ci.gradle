@@ -15,8 +15,7 @@
  */
 package net.wasdev.wlp.gradle.plugins
 
-import static junit.framework.Assert.assertFalse
-import static junit.framework.Assert.assertTrue
+import static junit.framework.Assert.assertEquals
 import static org.junit.Assert.*
 
 import org.junit.Before
@@ -52,7 +51,10 @@ class KernelInstallFeatureTest extends AbstractIntegrationTest{
         runTasks(buildDir, 'installFeature')
         copyBuildFiles(new File(resourceDir, "install_features_dependencies.gradle"), buildDir)
         runTasks(buildDir, 'installFeature')
-        assertInstalled("a-1.0")
+        assertInstalled("appSecurityClient-1.0")
+        assertNotInstalled("beanValidation-2.0")
+        assertNotInstalled("couchdb-1.0")
+        assertNotInstalled("distributedMap-1.0")
     }
     
     @Test
@@ -62,13 +64,17 @@ class KernelInstallFeatureTest extends AbstractIntegrationTest{
     public void testInstallFeaturesDependenciesInstallMore() {
         copyBuildFiles(new File(resourceDir, "install_features_dependencies.gradle"), buildDir)
         runTasks(buildDir, 'installFeature')
-        assertInstalled("a-1.0")
+        assertInstalled("appSecurityClient-1.0")
+        assertNotInstalled("beanValidation-2.0")
+        assertNotInstalled("couchdb-1.0")
+        assertNotInstalled("distributedMap-1.0")
         
         copyBuildFiles(new File(resourceDir, "install_features_dependencies_install_more.gradle"), buildDir)
         runTasks(buildDir, 'installFeature')
-        assertInstalled("a-1.0")
-        assertInstalled("c-1.0")
-        assertInstalled("d-1.0")
+        assertInstalled("appSecurityClient-1.0")
+        assertNotInstalled("beanValidation-2.0")
+        assertInstalled("couchdb-1.0")
+        assertInstalled("distributedMap-1.0")
     }
     
     @Test
@@ -78,10 +84,10 @@ class KernelInstallFeatureTest extends AbstractIntegrationTest{
     public void testInstallFeaturesDependencies() {
         copyBuildFiles(new File(resourceDir, "install_features_dependencies.gradle"), buildDir)
         runTasks(buildDir, 'installFeature')
-        assertInstalled("a-1.0")
-        
-        // sanity check
-        assertFalse("Feature b-1.0 should not have been installed", getFeatureInfo().contains("b-1.0"));
+        assertInstalled("appSecurityClient-1.0")
+        assertNotInstalled("beanValidation-2.0")
+        assertNotInstalled("couchdb-1.0")
+        assertNotInstalled("distributedMap-1.0")
     }
     
     @Test
@@ -91,15 +97,17 @@ class KernelInstallFeatureTest extends AbstractIntegrationTest{
     public void testInstallFeaturesDependenciesPluginListInstallMore() {
         copyBuildFiles(new File(resourceDir, "install_features_dependencies_pluginlist.gradle"), buildDir)
         runTasks(buildDir, 'installFeature')
-        assertInstalled("a-1.0")
-        assertInstalled("b-1.0")
+        assertInstalled("appSecurityClient-1.0")
+        assertInstalled("beanValidation-2.0")
+        assertNotInstalled("couchdb-1.0")
+        assertNotInstalled("distributedMap-1.0")
         
         copyBuildFiles(new File(resourceDir, "install_features_dependencies_pluginlist_install_more.gradle"), buildDir)
         runTasks(buildDir, 'installFeature')
-        assertInstalled("a-1.0")
-        assertInstalled("b-1.0")
-        assertInstalled("c-1.0")
-        assertInstalled("d-1.0")
+        assertInstalled("appSecurityClient-1.0")
+        assertInstalled("beanValidation-2.0")
+        assertInstalled("couchdb-1.0")
+        assertInstalled("distributedMap-1.0")
     }
     
     @Test
@@ -111,7 +119,10 @@ class KernelInstallFeatureTest extends AbstractIntegrationTest{
         runTasks(buildDir, "libertyCreate")
         copyServer("server_a.xml")
         runTasks(buildDir, 'installFeature')
-        assertInstalled("a-1.0")
+        assertInstalled("appSecurityClient-1.0")
+        assertNotInstalled("beanValidation-2.0")
+        assertNotInstalled("couchdb-1.0")
+        assertNotInstalled("distributedMap-1.0")
     }
     
     @Test
@@ -123,8 +134,10 @@ class KernelInstallFeatureTest extends AbstractIntegrationTest{
         runTasks(buildDir, "libertyCreate")
         copyServer("server_b.xml")
         runTasks(buildDir, 'installFeature')
-        assertInstalled("a-1.0")
-        assertInstalled("b-1.0")
+        assertInstalled("appSecurityClient-1.0")
+        assertInstalled("beanValidation-2.0")
+        assertNotInstalled("couchdb-1.0")
+        assertNotInstalled("distributedMap-1.0")
     }
     
     @Test
@@ -136,9 +149,10 @@ class KernelInstallFeatureTest extends AbstractIntegrationTest{
         runTasks(buildDir, "libertyCreate")
         copyServer("server_c.xml")
         runTasks(buildDir, 'installFeature')
-        assertInstalled("a-1.0")
-        assertInstalled("b-1.0")
-        assertInstalled("c-1.0")
+        assertInstalled("appSecurityClient-1.0")
+        assertInstalled("beanValidation-2.0")
+        assertInstalled("couchdb-1.0")
+        assertNotInstalled("distributedMap-1.0")
     }
     
     @Test
@@ -148,7 +162,10 @@ class KernelInstallFeatureTest extends AbstractIntegrationTest{
     public void testInstallFeaturesPluginList() {
         copyBuildFiles(new File(resourceDir, "install_features_pluginlist.gradle"), buildDir)
         runTasks(buildDir, 'installFeature')
-        assertInstalled("b-1.0")
+        assertNotInstalled("appSecurityClient-1.0")
+        assertInstalled("beanValidation-2.0")
+        assertNotInstalled("couchdb-1.0")
+        assertNotInstalled("distributedMap-1.0")
     }
     
     @Test
@@ -160,17 +177,29 @@ class KernelInstallFeatureTest extends AbstractIntegrationTest{
         runTasks(buildDir, "libertyCreate")
         copyServer("server_a.xml")
         runTasks(buildDir, "installFeature")
-        assertInstalled("a-1.0")
+        assertInstalled("appSecurityClient-1.0")
+        assertNotInstalled("beanValidation-2.0")
+        assertNotInstalled("couchdb-1.0")
+        assertNotInstalled("distributedMap-1.0")
     }
     
     private copyServer(String serverFile) {
         copyFile(new File(resourceDir, serverFile), new File(buildDir, "build/wlp/usr/servers/dummy/server.xml"))
     }
 
-    private void assertInstalled(String feature) throws Exception {
-        assertTrue("Feature " + feature + " was not installed into the lib/features directory", existsInFeaturesDirectory(feature));
+    private void assertInstallStatus(String feature, boolean expectation) throws Exception {
+        String expectationString = (expectation ? "installed" : "not installed");
+        assertEquals("Feature " + feature + " was expected to be " + expectationString + " in the lib/features directory", expectation, existsInFeaturesDirectory(feature));
         String featureInfo = getFeatureInfo();
-        assertTrue("Feature " + feature + " was not installed according to productInfo featureInfo: " + featureInfo, featureInfo.contains(feature));
+        assertEquals("Feature " + feature + " was expected to be " + expectationString + " according to productInfo featureInfo: " + featureInfo, expectation, featureInfo.contains(feature));
+    }
+
+    private void assertInstalled(String feature) throws Exception {
+        assertInstallStatus(feature, true);
+    }
+    
+    private void assertNotInstalled(String feature) throws Exception {
+        assertInstallStatus(feature, false);
     }
     
     private boolean existsInFeaturesDirectory(String feature) {

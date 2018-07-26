@@ -15,9 +15,6 @@ buildscript {
 apply plugin: 'liberty'
 
 repositories {
-    maven {
-        url file("features-repo").toURI().toURL().toString()
-    }
     mavenCentral()
 }
 
@@ -29,7 +26,7 @@ liberty {
     server{
         name = 'dummy'
         features {
-            name = ['b-1.0']
+            name = ['beanValidation-2.0']
             acceptLicense = true
         }
     }
