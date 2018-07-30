@@ -59,7 +59,7 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
     compile ('net.wasdev.wlp.ant:wlp-anttasks:1.4.1')
-    compile ('net.wasdev.wlp.common:ci.common:1.2-SNAPSHOT')
+    compile ('net.wasdev.wlp.common:ci.common:1.2')
     compile group: 'commons-io', name: 'commons-io', version: '2.5'
     provided group: 'com.ibm.websphere.appserver.api', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
     testCompile 'junit:junit:4.11'
@@ -112,6 +112,10 @@ sourceSets.main.compileClasspath += configurations.provided
 task wrapper(type: Wrapper) {
     gradleVersion = '3.5'
 }
+
+archivesBaseName = 'liberty-gradle-plugin'
+group = 'net.wasdev.wlp.gradle.plugins'
+version = '2.6-SNAPSHOT'
 
 task sourcesJar(type: Jar) {
     classifier = 'sources'
