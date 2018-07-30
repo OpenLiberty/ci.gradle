@@ -6,7 +6,7 @@ apply plugin: 'org.ysb33r.gradletest'
 
 archivesBaseName = rootProject.name
 group = 'net.wasdev.wlp.gradle.plugins'
-version = '2.5-SNAPSHOT'
+version = '2.6-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -112,10 +112,6 @@ sourceSets.main.compileClasspath += configurations.provided
 task wrapper(type: Wrapper) {
     gradleVersion = '3.5'
 }
-
-archivesBaseName = 'liberty-gradle-plugin'
-group = 'net.wasdev.wlp.gradle.plugins'
-version = '2.6-SNAPSHOT'
 
 task sourcesJar(type: Jar) {
     classifier = 'sources'
