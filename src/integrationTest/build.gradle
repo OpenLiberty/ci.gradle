@@ -33,7 +33,6 @@ configurations {
 }
 
 dependencies {
-    gradleTest 'net.wasdev.wlp.common:ci.common:1.2-SNAPSHOT'
     compile gradleApi()
     compile localGroovy()
     testCompile gradleTestKit()
