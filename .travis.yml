@@ -10,5 +10,5 @@ env:
     - RUNTIME=ol RUNTIME_VERSION=18.0.0.1
 script:
   - export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs='-XX:MaxPermSize=1024m -XX:+CMSClassUnloadingEnabled -XX:+HeapDumpOnOutOfMemoryError -Xmx2048m'"
-  - travis_wait ./gradlew install integrationTest -Druntime=$RUNTIME -DruntimeVersion=$RUNTIME_VERSION --stacktrace --info --no-daemon
-dist: trusty
+  - travis_wait ./gradlew install integrationTest -Druntime=$RUNTIME -DruntimeVersion=$RUNTIME_VERSION --stacktrace --info
+dist: precise

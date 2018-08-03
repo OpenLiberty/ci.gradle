@@ -36,6 +36,7 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
     testCompile gradleTestKit()
+    libertyRuntime group:runtimeGroup, name:runtimeArtifactId, version:runtimeVersion
 }
 
 gradleTest {
