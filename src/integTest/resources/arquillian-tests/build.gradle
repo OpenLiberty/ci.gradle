@@ -92,7 +92,7 @@ dependencies {
     arqRemote "io.openliberty.arquillian:arquillian-liberty-remote:1.0.1"
 
     testCompile "junit:junit:4.12"
-    testCompile "net.wasdev.wlp.common:ci.common:1.0"
+    testCompile "net.wasdev.wlp.common:ci.common:1.2"
     testCompile "org.jboss.shrinkwrap.resolver:shrinkwrap-resolver-impl-maven:2.2.4"
     testCompile "org.jboss.arquillian.junit:arquillian-junit-container:1.1.13.Final"
     testCompile "org.jboss.shrinkwrap:shrinkwrap-api:1.2.6"
