@@ -16,7 +16,7 @@ buildscript {
 project.buildDir = '../build'
 
 dependencies {
-    compile "org.jboss.arquillian.container:arquillian-wlp-remote-8.5:1.0.0.CR1"
+    compile 'io.openliberty.arquillian:arquillian-liberty-remote:1.0.2'
 }
 
 task configArq (type:ConfigureArquillianTask) {
