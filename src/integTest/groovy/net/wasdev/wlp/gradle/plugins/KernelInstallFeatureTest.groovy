@@ -183,6 +183,28 @@ class KernelInstallFeatureTest extends AbstractIntegrationTest{
         assertNotInstalled("distributedMap-1.0")
     }
     
+    @Test
+    /**
+     * Install with server.xml features specified in lowercase and were already installed
+     */
+    public void testInstallFeaturesServerAlreadyInstalledLowercase() {
+        copyBuildFiles(new File(resourceDir, "install_features_server.gradle"), buildDir)
+        runTasks(buildDir, "libertyCreate")
+        copyServer("server_lowercase.xml")
+        
+        runTasks(buildDir, "installFeature")
+        assertInstalled("appSecurityClient-1.0")
+        assertInstalled("beanValidation-2.0")
+        assertNotInstalled("couchdb-1.0")
+        assertNotInstalled("distributedMap-1.0")
+        
+        runTasks(buildDir, "installFeature")
+        assertInstalled("appSecurityClient-1.0")
+        assertInstalled("beanValidation-2.0")
+        assertNotInstalled("couchdb-1.0")
+        assertNotInstalled("distributedMap-1.0")
+    }
+    
     private copyServer(String serverFile) {
         copyFile(new File(resourceDir, serverFile), new File(buildDir, "build/wlp/usr/servers/dummy/server.xml"))
     }
