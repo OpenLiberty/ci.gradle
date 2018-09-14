@@ -53,6 +53,7 @@ class LibertyExtension {
     UninstallFeatureExtension uninstallfeatures = new UninstallFeatureExtension()
     InstallExtension install = new InstallExtension()
     CleanExtension cleanDir = new CleanExtension()
+    SpringBootExtension thin = new SpringBootExtension()
 
     DeployExtension deploy = new DeployExtension()
     UndeployExtension undeploy = new UndeployExtension()
@@ -104,6 +105,10 @@ class LibertyExtension {
 
     def cleanDir(Closure closure) {
         ConfigureUtil.configure(closure, cleanDir)
+    }
+
+    def thin(Closure closure) {
+       ConfigureUtil.configure(closure, thin)
     }
 
     def server(Closure closure){

@@ -321,7 +321,7 @@ class InstallAppsTask extends AbstractServerTask {
         }
     }
 
-    void createApplicationFolder(String appDir) {
+    File createApplicationFolder(String appDir) {
         File applicationDirectory = new File(getServerDir(project), appDir)
         try {
             if (!applicationDirectory.exists()) {
@@ -330,5 +330,6 @@ class InstallAppsTask extends AbstractServerTask {
         } catch (Exception e) {
             throw new GradleException("There was a problem creating ${applicationDirectory.getCanonicalPath()}.", e)
         }
+        return applicationDirectory
     }
 }

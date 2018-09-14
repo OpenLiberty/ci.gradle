@@ -15,6 +15,7 @@
  */
 package net.wasdev.wlp.gradle.plugins
 
+import net.wasdev.wlp.gradle.plugins.tasks.InstallSpringBootApp
 import org.gradle.api.Project
 
 import net.wasdev.wlp.gradle.plugins.tasks.StartTask
@@ -60,6 +61,7 @@ class LibertyTaskFactory {
         project.tasks.create('uninstallFeature', UninstallFeatureTask)
         project.tasks.create('cleanDirs', CleanTask)
         project.tasks.create('installApps', InstallAppsTask)
+        project.tasks.create('installSpringBootApp', InstallSpringBootApp)
         project.tasks.create('configureArquillian', ConfigureArquillianTask)
     }
 }
