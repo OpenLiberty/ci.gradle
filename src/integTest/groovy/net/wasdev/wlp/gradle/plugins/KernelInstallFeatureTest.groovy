@@ -220,7 +220,7 @@ class KernelInstallFeatureTest extends AbstractIntegrationTest{
     }
         
     private copyServer(String serverFile) {
-        copyFile(new File(resourceDir, serverFile), new File(buildDir, "build/wlp/usr/servers/dummy/server.xml"))
+        copyFile(new File(resourceDir, serverFile), new File(buildDir, "build/wlp/usr/servers/defaultServer/server.xml"))
     }
 
     private void assertInstallStatus(String feature, boolean expectation) throws Exception {

@@ -24,7 +24,6 @@ dependencies {
 
 liberty {
     server{
-        name = 'dummy'
         features {
             name = ['couchdb-1.0', 'distributedMap-1.0']
             acceptLicense = true

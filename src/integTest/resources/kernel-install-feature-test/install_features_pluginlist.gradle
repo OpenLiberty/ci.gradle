@@ -24,7 +24,6 @@ dependencies {
 
 liberty {
     server{
-        name = 'dummy'
         features {
             name = ['beanValidation-2.0']
             acceptLicense = true

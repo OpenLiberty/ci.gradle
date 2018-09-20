@@ -26,7 +26,6 @@ dependencies {
 
 liberty {
     server{
-        name = 'dummy'
         features {
             acceptLicense = true
         }
