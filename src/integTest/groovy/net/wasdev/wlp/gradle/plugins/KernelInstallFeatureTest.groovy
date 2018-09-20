@@ -218,34 +218,6 @@ class KernelInstallFeatureTest extends AbstractIntegrationTest{
         assertNotInstalled("distributedMap-1.0")
         assertNotInstalled("servlet-3.0")
     }
-
-    @Test
-    /**
-     * Install WLP features without accept license
-     */
-    public void testInstallWLPFeaturesNoAcceptLicense() {
-        copyBuildFiles(new File(resourceDir, "install_wlp_features_no_accept_license.gradle"), buildDir)
-        runTasks(buildDir, 'installFeature')
-        assertInstalled("appSecurityClient-1.0")
-        assertNotInstalled("beanValidation-2.0")
-        assertNotInstalled("couchdb-1.0")
-        assertNotInstalled("distributedMap-1.0")
-        assertInstalled("servlet-3.0")
-    }
-
-    @Test
-    /**
-     * Install WLP features with accept license
-     */
-    public void testInstallWLPFeaturesAcceptLicense() {
-        copyBuildFiles(new File(resourceDir, "install_wlp_features_accept_license.gradle"), buildDir)
-        runTasks(buildDir, 'installFeature')
-        assertInstalled("appSecurityClient-1.0")
-        assertNotInstalled("beanValidation-2.0")
-        assertNotInstalled("couchdb-1.0")
-        assertNotInstalled("distributedMap-1.0")
-        assertInstalled("servlet-3.0")
-    }
         
     private copyServer(String serverFile) {
         copyFile(new File(resourceDir, serverFile), new File(buildDir, "build/wlp/usr/servers/dummy/server.xml"))
@@ -258,11 +230,11 @@ class KernelInstallFeatureTest extends AbstractIntegrationTest{
         assertEquals("Feature " + feature + " was expected to be " + expectationString + " according to productInfo featureInfo: " + featureInfo, expectation, featureInfo.contains(feature));
     }
 
-    private void assertInstalled(String feature) throws Exception {
+    protected void assertInstalled(String feature) throws Exception {
         assertInstallStatus(feature, true);
     }
     
-    private void assertNotInstalled(String feature) throws Exception {
+    protected void assertNotInstalled(String feature) throws Exception {
         assertInstallStatus(feature, false);
     }
     
