@@ -15,15 +15,17 @@
  */
 package net.wasdev.wlp.gradle.plugins
 
-import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 
 class WLPKernelInstallFeatureTest extends KernelInstallFeatureTest{
 
-    @Before
-    public void before() {
-        copyBuildFiles(new File(resourceDir, "build_wlp.gradle"), buildDir)
-        super.before()
+    @BeforeClass
+    @Override
+    public static void setup() {
+        buildDir = new File(integTestDir, "/wlp-kernel-install-feature-test")
+        buildFilename = "build_wlp.gradle"
+        super.setup();
     }
     
     @Test
