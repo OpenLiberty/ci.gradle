@@ -205,6 +205,48 @@ class KernelInstallFeatureTest extends AbstractIntegrationTest{
         assertNotInstalled("distributedMap-1.0")
     }
     
+    @Test
+    /**
+     * Install OL features without accept license
+     */
+    public void testInstallOLFeaturesNoAcceptLicense() {
+        copyBuildFiles(new File(resourceDir, "install_ol_features_no_accept_license.gradle"), buildDir)
+        runTasks(buildDir, 'installFeature')
+        assertInstalled("appSecurityClient-1.0")
+        assertInstalled("beanValidation-2.0")
+        assertNotInstalled("couchdb-1.0")
+        assertNotInstalled("distributedMap-1.0")
+        assertNotInstalled("servlet-3.0")
+    }
+
+    @Test
+    /**
+     * Install WLP features without accept license
+     */
+    public void testInstallWLPFeaturesNoAcceptLicense() {
+        copyBuildFiles(new File(resourceDir, "install_wlp_features_no_accept_license.gradle"), buildDir)
+        runTasks(buildDir, 'installFeature')
+        assertInstalled("appSecurityClient-1.0")
+        assertNotInstalled("beanValidation-2.0")
+        assertNotInstalled("couchdb-1.0")
+        assertNotInstalled("distributedMap-1.0")
+        assertInstalled("servlet-3.0")
+    }
+
+    @Test
+    /**
+     * Install WLP features with accept license
+     */
+    public void testInstallWLPFeaturesAcceptLicense() {
+        copyBuildFiles(new File(resourceDir, "install_wlp_features_accept_license.gradle"), buildDir)
+        runTasks(buildDir, 'installFeature')
+        assertInstalled("appSecurityClient-1.0")
+        assertNotInstalled("beanValidation-2.0")
+        assertNotInstalled("couchdb-1.0")
+        assertNotInstalled("distributedMap-1.0")
+        assertInstalled("servlet-3.0")
+    }
+        
     private copyServer(String serverFile) {
         copyFile(new File(resourceDir, serverFile), new File(buildDir, "build/wlp/usr/servers/dummy/server.xml"))
     }
@@ -230,7 +272,7 @@ class KernelInstallFeatureTest extends AbstractIntegrationTest{
 
         features = featuresDir.listFiles(new FilenameFilter() {
                     public boolean accept(File dir, String name) {
-                        return name.toLowerCase().endsWith("." + feature.toLowerCase() + ".mf");
+                        return name.toLowerCase().equals("com.ibm.websphere.appserver." + feature.toLowerCase() + ".mf");
                     }
                 });
 
