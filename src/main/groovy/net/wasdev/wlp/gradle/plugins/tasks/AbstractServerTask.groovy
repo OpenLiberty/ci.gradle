@@ -70,7 +70,6 @@ abstract class AbstractServerTask extends AbstractTask {
 
     protected List<String> buildCommand (String operation) {
         List<String> command = new ArrayList<String>()
-        boolean isWindows = System.properties['os.name'].toLowerCase().indexOf("windows") >= 0
         String installDir = getInstallDir(project).toString()
 
         if (isWindows) {

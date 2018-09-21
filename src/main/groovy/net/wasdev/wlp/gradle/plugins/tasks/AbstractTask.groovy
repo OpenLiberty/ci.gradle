@@ -15,18 +15,26 @@
  */
 package net.wasdev.wlp.gradle.plugins.tasks
 
+import groovy.io.FileType
+import jdk.internal.util.xml.PropertiesDefaultHandler
 import net.wasdev.wlp.gradle.plugins.extensions.DeployExtension
 import net.wasdev.wlp.gradle.plugins.extensions.LibertyExtension
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.Project
+import static groovy.io.FileType.*
+
+import java.lang.reflect.Field
+import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import java.text.MessageFormat
 
 abstract class AbstractTask extends DefaultTask {
 
     //params that get built with installLiberty
     def params
-
+    protected boolean isWindows = System.properties['os.name'].toLowerCase().indexOf("windows") >= 0
     protected getInstallDir = { Project project ->
         if (project.liberty.installDir == null) {
             if (project.liberty.install.baseDir == null) {
@@ -59,4 +67,47 @@ abstract class AbstractTask extends DefaultTask {
         File installDir = getInstallDir(project)
         return (installDir.exists() && new File(installDir, "lib/ws-launch.jar").exists())
     }
+
+    final String  COM_IBM_WEBSPHERE_PRODUCTID_KEY = "com.ibm.websphere.productId"
+    final String COM_IBM_WEBSPHERE_PRODUCTVERSION_KEY = "com.ibm.websphere.productVersion"
+
+    protected boolean isOpenLiberty() {
+        getLibertyInstallProperties().getProperty(COM_IBM_WEBSPHERE_PRODUCTID_KEY).contains("io.openliberty")
+    }
+
+    protected boolean isClosedLiberty() {
+        getLibertyInstallProperties().getProperty(COM_IBM_WEBSPHERE_PRODUCTID_KEY).contains("com.ibm.websphere.appserver")
+    }
+
+    protected String getInstallVersion() {
+        getLibertyInstallProperties().getProperty(COM_IBM_WEBSPHERE_PRODUCTVERSION_KEY)
+    }
+
+    protected Properties getLibertyInstallProperties() {
+        String COM_IBM_WEBSPHERE_PRODUCTID_KEY = "com.ibm.websphere.productId"
+        String COM_IBM_WEBSPHERE_PRODUCTVERSION_KEY = "com.ibm.websphere.productVersion"
+        File propertiesDir = new File(getInstallDir(project), "lib/versions")
+        File wlpProductInfoProperties = new File(propertiesDir, "WebSphereApplicationServer.properties")
+        File olProductInfoProperties = new File(propertiesDir, "openliberty.properties")
+        File propsFile
+        if (wlpProductInfoProperties.isFile()) {
+            propsFile = wlpProductInfoProperties
+        }
+        else if (olProductInfoProperties.isFile()) {
+            propsFile = olProductInfoProperties
+        }
+        else {
+            throw new GradleException("Unable to determine the Liberty installation product information. " +
+                    "The Liberty installation may be corrupt.")
+        }
+        Properties installProps = new Properties()
+                propsFile.withInputStream { installProps.load(it) }
+        if (!installProps.containsKey(COM_IBM_WEBSPHERE_PRODUCTID_KEY) ||
+                !installProps.containsKey(COM_IBM_WEBSPHERE_PRODUCTVERSION_KEY)) {
+            throw new GradleException("Unable to determine the Liberty installation product information. " +
+                    "The Liberty installation may be corrupt.")
+        }
+        return installProps
+    }
+
 }

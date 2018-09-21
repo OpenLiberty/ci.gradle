@@ -16,9 +16,11 @@
 package net.wasdev.wlp.gradle.plugins.tasks
 
 import net.wasdev.wlp.common.plugins.util.PluginExecutionException
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.TaskAction
+import groovy.util.FileNameFinder
 
 class InstallSpringBootApp extends InstallAppsTask {
 
@@ -68,7 +70,7 @@ class InstallSpringBootApp extends InstallAppsTask {
             installFileList(dropinsLists[1], 'dropins')
         }
 
-        installSpringBootFeature()
+        installSpringBootFeatureIfNeeded()
         invokeThinOperation()
     }
 
@@ -84,19 +86,32 @@ class InstallSpringBootApp extends InstallAppsTask {
         params.put('targetLibCachePath', getTargetLibCachePath())
         params.put('targetThinAppPath', getTargetThinAppPath())
         project.ant.invokeUtil(params)
-
     }
 
-    private installSpringBootFeature() {
-        Map<String, String> params = buildLibertyMap(project);
+    private isSpringBootUtilAvailable() {
+        new FileNameFinder().getFileNames(new File(getInstallDir(project), "bin").getAbsolutePath(), "springBootUtility*")
+    }
 
-        project.ant.taskdef(name: 'installFeature',
-                classname: 'net.wasdev.wlp.ant.InstallFeatureTask',
-                classpath: project.buildscript.configurations.classpath.asPath)
+    private installSpringBootFeatureIfNeeded() {
+        if (isClosedLiberty() && !isSpringBootUtilAvailable()) {
+            String fileSuffix = isWindows ? ".bat" : ""
+            File installUtil = new File(getInstallDir(project), "bin/installUtility"+fileSuffix)
 
-        params.put('acceptLicense', true)
-        params.put('name', "springBoot-2.0")
-        project.ant.installFeature(params)
+            if (!server.features.acceptLicense) {
+                throw new GradleException("Spring Boot support features must be installed to complete this task. " +
+                        "The 'server.features.acceptLicense' property must be set to true in the build file to " +
+                        "indicate accptance of feature license terms and conditions.")
+            }
+            def installCommand = installUtil.toString() + " install springBoot-1.5 springBoot-2.0 --acceptLicense"
+            def sbuff = new StringBuffer()
+            def proc = installCommand.execute()
+            proc.consumeProcessOutput(sbuff, sbuff)
+            proc.waitFor()
+            logger.info(sbuff.toString())
+            if (proc.exitValue()!=0) {
+                throw new GradleException("Error installing required spring boot support features.")
+            }
+        }
     }
 
     protected void configureSpringBootApp(Project project) {
