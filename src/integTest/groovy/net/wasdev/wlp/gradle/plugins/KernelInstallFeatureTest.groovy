@@ -205,8 +205,22 @@ class KernelInstallFeatureTest extends AbstractIntegrationTest{
         assertNotInstalled("distributedMap-1.0")
     }
     
+    @Test
+    /**
+     * Install OL features without accept license
+     */
+    public void testInstallOLFeaturesNoAcceptLicense() {
+        copyBuildFiles(new File(resourceDir, "install_ol_features_no_accept_license.gradle"), buildDir)
+        runTasks(buildDir, 'installFeature')
+        assertInstalled("appSecurityClient-1.0")
+        assertInstalled("beanValidation-2.0")
+        assertNotInstalled("couchdb-1.0")
+        assertNotInstalled("distributedMap-1.0")
+        assertNotInstalled("servlet-3.0")
+    }
+        
     private copyServer(String serverFile) {
-        copyFile(new File(resourceDir, serverFile), new File(buildDir, "build/wlp/usr/servers/dummy/server.xml"))
+        copyFile(new File(resourceDir, serverFile), new File(buildDir, "build/wlp/usr/servers/defaultServer/server.xml"))
     }
 
     private void assertInstallStatus(String feature, boolean expectation) throws Exception {
@@ -216,11 +230,11 @@ class KernelInstallFeatureTest extends AbstractIntegrationTest{
         assertEquals("Feature " + feature + " was expected to be " + expectationString + " according to productInfo featureInfo: " + featureInfo, expectation, featureInfo.contains(feature));
     }
 
-    private void assertInstalled(String feature) throws Exception {
+    protected void assertInstalled(String feature) throws Exception {
         assertInstallStatus(feature, true);
     }
     
-    private void assertNotInstalled(String feature) throws Exception {
+    protected void assertNotInstalled(String feature) throws Exception {
         assertInstallStatus(feature, false);
     }
     
@@ -230,7 +244,7 @@ class KernelInstallFeatureTest extends AbstractIntegrationTest{
 
         features = featuresDir.listFiles(new FilenameFilter() {
                     public boolean accept(File dir, String name) {
-                        return name.toLowerCase().endsWith("." + feature.toLowerCase() + ".mf");
+                        return name.toLowerCase().equals("com.ibm.websphere.appserver." + feature.toLowerCase() + ".mf");
                     }
                 });
 

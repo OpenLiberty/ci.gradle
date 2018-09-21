@@ -8,6 +8,12 @@ env:
     - RUNTIME=wlp RUNTIME_VERSION=18.0.0.2
     - RUNTIME=ol RUNTIME_VERSION=18.0.0.1
     - RUNTIME=ol RUNTIME_VERSION=18.0.0.2
+before_install:
+    - echo 'Installing ci.common lib ....'
+    - git clone https://github.com/wasdev/ci.common.git ./ci.common
+    - cd ./ci.common
+    - mvn clean install
+    - cd ..
 script:
   - export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs='-XX:MaxPermSize=1024m -XX:+CMSClassUnloadingEnabled -XX:+HeapDumpOnOutOfMemoryError -Xmx2048m'"
   - travis_wait ./gradlew install integrationTest -Druntime=$RUNTIME -DruntimeVersion=$RUNTIME_VERSION --stacktrace --info --no-daemon

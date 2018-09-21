@@ -1,31 +1,24 @@
+apply plugin: 'liberty'
+
 buildscript {
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        maven {
+    repositories{
+      mavenLocal()
+      mavenCentral()
+      maven {
             name = 'Sonatype Nexus Snapshots'
             url = 'https://oss.sonatype.org/content/repositories/snapshots/'
-        }
+      }
     }
     dependencies {
         classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
     }
 }
 
-apply plugin: 'liberty'
-
 repositories {
-    mavenCentral()
+      mavenLocal()
+      mavenCentral()
 }
 
 dependencies {
-    libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: '18.0.0.2'
-}
-
-liberty {
-    server{
-        features {
-            acceptLicense = true
-        }
-    }
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-kernel', version: '18.0.0.2'
 }

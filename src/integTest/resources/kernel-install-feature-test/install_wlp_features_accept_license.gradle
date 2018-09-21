@@ -19,13 +19,14 @@ repositories {
 }
 
 dependencies {
-    libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: '18.0.0.2'
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-kernel', version: '18.0.0.2'
+    libertyFeature 'io.openliberty.features:appSecurityClient-1.0:18.0.0.2'
+    libertyFeature 'com.ibm.websphere.appserver.features:servlet-3.0:18.0.0.2'
 }
 
 liberty {
     server{
         features {
-            name = ['couchdb-1.0', 'distributedMap-1.0']
             acceptLicense = true
         }
     }
