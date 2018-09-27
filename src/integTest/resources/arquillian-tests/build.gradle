@@ -75,8 +75,8 @@ dependencies {
     testCompile ('org.jboss.shrinkwrap:shrinkwrap-api')
     testCompile files("${System.properties['java.home']}/../lib/tools.jar")
 
-    arqManaged "io.openliberty.arquillian:arquillian-liberty-managed:1.0.2"
-    arqRemote "io.openliberty.arquillian:arquillian-liberty-remote:1.0.2"
+    arqManaged "io.openliberty.arquillian:arquillian-liberty-managed:1.0.3"
+    arqRemote "io.openliberty.arquillian:arquillian-liberty-remote:1.0.3"
     
     libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
 }
