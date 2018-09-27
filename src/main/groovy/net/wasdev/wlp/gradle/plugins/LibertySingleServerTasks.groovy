@@ -79,6 +79,9 @@ class LibertySingleServerTasks extends LibertyTasks {
         }
 
         project.installApps {
+            if (project.plugins.hasPlugin("org.springframework.boot")) {
+                dependsOn 'bootJar'
+            }
             dependsOn project.tasks.withType(War), 'libertyCreate'
         }
 

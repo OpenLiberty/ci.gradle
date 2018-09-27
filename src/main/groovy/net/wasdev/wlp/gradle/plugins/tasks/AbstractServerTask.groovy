@@ -310,6 +310,8 @@ abstract class AbstractServerTask extends AbstractTask {
                 server.apps = [project.war]
             } else if (project.plugins.hasPlugin('ear')) {
                 server.apps = [project.ear]
+            } else if (project.plugins.hasPlugin('org.springframework.boot')) {
+                server.apps = [project.bootJar]
             }
         }
     }
@@ -511,8 +513,11 @@ abstract class AbstractServerTask extends AbstractTask {
       else if (project.plugins.hasPlugin("ear") || !project.tasks.withType(Ear).isEmpty()) {
           return "ear"
       }
+      else if (project.plugins.hasPlugin("org.springframework.boot") ) {
+          return "springboot"
+      }
       else {
-          throw new GradleException("Archive path not found. Supported formats are jar, war, and ear.")
+          throw new GradleException("Archive path not found. Supported formats are jar, war, ear, and springboot jar.")
       }
     }
 

@@ -96,21 +96,58 @@ class InstallAppsTask extends AbstractServerTask {
         }
     }
 
-    private void installProjectArchive(Task task, String appsDir){
-      Files.copy(task.archivePath.toPath(), new File(getServerDir(project), "/" + appsDir + "/" + getArchiveName(task)).toPath(), StandardCopyOption.REPLACE_EXISTING)
+    private void installProjectArchive(Task task, String appsDir) {
+        if (task.name == 'bootJar') {
+            invokeThinOperation()
+        } else {
+          Files.copy(task.archivePath.toPath(), new File(getServerDir(project), "/" + appsDir + "/" + getArchiveName(task)).toPath(), StandardCopyOption.REPLACE_EXISTING)
+        }
       validateAppConfig(getArchiveName(task), task.baseName, appsDir)
     }
 
     protected void installProject(Task task, String appsDir) throws Exception {
-      if(isSupportedType()) {
-        if(server.looseApplication){
-          installLooseApplication(task, appsDir)
+        if(isSupportedType()) {
+            if(server.looseApplication){
+                installLooseApplication(task, appsDir)
+            } else {
+                installProjectArchive(task, appsDir)
+            }
         } else {
-          installProjectArchive(task, appsDir)
+            throw new GradleException(MessageFormat.format("Application {0} is not supported", task.archiveName))
         }
-      } else {
-        throw new GradleException(MessageFormat.format("Application {0} is not supported", task.archiveName))
-      }
+    }
+
+    String getArchiveOutputPath() {
+        /*This is for springboot plugin >= 2.0.
+        project.plugins.hasPlugin(org.springboot)
+          TODO add logic for < 2.0.0  */
+
+        return project.bootJar.archivePath.getAbsolutePath()
+    }
+
+    String getParentLibCachePath() {
+
+    }
+
+    String getTargetLibCachePath() {
+        new File(getInstallDir(project), "usr/shared/resources/lib.index.cache").absolutePath
+    }
+
+    String getTargetThinAppPath() {
+        new File(createApplicationFolder("dropins/spring").absolutePath, project.bootJar.getArchiveName())
+    }
+
+    private invokeThinOperation() {
+        Map<String, String> params = buildLibertyMap(project);
+
+        project.ant.taskdef(name: 'invokeUtil',
+                classname: 'net.wasdev.wlp.ant.SpringBootUtilTask',
+                classpath: project.buildscript.configurations.classpath.asPath)
+
+        params.put('sourceAppPath', getArchiveOutputPath())
+        params.put('targetLibCachePath', getTargetLibCachePath())
+        params.put('targetThinAppPath', getTargetThinAppPath())
+        project.ant.invokeUtil(params)
     }
 
     private void installLooseApplication(Task task, String appsDir) throws Exception {
@@ -279,6 +316,7 @@ class InstallAppsTask extends AbstractServerTask {
       switch (getPackagingType()) {
         case "ear":
         case "war":
+        case "springboot":
             return true;
         default:
             return false;
