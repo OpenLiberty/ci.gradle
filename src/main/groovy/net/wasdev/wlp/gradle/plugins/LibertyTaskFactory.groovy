@@ -61,7 +61,6 @@ class LibertyTaskFactory {
         project.tasks.create('uninstallFeature', UninstallFeatureTask)
         project.tasks.create('cleanDirs', CleanTask)
         project.tasks.create('installApps', InstallAppsTask)
-        project.tasks.create('installSpringBootApp', InstallSpringBootApp)
         project.tasks.create('configureArquillian', ConfigureArquillianTask)
     }
 }

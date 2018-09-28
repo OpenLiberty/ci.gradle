@@ -59,17 +59,31 @@ class InstallAppsTask extends AbstractServerTask {
         })
     }
 
+    boolean containsTask(List<Task> taskList, String name) {
+        return taskList.find { it.getName().equals(name) }
+    }
+
     @TaskAction
     void installApps() {
+        boolean hasSpringBootApp
         configureApps(project)
-
         if (server.apps != null && !server.apps.isEmpty()) {
+            hasSpringBootApp = server.apps.find { it.getName().equals('bootJar') }
             createApplicationFolder('apps')
             Tuple appsLists = splitAppList(server.apps)
             installMultipleApps(appsLists[0], 'apps')
             installFileList(appsLists[1], 'apps')
         }
         if (server.dropins != null && !server.dropins.isEmpty()) {
+            if (server.dropins.find { it.getName().equals('bootJar') }) {
+                if (hasSpringBootApp) {
+                    throw new GradleException("Spring boot applications were configured for both the dropins and app folder. Only one " +
+                            "spring boot application may be configured per server.")
+                }
+                else {
+                    hasSpringBootApp = true
+                }
+            }
             createApplicationFolder('dropins')
             Tuple dropinsLists = splitAppList(server.dropins)
             installMultipleApps(dropinsLists[0], 'dropins')
