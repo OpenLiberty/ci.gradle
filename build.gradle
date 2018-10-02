@@ -79,7 +79,14 @@ task integrationTest(type: Test) {
     if (!gradle.gradleVersion.startsWith('4.')) {
         testClassesDir = sourceSets.integrationTest.output.getDirs().getSingleFile()
     } else {
-        testClassesDirs = fileTree(dir: sourceSets.integrationTest.output.getDirs().getSingleFile())
+        Map<String, ?> args = [dir: sourceSets.integrationTest.output.getDirs().getSingleFile()]
+        if (project.hasProperty("test.excludes.pattern")) {
+            args.put('excludes', [project.property("test.exclude.pattern")])
+        }
+        if (project.hasProperty("test.includes.pattern")) {
+            args.put('includes', [project.property("test.includes.pattern")])
+        }
+        testClassesDirs = fileTree(args)
     }
     classpath = sourceSets.integrationTest.runtimeClasspath
 

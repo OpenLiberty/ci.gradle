@@ -112,6 +112,7 @@ class InstallAppsTask extends AbstractServerTask {
 
     private void installProjectArchive(Task task, String appsDir) {
         if (task.name == 'bootJar') {
+            installSpringBootFeatureIfNeeded()
             invokeThinOperation()
         } else {
           Files.copy(task.archivePath.toPath(), new File(getServerDir(project), "/" + appsDir + "/" + getArchiveName(task)).toPath(), StandardCopyOption.REPLACE_EXISTING)
@@ -162,6 +163,32 @@ class InstallAppsTask extends AbstractServerTask {
         params.put('targetLibCachePath', getTargetLibCachePath())
         params.put('targetThinAppPath', getTargetThinAppPath())
         project.ant.invokeUtil(params)
+    }
+
+    private isSpringBootUtilAvailable() {
+        new FileNameFinder().getFileNames(new File(getInstallDir(project), "bin").getAbsolutePath(), "springBootUtility*")
+    }
+
+    private installSpringBootFeatureIfNeeded() {
+        if (isClosedLiberty() && !isSpringBootUtilAvailable()) {
+            String fileSuffix = isWindows ? ".bat" : ""
+            File installUtil = new File(getInstallDir(project), "bin/installUtility"+fileSuffix)
+
+            if (!server.features.acceptLicense) {
+                throw new GradleException("Spring Boot support features must be installed to complete this task. " +
+                        "The 'server.features.acceptLicense' property must be set to true in the build file to " +
+                        "indicate accptance of feature license terms and conditions.")
+            }
+            def installCommand = installUtil.toString() + " install springBoot-1.5 springBoot-2.0 --acceptLicense"
+            def sbuff = new StringBuffer()
+            def proc = installCommand.execute()
+            proc.consumeProcessOutput(sbuff, sbuff)
+            proc.waitFor()
+            logger.info(sbuff.toString())
+            if (proc.exitValue()!=0) {
+                throw new GradleException("Error installing required spring boot support features.")
+            }
+        }
     }
 
     private void installLooseApplication(Task task, String appsDir) throws Exception {
