@@ -34,7 +34,6 @@ liberty {
     install.useOpenLiberty = false
     looseApplication = false
         features {
-            name = [ 'springBoot-2.0' ]
             acceptLicense = true
         }
     }
