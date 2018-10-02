@@ -113,7 +113,7 @@ class InstallAppsTask extends AbstractServerTask {
     private void installProjectArchive(Task task, String appsDir) {
         if (task.name == 'bootJar') {
             installSpringBootFeatureIfNeeded()
-            invokeThinOperation()
+            invokeThinOperation(appsDir)
         } else {
           Files.copy(task.archivePath.toPath(), new File(getServerDir(project), "/" + appsDir + "/" + getArchiveName(task)).toPath(), StandardCopyOption.REPLACE_EXISTING)
         }
@@ -148,11 +148,18 @@ class InstallAppsTask extends AbstractServerTask {
         new File(getInstallDir(project), "usr/shared/resources/lib.index.cache").absolutePath
     }
 
-    String getTargetThinAppPath() {
-        new File(createApplicationFolder("dropins/spring").absolutePath, project.bootJar.getArchiveName())
+    String getTargetThinAppPath(String appsDir) {
+        String appsFolder
+        if (appsDir=="dropins") {
+            appsFolder = "dropins/spring"
+        }
+        else {
+            appsFolder = "apps"
+        }
+        new File(createApplicationFolder(appsFolder).absolutePath, project.bootJar.getArchiveName())
     }
 
-    private invokeThinOperation() {
+    private invokeThinOperation(String appsDir) {
         Map<String, String> params = buildLibertyMap(project);
 
         project.ant.taskdef(name: 'invokeUtil',
@@ -161,7 +168,7 @@ class InstallAppsTask extends AbstractServerTask {
 
         params.put('sourceAppPath', getArchiveOutputPath())
         params.put('targetLibCachePath', getTargetLibCachePath())
-        params.put('targetThinAppPath', getTargetThinAppPath())
+        params.put('targetThinAppPath', getTargetThinAppPath(appsDir))
         project.ant.invokeUtil(params)
     }
 
