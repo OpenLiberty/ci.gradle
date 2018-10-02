@@ -1,6 +1,7 @@
 package net.wasdev.wlp.gradle.plugins
 
 import org.junit.AfterClass
+import org.junit.Assert
 import org.junit.BeforeClass
 import org.junit.Test
 
@@ -23,7 +24,9 @@ public class TestSpringBootApplication extends AbstractIntegrationTest{
     @Test
     public void testAppStarts() {
         try {
-            runTasks(buildDir, 'installApps')
+            runTasks(buildDir, 'installApps', 'libertyStart')
+            String webPage = new URL("http://localhost:9080").getText()
+            Assert.assertEquals("Did not get expected http response.", webPage, "Hello!")
         } catch (Exception e) {
             throw new AssertionError ("Fail on task installApps. " + e)
         }
