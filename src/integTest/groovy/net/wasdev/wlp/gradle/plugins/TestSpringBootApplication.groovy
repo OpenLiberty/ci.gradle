@@ -1,34 +1,72 @@
 package net.wasdev.wlp.gradle.plugins
 
-import org.junit.AfterClass
-import org.junit.Assert
-import org.junit.BeforeClass
-import org.junit.Test
+import groovy.xml.QName
+import org.junit.*
+import org.junit.rules.TestName
 
 public class TestSpringBootApplication extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/integrationTest/sample.springboot")
-    static File buildDir = new File(integTestDir, "/test-spring-boot-application")
     static String buildFilename = "springboot_archive.gradle"
 
-    @BeforeClass
-    public static void setup() {
+    File buildDir;
+
+    @Rule
+    public TestName testName = new TestName();
+
+    @Before
+    public void setup() {
+        buildDir = new File(integTestDir, "/" + testName.getMethodName())
         createDir(buildDir)
-        createTestProject(buildDir, resourceDir, buildFilename)
+        createTestProject(buildDir, resourceDir, testName.getMethodName() + '.gradle')
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
-        runTasks(buildDir, 'libertyStop')
+    @After
+    public void tearDown() throws Exception {
+        runTasks(buildDir,'libertyStop')
+    }
+
+    void updateServerXmlApplication(String relServerXmlPath, HashMap<String,String> applicationMap) {
+        XmlParser parser = new XmlParser()
+        String serverXml = new File(buildDir, relServerXmlPath).getAbsolutePath()
+        Node rootNode = parser.parse(serverXml)
+        parser.createNode(rootNode, new QName("application"), applicationMap)
+        XmlNodePrinter nodePrinter = new XmlNodePrinter(new PrintWriter(new FileWriter(serverXml)))
+        nodePrinter.preserveWhitespace = true
+        nodePrinter.setNamespaceAware(false)
+        nodePrinter.print(rootNode)
     }
 
     @Test
-    public void testAppStarts() {
+    public void test_spring_boot_apps() {
         try {
+            updateServerXmlApplication("src/main/liberty/config/server.xml",
+                    [name: "springBootHello",  location:"${testName.getMethodName()}-1.0-SNAPSHOT.jar",  type:"spring"])
             runTasks(buildDir, 'installApps', 'libertyStart')
             String webPage = new URL("http://localhost:9080").getText()
-            Assert.assertEquals("Did not get expected http response.", webPage, "Hello!")
+            Assert.assertEquals("Did not get expected http response.","Hello!", webPage)
+            Assert.assertTrue('defaultServer/dropins has app deployed',
+                    new File(buildDir, 'build/wlp/usr/servers/defaultServer/dropins').list().size() == 0)
+            Assert.assertTrue('no app in apps folder',
+                    new File(buildDir, "build/wlp/usr/servers/defaultServer/apps/${testName.getMethodName()}-1.0-SNAPSHOT.jar").exists() )
         } catch (Exception e) {
             throw new AssertionError ("Fail on task installApps. " + e)
         }
     }
+
+    @Test
+    public void test_spring_boot_dropins() {
+        try {
+            runTasks(buildDir, 'installApps', 'libertyStart')
+            String webPage = new URL("http://localhost:9080").getText()
+            Assert.assertEquals("Did not get expected http response.","Hello!", webPage)
+            Assert.assertTrue('defaultServer/dropins/spring has no app',
+                    new File(buildDir, "build/wlp/usr/servers/defaultServer/dropins/spring/${testName.getMethodName()}-1.0-SNAPSHOT.jar").exists())
+            Assert.assertTrue('apps folder should be empty',
+                    new File(buildDir, "build/wlp/usr/servers/defaultServer/apps").list().size() == 0 )
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task installApps. " + e)
+        }
+    }
+
+
 }
