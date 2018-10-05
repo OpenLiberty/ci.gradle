@@ -15,37 +15,24 @@
  */
 package net.wasdev.wlp.gradle.plugins.tasks
 
-import org.gradle.api.tasks.TaskAction
-import java.io.File
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
+import net.wasdev.wlp.gradle.plugins.utils.*
+import org.apache.commons.io.FilenameUtils
 import org.gradle.api.GradleException
-import groovy.util.XmlParser
-import groovy.lang.Tuple
-import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ConfigurationContainer
+import org.gradle.api.Task
 import org.gradle.api.artifacts.Dependency
-import org.gradle.api.artifacts.PublishArtifact
-import org.gradle.plugins.ear.descriptor.EarModule
-import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.ProjectDependency
-import org.gradle.api.artifacts.DependencySet
-import org.gradle.api.logging.LogLevel
-import org.apache.commons.io.FilenameUtils
 import org.gradle.api.file.FileCollection
-import org.w3c.dom.Element;
-import java.util.regex.Pattern
-import java.util.regex.Matcher
-import java.text.MessageFormat
-import org.apache.commons.io.FilenameUtils
+import org.gradle.api.logging.LogLevel
+import org.gradle.api.tasks.TaskAction
+import org.w3c.dom.Element
 
-import org.gradle.api.Task
-import org.gradle.api.tasks.bundling.War
-import org.gradle.plugins.ear.Ear
-import net.wasdev.wlp.gradle.plugins.utils.*
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+import java.text.MessageFormat
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 class InstallAppsTask extends AbstractServerTask {
 
@@ -65,23 +52,24 @@ class InstallAppsTask extends AbstractServerTask {
 
     @TaskAction
     void installApps() {
-        boolean hasSpringBootApp
+        boolean hasSpringBootAppConfigured
+
         configureApps(project)
         if (server.apps != null && !server.apps.isEmpty()) {
-            hasSpringBootApp = server.apps.find { it.getName().equals('bootJar') }
+            hasSpringBootAppConfigured = server.apps.find { it.name.equals springBootBuildTask ?. name  }
             createApplicationFolder('apps')
             Tuple appsLists = splitAppList(server.apps)
             installMultipleApps(appsLists[0], 'apps')
             installFileList(appsLists[1], 'apps')
         }
         if (server.dropins != null && !server.dropins.isEmpty()) {
-            if (server.dropins.find { it.getName().equals('bootJar') }) {
-                if (hasSpringBootApp) {
+            if (server.dropins.find { it.name.equals springBootBuildTask ?. name  }) {
+                if (hasSpringBootAppConfigured) {
                     throw new GradleException("Spring boot applications were configured for both the dropins and app folder. Only one " +
                             "spring boot application may be configured per server.")
                 }
                 else {
-                    hasSpringBootApp = true
+                    hasSpringBootAppConfigured = true
                 }
             }
             createApplicationFolder('dropins')
@@ -111,13 +99,13 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
     private void installProjectArchive(Task task, String appsDir) {
-        if (task.name == 'bootJar') {
+        if (task.name == 'bootJar' || task.name == 'bootRepackage') {
             installSpringBootFeatureIfNeeded()
             invokeThinOperation(appsDir)
         } else {
           Files.copy(task.archivePath.toPath(), new File(getServerDir(project), "/" + appsDir + "/" + getArchiveName(task)).toPath(), StandardCopyOption.REPLACE_EXISTING)
         }
-      validateAppConfig(getArchiveName(task), task.baseName, appsDir)
+      validateAppConfig(getArchiveName(task), getBaseName(task), appsDir)
     }
 
     protected void installProject(Task task, String appsDir) throws Exception {
@@ -132,17 +120,17 @@ class InstallAppsTask extends AbstractServerTask {
         }
     }
 
+
     String getArchiveOutputPath() {
-        /*This is for springboot plugin >= 2.0.
-        project.plugins.hasPlugin(org.springboot)
-          TODO add logic for < 2.0.0  */
-
-        return project.bootJar.archivePath.getAbsolutePath()
+        if (springBootVersion.startsWith('2')) {
+            return project.bootJar.archivePath.getAbsolutePath()
+        }
+        else {
+            project.jar.archivePath.getAbsolutePath()
+            //TODO check for bootRepackageW.ithJarTask - return project.bootRepackage.withJarTask.archivePath.getAbsolutePath()
+        }
     }
 
-    String getParentLibCachePath() {
-
-    }
 
     String getTargetLibCachePath() {
         new File(getInstallDir(project), "usr/shared/resources/lib.index.cache").absolutePath
@@ -156,7 +144,8 @@ class InstallAppsTask extends AbstractServerTask {
         else {
             appsFolder = "apps"
         }
-        new File(createApplicationFolder(appsFolder).absolutePath, project.bootJar.getArchiveName())
+        String archiveName = springBootVersion.startsWith("2") ? springBootBuildTask.getArchiveName() : project.jar.getArchiveName()
+        new File(createApplicationFolder(appsFolder).absolutePath, archiveName)
     }
 
     private invokeThinOperation(String appsDir) {

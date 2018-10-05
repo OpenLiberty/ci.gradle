@@ -15,27 +15,19 @@
  */
 package net.wasdev.wlp.gradle.plugins.tasks
 
-import groovy.io.FileType
-import jdk.internal.util.xml.PropertiesDefaultHandler
-import net.wasdev.wlp.gradle.plugins.extensions.DeployExtension
-import net.wasdev.wlp.gradle.plugins.extensions.LibertyExtension
+
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
-import static groovy.io.FileType.*
-
-import java.lang.reflect.Field
-import java.nio.file.FileVisitResult
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
-import java.text.MessageFormat
 
 abstract class AbstractTask extends DefaultTask {
 
     //params that get built with installLiberty
     def params
     protected boolean isWindows = System.properties['os.name'].toLowerCase().indexOf("windows") >= 0
+    protected String springBootVersion =  findSpringBootVersion(project)
+
     protected getInstallDir = { Project project ->
         if (project.liberty.installDir == null) {
             if (project.liberty.install.baseDir == null) {
@@ -69,19 +61,19 @@ abstract class AbstractTask extends DefaultTask {
      */
     public static String findSpringBootVersion(Project project) {
         String version = null
-
-        try {
-            for (Dependency dep : project.buildscript.configurations.classpath.getAllDependencies().toArray()) {
-                if ("org.springframework.boot".equals(dep.getGroup()) && "spring-boot-gradle-plugin".equals(dep.getName())) {
-                    version = dep.getVersion()
-                    break
+        if (project.plugins.hasPlugin("org.springframework.boot")) {
+            try {
+                for (Dependency dep : project.buildscript.configurations.classpath.getAllDependencies().toArray()) {
+                    if ("org.springframework.boot".equals(dep.getGroup()) && "spring-boot-gradle-plugin".equals(dep.getName())) {
+                        version = dep.getVersion()
+                        break
+                    }
                 }
+            } catch (MissingPropertyException e) {
+                project.getLogger().warn('No buildscript configuration found.')
+                throw new GradleException("Unable to determe version of spring boot gradle plugin.")
             }
-        } catch (MissingPropertyException e) {
-            project.getLogger().warn('No buildscript configuration found.')
-            return version
         }
-
         return version
     }
 

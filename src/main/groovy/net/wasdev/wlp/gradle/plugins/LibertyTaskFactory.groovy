@@ -15,7 +15,7 @@
  */
 package net.wasdev.wlp.gradle.plugins
 
-import net.wasdev.wlp.gradle.plugins.tasks.InstallSpringBootApp
+
 import org.gradle.api.Project
 
 import net.wasdev.wlp.gradle.plugins.tasks.StartTask
