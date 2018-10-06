@@ -215,7 +215,7 @@ class InstallAppsTask extends AbstractServerTask {
             break
         default:
             logger.info(MessageFormat.format(("Loose application configuration is not supported for packaging type {0}. The project artifact will be installed as an archive file."),
-                    project.getPackaging()))
+                    project.getPackagingType()))
             installProjectArchive(task, appsDir)
             break
         }
