@@ -16,7 +16,6 @@
 package net.wasdev.wlp.gradle.plugins
 
 import groovy.xml.QName
-import net.wasdev.wlp.gradle.plugins.AbstractIntegrationTest
 import org.junit.*
 import org.junit.rules.TestName
 
@@ -41,7 +40,7 @@ public class TestSpringBootApplication extends AbstractIntegrationTest{
         runTasks(buildDir,'libertyStop')
     }
 
-    void updateServerXmlApplication(String relServerXmlPath, HashMap<String,String> applicationMap) {
+    void addApplToServerXml(String relServerXmlPath, HashMap < String, String > applicationMap) {
         XmlParser parser = new XmlParser()
         String serverXml = new File(buildDir, relServerXmlPath).getAbsolutePath()
         Node rootNode = parser.parse(serverXml)
@@ -52,12 +51,26 @@ public class TestSpringBootApplication extends AbstractIntegrationTest{
         nodePrinter.print(rootNode)
     }
 
+    void addFeatureToServerXml(String relServerXmlPath, String featureName) {
+        XmlParser parser = new XmlParser()
+        String serverXml = new File(buildDir, relServerXmlPath).getAbsolutePath()
+        Node rootNode = parser.parse(serverXml)
+        rootNode.featureManager[0].appendNode(new QName("feature"), [:], featureName)
+        XmlNodePrinter nodePrinter = new XmlNodePrinter(new PrintWriter(new FileWriter(serverXml)))
+        nodePrinter.preserveWhitespace = true
+        nodePrinter.setNamespaceAware(false)
+        nodePrinter.print(rootNode)
+    }
+
+
     @Test
     public void test_spring_boot_apps() {
         try {
-            updateServerXmlApplication("src/main/liberty/config/server.xml",
+            addApplToServerXml("src/main/liberty/config/server.xml",
                     [name: "springBootHello",  location:"${testName.getMethodName()}-1.0-SNAPSHOT.jar",  type:"spring"])
+            addFeatureToServerXml("src/main/liberty/config/server.xml", "springBoot-2.0")
             runTasks(buildDir, 'installApps', 'libertyStart')
+
             String webPage = new URL("http://localhost:9080").getText()
             Assert.assertEquals("Did not get expected http response.","Hello!", webPage)
             Assert.assertTrue('defaultServer/dropins has app deployed',
@@ -72,6 +85,41 @@ public class TestSpringBootApplication extends AbstractIntegrationTest{
     @Test
     public void test_spring_boot_dropins() {
         try {
+            addFeatureToServerXml("src/main/liberty/config/server.xml", "springBoot-2.0")
+            runTasks(buildDir, 'installApps', 'libertyStart')
+            String webPage = new URL("http://localhost:9080").getText()
+            Assert.assertEquals("Did not get expected http response.","Hello!", webPage)
+            Assert.assertTrue('defaultServer/dropins/spring has no app',
+                    new File(buildDir, "build/wlp/usr/servers/defaultServer/dropins/spring/${testName.getMethodName()}-1.0-SNAPSHOT.jar").exists())
+            Assert.assertTrue('apps folder should be empty',
+                    new File(buildDir, "build/wlp/usr/servers/defaultServer/apps").list().size() == 0 )
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task installApps. " + e)
+        }
+    }
+
+    @Test
+    public void test_spring_boot_apps_15() {
+        try {
+            addApplToServerXml("src/main/liberty/config/server.xml",
+                    [name: "springBootHello",  location:"${testName.getMethodName()}-1.0-SNAPSHOT.jar",  type:"spring"])
+            addFeatureToServerXml("src/main/liberty/config/server.xml", "springBoot-1.5")
+            runTasks(buildDir, 'installApps', 'libertyStart')
+            String webPage = new URL("http://localhost:9080").getText()
+            Assert.assertEquals("Did not get expected http response.","Hello!", webPage)
+            Assert.assertTrue('defaultServer/dropins has app deployed',
+                    new File(buildDir, 'build/wlp/usr/servers/defaultServer/dropins').list().size() == 0)
+            Assert.assertTrue('no app in apps folder',
+                    new File(buildDir, "build/wlp/usr/servers/defaultServer/apps/${testName.getMethodName()}-1.0-SNAPSHOT.jar").exists() )
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task installApps. " + e)
+        }
+    }
+
+    @Test
+    public void test_spring_boot_dropins_15() {
+        try {
+            addFeatureToServerXml("src/main/liberty/config/server.xml", "springBoot-1.5")
             runTasks(buildDir, 'installApps', 'libertyStart')
             String webPage = new URL("http://localhost:9080").getText()
             Assert.assertEquals("Did not get expected http response.","Hello!", webPage)
