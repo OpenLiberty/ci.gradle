@@ -7,8 +7,8 @@ buildscript {
 		mavenCentral()
 	}
 	dependencies {
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-		classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.6-SNAPSHOT'
+		classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+		classpath "net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:${lgpVersion}"
 	}
 }
 

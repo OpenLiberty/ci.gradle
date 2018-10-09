@@ -26,7 +26,7 @@ abstract class AbstractTask extends DefaultTask {
     //params that get built with installLiberty
     def params
     protected boolean isWindows = System.properties['os.name'].toLowerCase().indexOf("windows") >= 0
-    protected String springBootVersion =  findSpringBootVersion(project)
+    protected String springBootVersion
 
     protected getInstallDir = { Project project ->
         if (project.liberty.installDir == null) {

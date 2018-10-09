@@ -78,13 +78,12 @@ class LibertySingleServerTasks extends LibertyTasks {
         }
 
         project.installApps {
-            if (AbstractServerTask.findSpringBootVersion(project) == null) {
-            }
-            else if (springBootVersion?.startsWith('2')) {
-                dependsOn 'bootJar'
-            }
-            else { //version 1.5.x
-                dependsOn 'bootRepackage'
+            if (AbstractServerTask.findSpringBootVersion(project) != null) {
+                if (springBootVersion?.startsWith('2')) {
+                    dependsOn 'bootJar'
+                } else { //version 1.5.x
+                    dependsOn 'bootRepackage'
+                }
             }
             dependsOn project.tasks.withType(War), 'libertyCreate'
         }
