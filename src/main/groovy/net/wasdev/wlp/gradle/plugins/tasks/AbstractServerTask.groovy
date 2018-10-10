@@ -273,16 +273,6 @@ abstract class AbstractServerTask extends AbstractTask {
         configureMultipleAppsConfigDropins(serverNode)
     }
 
-    protected void validateAppConfig(String fileName, String artifactId, String dir) throws Exception {
-        String appsDir = dir
-        if (appsDir.equalsIgnoreCase('apps') && !isAppConfiguredInSourceServerXml(fileName)) {
-            applicationXml.createApplicationElement(fileName, artifactId)
-        }
-        else if (appsDir.equalsIgnoreCase('dropins') && isAppConfiguredInSourceServerXml(fileName)) {
-            throw new GradleException("The application, " + artifactId + ", is configured in the server.xml and the plug-in is configured to install the application in the dropins folder. A configured application must be installed to the apps folder.")
-        }
-    }
-
     protected boolean isAppConfiguredInSourceServerXml(String fileName) {
         boolean configured = false;
         File serverConfigFile = new File(getServerDir(project), 'server.xml')

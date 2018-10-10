@@ -108,9 +108,19 @@ class InstallAppsTask extends AbstractServerTask {
             installSpringBootFeatureIfNeeded()
             invokeThinOperation(appsDir)
         } else {
-          Files.copy(task.archivePath.toPath(), new File(getServerDir(project), "/" + appsDir + "/" + getArchiveName(task)).toPath(), StandardCopyOption.REPLACE_EXISTING)
+            Files.copy(task.archivePath.toPath(), new File(getServerDir(project), "/" + appsDir + "/" + getArchiveName(task)).toPath(), StandardCopyOption.REPLACE_EXISTING)
         }
-      validateAppConfig(getArchiveName(task), getBaseName(task), appsDir)
+        validateAppConfig(getArchiveName(task), getBaseName(task), appsDir)
+    }
+
+    protected void validateAppConfig(String fileName, String artifactId, String dir) throws Exception {
+        String appsDir = dir
+        if (appsDir.equalsIgnoreCase('apps') && !isAppConfiguredInSourceServerXml(fileName)) {
+            applicationXml.createApplicationElement(fileName, artifactId, springBootVersion!=null)
+        }
+        else if (appsDir.equalsIgnoreCase('dropins') && isAppConfiguredInSourceServerXml(fileName)) {
+            throw new GradleException("The application, " + artifactId + ", is configured in the server.xml and the plug-in is configured to install the application in the dropins folder. A configured application must be installed to the apps folder.")
+        }
     }
 
     protected void installProject(Task task, String appsDir) throws Exception {

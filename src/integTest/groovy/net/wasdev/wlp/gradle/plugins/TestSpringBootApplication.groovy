@@ -101,8 +101,10 @@ public class TestSpringBootApplication extends AbstractIntegrationTest{
     @Test
     public void test_spring_boot_apps_15() {
         try {
+            /*
             addApplToServerXml("src/main/liberty/config/server.xml",
                     [name: "springBootHello",  location:"${testName.getMethodName()}-1.0-SNAPSHOT.jar",  type:"spring"])
+            */
             addFeatureToServerXml("src/main/liberty/config/server.xml", "springBoot-1.5")
             runTasks(buildDir, 'installApps', 'libertyStart')
             String webPage = new URL("http://localhost:9080").getText()
