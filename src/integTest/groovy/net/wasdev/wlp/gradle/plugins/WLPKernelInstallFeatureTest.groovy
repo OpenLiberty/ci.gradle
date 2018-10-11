@@ -27,20 +27,6 @@ class WLPKernelInstallFeatureTest extends KernelInstallFeatureTest{
         buildFilename = "build_wlp.gradle"
         super.setup();
     }
-    
-    @Test
-    /**
-     * Install WLP features without accept license
-     */
-    public void testInstallWLPFeaturesNoAcceptLicense() {
-        copyBuildFiles(new File(resourceDir, "install_wlp_features_no_accept_license.gradle"), buildDir)
-        runTasks(buildDir, 'installFeature')
-        assertInstalled("appSecurityClient-1.0")
-        assertNotInstalled("beanValidation-2.0")
-        assertNotInstalled("couchdb-1.0")
-        assertNotInstalled("distributedMap-1.0")
-        assertInstalled("servlet-3.0")
-    }
 
     @Test
     /**
