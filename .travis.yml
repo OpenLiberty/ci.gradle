@@ -3,11 +3,17 @@ language: java
 jdk:
     - oraclejdk8
     - oraclejdk9
+matrix:
+    exclude:
+    - jdk: oraclejdk9
+      env: RUNTIME=ol RUNTIME_VERSION=18.0.0.3
+    - jdk: oraclejdk9
+      env: RUNTIME=wlp RUNTIME_VERSION=18.0.0.3
 env:
-    - RUNTIME=wlp RUNTIME_VERSION=18.0.0.1
     - RUNTIME=wlp RUNTIME_VERSION=18.0.0.2
-    - RUNTIME=ol RUNTIME_VERSION=18.0.0.1
+    - RUNTIME=wlp RUNTIME_VERSION=18.0.0.3
     - RUNTIME=ol RUNTIME_VERSION=18.0.0.2
+    - RUNTIME=ol RUNTIME_VERSION=18.0.0.3
 before_install:
     - echo 'Installing ci.common lib ....'
     - git clone https://github.com/wasdev/ci.common.git ./ci.common
