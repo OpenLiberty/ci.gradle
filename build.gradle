@@ -9,6 +9,7 @@ apply plugin: 'signing'
 apply plugin: "com.gradle.plugin-publish"
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven {
         url 'http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/maven/repository/'
