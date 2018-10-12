@@ -22,6 +22,8 @@ import javax.xml.transform.TransformerException;
 import java.io.File;
 import java.io.IOException;
 
+import net.wasdev.wlp.common.plugins.util.XmlDocument;
+
 public class ApplicationXmlDocument extends XmlDocument {
     
     public static final String APP_XML_FILENAME = "install_apps_configuration_741776.xml";
