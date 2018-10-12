@@ -15,9 +15,8 @@
  */
 package net.wasdev.wlp.gradle.plugins
 
-import net.wasdev.wlp.gradle.plugins.extensions.ServerExtension
-import net.wasdev.wlp.gradle.plugins.tasks.AbstractServerTask
 
+import net.wasdev.wlp.gradle.plugins.tasks.AbstractServerTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.War
 
@@ -79,6 +78,13 @@ class LibertySingleServerTasks extends LibertyTasks {
         }
 
         project.installApps {
+            if (AbstractServerTask.findSpringBootVersion(project) != null) {
+                if (springBootVersion?.startsWith('2')) {
+                    dependsOn 'bootJar'
+                } else { //version 1.5.x
+                    dependsOn 'bootRepackage'
+                }
+            }
             dependsOn project.tasks.withType(War), 'libertyCreate'
         }
 

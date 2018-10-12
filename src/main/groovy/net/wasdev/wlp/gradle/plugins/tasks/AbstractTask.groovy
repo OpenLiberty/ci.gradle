@@ -15,19 +15,20 @@
  */
 package net.wasdev.wlp.gradle.plugins.tasks
 
-import net.wasdev.wlp.gradle.plugins.extensions.DeployExtension
-import net.wasdev.wlp.gradle.plugins.extensions.LibertyExtension
+
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.Project
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
+import org.gradle.api.artifacts.Dependency
 
 abstract class AbstractTask extends DefaultTask {
 
     //params that get built with installLiberty
     def params
+    protected boolean isWindows = System.properties['os.name'].toLowerCase().indexOf("windows") >= 0
+    protected String springBootVersion
 
-    protected File getInstallDir(Project project) {
+    protected getInstallDir = { Project project ->
         if (project.liberty.installDir == null) {
             if (project.liberty.install.baseDir == null) {
                 return new File(project.buildDir, 'wlp')
@@ -55,8 +56,72 @@ abstract class AbstractTask extends DefaultTask {
         }
     }
 
+    /**
+     * Detect spring boot version dependency
+     */
+    public static String findSpringBootVersion(Project project) {
+        String version = null
+        if (project.plugins.hasPlugin("org.springframework.boot")) {
+            try {
+                for (Dependency dep : project.buildscript.configurations.classpath.getAllDependencies().toArray()) {
+                    if ("org.springframework.boot".equals(dep.getGroup()) && "spring-boot-gradle-plugin".equals(dep.getName())) {
+                        version = dep.getVersion()
+                        break
+                    }
+                }
+            } catch (MissingPropertyException e) {
+                project.getLogger().warn('No buildscript configuration found.')
+                throw new GradleException("Unable to determe version of spring boot gradle plugin.")
+            }
+        }
+        return version
+    }
+
     protected boolean isLibertyInstalled(Project project) {
         File installDir = getInstallDir(project)
         return (installDir.exists() && new File(installDir, "lib/ws-launch.jar").exists())
     }
+
+    final String  COM_IBM_WEBSPHERE_PRODUCTID_KEY = "com.ibm.websphere.productId"
+    final String COM_IBM_WEBSPHERE_PRODUCTVERSION_KEY = "com.ibm.websphere.productVersion"
+
+    protected boolean isOpenLiberty() {
+        getLibertyInstallProperties().getProperty(COM_IBM_WEBSPHERE_PRODUCTID_KEY).contains("io.openliberty")
+    }
+
+    protected boolean isClosedLiberty() {
+        getLibertyInstallProperties().getProperty(COM_IBM_WEBSPHERE_PRODUCTID_KEY).contains("com.ibm.websphere.appserver")
+    }
+
+    protected String getInstallVersion() {
+        getLibertyInstallProperties().getProperty(COM_IBM_WEBSPHERE_PRODUCTVERSION_KEY)
+    }
+
+    protected Properties getLibertyInstallProperties() {
+        String COM_IBM_WEBSPHERE_PRODUCTID_KEY = "com.ibm.websphere.productId"
+        String COM_IBM_WEBSPHERE_PRODUCTVERSION_KEY = "com.ibm.websphere.productVersion"
+        File propertiesDir = new File(getInstallDir(project), "lib/versions")
+        File wlpProductInfoProperties = new File(propertiesDir, "WebSphereApplicationServer.properties")
+        File olProductInfoProperties = new File(propertiesDir, "openliberty.properties")
+        File propsFile
+        if (wlpProductInfoProperties.isFile()) {
+            propsFile = wlpProductInfoProperties
+        }
+        else if (olProductInfoProperties.isFile()) {
+            propsFile = olProductInfoProperties
+        }
+        else {
+            throw new GradleException("Unable to determine the Liberty installation product information. " +
+                    "The Liberty installation may be corrupt.")
+        }
+        Properties installProps = new Properties()
+                propsFile.withInputStream { installProps.load(it) }
+        if (!installProps.containsKey(COM_IBM_WEBSPHERE_PRODUCTID_KEY) ||
+                !installProps.containsKey(COM_IBM_WEBSPHERE_PRODUCTVERSION_KEY)) {
+            throw new GradleException("Unable to determine the Liberty installation product information. " +
+                    "The Liberty installation may be corrupt.")
+        }
+        return installProps
+    }
+
 }

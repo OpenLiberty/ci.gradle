@@ -15,12 +15,12 @@
  */
 package net.wasdev.wlp.gradle.plugins.utils;
 
-import java.io.File;
-import java.io.IOException;
+import org.w3c.dom.Element;
+
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
-
-import org.w3c.dom.Element;
+import java.io.File;
+import java.io.IOException;
 
 public class ApplicationXmlDocument extends XmlDocument {
     
@@ -35,23 +35,28 @@ public class ApplicationXmlDocument extends XmlDocument {
         }
     }
     
-    public void createApplicationElement(String appFileName, String artifactId) {
+    public void createApplicationElement(String appFileName, String artifactId, boolean isSpringBoot) {
         File app = new File(appFileName);
         
-        if ("war".equalsIgnoreCase(appFileName.substring(appFileName.lastIndexOf(".")+1))) {
-            createElement("webApplication", app, artifactId);
+        if (isSpringBoot) {
+            createElement("application", app, artifactId, "spring");
+        } else if  ("war".equalsIgnoreCase(appFileName.substring(appFileName.lastIndexOf(".")+1))) {
+            createElement("webApplication", app, artifactId, null);
         } else if ("ear".equalsIgnoreCase(appFileName.substring(appFileName.lastIndexOf(".")+1))) {
-            createElement("enterpriseApplication", app, artifactId);
+            createElement("enterpriseApplication", app, artifactId, null);
         } else {
-            createElement("application", app, artifactId);
+            createElement("application", app, artifactId, null);
         }
     }    
  
-    public void createElement(String element, File appFile, String artifactId) {
+    public void createElement(String element, File appFile, String artifactId, String type) {
         Element child = doc.createElement(element);
         child.setAttribute("id", artifactId);
         child.setAttribute("location", appFile.getName());
         child.setAttribute("name", artifactId);
+        if (type!=null) {
+            child.setAttribute("type", type);
+        }
         doc.getDocumentElement().appendChild(child);
     }
     
