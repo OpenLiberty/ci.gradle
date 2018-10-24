@@ -1,24 +1,38 @@
 sudo: required
-language: java
-os:
-    - windows
-    - linux
-    - osx
-jdk:
-    - oraclejdk8
-    - oraclejdk9
+
 matrix:
-    exclude:
-    - jdk: oraclejdk9
-      env: RUNTIME=ol RUNTIME_VERSION=18.0.0.3
-    - jdk: oraclejdk9
-      env: RUNTIME=wlp RUNTIME_VERSION=18.0.0.3
+    include:
+    - os: linux 
+      language: java
+      jdk:
+      - oraclejdk8
+      - oraclejdk9
+      exclude:
+      - jdk: oraclejdk9
+        env: RUNTIME=ol RUNTIME_VERSION=18.0.0.3
+      - jdk: oraclejdk9
+        env: RUNTIME=wlp RUNTIME_VERSION=18.0.0.3
+    - os: osx
+      language: java
+      jdk:
+        - oraclejdk8
+        - oraclejdk9
+      exclude:
+      - jdk: oraclejdk9
+        env: RUNTIME=ol RUNTIME_VERSION=18.0.0.3
+      - jdk: oraclejdk9
+        env: RUNTIME=wlp RUNTIME_VERSION=18.0.0.3
+    - os: windows
+
 env:
     - RUNTIME=wlp RUNTIME_VERSION=18.0.0.2
     - RUNTIME=wlp RUNTIME_VERSION=18.0.0.3
     - RUNTIME=ol RUNTIME_VERSION=18.0.0.2
     - RUNTIME=ol RUNTIME_VERSION=18.0.0.3
+
+    
 before_install:
+    - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then curl -C - -LR#OH "Cookie: oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/8u191-b12/2787e4a523244c269598db4e85c51e0c/jdk-8u191-windows-x64.exe"; jdk-8u191-windows-x64.exe /s; fi
     - echo 'Installing ci.common lib ....'
     - git clone https://github.com/wasdev/ci.common.git ./ci.common
     - cd ./ci.common
