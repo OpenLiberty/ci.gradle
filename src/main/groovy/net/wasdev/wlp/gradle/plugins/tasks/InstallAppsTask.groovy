@@ -185,11 +185,6 @@ class InstallAppsTask extends AbstractServerTask {
             String fileSuffix = isWindows ? ".bat" : ""
             File installUtil = new File(getInstallDir(project), "bin/installUtility"+fileSuffix)
 
-            if (!server.features.acceptLicense) {
-                throw new GradleException("Spring Boot support features must be installed to complete this task. " +
-                        "The 'server.features.acceptLicense' property must be set to true in the build file to " +
-                        "indicate accptance of feature license terms and conditions.")
-            }
             def installCommand = installUtil.toString() + " install springBoot-1.5 springBoot-2.0 --acceptLicense"
             def sbuff = new StringBuffer()
             def proc = installCommand.execute()
