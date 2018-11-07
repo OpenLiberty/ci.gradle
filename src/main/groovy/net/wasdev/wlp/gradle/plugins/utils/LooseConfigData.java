@@ -19,6 +19,8 @@ import java.io.File;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Element;
 
+import net.wasdev.wlp.common.plugins.util.XmlDocument;
+
 public class LooseConfigData extends XmlDocument {
 
   public LooseConfigData() throws ParserConfigurationException {
