@@ -10,6 +10,7 @@ import org.gradle.api.artifacts.Dependency
 import org.w3c.dom.Element;
 import org.apache.commons.io.FilenameUtils
 
+import net.wasdev.wlp.common.plugins.config.LooseConfigData
 
 public class LooseEarApplication extends LooseApplication {
 

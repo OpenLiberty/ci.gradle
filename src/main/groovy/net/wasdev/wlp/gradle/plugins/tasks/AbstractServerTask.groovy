@@ -16,7 +16,7 @@
 package net.wasdev.wlp.gradle.plugins.tasks
 
 import groovy.xml.StreamingMarkupBuilder
-import net.wasdev.wlp.gradle.plugins.utils.ApplicationXmlDocument
+import net.wasdev.wlp.common.plugins.config.ApplicationXmlDocument
 import net.wasdev.wlp.gradle.plugins.utils.ServerConfigDocument
 import org.apache.commons.io.FileUtils
 import org.gradle.api.GradleException

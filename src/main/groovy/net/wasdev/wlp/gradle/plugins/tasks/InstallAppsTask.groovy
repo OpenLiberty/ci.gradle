@@ -16,6 +16,9 @@
 package net.wasdev.wlp.gradle.plugins.tasks
 
 import net.wasdev.wlp.gradle.plugins.utils.*
+import net.wasdev.wlp.common.plugins.config.ApplicationXmlDocument
+import net.wasdev.wlp.common.plugins.config.LooseConfigData
+
 import org.apache.commons.io.FilenameUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Project

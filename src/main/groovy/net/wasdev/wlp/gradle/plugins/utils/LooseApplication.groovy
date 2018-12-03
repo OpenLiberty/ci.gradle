@@ -1,12 +1,13 @@
 package net.wasdev.wlp.gradle.plugins.utils;
 
-
 import java.io.File;
 import org.w3c.dom.Element;
 import org.gradle.api.Project;
 import org.gradle.api.Task
 import org.gradle.api.tasks.bundling.War
 import org.gradle.api.GradleException
+
+import net.wasdev.wlp.common.plugins.config.LooseConfigData
 
 public class LooseApplication {
     protected Task task;
