@@ -7,18 +7,22 @@ import org.gradle.api.Task
 import org.gradle.api.tasks.bundling.War
 
 import net.wasdev.wlp.common.plugins.config.LooseConfigData
+import net.wasdev.wlp.common.plugins.util.PluginExecutionException
+import net.wasdev.wlp.common.plugins.config.LooseApplication
 
 public class LooseWarApplication extends LooseApplication {
+    
+    protected Task task;
 
     public LooseWarApplication(Task task, LooseConfigData config) {
-        super(task, config)
+        super(task.getProject().getBuildDir().getAbsolutePath(), config)
+        this.task = task
     }
 
     public void addSourceDir() throws Exception {
         WarPluginConvention wpc = task.getProject().getConvention().findPlugin(WarPluginConvention)
         File sourceDir = new File(wpc.getWebAppDir().getAbsolutePath())
-        config.addDir(sourceDir.getCanonicalPath(), "/")
+        config.addDir(sourceDir, "/")
     }
-
 
 }

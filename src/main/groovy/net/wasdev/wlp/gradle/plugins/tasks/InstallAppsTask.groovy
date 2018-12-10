@@ -17,6 +17,7 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import net.wasdev.wlp.gradle.plugins.utils.*
 import net.wasdev.wlp.common.plugins.config.ApplicationXmlDocument
+import net.wasdev.wlp.common.plugins.config.LooseApplication
 import net.wasdev.wlp.common.plugins.config.LooseConfigData
 
 import org.apache.commons.io.FilenameUtils
@@ -247,7 +248,7 @@ class InstallAppsTask extends AbstractServerTask {
         }
         LooseWarApplication looseWar = new LooseWarApplication(task, config)
         looseWar.addSourceDir()
-        looseWar.addOutputDir(looseWar.getDocumentRoot() , task, "/WEB-INF/classes/");
+        looseWar.addOutputDir(looseWar.getDocumentRoot() , task.classpath.getFiles().toArray()[0], "/WEB-INF/classes/");
 
         //retrieves dependent library jar files
         addWarEmbeddedLib(looseWar.getDocumentRoot(), looseWar, task);
@@ -285,11 +286,12 @@ class InstallAppsTask extends AbstractServerTask {
             if (resourceTask.getDestinationDir() != null){
                 looseApp.addOutputDir(archive, resourceTask.getDestinationDir(), "/");
             }
-            looseApp.addManifestFile(archive, siblingProject);
+            File manifestFile = project.sourceSets.main.getOutput().getResourcesDir().getParentFile()
+            looseApp.addManifestFileWithParent(archive, manifestFile);
         } else if(FilenameUtils.getExtension(dep.getAbsolutePath()).equalsIgnoreCase("jar")){
-            looseApp.getConfig().addFile(parent, dep.getAbsolutePath() , "/WEB-INF/lib/" + dep.getName());
+            looseApp.getConfig().addFile(parent, dep, "/WEB-INF/lib/" + dep.getName());
         } else {
-            looseApp.addOutputDir(looseApp.getDocumentRoot(), dep.getAbsolutePath() , "/WEB-INF/classes/");
+            looseApp.addOutputDir(looseApp.getDocumentRoot(), dep , "/WEB-INF/classes/");
         }
       }
     }
@@ -332,7 +334,7 @@ class InstallAppsTask extends AbstractServerTask {
                     }
             }
             else if (dependency instanceof ExternalModuleDependency) {
-                looseEar.getConfig().addFile(dependencyFile.getAbsolutePath(), "/WEB-INF/lib/" + it.getName())
+                looseEar.getConfig().addFile(dependencyFile, "/WEB-INF/lib/" + it.getName())
             }
             else {
                 logger.warn("Dependency " + dependency.getName() + "could not be added to the looseApplication, as it is neither a ProjectDependency or ExternalModuleDependency")
@@ -347,8 +349,7 @@ class InstallAppsTask extends AbstractServerTask {
         for (File f : filesAsDeps){
             String extension = FilenameUtils.getExtension(f.getAbsolutePath())
             if(extension.equals("jar")){
-                looseApp.getConfig().addFile(parent, f.getAbsolutePath(),
-                        dir + f.getName());
+                looseApp.getConfig().addFile(parent, f, dir + f.getName());
             }
         }
     }
