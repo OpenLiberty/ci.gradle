@@ -10,40 +10,46 @@ import org.gradle.api.artifacts.Dependency
 import org.w3c.dom.Element;
 import org.apache.commons.io.FilenameUtils
 
+import net.wasdev.wlp.common.plugins.config.LooseConfigData
+import net.wasdev.wlp.common.plugins.util.PluginExecutionException
+import net.wasdev.wlp.common.plugins.config.LooseApplication
 
 public class LooseEarApplication extends LooseApplication {
+    
+    protected Task task;
 
     public LooseEarApplication(Task task, LooseConfigData config) {
-        super(task, config);
+        super(task.getProject().getBuildDir().getAbsolutePath(), config)
+        this.task = task
     }
 
     public void addSourceDir() throws Exception {
         File sourceDir = new File(task.getProject().path.replace(":","") + "/" + task.getProject().getConvention().getPlugin(EarPluginConvention.class).getAppDirName())
-        config.addDir(sourceDir.getCanonicalPath(), "/")
+        config.addDir(sourceDir, "/")
     }
 
     public void addApplicationXmlFile() throws Exception {
         String applicationName = "/" + task.getProject().getConvention().getPlugin(EarPluginConvention.class).getDeploymentDescriptor().getFileName()
         File applicationXmlFile = new File(task.getProject().path.replace(":","") + "/" + task.getProject().getConvention().getPlugin(EarPluginConvention.class).getAppDirName() + "/META-INF/" + applicationName)
         if (applicationXmlFile.exists()) {
-            config.addFile(applicationXmlFile.getCanonicalPath(), "/META-INF/application.xml");
+            config.addFile(applicationXmlFile, "/META-INF/application.xml");
         }
         else {
             applicationXmlFile = new File(task.destinationDir.getParentFile().getAbsolutePath() + "/tmp/ear" + applicationName);
-            config.addFile(applicationXmlFile.getCanonicalPath(), "/META-INF/application.xml");
+            config.addFile(applicationXmlFile, "/META-INF/application.xml");
         }
     }
     
     public Element addWarModule(Project proj) throws Exception {
         Element warArchive = config.addArchive("/" + proj.war.archiveName);
-        proj.sourceSets.main.getOutput().getClassesDirs().each{config.addDir(warArchive, it.getAbsolutePath(), "/WEB-INF/classes");}
+        proj.sourceSets.main.getOutput().getClassesDirs().each{config.addDir(warArchive, it, "/WEB-INF/classes");}
         addModules(warArchive,proj)
         return warArchive;
     }
     
     public Element addJarModule(Project proj) throws Exception {
         Element moduleArchive = config.addArchive("/" + proj.jar.archiveName);
-        proj.sourceSets.main.getOutput().getClassesDirs().each{config.addDir(moduleArchive, it.getAbsolutePath(), "/");}
+        proj.sourceSets.main.getOutput().getClassesDirs().each{config.addDir(moduleArchive, it, "/");}
         addModules(moduleArchive, proj)
         return moduleArchive;
     }
@@ -55,10 +61,10 @@ public class LooseEarApplication extends LooseApplication {
                 case "jar":
                 case "war":
                 case "rar":
-                    config.addFile(moduleArchive, f.getAbsolutePath(), "/WEB-INF/lib/" + f.getName());
+                    config.addFile(moduleArchive, f, "/WEB-INF/lib/" + f.getName());
                     break
                 case "MF":
-                    config.addFile(moduleArchive, f.getAbsolutePath(), "/META-INF/MANIFEST.MF");
+                    addManifestFileWithParent(moduleArchive, f)
                     break
                 default:
                     break
