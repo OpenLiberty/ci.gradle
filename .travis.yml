@@ -10,9 +10,9 @@ matrix:
     - jdk: oraclejdk9
       env: RUNTIME=wlp RUNTIME_VERSION=18.0.0.3
 env:
-    - RUNTIME=wlp RUNTIME_VERSION=18.0.0.2
+    - RUNTIME=wlp RUNTIME_VERSION=18.0.0.4
     - RUNTIME=wlp RUNTIME_VERSION=18.0.0.3
-    - RUNTIME=ol RUNTIME_VERSION=18.0.0.2
+    - RUNTIME=ol RUNTIME_VERSION=18.0.0.4
     - RUNTIME=ol RUNTIME_VERSION=18.0.0.3
 before_install:
     - echo 'Installing ci.common lib ....'
