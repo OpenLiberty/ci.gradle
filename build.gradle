@@ -77,12 +77,12 @@ sourceSets {
 task integrationTest(type: Test) {
     logging.level = LogLevel.INFO
     description = 'Runs the integration tests.' + gradle.gradleVersion
-    if (!gradle.gradleVersion.startsWith('4.')) {
-        testClassesDir = sourceSets.integrationTest.output.getDirs().getSingleFile()
+    if (!gradle.gradleVersion.startsWith('4.') || !gradle.gradleVersion.startsWith('5.')) {
+        testClassesDirs = sourceSets.integrationTest.output.getDirs()
     } else {
         Map<String, ?> args = [dir: sourceSets.integrationTest.output.getDirs().getSingleFile()]
         if (project.hasProperty("test.excludes.pattern")) {
-            args.put('excludes', [project.property("test.exclude.pattern")])
+            args.put('excludes', [project.property("test.excludes.pattern")])
         }
         if (project.hasProperty("test.includes.pattern")) {
             args.put('includes', [project.property("test.includes.pattern")])
@@ -151,10 +151,6 @@ task integrationTest(type: Test) {
 }
 
 sourceSets.main.compileClasspath += configurations.provided
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '3.5'
-}
 
 archivesBaseName = 'liberty-gradle-plugin'
 group = 'net.wasdev.wlp.gradle.plugins'
