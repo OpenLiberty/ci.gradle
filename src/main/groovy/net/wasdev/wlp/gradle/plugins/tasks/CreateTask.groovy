@@ -66,11 +66,6 @@ class CreateTask extends AbstractServerTask {
         return getLibertyPropertyFile(server.serverEnv, 'server.env')
     }
 
-    @OutputFile
-    File getPluginConfigXml() {
-        return new File(project.buildDir, 'liberty-plugin-config.xml')
-    }
-
     @TaskAction
     void create() {
         //Checking etc/server.env for outputDirs

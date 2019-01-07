@@ -24,7 +24,7 @@ class DeployExtension implements Cloneable{
     List<Object> listOfClosures = new ArrayList<Object>()
 
     @Override
-    protected Object clone() throws CloneNotSupportedException {
+    public Object clone() throws CloneNotSupportedException {
         super.clone()
     }
 }
