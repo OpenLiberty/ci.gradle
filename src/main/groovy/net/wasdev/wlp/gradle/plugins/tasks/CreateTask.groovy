@@ -20,7 +20,6 @@ import net.wasdev.wlp.gradle.plugins.Liberty
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.logging.LogLevel
 
@@ -64,6 +63,11 @@ class CreateTask extends AbstractServerTask {
     @InputFile @Optional
     File getServerEnvFile() {
         return getLibertyPropertyFile(server.serverEnv, 'server.env')
+    }
+
+    @InputFile
+    File getPluginConfigXml() {
+        return new File(project.buildDir, 'liberty-plugin-config.xml')
     }
 
     @TaskAction
