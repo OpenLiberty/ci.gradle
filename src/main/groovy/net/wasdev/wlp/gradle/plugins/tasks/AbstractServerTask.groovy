@@ -471,6 +471,8 @@ abstract class AbstractServerTask extends AbstractTask {
             printer.preserveWhitespace = true
             printer.print( libertyPluginConfig )
         }
+
+        logger.info ("Adding Liberty plugin config info to ${project.buildDir}/liberty-plugin-config.xml.")
     }
 
     private void writeBootstrapProperties(File file, Map<String, Object> properties) throws IOException {

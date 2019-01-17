@@ -19,8 +19,10 @@ import javax.xml.parsers.*
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
 import org.gradle.api.logging.LogLevel
+import org.gradle.api.artifacts.Configuration
 import groovy.xml.MarkupBuilder
 
 class InstallLibertyTask extends AbstractTask {
@@ -32,8 +34,14 @@ class InstallLibertyTask extends AbstractTask {
             group 'Liberty'
         })
         outputs.upToDateWhen {
-            getInstallDir(project).exists()
+            getInstallDir(project).exists() && project.buildDir.exists()
         }
+    }
+
+    @Input
+    @Optional
+    Configuration getLibertyRuntimeConfiguration() {
+        return project.configurations.libertyRuntime
     }
 
     @TaskAction
@@ -55,8 +63,25 @@ class InstallLibertyTask extends AbstractTask {
         } else {
             logger.info ("Liberty is already installed at: " + getInstallDir(project))
         }
+        createPluginXmlFile()
+    }
 
-        createPluginXmlFile(project)
+    protected void createPluginXmlFile() {
+        if(!this.state.upToDate) {
+            if (!project.buildDir.exists()) {
+                logger.info ("Creating missing project buildDir at ${project.buildDir}.")
+                project.buildDir.mkdirs()
+            }
+
+            new File(project.buildDir, 'liberty-plugin-config.xml').withWriter { writer ->
+                def xmlDoc = new MarkupBuilder(writer)
+                xmlDoc.mkp.xmlDeclaration(version: "1.0", encoding: "UTF-8")
+                xmlDoc.'liberty-plugin-config'('version':'2.0') {
+                    outputLibertyPropertiesToXml(xmlDoc)
+                }
+            }
+            logger.info ("Adding Liberty plugin config info to ${project.buildDir}/liberty-plugin-config.xml.")
+        }
     }
 
     private Map<String, String> buildInstallLibertyMap(Project project) {
@@ -123,16 +148,6 @@ class InstallLibertyTask extends AbstractTask {
                     type ('zip')
                 }
                 xmlDoc.assemblyArchive (project.configurations.libertyRuntime.resolvedConfiguration.resolvedArtifacts.getAt(0).file.toString())
-            }
-        }
-    }
-
-    protected void createPluginXmlFile(Project project) {
-        new File(project.buildDir, 'liberty-plugin-config.xml').withWriter { writer ->
-            def xmlDoc = new MarkupBuilder(writer)
-            xmlDoc.mkp.xmlDeclaration(version: "1.0", encoding: "UTF-8")
-            xmlDoc.'liberty-plugin-config'('version':'2.0') {
-                outputLibertyPropertiesToXml(xmlDoc)
             }
         }
     }
