@@ -151,12 +151,4 @@ class InstallLibertyTask extends AbstractTask {
             }
         }
     }
-
-    private boolean runtimeUpToDate() {
-        boolean runtimeUpToDate = false
-
-        if (this.get)
-
-        return runtimeUpToDate
-    }
 }
