@@ -1,0 +1,18 @@
+// We need to copy the root project's classpath because the Liberty Gradle tasks invoke
+// Liberty Ant tasks through a taskdef with classpath 'project.buildscript.configurations.classpath.asPath'.
+// Even though the Gradle classpath is inherited from the root project and the 'liberty' plugin and its
+// Gradle tasks can be loaded here, this breaks the wrapped invocation of the Liberty Ant tasks.
+buildscript {
+    repositories {
+        addAll rootProject.buildscript.repositories
+    }
+    dependencies {
+        classpath rootProject.buildscript.configurations.classpath.dependencies
+    }
+}
+
+liberty {
+    server {
+        name = project.name
+    }
+}

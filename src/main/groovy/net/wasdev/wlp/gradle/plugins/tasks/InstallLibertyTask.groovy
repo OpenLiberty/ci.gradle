@@ -34,7 +34,7 @@ class InstallLibertyTask extends AbstractTask {
             group 'Liberty'
         })
         outputs.upToDateWhen {
-            getInstallDir(project).exists() && project.buildDir.exists()
+            getInstallDir(project).exists() && project.buildDir.exists() && new File(project.buildDir, 'liberty-plugin-config.xml').exists()
         }
     }
 
