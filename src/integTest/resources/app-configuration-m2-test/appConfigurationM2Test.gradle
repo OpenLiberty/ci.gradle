@@ -1,0 +1,34 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath "net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+apply plugin: 'liberty'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    libertyApplication 'test:test-maven-war:1.0-SNAPSHOT'
+    libertyRuntime "$runtimeGroup:$runtimeArtifactId:$runtimeVersion"
+}
+
+liberty {
+    server {
+        bootstrapProperties = ['default.http.port': 9080,
+                               'default.https.port': 9443,
+                               'appLocation': 'test-maven-war-1.0-SNAPSHOT.war',
+                               'appContext': 'servlet']
+    }
+}
