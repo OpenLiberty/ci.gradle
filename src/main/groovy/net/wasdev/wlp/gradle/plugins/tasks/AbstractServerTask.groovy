@@ -312,7 +312,7 @@ abstract class AbstractServerTask extends AbstractTask {
 
     protected void configureApps(Project project) {
         if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
-            if (!project.configurations.libertyApplication.isEmpty()) {
+            if (!project.configurations.libertyApp.isEmpty()) {
                 server.apps = getApplicationFilesFromConfiguration().toArray()
             } else if (project.plugins.hasPlugin('war')) {
                 server.apps = [project.war]
@@ -551,7 +551,7 @@ abstract class AbstractServerTask extends AbstractTask {
         //This loops all the Dependency objects that get created by the configuration treating them as File objects
         //Should also include transitive dependencies
         //Can't use the resolved configuration unless we do a check separate from this one, not sure if there is an advantage since we want the applicaitons
-        project.configurations.libertyApplication.each {
+        project.configurations.libertyApp.each {
             if (FilenameUtils.getExtension(it.name).equals('war') || FilenameUtils.getExtension(it.name).equals('ear')) {
                 appFiles.add(it)
             }

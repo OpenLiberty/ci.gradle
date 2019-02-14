@@ -20,6 +20,6 @@ repositories {
 }
 
 dependencies {
-    libertyApplication files('../../resources/integrationTest/test-war.war')
+    libertyApp files('../../resources/integrationTest/test-war.war')
     libertyRuntime "$runtimeGroup:$runtimeArtifactId:$runtimeVersion"
 }

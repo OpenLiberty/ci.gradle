@@ -32,7 +32,7 @@ class LibertyApplicationConfigurationM2Test extends AbstractIntegrationTest {
         try {
             //Installing the war built by the other gradle project in the src dir
             runTasks(new File(buildDir, 'test-maven-war'), 'install')
-            //Then installing that war from m2 to the apps directory through the libertyApplication configuration
+            //Then installing that war from m2 to the apps directory through the libertyApp configuration
             runTasks(buildDir, 'installApps')
         } catch (Exception e) {
             throw new AssertionError ("Fail on task installApps. "+ e)

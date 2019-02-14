@@ -20,7 +20,7 @@ repositories {
 }
 
 dependencies {
-    libertyApplication 'test:test-maven-war:1.0-SNAPSHOT'
+    libertyApp 'test:test-maven-war:1.0-SNAPSHOT'
     libertyRuntime "$runtimeGroup:$runtimeArtifactId:$runtimeVersion"
 }
 

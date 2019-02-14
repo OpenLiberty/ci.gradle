@@ -18,9 +18,9 @@ If you target an application to the `dropins` folder, no configuration is needed
 
 Multiple applications can be installed to the `apps` or `dropins` directories. This can be done by adding application files, or the tasks that generate these files, to the respective list.
 
-### Using the libertyApplication configuration
+### Using the libertyApp configuration
 
-The `libertyApplication` configuration can be used to pull in application artifacts as dependencies and then install them to the server's `apps` directory. You can specify the artifact as any type of object that can be resolved in to a Dependency object by Gradle. The application artifact still needs to be a supported application type of `war` or `ear` to be installed.
+The `libertyApp` configuration can be used to pull in application artifacts as dependencies and then install them to the server's `apps` directory. You can specify the artifact as any type of object that can be resolved in to a Dependency object by Gradle. The application artifact still needs to be a supported application type of `war` or `ear` to be installed.
 
 ### Examples:
 
@@ -61,6 +61,6 @@ liberty {
 apply plugin: 'liberty'
 
 dependencies {
-    libertyApplication 'example:app:1.0'
+    libertyApp 'example:app:1.0'
 }
 ```

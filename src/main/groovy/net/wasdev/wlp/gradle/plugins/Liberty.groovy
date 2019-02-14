@@ -42,7 +42,7 @@ class Liberty implements Plugin<Project> {
         project.configurations.create('libertyLicense')
         project.configurations.create('libertyRuntime')
         project.configurations.create('libertyFeature')
-        project.configurations.create('libertyApplication')
+        project.configurations.create('libertyApp')
         if (project.configurations.find { it.name == 'compileOnly' }) {
             project.configurations.libertyFeature.extendsFrom(project.configurations.compileOnly)
         }
