@@ -1,10 +1,8 @@
 package net.wasdev.wlp.gradle.plugins;
 
-import org.gradle.testkit.runner.UnexpectedBuildFailure
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
-import org.gradle.api.GradleException
 
 public class TestAppConfigFail extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/integrationTest/sample.servlet")
@@ -22,9 +20,12 @@ public class TestAppConfigFail extends AbstractIntegrationTest{
         runTasks(buildDir, 'libertyStop')
     }
 
-    //Should throw a GradleException when validating the app configuration which resolves as an UnexpectedBuildFailure.
-    @Test(expected = UnexpectedBuildFailure.class)
+    @Test
     public void test_smart_config_fail() {
-        runTasks(buildDir, 'installApps')
+        BuildResult result = GradleRunner.create()
+            .withProjectDir(buildDir)
+            .forwardOutput()
+            .withArguments('installApps', '-i', '-s')
+            .buildAndFail()
     }
 }
