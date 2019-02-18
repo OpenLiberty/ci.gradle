@@ -4,6 +4,9 @@ import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
 
+import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.GradleRunner
+
 public class TestAppConfigFail extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/integrationTest/sample.servlet")
     static File buildDir = new File(integTestDir, "/test-app-config-fail")
