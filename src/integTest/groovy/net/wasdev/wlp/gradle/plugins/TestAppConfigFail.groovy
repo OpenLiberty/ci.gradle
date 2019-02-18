@@ -1,6 +1,6 @@
 package net.wasdev.wlp.gradle.plugins;
 
-import org.gradle.tooling.BuildException
+import org.gradle.testkit.runner.UnexpectedBuildFailure
 import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
@@ -22,8 +22,8 @@ public class TestAppConfigFail extends AbstractIntegrationTest{
         runTasks(buildDir, 'libertyStop')
     }
 
-    //Should throw a GradleException when validating the app configuration which resolves as a BuildException.
-    @Test(expected = BuildException.class)
+    //Should throw a GradleException when validating the app configuration which resolves as an UnexpectedBuildFailure.
+    @Test(expected = UnexpectedBuildFailure.class)
     public void test_smart_config_fail() {
         runTasks(buildDir, 'installApps')
     }

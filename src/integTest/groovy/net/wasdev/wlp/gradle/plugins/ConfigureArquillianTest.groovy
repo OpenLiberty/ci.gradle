@@ -20,9 +20,8 @@ import java.io.File
 import org.junit.Test
 import org.junit.BeforeClass
 import org.apache.commons.io.FileUtils
-import org.gradle.tooling.BuildLauncher
-import org.gradle.tooling.GradleConnector
-import org.gradle.tooling.ProjectConnection
+import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.GradleRunner
 
 /**
  * Runs tests on the arquillian-tests project test cases. Any failures will result in
@@ -45,26 +44,11 @@ class ConfigureArquillianTest extends AbstractIntegrationTest {
 
     @Test
     public void test_build() {
-        try {
-            GradleConnector gradleConnector = GradleConnector.newConnector()
-            gradleConnector.forProjectDirectory(buildDir)
-            ProjectConnection connection = gradleConnector.connect()
-
-            try {
-                BuildLauncher build = connection.newBuild()
-                build.withArguments("-x", "test", "-i", "-s")
-                build.forTasks("build")
-                build.setStandardOutput(System.out)
-                build.setStandardError(System.out)
-                build.run()
-            }
-            finally {
-                connection?.close()
-            }
-        } catch (Exception e) {
-            e.printStackTrace()
-            throw new AssertionError(ERROR_MESSAGE)
-        }
+        BuildResult result = GradleRunner.create()
+            .withProjectDir(buildDir)
+            .forwardOutput()
+            .withArguments("build", "-x", "test", "-i", "-s")
+            .build()
     }
 
     private static void watch(final Process process) {

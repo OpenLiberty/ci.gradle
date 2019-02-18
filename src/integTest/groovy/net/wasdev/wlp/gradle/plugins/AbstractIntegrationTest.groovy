@@ -18,12 +18,15 @@ package net.wasdev.wlp.gradle.plugins
 
 import java.io.File
 
+import java.util.List
+import java.util.ArrayList
+
 import static org.junit.Assert.*
 
 import org.apache.commons.io.FileUtils
-import org.gradle.tooling.BuildLauncher
-import org.gradle.tooling.GradleConnector
-import org.gradle.tooling.ProjectConnection
+import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.GradleRunner
+import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.gradle.api.GradleException
 
 abstract class AbstractIntegrationTest {
@@ -76,18 +79,24 @@ abstract class AbstractIntegrationTest {
     }
 
     protected static void runTasks(File projectDir, String... tasks) {
-        GradleConnector gradleConnector = GradleConnector.newConnector()
-        gradleConnector.forProjectDirectory(projectDir)
-        ProjectConnection connection = gradleConnector.connect()
-
-        try {
-            BuildLauncher build = connection.newBuild()
-            build.withArguments("-i");
-            build.forTasks(tasks)
-            build.run()
+        List<String> args = new ArrayList<String>()
+        tasks.each {
+            args.add(it)
         }
-        finally {
-            connection?.close()
+        args.add("-i")
+        args.add("-s")
+
+        BuildResult result = GradleRunner.create()
+            .withProjectDir(projectDir)
+            .forwardOutput()
+            .withArguments(args)
+            .build()
+
+        //'it' is null if tasks is a single String
+        if(tasks.length > 1) {
+            tasks.each {
+                assert SUCCESS == result.task(":$it").getOutcome()
+            }
         }
     }
 
