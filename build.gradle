@@ -62,6 +62,7 @@ dependencies {
     compile group: 'commons-io', name: 'commons-io', version: '2.5'
     provided group: 'com.ibm.websphere.appserver.api', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
     testCompile 'junit:junit:4.11'
+    testCompile gradleTestKit()
 }
 
 sourceSets {
