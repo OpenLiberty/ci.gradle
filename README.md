@@ -22,7 +22,7 @@ This will download Gradle, build the plugin, and install it in to the `build\lib
 To build the plugin and run the integration tests execute the following commands in the root directory. The `runtime` and `runtimeVersion` parameters are used to select the Liberty runtime that will be used to run the tests. The `wlpLicense` parameter is only needed for Liberty packaged as a JAR file.
 
  ```bash
- $ ./gradlew install integrationTest -Druntime=<wlp|ol> -DruntimeVersion=<runtime_version> -DwlpLicense=<liberty_license_code>
+ $ ./gradlew install check -Druntime=<wlp|ol> -DruntimeVersion=<runtime_version> -DwlpLicense=<liberty_license_code>
  ```
 
 ## Usage
