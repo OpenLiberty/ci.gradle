@@ -108,13 +108,14 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
     private void installProjectArchive(Task task, String appsDir) {
-        if (task.name == 'bootJar' || task.name == 'bootRepackage') {
+        if (task.name == 'bootJar' || task.name == 'bootWar' || task.name == 'bootRepackage') {
             installSpringBootFeatureIfNeeded()
-            invokeThinOperation(appsDir)
+            String targetThinAppPath = invokeThinOperation(appsDir)
+            validateAppConfig(targetThinAppPath.substring(targetThinAppPath.lastIndexOf("/") + 1), getBaseName(task), appsDir)
         } else {
             Files.copy(task.archivePath.toPath(), new File(getServerDir(project), "/" + appsDir + "/" + getArchiveName(task)).toPath(), StandardCopyOption.REPLACE_EXISTING)
+            validateAppConfig(getArchiveName(task), getBaseName(task), appsDir)
         }
-        validateAppConfig(getArchiveName(task), getBaseName(task), appsDir)
     }
 
     protected void validateAppConfig(String fileName, String artifactId, String dir) throws Exception {
@@ -141,12 +142,37 @@ class InstallAppsTask extends AbstractServerTask {
 
 
     String getArchiveOutputPath() {
-        if (springBootVersion.startsWith('2')) {
-            return project.bootJar.archivePath.getAbsolutePath()
+        String archiveOutputPath;
+
+        if (springBootVersion.startsWith('2.')) {
+            if (project.tasks.getByName('bootJar') != null) {
+                archiveOutputPath = project.bootJar.archivePath.getAbsolutePath()
+            } else if (project.tasks.getByName('bootWar') != null) {
+                archiveOutputPath = project.bootWar.archivePath.getAbsolutePath()
+            }
         }
-        else {
-            project.jar.archivePath.getAbsolutePath()
-            //TODO check for bootRepackageW.ithJarTask - return project.bootRepackage.withJarTask.archivePath.getAbsolutePath()
+        else if(springBootVersion.startsWith('1.')) {
+            if (project.plugins.hasPlugin('java')) {
+                String uberJarPath = project.jar.archivePath.getAbsolutePath()
+                if (project.bootRepackage.classifier != null && !project.bootRepackage.classifier.isEmpty()) {
+                    archiveOutputPath = uberJarPath.substring(0, uberJarPath.lastIndexOf(".")) + "-" + project.bootRepackage.classifier + "." + project.jar.extension
+                } else {
+                    archiveOutputPath = uberJarPath
+                }
+            } else if (project.plugins.hasPlugin('war')) {
+                String uberWarPath = project.war.archivePath.getAbsolutePath()
+                if (project.bootRepackage.classifier != null && !project.bootRepackage.classifier.isEmpty()) {
+                    archiveOutputPath = uberWarPath.substring(0, uberWarPath.lastIndexOf(".")) + "-" + project.bootRepackage.classifier + "." + project.war.extension
+                } else {
+                    archiveOutputPath = uberWarPath
+                }
+            }
+        }
+
+        if(archiveOutputPath != null && net.wasdev.wlp.common.plugins.util.SpringBootUtil.isSpringBootUberJar(new File(archiveOutputPath))) {
+            return archiveOutputPath
+        } else {
+            throw new GradleException(archiveOutputPath + " is not a valid Spring Boot Uber JAR")
         }
     }
 
@@ -155,7 +181,7 @@ class InstallAppsTask extends AbstractServerTask {
         new File(getInstallDir(project), "usr/shared/resources/lib.index.cache").absolutePath
     }
 
-    String getTargetThinAppPath(String appsDir) {
+    String getTargetThinAppPath(String appsDir, String sourceArchiveName) {
         String appsFolder
         if (appsDir=="dropins") {
             appsFolder = "dropins/spring"
@@ -163,21 +189,23 @@ class InstallAppsTask extends AbstractServerTask {
         else {
             appsFolder = "apps"
         }
-        String archiveName = springBootVersion.startsWith("2") ? springBootBuildTask.getArchiveName() : project.jar.getArchiveName()
-        new File(createApplicationFolder(appsFolder).absolutePath, archiveName)
+        new File(createApplicationFolder(appsFolder).absolutePath, sourceArchiveName)
     }
 
-    private invokeThinOperation(String appsDir) {
+    private String invokeThinOperation(String appsDir) {
         Map<String, String> params = buildLibertyMap(project);
 
         project.ant.taskdef(name: 'invokeUtil',
                 classname: 'net.wasdev.wlp.ant.SpringBootUtilTask',
                 classpath: project.buildscript.configurations.classpath.asPath)
 
-        params.put('sourceAppPath', getArchiveOutputPath())
+        String sourceAppPath = getArchiveOutputPath()
+        params.put('sourceAppPath', sourceAppPath)
         params.put('targetLibCachePath', getTargetLibCachePath())
-        params.put('targetThinAppPath', getTargetThinAppPath(appsDir))
+        String targetThinAppPath = getTargetThinAppPath(appsDir, "thin-" + sourceAppPath.substring(sourceAppPath.lastIndexOf("/") + 1))
+        params.put('targetThinAppPath', targetThinAppPath)
         project.ant.invokeUtil(params)
+        return targetThinAppPath;
     }
 
     private isSpringBootUtilAvailable() {
