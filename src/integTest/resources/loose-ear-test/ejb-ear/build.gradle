@@ -39,6 +39,7 @@ liberty {
         name = "ejbServer"
         configFile = file('src/main/liberty/config/server.xml')
         apps = [ear]
+        verifyAppStartTimeout = 30
         looseApplication = true
     }
 }
