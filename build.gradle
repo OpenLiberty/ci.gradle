@@ -116,7 +116,7 @@ test {
             kernelArtifactId = "openliberty-kernel"
         } else {
             runtimeGroup = "com.ibm.websphere.appserver.runtime"
-            runtimeArtifactId = "wlp-webProfile7"
+            runtimeArtifactId = "wlp-javaee7"
             kernelArtifactId = "wlp-kernel"
         }
 
