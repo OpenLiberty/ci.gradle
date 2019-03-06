@@ -29,6 +29,6 @@ before_build:
 
 build_script:
   # Build the compiled extension
-  - "gradlew.bat install integrationTest -Druntime=%RUNTIME% -DruntimeVersion=%RUNTIME_VERSION% --stacktrace --info --no-daemon"
+  - "gradlew.bat install check -Druntime=%RUNTIME% -DruntimeVersion=%RUNTIME_VERSION% --stacktrace --info --no-daemon"
 
 test: off
