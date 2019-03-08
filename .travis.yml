@@ -3,17 +3,11 @@ language: java
 jdk:
     - oraclejdk8
     - oraclejdk9
-matrix:
-    exclude:
-    - jdk: oraclejdk9
-      env: RUNTIME=ol RUNTIME_VERSION=18.0.0.3
-    - jdk: oraclejdk9
-      env: RUNTIME=wlp RUNTIME_VERSION=18.0.0.3
 env:
     - RUNTIME=wlp RUNTIME_VERSION=18.0.0.4
-    - RUNTIME=wlp RUNTIME_VERSION=18.0.0.3
+    - RUNTIME=wlp RUNTIME_VERSION=19.0.0.2
     - RUNTIME=ol RUNTIME_VERSION=18.0.0.4
-    - RUNTIME=ol RUNTIME_VERSION=18.0.0.3
+    - RUNTIME=ol RUNTIME_VERSION=19.0.0.2
 before_install:
     - echo 'Installing ci.common lib ....'
     - git clone https://github.com/wasdev/ci.common.git ./ci.common
@@ -21,6 +15,6 @@ before_install:
     - mvn clean install
     - cd ..
 script:
-  - export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs='-XX:MaxPermSize=1024m -XX:+CMSClassUnloadingEnabled -XX:+HeapDumpOnOutOfMemoryError -Xmx2048m'"
-  - travis_wait ./gradlew install integrationTest -Druntime=$RUNTIME -DruntimeVersion=$RUNTIME_VERSION --stacktrace --info --no-daemon
+  - export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs='-XX:MaxPermSize=1024m -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:+HeapDumpOnOutOfMemoryError -Xmx2048m'"
+  - travis_wait ./gradlew install check -Druntime=$RUNTIME -DruntimeVersion=$RUNTIME_VERSION --stacktrace --info --no-daemon
 dist: trusty

@@ -8,6 +8,10 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: "com.gradle.plugin-publish"
 
+archivesBaseName = 'liberty-gradle-plugin'
+group = 'net.wasdev.wlp.gradle.plugins'
+version = '2.6.6-SNAPSHOT'
+
 repositories {
     mavenLocal()
     mavenCentral()
@@ -65,38 +69,27 @@ dependencies {
     testCompile gradleTestKit()
 }
 
-sourceSets {
-    integrationTest {
-        groovy.srcDir file('src/integTest/groovy')
-        resources.srcDir file('src/integTest/resources')
-        compileClasspath = sourceSets.main.output + configurations.testRuntime
-        runtimeClasspath = output + compileClasspath
-        output.dir(files(new File(buildDir, 'classes/groovy/integrationTest')))
-    }
+sourceSets.main.compileClasspath += configurations.provided
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
 }
 
-task integrationTest(type: Test) {
-    logging.level = LogLevel.INFO
-    description = 'Runs the integration tests.' + gradle.gradleVersion
-    if (!gradle.gradleVersion.startsWith('4.') || !gradle.gradleVersion.startsWith('5.')) {
-        testClassesDirs = sourceSets.integrationTest.output.getDirs()
-    } else {
-        Map<String, ?> args = [dir: sourceSets.integrationTest.output.getDirs().getSingleFile()]
-        if (project.hasProperty("test.excludes.pattern")) {
-            args.put('excludes', [project.property("test.excludes.pattern")])
-        }
-        if (project.hasProperty("test.includes.pattern")) {
-            args.put('includes', [project.property("test.includes.pattern")])
-        }
-        testClassesDirs = fileTree(args)
-    }
-    classpath = sourceSets.integrationTest.runtimeClasspath
+task groovydocJar(type: Jar) {
+    classifier = 'groovydoc'
+    from groovydoc
+}
 
+artifacts {
+    archives groovydocJar, sourcesJar
+}
+
+test {
     systemProperties System.getProperties()
     systemProperty 'runit', 'online'
 
     doFirst {
-
         String runtimeGroup
         String runtimeArtifactId
         String kernelArtifactId
@@ -149,26 +142,12 @@ task integrationTest(type: Test) {
             }
         }
     }
-}
-
-sourceSets.main.compileClasspath += configurations.provided
-
-archivesBaseName = 'liberty-gradle-plugin'
-group = 'net.wasdev.wlp.gradle.plugins'
-version = '2.6.6-SNAPSHOT'
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-task groovydocJar(type: Jar) {
-    classifier = 'groovydoc'
-    from groovydoc
-}
-
-artifacts {
-    archives groovydocJar, sourcesJar
+    if (project.hasProperty('test.exclude')){
+        exclude project.property('test.exclude')
+    }
+    if (project.hasProperty('test.include')){
+        include project.property('test.include')
+    }
 }
 
 if (!version.endsWith("SNAPSHOT")) {
