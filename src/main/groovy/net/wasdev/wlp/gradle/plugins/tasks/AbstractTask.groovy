@@ -20,6 +20,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
+import org.gradle.api.Task
 
 abstract class AbstractTask extends DefaultTask {
 
@@ -27,6 +28,7 @@ abstract class AbstractTask extends DefaultTask {
     def params
     protected boolean isWindows = System.properties['os.name'].toLowerCase().indexOf("windows") >= 0
     protected String springBootVersion
+    protected Task springBootTask
 
     protected getInstallDir = { Project project ->
         if (project.liberty.installDir == null) {
@@ -59,7 +61,7 @@ abstract class AbstractTask extends DefaultTask {
     /**
      * Detect spring boot version dependency
      */
-    public static String findSpringBootVersion(Project project) {
+    protected static String findSpringBootVersion(Project project) {
         String version = null
         if (project.plugins.hasPlugin("org.springframework.boot")) {
             try {
@@ -75,6 +77,28 @@ abstract class AbstractTask extends DefaultTask {
             }
         }
         return version
+    }
+
+    protected static Task findSpringBootTask(Project project, String springBootVersion) {
+        if (springBootVersion == null) {
+            return null
+        }
+        Task task
+        //Do not change the order of war and java
+        if (springBootVersion.startsWith('2.')) {
+            if (project.plugins.hasPlugin('war')) {
+                task = project.bootWar
+            } else if (project.plugins.hasPlugin('java')) {
+                task = project.bootJar
+            }
+        } else if (springBootVersion.startsWith('1.')) {
+            if (project.plugins.hasPlugin('war')) {
+                task = project.war
+            } else if (project.plugins.hasPlugin('java')) {
+                task = project.jar
+            }
+        }
+        return task
     }
 
     protected boolean isLibertyInstalled(Project project) {
