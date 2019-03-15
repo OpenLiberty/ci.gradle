@@ -303,10 +303,6 @@ abstract class AbstractServerTask extends AbstractTask {
         return task.archiveName;
     }
 
-    protected String getBaseName(Task task) {
-        return task.baseName;
-    }
-
     protected void configureApps(Project project) {
         if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
             if (!project.configurations.libertyApp.isEmpty()) {

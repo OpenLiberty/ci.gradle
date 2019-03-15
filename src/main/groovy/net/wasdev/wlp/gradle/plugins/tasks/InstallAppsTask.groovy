@@ -116,7 +116,7 @@ class InstallAppsTask extends AbstractServerTask {
             validateAppConfig(targetThinAppPath.substring(targetThinAppPath.lastIndexOf("/") + 1), baseName, appsDir)
         } else {
             Files.copy(task.archivePath.toPath(), new File(getServerDir(project), "/" + appsDir + "/" + getArchiveName(task)).toPath(), StandardCopyOption.REPLACE_EXISTING)
-            validateAppConfig(getArchiveName(task), getBaseName(task), appsDir)
+            validateAppConfig(getArchiveName(task), task.baseName, appsDir)
         }
     }
 
