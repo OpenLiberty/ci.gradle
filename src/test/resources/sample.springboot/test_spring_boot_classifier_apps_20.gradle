@@ -1,6 +1,6 @@
 buildscript {
 	ext {
-		springBootVersion = '1.5.16.RELEASE'
+		springBootVersion = '2.0.4.RELEASE'
 	}
 	repositories {
 	   mavenLocal()
@@ -26,17 +26,15 @@ repositories {
 dependencies {
 	compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
 	testCompile('org.springframework.boot:spring-boot-starter-test')
+	libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
 }
 
+bootJar {
+	classifier = 'test'
+}
 
 liberty {
-    server {
-		configFile = file("src/main/liberty/config/server15.xml")
-        install.useOpenLiberty = false
-        looseApplication = false
-        dropins = [bootRepackage]
-        features {
-            acceptLicense = true
-        }
-    }
+	server {
+		configFile = file("src/main/liberty/config/server20.xml")
+	}
 }
