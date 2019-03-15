@@ -28,7 +28,9 @@ before_build:
         cd..
 
 build_script:
-  # Build the compiled extension
-  - "gradlew.bat install check -Druntime=%RUNTIME% -DruntimeVersion=%RUNTIME_VERSION% --stacktrace --info --no-daemon"
+    - cmd: |
+        gradlew.bat clean install check -Ptest.exclude="**/*15*" -Druntime=%RUNTIME% -DruntimeVersion=%RUNTIME_VERSION% --stacktrace --info --no-daemon
+        gradlew.bat wrapper --gradle-version 4.10
+        gradlew.bat clean install check -Ptest.include="**/*15*" -Druntime=%RUNTIME% -DruntimeVersion=%RUNTIME_VERSION% --stacktrace --info --no-daemon
 
 test: off
