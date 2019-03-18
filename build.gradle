@@ -86,6 +86,10 @@ artifacts {
 }
 
 test {
+    minHeapSize = "1G"
+    maxHeapSize = "1.5G"
+    jvmArgs '-Xmx2G'
+
     systemProperties System.getProperties()
     systemProperty 'runit', 'online'
 
