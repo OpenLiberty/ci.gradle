@@ -37,6 +37,7 @@ import java.nio.file.StandardCopyOption
 import java.text.MessageFormat
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import java.io.File
 
 class InstallAppsTask extends AbstractServerTask {
 
@@ -189,7 +190,7 @@ class InstallAppsTask extends AbstractServerTask {
         String sourceAppPath = getArchiveOutputPath()
         params.put('sourceAppPath', sourceAppPath)
         params.put('targetLibCachePath', getTargetLibCachePath())
-        String targetThinAppPath = getTargetThinAppPath(appsDir, "thin-" + sourceAppPath.substring(sourceAppPath.lastIndexOf("/") + 1))
+        String targetThinAppPath = getTargetThinAppPath(appsDir, "thin-" + sourceAppPath.substring(sourceAppPath.lastIndexOf(File.separator) + 1))
         params.put('targetThinAppPath', targetThinAppPath)
         project.ant.invokeUtil(params)
         return targetThinAppPath;
