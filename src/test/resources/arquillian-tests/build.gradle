@@ -80,7 +80,7 @@ dependencies {
     
     libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
 
-    if(Integer.parseInt(JavaVersion.current().toString()) >= 11) {
+    if(JavaVersion.current().isJava11()) {
         compile "javax.annotation:javax.annotation-api:1.3.2"
     }
 }
