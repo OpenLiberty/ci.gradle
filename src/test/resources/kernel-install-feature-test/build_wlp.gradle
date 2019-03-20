@@ -20,5 +20,5 @@ repositories {
 }
 
 dependencies {
-    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-kernel', version: '18.0.0.2'
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-kernel', version: runtimeVersion
 }

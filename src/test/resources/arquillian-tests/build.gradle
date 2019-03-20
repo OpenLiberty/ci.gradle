@@ -79,6 +79,10 @@ dependencies {
     arqRemote "io.openliberty.arquillian:arquillian-liberty-remote:1.0.3"
     
     libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
+
+    if(Integer.parseInt(JavaVersion.current().toString()) >= 11) {
+        compile "javax.annotation:javax.annotation-api:1.3.2"
+    }
 }
 
 check.dependsOn 'verifyMainAppManaged'

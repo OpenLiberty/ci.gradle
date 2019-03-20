@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-kernel', version: '18.0.0.2'
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-kernel', version: runtimeVersion
     libertyFeature 'io.openliberty.features:appSecurityClient-1.0:18.0.0.2'
     libertyFeature 'com.ibm.websphere.appserver.features:servlet-3.0:18.0.0.2'
 }
