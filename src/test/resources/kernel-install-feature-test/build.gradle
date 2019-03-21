@@ -20,5 +20,5 @@ repositories {
 }
 
 dependencies {
-    libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: '18.0.0.2'
+    libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: runtimeVersion
 }
