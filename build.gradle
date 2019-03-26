@@ -147,10 +147,14 @@ test {
         }
     }
     if (project.hasProperty('test.exclude')){
-        exclude project.property('test.exclude')
+        for (String pattern: project.property('test.exclude').split(',')) {
+            exclude pattern
+        }
     }
     if (project.hasProperty('test.include')){
-        include project.property('test.include')
+        for (String pattern: project.property('test.include').split(',')) {
+            include pattern
+        }
     }
 }
 

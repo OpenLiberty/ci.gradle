@@ -37,6 +37,7 @@ import java.nio.file.StandardCopyOption
 import java.text.MessageFormat
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import java.io.File
 
 class InstallAppsTask extends AbstractServerTask {
 
@@ -50,6 +51,7 @@ class InstallAppsTask extends AbstractServerTask {
             group 'Liberty'
             project.afterEvaluate {
                 springBootVersion = findSpringBootVersion(project)
+                springBootTask = findSpringBootTask(project, springBootVersion)
                 springBootBuildTask = determineSpringBootBuildTask()
             }
         })
@@ -103,18 +105,20 @@ class InstallAppsTask extends AbstractServerTask {
 
     private void installMultipleApps(List<Task> applications, String appsDir) {
         applications.each{ Task task ->
-          installProject(task, appsDir)
+            installProject(task, appsDir)
         }
     }
 
     private void installProjectArchive(Task task, String appsDir) {
-        if (task.name == 'bootJar' || task.name == 'bootRepackage') {
+        if("springboot".equals(getPackagingType())) {
+            String baseName = springBootTask.baseName
             installSpringBootFeatureIfNeeded()
-            invokeThinOperation(appsDir)
+            String targetThinAppPath = invokeThinOperation(appsDir)
+            validateAppConfig(targetThinAppPath.substring(targetThinAppPath.lastIndexOf("/") + 1), baseName, appsDir)
         } else {
             Files.copy(task.archivePath.toPath(), new File(getServerDir(project), "/" + appsDir + "/" + getArchiveName(task)).toPath(), StandardCopyOption.REPLACE_EXISTING)
+            validateAppConfig(getArchiveName(task), task.baseName, appsDir)
         }
-        validateAppConfig(getArchiveName(task), getBaseName(task), appsDir)
     }
 
     protected void validateAppConfig(String fileName, String artifactId, String dir) throws Exception {
@@ -140,22 +144,32 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
 
-    String getArchiveOutputPath() {
-        if (springBootVersion.startsWith('2')) {
-            return project.bootJar.archivePath.getAbsolutePath()
+    private String getArchiveOutputPath() {
+        String archiveOutputPath;
+
+        if (springBootVersion.startsWith('2.')) {
+            archiveOutputPath = springBootTask.archivePath.getAbsolutePath()
         }
-        else {
-            project.jar.archivePath.getAbsolutePath()
-            //TODO check for bootRepackageW.ithJarTask - return project.bootRepackage.withJarTask.archivePath.getAbsolutePath()
+        else if(springBootVersion.startsWith('1.')) {
+            archiveOutputPath = springBootTask.archivePath.getAbsolutePath()
+            if (project.bootRepackage.classifier != null && !project.bootRepackage.classifier.isEmpty()) {
+                archiveOutputPath = archiveOutputPath.substring(0, archiveOutputPath.lastIndexOf(".")) + "-" + project.bootRepackage.classifier + "." + springBootTask.extension
+            }
+        }
+
+        if(archiveOutputPath != null && net.wasdev.wlp.common.plugins.util.SpringBootUtil.isSpringBootUberJar(new File(archiveOutputPath))) {
+            return archiveOutputPath
+        } else {
+            throw new GradleException(archiveOutputPath + " is not a valid Spring Boot Uber JAR")
         }
     }
 
 
-    String getTargetLibCachePath() {
+    private String getTargetLibCachePath() {
         new File(getInstallDir(project), "usr/shared/resources/lib.index.cache").absolutePath
     }
 
-    String getTargetThinAppPath(String appsDir) {
+    private String getTargetThinAppPath(String appsDir, String sourceArchiveName) {
         String appsFolder
         if (appsDir=="dropins") {
             appsFolder = "dropins/spring"
@@ -163,21 +177,23 @@ class InstallAppsTask extends AbstractServerTask {
         else {
             appsFolder = "apps"
         }
-        String archiveName = springBootVersion.startsWith("2") ? springBootBuildTask.getArchiveName() : project.jar.getArchiveName()
-        new File(createApplicationFolder(appsFolder).absolutePath, archiveName)
+        new File(createApplicationFolder(appsFolder).absolutePath, sourceArchiveName)
     }
 
-    private invokeThinOperation(String appsDir) {
+    private String invokeThinOperation(String appsDir) {
         Map<String, String> params = buildLibertyMap(project);
 
         project.ant.taskdef(name: 'invokeUtil',
                 classname: 'net.wasdev.wlp.ant.SpringBootUtilTask',
                 classpath: project.buildscript.configurations.classpath.asPath)
 
-        params.put('sourceAppPath', getArchiveOutputPath())
+        String sourceAppPath = getArchiveOutputPath()
+        params.put('sourceAppPath', sourceAppPath)
         params.put('targetLibCachePath', getTargetLibCachePath())
-        params.put('targetThinAppPath', getTargetThinAppPath(appsDir))
+        String targetThinAppPath = getTargetThinAppPath(appsDir, "thin-" + sourceAppPath.substring(sourceAppPath.lastIndexOf(File.separator) + 1))
+        params.put('targetThinAppPath', targetThinAppPath)
         project.ant.invokeUtil(params)
+        return targetThinAppPath;
     }
 
     private isSpringBootUtilAvailable() {
@@ -202,36 +218,36 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
     private void installLooseApplication(Task task, String appsDir) throws Exception {
-      String looseConfigFileName = getLooseConfigFileName(task)
-      String application = looseConfigFileName.substring(0, looseConfigFileName.length()-4)
-      File destDir = new File(getServerDir(project), appsDir)
-      File looseConfigFile = new File(destDir, looseConfigFileName)
-      LooseConfigData config = new LooseConfigData()
-      switch(getPackagingType()){
-        case "war":
-            validateAppConfig(application, task.baseName, appsDir)
-            logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFile.getAbsolutePath()))
-            installLooseConfigWar(config, task)
-            deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
-            deleteApplication(new File(getServerDir(project), "dropins"), looseConfigFile)
-            config.toXmlFile(looseConfigFile)
-            break
-        case "ear":
-            if ((String.valueOf(project.getGradle().getGradleVersion().charAt(0)) as int) < 4) {
-                throw new Exception(MessageFormat.format(("Loose Ear is only supported by Gradle 4.0 or higher")))
-            }
-            validateAppConfig(application, task.baseName, appsDir)
-            logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFile.getAbsolutePath()))
-            installLooseConfigEar(config, task)
-            deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
-            deleteApplication(new File(getServerDir(project), "dropins"), looseConfigFile)
-            config.toXmlFile(looseConfigFile)
-            break
-        default:
-            logger.info(MessageFormat.format(("Loose application configuration is not supported for packaging type {0}. The project artifact will be installed as an archive file."),
-                    getPackagingType()))
-            installProjectArchive(task, appsDir)
-            break
+        String looseConfigFileName = getLooseConfigFileName(task)
+        String application = looseConfigFileName.substring(0, looseConfigFileName.length()-4)
+        File destDir = new File(getServerDir(project), appsDir)
+        File looseConfigFile = new File(destDir, looseConfigFileName)
+        LooseConfigData config = new LooseConfigData()
+        switch(getPackagingType()){
+            case "war":
+                validateAppConfig(application, task.baseName, appsDir)
+                logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFile.getAbsolutePath()))
+                installLooseConfigWar(config, task)
+                deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
+                deleteApplication(new File(getServerDir(project), "dropins"), looseConfigFile)
+                config.toXmlFile(looseConfigFile)
+                break
+            case "ear":
+                if ((String.valueOf(project.getGradle().getGradleVersion().charAt(0)) as int) < 4) {
+                    throw new Exception(MessageFormat.format(("Loose Ear is only supported by Gradle 4.0 or higher")))
+                }
+                validateAppConfig(application, task.baseName, appsDir)
+                logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFile.getAbsolutePath()))
+                installLooseConfigEar(config, task)
+                deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
+                deleteApplication(new File(getServerDir(project), "dropins"), looseConfigFile)
+                config.toXmlFile(looseConfigFile)
+                break
+            default:
+                logger.info(MessageFormat.format(("Loose application configuration is not supported for packaging type {0}. The project artifact will be installed as an archive file."),
+                        getPackagingType()))
+                installProjectArchive(task, appsDir)
+                break
         }
     }
 
@@ -244,7 +260,7 @@ class InstallAppsTask extends AbstractServerTask {
         }
 
         if (outputDir != null && !outputDir.exists() && hasJavaSourceFiles(task.classpath, outputDir)) {
-          logger.warn(MessageFormat.format("Installed loose application from project {0}, but the project has not been compiled.", project.name))
+            logger.warn(MessageFormat.format("Installed loose application from project {0}, but the project has not been compiled.", project.name))
         }
         LooseWarApplication looseWar = new LooseWarApplication(task, config)
         looseWar.addSourceDir()
@@ -268,32 +284,32 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
     private void addWarEmbeddedLib(Element parent, LooseWarApplication looseApp, Task task) throws Exception {
-      ArrayList<File> deps = new ArrayList<File>();
-      task.classpath.each {deps.add(it)}
-      //Removes WEB-INF/lib/main directory since it is not rquired in the xml
-      if(deps != null && !deps.isEmpty()) {
-        deps.remove(0)
-      }
-      File parentProjectDir = new File(task.getProject().getRootProject().rootDir.getAbsolutePath())
-      for (File dep: deps) {
-        String dependentProjectName = "project ':"+getProjectPath(parentProjectDir, dep)+"'"
-        Project siblingProject = project.getRootProject().findProject(dependentProjectName)
-        boolean isCurrentProject = ((task.getProject().toString()).equals(dependentProjectName))
-        if (!isCurrentProject && siblingProject != null){
-            Element archive = looseApp.addArchive(parent, "/WEB-INF/lib/"+ dep.getName());
-            looseApp.addOutputDirectory(archive, siblingProject, "/");
-            Task resourceTask = siblingProject.getTasks().findByPath(":"+dependentProjectName+":processResources");
-            if (resourceTask.getDestinationDir() != null){
-                looseApp.addOutputDir(archive, resourceTask.getDestinationDir(), "/");
-            }
-            File manifestFile = project.sourceSets.main.getOutput().getResourcesDir().getParentFile()
-            looseApp.addManifestFileWithParent(archive, manifestFile);
-        } else if(FilenameUtils.getExtension(dep.getAbsolutePath()).equalsIgnoreCase("jar")){
-            looseApp.getConfig().addFile(parent, dep, "/WEB-INF/lib/" + dep.getName());
-        } else {
-            looseApp.addOutputDir(looseApp.getDocumentRoot(), dep , "/WEB-INF/classes/");
+        ArrayList<File> deps = new ArrayList<File>();
+        task.classpath.each {deps.add(it)}
+        //Removes WEB-INF/lib/main directory since it is not rquired in the xml
+        if(deps != null && !deps.isEmpty()) {
+            deps.remove(0)
         }
-      }
+        File parentProjectDir = new File(task.getProject().getRootProject().rootDir.getAbsolutePath())
+        for (File dep: deps) {
+            String dependentProjectName = "project ':"+getProjectPath(parentProjectDir, dep)+"'"
+            Project siblingProject = project.getRootProject().findProject(dependentProjectName)
+            boolean isCurrentProject = ((task.getProject().toString()).equals(dependentProjectName))
+            if (!isCurrentProject && siblingProject != null){
+                Element archive = looseApp.addArchive(parent, "/WEB-INF/lib/"+ dep.getName());
+                looseApp.addOutputDirectory(archive, siblingProject, "/");
+                Task resourceTask = siblingProject.getTasks().findByPath(":"+dependentProjectName+":processResources");
+                if (resourceTask.getDestinationDir() != null){
+                    looseApp.addOutputDir(archive, resourceTask.getDestinationDir(), "/");
+                }
+                File manifestFile = project.sourceSets.main.getOutput().getResourcesDir().getParentFile()
+                looseApp.addManifestFileWithParent(archive, manifestFile);
+            } else if(FilenameUtils.getExtension(dep.getAbsolutePath()).equalsIgnoreCase("jar")){
+                looseApp.getConfig().addFile(parent, dep, "/WEB-INF/lib/" + dep.getName());
+            } else {
+                looseApp.addOutputDir(looseApp.getDocumentRoot(), dep , "/WEB-INF/classes/");
+            }
+        }
     }
 
     protected void installLooseConfigEar(LooseConfigData config, Task task) throws Exception{
@@ -319,19 +335,19 @@ class InstallAppsTask extends AbstractServerTask {
                 Project dependencyProject = dependency.getDependencyProject()
                 String projectType = FilenameUtils.getExtension(dependencyFile.toString())
                 switch (projectType) {
-                        case "jar":
-                        case "ejb":
-                        case "rar":
-                            looseEar.addJarModule(dependencyProject)
-                            break;
-                        case "war":
-                            Element warElement = looseEar.addWarModule(dependencyProject)
-                            addEmbeddedLib(warElement, dependencyProject, looseEar, "/WEB-INF/lib/")
-                            break;
-                        default:
-                            logger.warn('Application ' + dependencyProject.getName() + ' is expressed as ' + projectType + ' which is not a supported input type. Define applications using Task or File objects of type war, ear, or jar.')
-                            break;
-                    }
+                    case "jar":
+                    case "ejb":
+                    case "rar":
+                        looseEar.addJarModule(dependencyProject)
+                        break;
+                    case "war":
+                        Element warElement = looseEar.addWarModule(dependencyProject)
+                        addEmbeddedLib(warElement, dependencyProject, looseEar, "/WEB-INF/lib/")
+                        break;
+                    default:
+                        logger.warn('Application ' + dependencyProject.getName() + ' is expressed as ' + projectType + ' which is not a supported input type. Define applications using Task or File objects of type war, ear, or jar.')
+                        break;
+                }
             }
             else if (dependency instanceof ExternalModuleDependency) {
                 looseEar.getConfig().addFile(dependencyFile, "/WEB-INF/lib/" + it.getName())
@@ -364,17 +380,17 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
     private boolean isSupportedType(){
-      switch (getPackagingType()) {
-        case "ear":
-        case "war":
-        case "springboot":
-            return true;
-        default:
-            return false;
+        switch (getPackagingType()) {
+            case "ear":
+            case "war":
+            case "springboot":
+                return true;
+            default:
+                return false;
         }
     }
     private String getLooseConfigFileName(Task task){
-      return getArchiveName(task) + ".xml"
+        return getArchiveName(task) + ".xml"
     }
 
     //Cleans up the application if the install style is switched from loose application to archive and vice versa
@@ -422,3 +438,4 @@ class InstallAppsTask extends AbstractServerTask {
         return applicationDirectory
     }
 }
+

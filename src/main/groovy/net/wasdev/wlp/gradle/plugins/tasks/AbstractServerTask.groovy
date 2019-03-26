@@ -303,13 +303,6 @@ abstract class AbstractServerTask extends AbstractTask {
         return task.archiveName;
     }
 
-    protected String getBaseName(Task task) {
-        if (springBootVersion?.startsWith('1')) {
-            task = project.jar
-        }
-        return task.baseName;
-    }
-
     protected void configureApps(Project project) {
         if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
             if (!project.configurations.libertyApp.isEmpty()) {
@@ -522,6 +515,9 @@ abstract class AbstractServerTask extends AbstractTask {
 
     protected String getPackagingType() throws Exception{
       if (project.plugins.hasPlugin("war") || !project.tasks.withType(War).isEmpty()) {
+          if (project.plugins.hasPlugin("org.springframework.boot")) {
+              return "springboot"
+          }
           return "war"
       }
       else if (project.plugins.hasPlugin("ear") || !project.tasks.withType(Ear).isEmpty()) {
