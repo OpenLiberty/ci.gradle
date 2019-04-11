@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017.
+ * (C) Copyright IBM Corporation 2017, 2019.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,7 +149,7 @@ public class ServerConfigDocument {
             if (cfgDirFile != null) {
                 fProps = parseProperties(new FileInputStream(cfgDirFile));
                 props.putAll(fProps);
-            } else if (serverEnvFile.exists()) {
+            } else if (serverEnvFile != null && serverEnvFile.exists()) {
                 fProps = parseProperties(new FileInputStream(serverEnvFile));
                 props.putAll(fProps);
             }
@@ -161,7 +161,7 @@ public class ServerConfigDocument {
                 props.putAll(fProps);
             } else if (bootstrapProp != null && !bootstrapProp.isEmpty()) {
                 props.putAll(bootstrapProp);
-            } else if (bootstrapFile.exists()) {
+            } else if (bootstrapFile != null && bootstrapFile.exists()) {
                 fProps = parseProperties(new FileInputStream(bootstrapFile));
                 props.putAll(fProps);
             }

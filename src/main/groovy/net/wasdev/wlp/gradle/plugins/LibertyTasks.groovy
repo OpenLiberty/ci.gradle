@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2018.
+ * (C) Copyright IBM Corporation 2018, 2019.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,12 +77,12 @@ abstract class LibertyTasks {
             //check server.env files and set liberty.server.outputDir
             if (server.configDirectory != null) {
                 File serverEnvFile = new File(server.configDirectory, 'server.env')
-                if (serverEnvFile.exists()) {
+                if (serverEnvFile != null && server.serverEnv != null && server.serverEnv.exists()) {
                     serverEnvFile.text = serverEnvFile.text.replace("\\", "/")
                     envProperties.load(new FileInputStream(serverEnvFile))
                     setServerOutputDir(server, (String) envProperties.get("WLP_OUTPUT_DIR"))
                 }
-            } else if (server.serverEnv.exists()) {
+            } else if (server.serverEnv != null && server.serverEnv.exists()) {
                 server.serverEnv.text = server.serverEnv.text.replace("\\", "/")
                 envProperties.load(new FileInputStream(server.serverEnv))
                 setServerOutputDir(server, (String) envProperties.get("WLP_OUTPUT_DIR"))

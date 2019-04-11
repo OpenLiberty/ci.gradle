@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017.
+ * (C) Copyright IBM Corporation 2017, 2019.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,10 @@ class ServerExtension{
     boolean looseApplication = true
 
     File configDirectory
-    File configFile = new File("default")
-    File bootstrapPropertiesFile = new File("default")
-    File jvmOptionsFile = new File("default")
-    File serverEnv = new File("default")
+    File configFile
+    File bootstrapPropertiesFile
+    File jvmOptionsFile
+    File serverEnv
 
     Map<String, Object> bootstrapProperties
     List<String> jvmOptions
