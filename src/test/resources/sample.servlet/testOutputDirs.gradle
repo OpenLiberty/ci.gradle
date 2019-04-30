@@ -52,6 +52,8 @@ liberty {
     server{
         name = wlpServerName
 
+        configFile = file("src/main/liberty/config/server-dropins.xml")
+
         packageLiberty {
             archive = packageFile
             include = packagingType

@@ -6,7 +6,7 @@ import org.junit.BeforeClass
 import org.junit.Test
 
 public class TestCreateWithFiles extends AbstractIntegrationTest{
-    static File sourceDir = new File("build/resources/test/server-config")
+    static File sourceDir = new File("build/resources/test/server-config-files")
     static File testBuildDir = new File(integTestDir, "/test-create-with-files")
     static String buildFilename = "testCreateLibertyFiles.gradle"
 

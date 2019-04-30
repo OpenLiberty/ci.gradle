@@ -67,6 +67,8 @@ liberty {
         apps = [testWar]
 
         verifyAppStartTimeout = 30
+
+        configFile = file("src/main/liberty/config/server-dropins.xml")
     }
 }
 
