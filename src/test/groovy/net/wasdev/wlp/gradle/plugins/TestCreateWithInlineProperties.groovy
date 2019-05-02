@@ -6,7 +6,7 @@ import org.junit.BeforeClass
 import org.junit.Test
 
 public class TestCreateWithInlineProperties extends AbstractIntegrationTest{
-    static File sourceDir = new File("build/resources/test/server-config")
+    static File sourceDir = new File("build/resources/test/server-config-files")
     static File testBuildDir = new File(integTestDir, "/test-create-with-inline-properties")
     static String buildFilename = "testCreateLibertyInlineProperties.gradle"
 

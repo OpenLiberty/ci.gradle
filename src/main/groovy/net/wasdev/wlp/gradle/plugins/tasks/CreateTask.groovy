@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2018.
+ * (C) Copyright IBM Corporation 2014, 2019.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ class CreateTask extends AbstractServerTask {
     }
 
     File getLibertyPropertyFile(File libertyPropertyFile, String fileName) {
-        if (!libertyPropertyFile.toString().equals('default') && libertyPropertyFile.exists()) {
+        if (libertyPropertyFile != null && libertyPropertyFile.exists()) {
             return libertyPropertyFile
         } else if (server.configDirectory != null && new File(server.configDirectory, fileName).exists()) {
             return new File(server.configDirectory, fileName)

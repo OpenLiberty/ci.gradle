@@ -34,8 +34,8 @@ liberty {
         name = wlpServerName
 
         bootstrapPropertiesFile = file("src/main/liberty/config/bootstrap.test.properties")
-        jvmOptionsFile = file("src/main/liberty/config/jvm.options")
-        serverEnv = file("src/main/liberty/config/server.env")
+        jvmOptionsFile = file("src/main/liberty/config/jvm.test.options")
+        serverEnv = file("src/main/liberty/config/server.test.env")
     }
 }
 

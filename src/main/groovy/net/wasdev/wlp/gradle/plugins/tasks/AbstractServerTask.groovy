@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017.
+ * (C) Copyright IBM Corporation 2017, 2019.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,29 +101,6 @@ abstract class AbstractServerTask extends AbstractTask {
         }
     }
 
-    protected void setDefaults(Project project) {
-        if (server.configFile.toString().equals('default')) {
-            server.configFile = new File(project.projectDir.toString() + '/src/main/liberty/config/server.xml')
-        } else if (!server.configFile.exists()) {
-            logger.warn("The server configFile was configured but was not found at: ${server.configFile}")
-        }
-        if (server.bootstrapPropertiesFile.toString().equals('default')) {
-            server.bootstrapPropertiesFile = new File(project.projectDir.toString() + '/src/main/liberty/config/bootstrap.properties')
-        } else if (!server.bootstrapPropertiesFile.exists()) {
-            logger.warn("The bootstrapPropertiesFile was configured but was not found at: ${server.bootstrapPropertiesFile}")
-        }
-        if (server.jvmOptionsFile.toString().equals('default')) {
-            server.jvmOptionsFile = new File(project.projectDir.toString() + '/src/main/liberty/config/jvm.options')
-        } else if (!server.jvmOptionsFile.exists()) {
-            logger.warn("The server jvmOptionsFile was configured but was not found at: ${server.jvmOptionsFile}")
-        }
-        if(server.serverEnv.toString().equals('default')) {
-            server.serverEnv = new File(project.projectDir.toString() + '/src/main/liberty/config/server.env')
-        } else if (!server.serverEnv.exists()) {
-            logger.warn("The server serverEnv was configured but was not found at: ${server.serverEnv}")
-        }
-    }
-
     /**
      * @throws IOException
      * @throws FileNotFoundException
@@ -136,35 +113,32 @@ abstract class AbstractServerTask extends AbstractTask {
         String bootStrapPropertiesPath = null
         String serverEnvPath = null
 
-        setDefaults(project)
+        if (server.configDirectory == null) {
+            server.configDirectory = new File(project.projectDir, "src/main/liberty/config")
+        }
 
-        if (server.configDirectory != null) {
-            if(server.configDirectory.exists()){
-                // copy configuration files from configuration directory to server directory if end-user set it
-                FileUtils.copyDirectory(server.configDirectory, getServerDir(project))
+        if(server.configDirectory.exists()) {
+            // copy configuration files from configuration directory to server directory if end-user set it
+            FileUtils.copyDirectory(server.configDirectory, getServerDir(project))
 
-                File configDirServerXML = new File(server.configDirectory, "server.xml")
-                if (configDirServerXML.exists()) {
-                    serverXMLPath = configDirServerXML.getCanonicalPath()
-                }
-
-                File configDirJvmOptionsFile = new File(server.configDirectory, "jvm.options")
-                if (configDirJvmOptionsFile.exists()) {
-                    jvmOptionsPath = configDirJvmOptionsFile.getCanonicalPath()
-                }
-
-                File configDirBootstrapFile = new File(server.configDirectory, "bootstrap.properties")
-                if (configDirBootstrapFile.exists()) {
-                    bootStrapPropertiesPath = configDirBootstrapFile.getCanonicalPath()
-                }
-
-                File configDirServerEnv = new File(server.configDirectory, "server.env")
-                if (configDirServerEnv.exists()) {
-                    serverEnvPath = configDirServerEnv.getCanonicalPath()
-                }
+            File configDirServerXML = new File(server.configDirectory, "server.xml")
+            if (configDirServerXML.exists()) {
+                serverXMLPath = configDirServerXML.getCanonicalPath()
             }
-            else{
-                println('WARNING: The configDirectory attribute was configured but the directory is not found: ' + project.liberty.configDirectory.getCanonicalPath())
+
+            File configDirJvmOptionsFile = new File(server.configDirectory, "jvm.options")
+            if (configDirJvmOptionsFile.exists()) {
+                jvmOptionsPath = configDirJvmOptionsFile.getCanonicalPath()
+            }
+
+            File configDirBootstrapFile = new File(server.configDirectory, "bootstrap.properties")
+            if (configDirBootstrapFile.exists()) {
+                bootStrapPropertiesPath = configDirBootstrapFile.getCanonicalPath()
+            }
+
+            File configDirServerEnv = new File(server.configDirectory, "server.env")
+            if (configDirServerEnv.exists()) {
+                serverEnvPath = configDirServerEnv.getCanonicalPath()
             }
         }
 
