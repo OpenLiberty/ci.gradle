@@ -42,6 +42,7 @@ The following properties are supported for server configuration.
 | jvmOptionsFile| File | 2.0 | Location of the file containing JVM options to copy to the jvm.options file in the server instance. The default value is `/src/main/liberty/config/jvm.options`.| No|
 | looseApplication | boolean | 2.0 | Indicates to install application using loose application configuration so that war or ear files do not need to be regenerated for every application update. The loose application support for ear files requires Gradle 4.0 or higher.  The default is `true`. | No |
 | name | String | 2.0 | The name of the server instance to create. The default value is `defaultServer`. | No |
+| noPassword | boolean | 2.6.6 | Disable generation of the default keystore password by specifying the --no-password option when creating a new server. This option was added in 18.0.0.3. The default value is `false`. Only used with the `libertyCreate` task. | No |
 | serverEnv| File | 2.0 | Location of the file containing server environment variables to copy to the server.env file in the server instance. The default value is `/src/main/liberty/config/server.env`.| No |
 | stripVersion | boolean | 2.0 | Remove the artifact version when copying the application to Liberty runtime's application directory. The default value is false.  | No |
 | template | String | 1.0 | Name of the template to use when creating a new server. Only used with the `libertyCreate` task. | No |

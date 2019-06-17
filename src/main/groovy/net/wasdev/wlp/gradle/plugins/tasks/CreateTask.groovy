@@ -79,6 +79,9 @@ class CreateTask extends AbstractServerTask {
             if (server.template != null && server.template.length() != 0) {
                 params.put('template', server.template)
             }
+            if (server.noPassword) {
+                params.put('noPassword', server.noPassword)
+            }
             executeServerCommand(project, 'create', params)
         }
         copyConfigFiles()

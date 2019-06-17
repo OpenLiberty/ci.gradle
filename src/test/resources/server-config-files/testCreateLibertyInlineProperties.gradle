@@ -35,6 +35,7 @@ liberty {
 
         bootstrapProperties = ['default.http.port':'9083', 'default.https.port':'9474']
         jvmOptions = ['-Xms128m', '-Xmx512m']
+        noPassword = true
     }
 }
 
