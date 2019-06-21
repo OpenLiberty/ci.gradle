@@ -89,5 +89,21 @@ public class TestLooseApplication extends AbstractIntegrationTest{
               nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue());
     }
 
+    @Test
+    public void test_server_env_file_contains_keystore_password(){
+        def serverEnvFile = new File("build/testBuilds/test-loose-application/build/wlp/usr/servers/LibertyProjectServer/server.env")
+
+        assert serverEnvFile.exists() : "file not found"
+
+        // Verify the server.env file does contain a keystore_password entry
+        FileInputStream input = new FileInputStream(serverEnvFile);
+
+        Properties prop = new Properties();
+        prop.load( input );
+        String value = prop.getProperty("keystore_password");
+        assert value != null : "keystore_password property not found"
+
+    }
+
 
 }

@@ -43,6 +43,7 @@ class ServerExtension{
     boolean clean = false
     String timeout
     String template
+    boolean noPassword = false
 
     int verifyAppStartTimeout = 0
 
