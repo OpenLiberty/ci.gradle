@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2018.
+ * (C) Copyright IBM Corporation 2014, 2019.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package net.wasdev.wlp.gradle.plugins.tasks
 import org.gradle.api.logging.LogLevel
 
 import org.gradle.api.tasks.TaskAction
+import net.wasdev.wlp.ant.ServerTask
 
 class StopTask extends AbstractServerTask {
 
@@ -32,10 +33,12 @@ class StopTask extends AbstractServerTask {
     void stop() {
         if (isLibertyInstalled(project)) {
             if (getServerDir(project).exists()) {
-                executeServerCommand(project, 'stop', buildLibertyMap(project))
-        	} else {
-        	   logger.error ('There is no server to stop. The server has not been created.')
-        	}
+                ServerTask serverTaskStop = createServerTask(project, "stop");
+                serverTaskStop.setUseEmbeddedServer(server.embedded)
+                serverTaskStop.execute()
+            } else {
+        	logger.error ('There is no server to stop. The server has not been created.')
+            }
         } else {
             logger.error ('There is no server to stop. The runtime has not been installed.')
         }

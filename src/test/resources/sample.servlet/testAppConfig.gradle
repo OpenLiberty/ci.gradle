@@ -43,6 +43,7 @@ liberty {
     server{
         name = wlpServerName
         looseApplication = false
+        embedded = true
         packageLiberty {
             archive = packageFile
             include = packagingType

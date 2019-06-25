@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2018.
+ * (C) Copyright IBM Corporation 2014, 2019.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.logging.LogLevel
+import net.wasdev.wlp.ant.ServerTask
 
 class RunTask extends AbstractServerTask {
 
@@ -30,19 +31,26 @@ class RunTask extends AbstractServerTask {
 
     @TaskAction
     void run() {
-        List<String> command = buildCommand("run")
-        if (project.liberty.clean) {
-            command.add("--clean")
-        }
-        def pb = new ProcessBuilder(command)
-        pb.environment().put('WLP_USER_DIR', getUserDir(project).getCanonicalPath())
+        if (server.embedded) {
+            ServerTask serverTaskRun = createServerTask(project, "run");
+            serverTaskRun.setUseEmbeddedServer(server.embedded)
+            serverTaskRun.setClean(server.clean)
+            serverTaskRun.execute();
+        } else {
+            List<String> command = buildCommand("run")
+            if (project.liberty.clean) {
+                command.add("--clean")
+            }
+            def pb = new ProcessBuilder(command)
+            pb.environment().put('WLP_USER_DIR', getUserDir(project).getCanonicalPath())
 
-        def run_process = pb.redirectErrorStream(true).start()
-        addShutdownHook {
-            run_process.waitFor()
-        }
-        run_process.inputStream.eachLine {
-            println it
+            def run_process = pb.redirectErrorStream(true).start()
+            addShutdownHook {
+                run_process.waitFor()
+            }
+            run_process.inputStream.eachLine {
+                println it
+            }
         }
     }
 }
