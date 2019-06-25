@@ -174,11 +174,11 @@ pluginBundle {
 
 if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
     
-if (!version.endsWith("SNAPSHOT")) {
-        signing {
-            sign configurations.archives
-        }
+  if (!version.endsWith("SNAPSHOT")) {
+      signing {
+        sign configurations.archives
     }
+  }
 
   uploadArchives {
     repositories {
