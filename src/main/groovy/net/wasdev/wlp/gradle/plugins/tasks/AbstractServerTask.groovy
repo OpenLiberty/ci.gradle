@@ -532,7 +532,7 @@ abstract class AbstractServerTask extends AbstractTask {
         return appFiles
     }
 
-    protected ServerTask createServerTask(Project project, String operation) throws Exception {
+    protected ServerTask createServerTask(Project project, String operation) {
         ServerTask serverTask =  new ServerTask()
         serverTask.setOperation(operation)
         serverTask.setServerName(server.name)
