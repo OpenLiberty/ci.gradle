@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2018.
+ * (C) Copyright IBM Corporation 2014, 2019.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,21 +37,15 @@ class StartTask extends AbstractServerTask {
 
     @TaskAction
     void start() {
-
-        params = buildLibertyMap(project);
-        params.put('clean', server.clean)
-        if (server.timeout != null && server.timeout.length() != 0) {
-            params.put('timeout', server.timeout)
-        }
-        executeServerCommand(project, 'start', params)
+        ServerTask serverTaskStart = createServerTask(project, "start");
+        serverTaskStart.setUseEmbeddedServer(server.embedded)
+        serverTaskStart.setClean(server.clean)
+        serverTaskStart.execute();
 
         if (server != null && server.verifyAppStartTimeout > 0) {
-            ServerTask serverTask = new ServerTask()
-            serverTask.setInstallDir(params.get('installDir'))
-            serverTask.setServerName(params.get('serverName'))
-            serverTask.setUserDir(params.get('userDir'))
-            serverTask.setOutputDir(getOutputDir(params))
-            serverTask.initTask()
+            ServerTask serverTaskStop = createServerTask(project, "stop")
+            serverTaskStop.setUseEmbeddedServer(server.embedded)
+            serverTaskStop.initTask()
 
             def verifyAppStartTimeout = server.verifyAppStartTimeout
 
@@ -72,9 +66,9 @@ class StartTask extends AbstractServerTask {
 
             def verifyAppStartedThreads = appsToVerify.collect { String archiveName ->
                 Thread.start {
-                    String verify = serverTask.waitForStringInLog(START_APP_MESSAGE_REGEXP + archiveName, timeout, serverTask.getLogFile())
+                    String verify = serverTaskStop.waitForStringInLog(START_APP_MESSAGE_REGEXP + archiveName, timeout, serverTaskStop.getLogFile())
                     if (!verify) {
-                        executeServerCommand(project, 'stop', buildLibertyMap(project))
+                        serverTaskStop.execute()
                         throw new GradleException("The server has been stopped. Unable to verify if the server was started after ${verifyAppStartTimeout} seconds.")
                     }
                 }
