@@ -7,3 +7,4 @@ bin/
 build
 *~
 *.DS_STORE
+gradle.properties

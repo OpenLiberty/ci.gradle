@@ -158,12 +158,6 @@ test {
     }
 }
 
-if (!version.endsWith("SNAPSHOT")) {
-    signing {
-        sign configurations.archives
-    }
-}
-
 pluginBundle {
   website = 'https://github.com/WASdev/ci.gradle'
   vcsUrl = 'https://github.com/WASdev/ci.gradle'
@@ -179,6 +173,13 @@ pluginBundle {
 }
 
 if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
+    
+  if (!version.endsWith("SNAPSHOT")) {
+      signing {
+        sign configurations.archives
+    }
+  }
+
   uploadArchives {
     repositories {
       mavenDeployer {
