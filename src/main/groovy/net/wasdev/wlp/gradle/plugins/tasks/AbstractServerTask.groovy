@@ -17,7 +17,9 @@ package net.wasdev.wlp.gradle.plugins.tasks
 
 import groovy.xml.StreamingMarkupBuilder
 import net.wasdev.wlp.common.plugins.config.ApplicationXmlDocument
-import net.wasdev.wlp.gradle.plugins.utils.ServerConfigDocument
+import net.wasdev.wlp.common.plugins.config.ServerConfigDocument
+import net.wasdev.wlp.gradle.plugins.utils.CommonLogger
+
 import org.apache.commons.io.FileUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -256,7 +258,7 @@ abstract class AbstractServerTask extends AbstractTask {
         File serverConfigFile = new File(getServerDir(project), 'server.xml')
         if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
-                ServerConfigDocument scd = new ServerConfigDocument(serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, server.bootstrapProperties, server.serverEnv)
+                ServerConfigDocument scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(), serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, convertBootstrapProperties(server.bootstrapProperties), server.serverEnv);
                 if (scd != null && scd.getLocations().contains(fileName)) {
                     logger.debug("Application configuration is found in server.xml : " + fileName)
                     configured = true
@@ -267,6 +269,25 @@ abstract class AbstractServerTask extends AbstractTask {
             }
         }
         return configured
+    }
+
+    // Gradle passes the properties from the configuration as Strings and Integers and maybe Booleans.
+    // Need to convert to the String values for those Objects before passing along to ServerConfigDocument.
+    protected Map<String,String> convertBootstrapProperties(Map<String,Object> props) {
+        if (props == null) {
+            return null
+        }
+
+        Map<String,String> returnProps = new HashMap<String,String> ()
+
+        for (Map.Entry<String,String> entry : props.entrySet()) {
+            String key = entry.getKey()
+            Object value = entry.getValue()
+            if (value != null) {
+                returnProps.put(key,value.toString())
+            }
+        }
+        return returnProps
     }
     
     protected String getArchiveName(Task task){

@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2018.
+ * (C) Copyright IBM Corporation 2014, 2019.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import net.wasdev.wlp.gradle.plugins.utils.*
 import net.wasdev.wlp.common.plugins.config.ApplicationXmlDocument
 import net.wasdev.wlp.common.plugins.config.LooseApplication
 import net.wasdev.wlp.common.plugins.config.LooseConfigData
+import net.wasdev.wlp.common.plugins.config.ServerConfigDocument
 
 import org.apache.commons.io.FilenameUtils
 import org.gradle.api.GradleException
@@ -99,6 +100,7 @@ class InstallAppsTask extends AbstractServerTask {
         } else {
             if (libertyConfigDropinsAppXml.exists()){
                 libertyConfigDropinsAppXml.delete()
+                ServerConfigDocument.markInstanceStale()
             }
         }
     }
