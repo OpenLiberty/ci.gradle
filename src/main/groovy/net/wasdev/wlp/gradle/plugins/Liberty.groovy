@@ -69,6 +69,8 @@ class Liberty implements Plugin<Project> {
             }
             //Checking serverEnv files for server properties
             Liberty.checkEtcServerEnvProperties(project)
+
+            setEclipseClasspath(project)
         }
     }
 
@@ -101,6 +103,25 @@ class Liberty implements Plugin<Project> {
                 def jstFacet = facets.find { it.type.name() == 'installed' && it.name == facetName && Double.parseDouble(it.version) < Double.parseDouble(version) }
                 if (jstFacet != null) {
                     jstFacet.version = version
+                }
+            }
+        }
+    }
+    
+    protected void setEclipseClasspath(Project project) {
+        if(project.plugins.hasPlugin('war')) {
+            //Configuring the Eclipse classpath to use the same directory as the war plugin for its output
+            //Using the default war/java plugin value
+            File warTaskOutput = new File("build/classes/java/main")
+            project.eclipse.classpath {
+                defaultOutputDir = warTaskOutput
+                file.whenMerged {
+                    entries.each {
+                        source ->
+                            if (source.kind == 'src' && source.hasProperty('output')) {
+                                source.output = warTaskOutput
+                            }
+                    }
                 }
             }
         }
