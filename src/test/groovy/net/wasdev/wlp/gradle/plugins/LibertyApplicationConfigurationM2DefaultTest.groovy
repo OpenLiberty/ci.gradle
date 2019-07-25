@@ -21,12 +21,12 @@ import org.junit.BeforeClass
 import org.junit.Test
 import java.io.File
 
-// Test that the appLocation variable in server.xml with a default value is not used for the 
-// location of the application when overridden by a bootstrapProperties property in the build.gradle
-class LibertyApplicationConfigurationM2Test extends AbstractIntegrationTest {
-    static File resourceDir = new File("build/resources/test/app-configuration-m2-test")
-    static File buildDir = new File(integTestDir, "/LibertyApplicationConfigurationM2Test")
-    static String buildFilename = "appConfigurationM2Test.gradle"
+// Test that the appLocation variable in server.xml with a default value is used for the location of the 
+// application when a value is not provided elsewhere (bootstrap props, server.xml, include file, etc)
+class LibertyApplicationConfigurationM2DefaultTest extends AbstractIntegrationTest {
+    static File resourceDir = new File("build/resources/test/app-configuration-m2-default-test")
+    static File buildDir = new File(integTestDir, "/LibertyApplicationConfigurationM2DefaultTest")
+    static String buildFilename = "appConfigurationM2DefaultTest.gradle"
     static String CONFIG_DROPINS_XML="build/wlp/usr/servers/defaultServer/configDropins/defaults/install_apps_configuration_1491924271.xml"
 
     @BeforeClass
@@ -48,8 +48,9 @@ class LibertyApplicationConfigurationM2Test extends AbstractIntegrationTest {
         assert new File(buildDir, 'build/wlp/usr/servers/defaultServer/apps/test-maven-war-1.0-SNAPSHOT.war').exists()
     }
 
+
     @Test
-    public void testApplicationNotConfiguredInConfigDropins() {
+    public void testApplicationNotConfiguredInConfigDropins()  {
         assert !(new File(buildDir, CONFIG_DROPINS_XML).exists())
     }
 
