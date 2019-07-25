@@ -10,7 +10,7 @@ apply plugin: "com.gradle.plugin-publish"
 
 archivesBaseName = 'liberty-gradle-plugin'
 group = 'net.wasdev.wlp.gradle.plugins'
-version = '2.6.6-SNAPSHOT'
+version = '2.7-SNAPSHOT'
 
 repositories {
     mavenLocal()
