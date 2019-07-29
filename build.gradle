@@ -10,7 +10,7 @@ apply plugin: "com.gradle.plugin-publish"
 
 archivesBaseName = 'liberty-gradle-plugin'
 group = 'net.wasdev.wlp.gradle.plugins'
-version = '2.6.6-SNAPSHOT'
+version = '2.7-SNAPSHOT'
 
 repositories {
     mavenLocal()
@@ -174,56 +174,58 @@ pluginBundle {
 
 if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
     
-  if (!version.endsWith("SNAPSHOT")) {
-      signing {
-        sign configurations.archives
+    if (!version.endsWith("SNAPSHOT")) {
+        signing {
+            sign configurations.archives
+        }
+    } else {
+        signing.required = false
     }
-  }
 
-  uploadArchives {
-    repositories {
-      mavenDeployer {
-        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-        repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-          authentication(userName: ossrhUsername, password: ossrhPassword)
-        }
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
 
-        snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-          authentication(userName: ossrhUsername, password: ossrhPassword)
-        }
+                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
 
-        pom.project {
-          name 'liberty-gradle-plugin'
-          packaging 'jar'
-          description 'Liberty Gradle Plug-in.'
-          url 'https://wasdev.github.io'
+                pom.project {
+                    name 'liberty-gradle-plugin'
+                    packaging 'jar'
+                    description 'Liberty Gradle Plug-in.'
+                    url 'https://wasdev.github.io'
 
-          scm {
-            connection 'scm:git:git@github.com:WASdev/ci.gradle.git'
-            developerConnection 'scm:git:git@github.com:WASdev/ci.gradle.git'
-            url 'git@github.com:WASdev/ci.gradle.git'
-            tag 'HEAD'
-          }
+                    scm {
+                        connection 'scm:git:git@github.com:WASdev/ci.gradle.git'
+                        developerConnection 'scm:git:git@github.com:WASdev/ci.gradle.git'
+                        url 'git@github.com:WASdev/ci.gradle.git'
+                        tag 'HEAD'
+                    }
 
-          licenses {
-            license {
-              name 'The Apache Software License, Version 2.0'
-              url 'https://raw.github.com/WASdev/ci.gradle/master/LICENSE'
+                    licenses {
+                        license {
+                            name 'The Apache Software License, Version 2.0'
+                            url 'https://raw.github.com/WASdev/ci.gradle/master/LICENSE'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'jgawor'
+                            name 'Jarek Gawor'
+                            email 'jgawor@gmail.com'
+                        }
+                    }
+                }
             }
-          }
-
-          developers {
-            developer {
-              id 'jgawor'
-              name 'Jarek Gawor'
-              email 'jgawor@gmail.com'
-            }
-          }
         }
-      }
     }
-  }
 }
 
 groovydoc.enabled = false
