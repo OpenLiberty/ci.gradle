@@ -178,6 +178,7 @@ if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')
         signing {
             def signingKey = findProperty("signingKey")
             def signingPassword = findProperty("signingPassword")
+            useInMemoryPgpKeys(signingKey, signingPassword)
             sign configurations.archives
         }
     } else {
