@@ -176,6 +176,8 @@ if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')
     
     if (!version.endsWith("SNAPSHOT")) {
         signing {
+            def signingKey = findProperty("signingKey")
+            def signingPassword = findProperty("signingPassword")
             sign configurations.archives
         }
     } else {
