@@ -176,7 +176,6 @@ if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')
     
     if (!version.endsWith("SNAPSHOT")) {
         signing {
-            ext."signing.keyId" = findProperty("signingKey")
             ext."signing.password" = findProperty("signingPassword")
             sign configurations.archives
         }
