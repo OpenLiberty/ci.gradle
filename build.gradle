@@ -172,7 +172,9 @@ pluginBundle {
   }
 }
 
-project.ext.set("signing.password", findProperty("signingPassword"))
+ext."signing.password"=findProperty("signingPassword")
+//
+// project.ext.set("signing.password", findProperty("signingPassword"))
 
 if (!version.endsWith("SNAPSHOT")) {
     assert project.signing.password != null
