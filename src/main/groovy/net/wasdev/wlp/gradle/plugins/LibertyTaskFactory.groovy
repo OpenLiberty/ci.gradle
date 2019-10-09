@@ -23,6 +23,7 @@ import net.wasdev.wlp.gradle.plugins.tasks.StopTask
 import net.wasdev.wlp.gradle.plugins.tasks.StatusTask
 import net.wasdev.wlp.gradle.plugins.tasks.CreateTask
 import net.wasdev.wlp.gradle.plugins.tasks.RunTask
+import net.wasdev.wlp.gradle.plugins.tasks.DevTask
 import net.wasdev.wlp.gradle.plugins.tasks.PackageTask
 import net.wasdev.wlp.gradle.plugins.tasks.DumpTask
 import net.wasdev.wlp.gradle.plugins.tasks.JavaDumpTask
@@ -47,6 +48,7 @@ class LibertyTaskFactory {
         project.tasks.create('compileJSP', CompileJSPTask)
         project.tasks.create('installLiberty', InstallLibertyTask)
         project.tasks.create('libertyRun', RunTask)
+        project.tasks.create('libertyDev', DevTask)
         project.tasks.create('libertyStatus', StatusTask)
         project.tasks.create('libertyCreate', CreateTask)
         project.tasks.create('libertyStart', StartTask)
