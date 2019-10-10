@@ -67,6 +67,8 @@ class DevTask extends AbstractServerTask {
             SourceSet mainSourceSet = project.sourceSets.main;
             SourceSet testSourceSet = project.sourceSets.test;
 
+            runGradleTask(gradleBuildLauncher, 'libertyStart');
+
             println 'srcDirs';
             println mainSourceSet.java.srcDirs;
             println testSourceSet.java.srcDirs;
@@ -74,8 +76,6 @@ class DevTask extends AbstractServerTask {
             println 'outputDir'
             println mainSourceSet.java.outputDir;
             println testSourceSet.java.outputDir;
-
-            runGradleTask(gradleBuildLauncher, 'libertyStart');
 
         } finally {
             connection.close();
