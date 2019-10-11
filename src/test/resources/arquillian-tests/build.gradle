@@ -71,12 +71,12 @@ dependencies {
     compile ('javax.enterprise:cdi-api:1.2')
    
     testCompile "net.wasdev.wlp.common:ci.common:1.2"
-    testCompile group: "io.openliberty.arquillian", name: "arquillian-liberty-managed-junit", version: "1.1.1"
+    testCompile group: "io.openliberty.arquillian", name: "arquillian-liberty-managed-junit", version: "1.1.6"
     testCompile ('org.jboss.shrinkwrap:shrinkwrap-api')
     testCompile files("${System.properties['java.home']}/../lib/tools.jar")
 
-    arqManaged "io.openliberty.arquillian:arquillian-liberty-managed:1.0.3"
-    arqRemote "io.openliberty.arquillian:arquillian-liberty-remote:1.0.3"
+    arqManaged "io.openliberty.arquillian:arquillian-liberty-managed:1.0.6"
+    arqRemote "io.openliberty.arquillian:arquillian-liberty-remote:1.0.6"
     
     libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
 
