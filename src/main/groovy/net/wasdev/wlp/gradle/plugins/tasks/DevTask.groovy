@@ -29,7 +29,6 @@ import org.gradle.tooling.GradleConnector
 
 import java.util.concurrent.ThreadPoolExecutor;
 
-
 import net.wasdev.wlp.ant.ServerTask
 
 import net.wasdev.wlp.gradle.plugins.tasks.StartTask
@@ -47,6 +46,17 @@ class DevTask extends AbstractServerTask {
             group 'Liberty'
         })
     }
+
+    private static final String TEST_RUN_ID_PROPERTY_NAME = "liberty.dev.test.run.id";
+    private static final String LIBERTY_HOSTNAME = "liberty.hostname";
+    private static final String LIBERTY_HTTP_PORT = "liberty.http.port";
+    private static final String LIBERTY_HTTPS_PORT = "liberty.https.port";
+    private static final String MICROSHED_HOSTNAME = "microshed_hostname";
+    private static final String MICROSHED_HTTP_PORT = "microshed_http_port";
+    private static final String MICROSHED_HTTPS_PORT = "microshed_https_port";
+    private static final String WLP_USER_DIR_PROPERTY_NAME = "wlp.user.dir";
+
+    DevTaskUtil util = null;
 
     /**
      * Hot tests
@@ -317,6 +327,7 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public ServerTask getDebugServerTask() throws Exception {
+
         }
 
         @Override
@@ -335,6 +346,7 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public boolean recompileBuildFile(File buildFile, List<String> artifactPaths, ThreadPoolExecutor executor) {
+
         }
 
         @Override
