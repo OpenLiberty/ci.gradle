@@ -16,8 +16,8 @@
 package net.wasdev.wlp.gradle.plugins.tasks
 
 import groovy.xml.StreamingMarkupBuilder
-import net.wasdev.wlp.common.plugins.config.ApplicationXmlDocument
-import net.wasdev.wlp.common.plugins.config.ServerConfigDocument
+import io.openliberty.tools.common.plugins.config.ApplicationXmlDocument
+import io.openliberty.tools.common.plugins.config.ServerConfigDocument
 import net.wasdev.wlp.gradle.plugins.utils.CommonLogger
 
 import org.apache.commons.io.FileUtils
@@ -32,7 +32,7 @@ import java.nio.file.StandardCopyOption
 
 import org.apache.commons.io.FilenameUtils
 
-import net.wasdev.wlp.ant.ServerTask
+import io.openliberty.tools.ant.ServerTask
 
 abstract class AbstractServerTask extends AbstractTask {
 
@@ -52,7 +52,7 @@ abstract class AbstractServerTask extends AbstractTask {
 
     protected void executeServerCommand(Project project, String command, Map<String, String> params) {
         project.ant.taskdef(name: 'server',
-                            classname: 'net.wasdev.wlp.ant.ServerTask',
+                            classname: 'io.openliberty.tools.ant.ServerTask',
                             classpath: project.buildscript.configurations.classpath.asPath)
         params.put('operation', command)
         project.ant.server(params)

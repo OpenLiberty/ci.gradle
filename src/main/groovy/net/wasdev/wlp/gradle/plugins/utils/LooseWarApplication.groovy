@@ -6,9 +6,9 @@ import org.gradle.api.plugins.WarPluginConvention
 import org.gradle.api.Task
 import org.gradle.api.tasks.bundling.War
 
-import net.wasdev.wlp.common.plugins.config.LooseConfigData
-import net.wasdev.wlp.common.plugins.util.PluginExecutionException
-import net.wasdev.wlp.common.plugins.config.LooseApplication
+import io.openliberty.tools.common.plugins.config.LooseConfigData
+import io.openliberty.tools.common.plugins.util.PluginExecutionException
+import io.openliberty.tools.common.plugins.config.LooseApplication
 
 public class LooseWarApplication extends LooseApplication {
     

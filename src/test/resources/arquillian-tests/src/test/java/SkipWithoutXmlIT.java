@@ -24,7 +24,7 @@ import java.io.InputStreamReader;
 
 import org.junit.Test;
 
-import net.wasdev.wlp.common.arquillian.util.Constants;
+import io.openliberty.tools.common.arquillian.util.Constants;
 
 /**
  * Only included in the skip-without-xml Maven profile.

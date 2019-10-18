@@ -37,7 +37,7 @@ class CleanTask extends AbstractServerTask {
         params.put('apps', server.cleanDir.apps)
         params.remove('timeout')
         project.ant.taskdef(name: 'cleanDir',
-                            classname: 'net.wasdev.wlp.ant.CleanTask',
+                            classname: 'io.openliberty.tools.ant.CleanTask',
                             classpath: project.buildscript.configurations.classpath.asPath)
         project.ant.cleanDir(params)
     }

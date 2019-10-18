@@ -10,9 +10,9 @@ import org.gradle.api.artifacts.Dependency
 import org.w3c.dom.Element;
 import org.apache.commons.io.FilenameUtils
 
-import net.wasdev.wlp.common.plugins.config.LooseConfigData
-import net.wasdev.wlp.common.plugins.util.PluginExecutionException
-import net.wasdev.wlp.common.plugins.config.LooseApplication
+import io.openliberty.tools.common.plugins.config.LooseConfigData
+import io.openliberty.tools.common.plugins.util.PluginExecutionException
+import io.openliberty.tools.common.plugins.config.LooseApplication
 
 public class LooseEarApplication extends LooseApplication {
     

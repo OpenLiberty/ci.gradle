@@ -19,9 +19,9 @@ import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.Task
 import org.gradle.api.logging.LogLevel
-import net.wasdev.wlp.ant.ServerTask
+import io.openliberty.tools.ant.ServerTask
 import net.wasdev.wlp.gradle.plugins.utils.*
-import net.wasdev.wlp.common.plugins.config.ServerConfigDocument
+import io.openliberty.tools.common.plugins.config.ServerConfigDocument
 import net.wasdev.wlp.gradle.plugins.utils.CommonLogger
 
 import java.io.File
