@@ -35,6 +35,6 @@ bootRepackage {
 
 liberty {
 	server {
-		configFile = file("src/main/liberty/config/server15.xml")
+		serverXmlFile = file("src/main/liberty/config/server15.xml")
 	}
 }

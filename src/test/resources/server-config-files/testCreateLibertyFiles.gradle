@@ -35,8 +35,8 @@ liberty {
 
         bootstrapPropertiesFile = file("src/test/resources/bootstrap.test.properties")
         jvmOptionsFile = file("src/test/resources/jvm.test.options")
-        serverEnv = file("src/test/resources/server.test.env")
-        configFile = file("src/test/resources/server.xml")
+        serverEnvFile = file("src/test/resources/server.test.env")
+        serverXmlFile = file("src/test/resources/server.xml")
     }
 }
 

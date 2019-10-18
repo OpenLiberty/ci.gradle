@@ -146,11 +146,11 @@ abstract class AbstractServerTask extends AbstractTask {
             }
         }
 
-        // configFile takes precedence over server.xml from configDirectory
+        // serverXmlFile takes precedence over server.xml from configDirectory
         // copy configuration file to server directory if end-user set it.
-        if (server.configFile != null && server.configFile.exists()) {
-            Files.copy(server.configFile.toPath(), new File(serverDirectory, "server.xml").toPath(), StandardCopyOption.REPLACE_EXISTING)
-            serverXMLPath = server.configFile.getCanonicalPath()
+        if (server.serverXmlFile != null && server.serverXmlFile.exists()) {
+            Files.copy(server.serverXmlFile.toPath(), new File(serverDirectory, "server.xml").toPath(), StandardCopyOption.REPLACE_EXISTING)
+            serverXMLPath = server.serverXmlFile.getCanonicalPath()
         }
 
         // jvmOptions and jvmOptionsFile take precedence over jvm.options from configDirectory
@@ -173,10 +173,10 @@ abstract class AbstractServerTask extends AbstractTask {
             bootStrapPropertiesPath = server.bootstrapPropertiesFile.getCanonicalPath()
         }
 
-        // serverEnv takes precedence over server.env from configDirectory
-        if (server.serverEnv != null && server.serverEnv.exists()) {
-            Files.copy(server.serverEnv.toPath(), new File(serverDirectory, "server.env").toPath(), StandardCopyOption.REPLACE_EXISTING)
-            serverEnvPath = server.serverEnv.getCanonicalPath()
+        // serverEnvFile takes precedence over server.env from configDirectory
+        if (server.serverEnvFile != null && server.serverEnvFile.exists()) {
+            Files.copy(server.serverEnvFile.toPath(), new File(serverDirectory, "server.env").toPath(), StandardCopyOption.REPLACE_EXISTING)
+            serverEnvPath = server.serverEnvFile.getCanonicalPath()
         }
 
         // log info on the configuration files that get used
@@ -211,8 +211,8 @@ abstract class AbstractServerTask extends AbstractTask {
             serverNode.appendNode('configDirectory', server.configDirectory.toString())
         }
 
-        if (server.configFile != null && server.configFile.exists()) {
-            serverNode.appendNode('configFile', server.configFile.toString())
+        if (server.serverXmlFile != null && server.serverXmlFile.exists()) {
+            serverNode.appendNode('configFile', server.serverXmlFile.toString())
         }
 
         if (server.bootstrapProperties != null && !server.bootstrapProperties.isEmpty()) {
@@ -235,8 +235,8 @@ abstract class AbstractServerTask extends AbstractTask {
             serverNode.appendNode('jvmOptionsFile', server.jvmOptionsFile.toString())
         }
 
-        if (server.serverEnv != null && server.serverEnv.exists()) {
-            serverNode.appendNode('serverEnv', server.serverEnv.toString())
+        if (server.serverEnvFile != null && server.serverEnvFile.exists()) {
+            serverNode.appendNode('serverEnv', server.serverEnvFile.toString())
         }
 
         serverNode.appendNode('looseApplication', server.looseApplication)
@@ -250,7 +250,7 @@ abstract class AbstractServerTask extends AbstractTask {
         File serverConfigFile = new File(getServerDir(project), 'server.xml')
         if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
-                ServerConfigDocument scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(), serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, convertBootstrapProperties(server.bootstrapProperties), server.serverEnv, false);
+                ServerConfigDocument scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(), serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, convertBootstrapProperties(server.bootstrapProperties), server.serverEnvFile, false);
                 if (scd != null && scd.getLocations().contains(fileName)) {
                     logger.debug("Application configuration is found in server.xml : " + fileName)
                     configured = true

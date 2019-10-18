@@ -34,7 +34,7 @@ liberty {
         serverName = 'libertyOffline'
     }
     server{
-        configFile = file("src/main/liberty/config/server-installFeature-test.xml")
+        serverXmlFile = file("src/main/liberty/config/server-installFeature-test.xml")
         name = serverName
         features {
             acceptLicense = true

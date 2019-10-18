@@ -51,7 +51,7 @@ war {
 
 liberty {
     server {
-        configFile = file("${rootProject.projectDir}/src/test/resources/server.xml")
+        serverXmlFile = file("${rootProject.projectDir}/src/test/resources/server.xml")
         name = 'LibertyProjectServer'
     }
 }

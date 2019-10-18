@@ -31,7 +31,7 @@ dependencies {
 
 liberty {
     server {
-		configFile = file("src/main/liberty/config/server20.xml")
+	serverXmlFile = file("src/main/liberty/config/server20.xml")
         install.useOpenLiberty = false
         looseApplication = false
         dropins = [bootJar]

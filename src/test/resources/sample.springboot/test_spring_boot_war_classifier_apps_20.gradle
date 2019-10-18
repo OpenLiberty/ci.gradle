@@ -35,6 +35,6 @@ bootWar {
 
 liberty {
 	server {
-		configFile = file("src/main/liberty/config/server20.xml")
+		serverXmlFile = file("src/main/liberty/config/server20.xml")
 	}
 }

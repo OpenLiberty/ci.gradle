@@ -36,7 +36,6 @@ The following properties are supported for server configuration.
 | bootstrapPropertiesFile| File | 2.0 | Location of the file containing server properties to copy to the bootstrap.properties file in the server instance.| No |
 | clean | boolean | 1.0 | Clean all cached information on server start up. It deletes every file in the `${wlp_output_dir}/logs`, `${wlp_output_dir}/workarea`, `${wlp_user_dir}/dropins` or `${wlp_user_dir}/apps`. The default value is `false`. Only used with the `libertyStart` and `libertyRun` tasks. | No |
 | configDirectory| File | 2.0 | Location of a server configuration directory to be used by the server instance. Configuration files and folder structure will be copied to the server instance. Files specified by other server extension properties will take precedence over files located in the configDirectory. The default value is `/src/main/liberty/config`. | No|
-| configFile| File | 2.0 | Location of the `server.xml` file used by the server instance.| No|
 | embedded | boolean | 2.7 | Whether the server is [embedded](https://www.ibm.com/support/knowledgecenter/SSD28V_9.0.0/com.ibm.websphere.wlp.core.doc/ae/twlp_extend_embed.html) in the Gradle JVM. If not, the server will run as a separate process. The default value is `false`. Only used with the `libertyStart`, `libertyRun` and `libertyStop` tasks.| No |
 | jvmOptions| List | 2.0 | Inline `List` of jvm options that is written to the jvm.options file in the server directory. These properties take precedence over a specified jvm.options file.| No|
 | jvmOptionsFile| File | 2.0 | Location of the file containing JVM options to copy to the jvm.options file in the server instance.| No|
@@ -44,7 +43,8 @@ The following properties are supported for server configuration.
 | name | String | 2.0 | The name of the server instance to create. The default value is `defaultServer`. | No |
 | noPassword | boolean | 2.7 | Disable generation of the default keystore password by specifying the --no-password option when creating a new server. This option was added in 18.0.0.3. The default value is `false`. Only used with the `libertyCreate` task. | No |
 | outputDir | String | 1.0 | Value of the `${wlp_output_dir}` variable. The default value is `${installDir}/usr/servers/${serverName}`. | No |
-| serverEnv| File | 2.0 | Location of the file containing server environment variables to copy to the server.env file in the server instance.| No |
+| serverEnvFile | File | 3.0 | Location of the file containing server environment variables to copy to the server.env file in the server instance. This replaces the serverEnv property.| No |
+| serverXmlFile | File | 3.0 | Location of the `server.xml` file used by the server instance. This replaces the configFile parameter.| No|
 | stripVersion | boolean | 2.0 | Remove the artifact version when copying the application to Liberty runtime's application directory. The default value is false.  | No |
 | template | String | 1.0 | Name of the template to use when creating a new server. Only used with the `libertyCreate` task. | No |
 | timeout | String | 1.0 | Waiting time before the server starts. The default value is 30 seconds. The unit is seconds. Only used with `libertyStart` and `deploy` tasks. | No |
