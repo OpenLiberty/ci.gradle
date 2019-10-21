@@ -31,11 +31,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import net.wasdev.wlp.ant.ServerTask
 
-import net.wasdev.wlp.gradle.plugins.tasks.StartTask
-
 import net.wasdev.wlp.common.plugins.util.DevUtil
 import net.wasdev.wlp.common.plugins.util.PluginExecutionException
 import net.wasdev.wlp.common.plugins.util.PluginScenarioException
+import net.wasdev.wlp.common.plugins.util.ServerFeatureUtil
 
 class DevTask extends AbstractServerTask {
 
@@ -47,21 +46,11 @@ class DevTask extends AbstractServerTask {
         })
     }
 
-    private static final String TEST_RUN_ID_PROPERTY_NAME = "liberty.dev.test.run.id";
-    private static final String LIBERTY_HOSTNAME = "liberty.hostname";
-    private static final String LIBERTY_HTTP_PORT = "liberty.http.port";
-    private static final String LIBERTY_HTTPS_PORT = "liberty.https.port";
-    private static final String MICROSHED_HOSTNAME = "microshed_hostname";
-    private static final String MICROSHED_HTTP_PORT = "microshed_http_port";
-    private static final String MICROSHED_HTTPS_PORT = "microshed_https_port";
-    private static final String WLP_USER_DIR_PROPERTY_NAME = "wlp.user.dir";
-
     DevTaskUtil util = null;
 
     /**
      * Hot tests
      */
-    @Input
     private boolean hotTests = false;
 
     @Option(option = 'hotTests', description = 'TODO')
@@ -72,7 +61,6 @@ class DevTask extends AbstractServerTask {
     /**
      * Skip tests
      */
-    @Input
     private boolean skipTests = false;
 
     @Option(option = 'skipTests', description = 'Skip tests.')
@@ -83,7 +71,6 @@ class DevTask extends AbstractServerTask {
     /**
      * Skip unit tests
      */
-    @Input
     private boolean skipUTs = false;
 
     @Option(option = 'skipUTs', description = 'Skip unit tests.')
@@ -94,7 +81,6 @@ class DevTask extends AbstractServerTask {
     /**
      * Skip integration tests
      */
-    @Input
     private boolean skipITs = false;
 
     @Option(option = 'skipITs', description = 'Skip integration tests.')
@@ -105,7 +91,6 @@ class DevTask extends AbstractServerTask {
     /**
      * Debug
      */
-    @Input
     private boolean libertyDebug = true;
 
     @Option(option = 'debug', description = 'TODO')
@@ -116,7 +101,6 @@ class DevTask extends AbstractServerTask {
     /**
      * Debug Port
      */
-    @Input
     private int libertyDebugPort = 7777;
 
     @Option(option = 'debugPort', description = 'Liberty debug port.')
@@ -129,7 +113,6 @@ class DevTask extends AbstractServerTask {
     /**
      * Time in seconds to wait before processing Java changes and deletions.
      */
-    @Input
     private double compileWait = 0.5;
 
     @Option(option = 'compileWait', description = 'Time in seconds to wait before processing Java changes and deletions.')
@@ -142,13 +125,12 @@ class DevTask extends AbstractServerTask {
     private int runId = 0;
 
     private ServerTask serverTask = null;
-    
+
     // private Plugin boostPlugin = null;
 
     /**
      * Time in seconds to wait while verifying that the application has started.
      */
-    @Input
     private int verifyTimeout = 30;
 
     @Option(option = 'verifyTimeout', description = 'Time in seconds to wait while verifying that the application has started.')
@@ -161,7 +143,6 @@ class DevTask extends AbstractServerTask {
     /**
      * Time in seconds to wait while verifying that the application has updated.
      */
-    @Input
     private int appUpdateTimeout = 5;
 
     @Option(option = 'appUpdateTimeout', description = 'Time in seconds to wait while verifying that the application has updated.')
@@ -174,7 +155,6 @@ class DevTask extends AbstractServerTask {
     /**
      * Time in seconds to wait while verifying that the server has started.
      */
-    @Input
     private int serverStartTimeout = 30;
 
     @Option(option = 'serverStartTimeout', description = 'Time in seconds to wait while verifying that the server has started.')
@@ -187,7 +167,6 @@ class DevTask extends AbstractServerTask {
     /**
      * comma separated list of app names to wait for
      */
-    @Input
     private String applications;
 
     @Option(option = 'applications', description = 'Comma separated list of app names to wait for')
@@ -198,7 +177,6 @@ class DevTask extends AbstractServerTask {
     /**
      * Clean all cached information on server start up.
      */
-    @Input
     private boolean clean = false;
 
     @Option(option = 'clean', description = 'Clean all cached information on server start up.')
@@ -206,72 +184,194 @@ class DevTask extends AbstractServerTask {
         this.clean = clean;
     }
 
-    /**
-     * The directory for source files.
-     */
-    @Input
-    private String sourceDirectoryString
 
-    @Input
-    private File sourceDirectory
-
-    @Option(option = 'sourceDirectory', description = 'The directory for source files.')
-    void setSourceDirectory(String sourceDirectoryString) {
-        this.sourceDirectoryString = sourceDirectoryString;
-        this.sourceDirectory = new File(sourceDirectoryString);
-    }
-
-    /**
-     * The directory for test source files.
-     */
-    @Input
-    private String testSourceDirectoryString
-    
-    @Input
-    private File testSourceDirectory
-
-    @Option(option = 'testSourceDirectory', description = 'The directory for test source files.')
-    void setSestSourceDirectory(String testSourceDirectoryString) {
-        this.testSourceDirectoryString = testSourceDirectoryString;
-        this.testSourceDirectory = new File(testSourceDirectoryString);
-    }
-
-    
-    /**
-     * The directory for compiled classes.
-     */
-    @Input
-    private File outputDirectory;
-
-    @Option(option = 'outputDirectory', description = 'The directory for test source files.')
-    void setOutputDirectory(String outputDirectoryString) {
-        this.outputDirectory = new File(outputDirectoryString);
-    }
-
-    /**
-     * The directory for compiled test classes.
-     */
-    @Input
-    private File testOutputDirectory;
-
-    @Option(option = 'testOutputDirectory', description = 'The directory for compiled test classes.')
-    void setTestOutputDirectory(String testOutputDirectoryString) {
-        this.testOutputDirectory = new File(testOutputDirectoryString);
-    }
-
-    
     private class DevTaskUtil extends DevUtil {
-        public DevTaskUtil(
-            File serverDirectory, File sourceDirectory, File testSourceDirectory, File configDirectory,
-                List<File> resourceDirs
-                ) throws IOException {
-            // super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs, hotTests,
-            //         skipTests, skipUTs, skipITs, project.getArtifactId(), verifyTimeout, appUpdateTimeout,
-            //         ((long) (compileWait * 1000L)), libertyDebug);
 
-            // ServerFeature servUtil = getServerFeatureUtil();
-            // this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
+        Set<String> existingFeatures;
+
+        DevTaskUtil(
+            File serverDirectory, File sourceDirectory, File testSourceDirectory, File configDirectory,
+                List<File> resourceDirs, boolean hotTests, boolean  skipTests, boolean skipUTs, boolean skipITs, String applicationId, int appUpdateTimeout
+                ) throws IOException {
+            super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs, hotTests, skipTests, skipUTs, skipITs, applicationId, appUpdateTimeout);
+            ServerFeature servUtil = getServerFeatureUtil();
+            this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
         }
+
+        @Override
+        public void debug(String msg) {
+            logger.warn(msg); // TODO: Change these back to proper method
+        }
+
+        @Override
+        public void debug(String msg, Throwable e) {
+            logger.warn(msg, e);
+        }
+
+        @Override
+        public void debug(Throwable e) {
+            logger.warn(e);
+        }
+
+        @Override
+        public void warn(String msg) {
+            logger.warn(msg);
+        }
+
+        @Override
+        public void info(String msg) {
+            logger.warn(msg);
+        }
+
+        @Override
+        public void error(String msg) {
+            logger.error(msg);
+        }
+
+        @Override
+        public void error(String msg, Throwable e) {
+            logger.error(msg, e);
+        }
+
+        @Override
+        public boolean isDebugEnabled() {
+            return logger.isEnabled(LogLevel.DEBUG);
+        }
+
+        @Override
+        public void stopServer() {
+            if (isLibertyInstalled(project)) {
+                if (getServerDir(project).exists()) {
+                    ServerTask serverTaskStop = createServerTask(project, "stop");
+                    serverTaskStop.setUseEmbeddedServer(server.embedded)
+                    serverTaskStop.execute()
+                } else {
+                    logger.error ('There is no server to stop. The server has not been created.')
+                }
+            } else {
+                logger.error ('There is no server to stop. The runtime has not been installed.')
+            }
+        }
+
+        @Override
+        public ServerTask getDebugServerTask() throws Exception {
+            ServerTask serverTaskStart = createServerTask(project, "start");
+            serverTaskStart.setUseEmbeddedServer(server.embedded)
+            serverTaskStart.setClean(server.clean)
+            serverTaskStart.execute();
+
+            return serverTaskStart;
+        }
+
+        @Override
+        public List<String> getArtifacts() {
+
+        }
+
+        @Override
+        public boolean recompileBuildFile(File buildFile, List<String> artifactPaths, ThreadPoolExecutor executor) {
+        }
+
+        @Override
+        public void checkConfigFile(File configFile, File serverDir) {
+        }
+
+        @Override
+        public boolean compile(File dir) {
+        }
+
+        @Override
+        public void runUnitTests() throws PluginExecutionException, PluginScenarioException {
+        }
+
+        @Override
+        public void runIntegrationTests() throws PluginExecutionException, PluginScenarioException {
+        }
+    }
+
+    void runGradleTask(BuildLauncher buildLauncher, String ... tasks) {
+        buildLauncher.forTasks(tasks);
+        buildLauncher.run();
+    }
+
+    @TaskAction
+    void action() {
+        // https://docs.gradle.org/current/userguide/embedding.html Tooling API docs
+        // Represents a long-lived connection to a Gradle project.
+        ProjectConnection connection = GradleConnector.newConnector()
+            .forProjectDirectory(new File("."))
+            .connect();
+
+        try {
+            // configure a gradle build launcher
+            // you can reuse the launcher to launch additional builds.
+            BuildLauncher gradleBuildLauncher = connection.newBuild()
+                .setStandardOutput(System.out)
+                .setStandardError(System.err);
+
+            SourceSet mainSourceSet = project.sourceSets.main;
+            SourceSet testSourceSet = project.sourceSets.test;
+
+            File sourceDirectory = mainSourceSet.java.srcDirs.iterator().next()
+            File testSourceDirectory = testSourceSet.java.srcDirs.iterator().next()
+            File outputDirectory = mainSourceSet.java.outputDir;
+            File testOutputDirectory = testSourceSet.java.outputDir;
+            File serverDirectory = getServerDir(project);
+            File configDirectory = new File(project.projectDir, "src/main/liberty/config");
+            List<File> resourceDirs = mainSourceSet.resources.srcDirs.toArray()
+
+            String artifactId = '' // TODO: Find where to get this
+
+            println "Hot tests: " + this.hotTests
+            println "Skip tests: " + this.skipTests
+            println "SKip UTs: " + this.skipUTs
+            println "Skip ITs: " + this.skipITs
+            println "libertyDebug: " + this.libertyDebug
+            println "libertyDebugPort: " + this.libertyDebugPort
+            println "Compile wait: " + this.compileWait
+            println "verifyTimeout: " + this.verifyTimeout
+            println "appUpdateTimeout: " + this.appUpdateTimeout
+            println "serverStartTimeout: " + this.serverStartTimeout
+            println "applications" + this.applications
+            println "clean: " + this.clean
+            println "Server directory" + serverDirectory;
+            println "Config directory" + configDirectory;
+            println "Source directory: " + sourceDirectory;
+            println "Output directory: " + outputDirectory;
+            println"Test Source directory: " + testSourceDirectory;
+            println"Test Output directory: " + testOutputDirectory;
+            println"Resource directories" + resourceDirs;
+
+            runGradleTask(gradleBuildLauncher, 'compileJava');
+            runGradleTask(gradleBuildLauncher, 'processResources');
+            runGradleTask(gradleBuildLauncher, 'compileTestJava');
+            runGradleTask(gradleBuildLauncher, 'processTestResources');
+
+//            final ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+//                new ArrayBlockingQueue<Runnable>(1, true));
+
+            util = new DevTaskUtil(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs, this.hotTests, this.skipTests, this.skipUTs, this.skipITs, artifactId, this.appUpdateTimeout);
+//            util.addShutdownHook(executor);
+            util.startServer(this.serverStartTimeout, this.verifyTimeout);
+
+//          runGradleTask(gradleBuildLauncher, 'libertyStart');
+
+        } finally {
+            connection.close();
+        }
+    }
+
+
+    private static ServerFeature serverFeatureUtil;
+
+    private ServerFeature getServerFeatureUtil() {
+        if (serverFeatureUtil == null) {
+            serverFeatureUtil = new ServerFeature();
+        }
+        return serverFeatureUtil;
+    }
+
+    private class ServerFeature extends ServerFeatureUtil {
 
         @Override
         public void debug(String msg) {
@@ -296,159 +396,6 @@ class DevTask extends AbstractServerTask {
         @Override
         public void info(String msg) {
             logger.info(msg);
-        }
-
-        @Override
-        public void error(String msg) {
-            logger.error(msg);
-        }
-
-        @Override
-        public void error(String msg, Throwable e) {
-            logger.error(msg, e);
-        }
-
-        @Override
-        public boolean isDebugEnabled() {
-            return logger.isEnabled(LogLevel.DEBUG);
-        }
-
-        @Override
-        public void stopServer() {
-            // try {
-            //     ServerTask serverTask = initializeJava();
-            //     serverTask.setOperation("stop");
-            //     serverTask.execute();
-            // } catch (Exception e) {
-            //     // ignore
-            //     log.debug("Error stopping server", e);
-            // }
-        }
-
-        @Override
-        public ServerTask getDebugServerTask() throws Exception {
-
-        }
-
-        @Override
-        public List<String> getArtifacts() {
-            // List<String> artifactPaths = new ArrayList<String>();
-            // Set<Artifact> artifacts = project.getArtifacts();
-            // for (Artifact artifact : artifacts) {
-            //     try {
-            //         artifactPaths.add(artifact.getFile().getCanonicalPath());
-            //     } catch (IOException e) {
-            //         log.error("Unable to resolve project artifact " + e.getMessage());
-            //     }
-            // }
-            // return artifactPaths;
-        }
-
-        @Override
-        public boolean recompileBuildFile(File buildFile, List<String> artifactPaths, ThreadPoolExecutor executor) {
-
-        }
-
-        @Override
-        public void checkConfigFile(File configFile, File serverDir) {
-            
-        }
-
-        @Override
-        public boolean compile(File dir) {
-        }
-
-        @Override
-        public void runUnitTests() throws PluginExecutionException, PluginScenarioException {
-            // try {
-            //     runTestMojo("org.apache.maven.plugins", "maven-surefire-plugin", "test");
-            //     runTestMojo("org.apache.maven.plugins", "maven-surefire-report-plugin", "report-only");
-            // } catch (MojoExecutionException e) {
-            //     Throwable cause = e.getCause();
-            //     if (cause != null && cause instanceof MojoFailureException) {
-            //         throw new PluginScenarioException("Unit tests failed: " + cause.getLocalizedMessage(), e);
-            //     } else {
-            //         throw new PluginExecutionException("Failed to run unit tests", e);
-            //     }
-            // }
-        }
-
-        @Override
-        public void runIntegrationTests() throws PluginExecutionException, PluginScenarioException {
-            // try {
-            //     runTestMojo("org.apache.maven.plugins", "maven-failsafe-plugin", "integration-test");
-            //     runTestMojo("org.apache.maven.plugins", "maven-surefire-report-plugin", "failsafe-report-only");
-            //     runTestMojo("org.apache.maven.plugins", "maven-failsafe-plugin", "verify");
-            // } catch (MojoExecutionException e) {
-            //     Throwable cause = e.getCause();
-            //     if (cause != null && cause instanceof MojoFailureException) {
-            //         throw new PluginScenarioException("Integration tests failed: " + cause.getLocalizedMessage(), e);
-            //     } else {
-            //         throw new PluginExecutionException("Failed to run integration tests", e);
-            //     }
-            // }
-        }
-    }
-
-    void runGradleTask(BuildLauncher buildLauncher, String ... tasks) {
-        buildLauncher.forTasks(tasks);
-        buildLauncher.run();
-    }
-
-    @TaskAction
-    void action() {
-        // https://docs.gradle.org/current/userguide/embedding.html Tooling API docs
-        // Represents a long-lived connection to a Gradle project.
-        ProjectConnection connection = GradleConnector.newConnector()
-            .forProjectDirectory(new File("."))
-            .connect();
-
-        try {
-            // configure a gradle build launcher
-            // you can reuse the launcher to launch additional builds.
-            BuildLauncher gradleBuildLauncher = connection.newBuild()
-                .setStandardOutput(System.out)
-                .setStandardError(System.err);
-
-            // runGradleTask(gradleBuildLauncher, 'compileJava');
-            // runGradleTask(gradleBuildLauncher, 'processResources');
-            // runGradleTask(gradleBuildLauncher, 'compileTestJava');
-            // runGradleTask(gradleBuildLauncher, 'processTestResources');
-
-            // SourceSet mainSourceSet = project.sourceSets.main;
-            // SourceSet testSourceSet = project.sourceSets.test;
-            // println 'srcDirs';
-            // println mainSourceSet.java.srcDirs;
-            // println testSourceSet.java.srcDirs;
-
-            // println 'outputDir'
-            // println mainSourceSet.java.outputDir;
-            // println testSourceSet.java.outputDir;
-
-            println this.hotTests
-            println this.skipTests
-            println this.skipUTs
-            println this.skipITs
-            println this.libertyDebug
-            println this.libertyDebugPort
-            println this.compileWait
-            println this.verifyTimeout
-            println this.appUpdateTimeout
-            println this.serverStartTimeout
-            println this.applications
-            println this.clean
-            println this.sourceDirectoryString
-            println this.testSourceDirectoryString
-
-            // runGradleTask(gradleBuildLauncher, 'libertyStart');
-            // println 'SLEEPING';
-            // sleep(15 * 1000); 
-            // runGradleTask(gradleBuildLauncher, 'libertyStop');
-            // runGradleTask(gradleBuildLauncher, 'libertyStart');
-
-
-        } finally {
-            connection.close();
         }
 
     }
