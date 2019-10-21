@@ -68,7 +68,7 @@ liberty {
 
         verifyAppStartTimeout = 30
 
-        configFile = file("src/main/liberty/config/server-dropins.xml")
+        serverXmlFile = file("src/main/liberty/config/server-dropins.xml")
     }
 }
 

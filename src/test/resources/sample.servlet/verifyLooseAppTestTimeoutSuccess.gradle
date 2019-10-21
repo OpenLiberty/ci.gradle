@@ -41,7 +41,7 @@ ext {
 
 liberty {
     server{
-        configFile = file("src/main/liberty/config/server-loose-config-test.xml")
+        serverXmlFile = file("src/main/liberty/config/server-loose-config-test.xml")
 
         name = wlpServerName
         stripVersion = true

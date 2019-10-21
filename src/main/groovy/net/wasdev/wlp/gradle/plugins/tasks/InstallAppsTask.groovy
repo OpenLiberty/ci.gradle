@@ -16,10 +16,10 @@
 package net.wasdev.wlp.gradle.plugins.tasks
 
 import net.wasdev.wlp.gradle.plugins.utils.*
-import net.wasdev.wlp.common.plugins.config.ApplicationXmlDocument
-import net.wasdev.wlp.common.plugins.config.LooseApplication
-import net.wasdev.wlp.common.plugins.config.LooseConfigData
-import net.wasdev.wlp.common.plugins.config.ServerConfigDocument
+import io.openliberty.tools.common.plugins.config.ApplicationXmlDocument
+import io.openliberty.tools.common.plugins.config.LooseApplication
+import io.openliberty.tools.common.plugins.config.LooseConfigData
+import io.openliberty.tools.common.plugins.config.ServerConfigDocument
 
 import org.apache.commons.io.FilenameUtils
 import org.gradle.api.GradleException
@@ -159,7 +159,7 @@ class InstallAppsTask extends AbstractServerTask {
             }
         }
 
-        if(archiveOutputPath != null && net.wasdev.wlp.common.plugins.util.SpringBootUtil.isSpringBootUberJar(new File(archiveOutputPath))) {
+        if(archiveOutputPath != null && io.openliberty.tools.common.plugins.util.SpringBootUtil.isSpringBootUberJar(new File(archiveOutputPath))) {
             return archiveOutputPath
         } else {
             throw new GradleException(archiveOutputPath + " is not a valid Spring Boot Uber JAR")
@@ -186,7 +186,7 @@ class InstallAppsTask extends AbstractServerTask {
         Map<String, String> params = buildLibertyMap(project);
 
         project.ant.taskdef(name: 'invokeUtil',
-                classname: 'net.wasdev.wlp.ant.SpringBootUtilTask',
+                classname: 'io.openliberty.tools.ant.SpringBootUtilTask',
                 classpath: project.buildscript.configurations.classpath.asPath)
 
         String sourceAppPath = getArchiveOutputPath()

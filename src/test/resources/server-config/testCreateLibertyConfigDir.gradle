@@ -33,7 +33,7 @@ liberty {
     server{
         name = wlpServerName
 
-        configDirectory = file("${project.projectDir}/src/main/liberty/config")
+        configDirectory = file("${project.projectDir}/src/test/resources")
     }
 }
 

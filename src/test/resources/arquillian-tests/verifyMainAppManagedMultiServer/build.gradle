@@ -23,11 +23,11 @@ liberty{
     installDir = "${buildDir}/wlp"
     servers {
         libertyProjectServer1 {
-            configFile = file("${rootProject.projectDir}/src/test/resources/server.xml")
+            serverXmlFile = file("${rootProject.projectDir}/src/test/resources/server.xml")
             apps = [rootProject.war]
         }
         libertyProjectServer2 {
-            configFile = file("${rootProject.projectDir}/src/test/resources/server.xml")
+            serverXmlFile = file("${rootProject.projectDir}/src/test/resources/server.xml")
             apps = [rootProject.war]
         }
     }

@@ -19,7 +19,7 @@ apply plugin: 'war'
 
 liberty {
     server {
-      configFile = file("src/resources/server.xml")
+      serverXmlFile = file("src/resources/server.xml")
       stripVersion = true
       jspVersion = 2.2
       jspCompileTimeout = 35

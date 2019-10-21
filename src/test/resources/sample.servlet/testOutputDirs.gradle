@@ -52,14 +52,14 @@ liberty {
     server{
         name = wlpServerName
 
-        configFile = file("src/main/liberty/config/server-dropins.xml")
+        serverXmlFile = file("src/main/liberty/config/server-dropins.xml")
 
         packageLiberty {
             archive = packageFile
             include = packagingType
         }
 
-        serverEnv = file("src/main/liberty/config/testOutputDir-server.env")
+        serverEnvFile = file("src/main/liberty/config/testOutputDir-server.env")
         looseApplication = false
         apps = [file('build/libs/testWar-1.war')]
 
