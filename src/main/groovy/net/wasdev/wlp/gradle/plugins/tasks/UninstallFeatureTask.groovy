@@ -38,7 +38,7 @@ class UninstallFeatureTask extends AbstractServerTask {
             params.remove('timeout')
 
             project.ant.taskdef(name: 'uninstallFeature',
-                                classname: 'net.wasdev.wlp.ant.UninstallFeatureTask',
+                                classname: 'io.openliberty.tools.ant.UninstallFeatureTask',
                                 classpath: project.buildscript.configurations.classpath.asPath)
             project.ant.uninstallFeature(params)
         } else {

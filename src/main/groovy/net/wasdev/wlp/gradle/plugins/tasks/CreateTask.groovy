@@ -46,8 +46,8 @@ class CreateTask extends AbstractServerTask {
     }
 
     @InputFile @Optional
-    File getConfigFile() {
-        return getLibertyPropertyFile(server.configFile, 'server.xml')
+    File getServerXmlFile() {
+        return getLibertyPropertyFile(server.serverXmlFile, 'server.xml')
     }
 
     @InputFile @Optional
@@ -62,7 +62,7 @@ class CreateTask extends AbstractServerTask {
 
     @InputFile @Optional
     File getServerEnvFile() {
-        return getLibertyPropertyFile(server.serverEnv, 'server.env')
+        return getLibertyPropertyFile(server.serverEnvFile, 'server.env')
     }
 
     @InputFile

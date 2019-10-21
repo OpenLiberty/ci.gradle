@@ -75,17 +75,17 @@ abstract class LibertyTasks {
         if (server.outputDir == null) {
             Properties envProperties = new Properties()
             //check server.env files and set liberty.server.outputDir
-            if (server.configDirectory != null) {
+            if (server.serverEnvFile != null && server.serverEnvFile.exists()) {
+                server.serverEnvFile.text = server.serverEnvFile.text.replace("\\", "/")
+                envProperties.load(new FileInputStream(server.serverEnvFile))
+                setServerOutputDir(server, (String) envProperties.get("WLP_OUTPUT_DIR"))
+            } else if (server.configDirectory != null) {
                 File serverEnvFile = new File(server.configDirectory, 'server.env')
-                if (serverEnvFile != null && server.serverEnv != null && server.serverEnv.exists()) {
+                if (serverEnvFile != null && serverEnvFile.exists()) {
                     serverEnvFile.text = serverEnvFile.text.replace("\\", "/")
                     envProperties.load(new FileInputStream(serverEnvFile))
                     setServerOutputDir(server, (String) envProperties.get("WLP_OUTPUT_DIR"))
                 }
-            } else if (server.serverEnv != null && server.serverEnv.exists()) {
-                server.serverEnv.text = server.serverEnv.text.replace("\\", "/")
-                envProperties.load(new FileInputStream(server.serverEnv))
-                setServerOutputDir(server, (String) envProperties.get("WLP_OUTPUT_DIR"))
             }
         }
     }

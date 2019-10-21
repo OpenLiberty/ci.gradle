@@ -34,7 +34,7 @@ class DeployTask extends AbstractServerTask {
         def deployClosureDeclared = false
 
         project.ant.taskdef(name: 'deploy',
-                                classname: 'net.wasdev.wlp.ant.DeployTask',
+                                classname: 'io.openliberty.tools.ant.DeployTask',
                                 classpath: project.buildscript.configurations.classpath.asPath)
 
         server.deploy.listOfClosures.add(project.liberty.deploy)

@@ -19,9 +19,9 @@ import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.Task
 import org.gradle.api.logging.LogLevel
-import net.wasdev.wlp.ant.ServerTask
+import io.openliberty.tools.ant.ServerTask
 import net.wasdev.wlp.gradle.plugins.utils.*
-import net.wasdev.wlp.common.plugins.config.ServerConfigDocument
+import io.openliberty.tools.common.plugins.config.ServerConfigDocument
 import net.wasdev.wlp.gradle.plugins.utils.CommonLogger
 
 import java.io.File
@@ -86,7 +86,7 @@ class StartTask extends AbstractServerTask {
         File serverConfigFile = new File(getServerDir(project), 'server.xml')
         if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
-                ServerConfigDocument scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(), serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, convertBootstrapProperties(server.bootstrapProperties), server.serverEnv);
+                ServerConfigDocument scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(), serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, convertBootstrapProperties(server.bootstrapProperties), server.serverEnvFile, false);
                 if (scd != null) {
                     appNames = scd.getNames()
                     appNames += scd.getNamelessLocations().collect { String location ->

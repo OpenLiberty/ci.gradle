@@ -22,7 +22,7 @@ import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 
-import net.wasdev.wlp.common.plugins.util.InstallFeatureUtil
+import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
 
 class KernelInstallFeatureTest extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/kernel-install-feature-test")

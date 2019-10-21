@@ -30,5 +30,11 @@ public class TestCreateWithConfigDir extends AbstractIntegrationTest{
         assert configFile.exists() : "file not found"
         assert bootstrapFile.exists() : "file not found"
         assert jvmOptionsFile.exists() : "file not found"
+
+        assert bootstrapFile.text.equals(new File("build/testBuilds/test-create-with-config-dir/src/test/resources/bootstrap.properties").text) : "bootstrap.properties file did not copy properly"
+        assert jvmOptionsFile.text.equals(new File("build/testBuilds/test-create-with-config-dir/src/test/resources/jvm.options").text) : "jvm.options file did not copy properly"
+        assert serverEnvFile.text.equals(new File("build/testBuilds/test-create-with-config-dir/src/test/resources/server.env").text) : "server.env file did not copy properly"
+        assert configFile.text.equals(new File("build/testBuilds/test-create-with-config-dir/src/test/resources/server.xml").text) : "server.xml file did not copy properly"
+
     }
 }

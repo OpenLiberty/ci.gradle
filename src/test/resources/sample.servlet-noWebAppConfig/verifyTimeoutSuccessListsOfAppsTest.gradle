@@ -56,7 +56,7 @@ task war4(type:War){
 liberty {
     server{
         name = wlpServerName
-        configFile = file("src/main/liberty/config/server-list-test.xml")
+        serverXmlFile = file("src/main/liberty/config/server-list-test.xml")
         packageLiberty {
             archive = packageFile
             include = packagingType

@@ -21,7 +21,7 @@ import org.junit.BeforeClass
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runners.MethodSorters
-import net.wasdev.wlp.ant.ServerTask
+import io.openliberty.tools.ant.ServerTask
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class LibertyTest extends AbstractIntegrationTest{

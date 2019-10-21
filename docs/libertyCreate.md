@@ -18,14 +18,14 @@ Server configuration parameters were added to the [server extension](libertyExte
 
 These examples show you different ways to configure servers in your scripts:
 
-1. Configure using `configDirectory`. This is useful when you need to copy multiple files such as `server.xml`, `bootstrap.properties`, and included configuration files.
+1. Configure using `configDirectory`. This is useful when you need to copy multiple files such as `server.xml`, `bootstrap.properties`, and included configuration files. Alternatively, you can place your configuration files in the default location for `configDirectory` which is `src/main/liberty/config`.
 
 ```groovy
 apply plugin: 'liberty'
 
 liberty {
     server {
-        configDirectory = file('src/main/liberty/config')
+        configDirectory = file('src/resources/config')
     }
 }
 ```
@@ -48,10 +48,10 @@ apply plugin: 'liberty'
 
 liberty {
     server {
-        configFile = file('src/main/liberty/config/server-test1.xml')
-        bootstrapPropertiesFile = file('src/main/liberty/config/bootstrap.properties')
-        jvmOptionsFile = file('src/main/liberty/config/jvm.options')
-        serverEnv = file('src/main/liberty/config/server.env')
+        serverXmlFile = file('src/resources/config/server-test1.xml')
+        bootstrapPropertiesFile = file('src/resources/config/bootstrap.test.properties')
+        jvmOptionsFile = file('src/resources/config/jvm.test.options')
+        serverEnvFile = file('src/resources/config/server.test.env')
     }
 }
 ```
