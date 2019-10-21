@@ -8,7 +8,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:$lgpVersion"
+        classpath "io.openliberty.tools:liberty-gradle:$lgpVersion"
     }
 }
 

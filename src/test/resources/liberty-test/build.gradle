@@ -11,7 +11,7 @@ buildscript {
     }
     dependencies {
         classpath fileTree(dir: '../libs', include: '*.jar', exclude: ['*-groovydoc.jar', '*-sources.jar'])
-        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+        classpath "io.openliberty.tools:liberty-gradle:$lgpVersion"
     }
 }
 

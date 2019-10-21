@@ -20,7 +20,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+        classpath "io.openliberty.tools:liberty-gradle:$lgpVersion"
     }
 }
 
