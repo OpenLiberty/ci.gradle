@@ -48,7 +48,7 @@ liberty {
             include = packagingType
         }
         dropins = [war]
-        configFile = file("src/main/liberty/config/server-apps-test.xml")
+        serverXmlFile = file("src/main/liberty/config/server-apps-test.xml")
         verifyAppStartTimeout = 30
     }
 }

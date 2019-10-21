@@ -29,7 +29,7 @@ import org.gradle.api.tasks.bundling.War
 import org.gradle.api.logging.LogLevel
 
 import org.apache.tools.ant.Project;
-import net.wasdev.wlp.ant.jsp.CompileJSPs;
+import io.openliberty.tools.ant.jsp.CompileJSPs;
 
 class CompileJSPTask extends AbstractServerTask {
     protected Project ant = new Project();

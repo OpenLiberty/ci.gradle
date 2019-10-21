@@ -33,7 +33,7 @@ class UndeployTask extends AbstractServerTask {
         def params = buildLibertyMap(project);
 
         project.ant.taskdef(name: 'undeploy',
-                            classname: 'net.wasdev.wlp.ant.UndeployTask',
+                            classname: 'io.openliberty.tools.ant.UndeployTask',
                             classpath: project.buildscript.configurations.classpath.asPath)
 
         def application = server.undeploy.application

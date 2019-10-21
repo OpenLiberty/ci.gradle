@@ -26,13 +26,13 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.logging.LogLevel
 import org.xml.sax.SAXException
-import net.wasdev.wlp.common.arquillian.objects.LibertyProperty;
-import net.wasdev.wlp.common.arquillian.objects.LibertyRemoteObject
-import net.wasdev.wlp.common.arquillian.objects.LibertyManagedObject
-import net.wasdev.wlp.common.arquillian.util.ArquillianConfigurationException
-import net.wasdev.wlp.common.arquillian.util.ArtifactCoordinates;
-import net.wasdev.wlp.common.arquillian.util.Constants
-import net.wasdev.wlp.common.arquillian.util.HttpPortUtil
+import io.openliberty.tools.common.arquillian.objects.LibertyProperty;
+import io.openliberty.tools.common.arquillian.objects.LibertyRemoteObject
+import io.openliberty.tools.common.arquillian.objects.LibertyManagedObject
+import io.openliberty.tools.common.arquillian.util.ArquillianConfigurationException
+import io.openliberty.tools.common.arquillian.util.ArtifactCoordinates;
+import io.openliberty.tools.common.arquillian.util.Constants
+import io.openliberty.tools.common.arquillian.util.HttpPortUtil
 import net.wasdev.wlp.gradle.plugins.tasks.AbstractServerTask
 
 class ConfigureArquillianTask extends AbstractServerTask {

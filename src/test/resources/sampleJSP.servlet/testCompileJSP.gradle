@@ -40,7 +40,7 @@ ext {
 
 liberty {
     server{
-        configFile = file("src/resources/server.xml")
+        serverXmlFile = file("src/resources/server.xml")
         name = 'LibertyProjectServer'
         apps = [war]
         looseApplication = false

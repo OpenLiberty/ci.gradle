@@ -21,9 +21,9 @@ import org.gradle.api.artifacts.ResolveException
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.TaskAction
 
-import net.wasdev.wlp.common.plugins.util.InstallFeatureUtil
-import net.wasdev.wlp.common.plugins.util.PluginExecutionException
-import net.wasdev.wlp.common.plugins.util.PluginScenarioException
+import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
+import io.openliberty.tools.common.plugins.util.PluginExecutionException
+import io.openliberty.tools.common.plugins.util.PluginScenarioException
 
 class InstallFeatureTask extends AbstractServerTask {
 
@@ -158,7 +158,7 @@ class InstallFeatureTask extends AbstractServerTask {
     void installFeatureFromAnt() {
         def params = buildAntParams()
         project.ant.taskdef(name: 'installFeature',
-                            classname: 'net.wasdev.wlp.ant.InstallFeatureTask',
+                            classname: 'io.openliberty.tools.ant.InstallFeatureTask',
                             classpath: project.buildscript.configurations.classpath.asPath)
         project.ant.installFeature(params)
     }

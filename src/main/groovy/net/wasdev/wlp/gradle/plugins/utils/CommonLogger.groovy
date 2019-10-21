@@ -15,7 +15,7 @@
  */
 package net.wasdev.wlp.gradle.plugins.utils
 
-import net.wasdev.wlp.common.CommonLoggerI
+import io.openliberty.tools.common.CommonLoggerI
 
 import org.gradle.api.Project
 

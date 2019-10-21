@@ -16,8 +16,8 @@
 package net.wasdev.wlp.gradle.plugins.tasks
 
 import groovy.xml.StreamingMarkupBuilder
-import net.wasdev.wlp.common.plugins.config.ApplicationXmlDocument
-import net.wasdev.wlp.common.plugins.config.ServerConfigDocument
+import io.openliberty.tools.common.plugins.config.ApplicationXmlDocument
+import io.openliberty.tools.common.plugins.config.ServerConfigDocument
 import net.wasdev.wlp.gradle.plugins.utils.CommonLogger
 
 import org.apache.commons.io.FileUtils
@@ -32,7 +32,7 @@ import java.nio.file.StandardCopyOption
 
 import org.apache.commons.io.FilenameUtils
 
-import net.wasdev.wlp.ant.ServerTask
+import io.openliberty.tools.ant.ServerTask
 
 abstract class AbstractServerTask extends AbstractTask {
 
@@ -52,7 +52,7 @@ abstract class AbstractServerTask extends AbstractTask {
 
     protected void executeServerCommand(Project project, String command, Map<String, String> params) {
         project.ant.taskdef(name: 'server',
-                            classname: 'net.wasdev.wlp.ant.ServerTask',
+                            classname: 'io.openliberty.tools.ant.ServerTask',
                             classpath: project.buildscript.configurations.classpath.asPath)
         params.put('operation', command)
         project.ant.server(params)
@@ -146,45 +146,37 @@ abstract class AbstractServerTask extends AbstractTask {
             }
         }
 
-        // handle server.xml if not overwritten by server.xml from configDirectory
-        if (serverXMLPath == null || serverXMLPath.isEmpty()) {
-            // copy configuration file to server directory if end-user set it.
-            if (server.configFile != null && server.configFile.exists()) {
-                Files.copy(server.configFile.toPath(), new File(serverDirectory, "server.xml").toPath(), StandardCopyOption.REPLACE_EXISTING)
-                serverXMLPath = server.configFile.getCanonicalPath()
-            }
+        // serverXmlFile takes precedence over server.xml from configDirectory
+        // copy configuration file to server directory if end-user set it.
+        if (server.serverXmlFile != null && server.serverXmlFile.exists()) {
+            Files.copy(server.serverXmlFile.toPath(), new File(serverDirectory, "server.xml").toPath(), StandardCopyOption.REPLACE_EXISTING)
+            serverXMLPath = server.serverXmlFile.getCanonicalPath()
         }
 
-        // handle jvm.options if not overwritten by jvm.options from configDirectory
-        if (jvmOptionsPath == null || jvmOptionsPath.isEmpty()) {
-            File optionsFile = new File(serverDirectory, "jvm.options")
-            if(server.jvmOptions != null && !server.jvmOptions.isEmpty()){
-                writeJvmOptions(optionsFile, server.jvmOptions)
-                jvmOptionsPath = "inlined configuration"
-            } else if (server.jvmOptionsFile != null && server.jvmOptionsFile.exists()) {
-                Files.copy(server.jvmOptionsFile.toPath(), optionsFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
-                jvmOptionsPath = server.jvmOptionsFile.getCanonicalPath()
-            }
+        // jvmOptions and jvmOptionsFile take precedence over jvm.options from configDirectory
+        File optionsFile = new File(serverDirectory, "jvm.options")
+        if(server.jvmOptions != null && !server.jvmOptions.isEmpty()){
+            writeJvmOptions(optionsFile, server.jvmOptions)
+            jvmOptionsPath = "inlined configuration"
+        } else if (server.jvmOptionsFile != null && server.jvmOptionsFile.exists()) {
+            Files.copy(server.jvmOptionsFile.toPath(), optionsFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            jvmOptionsPath = server.jvmOptionsFile.getCanonicalPath()
         }
 
-        // handle bootstrap.properties if not overwritten by bootstrap.properties from configDirectory
-        if (bootStrapPropertiesPath == null || bootStrapPropertiesPath.isEmpty()) {
-            File bootstrapFile = new File(serverDirectory, "bootstrap.properties")
-            if(server.bootstrapProperties != null && !server.bootstrapProperties.isEmpty()){
-                writeBootstrapProperties(bootstrapFile, server.bootstrapProperties)
-                bootStrapPropertiesPath = "inlined configuration"
-            } else if (server.bootstrapPropertiesFile != null && server.bootstrapPropertiesFile.exists()) {
-                Files.copy(server.bootstrapPropertiesFile.toPath(), bootstrapFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
-                bootStrapPropertiesPath = server.bootstrapPropertiesFile.getCanonicalPath()
-            }
+        // bootstrapProperties and bootstrapPropertiesFile take precedence over bootstrap.properties from configDirectory
+        File bootstrapFile = new File(serverDirectory, "bootstrap.properties")
+        if(server.bootstrapProperties != null && !server.bootstrapProperties.isEmpty()){
+            writeBootstrapProperties(bootstrapFile, server.bootstrapProperties)
+            bootStrapPropertiesPath = "inlined configuration"
+        } else if (server.bootstrapPropertiesFile != null && server.bootstrapPropertiesFile.exists()) {
+            Files.copy(server.bootstrapPropertiesFile.toPath(), bootstrapFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            bootStrapPropertiesPath = server.bootstrapPropertiesFile.getCanonicalPath()
         }
 
-        // handle server.env if not overwritten by server.env from configDirectory
-        if (serverEnvPath == null || serverEnvPath.isEmpty()) {
-            if (server.serverEnv != null && server.serverEnv.exists()) {
-                Files.copy(server.serverEnv.toPath(), new File(serverDirectory, "server.env").toPath(), StandardCopyOption.REPLACE_EXISTING)
-                serverEnvPath = server.serverEnv.getCanonicalPath()
-            }
+        // serverEnvFile takes precedence over server.env from configDirectory
+        if (server.serverEnvFile != null && server.serverEnvFile.exists()) {
+            Files.copy(server.serverEnvFile.toPath(), new File(serverDirectory, "server.env").toPath(), StandardCopyOption.REPLACE_EXISTING)
+            serverEnvPath = server.serverEnvFile.getCanonicalPath()
         }
 
         // log info on the configuration files that get used
@@ -219,8 +211,8 @@ abstract class AbstractServerTask extends AbstractTask {
             serverNode.appendNode('configDirectory', server.configDirectory.toString())
         }
 
-        if (server.configFile != null && server.configFile.exists()) {
-            serverNode.appendNode('configFile', server.configFile.toString())
+        if (server.serverXmlFile != null && server.serverXmlFile.exists()) {
+            serverNode.appendNode('configFile', server.serverXmlFile.toString())
         }
 
         if (server.bootstrapProperties != null && !server.bootstrapProperties.isEmpty()) {
@@ -243,8 +235,8 @@ abstract class AbstractServerTask extends AbstractTask {
             serverNode.appendNode('jvmOptionsFile', server.jvmOptionsFile.toString())
         }
 
-        if (server.serverEnv != null && server.serverEnv.exists()) {
-            serverNode.appendNode('serverEnv', server.serverEnv.toString())
+        if (server.serverEnvFile != null && server.serverEnvFile.exists()) {
+            serverNode.appendNode('serverEnv', server.serverEnvFile.toString())
         }
 
         serverNode.appendNode('looseApplication', server.looseApplication)
@@ -258,7 +250,7 @@ abstract class AbstractServerTask extends AbstractTask {
         File serverConfigFile = new File(getServerDir(project), 'server.xml')
         if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
-                ServerConfigDocument scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(), serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, convertBootstrapProperties(server.bootstrapProperties), server.serverEnv);
+                ServerConfigDocument scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(), serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, convertBootstrapProperties(server.bootstrapProperties), server.serverEnvFile, false);
                 if (scd != null && scd.getLocations().contains(fileName)) {
                     logger.debug("Application configuration is found in server.xml : " + fileName)
                     configured = true

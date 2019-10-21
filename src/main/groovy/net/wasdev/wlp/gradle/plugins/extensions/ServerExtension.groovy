@@ -29,10 +29,10 @@ class ServerExtension{
     boolean looseApplication = true
 
     File configDirectory
-    File configFile
+    File serverXmlFile
     File bootstrapPropertiesFile
     File jvmOptionsFile
-    File serverEnv
+    File serverEnvFile
 
     Map<String, Object> bootstrapProperties
     List<String> jvmOptions

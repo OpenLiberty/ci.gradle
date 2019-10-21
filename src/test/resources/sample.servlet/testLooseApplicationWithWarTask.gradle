@@ -74,7 +74,7 @@ liberty {
         name = wlpServerName
         looseApplication = true
         stripVersion = true
-        configFile = file("src/main/liberty/config/server-list-test.xml")
+        serverXmlFile = file("src/main/liberty/config/server-list-test.xml")
         packageLiberty {
             archive = packageFile
             include = packagingType
