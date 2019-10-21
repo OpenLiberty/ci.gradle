@@ -29,12 +29,12 @@ import org.gradle.tooling.GradleConnector
 
 import java.util.concurrent.ThreadPoolExecutor;
 
-import net.wasdev.wlp.ant.ServerTask
+import io.openliberty.tools.ant.ServerTask
 
-import net.wasdev.wlp.common.plugins.util.DevUtil
-import net.wasdev.wlp.common.plugins.util.PluginExecutionException
-import net.wasdev.wlp.common.plugins.util.PluginScenarioException
-import net.wasdev.wlp.common.plugins.util.ServerFeatureUtil
+import io.openliberty.tools.common.plugins.util.DevUtil
+import io.openliberty.tools.common.plugins.util.PluginExecutionException
+import io.openliberty.tools.common.plugins.util.PluginScenarioException
+import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 
 class DevTask extends AbstractServerTask {
 
@@ -254,7 +254,7 @@ class DevTask extends AbstractServerTask {
         }
 
         @Override
-        public ServerTask getDebugServerTask() throws Exception {
+        public ServerTask getServerTask() throws Exception {
             ServerTask serverTaskStart = createServerTask(project, "start");
             serverTaskStart.setUseEmbeddedServer(server.embedded)
             serverTaskStart.setClean(server.clean)
