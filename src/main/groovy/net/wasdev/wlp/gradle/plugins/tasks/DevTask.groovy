@@ -189,11 +189,13 @@ class DevTask extends AbstractServerTask {
 
         Set<String> existingFeatures;
 
-        DevTaskUtil(
-            File serverDirectory, File sourceDirectory, File testSourceDirectory, File configDirectory,
-                List<File> resourceDirs, boolean hotTests, boolean  skipTests, boolean skipUTs, boolean skipITs, String applicationId, int appUpdateTimeout
-                ) throws IOException {
-            super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs, hotTests, skipTests, skipUTs, skipITs, applicationId, appUpdateTimeout);
+
+        DevTaskUtil(File serverDirectory, File sourceDirectory, File testSourceDirectory, File configDirectory,
+                           List<File> resourceDirs, boolean  hotTests, boolean  skipTests, boolean  skipUTs, boolean  skipITs, String artifactId, int verifyTimeout, int appUpdateTimeout, double compileWait, boolean libertyDebug) throws IOException {
+            super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs, hotTests,
+                    skipTests, skipUTs, skipITs, artifactId, verifyTimeout, appUpdateTimeout,
+                    ((long) (compileWait * 1000L)), libertyDebug);
+
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
         }
@@ -265,27 +267,54 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public List<String> getArtifacts() {
+            // TODO:
 
         }
 
         @Override
         public boolean recompileBuildFile(File buildFile, List<String> artifactPaths, ThreadPoolExecutor executor) {
+            // TODO:
         }
 
         @Override
         public void checkConfigFile(File configFile, File serverDir) {
+            // TODO:
         }
 
         @Override
         public boolean compile(File dir) {
+            ProjectConnection connection = GradleConnector.newConnector()
+                    .forProjectDirectory(new File("."))
+                    .connect();
+
+            try {
+                BuildLauncher gradleBuildLauncher = connection.newBuild()
+                        .setStandardOutput(System.out)
+                        .setStandardError(System.err);
+
+                if (dir.equals(sourceDirectory)) {
+                    runGradleTask(gradleBuildLauncher, 'compileJava');
+                    runGradleTask(gradleBuildLauncher, 'processResources');
+                }
+
+                if (dir.equals(testSourceDirectory)) {
+                    runGradleTask(gradleBuildLauncher, 'compileTestJava');
+                    runGradleTask(gradleBuildLauncher, 'processTestResources');
+                }
+
+            } finally {
+                connection.close();
+            }
         }
 
         @Override
         public void runUnitTests() throws PluginExecutionException, PluginScenarioException {
+            // TODO:
         }
 
         @Override
         public void runIntegrationTests() throws PluginExecutionException, PluginScenarioException {
+            // TODO:
         }
     }
 
@@ -306,8 +335,8 @@ class DevTask extends AbstractServerTask {
             // configure a gradle build launcher
             // you can reuse the launcher to launch additional builds.
             BuildLauncher gradleBuildLauncher = connection.newBuild()
-                .setStandardOutput(System.out)
-                .setStandardError(System.err);
+                    .setStandardOutput(System.out)
+                    .setStandardError(System.err);
 
             SourceSet mainSourceSet = project.sourceSets.main;
             SourceSet testSourceSet = project.sourceSets.test;
@@ -318,7 +347,7 @@ class DevTask extends AbstractServerTask {
             File testOutputDirectory = testSourceSet.java.outputDir;
             File serverDirectory = getServerDir(project);
             File configDirectory = new File(project.projectDir, "src/main/liberty/config");
-            List<File> resourceDirs = mainSourceSet.resources.srcDirs.toArray()
+            List<File> resourceDirs = Arrays.asList(mainSourceSet.resources.srcDirs.toArray());
 
             String artifactId = '' // TODO: Find where to get this
 
@@ -350,9 +379,9 @@ class DevTask extends AbstractServerTask {
 //            final ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
 //                new ArrayBlockingQueue<Runnable>(1, true));
 
-            util = new DevTaskUtil(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs, this.hotTests, this.skipTests, this.skipUTs, this.skipITs, artifactId, this.appUpdateTimeout);
+            util = new DevTaskUtil(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs, hotTests, skipTests, skipUTs, skipITs, artifactId, verifyTimeout, appUpdateTimeout, compileWait, libertyDebug);
 //            util.addShutdownHook(executor);
-            util.startServer(this.serverStartTimeout, this.verifyTimeout);
+            util.startServer(serverStartTimeout);
 
 //          runGradleTask(gradleBuildLauncher, 'libertyStart');
 
