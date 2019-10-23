@@ -20,7 +20,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "io.openliberty.tools:liberty-gradle:$lgpVersion"
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
     }
 }
 

@@ -8,7 +8,7 @@ buildscript {
 	}
 	dependencies {
 		classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-        classpath "io.openliberty.tools:liberty-gradle:$lgpVersion"
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
 	}
 }
 
