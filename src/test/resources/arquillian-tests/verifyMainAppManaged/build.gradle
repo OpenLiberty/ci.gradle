@@ -1,4 +1,4 @@
-import net.wasdev.wlp.gradle.plugins.tasks.extensions.arquillian.ConfigureArquillianTask
+import io.openliberty.tools.gradle.tasks.arquillian.ConfigureArquillianTask
 
 buildscript {
     repositories {
@@ -9,7 +9,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
     }
 }
 
