@@ -100,8 +100,10 @@ abstract class AbstractServerTask extends AbstractTask {
     protected String getServerOutputDir(Project project) {
         if (server.outputDir != null) {
             return server.outputDir
-        } else {
+        } else if (project.liberty.outputDir != null) {
             return project.liberty.outputDir
+        } else {
+            return getServerDir(project).toString()
         }
     }
 
@@ -197,12 +199,7 @@ abstract class AbstractServerTask extends AbstractTask {
     protected void setServerDirectoryNodes(Project project, Node serverNode) {
         serverNode.appendNode('userDirectory', getUserDir(project).toString())
         serverNode.appendNode('serverDirectory', getServerDir(project).toString())
-        String serverOutputDir = getServerOutputDir(project)
-        if (serverOutputDir != null && !serverOutputDir.isEmpty()) {
-            serverNode.appendNode('serverOutputDirectory', serverOutputDir)
-        } else {
-            serverNode.appendNode('serverOutputDirectory', getServerDir(project).toString())
-        }
+        serverNode.appendNode('serverOutputDirectory', getServerOutputDir(project))
     }
 
     protected void setServerPropertyNodes(Project project, Node serverNode) {
