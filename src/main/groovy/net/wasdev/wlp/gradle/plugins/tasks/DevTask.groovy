@@ -189,13 +189,14 @@ class DevTask extends AbstractServerTask {
 
         Set<String> existingFeatures;
 
-
         DevTaskUtil(File serverDirectory, File sourceDirectory, File testSourceDirectory, File configDirectory,
-                           List<File> resourceDirs, boolean  hotTests, boolean  skipTests, boolean  skipUTs, boolean  skipITs, String artifactId, int verifyTimeout, int appUpdateTimeout, double compileWait, boolean libertyDebug) throws IOException {
-            super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs, hotTests,
-                    skipTests, skipUTs, skipITs, artifactId, verifyTimeout, appUpdateTimeout,
-                    ((long) (compileWait * 1000L)), libertyDebug);
+                    List<File> resourceDirs, boolean  hotTests, boolean  skipTests, boolean  skipUTs, boolean  skipITs,
+                    String artifactId, int serverStartTimeout,int verifyTimeout, int appUpdateTimeout, double compileWait, boolean libertyDebug
+        ) throws IOException {
 
+            super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs, hotTests,
+                    skipTests, skipUTs, skipITs, artifactId,  serverStartTimeout, verifyTimeout, appUpdateTimeout,
+                    ((long) (compileWait * 1000L)), libertyDebug);
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
         }
@@ -257,18 +258,26 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public ServerTask getServerTask() throws Exception {
-            ServerTask serverTaskStart = createServerTask(project, "start");
-            serverTaskStart.setUseEmbeddedServer(server.embedded)
-            serverTaskStart.setClean(server.clean)
-            serverTaskStart.execute();
-
-            return serverTaskStart;
+            ServerTask serverTask = createServerTask(project, "start");
+            copyConfigFiles();
+            serverTask.setUseEmbeddedServer(server.embedded)
+            serverTask.setClean(server.clean)
+            serverTask.execute()
+            return serverTask;
         }
 
         @Override
         public List<String> getArtifacts() {
-            // TODO:
-
+//            List<String> artifactPaths = new ArrayList<String>();
+//            Set<Artifact> artifacts = project.getArtifacts();
+//            for (Artifact artifact : artifacts) {
+//                try {
+//                    artifactPaths.add(artifact.getFile().getCanonicalPath());
+//                } catch (IOException e) {
+//                    log.error("Unable to resolve project artifact " + e.getMessage());
+//                }
+//            }
+//            return artifactPaths;
         }
 
         @Override
@@ -315,6 +324,26 @@ class DevTask extends AbstractServerTask {
         @Override
         public void runIntegrationTests() throws PluginExecutionException, PluginScenarioException {
             // TODO:
+        }
+
+        @Override
+        public void redeployApp() {
+            // TODO:
+        }
+
+        @Override
+        public void libertyInstallFeature() {
+            // TODO: 
+        }
+
+        @Override
+        public void libertyDeploy() {
+            // TODO: 
+        }
+
+        @Override
+        public void libertyCreate() {
+            // TODO: 
         }
     }
 
@@ -379,9 +408,13 @@ class DevTask extends AbstractServerTask {
 //            final ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
 //                new ArrayBlockingQueue<Runnable>(1, true));
 
-            util = new DevTaskUtil(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs, hotTests, skipTests, skipUTs, skipITs, artifactId, verifyTimeout, appUpdateTimeout, compileWait, libertyDebug);
+            util = new DevTaskUtil(
+                    serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs,
+                    hotTests, skipTests, skipUTs, skipITs, artifactId,
+                    serverStartTimeout, verifyTimeout, appUpdateTimeout, compileWait, libertyDebug
+            );
 //            util.addShutdownHook(executor);
-            util.startServer(serverStartTimeout);
+            util.startServer();
 
 //          runGradleTask(gradleBuildLauncher, 'libertyStart');
 
