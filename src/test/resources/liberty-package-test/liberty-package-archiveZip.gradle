@@ -29,7 +29,8 @@ liberty {
         name = 'LibertyProjectServer'
         name = serverName
         packageLiberty {
-            archive = 'testPackage.zip'
+            packageDirectory = "${project.projectDir}"
+            packageName = 'testPackage'
         }
     }
 }

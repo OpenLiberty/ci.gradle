@@ -43,7 +43,7 @@ class LibertyPackage_archiveJarDirExist_Test extends AbstractIntegrationTest{
         try{
            runTasks(buildDir, 'libertyPackage')
 
-           def file = new File(buildDir, 'build/liberty-package-archiveJarDirExist-test.jar')
+           def file = new File(buildDir, 'build/libs/build/liberty-package-archiveJarDirExist-test.jar')
 
            assert file.exists() : "file not found"
            assert file.canRead() : "file cannot be read"

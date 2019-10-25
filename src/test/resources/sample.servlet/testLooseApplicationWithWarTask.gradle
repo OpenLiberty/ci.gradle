@@ -39,7 +39,7 @@ ext {
     // This is set in the ibm-web-ext.xml file
     warContext = 'sample.servlet-1'
     appName = 'LibertyProject'
-    packageFile = "${project.buildDir}/${appName}.zip"
+    packageDir = "${project.buildDir}"
     packagingType = 'usr'
 
 }
@@ -76,7 +76,8 @@ liberty {
         stripVersion = true
         serverXmlFile = file("src/main/liberty/config/server-list-test.xml")
         packageLiberty {
-            archive = packageFile
+            packageDirectory = packageDir
+            packageName = appName
             include = packagingType
         }
     	apps = [war1, war2]

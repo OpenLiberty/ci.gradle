@@ -28,7 +28,7 @@ liberty {
     server{
         name = 'LibertyProjectServer'
         packageLiberty {
-            archive = 'build'
+            packageDirectory = 'build'
             include = 'runnable'
         }
     }

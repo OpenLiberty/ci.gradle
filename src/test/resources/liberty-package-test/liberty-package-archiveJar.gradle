@@ -28,7 +28,9 @@ liberty {
     server{
         name = 'LibertyProjectServer'
         packageLiberty {
-            archive = 'testPackage.jar'
+            packageDirectory = "${project.projectDir}"
+            packageName = 'testPackage'
+            packageType = 'jar'
             include = 'runnable,minify'
         }
     }
