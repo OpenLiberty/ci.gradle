@@ -16,6 +16,9 @@
 package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.Task
+import org.gradle.api.artifacts.dsl.ArtifactHandler
+import org.gradle.api.component.Artifact
+import org.gradle.api.internal.artifacts.dsl.DefaultArtifactHandler
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.GradleBuild
 import org.gradle.api.tasks.SourceSet
@@ -27,6 +30,7 @@ import org.gradle.tooling.BuildLauncher
 import org.gradle.tooling.ProjectConnection
 import org.gradle.tooling.GradleConnector
 
+import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor;
 
 import io.openliberty.tools.ant.ServerTask
@@ -35,6 +39,8 @@ import io.openliberty.tools.common.plugins.util.DevUtil
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.PluginScenarioException
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
+
+import java.util.concurrent.TimeUnit
 
 class DevTask extends AbstractServerTask {
 
@@ -258,7 +264,7 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public ServerTask getServerTask() throws Exception {
-            ServerTask serverTask = createServerTask(project, "start");
+            ServerTask serverTask = createServerTask(project, "run");
             copyConfigFiles();
             serverTask.setUseEmbeddedServer(server.embedded)
             serverTask.setClean(server.clean)
@@ -267,7 +273,23 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public List<String> getArtifacts() {
-//            List<String> artifactPaths = new ArrayList<String>();
+            List<String> artifactPaths = new ArrayList<String>();
+            ArtifactHandler artifacts = project.getArtifacts();
+
+            // TODO: Figure this out
+
+            return new ArrayList<String>();
+
+//            project.configuration.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+//                println artifact.moduleVersion.id.group
+//                println artifact.moduleVersion.id.name
+//                println artifact.moduleVersion.id.version
+//                println artifact.file
+//            }
+
+
+//            println artifacts.eachWithIndex{ ArtifactHandler entry, int i -> entry.eachWithIndex{ ArtifactHandler entry, int i -> }  }
+
 //            Set<Artifact> artifacts = project.getArtifacts();
 //            for (Artifact artifact : artifacts) {
 //                try {
@@ -399,23 +421,44 @@ class DevTask extends AbstractServerTask {
             println"Test Output directory: " + testOutputDirectory;
             println"Resource directories" + resourceDirs;
 
+            // create an executor for tests with an additional queue of size 1, so
+            // any further changes detected mid-test will be in the following run
+            final ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+                    new ArrayBlockingQueue<Runnable>(1, true));
+
             runGradleTask(gradleBuildLauncher, 'compileJava');
             runGradleTask(gradleBuildLauncher, 'processResources');
             runGradleTask(gradleBuildLauncher, 'compileTestJava');
             runGradleTask(gradleBuildLauncher, 'processTestResources');
-
-//            final ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
-//                new ArrayBlockingQueue<Runnable>(1, true));
 
             util = new DevTaskUtil(
                     serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs,
                     hotTests, skipTests, skipUTs, skipITs, artifactId,
                     serverStartTimeout, verifyTimeout, appUpdateTimeout, compileWait, libertyDebug
             );
-//            util.addShutdownHook(executor);
+            util.addShutdownHook(executor);
             util.startServer();
 
-//          runGradleTask(gradleBuildLauncher, 'libertyStart');
+            List<String> artifactPaths = util.getArtifacts();
+
+            File buildFile = project.getBuildFile()
+
+            File serverXMLFile;
+            if (server.serverXmlFile != null && server.serverXmlFile.exists()) {
+                serverXMLFile = server.serverXmlFile;
+            } else {
+                File configDirServerXML = new File(server.configDirectory, "server.xml")
+                if (configDirServerXML.exists()) {
+                    serverXMLFile = configDirServerXML;
+                }
+            }
+
+            try {
+                util.watchFiles(buildFile, outputDirectory, testOutputDirectory, executor, artifactPaths, serverXMLFile);
+            } catch (PluginScenarioException e) { // this exception is caught when the server has been stopped by another process
+                logger.info(e.getMessage());
+                return; // enter shutdown hook
+            }
 
         } finally {
             connection.close();
