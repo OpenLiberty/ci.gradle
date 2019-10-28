@@ -262,7 +262,6 @@ class DevTask extends AbstractServerTask {
             copyConfigFiles();
             serverTask.setUseEmbeddedServer(server.embedded)
             serverTask.setClean(server.clean)
-            serverTask.execute()
             return serverTask;
         }
 
