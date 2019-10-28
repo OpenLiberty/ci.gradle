@@ -28,8 +28,8 @@ liberty {
     server{
         name = 'LibertyProjectServer'
         packageLiberty {
-            packageDirectory = 'build'
-            include = 'runnable'
+            packageDirectory = "${project.buildDir}"
+            packageType = 'jar'
         }
     }
 }

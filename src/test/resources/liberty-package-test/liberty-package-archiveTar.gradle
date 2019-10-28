@@ -27,11 +27,9 @@ dependencies {
 liberty {
     server{
         name = 'LibertyProjectServer'
-        name = serverName
         packageLiberty {
-            packageDirectory = "${project.projectDir}"
             packageName = 'testPackage'
-            serverRoot = 'myServerRoot'
+            packageType = 'tar'
         }
     }
 }
