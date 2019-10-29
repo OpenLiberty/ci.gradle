@@ -9,8 +9,8 @@ apply plugin: 'signing'
 apply plugin: "com.gradle.plugin-publish"
 
 archivesBaseName = 'liberty-gradle-plugin'
-group = 'net.wasdev.wlp.gradle.plugins'
-version = '2.7.1-SNAPSHOT'
+group = 'io.openliberty.tools'
+version = '3.0-SNAPSHOT'
 
 repositories {
     mavenLocal()
