@@ -205,17 +205,20 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void debug(String msg) {
-            logger.debug(msg);
+            logger.warn(msg); // TODO: Change this back to debug
+//            logger.debug(msg);
         }
 
         @Override
         public void debug(String msg, Throwable e) {
-            logger.debug(msg, e);
+            logger.warn(msg, e);
+//            logger.debug(msg, e);
         }
 
         @Override
         public void debug(Throwable e) {
-            logger.debug(e);
+            logger.warn(e);
+//            logger.debug(e);
         }
 
         @Override
@@ -417,9 +420,10 @@ class DevTask extends AbstractServerTask {
                 runGradleTask(gradleBuildLauncher, 'compileTestJava');
                 runGradleTask(gradleBuildLauncher, 'processTestResources');
 
-                runGradleTask(gradleBuildLauncher, 'libertyCreate'); // runLibertyMojoCreate();
-                runGradleTask(gradleBuildLauncher, 'installFeature'); // runLibertyMojoInstallFeature(null);
-                runGradleTask(gradleBuildLauncher, 'deploy'); // runLibertyMojoDeploy();
+                runGradleTask(gradleBuildLauncher, 'libertyCreate');
+                runGradleTask(gradleBuildLauncher, 'installFeature');
+                runGradleTask(gradleBuildLauncher, 'installApps');
+
 
             } finally {
                 connection.close();
@@ -435,15 +439,6 @@ class DevTask extends AbstractServerTask {
             util.addShutdownHook(executor);
 
             util.startServer();
-
-//            if (hotTests && testSourceDirectory.exists()) {
-//                // if hot testing, run tests on startup and then watch for
-//                // keypresses
-//                util.runTestThread(false, executor, -1, false, false);
-//            } else {
-//                // else watch for keypresses immediately
-//                util.runHotkeyReaderThread(executor);
-//            }
 
             List<String> artifactPaths = util.getArtifacts();
             File buildFile = project.getBuildFile()
