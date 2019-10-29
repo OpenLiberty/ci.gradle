@@ -68,7 +68,7 @@ abstract class AbstractServerTask extends AbstractTask {
         def userDir = getUserDir(project, installDir)
         result.put('userDir', userDir)
 
-        result.put('outputDir', getServerOutputDir(project))
+        result.put('outputDir', getOutputDir(project))
 
         if (server.timeout != null && !server.timeout.isEmpty()) {
             result.put('timeout', server.timeout)
@@ -96,7 +96,7 @@ abstract class AbstractServerTask extends AbstractTask {
         return new File(getUserDir(project).toString() + "/servers/" + server.name)
     }
 
-    protected String getServerOutputDir(Project project) {
+    protected String getOutputDir(Project project) {
         if (server.outputDir != null) {
             return server.outputDir
         } else if (project.liberty.outputDir != null) {
@@ -198,7 +198,7 @@ abstract class AbstractServerTask extends AbstractTask {
     protected void setServerDirectoryNodes(Project project, Node serverNode) {
         serverNode.appendNode('userDirectory', getUserDir(project).toString())
         serverNode.appendNode('serverDirectory', getServerDir(project).toString())
-        serverNode.appendNode('serverOutputDirectory', getServerOutputDir(project))
+        serverNode.appendNode('serverOutputDirectory', new File(getOutputDir(project), server.name))
     }
 
     protected void setServerPropertyNodes(Project project, Node serverNode) {
@@ -551,9 +551,9 @@ abstract class AbstractServerTask extends AbstractTask {
         serverTask.setInstallDir(installDir)
         serverTask.setUserDir(getUserDir(project, installDir))
 
-        def serverOutputDir = getServerOutputDir(project)
-        if (serverOutputDir != null) {
-            serverTask.setOutputDir(new File(serverOutputDir))
+        def outputDir = getOutputDir(project)
+        if (outputDir != null) {
+            serverTask.setOutputDir(new File(outputDir))
         }  
 
         if (server.timeout != null && !server.timeout.isEmpty()) {
