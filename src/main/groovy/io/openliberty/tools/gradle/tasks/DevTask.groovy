@@ -129,9 +129,6 @@ class DevTask extends AbstractServerTask {
     }
 
     private int runId = 0;
-
-    private ServerTask serverTask = null;
-
     // private Plugin boostPlugin = null;
 
     /**
@@ -262,13 +259,19 @@ class DevTask extends AbstractServerTask {
             }
         }
 
+        private ServerTask serverTask = null;
+
         @Override
         public ServerTask getServerTask() throws Exception {
-            ServerTask serverTask = createServerTask(project, "run");
-            copyConfigFiles();
-            serverTask.setUseEmbeddedServer(server.embedded)
-            serverTask.setClean(server.clean)
-            return serverTask;
+            if (serverTask != null) {
+                return serverTask;
+            } else {
+                serverTask = createServerTask(project, "run");
+                copyConfigFiles();
+                serverTask.setUseEmbeddedServer(server.embedded)
+                serverTask.setClean(server.clean)
+                return serverTask;
+            }
         }
 
         @Override
@@ -377,17 +380,6 @@ class DevTask extends AbstractServerTask {
     void action() {
         // https://docs.gradle.org/current/userguide/embedding.html Tooling API docs
         // Represents a long-lived connection to a Gradle project.
-        ProjectConnection connection = GradleConnector.newConnector()
-            .forProjectDirectory(new File("."))
-            .connect();
-
-        try {
-            // configure a gradle build launcher
-            // you can reuse the launcher to launch additional builds.
-            BuildLauncher gradleBuildLauncher = connection.newBuild()
-                    .setStandardOutput(System.out)
-                    .setStandardError(System.err);
-
             SourceSet mainSourceSet = project.sourceSets.main;
             SourceSet testSourceSet = project.sourceSets.test;
 
@@ -398,6 +390,12 @@ class DevTask extends AbstractServerTask {
             File serverDirectory = getServerDir(project);
             File configDirectory = new File(project.projectDir, "src/main/liberty/config");
             List<File> resourceDirs = Arrays.asList(mainSourceSet.resources.srcDirs.toArray());
+
+            if (resourceDirs.isEmpty()) {
+                File defaultResourceDir = new File(project.getRootDir() + "/src/main/resources");
+                logger.info("No resource directory detected, using default directory: " + defaultResourceDir);
+                resourceDirs.add(defaultResourceDir);
+            }
 
             String artifactId = '' // TODO: Find where to get this
 
@@ -426,32 +424,53 @@ class DevTask extends AbstractServerTask {
             final ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
                     new ArrayBlockingQueue<Runnable>(1, true));
 
-            runGradleTask(gradleBuildLauncher, 'compileJava');
-            runGradleTask(gradleBuildLauncher, 'processResources');
-            runGradleTask(gradleBuildLauncher, 'compileTestJava');
-            runGradleTask(gradleBuildLauncher, 'processTestResources');
+            ProjectConnection connection = GradleConnector.newConnector()
+                .forProjectDirectory(new File("."))
+                .connect();
+
+            try {
+                // configure a gradle build launcher
+                // you can reuse the launcher to launch additional builds.
+                BuildLauncher gradleBuildLauncher = connection.newBuild()
+                        .setStandardOutput(System.out)
+                        .setStandardError(System.err);
+
+                runGradleTask(gradleBuildLauncher, 'compileJava');
+                runGradleTask(gradleBuildLauncher, 'processResources');
+                runGradleTask(gradleBuildLauncher, 'compileTestJava');
+                runGradleTask(gradleBuildLauncher, 'processTestResources');
+
+                runGradleTask(gradleBuildLauncher, 'libertyCreate'); // runLibertyMojoCreate();
+                runGradleTask(gradleBuildLauncher, 'installFeature'); // runLibertyMojoInstallFeature(null);
+                runGradleTask(gradleBuildLauncher, 'deploy'); // runLibertyMojoDeploy();
+                
+            } finally {
+                connection.close();
+            }
+            
 
             util = new DevTaskUtil(
                     serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs,
                     hotTests, skipTests, skipUTs, skipITs, artifactId,
                     serverStartTimeout, verifyTimeout, appUpdateTimeout, compileWait, libertyDebug
             );
+
             util.addShutdownHook(executor);
+
             util.startServer();
 
+//            if (hotTests && testSourceDirectory.exists()) {
+//                // if hot testing, run tests on startup and then watch for
+//                // keypresses
+//                util.runTestThread(false, executor, -1, false, false);
+//            } else {
+//                // else watch for keypresses immediately
+//                util.runHotkeyReaderThread(executor);
+//            }
+
             List<String> artifactPaths = util.getArtifacts();
-
             File buildFile = project.getBuildFile()
-
-            File serverXMLFile;
-            if (server.serverXmlFile != null && server.serverXmlFile.exists()) {
-                serverXMLFile = server.serverXmlFile;
-            } else {
-                File configDirServerXML = new File(server.configDirectory, "server.xml")
-                if (configDirServerXML.exists()) {
-                    serverXMLFile = configDirServerXML;
-                }
-            }
+            File serverXMLFile = getServerXMLFile(server);
 
             try {
                 util.watchFiles(buildFile, outputDirectory, testOutputDirectory, executor, artifactPaths, serverXMLFile);
@@ -460,8 +479,16 @@ class DevTask extends AbstractServerTask {
                 return; // enter shutdown hook
             }
 
-        } finally {
-            connection.close();
+    }
+
+    File getServerXMLFile(def server) {
+        if (server.serverXmlFile != null && server.serverXmlFile.exists()) {
+            return server.serverXmlFile;
+        }
+
+        File configDirServerXML = new File(server.configDirectory, "server.xml")
+        if (configDirServerXML.exists()) {
+            return configDirServerXML;
         }
     }
 
