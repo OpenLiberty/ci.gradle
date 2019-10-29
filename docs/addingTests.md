@@ -1,10 +1,10 @@
 ## Adding Tests
-1) Create a new test class that extends `AbstractIntegrationTest` in `src/integTest/groovy/net/wasdev/wlp/gradle/plugins/`
-2) Add a directory in `src/integTest/resources/` that contains the files needed to build the project you wish to test against
+1) Create a new test class that extends `AbstractIntegrationTest` in `src/test/groovy/io/openliberty/tools/gradle/`
+2) Add a directory in `src/test/resources/` that contains the files needed to build the project you wish to test against
 3) Below is and example test class outlining requirement for a new test suite 
 
 ```groovy
-package net.wasdev.wlp.gradle.plugins;
+package io.openliberty.tools.gradle;
 
 import java.io.File
 
@@ -25,13 +25,8 @@ public class YourAwesomeTest extends AbstractIntegrationTest{
     @BeforeClass 
     // this method configures the setup for your test build
     public static void setup() { // **required**
-        // create the directory you will be building out of
+         // create the directory you will be building out of
         createDir(buildDir) // **required**
-        if(test_mode == "offline"){
-            WLP_DIR.replace("\\","/")
-            // copy your testing resources into your build directory 
-            createTestProject(buildDir, sourceDir, buildFilename) // **required**
-        }
         // copy your testing resource into your build directory as
         // well as your needed .gradle files.
         createTestProject(buildDir, resourceDir, buildFilename) // **required**
