@@ -196,7 +196,6 @@ class DevTask extends AbstractServerTask {
                     List<File> resourceDirs, boolean  hotTests, boolean  skipTests, boolean  skipUTs, boolean  skipITs,
                     String artifactId, int serverStartTimeout,int verifyTimeout, int appUpdateTimeout, double compileWait, boolean libertyDebug
         ) throws IOException {
-
             super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs, hotTests,
                     skipTests, skipUTs, skipITs, artifactId,  serverStartTimeout, verifyTimeout, appUpdateTimeout,
                     ((long) (compileWait * 1000L)), libertyDebug);
@@ -206,17 +205,17 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void debug(String msg) {
-            logger.warn(msg); // TODO: Change these back to proper method
+            logger.debug(msg);
         }
 
         @Override
         public void debug(String msg, Throwable e) {
-            logger.warn(msg, e);
+            logger.debug(msg, e);
         }
 
         @Override
         public void debug(Throwable e) {
-            logger.warn(e);
+            logger.debug(e);
         }
 
         @Override
@@ -226,7 +225,7 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void info(String msg) {
-            logger.warn(msg);
+            logger.info(msg);
         }
 
         @Override
@@ -277,31 +276,11 @@ class DevTask extends AbstractServerTask {
         @Override
         public List<String> getArtifacts() {
             List<String> artifactPaths = new ArrayList<String>();
-            ArtifactHandler artifacts = project.getArtifacts();
 
-            // TODO: Figure this out
+            // TODO: Figure out how to get list of artifacts
 
             return new ArrayList<String>();
 
-//            project.configuration.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-//                println artifact.moduleVersion.id.group
-//                println artifact.moduleVersion.id.name
-//                println artifact.moduleVersion.id.version
-//                println artifact.file
-//            }
-
-
-//            println artifacts.eachWithIndex{ ArtifactHandler entry, int i -> entry.eachWithIndex{ ArtifactHandler entry, int i -> }  }
-
-//            Set<Artifact> artifacts = project.getArtifacts();
-//            for (Artifact artifact : artifacts) {
-//                try {
-//                    artifactPaths.add(artifact.getFile().getCanonicalPath());
-//                } catch (IOException e) {
-//                    log.error("Unable to resolve project artifact " + e.getMessage());
-//                }
-//            }
-//            return artifactPaths;
         }
 
         @Override
@@ -378,8 +357,6 @@ class DevTask extends AbstractServerTask {
 
     @TaskAction
     void action() {
-        // https://docs.gradle.org/current/userguide/embedding.html Tooling API docs
-        // Represents a long-lived connection to a Gradle project.
             SourceSet mainSourceSet = project.sourceSets.main;
             SourceSet testSourceSet = project.sourceSets.test;
 
@@ -443,7 +420,7 @@ class DevTask extends AbstractServerTask {
                 runGradleTask(gradleBuildLauncher, 'libertyCreate'); // runLibertyMojoCreate();
                 runGradleTask(gradleBuildLauncher, 'installFeature'); // runLibertyMojoInstallFeature(null);
                 runGradleTask(gradleBuildLauncher, 'deploy'); // runLibertyMojoDeploy();
-                
+
             } finally {
                 connection.close();
             }
