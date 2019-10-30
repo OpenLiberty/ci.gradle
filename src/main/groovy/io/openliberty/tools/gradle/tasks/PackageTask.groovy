@@ -71,40 +71,12 @@ class PackageTask extends AbstractServerTask {
 
         def params = buildLibertyMap(project)
         def fileType = getPackageFileType()
-
-        //def name = server.packageLiberty.packageName
-        //def directory = server.packageLiberty.packageDirectory
-        //def type = server.packageLiberty.packageType
-
         def projectBuildDir = getPackageDirectory()
-        logger.info 'Package dir ' + projectBuildDir
         def projectBuildName = getPackageName()
-        logger.info 'Package name ' + projectBuildName
         
         def packageFile = new File(projectBuildDir, projectBuildName + "." + fileType.getValue())
         params.put('archive', packageFile)
         logger.info 'Packaging ' + packageFile
-
-        //def archive = server.packageLiberty.archive
-
-        //if (archive != null && archive.length() != 0) {
-        //    def archiveFile = new File(archive)
-
-        //    if (archiveFile.exists() && archiveFile.isDirectory()) {
-        //        archiveFile = new File(archiveFile, project.getName() + fileType)
-        //    }
-        //    params.put('archive', archiveFile)
-        //    logger.debug 'Packaging ' + archiveFile
-        //} else {
-            // default output directory
-        //    def buildLibsDir = new File(project.getBuildDir(), 'libs')
-
-        //    createDir(buildLibsDir)
-
-        //    def defaultPackageFile = new File(buildLibsDir, project.getName() + fileType)
-        //    params.put('archive', defaultPackageFile)
-        //    logger.debug 'Packaging default ' + defaultPackageFile
-        //}
 
         if (server.packageLiberty.include != null && server.packageLiberty.include.length() != 0) {
             params.put('include', server.packageLiberty.include)
@@ -188,7 +160,7 @@ class PackageTask extends AbstractServerTask {
     }
 
     /**
-     * Returns `packageFileType` for specified packageType and include values. If packageType is not specified, 
+     * Returns PackageFileType for specified packageType and include values. If packageType is not specified, 
      * and include contains `runnable`, default to PackageFileType.JAR. Otherwise, default 
      * to PackageFileType.ZIP. If packageType is specified, and include contains `runnable`, 
      * then packageType must be `jar`.
@@ -210,7 +182,7 @@ class PackageTask extends AbstractServerTask {
             if (packType != null) {
                 // if include contains runnable, validate packageType
                 if (includeValues.contains("runnable") && packType != PackageFileType.JAR) {
-                    logger.debug("The `include` value `runnable` requires a `packageType` value of `jar`. Overriding the packageType.")
+                    logger.debug("The `packageType` value " + server.packageLiberty.packageType + " is not supported when the `include` value contains `runnable`. Defaulting to 'jar'.")
                     packageFileType = PackageFileType.JAR
                 } else {
                     packageFileType = packType
