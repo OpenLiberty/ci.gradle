@@ -551,10 +551,7 @@ abstract class AbstractServerTask extends AbstractTask {
         serverTask.setInstallDir(installDir)
         serverTask.setUserDir(getUserDir(project, installDir))
 
-        def outputDir = getOutputDir(project)
-        if (outputDir != null) {
-            serverTask.setOutputDir(new File(outputDir))
-        }  
+        serverTask.setOutputDir(new File(getOutputDir(project)))
 
         if (server.timeout != null && !server.timeout.isEmpty()) {
             serverTask.setTimeout(server.timeout)
