@@ -15,16 +15,10 @@
  */
 package io.openliberty.tools.gradle.tasks
 
-import org.gradle.api.Task
-import org.gradle.api.artifacts.dsl.ArtifactHandler
-import org.gradle.api.component.Artifact
-import org.gradle.api.internal.artifacts.dsl.DefaultArtifactHandler
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.GradleBuild
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.options.Option;
-import org.gradle.api.tasks.Input
 
 import org.gradle.tooling.BuildLauncher
 import org.gradle.tooling.ProjectConnection
@@ -54,9 +48,6 @@ class DevTask extends AbstractServerTask {
 
     DevTaskUtil util = null;
 
-    /**
-     * Hot tests
-     */
     private boolean hotTests = false;
 
     @Option(option = 'hotTests', description = 'TODO')
@@ -64,9 +55,6 @@ class DevTask extends AbstractServerTask {
         this.hotTests = hotTests;
     }
 
-    /**
-     * Skip tests
-     */
     private boolean skipTests = false;
 
     @Option(option = 'skipTests', description = 'Skip tests.')
@@ -74,9 +62,7 @@ class DevTask extends AbstractServerTask {
         this.skipTests = skipTests;
     }
 
-    /**
-     * Skip unit tests
-     */
+
     private boolean skipUTs = false;
 
     @Option(option = 'skipUTs', description = 'Skip unit tests.')
@@ -84,9 +70,6 @@ class DevTask extends AbstractServerTask {
         this.skipUTs = skipUTs;
     }
 
-    /**
-     * Skip integration tests
-     */
     private boolean skipITs = false;
 
     @Option(option = 'skipITs', description = 'Skip integration tests.')
@@ -94,9 +77,6 @@ class DevTask extends AbstractServerTask {
         this.skipITs = skipITs;
     }
 
-    /**
-     * Debug
-     */
     private boolean libertyDebug = true;
 
     @Option(option = 'debug', description = 'TODO')
@@ -104,9 +84,6 @@ class DevTask extends AbstractServerTask {
         this.libertyDebug = libertyDebug;
     }
 
-    /**
-     * Debug Port
-     */
     private int libertyDebugPort = 7777;
 
     @Option(option = 'debugPort', description = 'Liberty debug port.')
@@ -116,9 +93,6 @@ class DevTask extends AbstractServerTask {
         }
     }
 
-    /**
-     * Time in seconds to wait before processing Java changes and deletions.
-     */
     private double compileWait = 0.5;
 
     @Option(option = 'compileWait', description = 'Time in seconds to wait before processing Java changes and deletions.')
@@ -129,11 +103,7 @@ class DevTask extends AbstractServerTask {
     }
 
     private int runId = 0;
-    // private Plugin boostPlugin = null;
 
-    /**
-     * Time in seconds to wait while verifying that the application has started.
-     */
     private int verifyTimeout = 30;
 
     @Option(option = 'verifyTimeout', description = 'Time in seconds to wait while verifying that the application has started.')
@@ -143,9 +113,6 @@ class DevTask extends AbstractServerTask {
         }
     }
 
-    /**
-     * Time in seconds to wait while verifying that the application has updated.
-     */
     private int appUpdateTimeout = 5;
 
     @Option(option = 'appUpdateTimeout', description = 'Time in seconds to wait while verifying that the application has updated.')
@@ -155,9 +122,6 @@ class DevTask extends AbstractServerTask {
         }
     }
 
-    /**
-     * Time in seconds to wait while verifying that the server has started.
-     */
     private int serverStartTimeout = 30;
 
     @Option(option = 'serverStartTimeout', description = 'Time in seconds to wait while verifying that the server has started.')
@@ -167,9 +131,6 @@ class DevTask extends AbstractServerTask {
         }
     }
 
-    /**
-     * comma separated list of app names to wait for
-     */
     private String applications;
 
     @Option(option = 'applications', description = 'Comma separated list of app names to wait for')
@@ -177,9 +138,6 @@ class DevTask extends AbstractServerTask {
         this.applications = applications;
     }
 
-    /**
-     * Clean all cached information on server start up.
-     */
     private boolean clean = false;
 
     @Option(option = 'clean', description = 'Clean all cached information on server start up.')
@@ -191,6 +149,8 @@ class DevTask extends AbstractServerTask {
     private class DevTaskUtil extends DevUtil {
 
         Set<String> existingFeatures;
+
+        private ServerTask serverTask = null;
 
         DevTaskUtil(File serverDirectory, File sourceDirectory, File testSourceDirectory, File configDirectory,
                     List<File> resourceDirs, boolean  hotTests, boolean  skipTests, boolean  skipUTs, boolean  skipITs,
@@ -260,8 +220,6 @@ class DevTask extends AbstractServerTask {
                 logger.error ('There is no server to stop. The runtime has not been installed.')
             }
         }
-
-        private ServerTask serverTask = null;
 
         @Override
         public ServerTask getServerTask() throws Exception {
@@ -468,6 +426,14 @@ class DevTask extends AbstractServerTask {
             List<String> artifactPaths = util.getArtifacts();
             File buildFile = project.getBuildFile()
             File serverXMLFile = getServerXMLFile(server);
+
+            if (hotTests && testSourceDirectory.exists()) {
+            // if hot testing, run tests on startup and then watch for keypresses
+            util.runTestThread(false, executor, -1, false, false);
+            } else {
+                // else watch for keypresses immediately
+                util.runHotkeyReaderThread(executor);
+            }
 
             try {
                 util.watchFiles(buildFile, outputDirectory, testOutputDirectory, executor, artifactPaths, serverXMLFile);
