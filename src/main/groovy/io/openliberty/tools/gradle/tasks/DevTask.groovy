@@ -278,11 +278,25 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public List<String> getArtifacts() {
+            // https://docs.gradle.org/current/userguide/java_plugin.html#sec:java_plugin_and_dependency_management
+            def dependencyConfigurationNames = ['compile', 'compileOnly', 'testCompileOnly'];
+
+            Set<File> artifactFiles = new HashSet<File>()
+
+            dependencyConfigurationNames.each { name ->
+               def configuration = project.configurations.getByName(name);
+                configuration.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+                   artifactFiles.add(artifact.file)
+               }
+           }
+
             List<String> artifactPaths = new ArrayList<String>();
 
-            // TODO: Figure out how to get list of artifacts
+            for (File file : artifactFiles) {
+                artifactPaths.add(file.getCanonicalPath());
+            }
 
-            return new ArrayList<String>();
+            return artifactPaths;
 
         }
 
@@ -324,12 +338,23 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void runUnitTests() throws PluginExecutionException, PluginScenarioException {
-            // TODO:
+            // NOT NEEDED FOR GRADLE ??
         }
 
         @Override
         public void runIntegrationTests() throws PluginExecutionException, PluginScenarioException {
-            // TODO:
+            ProjectConnection connection = GradleConnector.newConnector()
+                    .forProjectDirectory(new File("."))
+                    .connect();
+            try {
+                BuildLauncher gradleBuildLauncher = connection.newBuild()
+                        .setStandardOutput(System.out)
+                        .setStandardError(System.err);
+
+                runGradleTask(gradleBuildLauncher, 'test')
+            } finally {
+                connection.close();
+            }
         }
 
         @Override
