@@ -273,20 +273,18 @@ class DevTask extends AbstractServerTask {
             ProjectConnection connection = GradleConnector.newConnector()
                     .forProjectDirectory(new File("."))
                     .connect();
-
             try {
                 BuildLauncher gradleBuildLauncher = connection.newBuild()
                         .setStandardOutput(System.out)
                         .setStandardError(System.err);
 
                 if (dir.equals(sourceDirectory)) {
-                    runGradleTask(gradleBuildLauncher, 'compileJava');
-                    runGradleTask(gradleBuildLauncher, 'processResources');
+                    runGradleTask(gradleBuildLauncher, 'processResources', 'processResources');
+                    runGradleTask(gradleBuildLauncher, );
                 }
 
                 if (dir.equals(testSourceDirectory)) {
-                    runGradleTask(gradleBuildLauncher, 'compileTestJava');
-                    runGradleTask(gradleBuildLauncher, 'processTestResources');
+                    runGradleTask(gradleBuildLauncher, 'compileTestJava', 'processTestResources');
                 }
 
             } finally {
@@ -392,22 +390,22 @@ class DevTask extends AbstractServerTask {
                 .connect();
 
             try {
-                // configure a gradle build launcher
-                // you can reuse the launcher to launch additional builds.
                 BuildLauncher gradleBuildLauncher = connection.newBuild()
                         .setStandardOutput(System.out)
                         .setStandardError(System.err);
-
-                runGradleTask(gradleBuildLauncher, 'compileJava');
-                runGradleTask(gradleBuildLauncher, 'processResources');
-                runGradleTask(gradleBuildLauncher, 'compileTestJava');
-                runGradleTask(gradleBuildLauncher, 'processTestResources');
-
-                runGradleTask(gradleBuildLauncher, 'libertyCreate');
-                runGradleTask(gradleBuildLauncher, 'installFeature');
+                /*
+                Running the installApps task runs all tasks it depends on:
+                    :libertyStop
+                    :clean
+                    :installLiberty
+                    :libertyCreate
+                    :compileJava
+                    :processResources
+                    :classes
+                    :war
+                    :installApps
+                 */
                 runGradleTask(gradleBuildLauncher, 'installApps');
-
-
             } finally {
                 connection.close();
             }
