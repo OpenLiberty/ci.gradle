@@ -18,8 +18,8 @@ package io.openliberty.tools.gradle.tasks
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.logging.LogLevel
-import org.gradle.api.tasks.options.Option;
-
+import org.gradle.api.tasks.options.Option
+import org.gradle.tooling.BuildException;
 import org.gradle.tooling.BuildLauncher
 import org.gradle.tooling.ProjectConnection
 import org.gradle.tooling.GradleConnector
@@ -274,13 +274,10 @@ class DevTask extends AbstractServerTask {
                     .forProjectDirectory(new File("."))
                     .connect();
             try {
-                BuildLauncher gradleBuildLauncher = connection.newBuild()
-                        .setStandardOutput(System.out)
-                        .setStandardError(System.err);
+                BuildLauncher gradleBuildLauncher = connection.newBuild();
 
                 if (dir.equals(sourceDirectory)) {
                     runGradleTask(gradleBuildLauncher, 'processResources', 'processResources');
-                    runGradleTask(gradleBuildLauncher, );
                 }
 
                 if (dir.equals(testSourceDirectory)) {
@@ -303,10 +300,7 @@ class DevTask extends AbstractServerTask {
                     .forProjectDirectory(new File("."))
                     .connect();
             try {
-                BuildLauncher gradleBuildLauncher = connection.newBuild()
-                        .setStandardOutput(System.out)
-                        .setStandardError(System.err);
-
+                BuildLauncher gradleBuildLauncher = connection.newBuild();
                 runGradleTask(gradleBuildLauncher, 'test')
             } finally {
                 connection.close();
@@ -335,8 +329,16 @@ class DevTask extends AbstractServerTask {
     }
 
     void runGradleTask(BuildLauncher buildLauncher, String ... tasks) {
-        buildLauncher.forTasks(tasks);
-        buildLauncher.run();
+        try {
+            buildLauncher
+                    .setStandardOutput(System.out)
+                    .setStandardError(System.err);
+            buildLauncher.forTasks(tasks);
+            buildLauncher.run();
+        } catch (BuildException e) {
+            // If there is a exception during the build do nothing,
+            // the build error will be printed to stdout
+        }
     }
 
     @TaskAction
@@ -391,8 +393,6 @@ class DevTask extends AbstractServerTask {
 
             try {
                 BuildLauncher gradleBuildLauncher = connection.newBuild()
-                        .setStandardOutput(System.out)
-                        .setStandardError(System.err);
                 /*
                 Running the installApps task runs all tasks it depends on:
                     :libertyStop
