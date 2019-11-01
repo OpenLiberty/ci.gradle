@@ -44,7 +44,7 @@ class LibertyPackage_looseApplication_Test extends AbstractIntegrationTest{
         try{
            runTasks(buildDir, 'libertyPackage')
 
-           def file = new File(buildDir, 'testPackage.zip')
+           def file = new File(buildDir, 'build/libs/testPackage.zip')
 
            assert file.exists() : "file not found"
            assert file.canRead() : "file cannot be read"

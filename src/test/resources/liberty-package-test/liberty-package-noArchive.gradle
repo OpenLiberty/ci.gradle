@@ -28,7 +28,7 @@ liberty {
     server{
         name = 'LibertyProjectServer'
         packageLiberty {
-            // archive is not set
+            // packageDir, packageName and packageType are not set
             include = 'minify'
             os='Linux'
         }

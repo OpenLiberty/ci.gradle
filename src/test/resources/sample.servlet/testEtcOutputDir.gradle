@@ -33,7 +33,7 @@ ext {
 
     warContext = 'sample.servlet-1'
     appName = 'LibertyProject'
-    packageFile = "${project.buildDir}/${appName}.zip"
+    packageDir = "${project.buildDir}"
     packagingType = 'usr'
 }
 
@@ -59,7 +59,8 @@ liberty {
         name = wlpServerName
 
         packageLiberty {
-            archive = packageFile
+            packageDirectory = packageDir
+            packageName = appName
             include = packagingType
         }
 

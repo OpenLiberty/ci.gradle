@@ -28,7 +28,8 @@ liberty {
     server{
         name = 'LibertyProjectServer'
         packageLiberty {
-            archive = 'build/testPackage'
+            packageDirectory = 'build'
+            packageName = 'testPackage'
         }
     }
 }
