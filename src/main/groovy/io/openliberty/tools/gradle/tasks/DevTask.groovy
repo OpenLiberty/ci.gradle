@@ -226,8 +226,6 @@ class DevTask extends AbstractServerTask {
 
             copyConfigFiles();
 
-            println 'libertyDebug ' + libertyDebug
-
             if (libertyDebug) {
                 serverTask = createServerTask(project, "debug");
                 setLibertyDebugPort(libertyDebugPort);
@@ -279,7 +277,19 @@ class DevTask extends AbstractServerTask {
                 features.removeAll(existingFeatures);
                 if (!features.isEmpty()) {
                     logger.info("Configuration features have been added");
-                    // TODO: Install new features
+
+                    ProjectConnection connection = GradleConnector.newConnector()
+                            .forProjectDirectory(new File("."))
+                            .connect();
+                    try {
+                        BuildLauncher gradleBuildLauncher = connection.newBuild();
+
+                        runGradleTask(gradleBuildLauncher, 'installFeature');
+
+                    } finally {
+                        connection.close();
+                        this.existingFeatures.addAll(features);
+                    }
                 }
             }
         }
@@ -352,8 +362,7 @@ class DevTask extends AbstractServerTask {
             buildLauncher.forTasks(tasks);
             buildLauncher.run();
         } catch (BuildException e) {
-            // If there is a exception during the build do nothing,
-            // the build error will be printed to stdout
+            // TODO:
         }
     }
 
