@@ -57,9 +57,9 @@ class ServerExtension {
     DeployExtension deploy = new DeployExtension()
     UndeployExtension undeploy = new UndeployExtension()
 
-    PackageAndDumpExtension packageLiberty = new PackageAndDumpExtension()
-    PackageAndDumpExtension dumpLiberty = new PackageAndDumpExtension()
-    PackageAndDumpExtension javaDumpLiberty = new PackageAndDumpExtension()
+    PackageExtension packageLiberty = new PackageExtension()
+    DumpExtension dumpLiberty = new DumpExtension()
+    DumpExtension javaDumpLiberty = new DumpExtension()
 
     public ServerExtension(String name) {
         if (name != null) {

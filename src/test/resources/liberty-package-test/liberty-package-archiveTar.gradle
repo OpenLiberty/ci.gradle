@@ -28,10 +28,8 @@ liberty {
     server{
         name = 'LibertyProjectServer'
         packageLiberty {
-            packageDirectory = "${project.projectDir}"
             packageName = 'testPackage'
-            packageType = 'jar'
-            include = 'runnable,minify'
+            packageType = 'tar'
         }
     }
 }

@@ -34,7 +34,7 @@ ext {
     // This is set in the ibm-web-ext.xml file
     warContext = 'myLibertyApp'
     appName = 'LibertyProject'
-    packageFile = "${project.buildDir}/${appName}.zip"
+    packageDir = "${project.buildDir}"
     packagingType = 'usr'
 
 }
@@ -47,7 +47,8 @@ liberty {
         serverXmlFile = file("src/main/liberty/config/server-dropins.xml")
 
         packageLiberty {
-            archive = packageFile
+            packageDirectory = packageDir
+            packageName = appName
             include = packagingType
         }
 

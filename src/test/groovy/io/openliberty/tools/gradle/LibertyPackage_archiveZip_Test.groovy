@@ -22,6 +22,10 @@ import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runners.MethodSorters
 
+import java.util.Enumeration
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class LibertyPackage_archiveZip_Test extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/liberty-package-test")
@@ -48,6 +52,24 @@ class LibertyPackage_archiveZip_Test extends AbstractIntegrationTest{
 
            assert file.exists() : "file not found"
            assert file.canRead() : "file cannot be read"
+
+           // test package contents
+           try {
+               ZipFile fileToProcess = new ZipFile(file.getAbsoluteFile())
+
+               Enumeration<? extends ZipEntry> entries = fileToProcess.entries()
+               while (entries.hasMoreElements()) {
+                   ZipEntry entry = entries.nextElement()
+                   def entryName = entry.getName()
+                
+                   if (entry.isDirectory()) {
+                       assert entryName.startsWith("myServerRoot") : "Zip file server root is not correct."
+                       break
+                   }
+               }
+           } catch (Exception e) {
+               throw new AssertionError ("Unexpected exception when checking the zip server root folder. "+e)
+           }
 
         } catch (Exception e) {
            throw new AssertionError ("Fail on task libertyPackage. "+e)

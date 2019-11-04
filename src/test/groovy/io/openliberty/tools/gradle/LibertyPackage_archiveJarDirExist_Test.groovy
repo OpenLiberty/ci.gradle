@@ -22,6 +22,10 @@ import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runners.MethodSorters
 
+import java.util.jar.Attributes
+import java.util.jar.Manifest
+import java.util.jar.JarFile
+
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class LibertyPackage_archiveJarDirExist_Test extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/liberty-package-test")
@@ -48,6 +52,24 @@ class LibertyPackage_archiveJarDirExist_Test extends AbstractIntegrationTest{
            assert file.exists() : "file not found"
            assert file.canRead() : "file cannot be read"
 
+           // test package contents - non-runnable Jar since the include property was not specified
+           try {
+              JarFile fileToProcess = new JarFile(file.getAbsoluteFile(), false)
+            
+              // If a manifest file has an invalid format, an IOException is thrown.
+              // Catch the exception so that the rest of the archive can be processed.
+              Manifest mf = fileToProcess.getManifest()
+              assert mf != null : "Manifest.mf file not found in Jar. Cannot verify packaged Jar is non-runnable."
+
+              Attributes manifestMap = mf.getMainAttributes()
+              assert manifestMap != null : "Manifest.mf attributes are null. Cannot verify Main-Class attribute value."
+
+              def value = manifestMap.getValue("Main-Class")
+              assert value != null : "Manifest.mf does not contain Main-Class attribute."
+              assert value.equals("wlp.lib.extract.SelfExtract") : "Expected Main-Class manifest value for non-runnable jar not found."
+           } catch (Exception e) {
+                 throw new AssertionError ("Unexpected exception when checking the Jar Manifest for Main-Class attribute. "+e)
+           }
         } catch (Exception e) {
            throw new AssertionError ("Fail on task libertyPackage. "+e)
         }

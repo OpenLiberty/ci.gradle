@@ -51,7 +51,7 @@ liberty {
             acceptLicense = true
         }
         packageLiberty {
-            archive = 'testPackage.zip'
+            packageName = 'testPackage'
         }
      }
 }
