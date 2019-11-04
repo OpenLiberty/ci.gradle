@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2015, 2019.
+ * (C) Copyright IBM Corporation 2019.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,12 @@
  */
 package io.openliberty.tools.gradle.extensions
 
-class PackageAndDumpExtension {
+class PackageExtension {
     
     String include
-    String archive
+    String packageDirectory
+    String packageName
+    String packageType
+    String serverRoot
     String os
 }

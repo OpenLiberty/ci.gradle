@@ -31,7 +31,7 @@ liberty {
 
 // TEST: packageLiberty attributes are not set on purpose
 //    packageLiberty {
-//        archive = 'test'
+//        packageDir = 'test'
 //        include = 'minify'
 //        os='Linux'
 //    }

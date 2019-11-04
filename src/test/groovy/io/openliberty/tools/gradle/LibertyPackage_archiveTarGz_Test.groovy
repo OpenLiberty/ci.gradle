@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2017.
+ * (C) Copyright IBM Corporation 2019.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import org.junit.Test
 import org.junit.runners.MethodSorters
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class LibertyPackage_archiveZipPath_Test extends AbstractIntegrationTest{
+class LibertyPackage_archiveTarGz_Test extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/liberty-package-test")
-    static File buildDir = new File(integTestDir, "/liberty-package-archiveZipPath-test")
-    static File buildFilename = new File(resourceDir, "liberty-package-archiveZipPath.gradle")
+    static File buildDir = new File(integTestDir, "/liberty-package-archiveTarGz-test")
+    static File buildFilename = new File(resourceDir, "liberty-package-archiveTarGz.gradle")
 
     @BeforeClass
     public static void setup() {
@@ -40,11 +40,11 @@ class LibertyPackage_archiveZipPath_Test extends AbstractIntegrationTest{
     }
 
     @Test
-    public void test_package_archiveZipPath() {
+    public void test_package_archiveTar() {
         try{
            runTasks(buildDir, 'libertyPackage')
 
-           def file = new File(buildDir, 'build/libs/build/testPackage.zip')
+           def file = new File(buildDir, 'build/libs/testPackage.tar.gz')
 
            assert file.exists() : "file not found"
            assert file.canRead() : "file cannot be read"

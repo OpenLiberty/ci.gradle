@@ -68,9 +68,8 @@ abstract class AbstractServerTask extends AbstractTask {
         def userDir = getUserDir(project, installDir)
         result.put('userDir', userDir)
 
-        if (getServerOutputDir(project) != null) {
-            result.put('outputDir', getServerOutputDir(project))
-        }
+        result.put('outputDir', getOutputDir(project))
+
         if (server.timeout != null && !server.timeout.isEmpty()) {
             result.put('timeout', server.timeout)
         }
@@ -97,11 +96,13 @@ abstract class AbstractServerTask extends AbstractTask {
         return new File(getUserDir(project).toString() + "/servers/" + server.name)
     }
 
-    protected String getServerOutputDir(Project project) {
+    protected String getOutputDir(Project project) {
         if (server.outputDir != null) {
             return server.outputDir
-        } else {
+        } else if (project.liberty.outputDir != null) {
             return project.liberty.outputDir
+        } else {
+            return getUserDir(project).toString() + "/servers"
         }
     }
 
@@ -197,12 +198,7 @@ abstract class AbstractServerTask extends AbstractTask {
     protected void setServerDirectoryNodes(Project project, Node serverNode) {
         serverNode.appendNode('userDirectory', getUserDir(project).toString())
         serverNode.appendNode('serverDirectory', getServerDir(project).toString())
-        String serverOutputDir = getServerOutputDir(project)
-        if (serverOutputDir != null && !serverOutputDir.isEmpty()) {
-            serverNode.appendNode('serverOutputDirectory', serverOutputDir)
-        } else {
-            serverNode.appendNode('serverOutputDirectory', getServerDir(project).toString())
-        }
+        serverNode.appendNode('serverOutputDirectory', new File(getOutputDir(project), server.name))
     }
 
     protected void setServerPropertyNodes(Project project, Node serverNode) {
@@ -555,10 +551,7 @@ abstract class AbstractServerTask extends AbstractTask {
         serverTask.setInstallDir(installDir)
         serverTask.setUserDir(getUserDir(project, installDir))
 
-        def serverOutputDir = getServerOutputDir(project)
-        if (serverOutputDir != null) {
-            serverTask.setOutputDir(new File(serverOutputDir))
-        }  
+        serverTask.setOutputDir(new File(getOutputDir(project)))
 
         if (server.timeout != null && !server.timeout.isEmpty()) {
             serverTask.setTimeout(server.timeout)

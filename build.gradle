@@ -166,7 +166,7 @@ pluginBundle {
 
   plugins {
     cigradle {
-      id = 'net.wasdev.wlp.gradle.plugins.Liberty'
+      id = 'io.openliberty.tools.gradle.Liberty'
       displayName = 'ci.gradle'
     }
   }
