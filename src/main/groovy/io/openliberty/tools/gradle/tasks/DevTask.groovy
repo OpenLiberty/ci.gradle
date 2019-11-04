@@ -77,14 +77,14 @@ class DevTask extends AbstractServerTask {
         this.skipITs = skipITs;
     }
 
-    private boolean libertyDebug = true;
+    boolean libertyDebug = false;
 
-    @Option(option = 'debug', description = 'TODO')
+    @Option(option = 'libertyDebug', description = 'TODO')
     void setLibertyDebug(boolean libertyDebug) {
         this.libertyDebug = libertyDebug;
     }
 
-    private int libertyDebugPort = 7777;
+    int libertyDebugPort = 7777;
 
     @Option(option = 'debugPort', description = 'Liberty debug port.')
     void setLibertyDebugPort(String libertyDebugPort) {
@@ -165,20 +165,17 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void debug(String msg) {
-            logger.warn(msg); // TODO: Change this back to debug
-//            logger.debug(msg);
+            logger.debug(msg);
         }
 
         @Override
         public void debug(String msg, Throwable e) {
-            logger.warn(msg, e);
-//            logger.debug(msg, e);
+            logger.debug(msg, e);
         }
 
         @Override
         public void debug(Throwable e) {
-            logger.warn(e);
-//            logger.debug(e);
+            logger.debug(e);
         }
 
         @Override
@@ -225,13 +222,24 @@ class DevTask extends AbstractServerTask {
         public ServerTask getServerTask() throws Exception {
             if (serverTask != null) {
                 return serverTask;
+            }
+
+            copyConfigFiles();
+
+            println 'libertyDebug ' + libertyDebug
+
+            if (libertyDebug) {
+                serverTask = createServerTask(project, "debug");
+                setLibertyDebugPort(libertyDebugPort);
+                serverTask.setEnvironmentVariables(getDebugEnvironmentVariables());
+                serverTask.setClean(server.clean)
+
             } else {
                 serverTask = createServerTask(project, "run");
-                copyConfigFiles();
-                serverTask.setUseEmbeddedServer(server.embedded)
                 serverTask.setClean(server.clean)
-                return serverTask;
             }
+
+            return serverTask;
         }
 
         @Override
@@ -265,7 +273,15 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void checkConfigFile(File configFile, File serverDir) {
-            // TODO:
+            ServerFeature servUtil = getServerFeatureUtil();
+            Set<String> features = servUtil.getServerFeatures(serverDir);
+            if (features != null) {
+                features.removeAll(existingFeatures);
+                if (!features.isEmpty()) {
+                    logger.info("Configuration features have been added");
+                    // TODO: Install new features
+                }
+            }
         }
 
         @Override
@@ -277,7 +293,7 @@ class DevTask extends AbstractServerTask {
                 BuildLauncher gradleBuildLauncher = connection.newBuild();
 
                 if (dir.equals(sourceDirectory)) {
-                    runGradleTask(gradleBuildLauncher, 'processResources', 'processResources');
+                    runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources');
                 }
 
                 if (dir.equals(testSourceDirectory)) {
@@ -328,7 +344,7 @@ class DevTask extends AbstractServerTask {
         }
     }
 
-    void runGradleTask(BuildLauncher buildLauncher, String ... tasks) {
+    void runGradleTask(BuildLauncher buildLauncher, String ... tasks) throws BuildException  {
         try {
             buildLauncher
                     .setStandardOutput(System.out)
@@ -362,25 +378,25 @@ class DevTask extends AbstractServerTask {
 
             String artifactId = '' // TODO: Find where to get this
 
-            println "Hot tests: " + this.hotTests
-            println "Skip tests: " + this.skipTests
-            println "SKip UTs: " + this.skipUTs
-            println "Skip ITs: " + this.skipITs
-            println "libertyDebug: " + this.libertyDebug
-            println "libertyDebugPort: " + this.libertyDebugPort
-            println "Compile wait: " + this.compileWait
-            println "verifyTimeout: " + this.verifyTimeout
-            println "appUpdateTimeout: " + this.appUpdateTimeout
-            println "serverStartTimeout: " + this.serverStartTimeout
-            println "applications" + this.applications
-            println "clean: " + this.clean
-            println "Server directory" + serverDirectory;
-            println "Config directory" + configDirectory;
-            println "Source directory: " + sourceDirectory;
-            println "Output directory: " + outputDirectory;
-            println"Test Source directory: " + testSourceDirectory;
-            println"Test Output directory: " + testOutputDirectory;
-            println"Resource directories" + resourceDirs;
+//            println "Hot tests: " + this.hotTests
+//            println "Skip tests: " + this.skipTests
+//            println "SKip UTs: " + this.skipUTs
+//            println "Skip ITs: " + this.skipITs
+//            println "libertyDebug: " + this.libertyDebug
+//            println "libertyDebugPort: " + this.libertyDebugPort
+//            println "Compile wait: " + this.compileWait
+//            println "verifyTimeout: " + this.verifyTimeout
+//            println "appUpdateTimeout: " + this.appUpdateTimeout
+//            println "serverStartTimeout: " + this.serverStartTimeout
+//            println "applications" + this.applications
+//            println "clean: " + this.clean
+//            println "Server directory" + serverDirectory;
+//            println "Config directory" + configDirectory;
+//            println "Source directory: " + sourceDirectory;
+//            println "Output directory: " + outputDirectory;
+//            println"Test Source directory: " + testSourceDirectory;
+//            println"Test Output directory: " + testOutputDirectory;
+//            println"Resource directories" + resourceDirs;
 
             // create an executor for tests with an additional queue of size 1, so
             // any further changes detected mid-test will be in the following run
@@ -439,6 +455,8 @@ class DevTask extends AbstractServerTask {
                 logger.info(e.getMessage());
                 return; // enter shutdown hook
             }
+
+            logger.warn('Started watching files');
 
     }
 
