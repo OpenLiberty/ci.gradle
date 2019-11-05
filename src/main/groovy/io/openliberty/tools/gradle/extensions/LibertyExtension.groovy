@@ -35,9 +35,6 @@ class LibertyExtension {
     File jvmOptionsFile
     File serverEnvFile
 
-    Map<String, Object> bootstrapProperties
-    List<String> jvmOptions
-
     boolean clean = false
     String timeout
     String template
