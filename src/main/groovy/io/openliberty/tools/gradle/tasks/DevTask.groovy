@@ -145,6 +145,10 @@ class DevTask extends AbstractServerTask {
         this.clean = clean;
     }
 
+    File sourceDirectory;
+
+    File testSourceDirectory;
+
 
     private class DevTaskUtil extends DevUtil {
 
@@ -278,16 +282,13 @@ class DevTask extends AbstractServerTask {
                 if (!features.isEmpty()) {
                     logger.info("Configuration features have been added");
 
-                    ProjectConnection connection = GradleConnector.newConnector()
-                            .forProjectDirectory(new File("."))
-                            .connect();
+                    ProjectConnection gradleConnection = initGradleProjectConnection();
+                    BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+
                     try {
-                        BuildLauncher gradleBuildLauncher = connection.newBuild();
-
                         runGradleTask(gradleBuildLauncher, 'installFeature');
-
                     } finally {
-                        connection.close();
+                        gradleConnection.close();
                         this.existingFeatures.addAll(features);
                     }
                 }
@@ -296,12 +297,10 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public boolean compile(File dir) {
-            ProjectConnection connection = GradleConnector.newConnector()
-                    .forProjectDirectory(new File("."))
-                    .connect();
-            try {
-                BuildLauncher gradleBuildLauncher = connection.newBuild();
+            ProjectConnection gradleConnection = initGradleProjectConnection();
+            BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
+            try {
                 if (dir.equals(sourceDirectory)) {
                     runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources');
                 }
@@ -311,7 +310,7 @@ class DevTask extends AbstractServerTask {
                 }
 
             } finally {
-                connection.close();
+                gradleConnection.close();
             }
         }
 
@@ -322,14 +321,13 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void runIntegrationTests() throws PluginExecutionException, PluginScenarioException {
-            ProjectConnection connection = GradleConnector.newConnector()
-                    .forProjectDirectory(new File("."))
-                    .connect();
+            ProjectConnection gradleConnection = initGradleProjectConnection();
+            BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+
             try {
-                BuildLauncher gradleBuildLauncher = connection.newBuild();
                 runGradleTask(gradleBuildLauncher, 'test')
             } finally {
-                connection.close();
+                gradleConnection.close();
             }
         }
 
@@ -354,25 +352,13 @@ class DevTask extends AbstractServerTask {
         }
     }
 
-    void runGradleTask(BuildLauncher buildLauncher, String ... tasks) throws BuildException  {
-        try {
-            buildLauncher
-                    .setStandardOutput(System.out)
-                    .setStandardError(System.err);
-            buildLauncher.forTasks(tasks);
-            buildLauncher.run();
-        } catch (BuildException e) {
-            // TODO:
-        }
-    }
-
     @TaskAction
     void action() {
             SourceSet mainSourceSet = project.sourceSets.main;
             SourceSet testSourceSet = project.sourceSets.test;
 
-            File sourceDirectory = mainSourceSet.java.srcDirs.iterator().next()
-            File testSourceDirectory = testSourceSet.java.srcDirs.iterator().next()
+            sourceDirectory = mainSourceSet.java.srcDirs.iterator().next()
+            testSourceDirectory = testSourceSet.java.srcDirs.iterator().next()
             File outputDirectory = mainSourceSet.java.outputDir;
             File testOutputDirectory = testSourceSet.java.outputDir;
             File serverDirectory = getServerDir(project);
@@ -385,39 +371,16 @@ class DevTask extends AbstractServerTask {
                 resourceDirs.add(defaultResourceDir);
             }
 
-            String artifactId = '' // TODO: Find where to get this
-
-//            println "Hot tests: " + this.hotTests
-//            println "Skip tests: " + this.skipTests
-//            println "SKip UTs: " + this.skipUTs
-//            println "Skip ITs: " + this.skipITs
-//            println "libertyDebug: " + this.libertyDebug
-//            println "libertyDebugPort: " + this.libertyDebugPort
-//            println "Compile wait: " + this.compileWait
-//            println "verifyTimeout: " + this.verifyTimeout
-//            println "appUpdateTimeout: " + this.appUpdateTimeout
-//            println "serverStartTimeout: " + this.serverStartTimeout
-//            println "applications" + this.applications
-//            println "clean: " + this.clean
-//            println "Server directory" + serverDirectory;
-//            println "Config directory" + configDirectory;
-//            println "Source directory: " + sourceDirectory;
-//            println "Output directory: " + outputDirectory;
-//            println"Test Source directory: " + testSourceDirectory;
-//            println"Test Output directory: " + testOutputDirectory;
-//            println"Resource directories" + resourceDirs;
+            String artifactId = project.getName();
 
             // create an executor for tests with an additional queue of size 1, so
             // any further changes detected mid-test will be in the following run
             final ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
                     new ArrayBlockingQueue<Runnable>(1, true));
 
-            ProjectConnection connection = GradleConnector.newConnector()
-                .forProjectDirectory(new File("."))
-                .connect();
-
+            ProjectConnection gradleConnection = initGradleProjectConnection();
+            BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
             try {
-                BuildLauncher gradleBuildLauncher = connection.newBuild()
                 /*
                 Running the installApps task runs all tasks it depends on:
                     :libertyStop
@@ -432,15 +395,22 @@ class DevTask extends AbstractServerTask {
                  */
                 runGradleTask(gradleBuildLauncher, 'installApps');
             } finally {
-                connection.close();
+                gradleConnection.close();
             }
-            
 
             util = new DevTaskUtil(
                     serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs,
                     hotTests, skipTests, skipUTs, skipITs, artifactId,
                     serverStartTimeout, verifyTimeout, appUpdateTimeout, compileWait, libertyDebug
             );
+
+            util.setUseMavenOrGradleCompile(true);
+
+            println 'serverDirectory' + serverDirectory
+            println 'sourceDirectory' + sourceDirectory
+            println 'testSourceDirectory' + testSourceDirectory
+            println 'configDirectory' + configDirectory
+            println 'resourceDirs' + resourceDirs.toListString()
 
             util.addShutdownHook(executor);
 
@@ -469,7 +439,32 @@ class DevTask extends AbstractServerTask {
 
     }
 
-    File getServerXMLFile(def server) {
+    static ProjectConnection initGradleProjectConnection() {
+        return initGradleConnection('.');
+    }
+
+    static ProjectConnection initGradleConnection(String path) {
+        ProjectConnection connection = GradleConnector.newConnector()
+                .forProjectDirectory(new File(path))
+                .connect();
+
+        return connection;
+    }
+
+    static void runGradleTask(BuildLauncher buildLauncher, String ... tasks)  {
+        try {
+            buildLauncher
+                    .setStandardOutput(System.out)
+                    .setStandardError(System.err);
+            buildLauncher.forTasks(tasks);
+            buildLauncher.run();
+        } catch (BuildException e) {
+            // Catch the  build exception bc we do not want to exit dev mode if a gradle task fails
+            // For example if gradle compile or gradle test failed
+        }
+    }
+
+    static File getServerXMLFile(def server) {
         if (server.serverXmlFile != null && server.serverXmlFile.exists()) {
             return server.serverXmlFile;
         }
