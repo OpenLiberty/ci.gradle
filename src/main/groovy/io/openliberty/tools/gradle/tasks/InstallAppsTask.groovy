@@ -16,6 +16,7 @@
 package io.openliberty.tools.gradle.tasks
 
 import io.openliberty.tools.gradle.utils.*
+import io.openliberty.tools.ant.ServerTask
 import io.openliberty.tools.common.plugins.config.ApplicationXmlDocument
 import io.openliberty.tools.common.plugins.config.LooseApplication
 import io.openliberty.tools.common.plugins.config.LooseConfigData
@@ -112,15 +113,22 @@ class InstallAppsTask extends AbstractServerTask {
     }
 
     private void installProjectArchive(Task task, String appsDir) {
+        String baseName
+        String fileName
         if("springboot".equals(getPackagingType())) {
-            String baseName = springBootTask.baseName
+            baseName = springBootTask.baseName
             installSpringBootFeatureIfNeeded()
             String targetThinAppPath = invokeThinOperation(appsDir)
+            fileName = targetThinAppPath.substring(targetThinAppPath.lastIndexOf("/") + 1)
             validateAppConfig(targetThinAppPath.substring(targetThinAppPath.lastIndexOf("/") + 1), baseName, appsDir)
         } else {
+            baseName = task.baseName
+            fileName = getArchiveName(task)
             Files.copy(task.archivePath.toPath(), new File(getServerDir(project), "/" + appsDir + "/" + getArchiveName(task)).toPath(), StandardCopyOption.REPLACE_EXISTING)
             validateAppConfig(getArchiveName(task), task.baseName, appsDir)
         }
+        validateAppConfig(fileName, baseName, appsDir)
+        verifyAppStarted(fileName, appsDir)
     }
 
     protected void validateAppConfig(String fileName, String artifactId, String dir) throws Exception {
@@ -230,9 +238,7 @@ class InstallAppsTask extends AbstractServerTask {
                 validateAppConfig(application, task.baseName, appsDir)
                 logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFile.getAbsolutePath()))
                 installLooseConfigWar(config, task)
-                deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
-                deleteApplication(new File(getServerDir(project), "dropins"), looseConfigFile)
-                config.toXmlFile(looseConfigFile)
+                installAndVerify(config, looseConfigFile, application, appsDir)
                 break
             case "ear":
                 if ((String.valueOf(project.getGradle().getGradleVersion().charAt(0)) as int) < 4) {
@@ -241,9 +247,7 @@ class InstallAppsTask extends AbstractServerTask {
                 validateAppConfig(application, task.baseName, appsDir)
                 logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFile.getAbsolutePath()))
                 installLooseConfigEar(config, task)
-                deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
-                deleteApplication(new File(getServerDir(project), "dropins"), looseConfigFile)
-                config.toXmlFile(looseConfigFile)
+                installAndVerify(config, looseConfigFile, application, appsDir)
                 break
             default:
                 logger.info(MessageFormat.format(("Loose application configuration is not supported for packaging type {0}. The project artifact will be installed as an archive file."),
@@ -251,6 +255,13 @@ class InstallAppsTask extends AbstractServerTask {
                 installProjectArchive(task, appsDir)
                 break
         }
+    }
+
+    private void installAndVerify(LooseConfigData config, File looseConfigFile, String applicationName, String appsDir) {
+        deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
+        deleteApplication(new File(getServerDir(project), "dropins"), looseConfigFile)
+        config.toXmlFile(looseConfigFile)
+        verifyAppStarted(applicationName, appsDir)
     }
 
     protected void installLooseConfigWar(LooseConfigData config, Task task) throws Exception {
@@ -420,6 +431,7 @@ class InstallAppsTask extends AbstractServerTask {
         if (server.looseApplication) {
             logger.warn('Application ' + file.getName() + ' was installed as a file as specified. To install as a loose application, specify the plugin or task generating the archive. ')
         }
+        verifyAppStarted(file.name, appsDir)
     }
 
     protected void installFileList(List<File> appFiles, String appsDir) {
@@ -438,6 +450,45 @@ class InstallAppsTask extends AbstractServerTask {
             throw new GradleException("There was a problem creating ${applicationDirectory.getCanonicalPath()}.", e)
         }
         return applicationDirectory
+    }
+
+    private boolean shouldValidateAppStart() throws GradleException {
+        try {
+            return new File(getServerDir(project).getCanonicalPath()  + "/workarea/.sRunning").exists()
+        } catch (IOException ioe) {
+            throw new GradleException("Could not get the server directory to determine the state of the server.")
+        }
+    }
+
+    protected void verifyAppStarted(String appFile, String appsDir) throws GradleException {
+        if (shouldValidateAppStart()) {
+            String appName = appFile.substring(0, appFile.lastIndexOf('.'))
+            if (appsDir.equals("apps")) {
+                ServerConfigDocument scd = null
+
+                File serverXML = new File(getServerDir(project).getCanonicalPath(), "server.xml")
+
+                try {
+                    scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(), server.serverXML, server.configDirectory,
+                            server.bootstrapPropertiesFile, server.bootstrapProperties, server.serverEnvFile, false)
+
+                    //appName will be set to a name derived from appFile if no name can be found.
+                    appName = scd.findNameForLocation(appFile)
+                } catch (Exception e) {
+                    logger.warn(e.getLocalizedMessage())
+                } 
+            }
+
+            long appTimeout = 30 * 1000
+            if (server.timeout != null && !server.timeout.isEmpty()) {
+                appTimeout = server.timeout * 1000
+            }
+            
+            ServerTask serverTask = createServerTask(project, null) //Using a server task without an opertation to check logs for app start
+            if (serverTask.waitForStringInLog("CWWKZ0001I.*" + appName, appTimeout, new File(new File(getOutputDir(project), server.name), "logs/messages.log")) == null) {
+                throw new GradleException("Failed to deploy the " + appName + " application. The application start message was not found in the log file.")
+            }
+        }
     }
 }
 

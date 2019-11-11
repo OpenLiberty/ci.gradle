@@ -866,7 +866,6 @@ abstract class AbstractServerTask extends AbstractTask {
 
     protected ServerTask createServerTask(Project project, String operation) {
         ServerTask serverTask =  new ServerTask()
-        serverTask.setOperation(operation)
         serverTask.setServerName(server.name)
 
         def installDir = getInstallDir(project)
@@ -875,6 +874,11 @@ abstract class AbstractServerTask extends AbstractTask {
         serverTask.setUserDir(getUserDir(project, installDir))
 
         serverTask.setOutputDir(new File(getOutputDir(project)))
+
+        //Some uses of a server task do not require an operation to be specified
+        if (operation != null && !operation.isEmpty()) {
+            serverTask.setOperation(operation)
+        }
 
         if (server.timeout != null && !server.timeout.isEmpty()) {
             serverTask.setTimeout(server.timeout)
