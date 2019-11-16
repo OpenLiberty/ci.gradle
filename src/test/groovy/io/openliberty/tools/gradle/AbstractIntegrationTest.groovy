@@ -28,6 +28,7 @@ import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.gradle.api.GradleException
+import io.openliberty.tools.common.plugins.util.OSUtil
 
 abstract class AbstractIntegrationTest {
 
@@ -50,11 +51,26 @@ abstract class AbstractIntegrationTest {
     }
 
     protected static File copyBuildFiles(File buildFilename, File buildDir) {
-        copyFile(buildFilename, new File(buildDir, 'build.gradle'))
-        copyFile(new File("build/gradle.properties"), new File(buildDir, 'gradle.properties'))
+        copyBuildFiles(buildFilename, buildDir, false)
+    }
+
+    protected static File copyBuildFiles(File buildFile, File buildDir, boolean appendGradleProperties) {
+        copyFile(buildFile, new File(buildDir, 'build.gradle'))
+
+        File destProps = new File(buildDir, 'gradle.properties')
+        if (appendGradleProperties && destProps.exists()) {
+            // if gradle.properties file already exists, need to merge the two files
+            mergeFiles(new File("build/gradle.properties"), destProps)
+        } else {
+            copyFile(new File("build/gradle.properties"), destProps)
+        }
     }
 
     protected static File createTestProject(File parent, File sourceDir, String buildFilename) {
+        createTestProject(parent, sourceDir, buildFilename, false)
+    }
+
+    protected static File createTestProject(File parent, File sourceDir, String buildFilename, boolean appendGradleProperties) {
         if (!sourceDir.exists()){
             throw new AssertionError("The source file '${sourceDir.canonicalPath}' doesn't exist.")
         }
@@ -70,8 +86,8 @@ abstract class AbstractIntegrationTest {
             });
 
             // copy the needed gradle build and property files
-            File sourceFile = new File(sourceDir, buildFilename)
-            copyBuildFiles(sourceFile, parent)
+            File buildFile = new File(sourceDir, buildFilename)
+            copyBuildFiles(buildFile, parent, appendGradleProperties)
 
         } catch (IOException e) {
             throw new AssertionError("Unable to copy directory '${parent.canonicalPath}'.")
@@ -108,6 +124,28 @@ abstract class AbstractIntegrationTest {
             FileUtils.copyFile(sourceFile, destFile)
         } catch (Exception e) {
             throw new AssertionError("Unable to create file '${destFile.canonicalPath}'.")
+        }
+    }
+
+    protected static File mergeFiles(File sourceFile, File destFile) {
+        if (sourceFile.exists()) {
+            try {
+                String endLineCharacters = "\n"
+                if (OSUtil.isWindows()) {
+                    endLineCharacters = "\r\n"
+                }
+
+                List<String> sourceLines = FileUtils.readLines(sourceFile, (String) null)
+
+                FileUtils.writeStringToFile(destFile, endLineCharacters, (String) null, true)
+
+                for (String sourceLine : sourceLines) {
+                    FileUtils.writeStringToFile(destFile, sourceLine + endLineCharacters, (String) null, true)
+                }
+
+            } catch (Exception e) {
+                throw new AssertionError("Unable to merge file '${sourceFile.canonicalPath}' to '${destFile.canonicalPath}'.")
+            }
         }
     }
 

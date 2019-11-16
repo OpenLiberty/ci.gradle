@@ -42,6 +42,19 @@ public class TestPluginConfigFile extends AbstractIntegrationTest{
             throw new AssertionError ("Fail on task installApps. " + e)
         }
         assert new File('build/testBuilds/test-plugin-config-file/build/liberty-plugin-config.xml').exists() : 'liberty plugin config file was not created in the build directory'
+
+        def serverEnvFile = new File("build/testBuilds/test-plugin-config-file/build/wlp/usr/servers/LibertyProjectServer/server.env")
+
+        assert serverEnvFile.exists() : "file not found"
+
+        // Verify the server.env file does not contain a keystore_password entry
+        FileInputStream input = new FileInputStream(serverEnvFile);
+
+        Properties prop = new Properties();
+        prop.load( input );
+        String value = prop.getProperty("keystore_password");
+        assert value == null : "keystore_password property unexpectedly found"
+
     }
 
     @Test
@@ -81,4 +94,5 @@ public class TestPluginConfigFile extends AbstractIntegrationTest{
 
       Assert.assertTrue("correct configFile value", nodes.item(0).getTextContent().replace("\\", "/").contains("/src/main/liberty/config/server-apps-test.xml"));
     }
+
 }
