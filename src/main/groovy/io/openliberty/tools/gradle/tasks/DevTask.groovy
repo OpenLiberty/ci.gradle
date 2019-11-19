@@ -402,8 +402,8 @@ class DevTask extends AbstractServerTask {
                     serverStartTimeout, verifyTimeout, appUpdateTimeout, compileWait, libertyDebug
             );
 
-            // Use the gradle compile task instead of using the DevUtil compile
-            util.setUseMavenOrGradleCompile(true);
+//            Use the gradle compile task instead of using the DevUtil compile
+//            util.setUseMavenOrGradleCompile(true);
 
             util.addShutdownHook(executor);
 
