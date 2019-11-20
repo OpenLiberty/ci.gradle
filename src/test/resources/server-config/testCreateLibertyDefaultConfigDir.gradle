@@ -24,30 +24,6 @@ targetCompatibility = 1.7
 
 compileJava.options.encoding = 'UTF-8'
 
-ext {
-    // Liberty server properties
-    wlpServerName = 'LibertyProjectServer'
-}
-
-liberty {
-    server{
-        name = wlpServerName
-
-        bootstrapProperties = ['default.http.port':'9084','default.https.port':'9474']
-        jvmOptions = ['-Xmx512m']
-    }
-}
-
-afterEvaluate {
-    ext {
-        liberty.server.env."another.env.var" = "anotherValue"
-        liberty.server.defaultVar.someDefaultVar = 'someDefaultValue'
-        liberty.server.var.someVar = 'someValue'
-        liberty.server.var."my.custom.var" = 'myCustomValue'
-        liberty.server.bootstrapProperties."default.http.port" = '9083'
-    }
-}
-
 repositories {
     mavenCentral()
     maven {

@@ -18,6 +18,7 @@ package io.openliberty.tools.gradle.extensions
 
 import org.gradle.util.ConfigureUtil
 import org.gradle.api.Task
+import java.util.Properties
 
 class ServerExtension {
     //Server properties
@@ -34,8 +35,11 @@ class ServerExtension {
     File jvmOptionsFile
     File serverEnvFile
 
-    Map<String, Object> bootstrapProperties
+    Properties bootstrapProperties = new Properties()
     List<String> jvmOptions
+    Properties env = new Properties()
+    Properties var = new Properties()
+    Properties defaultVar = new Properties()
 
     List<Object> apps
     List<Object> dropins

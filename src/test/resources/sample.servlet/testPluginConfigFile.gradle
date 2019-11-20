@@ -46,6 +46,7 @@ liberty {
         apps = [war]
         stripVersion = true
         looseApplication = true
+        noPassword = true
     }
 }
 
