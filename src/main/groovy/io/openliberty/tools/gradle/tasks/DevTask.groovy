@@ -347,14 +347,18 @@ class DevTask extends AbstractServerTask {
             File outputDirectory = mainSourceSet.java.outputDir;
             File testOutputDirectory = testSourceSet.java.outputDir;
             File serverDirectory = getServerDir(project);
-            File configDirectory = new File(project.projectDir, "src/main/liberty/config");
             List<File> resourceDirs = mainSourceSet.resources.srcDirs.toList();
 
             String serverName = server.name;
             File serverInstallDir = getInstallDir(project);
 
+            // make sure server.configDirectory exists
+            initializeConfigDirectory();
+            File configDirectory = server.configDirectory;
+
             // getOutputDir returns a string
             File serverOutputDir = new File(getOutputDir(project));
+
             if (serverDirectory.exists()) {
                 if (ServerStatusUtil.isServerRunning(serverInstallDir, serverOutputDir, serverName)) {
                     throw new Exception("The server " + serverName
