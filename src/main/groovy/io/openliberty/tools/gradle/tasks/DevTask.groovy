@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2019.
+ * (C) Copyright IBM Corporation 2019.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ class DevTask extends AbstractServerTask {
 
     DevTask() {
         configure({
-            description "Runs a Liberty dev server"
+            description 'Runs a Liberty server in dev mode'
             logging.level = LogLevel.INFO
             group 'Liberty'
         })
@@ -52,83 +52,82 @@ class DevTask extends AbstractServerTask {
 
     private boolean hotTests = false;
 
-    @Option(option = 'hotTests', description = 'Tests are run immediately after dev mode starts up and automatically after source changes.')
+    @Option(option = 'hotTests', description = 'If set to true, run tests automatically after every change. The default value is false.')
     void setHotTests(boolean hotTests) {
         this.hotTests = hotTests;
     }
 
     private boolean skipTests = false;
 
-    @Option(option = 'skipTests', description = 'Skip tests.')
+    @Option(option = 'skipTests', description = 'If set to true, do not run any tests in dev mode. The default value is false.')
     void setSkipTests(boolean skipTests) {
         this.skipTests = skipTests;
     }
 
-//    Only calling a single `gradle test` command, no need to have options to
-//    skipITs vs skipUTs, just a single skipTests flag
-//    ?? Could be needed later if we can separate out ITs vs UTs
+    boolean libertyDebug = true;
 
-    private boolean skipUTs = false;
-//    @Option(option = 'skipUTs', description = 'Skip unit tests.')
-//    void setSkipUTs(boolean skipUTs) {
-//        this.skipUTs = skipUTs;
-//    }
-
-    private boolean skipITs = false;
-//    @Option(option = 'skipITs', description = 'Skip integration tests.')
-//    void setSkipITs(boolean skipITs) {
-//        this.skipITs = skipITs;
-//    }
-
-    boolean libertyDebug = false;
-
-    @Option(option = 'libertyDebug', description = 'TODO')
-    void setLibertyDebug(boolean libertyDebug) {
-        this.libertyDebug = libertyDebug;
+    @Option(option = 'libertyDebug', description = 'Whether to allow attaching a debugger to the running server. The default value is true.')
+    void setLibertyDebug(String libertyDebug) {
+        this.libertyDebug = Boolean.parseBoolean(libertyDebug)
     }
 
     int libertyDebugPort = 7777;
 
-    @Option(option = 'debugPort', description = 'Liberty debug port.')
+    @Option(option = 'debugPort', description = 'The debug port that you can attach a debugger to. The default value is 7777.')
     void setLibertyDebugPort(String libertyDebugPort) {
-        if (libertyDebugPort.isInteger()) {
+        try {
             this.libertyDebugPort = libertyDebugPort.toInteger();
+        } catch (NumberFormatException e) {
+            logger.error(String.format("Unexpected value: %s for dev mode option libertyDebugPort. libertyDebugPort should be a valid integer.", libertyDebugPort));
+            throw e;
         }
     }
 
     private double compileWait = 0.5;
 
-    @Option(option = 'compileWait', description = 'Time in seconds to wait before processing Java changes and deletions.')
+    @Option(option = 'compileWait', description = 'Time in seconds to wait before processing Java changes and deletions. The default value is 0.5 seconds.')
     void setCompileWait(String compileWait) {
-        if (compileWait.isDouble()) {
+        try {
             this.compileWait = compileWait.toDouble();
+        } catch (NumberFormatException e) {
+            logger.error(String.format("Unexpected value: %s for dev mode option compileWait. compileWait should be a valid number.", compileWait));
+            throw e;
         }
     }
 
     private int verifyTimeout = 30;
 
-    @Option(option = 'verifyTimeout', description = 'Time in seconds to wait while verifying that the application has started.')
+    @Option(option = 'verifyTimeout', description = 'Maximum time to wait (in seconds) to verify that the application has started. The default value is 30 seconds.')
     void setVerifyTimeout(String verifyTimeout) {
-        if (verifyTimeout.isInteger()) {
+        try {
             this.verifyTimeout = verifyTimeout.toInteger();
+        } catch (NumberFormatException e) {
+            logger.error(String.format("Unexpected value: %s for dev mode option verifyTimeout. verifyTimeout should be a valid integer.", verifyTimeout));
+            throw e;
         }
     }
 
     private int appUpdateTimeout = 5;
 
-    @Option(option = 'appUpdateTimeout', description = 'Time in seconds to wait while verifying that the application has updated.')
+    @Option(option = 'appUpdateTimeout', description = 'Maximum time to wait (in seconds) to verify that the application has updated before running integration tests. The default value is 5 seconds.')
     void setAppUpdateTimeout(String appUpdateTimeout) {
-        if (appUpdateTimeout.isInteger()) {
+        try {
             this.appUpdateTimeout = appUpdateTimeout.toInteger();
+        } catch (NumberFormatException e) {
+            logger.error(String.format("Unexpected value: %s for dev mode option appUpdateTimeout. appUpdateTimeout should be a valid integer.", appUpdateTimeout));
+            throw e;
         }
     }
 
     private int serverStartTimeout = 30;
 
-    @Option(option = 'serverStartTimeout', description = 'Time in seconds to wait while verifying that the server has started.')
+    @Option(option = 'serverStartTimeout', description = 'Time in seconds to wait while verifying that the server has started. The default value is 30 seconds.')
     void setServerStartTimeout(String serverStartTimeout) {
-        if (serverStartTimeout.isInteger()) {
+        try {
             this.serverStartTimeout = serverStartTimeout.toInteger();
+        } catch (NumberFormatException e) {
+            logger.error(String.format("Unexpected value: %s for dev mode option serverStartTimeout. serverStartTimeout should be a valid integer.", serverStartTimeout));
+            throw e;
         }
     }
 
@@ -150,13 +149,14 @@ class DevTask extends AbstractServerTask {
         private ServerTask serverTask = null;
 
         DevTaskUtil(File serverDirectory, File sourceDirectory, File testSourceDirectory,
-                    File configDirectory, List<File> resourceDirs, boolean  hotTests, boolean  skipTests,
-                    boolean  skipUTs, boolean  skipITs, String artifactId, int serverStartTimeout,
+                    File configDirectory, List<File> resourceDirs, boolean  hotTests,
+                    boolean  skipTests, String artifactId, int serverStartTimeout,
                     int verifyTimeout, int appUpdateTimeout, double compileWait, boolean libertyDebug
         ) throws IOException {
-            super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs, hotTests,
-                    skipTests, skipUTs, skipITs, artifactId,  serverStartTimeout, verifyTimeout, appUpdateTimeout,
-                    ((long) (compileWait * 1000L)), libertyDebug);
+            super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs,
+                    hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
+                    verifyTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug);
+
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
         }
@@ -206,12 +206,12 @@ class DevTask extends AbstractServerTask {
             if (isLibertyInstalled(project)) {
                 if (getServerDir(project).exists()) {
                     ServerTask serverTaskStop = createServerTask(project, "stop");
-                    serverTaskStop.execute()
+                    serverTaskStop.execute();
                 } else {
-                    logger.error('There is no server to stop. The server has not been created.')
+                    logger.error('There is no server to stop. The server has not been created.');
                 }
             } else {
-                logger.error('There is no server to stop. The runtime has not been installed.')
+                logger.error('There is no server to stop. The runtime has not been installed.');
             }
         }
 
@@ -239,9 +239,9 @@ class DevTask extends AbstractServerTask {
         @Override
         public List<String> getArtifacts() {
             // https://docs.gradle.org/current/userguide/java_plugin.html#sec:java_plugin_and_dependency_management
-            def dependencyConfigurationNames = ['compile', 'compileOnly', 'testCompileOnly'];
+            String[] dependencyConfigurationNames = ['compile', 'compileOnly', 'testCompileOnly'];
 
-            Set<File> artifactFiles = new HashSet<File>()
+            Set<File> artifactFiles = new HashSet<File>();
 
             dependencyConfigurationNames.each { name ->
                def configuration = project.configurations.getByName(name);
@@ -285,7 +285,7 @@ class DevTask extends AbstractServerTask {
                 }
                 return true;
             } catch (BuildException e) {
-                logger.error("Unable to compile");
+                logger.error('Unable to compile', e);
                 return false;
             } finally {
                 gradleConnection.close();
@@ -294,7 +294,7 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void runUnitTests() throws PluginExecutionException, PluginScenarioException {
-            // NOT NEEDED FOR GRADLE ??
+            // Not needed for gradle.
         }
 
         @Override
@@ -306,7 +306,7 @@ class DevTask extends AbstractServerTask {
                 // Force tests to run by calling cleanTest first
                 // otherwise tests may be skipped with an UP-TO-DATE message
                 // https://docs.gradle.org/current/userguide/java_testing.html#sec:forcing_java_tests_to_run
-                runGradleTask(gradleBuildLauncher, 'cleanTest', 'test')
+                runGradleTask(gradleBuildLauncher, 'cleanTest', 'test');
             } catch (BuildException e) {
                 // Gradle throws a build exception if tests fail
                 // catch it and do nothing
@@ -343,6 +343,7 @@ class DevTask extends AbstractServerTask {
 
             sourceDirectory = mainSourceSet.java.srcDirs.iterator().next()
             testSourceDirectory = testSourceSet.java.srcDirs.iterator().next()
+
             File outputDirectory = mainSourceSet.java.outputDir;
             File testOutputDirectory = testSourceSet.java.outputDir;
             File serverDirectory = getServerDir(project);
@@ -351,6 +352,7 @@ class DevTask extends AbstractServerTask {
 
             String serverName = server.name;
             File serverInstallDir = getInstallDir(project);
+
             // getOutputDir returns a string
             File serverOutputDir = new File(getOutputDir(project));
             if (serverDirectory.exists()) {
@@ -397,9 +399,9 @@ class DevTask extends AbstractServerTask {
             }
 
             util = new DevTaskUtil(
-                    serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs,
-                    hotTests, skipTests, skipUTs, skipITs, artifactId,
-                    serverStartTimeout, verifyTimeout, appUpdateTimeout, compileWait, libertyDebug
+                    serverDirectory, sourceDirectory, testSourceDirectory, configDirectory,
+                    resourceDirs, hotTests, skipTests, artifactId, serverStartTimeout,
+                    verifyTimeout, appUpdateTimeout, compileWait, libertyDebug
             );
 
 //            Use the gradle compile task instead of using the DevUtil compile
@@ -410,14 +412,14 @@ class DevTask extends AbstractServerTask {
             util.startServer();
 
             List<String> artifactPaths = util.getArtifacts();
-            File buildFile = project.getBuildFile()
+            File buildFile = project.getBuildFile();
             File serverXMLFile = getServerXMLFile(server);
 
             if (hotTests && testSourceDirectory.exists()) {
             // if hot testing, run tests on startup and then watch for keypresses
             util.runTestThread(false, executor, -1, false, false);
             } else {
-                // else watch for keypresses immediately
+                // else watch for key presses immediately
                 util.runHotkeyReaderThread(executor);
             }
 
