@@ -19,13 +19,13 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.options.Option
-import org.gradle.tooling.BuildException;
+import org.gradle.tooling.BuildException
 import org.gradle.tooling.BuildLauncher
 import org.gradle.tooling.ProjectConnection
 import org.gradle.tooling.GradleConnector
 
 import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor
 
 import io.openliberty.tools.ant.ServerTask
 
@@ -33,8 +33,7 @@ import io.openliberty.tools.common.plugins.util.DevUtil
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.PluginScenarioException
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
-import io.openliberty.tools.common.plugins.util.ServerStatusUtil;
-
+import io.openliberty.tools.common.plugins.util.ServerStatusUtil
 
 import java.util.concurrent.TimeUnit
 
@@ -50,28 +49,43 @@ class DevTask extends AbstractServerTask {
 
     DevTaskUtil util = null;
 
-    private boolean hotTests = false;
+    // Default DevMode argument values
+    // DevMode uses CLI Arguments if provided, otherwise it uses ServerExtension properties if one exists, fallback to default value if neither are provided.
+    private static final int DEFAULT_VERIFY_TIMEOUT = 30;
+    private static final int DEFAULT_SERVER_TIMEOUT = 30;
+    private static final int DEFAULT_APP_UPDATE_TIMEOUT = 5;
+    private static final double DEFAULT_COMPILE_WAIT = 0.5;
+    private static final int DEFAULT_DEBUG_PORT = 7777;
+    private static final boolean DEFAULT_HOT_TESTS = false;
+    private static final boolean  DEFAULT_SKIP_TESTS = false;
+    private static final boolean DEFAULT_LIBERTY_DEBUG = true;
+
+
+    private Boolean hotTests;
 
     @Option(option = 'hotTests', description = 'If set to true, run tests automatically after every change. The default value is false.')
     void setHotTests(boolean hotTests) {
         this.hotTests = hotTests;
     }
 
-    private boolean skipTests = false;
+    private Boolean skipTests;
 
     @Option(option = 'skipTests', description = 'If set to true, do not run any tests in dev mode. The default value is false.')
     void setSkipTests(boolean skipTests) {
         this.skipTests = skipTests;
     }
 
-    boolean libertyDebug = true;
+    Boolean libertyDebug;
 
+    // Need to use a string value to allow someone to specify --libertyDebug=false
+    // bool @Options only allow you to specify "--libertyDebug" or nothing.
+    // So there is no way to explicitly set libertyDebug to false if we want the default behavior to be true
     @Option(option = 'libertyDebug', description = 'Whether to allow attaching a debugger to the running server. The default value is true.')
     void setLibertyDebug(String libertyDebug) {
         this.libertyDebug = Boolean.parseBoolean(libertyDebug)
     }
 
-    int libertyDebugPort = 7777;
+    Integer libertyDebugPort;
 
     @Option(option = 'debugPort', description = 'The debug port that you can attach a debugger to. The default value is 7777.')
     void setLibertyDebugPort(String libertyDebugPort) {
@@ -83,7 +97,7 @@ class DevTask extends AbstractServerTask {
         }
     }
 
-    private double compileWait = 0.5;
+    private Double compileWait;
 
     @Option(option = 'compileWait', description = 'Time in seconds to wait before processing Java changes and deletions. The default value is 0.5 seconds.')
     void setCompileWait(String compileWait) {
@@ -95,7 +109,7 @@ class DevTask extends AbstractServerTask {
         }
     }
 
-    private int verifyTimeout = 30;
+    private Integer verifyTimeout;
 
     @Option(option = 'verifyTimeout', description = 'Maximum time to wait (in seconds) to verify that the application has started. The default value is 30 seconds.')
     void setVerifyTimeout(String verifyTimeout) {
@@ -107,7 +121,7 @@ class DevTask extends AbstractServerTask {
         }
     }
 
-    private int appUpdateTimeout = 5;
+    private Integer appUpdateTimeout;
 
     @Option(option = 'appUpdateTimeout', description = 'Maximum time to wait (in seconds) to verify that the application has updated before running integration tests. The default value is 5 seconds.')
     void setAppUpdateTimeout(String appUpdateTimeout) {
@@ -119,7 +133,7 @@ class DevTask extends AbstractServerTask {
         }
     }
 
-    private int serverStartTimeout = 30;
+    private Integer serverStartTimeout;
 
     @Option(option = 'serverStartTimeout', description = 'Time in seconds to wait while verifying that the server has started. The default value is 30 seconds.')
     void setServerStartTimeout(String serverStartTimeout) {
@@ -131,9 +145,9 @@ class DevTask extends AbstractServerTask {
         }
     }
 
-    boolean clean = false;
+    Boolean clean;
 
-    @Option(option = 'clean', description = 'Clean all cached information on server start up.')
+    @Option(option = 'clean', description = 'Clean all cached information on server start up. The default value is false.')
     void setClean(boolean clean) {
         this.clean = clean;
     }
@@ -257,7 +271,6 @@ class DevTask extends AbstractServerTask {
             }
 
             return artifactPaths;
-
         }
 
         @Override
@@ -336,103 +349,153 @@ class DevTask extends AbstractServerTask {
         }
     }
 
+    // If a argument has not been set using CLI arguments set a default value
+    // Using the ServerExtension properties if available, otherwise use hardcoded defaults
+    private void initializeDefaultValues() {
+        if (verifyTimeout == null) {
+            if (server.verifyAppStartTimeout != 0) {
+                verifyTimeout = server.verifyAppStartTimeout;
+            } else {
+                verifyTimeout = DEFAULT_VERIFY_TIMEOUT;
+            }
+        }
+
+        if (serverStartTimeout == null) {
+            if (server.timeout != null && server.timeout.isInteger()) {
+                serverStartTimeout = server.timeout.toInteger();
+            } else {
+                serverStartTimeout = DEFAULT_SERVER_TIMEOUT;
+            }
+        }
+
+        if (clean == null) {
+            clean = server.clean;
+        }
+
+        if (appUpdateTimeout == null) {
+            appUpdateTimeout = DEFAULT_APP_UPDATE_TIMEOUT;
+        }
+
+        if (compileWait == null) {
+            compileWait = DEFAULT_COMPILE_WAIT;
+        }
+
+        if (libertyDebugPort == null) {
+            libertyDebugPort = DEFAULT_DEBUG_PORT;
+        }
+
+        if (hotTests == null) {
+            hotTests = DEFAULT_HOT_TESTS;
+        }
+
+        if (skipTests == null) {
+            skipTests = DEFAULT_SKIP_TESTS;
+        }
+
+        if (libertyDebug == null) {
+            libertyDebug = DEFAULT_LIBERTY_DEBUG;
+        }
+    }
+
     @TaskAction
     void action() {
-            SourceSet mainSourceSet = project.sourceSets.main;
-            SourceSet testSourceSet = project.sourceSets.test;
+        initializeDefaultValues();
 
-            sourceDirectory = mainSourceSet.java.srcDirs.iterator().next()
-            testSourceDirectory = testSourceSet.java.srcDirs.iterator().next()
+        SourceSet mainSourceSet = project.sourceSets.main;
+        SourceSet testSourceSet = project.sourceSets.test;
 
-            File outputDirectory = mainSourceSet.java.outputDir;
-            File testOutputDirectory = testSourceSet.java.outputDir;
-            File serverDirectory = getServerDir(project);
-            List<File> resourceDirs = mainSourceSet.resources.srcDirs.toList();
+        sourceDirectory = mainSourceSet.java.srcDirs.iterator().next()
+        testSourceDirectory = testSourceSet.java.srcDirs.iterator().next()
+        File outputDirectory = mainSourceSet.java.outputDir;
+        File testOutputDirectory = testSourceSet.java.outputDir;
+        List<File> resourceDirs = mainSourceSet.resources.srcDirs.toList();
 
-            String serverName = server.name;
-            File serverInstallDir = getInstallDir(project);
+        File serverDirectory = getServerDir(project);
+        String serverName = server.name;
+        File serverInstallDir = getInstallDir(project);
+        // make sure server.configDirectory is set before accessing it
+        initializeConfigDirectory();
+        File configDirectory = server.configDirectory;
+        // getOutputDir returns a string
+        File serverOutputDir = new File(getOutputDir(project));
 
-            // make sure server.configDirectory exists
-            initializeConfigDirectory();
-            File configDirectory = server.configDirectory;
-
-            // getOutputDir returns a string
-            File serverOutputDir = new File(getOutputDir(project));
-
-            if (serverDirectory.exists()) {
-                if (ServerStatusUtil.isServerRunning(serverInstallDir, serverOutputDir, serverName)) {
-                    throw new Exception("The server " + serverName
-                            + " is already running. Terminate all instances of the server before starting dev mode.");
-                }
+        if (serverDirectory.exists()) {
+            if (ServerStatusUtil.isServerRunning(serverInstallDir, serverOutputDir, serverName)) {
+                throw new Exception("The server " + serverName
+                        + " is already running. Terminate all instances of the server before starting dev mode.");
             }
+        }
 
+        if (resourceDirs.isEmpty()) {
+            File defaultResourceDir = new File(project.getRootDir() + "/src/main/resources");
+            logger.info("No resource directory detected, using default directory: " + defaultResourceDir);
+            resourceDirs.add(defaultResourceDir);
+        }
 
-            if (resourceDirs.isEmpty()) {
-                File defaultResourceDir = new File(project.getRootDir() + "/src/main/resources");
-                logger.info("No resource directory detected, using default directory: " + defaultResourceDir);
-                resourceDirs.add(defaultResourceDir);
-            }
+        String artifactId = project.getName();
 
-            String artifactId = project.getName();
+        // create an executor for tests with an additional queue of size 1, so
+        // any further changes detected mid-test will be in the following run
+        final ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<Runnable>(1, true));
 
-            // create an executor for tests with an additional queue of size 1, so
-            // any further changes detected mid-test will be in the following run
-            final ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
-                    new ArrayBlockingQueue<Runnable>(1, true));
+        ProjectConnection gradleConnection = initGradleProjectConnection();
+        BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+        try {
+            /*
+            Running the installApps task runs all tasks it depends on:
+                :libertyStop
+                :clean
+                :installLiberty
+                :libertyCreate
+                :compileJava
+                :processResources
+                :classes
+                :war
+                :installApps
+             */
+            runGradleTask(gradleBuildLauncher, 'libertyCreate');
+            runGradleTask(gradleBuildLauncher, 'installFeature');
+            runGradleTask(gradleBuildLauncher, 'installApps');
+        } finally {
+            gradleConnection.close();
+        }
 
-            ProjectConnection gradleConnection = initGradleProjectConnection();
-            BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
-            try {
-                /*
-                Running the installApps task runs all tasks it depends on:
-                    :libertyStop
-                    :clean
-                    :installLiberty
-                    :libertyCreate
-                    :compileJava
-                    :processResources
-                    :classes
-                    :war
-                    :installApps
-                 */
-                runGradleTask(gradleBuildLauncher, 'libertyCreate');
-                runGradleTask(gradleBuildLauncher, 'installFeature');
-                runGradleTask(gradleBuildLauncher, 'installApps');
-            } finally {
-                gradleConnection.close();
-            }
-
-            util = new DevTaskUtil(
-                    serverDirectory, sourceDirectory, testSourceDirectory, configDirectory,
-                    resourceDirs, hotTests, skipTests, artifactId, serverStartTimeout,
-                    verifyTimeout, appUpdateTimeout, compileWait, libertyDebug
-            );
+        util = new DevTaskUtil(
+                serverDirectory, sourceDirectory, testSourceDirectory, configDirectory,
+                resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
+                verifyTimeout.intValue(), appUpdateTimeout.intValue(), compileWait.doubleValue(), libertyDebug.booleanValue()
+        );
 
 //            Use the gradle compile task instead of using the DevUtil compile
 //            util.setUseMavenOrGradleCompile(true);
 
-            util.addShutdownHook(executor);
+        util.addShutdownHook(executor);
 
-            util.startServer();
+        util.startServer();
 
-            List<String> artifactPaths = util.getArtifacts();
-            File buildFile = project.getBuildFile();
-            File serverXMLFile = getServerXMLFile(server);
+        List<String> artifactPaths = util.getArtifacts();
+        File buildFile = project.getBuildFile();
+        File serverXMLFile = server.serverXmlFile;
 
-            if (hotTests && testSourceDirectory.exists()) {
-            // if hot testing, run tests on startup and then watch for keypresses
-            util.runTestThread(false, executor, -1, false, false);
-            } else {
-                // else watch for key presses immediately
-                util.runHotkeyReaderThread(executor);
-            }
+        if (hotTests && testSourceDirectory.exists()) {
+        // if hot testing, run tests on startup and then watch for keypresses
+        util.runTestThread(false, executor, -1, false, false);
+        } else {
+            // else watch for key presses immediately
+            util.runHotkeyReaderThread(executor);
+        }
 
-            try {
-                util.watchFiles(buildFile, outputDirectory, testOutputDirectory, executor, artifactPaths, serverXMLFile);
-            } catch (PluginScenarioException e) { // this exception is caught when the server has been stopped by another process
-                logger.info(e.getMessage());
-                return; // enter shutdown hook
-            }
+        // Note that serverXMLFile can be null. DevUtil will automatically watch
+        // all files in the configDirectory,
+        // which is where the server.xml is located if a specific serverXmlFile
+        // configuration parameter is not specified.
+        try {
+            util.watchFiles(buildFile, outputDirectory, testOutputDirectory, executor, artifactPaths, serverXMLFile);
+        } catch (PluginScenarioException e) { // this exception is caught when the server has been stopped by another process
+            logger.info(e.getMessage());
+            return; // enter shutdown hook
+        }
     }
 
     static ProjectConnection initGradleProjectConnection() {
@@ -454,18 +517,6 @@ class DevTask extends AbstractServerTask {
         buildLauncher.forTasks(tasks);
         buildLauncher.run();
     }
-
-    static File getServerXMLFile(def server) {
-        if (server.serverXmlFile != null && server.serverXmlFile.exists()) {
-            return server.serverXmlFile;
-        }
-
-        File configDirServerXML = new File(server.configDirectory, "server.xml")
-        if (configDirServerXML.exists()) {
-            return configDirServerXML;
-        }
-    }
-
 
     private static ServerFeature serverFeatureUtil;
 
