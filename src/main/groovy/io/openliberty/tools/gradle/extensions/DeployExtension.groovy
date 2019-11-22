@@ -15,18 +15,10 @@
  */
 package io.openliberty.tools.gradle.extensions
 
-class DeployExtension implements Cloneable {
+class DeployExtension {
   
-    String dir
-    String include = ""
-    String exclude
-    String file
-    List<Object> listOfClosures = new ArrayList<Object>()
-
-    @Override
-    public Object clone() throws CloneNotSupportedException {
-        super.clone()
-    }
+    List<Object> apps
+    List<Object> dropins
 }
 
 

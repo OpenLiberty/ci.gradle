@@ -17,8 +17,6 @@ package io.openliberty.tools.gradle.extensions
 
 class UndeployExtension {
 
-    String application
-    String include = ""
-    String exclude
-
+    List<Object> apps
+    List<Object> dropins
 }
