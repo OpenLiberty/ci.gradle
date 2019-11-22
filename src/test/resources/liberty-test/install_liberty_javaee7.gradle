@@ -19,10 +19,11 @@ repositories {
 }
 
 dependencies {
-    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-javaee7', version: runtimeVersion
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-kernel', version: runtimeVersion
 }
 
 liberty {
+    runtime = ['name':'wlp-javaee7']
     server{
         name ='LibertyProjectServer'
     }

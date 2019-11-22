@@ -328,7 +328,7 @@ abstract class AbstractServerTask extends AbstractTask {
                     // dealing with single property
                     Object value = entry.getValue()
                     String propValue = value == null ? null : value.toString()
-                    if (propValue.startsWith("\"") && propValue.endsWith("\"")) {
+                    if (propValue != null && propValue.startsWith("\"") && propValue.endsWith("\"")) {
                         propValue = propValue.substring(1, propValue.length() -1)
                     }
 
@@ -337,7 +337,7 @@ abstract class AbstractServerTask extends AbstractTask {
                     // dealing with array of properties
                     Object value = entry.getValue()
                     String propValue = value == null ? null : value.toString()
-                    if ((propValue.startsWith("{") && propValue.endsWith("}") )|| (propValue.startsWith("[") && propValue.endsWith("]"))) {
+                    if ( (propValue != null) && ( (propValue.startsWith("{") && propValue.endsWith("}")) || (propValue.startsWith("[") && propValue.endsWith("]")) ) ) {
                         propValue = propValue.substring(1, propValue.length() -1)
                     }
 

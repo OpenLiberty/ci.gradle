@@ -31,7 +31,7 @@ class InstallLiberty_webProfile7 extends AbstractIntegrationTest{
     @BeforeClass
     public static void setup() {
         createDir(buildDir)
-        createTestProject(buildDir, resourceDir, buildFilename)
+        createTestProject(buildDir, resourceDir, buildFilename, true)
         try {
             runTasks(buildDir, 'installLiberty')
         } catch (Exception e) {

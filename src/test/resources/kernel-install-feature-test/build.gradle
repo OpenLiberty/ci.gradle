@@ -19,6 +19,6 @@ repositories {
       mavenCentral()
 }
 
-dependencies {
-    libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: runtimeVersion
+liberty {
+    runtime = ['group': runtimeGroup,'name':kernelArtifactId,'version':runtimeVersion]
 }
