@@ -54,7 +54,9 @@ liberty {
             include = packagingType
         }
         looseApplication = false
-        apps = [file('build/libs/testWar-1.war')]
+        deploy {
+            apps = [file('build/libs/testWar-1.war')]
+        }
 
         verifyAppStartTimeout = 30
     }
@@ -99,8 +101,7 @@ task printMessageAboutRunningServer {
 }
 
 check.dependsOn 'integrationTest'
-installApps.dependsOn tasks.withType(War)
-libertyStart.dependsOn 'installApps'
+deploy.dependsOn tasks.withType(War)
 integrationTest.dependsOn 'libertyStart', 'testClasses'
 integrationTest.finalizedBy 'libertyStop'
 libertyStart.finalizedBy 'printMessageAboutRunningServer'

@@ -62,7 +62,9 @@ liberty {
 
         serverEnvFile = file("src/main/liberty/config/testOutputDir-server.env")
         looseApplication = false
-        apps = [file('build/libs/testWar-1.war')]
+        deploy {
+            apps = [file('build/libs/testWar-1.war')]
+        }
 
         verifyAppStartTimeout = 30
     }

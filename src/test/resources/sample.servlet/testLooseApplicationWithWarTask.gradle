@@ -1,6 +1,6 @@
 /*
 	This test checks whether the application was successfully installed without the version number in the package
-	when installApps is called and stripVersion is set to true.
+	when deploy is called and stripVersion is set to true.
 */
 group = 'liberty.gradle'
 version = '1'
@@ -70,8 +70,10 @@ liberty {
             packageName = appName
             include = packagingType
         }
-    	apps = [war]
-      verifyAppStartTimeout = 30
+        deploy {
+            apps = [war]
+        }
+        verifyAppStartTimeout = 30
     }
 }
 
@@ -101,5 +103,5 @@ task printMessageAboutRunningServer {
     }
 }
 
-installApps.dependsOn tasks.withType(War)
+deploy.dependsOn tasks.withType(War)
 libertyStart.finalizedBy 'printMessageAboutRunningServer'

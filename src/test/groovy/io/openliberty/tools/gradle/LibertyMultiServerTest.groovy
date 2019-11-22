@@ -50,25 +50,7 @@ class LibertyMultiServerTest extends AbstractIntegrationTest{
     }
 
     @Test
-    public void test2_executeDeployTask() {
-        try {
-            runTasks(buildDir, 'deploy')
-        } catch (Exception e) {
-            throw new AssertionError ("Fail on task deploy. "+e)
-        }
-    }
-
-    @Test
-    public void test3_executeUndeployTask() {
-        try {
-            runTasks(buildDir, 'undeploy')
-        } catch (Exception e) {
-            throw new AssertionError ("Fail on task undeploy. "+e)
-        }
-    }
-
-    @Test
-    public void test4_stop() {
+    public void test2_stop() {
         try{
             runTasks(buildDir, 'libertyStop')
         } catch (Exception e) {
@@ -77,7 +59,7 @@ class LibertyMultiServerTest extends AbstractIntegrationTest{
     }
 
     @Test
-    public void test5_status() {
+    public void test3_status() {
         try{
           runTasks(buildDir, 'libertyStatus')
         } catch (Exception e) {
@@ -86,7 +68,7 @@ class LibertyMultiServerTest extends AbstractIntegrationTest{
     }
 
     @Test
-    public void test6_package() {
+    public void test4_package() {
         try{
            runTasks(buildDir, 'libertyPackage')
         } catch (Exception e) {
@@ -95,7 +77,7 @@ class LibertyMultiServerTest extends AbstractIntegrationTest{
     }
 
     @Test
-    public void test7_installFeature() {
+    public void test5_installFeature() {
         try{
            runTasks(buildDir, 'installFeature')
         } catch (Exception e) {
@@ -104,7 +86,7 @@ class LibertyMultiServerTest extends AbstractIntegrationTest{
     }
 
     @Test
-    public void test8_uninstallFeature() {
+    public void test6_uninstallFeature() {
         try{
            runTasks(buildDir, 'uninstallFeature-libertyServer1')
         } catch (Exception e) {
@@ -113,7 +95,7 @@ class LibertyMultiServerTest extends AbstractIntegrationTest{
     }
 
     @Test
-    public void test9_cleanDirectories() {
+    public void test7_cleanDirectories() {
         try{
            runTasks(buildDir, 'cleanDirs')
         } catch (Exception e) {

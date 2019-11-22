@@ -65,7 +65,9 @@ liberty {
         }
 
         looseApplication = false
-        apps = [testWar]
+        deploy {
+            apps = [testWar]
+        }
 
         verifyAppStartTimeout = 30
 

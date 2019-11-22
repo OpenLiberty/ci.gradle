@@ -92,7 +92,7 @@ test.enabled = false
 tasks.withType(Test) {
     group 'Verification'
     testLogging.showStandardStreams = true
-    dependsOn 'installApps', 'testClasses'
+    dependsOn 'deploy', 'testClasses'
 }
 
 task verifyMainAppManaged (type:Test) {

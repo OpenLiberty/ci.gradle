@@ -37,12 +37,14 @@ ear {
 liberty {
     server {
         name = "ejbServer"
-        apps = [ear]
+        deploy {
+            apps = [ear]
+        }
         verifyAppStartTimeout = 30
         looseApplication = true
     }
 }
 
 clean.dependsOn 'libertyStop'
-installApps.dependsOn 'ear'
+deploy.dependsOn 'ear'
 ear.dependsOn ':ejb-war:jar', ':ejb-war:war'

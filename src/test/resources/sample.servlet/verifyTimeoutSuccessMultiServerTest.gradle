@@ -40,7 +40,9 @@ dependencies {
 liberty {
     servers {
         libertyServer1 {
-            apps = [war]
+            deploy {
+                apps = [war]
+            }
 
             serverXmlFile = file("src/main/liberty/config/multi-server-test.xml")
 
@@ -51,7 +53,9 @@ liberty {
             verifyAppStartTimeout = 30
         }
         libertyServer2 {
-            apps = [war]
+            deploy {
+                apps = [war]
+            }
 
             serverXmlFile = file("src/main/liberty/config/multi-server-test.xml")
 
@@ -62,7 +66,9 @@ liberty {
             verifyAppStartTimeout = 30
         }
         libertyServer3 {
-            apps = [war]
+            deploy {
+                apps = [war]
+            }
 
             serverXmlFile = file("src/main/liberty/config/multi-server-test.xml")
 

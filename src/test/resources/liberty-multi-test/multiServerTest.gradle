@@ -29,7 +29,7 @@ liberty {
         libertyServer1 {
 
             deploy {
-                file = '../../resources/test/test-war.war'
+                dropins = [file('../../resources/test/test-war.war')]
             }
 
             packageLiberty {
@@ -49,7 +49,7 @@ liberty {
         libertyServer2 {
 
             deploy {
-                file = '../../resources/test/test-war.war'
+                dropins = [file('../../resources/test/test-war.war')]
             }
 
             packageLiberty {
@@ -69,7 +69,7 @@ liberty {
         libertyServer3 {
 
             deploy {
-                file = '../../resources/test/test-war.war'
+                dropins = [file('../../resources/test/test-war.war')]
             }
 
             packageLiberty {
@@ -88,3 +88,6 @@ liberty {
         }
     }
 }
+
+deploy.dependsOn "libertyStart"
+libertyPackage.dependsOn "libertyStop"

@@ -48,7 +48,9 @@ liberty {
             packageName = appName
             include = packagingType
         }
-        dropins = [war]
+        deploy {
+            dropins = [war]
+        }
         serverXmlFile = file("src/main/liberty/config/server-apps-test.xml")
         verifyAppStartTimeout = 30
     }
@@ -90,5 +92,5 @@ task printMessageAboutRunningServer {
     }
 }
 
-installApps.dependsOn 'war'
+deploy.dependsOn 'war'
 libertyStart.finalizedBy 'printMessageAboutRunningServer'

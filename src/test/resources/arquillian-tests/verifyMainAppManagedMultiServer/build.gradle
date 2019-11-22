@@ -24,11 +24,15 @@ liberty{
     servers {
         libertyProjectServer1 {
             serverXmlFile = file("${rootProject.projectDir}/src/test/resources/server.xml")
-            apps = [rootProject.war]
+            deploy {
+                apps = [rootProject.war]
+            }
         }
         libertyProjectServer2 {
             serverXmlFile = file("${rootProject.projectDir}/src/test/resources/server.xml")
-            apps = [rootProject.war]
+            deploy {
+                apps = [rootProject.war]
+            }
         }
     }
 }
