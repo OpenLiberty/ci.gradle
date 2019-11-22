@@ -253,24 +253,18 @@ class DevTask extends AbstractServerTask {
         @Override
         public List<String> getArtifacts() {
             // https://docs.gradle.org/current/userguide/java_plugin.html#sec:java_plugin_and_dependency_management
-            String[] dependencyConfigurationNames = ['compile', 'compileOnly', 'testCompileOnly'];
+            String[] dependencyConfigurationNames = ['compileClasspath', 'testCompileClasspath'];
 
-            Set<File> artifactFiles = new HashSet<File>();
+            Set<String> artifactPaths = new HashSet<String>();
 
             dependencyConfigurationNames.each { name ->
                def configuration = project.configurations.getByName(name);
                 configuration.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-                   artifactFiles.add(artifact.file);
+                    artifactPaths.add(artifact.file.getCanonicalPath());
                }
-           }
-
-            List<String> artifactPaths = new ArrayList<String>();
-
-            for (File file : artifactFiles) {
-                artifactPaths.add(file.getCanonicalPath());
             }
 
-            return artifactPaths;
+            return artifactPaths.toList();
         }
 
         @Override
