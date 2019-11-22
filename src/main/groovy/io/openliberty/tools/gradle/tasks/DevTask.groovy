@@ -109,14 +109,14 @@ class DevTask extends AbstractServerTask {
         }
     }
 
-    private Integer verifyTimeout;
+    private Integer verifyAppStartTimeout;
 
-    @Option(option = 'verifyTimeout', description = 'Maximum time to wait (in seconds) to verify that the application has started. The default value is 30 seconds.')
-    void setVerifyTimeout(String verifyTimeout) {
+    @Option(option = 'verifyAppStartTimeout', description = 'Maximum time to wait (in seconds) to verify that the application has started. The default value is 30 seconds.')
+    void setVerifyAppStartTimeout(String verifyAppStartTimeout) {
         try {
-            this.verifyTimeout = verifyTimeout.toInteger();
+            this.verifyAppStartTimeout = verifyAppStartTimeout.toInteger();
         } catch (NumberFormatException e) {
-            logger.error(String.format("Unexpected value: %s for dev mode option verifyTimeout. verifyTimeout should be a valid integer.", verifyTimeout));
+            logger.error(String.format("Unexpected value: %s for dev mode option verifyAppStartTimeout. verifyAppStartTimeout should be a valid integer.", verifyAppStartTimeout));
             throw e;
         }
     }
@@ -165,11 +165,11 @@ class DevTask extends AbstractServerTask {
         DevTaskUtil(File serverDirectory, File sourceDirectory, File testSourceDirectory,
                     File configDirectory, List<File> resourceDirs, boolean  hotTests,
                     boolean  skipTests, String artifactId, int serverStartTimeout,
-                    int verifyTimeout, int appUpdateTimeout, double compileWait, boolean libertyDebug
+                    int verifyAppStartTimeout, int appUpdateTimeout, double compileWait, boolean libertyDebug
         ) throws IOException {
             super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs,
                     hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
-                    verifyTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug);
+                    verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug);
 
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
@@ -352,11 +352,11 @@ class DevTask extends AbstractServerTask {
     // If a argument has not been set using CLI arguments set a default value
     // Using the ServerExtension properties if available, otherwise use hardcoded defaults
     private void initializeDefaultValues() {
-        if (verifyTimeout == null) {
+        if (verifyAppStartTimeout == null) {
             if (server.verifyAppStartTimeout != 0) {
-                verifyTimeout = server.verifyAppStartTimeout;
+                verifyAppStartTimeout = server.verifyAppStartTimeout;
             } else {
-                verifyTimeout = DEFAULT_VERIFY_TIMEOUT;
+                verifyAppStartTimeout = DEFAULT_VERIFY_TIMEOUT;
             }
         }
 
@@ -464,7 +464,7 @@ class DevTask extends AbstractServerTask {
         util = new DevTaskUtil(
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory,
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
-                verifyTimeout.intValue(), appUpdateTimeout.intValue(), compileWait.doubleValue(), libertyDebug.booleanValue()
+                verifyAppStartTimeout.intValue(), appUpdateTimeout.intValue(), compileWait.doubleValue(), libertyDebug.booleanValue()
         );
 
 //            Use the gradle compile task instead of using the DevUtil compile
