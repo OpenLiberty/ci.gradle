@@ -15,10 +15,22 @@
  */
 package io.openliberty.tools.gradle.tasks
 
+import org.gradle.api.GradleException
+import org.gradle.api.Task
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.logging.LogLevel
 
+import io.openliberty.tools.ant.ServerTask
+import io.openliberty.tools.common.plugins.config.ServerConfigDocument
+
 class UndeployTask extends AbstractServerTask {
+
+    private static final String STOP_APP_MESSAGE_CODE_REG = "CWWKZ0009I.*"
+    private static final long APP_STOP_TIMEOUT_DEFAULT = 30 * 1000
+
+    protected ServerConfigDocument scd
+
+    protected List<File> appFiles = new ArrayList<File>()
 
     UndeployTask() {
         configure({
@@ -30,32 +42,61 @@ class UndeployTask extends AbstractServerTask {
 
     @TaskAction
     void undeploy() {
-        def params = buildLibertyMap(project);
-
-        project.ant.taskdef(name: 'undeploy',
-                            classname: 'io.openliberty.tools.ant.UndeployTask',
-                            classpath: project.buildscript.configurations.classpath.asPath)
-
-        def application = server.undeploy.application
-        def include = server.undeploy.include
-        def exclude = server.undeploy.exclude
-
-        if (application != null) {
-            params.put('file', application)
-            project.ant.undeploy(params)
-        } else if ((include != null && !include.isEmpty()) || exclude != null) {
-            project.ant.undeploy(params) {
-                patternset(includes: include, excludes: exclude)
+        if (server.undeploy != null) {
+            if (server.undeploy.apps != null && !server.undeploy.apps.isEmpty()) {
+                def apps = getAppFiles(server.undeploy.apps, 'apps')
+                apps.each { undeployApp(it, 'apps') }
             }
-        } else {
-            if (project.plugins.hasPlugin("war")) {
-                params.put('file', project.war.archiveName)
+            if (server.undeploy.dropins != null && !server.undeploy.dropins.isEmpty()) {
+                def dropins = getAppFiles(server.undeploy.dropins, 'dropins')
+                dropins.each { undeployApp(it, 'dropins') }
             }
+        }
+    }
 
-            if (project.plugins.hasPlugin("ear")) {
-                params.put('file', project.ear.archiveName)
+    private void getAppFiles(List<Object> allApps, String appsDir) {
+        File installDir = new File(getServerDir(project), appsDir)
+        allApps.each { Object appObj ->
+            if (appObj instanceof org.gradle.api.tasks.bundling.AbstractArchiveTask) { //War or ear task
+                if (server.looseApplication) {
+                    appFiles.add(new File(installDir, getLooseConfigFileName((Task)appObj)))
+                } else {
+                    appFiles.add(new File(installDir, getArchiveName((Task)appObj)))
+                }
+            } else if (appObj instanceof File) {
+                appFiles.add(new File(installDir, ((File)appObj).getName()))
+            } else {
+                logger.warn('Application ' + appObj.getClass.name + ' is expressed as ' + appObj.toString() + ' which is not a supported input type. Define applications using Task or File objects.')
             }
-            project.ant.undeploy(params)
+        }
+    }
+
+    protected void undeployApp(File file, String appsDir) throws GradleException {
+        String appName = file.getName().substring(0, file.getName().lastIndexOf('.'))
+
+        if (appsDir.equals("apps")) {
+            scd = null
+
+            File serverXML = new File(getServerDir(project).getCanonicalPath(), "server.xml")
+
+            try {
+                scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(), server.serverXML, server.configDirectory,
+                        server.bootstrapPropertiesFile, server.bootstrapProperties, server.serverEnvFile, false)
+
+                //appName will be set to a name derived from appFile if no name can be found.
+                appName = scd.findNameForLocation(file)
+            } catch (Exception e) {
+                logger.warn(e.getLocalizedMessage())
+            } 
+        }
+
+        FileUtils.delete(file)
+
+        //check stop message code
+        String stopMessage = STOP_APP_MESSAGE_CODE_REG + appName
+        ServerTask serverTask = createServerTask(project, null) //Using a server task without an opertation to check logs for app undeploy message
+        if (serverTask.waitForStringInLog(stopMessage, appStopTimeout, new File(new File(getOutputDir(project), server.name), "logs/messages.log")) == null) {
+            throw new GradleException("CWWKM2022E: Failed to undeploy application " + file.getPath() + ". The Stop application message cannot be found in console.log.")
         }
     }
 
