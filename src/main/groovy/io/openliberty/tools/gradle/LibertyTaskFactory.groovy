@@ -36,6 +36,7 @@ import io.openliberty.tools.gradle.tasks.CleanTask
 import io.openliberty.tools.gradle.tasks.InstallAppsTask
 import io.openliberty.tools.gradle.tasks.CompileJSPTask
 import io.openliberty.tools.gradle.tasks.arquillian.ConfigureArquillianTask
+import io.openliberty.tools.gradle.tasks.DevTask
 
 class LibertyTaskFactory {
     Project project
@@ -47,6 +48,7 @@ class LibertyTaskFactory {
         project.tasks.create('compileJSP', CompileJSPTask)
         project.tasks.create('installLiberty', InstallLibertyTask)
         project.tasks.create('libertyRun', RunTask)
+        project.tasks.create('libertyDev', DevTask)
         project.tasks.create('libertyStatus', StatusTask)
         project.tasks.create('libertyCreate', CreateTask)
         project.tasks.create('libertyStart', StartTask)

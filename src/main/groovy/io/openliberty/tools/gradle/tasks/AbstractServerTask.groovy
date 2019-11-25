@@ -193,6 +193,12 @@ abstract class AbstractServerTask extends AbstractTask {
         }
     }
 
+    protected void initializeConfigDirectory() {
+        if (server.configDirectory == null) {
+            server.configDirectory = new File(project.projectDir, "src/main/liberty/config")
+        }
+    }
+
     /**
      * @throws IOException
      * @throws FileNotFoundException
@@ -207,10 +213,9 @@ abstract class AbstractServerTask extends AbstractTask {
 
         // First check for Liberty configuration specified by Gradle project properties.
         loadLibertyConfigFromProperties();
-
-        if (server.configDirectory == null) {
-            server.configDirectory = new File(project.projectDir, "src/main/liberty/config")
-        }
+      
+        // make sure server.configDirectory exists
+        initializeConfigDirectory();
 
         if(server.configDirectory.exists()) {
             // copy configuration files from configuration directory to server directory if end-user set it
