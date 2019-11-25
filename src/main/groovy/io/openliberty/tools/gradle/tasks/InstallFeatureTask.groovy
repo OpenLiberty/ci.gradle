@@ -20,6 +20,7 @@ import java.util.Set
 import org.gradle.api.artifacts.ResolveException
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.options.Option
 
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
@@ -33,6 +34,15 @@ class InstallFeatureTask extends AbstractServerTask {
             logging.level = LogLevel.INFO
             group 'Liberty'
         })
+    }
+
+    // DevMode uses this to provide the location of the
+    // temp location of the server.xml after it has been modified
+    private String serverDirectoryParam;
+
+    @Option(option = 'serverDir', description = '(Optional) Server Directory')
+    void setServerDirectoryParam(String serverDir) {
+        this.serverDirectoryParam = serverDir;
     }
 
     private class InstallFeatureTaskUtil extends InstallFeatureUtil {
@@ -110,7 +120,15 @@ class InstallFeatureTask extends AbstractServerTask {
         }
 
         def dependencyFeatures = getDependencyFeatures()
-        def serverFeatures = getServerDir(project).exists() ? util.getServerFeatures(getServerDir(project)) : null
+
+        def serverFeatures = null;
+
+        // if DevMode provides a server directory parameter use that for finding the server features
+        if (serverDirectoryParam != null) {
+            serverFeatures = util.getServerFeatures(new File(serverDirectoryParam));
+        } else if (getServerDir(project).exists()) {
+            serverFeatures = util.getServerFeatures(getServerDir(project));
+        }
 
         Set<String> featuresToInstall = InstallFeatureUtil.combineToSet(pluginListedFeatures, dependencyFeatures, serverFeatures)
 

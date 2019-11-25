@@ -274,7 +274,33 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void checkConfigFile(File configFile, File serverDir) {
-            // TODO:
+            ServerFeature servUtil = getServerFeatureUtil();
+            Set<String> features = servUtil.getServerFeatures(serverDir);
+
+            if (features == null) {
+                return;
+            }
+
+            features.removeAll(existingFeatures);
+
+            if (!features.isEmpty()) {
+                logger.info("Configuration features have been added");
+
+                // Call installFeature using the temp serverDir directory
+                ProjectConnection gradleConnection;
+                try {
+                    gradleConnection = initGradleProjectConnection();
+                    BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+                    runGradleTask(gradleBuildLauncher, "installFeature", "--serverDir", serverDir.getAbsolutePath());
+                    this.existingFeatures.addAll(features);
+                } catch (BuildException e) {
+                    logger.error('Failed to install features from configuration file', e);
+                } finally {
+                    if (gradleConnection != null) {
+                        gradleConnection.close();
+                    }
+                }
+            }
         }
 
         @Override
