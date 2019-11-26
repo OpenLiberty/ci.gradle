@@ -36,11 +36,11 @@ class InstallFeatureTask extends AbstractServerTask {
         })
     }
 
-    // DevMode uses this to provide the location of the
-    // temp location of the server.xml after it has been modified
+    // DevMode uses this option to provide the location of the
+    // temporary serverDir it uses after a change to the server.xml
     private String serverDirectoryParam;
 
-    @Option(option = 'serverDir', description = '(Optional) Server Directory')
+    @Option(option = 'serverDir', description = '(Optional) Server Directory to get the list of features from.')
     void setServerDirectoryParam(String serverDir) {
         this.serverDirectoryParam = serverDir;
     }

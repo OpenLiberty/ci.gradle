@@ -286,7 +286,7 @@ class DevTask extends AbstractServerTask {
             if (!features.isEmpty()) {
                 logger.info("Configuration features have been added");
 
-                // Call installFeature using the temp serverDir directory
+                // Call installFeature gradle task using the temporary serverDir directory that DevMode uses
                 ProjectConnection gradleConnection;
                 try {
                     gradleConnection = initGradleProjectConnection();
