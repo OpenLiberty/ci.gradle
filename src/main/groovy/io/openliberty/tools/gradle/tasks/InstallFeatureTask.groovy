@@ -40,7 +40,7 @@ class InstallFeatureTask extends AbstractServerTask {
     // temporary serverDir it uses after a change to the server.xml
     private String serverDirectoryParam;
 
-    @Option(option = 'serverDir', description = '(Optional) Server Directory to get the list of features from.')
+    @Option(option = 'serverDir', description = '(Optional) Server directory to get the list of features from.')
     void setServerDirectoryParam(String serverDir) {
         this.serverDirectoryParam = serverDir;
     }
