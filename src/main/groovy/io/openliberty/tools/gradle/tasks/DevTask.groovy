@@ -286,19 +286,16 @@ class DevTask extends AbstractServerTask {
             if (!features.isEmpty()) {
                 logger.info("Configuration features have been added");
 
-                // Call installFeature gradle task using the temporary serverDir directory that DevMode uses
-                ProjectConnection gradleConnection;
+                // Call the installFeature gradle task using the temporary serverDir directory that DevMode uses
+                ProjectConnection gradleConnection = initGradleProjectConnection();
+                BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
                 try {
-                    gradleConnection = initGradleProjectConnection();
-                    BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
-                    runGradleTask(gradleBuildLauncher, "installFeature", "--serverDir", serverDir.getAbsolutePath());
+                    runGradleTask(gradleBuildLauncher, "installFeature", "--serverDir=${serverDir.getAbsolutePath()}");
                     this.existingFeatures.addAll(features);
                 } catch (BuildException e) {
                     logger.error('Failed to install features from configuration file', e);
                 } finally {
-                    if (gradleConnection != null) {
-                        gradleConnection.close();
-                    }
+                    gradleConnection.close();
                 }
             }
         }
