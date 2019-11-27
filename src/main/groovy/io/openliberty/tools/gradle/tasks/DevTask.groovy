@@ -347,22 +347,58 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void redeployApp() {
-            // TODO:
+            ProjectConnection gradleConnection = initGradleProjectConnection();
+            BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+
+            try {
+                runGradleTask(gradleBuildLauncher, 'deploy');
+            } catch (BuildException e) {
+                throw new PluginExecutionException(e);
+            } finally {
+                gradleConnection.close();
+            }
         }
 
         @Override
         public void libertyInstallFeature() {
-            // TODO: 
+            ProjectConnection gradleConnection = initGradleProjectConnection();
+            BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+
+            try {
+                runGradleTask(gradleBuildLauncher, 'installFeature');
+            } catch (BuildException e) {
+                throw new PluginExecutionException(e);
+            } finally {
+                gradleConnection.close();
+            }
         }
 
         @Override
         public void libertyDeploy() {
-            // TODO: 
+            ProjectConnection gradleConnection = initGradleProjectConnection();
+            BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+
+            try {
+                runGradleTask(gradleBuildLauncher, 'deploy');
+            } catch (BuildException e) {
+                throw new PluginExecutionException(e);
+            } finally {
+                gradleConnection.close();
+            }
         }
 
         @Override
         public void libertyCreate() {
-            // TODO: 
+            ProjectConnection gradleConnection = initGradleProjectConnection();
+            BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+
+            try {
+                runGradleTask(gradleBuildLauncher, 'libertyCreate');
+            } catch (BuildException e) {
+                throw new PluginExecutionException(e);
+            } finally {
+                gradleConnection.close();
+            }
         }
     }
 
