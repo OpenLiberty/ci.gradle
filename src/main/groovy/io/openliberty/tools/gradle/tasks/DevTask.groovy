@@ -62,14 +62,14 @@ class DevTask extends AbstractServerTask {
 
     private Boolean hotTests;
 
-    @Option(option = 'hotTests', description = 'If set to true, run tests automatically after every change. The default value is false.')
+    @Option(option = 'hotTests', description = 'If this option is enabled, run tests automatically after every change. The default value is false.')
     void setHotTests(boolean hotTests) {
         this.hotTests = hotTests;
     }
 
     private Boolean skipTests;
 
-    @Option(option = 'skipTests', description = 'If set to true, do not run any tests in dev mode. The default value is false.')
+    @Option(option = 'skipTests', description = 'If this option is enabled, do not run any tests in dev mode. The default value is false.')
     void setSkipTests(boolean skipTests) {
         this.skipTests = skipTests;
     }
