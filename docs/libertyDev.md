@@ -21,7 +21,7 @@ $ gradle libertyDev
 
 Start dev mode and run tests automatically after every code change.
 ```
-$ gradle libertyDev --hotTests=true
+$ gradle libertyDev --hotTests
 ```
 
 Start dev mode and listen on a specific port for attaching a debugger (default is 7777).
