@@ -61,7 +61,7 @@ compileTestGroovy {
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    compile ('io.openliberty.tools:liberty-ant-tasks:1.9.2')
+    compile ('io.openliberty.tools:liberty-ant-tasks:1.9.3-SNAPSHOT')
     compile ('io.openliberty.tools:ci.common:1.8-SNAPSHOT')
     compile group: 'commons-io', name: 'commons-io', version: '2.5'
     provided group: 'com.ibm.websphere.appserver.api', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
