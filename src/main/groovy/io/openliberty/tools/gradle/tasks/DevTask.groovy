@@ -515,13 +515,13 @@ class DevTask extends AbstractServerTask {
         }
     }
 
-    static ProjectConnection initGradleProjectConnection() {
-        return initGradleConnection('.');
+    ProjectConnection initGradleProjectConnection() {
+        return initGradleConnection(project.getRootDir());
     }
 
-    static ProjectConnection initGradleConnection(String path) {
+    static ProjectConnection initGradleConnection(File rootDir) {
         ProjectConnection connection = GradleConnector.newConnector()
-                .forProjectDirectory(new File(path))
+                .forProjectDirectory(rootDir)
                 .connect();
 
         return connection;
