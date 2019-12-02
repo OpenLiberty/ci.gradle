@@ -156,7 +156,7 @@ class DevTask extends AbstractServerTask {
         ) throws IOException {
             super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs,
                     hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
-                    verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug);
+                    verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug, true);
 
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
@@ -466,9 +466,6 @@ class DevTask extends AbstractServerTask {
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), libertyDebug.booleanValue()
         );
-
-//            Use the gradle compile task instead of using the DevUtil compile
-//            util.setUseMavenOrGradleCompile(true);
 
         util.addShutdownHook(executor);
 
