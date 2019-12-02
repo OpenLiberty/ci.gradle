@@ -53,7 +53,6 @@ class DevTask extends AbstractServerTask {
     // DevMode uses CLI Arguments if provided, otherwise it uses ServerExtension properties if one exists, fallback to default value if neither are provided.
     private static final int DEFAULT_VERIFY_TIMEOUT = 30;
     private static final int DEFAULT_SERVER_TIMEOUT = 30;
-    private static final int DEFAULT_APP_UPDATE_TIMEOUT = 5;
     private static final double DEFAULT_COMPILE_WAIT = 0.5;
     private static final int DEFAULT_DEBUG_PORT = 7777;
     private static final boolean DEFAULT_HOT_TESTS = false;
@@ -63,14 +62,14 @@ class DevTask extends AbstractServerTask {
 
     private Boolean hotTests;
 
-    @Option(option = 'hotTests', description = 'If set to true, run tests automatically after every change. The default value is false.')
+    @Option(option = 'hotTests', description = 'If this option is enabled, run tests automatically after every change. The default value is false.')
     void setHotTests(boolean hotTests) {
         this.hotTests = hotTests;
     }
 
     private Boolean skipTests;
 
-    @Option(option = 'skipTests', description = 'If set to true, do not run any tests in dev mode. The default value is false.')
+    @Option(option = 'skipTests', description = 'If this option is enabled, do not run any tests in dev mode. The default value is false.')
     void setSkipTests(boolean skipTests) {
         this.skipTests = skipTests;
     }
@@ -87,7 +86,7 @@ class DevTask extends AbstractServerTask {
 
     Integer libertyDebugPort;
 
-    @Option(option = 'debugPort', description = 'The debug port that you can attach a debugger to. The default value is 7777.')
+    @Option(option = 'libertyDebugPort', description = 'The debug port that you can attach a debugger to. The default value is 7777.')
     void setLibertyDebugPort(String libertyDebugPort) {
         try {
             this.libertyDebugPort = libertyDebugPort.toInteger();
@@ -111,24 +110,12 @@ class DevTask extends AbstractServerTask {
 
     private Integer verifyAppStartTimeout;
 
-    @Option(option = 'verifyAppStartTimeout', description = 'Maximum time to wait (in seconds) to verify that the application has started. The default value is 30 seconds.')
+    @Option(option = 'verifyAppStartTimeout', description = 'Maximum time to wait (in seconds) to verify that the application has started or updated before running tests. The default value is 30 seconds.')
     void setVerifyAppStartTimeout(String verifyAppStartTimeout) {
         try {
             this.verifyAppStartTimeout = verifyAppStartTimeout.toInteger();
         } catch (NumberFormatException e) {
             logger.error(String.format("Unexpected value: %s for dev mode option verifyAppStartTimeout. verifyAppStartTimeout should be a valid integer.", verifyAppStartTimeout));
-            throw e;
-        }
-    }
-
-    private Integer appUpdateTimeout;
-
-    @Option(option = 'appUpdateTimeout', description = 'Maximum time to wait (in seconds) to verify that the application has updated before running integration tests. The default value is 5 seconds.')
-    void setAppUpdateTimeout(String appUpdateTimeout) {
-        try {
-            this.appUpdateTimeout = appUpdateTimeout.toInteger();
-        } catch (NumberFormatException e) {
-            logger.error(String.format("Unexpected value: %s for dev mode option appUpdateTimeout. appUpdateTimeout should be a valid integer.", appUpdateTimeout));
             throw e;
         }
     }
@@ -169,7 +156,7 @@ class DevTask extends AbstractServerTask {
         ) throws IOException {
             super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs,
                     hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
-                    verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug);
+                    verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug, true);
 
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
@@ -425,10 +412,6 @@ class DevTask extends AbstractServerTask {
             clean = server.clean;
         }
 
-        if (appUpdateTimeout == null) {
-            appUpdateTimeout = DEFAULT_APP_UPDATE_TIMEOUT;
-        }
-
         if (compileWait == null) {
             compileWait = DEFAULT_COMPILE_WAIT;
         }
@@ -517,11 +500,8 @@ class DevTask extends AbstractServerTask {
         util = new DevTaskUtil(
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory,
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
-                verifyAppStartTimeout.intValue(), appUpdateTimeout.intValue(), compileWait.doubleValue(), libertyDebug.booleanValue()
+                verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), libertyDebug.booleanValue()
         );
-
-//            Use the gradle compile task instead of using the DevUtil compile
-//            util.setUseMavenOrGradleCompile(true);
 
         util.addShutdownHook(executor);
 
@@ -551,13 +531,13 @@ class DevTask extends AbstractServerTask {
         }
     }
 
-    static ProjectConnection initGradleProjectConnection() {
-        return initGradleConnection('.');
+    ProjectConnection initGradleProjectConnection() {
+        return initGradleConnection(project.getRootDir());
     }
 
-    static ProjectConnection initGradleConnection(String path) {
+    static ProjectConnection initGradleConnection(File rootDir) {
         ProjectConnection connection = GradleConnector.newConnector()
-                .forProjectDirectory(new File(path))
+                .forProjectDirectory(rootDir)
                 .connect();
 
         return connection;
