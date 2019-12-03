@@ -43,7 +43,7 @@ public class TestSpringBootApplication15 extends AbstractIntegrationTest{
     @Test
     public void test_spring_boot_apps_15() {
         try {
-            runTasks(buildDir, 'installApps', 'libertyStart')
+            runTasks(buildDir, 'deploy', 'libertyStart')
             String webPage = new URL("http://localhost:9080").getText()
             Assert.assertEquals("Did not get expected http response.","Hello!", webPage)
             Assert.assertTrue('defaultServer/dropins has app deployed',
@@ -51,14 +51,14 @@ public class TestSpringBootApplication15 extends AbstractIntegrationTest{
             Assert.assertTrue('no app in apps folder',
                     new File(buildDir, "build/wlp/usr/servers/defaultServer/apps/thin-${testName.getMethodName()}-1.0-SNAPSHOT.jar").exists() )
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task installApps. " + e)
+            throw new AssertionError ("Fail on task deploy. " + e)
         }
     }
 
     @Test
     public void test_spring_boot_classifier_apps_15() {
         try {
-            runTasks(buildDir, 'installApps', 'libertyStart')
+            runTasks(buildDir, 'deploy', 'libertyStart')
             String webPage = new URL("http://localhost:9080").getText()
             Assert.assertEquals("Did not get expected http response.","Hello!", webPage)
             Assert.assertTrue('defaultServer/dropins has app deployed',
@@ -66,14 +66,14 @@ public class TestSpringBootApplication15 extends AbstractIntegrationTest{
             Assert.assertTrue('no app in apps folder',
                     new File(buildDir, "build/wlp/usr/servers/defaultServer/apps/thin-${testName.getMethodName()}-1.0-SNAPSHOT-test.jar").exists() )
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task installApps. " + e)
+            throw new AssertionError ("Fail on task deploy. " + e)
         }
     }
 
     @Test
     public void test_spring_boot_dropins_15() {
         try {
-            runTasks(buildDir, 'installApps', 'libertyStart')
+            runTasks(buildDir, 'deploy', 'libertyStart')
             String webPage = new URL("http://localhost:9080").getText()
             Assert.assertEquals("Did not get expected http response.","Hello!", webPage)
             Assert.assertTrue('defaultServer/dropins/spring has no app',
@@ -81,7 +81,7 @@ public class TestSpringBootApplication15 extends AbstractIntegrationTest{
             Assert.assertTrue('apps folder should be empty',
                     new File(buildDir, "build/wlp/usr/servers/defaultServer/apps").list().size() == 0 )
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task installApps. " + e)
+            throw new AssertionError ("Fail on task deploy. " + e)
         }
     }
 }

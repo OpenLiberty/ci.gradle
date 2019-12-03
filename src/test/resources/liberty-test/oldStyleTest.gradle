@@ -27,10 +27,6 @@ dependencies {
 liberty {
     serverName ='LibertyProjectServer'
 
-    deploy {
-        file = '../../resources/test/test-war.war'
-    }
-
     packageLiberty {
         include = 'minify'
         os='Linux'

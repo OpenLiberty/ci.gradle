@@ -34,7 +34,7 @@ class LibertySingleServerTasks extends LibertyTasks {
         project.libertyRun {
             dependsOn 'libertyCreate'
 
-            if (dependsOnApps(project.liberty.server)) dependsOn 'installApps'
+            if (dependsOnApps(project.liberty.server)) dependsOn 'deploy'
         }
 
         project.libertyStatus {
@@ -50,15 +50,11 @@ class LibertySingleServerTasks extends LibertyTasks {
         project.libertyStart {
             dependsOn 'libertyCreate'
 
-            if (dependsOnApps(project.liberty.server)) dependsOn 'installApps'
+            if (dependsOnApps(project.liberty.server)) dependsOn 'deploy'
         }
 
         project.libertyPackage {
             dependsOn installDependsOn(project.liberty.server, 'libertyCreate')
-        }
-
-        project.deploy {
-            dependsOn 'libertyStart'
         }
 
         project.undeploy {
@@ -77,7 +73,7 @@ class LibertySingleServerTasks extends LibertyTasks {
             dependsOn 'libertyStop'
         }
 
-        project.installApps {
+        project.deploy {
             if (AbstractServerTask.findSpringBootVersion(project) != null) {
                 if (springBootVersion?.startsWith('2')) {
                     dependsOn 'bootJar'
@@ -89,7 +85,7 @@ class LibertySingleServerTasks extends LibertyTasks {
         }
 
         project.configureArquillian {
-            dependsOn 'installApps', 'processTestResources'
+            dependsOn 'deploy', 'processTestResources'
             skipIfArquillianXmlExists = project.arquillianConfiguration.skipIfArquillianXmlExists
             arquillianProperties = project.arquillianConfiguration.arquillianProperties
         }
@@ -97,9 +93,9 @@ class LibertySingleServerTasks extends LibertyTasks {
         if (!dependsOnApps(project.liberty.server)) {
             if (project.plugins.hasPlugin('war') || project.plugins.hasPlugin('ear')) {
                 def tasks = project.tasks
-                tasks.getByName('libertyRun').dependsOn 'installApps'
-                tasks.getByName('libertyStart').dependsOn 'installApps'
-                tasks.getByName('libertyPackage').dependsOn 'installApps'
+                tasks.getByName('libertyRun').dependsOn 'deploy'
+                tasks.getByName('libertyStart').dependsOn 'deploy'
+                tasks.getByName('libertyPackage').dependsOn 'deploy'
             }
         }
 

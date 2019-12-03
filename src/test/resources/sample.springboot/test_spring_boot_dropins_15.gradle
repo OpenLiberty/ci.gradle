@@ -34,7 +34,9 @@ liberty {
 	serverXmlFile = file("src/main/liberty/config/server15.xml")
         install.useOpenLiberty = false
         looseApplication = false
-        dropins = [bootRepackage]
+		deploy {
+			dropins = [bootRepackage]
+		}
         features {
             acceptLicense = true
         }

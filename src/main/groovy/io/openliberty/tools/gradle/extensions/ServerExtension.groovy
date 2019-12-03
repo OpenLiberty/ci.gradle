@@ -41,9 +41,6 @@ class ServerExtension {
     Properties var = new Properties()
     Properties defaultVar = new Properties()
 
-    List<Object> apps
-    List<Object> dropins
-
     boolean clean = false
     String timeout
     String template
@@ -84,12 +81,7 @@ class ServerExtension {
     }
 
     def deploy(Closure closure) {
-        if (numberOfClosures > 0){
-            deploy.listOfClosures.add(deploy.clone())
-            deploy.file = null
-        }
         ConfigureUtil.configure(closure, deploy)
-        numberOfClosures++
     }
 
     def undeploy(Closure closure) {

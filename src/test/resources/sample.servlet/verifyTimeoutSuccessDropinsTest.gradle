@@ -52,8 +52,11 @@ liberty {
             include = packagingType
         }
 
-      dropins = [war]
-      verifyAppStartTimeout = 30
+        deploy {
+            dropins = [war]
+        }
+
+        verifyAppStartTimeout = 30
     }
 }
 
@@ -96,8 +99,7 @@ task printMessageAboutRunningServer {
 }
 
 check.dependsOn 'integrationTest'
-installApps.dependsOn 'war'
-libertyStart.dependsOn 'installApps'
+deploy.dependsOn 'war'
 integrationTest.dependsOn libertyStart, 'testClasses'
 integrationTest.finalizedBy 'libertyStop'
 libertyStart.finalizedBy 'printMessageAboutRunningServer'

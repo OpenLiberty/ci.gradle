@@ -18,9 +18,9 @@ public class NoAppsTemplateTest extends AbstractIntegrationTest{
     @Test
     public void test_app_installed_correctly() {
         try {
-            runTasks(buildDir, 'installApps')
+            runTasks(buildDir, 'deploy')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task installApps. "+ e)
+            throw new AssertionError ("Fail on task deploy. "+ e)
         }
         assert new File(buildDir, 'build/wlp/usr/servers/testServer').exists() : 'testServer was not created'
         assert new File(buildDir, 'build/wlp/usr/servers/testServer/apps').exists() : 'testServer/apps was not created'

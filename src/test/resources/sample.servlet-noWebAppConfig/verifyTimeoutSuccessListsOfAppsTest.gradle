@@ -62,10 +62,13 @@ liberty {
             packageName = appName
             include = packagingType
         }
-      looseApplication = false
-    	apps = [war2, war3]
-      dropins = [war, war4]
-      verifyAppStartTimeout = 30
+        looseApplication = false
+        deploy {
+            apps = [war2, war3]
+            dropins = [war, war4]
+        }
+            
+        verifyAppStartTimeout = 30
     }
 }
 
@@ -108,8 +111,7 @@ task printMessageAboutRunningServer {
 }
 
 check.dependsOn 'integrationTest'
-installApps.dependsOn tasks.withType(War)
-libertyStart.dependsOn 'installApps'
+deploy.dependsOn tasks.withType(War)
 integrationTest.dependsOn 'libertyStart', 'testClasses'
 integrationTest.finalizedBy 'libertyStop'
 libertyStart.finalizedBy 'printMessageAboutRunningServer'

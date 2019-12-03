@@ -57,8 +57,8 @@ class StartTask extends AbstractServerTask {
 
             Set<String> appsToVerify = getAppNamesFromServerXml()
 
-            if (server.dropins != null && !server.dropins.isEmpty()) {
-                server.dropins.each { Object dropinObj ->
+            if (server.deploy.dropins != null && !server.deploy.dropins.isEmpty()) {
+                server.deploy.dropins.each { Object dropinObj ->
                     if (dropinObj instanceof Task) {
                         appsToVerify += dropinObj.baseName
                     } else if (dropinObj instanceof File) {
@@ -108,7 +108,7 @@ class StartTask extends AbstractServerTask {
 
         boolean foundName = false
 
-        server.apps.each { app ->
+        server.deploy.apps.each { app ->
             if (app instanceof Task) {
                 if (getArchiveName(app.archiveName).equals(fileName)) {
                     appName = app.baseName

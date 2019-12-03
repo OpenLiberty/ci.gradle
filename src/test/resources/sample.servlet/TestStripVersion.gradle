@@ -1,6 +1,6 @@
 /*
 	This test checks whether the application was successfully installed without the version number in the package
-	when installApps is called and stripVersion is set to true.
+	when deploy is called and stripVersion is set to true.
 */
 group = 'liberty.gradle'
 version = '1'
@@ -86,5 +86,5 @@ task printMessageAboutRunningServer {
         println "To stop the server run 'gradle libertyStop'"
     }
 }
-installApps.dependsOn 'war'
+deploy.dependsOn 'war'
 libertyStart.finalizedBy 'printMessageAboutRunningServer'

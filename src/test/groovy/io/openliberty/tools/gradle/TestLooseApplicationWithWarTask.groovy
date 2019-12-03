@@ -37,9 +37,9 @@ public class TestLooseApplicationWithWarTask extends AbstractIntegrationTest{
     @Test
     public void test_loose_config_file_exists() {
         try {
-            runTasks(buildDir, 'installApps')
+            runTasks(buildDir, 'deploy')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task installApps. " + e)
+            throw new AssertionError ("Fail on task deploy. " + e)
         }
         assert new File('build/testBuilds/test-loose-application-with-war-tasks/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet1.war.xml').exists() : 'looseApplication config file was not copied over to the liberty runtime'
     }
