@@ -43,7 +43,9 @@ liberty {
     server{
         serverXmlFile = file("src/main/liberty/config/server-apps-test.xml")
         name = wlpServerName
-        apps = [war]
+        deploy {
+            apps = [war]
+        }
         stripVersion = true
         looseApplication = true
         noPassword = true
@@ -86,5 +88,5 @@ task printMessageAboutRunningServer {
     }
 }
 
-installApps.dependsOn 'war'
+deploy.dependsOn 'war'
 libertyStart.finalizedBy 'printMessageAboutRunningServer'

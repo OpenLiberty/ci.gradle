@@ -40,9 +40,9 @@ public class TestLooseEarApplication extends AbstractIntegrationTest{
     @Test
     public void test_loose_config_file_exists() {
         try {
-            runTasks(buildDir, 'installApps')
+            runTasks(buildDir, 'deploy')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task installApps. " + e)
+            throw new AssertionError ("Fail on task deploy. " + e)
         }
         assert new File('build/testBuilds/test-loose-ear-application/ejb-ear/build/wlp/usr/servers/ejbServer/apps/ejb-ear.ear.xml').exists() : 'looseApplication config file was not copied over to the liberty runtime'
     }

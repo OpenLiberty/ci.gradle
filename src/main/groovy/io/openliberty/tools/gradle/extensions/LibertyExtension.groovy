@@ -54,9 +54,6 @@ class LibertyExtension {
     CleanExtension cleanDir = new CleanExtension()
     SpringBootExtension thin = new SpringBootExtension()
 
-    DeployExtension deploy = new DeployExtension()
-    UndeployExtension undeploy = new UndeployExtension()
-
     PackageExtension packageLiberty = new PackageExtension()
     DumpExtension dumpLiberty = new DumpExtension()
     DumpExtension javaDumpLiberty = new DumpExtension()
@@ -75,19 +72,6 @@ class LibertyExtension {
 
     def install(Closure closure) {
         ConfigureUtil.configure(closure, install)
-    }
-
-    def deploy(Closure closure) {
-        if (numberOfClosures > 0){
-            deploy.listOfClosures.add(deploy.clone())
-            deploy.file = null
-        }
-        ConfigureUtil.configure(closure, deploy)
-        numberOfClosures++
-    }
-
-    def undeploy(Closure closure) {
-        ConfigureUtil.configure(closure, undeploy)
     }
 
     def packageLiberty(Closure closure) {

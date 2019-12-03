@@ -42,7 +42,9 @@ liberty {
     server{
         serverXmlFile = file("src/resources/server.xml")
         name = 'LibertyProjectServer'
-        apps = [war]
+        deploy {
+            apps = [war]
+        }
         looseApplication = false
         stripVersion = true
      }
@@ -89,9 +91,8 @@ task printMessageAboutRunningServer {
     }
 }
 
-installApps.dependsOn 'war'
+deploy.dependsOn 'war'
 war.dependsOn 'compileJSP'
-libertyStart.dependsOn 'installApps'
 integrationTest.dependsOn 'libertyStart', 'testClasses'
 integrationTest.finalizedBy 'libertyStop'
 libertyStart.finalizedBy 'printMessageAboutRunningServer'

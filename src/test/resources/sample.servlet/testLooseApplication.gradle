@@ -1,6 +1,6 @@
 /*
 	This test checks whether the application was successfully installed without the version number in the package
-	when installApps is called and stripVersion is set to true.
+	when deploy is called and stripVersion is set to true.
 */
 group = 'liberty.gradle'
 version = '1'
@@ -44,7 +44,10 @@ liberty {
     server{
         serverXmlFile = file("src/main/liberty/config/server-apps-test.xml")
         name = wlpServerName
-        apps = [war]
+        deploy {
+            apps = [war]
+        }
+        
         stripVersion = true
         looseApplication = true
     }
@@ -86,5 +89,5 @@ task printMessageAboutRunningServer {
     }
 }
 
-installApps.dependsOn 'war'
+deploy.dependsOn 'war'
 libertyStart.finalizedBy 'printMessageAboutRunningServer'

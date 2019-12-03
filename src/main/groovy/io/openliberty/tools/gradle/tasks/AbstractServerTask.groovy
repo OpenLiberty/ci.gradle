@@ -501,22 +501,22 @@ abstract class AbstractServerTask extends AbstractTask {
     }
 
     protected void configureApps(Project project) {
-        if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
+        if ((server.deploy.apps == null || server.deploy.apps.isEmpty()) && (server.deploy.dropins == null || server.deploy.dropins.isEmpty())) {
             if (!project.configurations.libertyApp.isEmpty()) {
-                server.apps = getApplicationFilesFromConfiguration().toArray()
+                server.deploy.apps = getApplicationFilesFromConfiguration().toArray()
             } else if (project.plugins.hasPlugin('war')) {
-                server.apps = [project.war]
+                server.deploy.apps = [project.war]
             } else if (project.plugins.hasPlugin('ear')) {
-                server.apps = [project.ear]
+                server.deploy.apps = [project.ear]
             } else if (project.plugins.hasPlugin('org.springframework.boot')) {
-                server.apps = [springBootBuildTask]
+                server.deploy.apps = [springBootBuildTask]
             }
         }
     }
     
     protected void configureMultipleAppsConfigDropins(Node serverNode) {
-        if (server.apps != null && !server.apps.isEmpty()) {
-            Tuple applications = splitAppList(server.apps)
+        if (server.deploy.apps != null && !server.deploy.apps.isEmpty()) {
+            Tuple applications = splitAppList(server.deploy.apps)
             applications[0].each{ Task task ->
               isConfigDropinsRequired(task, 'apps', serverNode)
             }
@@ -549,7 +549,7 @@ abstract class AbstractServerTask extends AbstractTask {
             return false;
         }
     }
-    private String getLooseConfigFileName(Task task){
+    protected String getLooseConfigFileName(Task task){
       return getArchiveName(task) + ".xml"
     }
     
@@ -609,7 +609,7 @@ abstract class AbstractServerTask extends AbstractTask {
 
     protected void setApplicationPropertyNodes(Project project, Node serverNode) {
         Node applicationsNode;
-        if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
+        if ((server.deploy.apps == null || server.deploy.apps.isEmpty()) && (server.deploy.dropins == null || server.deploy.dropins.isEmpty())) {
             if (project.plugins.hasPlugin('war')) {
                 applicationsNode = new Node(null, 'applications')
                 createApplicationElements(applicationsNode, [project.tasks.war], 'apps')
@@ -617,11 +617,11 @@ abstract class AbstractServerTask extends AbstractTask {
             }
         } else {
             applicationsNode = new Node(null, 'applications')
-            if (server.apps != null && !server.apps.isEmpty()) {
-                createApplicationElements(applicationsNode, server.apps, 'apps')
+            if (server.deploy.apps != null && !server.deploy.apps.isEmpty()) {
+                createApplicationElements(applicationsNode, server.deploy.apps, 'apps')
             }
-            if (server.dropins != null && !server.dropins.isEmpty()) {
-                createApplicationElements(applicationsNode, server.dropins, 'dropins')
+            if (server.deploy.dropins != null && !server.deploy.dropins.isEmpty()) {
+                createApplicationElements(applicationsNode, server.deploy.dropins, 'dropins')
             }
             serverNode.append(applicationsNode)
         }
@@ -866,7 +866,6 @@ abstract class AbstractServerTask extends AbstractTask {
 
     protected ServerTask createServerTask(Project project, String operation) {
         ServerTask serverTask =  new ServerTask()
-        serverTask.setOperation(operation)
         serverTask.setServerName(server.name)
 
         def installDir = getInstallDir(project)
@@ -875,6 +874,11 @@ abstract class AbstractServerTask extends AbstractTask {
         serverTask.setUserDir(getUserDir(project, installDir))
 
         serverTask.setOutputDir(new File(getOutputDir(project)))
+
+        //Some uses of a server task do not require an operation to be specified
+        if (operation != null && !operation.isEmpty()) {
+            serverTask.setOperation(operation)
+        }
 
         if (server.timeout != null && !server.timeout.isEmpty()) {
             serverTask.setTimeout(server.timeout)

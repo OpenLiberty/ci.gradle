@@ -44,7 +44,9 @@ liberty {
 
         template = 'webProfile7'
 
-        apps = [war]
-        dropins = [war2]
+        deploy {
+            apps = [war]
+            dropins = [war2]
+        }
     }
 }
