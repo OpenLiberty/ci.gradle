@@ -30,9 +30,9 @@ class LibertyApplicationConfigurationTest extends AbstractIntegrationTest {
         createDir(buildDir)
         createTestProject(buildDir, resourceDir, buildFilename)
         try {
-            runTasks(buildDir, 'installApps')
+            runTasks(buildDir, 'deploy')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task installApps. "+ e)
+            throw new AssertionError ("Fail on task deploy. "+ e)
         }
     }
 

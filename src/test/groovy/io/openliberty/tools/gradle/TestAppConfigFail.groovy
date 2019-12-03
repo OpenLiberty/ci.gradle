@@ -28,7 +28,7 @@ public class TestAppConfigFail extends AbstractIntegrationTest{
         BuildResult result = GradleRunner.create()
             .withProjectDir(buildDir)
             .forwardOutput()
-            .withArguments('installApps', '-i', '-s')
+            .withArguments('deploy', '-i', '-s')
             .buildAndFail()
     }
 }

@@ -1,6 +1,6 @@
 /*
 	This test checks whether the application was successfully installed without the version number in the package
-	when installApps is called and stripVersion is set to true.
+	when deploy is called and stripVersion is set to true.
 */
 group = 'liberty.gradle'
 version = '1'
@@ -48,25 +48,15 @@ repositories {
     mavenCentral()
 }
 
-configurations {
-  war2.extendsFrom runtime
-}
-
 dependencies {
     testCompile 'junit:junit:4.12'
     providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
     compile 'org.apache.commons:commons-text:1.1'
-    war2 'org.apache.commons:commons-proxy:1.0'
     libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
 }
 
-task war1(type:War){
+war {
     baseName = 'sample.servlet1'
-}
-
-task war2(type:War){
-    baseName = 'sample.servlet2'
-    classpath = configurations.war2
 }
 
 liberty {
@@ -74,14 +64,16 @@ liberty {
         name = wlpServerName
         looseApplication = true
         stripVersion = true
-        serverXmlFile = file("src/main/liberty/config/server-list-test.xml")
+        serverXmlFile = file("src/main/liberty/config/server-apps-test.xml")
         packageLiberty {
             packageDirectory = packageDir
             packageName = appName
             include = packagingType
         }
-    	apps = [war1, war2]
-      verifyAppStartTimeout = 30
+        deploy {
+            apps = [war]
+        }
+        verifyAppStartTimeout = 30
     }
 }
 
@@ -111,5 +103,5 @@ task printMessageAboutRunningServer {
     }
 }
 
-installApps.dependsOn tasks.withType(War)
+deploy.dependsOn tasks.withType(War)
 libertyStart.finalizedBy 'printMessageAboutRunningServer'

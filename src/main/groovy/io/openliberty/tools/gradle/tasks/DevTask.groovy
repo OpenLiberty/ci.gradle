@@ -479,7 +479,7 @@ class DevTask extends AbstractServerTask {
         BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
         try {
             /*
-            Running the installApps task runs all tasks it depends on:
+            Running the deploy task runs all tasks it depends on:
                 :libertyStop
                 :clean
                 :installLiberty
@@ -488,11 +488,11 @@ class DevTask extends AbstractServerTask {
                 :processResources
                 :classes
                 :war
-                :installApps
+                :deploy
              */
             runGradleTask(gradleBuildLauncher, 'libertyCreate');
             runGradleTask(gradleBuildLauncher, 'installFeature');
-            runGradleTask(gradleBuildLauncher, 'installApps');
+            runGradleTask(gradleBuildLauncher, 'deploy');
         } finally {
             gradleConnection.close();
         }

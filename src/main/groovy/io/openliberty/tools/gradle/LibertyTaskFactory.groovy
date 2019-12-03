@@ -33,7 +33,6 @@ import io.openliberty.tools.gradle.tasks.InstallFeatureTask
 import io.openliberty.tools.gradle.tasks.InstallLibertyTask
 import io.openliberty.tools.gradle.tasks.UninstallFeatureTask
 import io.openliberty.tools.gradle.tasks.CleanTask
-import io.openliberty.tools.gradle.tasks.InstallAppsTask
 import io.openliberty.tools.gradle.tasks.CompileJSPTask
 import io.openliberty.tools.gradle.tasks.arquillian.ConfigureArquillianTask
 import io.openliberty.tools.gradle.tasks.DevTask
@@ -62,7 +61,6 @@ class LibertyTaskFactory {
         project.tasks.create('installFeature', InstallFeatureTask)
         project.tasks.create('uninstallFeature', UninstallFeatureTask)
         project.tasks.create('cleanDirs', CleanTask)
-        project.tasks.create('installApps', InstallAppsTask)
         project.tasks.create('configureArquillian', ConfigureArquillianTask)
     }
 }

@@ -17,6 +17,7 @@ package io.openliberty.tools.gradle
 
 import org.gradle.api.*
 
+import io.openliberty.tools.gradle.extensions.DeployExtension
 import io.openliberty.tools.gradle.extensions.LibertyExtension
 import io.openliberty.tools.gradle.extensions.ServerExtension
 import io.openliberty.tools.gradle.extensions.arquillian.ArquillianExtension
@@ -57,6 +58,7 @@ class Liberty implements Plugin<Project> {
         project.afterEvaluate {
             setEclipseFacets(project)
             if (isSingleServerProject(project)) {
+                setDeployExtension(project)
                 new LibertySingleServerTasks(project).applyTasks()
             } else if (isMultiServerProject(project)) {
                 new LibertyMultiServerTasks(project).applyTasks()
@@ -65,6 +67,7 @@ class Liberty implements Plugin<Project> {
             }
             if (project.liberty.server == null && project.liberty.servers.isEmpty()) {
                 project.liberty.server = copyProperties(project.liberty)
+                setDeployExtension(project)
                 new LibertySingleServerTasks(project).applyTasks()
             }
             //Checking serverEnv files for server properties
@@ -173,6 +176,12 @@ class Liberty implements Plugin<Project> {
            }
         } else {
            return new File(project.liberty.installDir)
+        }
+    }
+
+    private static setDeployExtension(Project project) {
+        if (project.liberty.server.deploy == null) {
+            project.liberty.server.deploy = new DeployExtension()
         }
     }
 

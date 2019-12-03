@@ -28,7 +28,11 @@ liberty {
     server{
         name = 'LibertyProjectServer'
         deploy {
-            file = '../../resources/test/test-war.war'
+            dropins = [file('../../resources/test/test-war.war')]
+        }
+
+        undeploy {
+            dropins = [file('test-war.war')]
         }
 
         packageLiberty {

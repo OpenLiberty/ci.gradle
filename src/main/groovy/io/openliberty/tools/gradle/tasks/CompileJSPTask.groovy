@@ -45,14 +45,14 @@ class CompileJSPTask extends AbstractServerTask {
     @TaskAction
     protected void compileJSP(){
         if(getPackagingType().equals('war')){
-            if ((server.apps == null || server.apps.isEmpty()) && (server.dropins == null || server.dropins.isEmpty())) {
+            if ((server.deploy.apps == null || server.deploy.apps.isEmpty()) && (server.deploy.dropins == null || server.deploy.dropins.isEmpty())) {
                 perTaskCompileJSP(project.war)
             }
-            else if (server.apps != null && !server.apps.isEmpty()) {
-                perTaskCompileJSP(server.apps[0])
+            else if (server.deploy.apps != null && !server.deploy.apps.isEmpty()) {
+                perTaskCompileJSP(server.deploy.apps[0])
             }
-            else if (server.dropins != null && !server.dropins.isEmpty()) {
-                perTaskCompileJSP(server.dropins[0])
+            else if (server.deploy.dropins != null && !server.deploy.dropins.isEmpty()) {
+                perTaskCompileJSP(server.deploy.dropins[0])
             }
         }
     }

@@ -23,9 +23,9 @@ public class TestStripVersion extends AbstractIntegrationTest{
     @Test
     public void test_strip_version_true() {
         try {
-            runTasks(buildDir, 'installApps')
+            runTasks(buildDir, 'deploy')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task installApps. "+ e)
+            throw new AssertionError ("Fail on task deploy. "+ e)
         }
         assert new File('build/testBuilds/test-strip-version/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war').exists() : 'version was NOT removed properly when stripVersion was set to true'
     }

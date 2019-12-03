@@ -35,14 +35,14 @@ abstract class LibertyTasks {
         boolean apps = dependsOnApps(server)
         boolean feature = dependsOnFeature(server)
 
-        if (apps) tasks.add('installApps')
+        if (apps) tasks.add('deploy')
         if (feature) tasks.add('installFeature')
         if (!apps && !feature) tasks.add(elseDepends)
         return tasks
     }
 
     protected boolean dependsOnApps(ServerExtension server) {
-        return ((server.apps != null && !server.apps.isEmpty()) || (server.dropins != null && !server.dropins.isEmpty()))
+        return ((server.deploy.apps != null && !server.deploy.apps.isEmpty()) || (server.deploy.dropins != null && !server.deploy.dropins.isEmpty()))
     }
 
     protected boolean dependsOnFeature(ServerExtension server) {
