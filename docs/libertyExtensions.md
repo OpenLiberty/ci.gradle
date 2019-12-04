@@ -16,6 +16,7 @@ Some tasks have additional configuration blocks.
 | serverName | String | 1.0 | Deprecated. Name of the WebSphere Liberty server instance. The default value is `defaultServer`. The server name is now defined by the `name` property in the `server` extension. | No |
 | jspVersion | int | 2.0 | Maximum time to wait (in seconds) for all the JSP files to compile. The server is stopped and the goal ends after this specified time. The default value is 30 seconds. | No |
 | jspCompileTimeout | int | 2.0 | Maximum time to wait (in seconds) for all the JSP files to compile. The server is stopped and the goal ends after this specified time. The default value is 30 seconds. | No |
+| runtime | Properties | 3.0 | For overriding the `group`, `name` or `version` of the `libertyRuntime` installed from The Central Repository. The default runtime artifact is the latest version of io.openliberty:openliberty-kernel.
 
 
 ### Liberty server configuration

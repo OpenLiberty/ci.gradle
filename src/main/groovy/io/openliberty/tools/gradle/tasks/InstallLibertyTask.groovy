@@ -132,8 +132,8 @@ class InstallLibertyTask extends AbstractTask {
                     detachedConfigFilePath = detachedConfig.getAsPath()
                     runtimeFilePath = detachedConfigFilePath
                 }
-           } else if (isMavenCentralConfigured()) {
-                // if a Maven Central repo is configured, default to get the Liberty runtime from Maven Central
+           } else if (isMavenCentralConfigured() && project.liberty.install.useOpenLiberty) {
+                // if a Maven Central repo is configured, default to get the Open Liberty runtime from Maven Central
                 // otherwise let the installLiberty ant task default to DHE as it has in the past
                 detachedCoords = getDefaultLibertyRuntimeCoordinates()
                 Dependency dep = project.dependencies.create(detachedCoords)
