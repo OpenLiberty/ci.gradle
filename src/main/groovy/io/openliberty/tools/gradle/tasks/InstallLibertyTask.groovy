@@ -181,9 +181,11 @@ class InstallLibertyTask extends AbstractTask {
         boolean found = false
         project.repositories.find { nextRepo ->
             if (nextRepo instanceof MavenArtifactRepository) {
-                logger.debug 'Found configured repo that is a MavenArtifactRepository'
-                found = true
-                return true
+                logger.info 'Found configured repo that is a MavenArtifactRepository with name ' + nextRepo.name
+                if (nextRepo.name.equals("MavenRepo") || nextRepo.name.equals("MavenLocal")) {
+                    found = true
+                    return true
+                }
             }
         }
         return found
