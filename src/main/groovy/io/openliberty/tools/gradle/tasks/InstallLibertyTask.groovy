@@ -26,6 +26,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvedConfiguration
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import groovy.xml.MarkupBuilder
 
 import java.util.Map.Entry
@@ -131,7 +132,9 @@ class InstallLibertyTask extends AbstractTask {
                     detachedConfigFilePath = detachedConfig.getAsPath()
                     runtimeFilePath = detachedConfigFilePath
                 }
-           } else {
+           } else if (isMavenCentralConfigured()) {
+                // if a Maven Central repo is configured, default to get the Liberty runtime from Maven Central
+                // otherwise let the installLiberty ant task default to DHE as it has in the past
                 detachedCoords = getDefaultLibertyRuntimeCoordinates()
                 Dependency dep = project.dependencies.create(detachedCoords)
                 Configuration detachedConfig = project.configurations.detachedConfiguration( dep )
@@ -139,13 +142,15 @@ class InstallLibertyTask extends AbstractTask {
                 runtimeFilePath = detachedConfigFilePath
             }
 
-            logger.debug 'Liberty archive file path to the local Gradle repository  : ' + runtimeFilePath
+            if (runtimeFilePath) {
+                logger.debug 'Liberty archive file path to the local Gradle repository  : ' + runtimeFilePath
 
-            File localFile = new File(runtimeFilePath)
+                File localFile = new File(runtimeFilePath)
 
-            if (localFile.exists()) {
-                logger.debug 'Getting WebSphere Liberty archive file from the local Gradle repository.'
-                result.put('runtimeUrl', localFile.toURI().toURL())
+                if (localFile.exists()) {
+                    logger.debug 'Getting WebSphere Liberty archive file from the local Gradle repository.'
+                    result.put('runtimeUrl', localFile.toURI().toURL())
+                }
             }
         }
 
@@ -170,6 +175,18 @@ class InstallLibertyTask extends AbstractTask {
         result.put('offline', project.gradle.startParameter.offline)
 
         return result
+    }
+
+    private boolean isMavenCentralConfigured() {
+        boolean found = false
+        project.repositories.find { nextRepo ->
+            if (nextRepo instanceof MavenArtifactRepository) {
+                logger.debug 'Found configured repo that is a MavenArtifactRepository'
+                found = true
+                return true
+            }
+        }
+        return found
     }
 
     protected void outputLibertyPropertiesToXml(MarkupBuilder xmlDoc) {
@@ -202,9 +219,10 @@ class InstallLibertyTask extends AbstractTask {
         String runtimeCoords = null
         Configuration config = project.configurations.getByName('libertyRuntime')
         if (config != null) {
-             config.dependencies.each { libertyArtifact ->
+             config.dependencies.find { libertyArtifact ->
                  runtimeCoords = libertyArtifact.group + ':' + libertyArtifact.name + ':' + libertyArtifact.version
                  logger.debug 'Existing Liberty runtime coordinates: ' + runtimeCoords
+                 return true
              }
         }
         return runtimeCoords
