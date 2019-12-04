@@ -184,7 +184,7 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void info(String msg) {
-            logger.info(msg);
+            logger.lifecycle(msg);
         }
 
         @Override
