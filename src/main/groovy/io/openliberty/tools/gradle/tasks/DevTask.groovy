@@ -59,7 +59,6 @@ class DevTask extends AbstractServerTask {
     private static final boolean  DEFAULT_SKIP_TESTS = false;
     private static final boolean DEFAULT_LIBERTY_DEBUG = true;
 
-
     private Boolean hotTests;
 
     @Option(option = 'hotTests', description = 'If this option is enabled, run tests automatically after every change. The default value is false.')
@@ -334,22 +333,58 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void redeployApp() {
-            // TODO:
+            ProjectConnection gradleConnection = initGradleProjectConnection();
+            BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+
+            try {
+                runGradleTask(gradleBuildLauncher, 'deploy');
+            } catch (BuildException e) {
+                throw new PluginExecutionException(e);
+            } finally {
+                gradleConnection.close();
+            }
         }
 
         @Override
         public void libertyInstallFeature() {
-            // TODO: 
+            ProjectConnection gradleConnection = initGradleProjectConnection();
+            BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+
+            try {
+                runGradleTask(gradleBuildLauncher, 'installFeature');
+            } catch (BuildException e) {
+                throw new PluginExecutionException(e);
+            } finally {
+                gradleConnection.close();
+            }
         }
 
         @Override
         public void libertyDeploy() {
-            // TODO: 
+            ProjectConnection gradleConnection = initGradleProjectConnection();
+            BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+
+            try {
+                runGradleTask(gradleBuildLauncher, 'deploy');
+            } catch (BuildException e) {
+                throw new PluginExecutionException(e);
+            } finally {
+                gradleConnection.close();
+            }
         }
 
         @Override
         public void libertyCreate() {
-            // TODO: 
+            ProjectConnection gradleConnection = initGradleProjectConnection();
+            BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+
+            try {
+                runGradleTask(gradleBuildLauncher, 'libertyCreate');
+            } catch (BuildException e) {
+                throw new PluginExecutionException(e);
+            } finally {
+                gradleConnection.close();
+            }
         }
     }
 
