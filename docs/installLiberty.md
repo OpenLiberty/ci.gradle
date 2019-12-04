@@ -38,7 +38,7 @@ Use the `install` to specify the name of the Liberty server to install from the 
 | username | Username needed for basic authentication. | No |
 | password | Password needed for basic authentication. | No |
 | maxDownloadTime | Maximum time in seconds the download can take. The default value is `0` (no maximum time). | No |
-| type | Liberty runtime type to download from the Liberty repository. Currently, the following types are supported: `kernel`, `webProfile6`, `webProfile7`, `webProfile8`, `javaee7, and `javaee8`. Only used if `runtimeUrl` is not set and the Maven repository is not used. The default value is `webProfile7` if `useOpenLiberty` is `false`. If using Open Liberty and no type is specified, the default Open Liberty runtime is used. | No |
+| type | Liberty runtime type to download from the Liberty repository. Currently, the following types are supported: `kernel`, `webProfile6`, `webProfile7`, `webProfile8`, `javaee7`, and `javaee8`. Only used if `runtimeUrl` is not set and the Maven repository is not used. The default value is `webProfile7` if `useOpenLiberty` is `false`. If using Open Liberty and no type is specified, the default Open Liberty runtime is used. | No |
 | useOpenLiberty | Boolean used to specify whether to install Open Liberty or WebSphere Liberty runtime when `runtimeUrl` is not specified. The default value is `true`. | No |
 
 #### Example
