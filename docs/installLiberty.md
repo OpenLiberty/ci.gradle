@@ -3,9 +3,9 @@
 The `installLiberty` task is used to download and install WebSphere Liberty. The task can also upgrade your Liberty runtime from an ILAN to an IPLA license with a license JAR file [setup](#installing-your-upgrade-license) and [license configuration](#license-configuration).  
 
 The task can download the Liberty runtime archive in three ways:
-* From [The Central Repository](http://search.maven.org/) using the `libertyRuntime` dependencies configuration or the `liberty.runtime` properties. This is the default installation method if a Maven repository is configured. The default runtime artifact is the latest version of io.openliberty:openliberty-kernel.
+* From [The Central Repository](http://search.maven.org/) using the `libertyRuntime` dependencies configuration or the `liberty.runtime` properties. This is the default installation. The default runtime artifact is the latest version of io.openliberty:openliberty-kernel.
 * From a specified location using `runtimeUrl`
-* From the [Liberty repository](https://developer.ibm.com/wasdev/downloads/) based on a version and a runtime type. This is the default installation method if no Maven repository is configured. 
+* From the [Liberty repository](https://developer.ibm.com/wasdev/downloads/) based on a version and a runtime type.
 
 When installing Liberty from a JAR file, the Liberty license code is needed to install the runtime. When you are installing Liberty from the Liberty repository, you can see the versions of Liberty available to install and find the link to their license using the [index.yml](https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/index.yml) file. After opening the license, look for the `D/N: <license code>` line. Otherwise, download the runtime archive and execute `java -jar wlp*runtime.jar --viewLicenseInfo` command and look for the `D/N: <license code>` line.
 
@@ -16,7 +16,7 @@ Note: Use the `libertyRuntime` dependency or the `liberty.runtime` properties to
 
 The Liberty Gradle plugin defines two dependency configurations for the `installLiberty` task: `libertyRuntime` and `libertyLicense`.  `libertyRuntime` defines which [Liberty runtime](#using-maven-artifact) to download from The Central Repository. `libertyLicense` [configures](#license-configuration) a license artifact so that your license JAR archive can be identified and used during the `installLiberty` task. Make sure to properly [setup](#installing-your-upgrade-license) your license JAR to prevent a missing dependency failure.
 
-You need to include `group`, `name`, and `version` values that describes the artifacts to use. An `ext` value for a specific archive type can be used but is not required.
+You need to include `group`, `name`, and `version` values that describe the artifacts to use. 
 
 ### Properties
 
@@ -26,20 +26,18 @@ You can also use the `runtime` properties object in the [general runtime properi
 
 ### install block
 
-Use the `install` to specify the name of the Liberty server to install from the Liberty repository.
+Use the `install` block to specify the Liberty server to install from the Liberty repository. If any property is specified in the `install` block and `libertyRuntime` is not configured, the default runtime is installed from the Liberty repository.
 
 | Attribute | Description | Required |
 | --------- | ------------ | ----------|
 | licenseCode | WebSphere Liberty server license code. See [above](#installliberty-task). | Yes, if `type` is `webProfile6` or `runtimeUrl` specifies a `.jar` file. |
-| version | Exact or wildcard version of the WebSphere Liberty server to install. Available versions are listed in the [index.yml](http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/index.yml) file. Only used if `runtimeUrl` is not set and the Maven repository is not used. By default, the latest stable release is used. | No |
-| runtimeUrl | URL to the WebSphere Liberty server's `.jar` or a `.zip` file on your repository or on the [Liberty repository](https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/). `runtimeUrl` can also point to an [Open Liberty](https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/) `.zip`. If not set, the Liberty repository will be used to find the Liberty runtime archive. | No |
-| baseDir | The base installation directory. The actual installation directory of WebSphere Liberty server will be `${baseDir}/wlp`. The default value is `${project.buildDir}`. | No |
-| cacheDir | The directory used for caching downloaded files such as the license or `.jar` files. The default value is `${java.io.tmpdir}/wlp-cache`. | No |
+| version | Exact or wildcard version of the WebSphere Liberty server to install. Available versions are listed in the [index.yml](http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/index.yml) file. Only used if `runtimeUrl` is not set and `libertyRuntime` is not configured. By default, the latest stable release is used. | No |
+| runtimeUrl | URL to the WebSphere Liberty server's `.jar` or a `.zip` file on your repository or on the [Liberty repository](https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/). `runtimeUrl` can also point to an [Open Liberty](https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/) `.zip`. If not set and `libertyRuntime` is not configured, the Liberty repository will be used to find the Liberty runtime archive. | No |
 | username | Username needed for basic authentication. | No |
 | password | Password needed for basic authentication. | No |
 | maxDownloadTime | Maximum time in seconds the download can take. The default value is `0` (no maximum time). | No |
-| type | Liberty runtime type to download from the Liberty repository. Currently, the following types are supported: `kernel`, `webProfile6`, `webProfile7`, `webProfile8`, `javaee7`, and `javaee8`. Only used if `runtimeUrl` is not set and the Maven repository is not used. The default value is `webProfile7` if `useOpenLiberty` is `false`. If using Open Liberty and no type is specified, the default Open Liberty runtime is used. | No |
-| useOpenLiberty | Boolean used to specify whether to install Open Liberty or WebSphere Liberty runtime when `runtimeUrl` is not specified. The default value is `true`. | No |
+| type | Liberty runtime type to download from the Liberty repository. Currently, the following types are supported: `kernel`, `webProfile6`, `webProfile7`, `webProfile8`, `javaee7`, and `javaee8`. Only used if `runtimeUrl` is not set and `libertyRuntime` is not configured. The default value is `webProfile7` if `useOpenLiberty` is `false`. If using Open Liberty and no type is specified, the default Open Liberty runtime is used. | No |
+| useOpenLiberty | Specifies whether to install Open Liberty or WebSphere Liberty runtime when `runtimeUrl` is not specified and `libertyRuntime` is not configured. The default value is `true`. | No |
 
 #### Example
 ```
@@ -183,7 +181,7 @@ publishing {
         licenseArtifact(MavenPublication) {
             groupId = 'com.ibm.websphere.appserver.license'
             artifactId = 'wlp-core-license'
-            version = '17.0.0.2'
+            version = '19.0.0.9'
 
             artifact licenseFile
         }
@@ -201,7 +199,7 @@ repositories {
 }
 
 dependencies {
-    libertyLicense 'com.ibm.websphere.appserver.license:wlp-core-license:17.0.0.2'
+    libertyLicense 'com.ibm.websphere.appserver.license:wlp-core-license:19.0.0.9'
 }
 ```
 
