@@ -483,8 +483,12 @@ class DevTask extends AbstractServerTask {
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
+            // need to force liberty-create to re-run
+            // else it will just say up-to-date and skip the task
+            gradleBuildLauncher.withArguments('--rerun-tasks');
+
             try {
-                runGradleTask(gradleBuildLauncher, 'libertyCreate');
+                runGradleTask(gradleBuildLauncher, 'libertyCreate',);
             } catch (BuildException e) {
                 throw new PluginExecutionException(e);
             } finally {
