@@ -15,10 +15,12 @@
  */
 package io.openliberty.tools.gradle.tasks
 
+import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.options.Option
+import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.tooling.BuildException
 import org.gradle.tooling.BuildLauncher
 import org.gradle.tooling.ProjectConnection
@@ -255,8 +257,111 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public boolean recompileBuildFile(File buildFile, List<String> artifactPaths, ThreadPoolExecutor executor) {
-            // TODO:
+            // monitoring project build.gradle file changes in dev mode:
+            // - changes in liberty plugin configuration in the build plugin section
+
+            boolean restartServer = false;
+
+            ProjectBuilder builder = ProjectBuilder.builder();
+            Project newProject = builder
+                    .withProjectDir(project.rootDir)
+                    .withGradleUserHomeDir(project.gradle.gradleUserHomeDir)
+                    .build();
+
+            // need this for gradle to evaluate the new project
+            // and load the different plugins and extensions
+            newProject.evaluate();
+
+            if(hasServerConfigBootstrapPropertiesChanged(newProject, project)) {
+                println 'Bootstrap properties changed';
+                restartServer = true;
+                project.liberty.server.bootstrapProperties = newProject.liberty.server.bootstrapProperties;
+            } else if (hasServerConfigBootstrapPropertiesFileChanged(newProject, project)) {
+                println 'Bootstrap properties file changed';
+                restartServer = true;
+                project.liberty.server.bootstrapPropertiesFile = newProject.liberty.server.bootstrapPropertiesFile;
+            } else if (hasServerConfigJVMOptionsChanged(newProject, project)) {
+                println 'JVM Options changed';
+                restartServer = true;
+                project.liberty.server.jvmOptions = newProject.liberty.server.jvmOptions;
+            } else if (hasServerConfigJVMOptionsFileChanged(newProject, project)) {
+                println 'JVM Options file changed';
+                restartServer = true;
+                project.liberty.server.jvmOptionsFile = newProject.liberty.server.jvmOptionsFile;
+            } else if (hasServerConfigEnvFileChanged(newProject, project)) {
+                println 'Server Env file changed';
+                restartServer = true;
+                project.liberty.server.serverEnvFile = newProject.liberty.server.serverEnvFile;
+            } else if (hasServerConfigDirectoryChanged(newProject, project)) {
+                println 'Server config directory changed'
+                restartServer = true;
+                project.liberty.server.configDirectory = newProject.liberty.server.configDirectory;
+                initializeConfigDirectory(); // make sure that the config dir is set if it was null in the new project
+            }
+
+            if (restartServer) {
+                // - stop Server
+                // - create server or runBoostMojo
+                // - install feature
+                // - deploy app
+                // - start server
+                util.restartServer();
+                return true;
+            }
+
+
+            return true;
+
         }
+
+        private boolean hasServerConfigBootstrapPropertiesChanged(Project newProject, Project oldProject) {
+            def newServerConfig = newProject.liberty.server;
+            def oldServerConfig = oldProject.liberty.server;
+            return newServerConfig.bootstrapProperties != oldServerConfig.bootstrapProperties;
+        }
+
+        private boolean hasServerConfigBootstrapPropertiesFileChanged(Project newProject, Project oldProject) {
+            def newServerConfig = newProject.liberty.server;
+            def oldServerConfig = oldProject.liberty.server;
+            return newServerConfig.bootstrapPropertiesFile != oldServerConfig.bootstrapPropertiesFile;
+        }
+
+        private boolean hasServerConfigJVMOptionsChanged(Project newProject, Project oldProject) {
+            def newServerConfig = newProject.liberty.server;
+            def oldServerConfig = oldProject.liberty.server;
+            return newServerConfig.jvmOptions != oldServerConfig.jvmOptions;
+        }
+
+        private boolean hasServerConfigJVMOptionsFileChanged(Project newProject, Project oldProject) {
+            def newServerConfig = newProject.liberty.server;
+            def oldServerConfig = oldProject.liberty.server;
+            return newServerConfig.jvmOptionsFile != oldServerConfig.jvmOptionsFile;
+        }
+
+        private boolean hasServerConfigEnvFileChanged(Project newProject, Project oldProject) {
+            def newServerConfig = newProject.liberty.server;
+            def oldServerConfig = oldProject.liberty.server;
+            return newServerConfig.serverEnvFile != oldServerConfig.serverEnvFile;
+        }
+
+        private boolean hasServerConfigDirectoryChanged(Project newProject, Project oldProject) {
+            def newServerConfig = newProject.liberty.server;
+            def oldServerConfig = oldProject.liberty.server;
+
+            def newServerConfigDir = newServerConfig.configDirectory;
+            def oldServerConfigDir = oldServerConfig.configDirectory;
+
+            // Since no tasks have been run on the new project the initializeConfigDirectory()
+            // method has not been ran yet, so the file may still be null. But for the old project
+            // this method is guaranteed to have ran at the start of DevMode. So we need to initialize
+            // the config directory on the new project or else it would report that the directory has changed
+            if (newServerConfigDir == null) {
+                newServerConfigDir = new File(newProject.projectDir, "src/main/liberty/config");
+            }
+
+            return newServerConfigDir != oldServerConfigDir;
+        }
+
 
         @Override
         public void checkConfigFile(File configFile, File serverDir) {
