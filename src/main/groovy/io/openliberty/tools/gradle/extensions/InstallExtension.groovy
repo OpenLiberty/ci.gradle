@@ -20,11 +20,9 @@ class InstallExtension {
     String licenseCode
     String version
     String runtimeUrl
-    String baseDir
-    String cacheDir
     String username
     String password
-    String maxDownloadTime = "0"
+    String maxDownloadTime
     String type
-    boolean useOpenLiberty = true
+    String useOpenLiberty
 }

@@ -32,6 +32,8 @@ import groovy.xml.MarkupBuilder
 import java.util.Map.Entry
 import java.util.Set
 
+import io.openliberty.tools.common.plugins.util.PluginExecutionException
+
 class InstallLibertyTask extends AbstractTask {
     protected Properties libertyRuntimeProjectProps = new Properties()
     String detachedCoords
@@ -97,97 +99,119 @@ class InstallLibertyTask extends AbstractTask {
         }
     }
 
+    private boolean checkAndLoadInstallExtensionProperties(Map<String,String> props) {
+        boolean hasInstallExtProps = false;
+
+        if (project.liberty.install.licenseCode != null) {
+            hasInstallExtProps = true
+            props.put('licenseCode', project.liberty.install.licenseCode)
+        }
+
+        if (project.liberty.install.version != null) {
+            hasInstallExtProps = true
+            props.put('version', project.liberty.install.version)
+        }
+
+        if (project.liberty.install.type != null) {
+            hasInstallExtProps = true
+            props.put('type', project.liberty.install.type)
+        }
+
+        if (project.liberty.install.username != null) {
+            hasInstallExtProps = true
+            props.put('username', project.liberty.install.username)
+            props.put('password', project.liberty.install.password)
+        }
+
+        if (project.liberty.install.runtimeUrl != null) {
+            hasInstallExtProps = true
+            props.put('runtimeUrl', project.liberty.install.runtimeUrl)
+        }
+
+        if (project.liberty.install.useOpenLiberty != null) {
+            hasInstallExtProps = true
+            boolean value = Boolean.parseBoolean(project.liberty.install.useOpenLiberty)
+            props.put('useOpenLiberty', value)
+        }
+
+        if (project.liberty.install.maxDownloadTime != null) {
+            hasInstallExtProps = true
+            props.put('maxDownloadTime', project.liberty.install.maxDownloadTime)
+        }
+
+        if (hasInstallExtProps  && project.liberty.install.useOpenLiberty == null) {
+            // default to true
+            props.put('useOpenLiberty', 'true')
+        }
+
+        if (hasInstallExtProps  && project.liberty.install.maxDownloadTime == null) {
+            // default to zero
+            props.put('maxDownloadTime', '0')
+        }
+
+        return hasInstallExtProps
+    }
+
     private Map<String, String> buildInstallLibertyMap(Project project) {
 
         detachedCoords = null
         detachedConfigFilePath = null
         loadLibertyRuntimeProperties()
 
-        Map<String, String> result = new HashMap();
-        if (project.liberty.install.licenseCode != null) {
-           result.put('licenseCode', project.liberty.install.licenseCode)
-        }
+        Map<String, String> result = new HashMap()
+        boolean hasInstallExtensionProps = checkAndLoadInstallExtensionProperties(result)
 
-        if (project.liberty.install.version != null) {
-            result.put('version', project.liberty.install.version)
-        }
-
-        if (project.liberty.install.type != null) {
-            result.put('type', project.liberty.install.type)
-        }
-
-        if (project.liberty.install.runtimeUrl != null) {
-            result.put('runtimeUrl', project.liberty.install.runtimeUrl)
-        } else {
+        if (!hasInstallExtensionProps) {
             String runtimeFilePath = project.configurations.getByName('libertyRuntime').getAsPath()
+            String coordinatesToUse = null
 
             if (runtimeFilePath) {
-                String existingCoords = getLibertyRuntimeCoordinates()
-                String newCoords = getUpdatedLibertyRuntimeCoordinates(existingCoords)
+                coordinatesToUse = getLibertyRuntimeCoordinates()
+                String newCoords = getUpdatedLibertyRuntimeCoordinates(coordinatesToUse)
 
-                if (newCoords != null && !newCoords.equals(existingCoords)) {
-                    detachedCoords = newCoords
-                    Dependency dep = project.dependencies.create(newCoords)
+                if (newCoords != null && !newCoords.equals(coordinatesToUse)) {
+                    coordinatesToUse = newCoords
+                    detachedCoords = coordinatesToUse
+                    Dependency dep = project.dependencies.create(coordinatesToUse)
                     Configuration detachedConfig = project.configurations.detachedConfiguration( dep )
                     detachedConfigFilePath = detachedConfig.getAsPath()
                     runtimeFilePath = detachedConfigFilePath
                 }
-           } else if (isMavenCentralConfigured() && project.liberty.install.useOpenLiberty) {
-                // if a Maven Central repo is configured, default to get the Open Liberty runtime from Maven Central
-                // otherwise let the installLiberty ant task default to DHE as it has in the past
-                detachedCoords = getDefaultLibertyRuntimeCoordinates()
-                Dependency dep = project.dependencies.create(detachedCoords)
+            } else {
+                // default to get the Open Liberty runtime from maven
+                // if the file cannot be located, throw an error - a maven repo may not be configured
+                coordinatesToUse = getDefaultLibertyRuntimeCoordinates()
+                detachedCoords = coordinatesToUse
+                Dependency dep = project.dependencies.create(coordinatesToUse)
                 Configuration detachedConfig = project.configurations.detachedConfiguration( dep )
                 detachedConfigFilePath = detachedConfig.getAsPath()
                 runtimeFilePath = detachedConfigFilePath
             }
 
-            if (runtimeFilePath) {
-                logger.debug 'Liberty archive file path to the local Gradle repository  : ' + runtimeFilePath
+            File localFile = new File(runtimeFilePath)
 
-                File localFile = new File(runtimeFilePath)
-
-                if (localFile.exists()) {
-                    logger.debug 'Getting WebSphere Liberty archive file from the local Gradle repository.'
-                    result.put('runtimeUrl', localFile.toURI().toURL())
-                }
+            if (localFile.exists()) {
+                logger.debug 'Getting WebSphere Liberty archive file from the local Gradle repository.'
+                result.put('runtimeUrl', localFile.toURI().toURL())
+            } else {
+                logger.debug 'Liberty archive file does not exist in the local Gradle repository with path: ' + runtimeFilePath
+                throw new PluginExecutionException("Could not find artifact with coordinates " + coordinatesToUse + ". Verify a Maven repository is configured that contains the corresponding artifact.")
             }
         }
 
-        if (project.liberty.install.baseDir == null) {
+        if (project.liberty.baseDir == null) {
            result.put('baseDir', project.buildDir)
         } else {
-           result.put('baseDir', project.liberty.install.baseDir)
+           result.put('baseDir', project.liberty.baseDir)
         }
 
-        if (project.liberty.install.cacheDir != null) {
-            result.put('cacheDir', project.liberty.install.cacheDir)
+        if (project.liberty.cacheDir != null) {
+            result.put('cacheDir', project.liberty.cacheDir)
         }
-
-        if (project.liberty.install.username != null) {
-            result.put('username', project.liberty.install.username)
-            result.put('password', project.liberty.install.password)
-        }
-
-        result.put('useOpenLiberty', project.liberty.install.useOpenLiberty)
-        result.put('maxDownloadTime', project.liberty.install.maxDownloadTime)
 
         result.put('offline', project.gradle.startParameter.offline)
 
         return result
-    }
-
-    private boolean isMavenCentralConfigured() {
-        boolean found = false
-        project.repositories.find { nextRepo ->
-            if (nextRepo instanceof MavenArtifactRepository) {
-                if (nextRepo.name.equals("MavenRepo") || nextRepo.name.equals("MavenLocal")) {
-                    found = true
-                    return true
-                }
-            }
-        }
-        return found
     }
 
     protected void outputLibertyPropertiesToXml(MarkupBuilder xmlDoc) {

@@ -24,6 +24,8 @@ class LibertyExtension {
     String outputDir
     String userDir
     String serverName = "defaultServer"
+    String baseDir
+    String cacheDir
 
     String appsDirectory = "apps"
     boolean stripVersion = false
