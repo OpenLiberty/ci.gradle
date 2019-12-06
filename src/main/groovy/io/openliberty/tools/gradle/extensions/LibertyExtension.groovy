@@ -24,6 +24,8 @@ class LibertyExtension {
     String outputDir
     String userDir
     String serverName = "defaultServer"
+    String baseDir
+    String cacheDir
 
     String appsDirectory = "apps"
     boolean stripVersion = false
@@ -45,6 +47,10 @@ class LibertyExtension {
 
     String jspVersion
     int jspCompileTimeout = 40
+
+    // For overriding the group, name or version of the libertyRuntime installed from Maven Central repository.
+    // Default is group 'io.openliberty', name 'openliberty-kernel' and version '[19.0.0.9,)' which gets the latest version.
+    Properties runtime = new Properties()
 
     def numberOfClosures = 0
 

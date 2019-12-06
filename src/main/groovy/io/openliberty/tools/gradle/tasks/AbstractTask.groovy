@@ -32,10 +32,10 @@ abstract class AbstractTask extends DefaultTask {
 
     protected getInstallDir = { Project project ->
         if (project.liberty.installDir == null) {
-            if (project.liberty.install.baseDir == null) {
+            if (project.liberty.baseDir == null) {
                 return new File(project.buildDir, 'wlp')
             } else {
-                return new File(project.liberty.install.baseDir, 'wlp')
+                return new File(project.liberty.baseDir, 'wlp')
             }
         } else {
             return new File(project.liberty.installDir)
