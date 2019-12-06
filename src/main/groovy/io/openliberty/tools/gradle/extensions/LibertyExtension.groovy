@@ -42,6 +42,10 @@ class LibertyExtension {
         ConfigureUtil.configure(closure, jsp)
     }
 
+    def thin(Closure closure) {
+       ConfigureUtil.configure(closure, thin)
+    }
+
     def install(Closure closure) {
         ConfigureUtil.configure(closure, install)
     }
