@@ -640,6 +640,11 @@ class DevTask extends AbstractServerTask {
 
         util.addShutdownHook(executor);
 
+        List<File> propertyFiles = new ArrayList<File>();
+        propertyFiles.add(new File(project.gradle.gradleUserHomeDir, "gradle.properties"));
+        propertyFiles.add(new File(project.getRootDir(), "gradle.properties"));
+        util.setPropertyFiles(propertyFiles);
+
         util.startServer();
 
         List<String> artifactPaths = util.getArtifacts();
