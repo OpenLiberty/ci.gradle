@@ -518,7 +518,7 @@ class DevTask extends AbstractServerTask {
             gradleBuildLauncher.withArguments('--rerun-tasks');
 
             try {
-                runGradleTask(gradleBuildLauncher, 'libertyCreate',);
+                runGradleTask(gradleBuildLauncher, 'libertyCreate');
             } catch (BuildException e) {
                 throw new PluginExecutionException(e);
             } finally {
