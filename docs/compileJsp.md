@@ -7,9 +7,12 @@ The `compileJsp` task compiles the JSP files in the src/main/webapp directory so
 
 ### Parameters
 
-See the [Liberty general runtime properties.](libertyExtensions.md#general-runtime-properties) properties for common server configuration.
+| Attribute | Type | Since | Description | Required |
+| --------- | ---- | ----- | ----------- | ---------|
+| jspVersion | int | 2.0 | Maximum time to wait (in seconds) for all the JSP files to compile. The server is stopped and the goal ends after this specified time. The default value is 30 seconds. | No |
+| jspCompileTimeout | int | 2.0 | Maximum time to wait (in seconds) for all the JSP files to compile. The server is stopped and the goal ends after this specified time. The default value is 30 seconds. | No |
 
-In particular, the jspVersion and the jspCompileTimeout properties are used for compiling JSP files.
+The `jspVersion` and `jspCompileTimeout` properties are set in the `liberty.jsp` closure.
 
 ### Example:
 
@@ -19,10 +22,12 @@ apply plugin: 'war'
 
 liberty {
     server {
-      serverXmlFile = file("src/resources/server.xml")
-      stripVersion = true
-      jspVersion = 2.2
-      jspCompileTimeout = 35
+        serverXmlFile = file("src/resources/server.xml")
+        stripVersion = true
+    }
+    jsp {
+        jspVersion = 2.2
+        jspCompileTimeout = 35
     }
 }
 

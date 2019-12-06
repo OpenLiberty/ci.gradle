@@ -16,19 +16,103 @@
 package io.openliberty.tools.gradle
 
 import io.openliberty.tools.gradle.extensions.ServerExtension
+import io.openliberty.tools.gradle.tasks.AbstractServerTask
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskDependency
+import org.gradle.api.tasks.bundling.War
 import org.gradle.api.Task
 
-abstract class LibertyTasks {
+public class LibertyTasks {
     Project project
 
     LibertyTasks (Project project) {
         this.project = project
     }
 
-    abstract void applyTasks()
+    public void applyTasks() {
+        project.compileJSP {
+            dependsOn 'installLiberty', 'compileJava'
+        }
+
+        project.libertyRun {
+            dependsOn 'libertyCreate'
+
+            if (dependsOnApps(project.liberty.server)) dependsOn 'deploy'
+        }
+
+        project.libertyStatus {
+            dependsOn 'libertyCreate'
+        }
+
+        project.libertyCreate {
+            dependsOn 'installLiberty'
+            // Run install features if configured
+            if (dependsOnFeature(project.liberty.server)) finalizedBy 'installFeature'
+        }
+
+        project.libertyStart {
+            dependsOn 'libertyCreate'
+
+            if (dependsOnApps(project.liberty.server)) dependsOn 'deploy'
+        }
+
+        project.libertyPackage {
+            dependsOn installDependsOn(project.liberty.server, 'libertyCreate')
+        }
+
+        project.undeploy {
+            dependsOn 'libertyStart'
+        }
+
+        project.installFeature {
+            if (dependsOnFeature(project.liberty.server)) {
+                dependsOn 'libertyCreate'
+            } else {
+                dependsOn 'installLiberty'
+            }
+        }
+
+        project.cleanDirs {
+            dependsOn 'libertyStop'
+        }
+
+        project.deploy {
+            if (AbstractServerTask.findSpringBootVersion(project) != null) {
+                if (springBootVersion?.startsWith('2')) {
+                    dependsOn 'bootJar'
+                } else { //version 1.5.x
+                    dependsOn 'bootRepackage'
+                }
+            }
+            dependsOn project.tasks.withType(War), 'libertyCreate'
+        }
+
+        project.configureArquillian {
+            dependsOn 'deploy', 'processTestResources'
+            skipIfArquillianXmlExists = project.arquillianConfiguration.skipIfArquillianXmlExists
+            arquillianProperties = project.arquillianConfiguration.arquillianProperties
+        }
+
+        if (!dependsOnApps(project.liberty.server)) {
+            if (project.plugins.hasPlugin('war') || project.plugins.hasPlugin('ear')) {
+                def tasks = project.tasks
+                tasks.getByName('libertyRun').dependsOn 'deploy'
+                tasks.getByName('libertyStart').dependsOn 'deploy'
+                tasks.getByName('libertyPackage').dependsOn 'deploy'
+            }
+        }
+
+        checkServerEnvProperties(project.liberty.server)
+        //Server objects need to be set per task after the project configuration phase
+        setServersForTasks()
+    }
+
+    private void setServersForTasks(){
+        project.tasks.withType(AbstractServerTask).each { task ->
+            task.server = project.liberty.server
+        }
+    }
 
     protected List<String> installDependsOn(ServerExtension server, String elseDepends) {
         List<String> tasks = new ArrayList<String>()
@@ -48,28 +132,6 @@ abstract class LibertyTasks {
     protected boolean dependsOnFeature(ServerExtension server) {
         return (server.features.name != null && !server.features.name.isEmpty())
     }
-
-    //Need to overwrite existing task with new task to add a task type
-    protected void overwriteTask(String taskName, Class taskType, Closure configureClosure) {
-        Task oldTask = project.tasks.getByName(taskName)
-
-        //Getting task dependencies set inside of build.gradle files
-        Set<Object> dependsOnList, finalizedByList, shouldRunAfterList, mustRunAfterList
-        dependsOnList = oldTask.getDependsOn()
-        finalizedByList = oldTask.getFinalizedBy().getDependencies(oldTask)
-        shouldRunAfterList = oldTask.getShouldRunAfter().getDependencies(oldTask)
-        mustRunAfterList = oldTask.getMustRunAfter().getDependencies(oldTask)
-
-        project.tasks.remove(oldTask)
-        //Creating new task with task type, the passed in closure, and setting dependencies
-        Task newTask = project.task(taskName, type: taskType, overwrite: true)
-        newTask.setDependsOn(dependsOnList)
-        newTask.setFinalizedBy(finalizedByList)
-        newTask.setShouldRunAfter(shouldRunAfterList)
-        newTask.setMustRunAfter(mustRunAfterList)
-        newTask.configure(configureClosure)
-    }
-
 
     public void checkServerEnvProperties(ServerExtension server) {
         if (server.outputDir == null) {

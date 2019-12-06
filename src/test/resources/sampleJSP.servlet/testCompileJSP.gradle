@@ -47,8 +47,10 @@ liberty {
         }
         looseApplication = false
         stripVersion = true
-     }
-     jspCompileTimeout = 35
+    }
+    jsp {
+        jspCompileTimeout = 35
+    }
 }
 
 repositories {

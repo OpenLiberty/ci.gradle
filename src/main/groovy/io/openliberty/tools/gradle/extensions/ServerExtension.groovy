@@ -49,8 +49,6 @@ class ServerExtension {
 
     int verifyAppStartTimeout = 0
 
-    def numberOfClosures = 0
-
     FeatureExtension features = new FeatureExtension()
     UninstallFeatureExtension uninstallfeatures = new UninstallFeatureExtension()
     CleanExtension cleanDir = new CleanExtension()

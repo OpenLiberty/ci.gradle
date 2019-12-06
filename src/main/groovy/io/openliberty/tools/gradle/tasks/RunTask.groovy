@@ -38,7 +38,7 @@ class RunTask extends AbstractServerTask {
             serverTaskRun.execute();
         } else {
             List<String> command = buildCommand("run")
-            if (project.liberty.clean) {
+            if (server.clean) {
                 command.add("--clean")
             }
             def pb = new ProcessBuilder(command)
