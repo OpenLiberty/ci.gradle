@@ -36,18 +36,6 @@ class InstallLiberty_DefaultNoMavenRepo extends AbstractIntegrationTest{
         createTestProject(buildDir, resourceDir, buildFilename)
     }
 
-    //@Test
-    public void test_installLiberty_no_maven_repo() {
-        try {
-            runTasks(buildDir, 'installLiberty')
-            fail('installLiberty task did not fail as expected')
-        } catch (Exception e) {
-            assert e instanceof GradleException : "Expected GradleException but received "+e
-            assert e.getCause() instanceof ResolveException : "Expected ResolveException but received "+e.getCause()
-
-        }
-    }
-
     @Test
     public void test_installLiberty_no_maven_repo_fail() {
         BuildResult result = GradleRunner.create()

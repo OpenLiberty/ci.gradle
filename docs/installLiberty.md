@@ -3,7 +3,7 @@
 The `installLiberty` task is used to download and install WebSphere Liberty. The task can also upgrade your Liberty runtime from an ILAN to an IPLA license with a license JAR file [setup](#installing-your-upgrade-license) and [license configuration](#license-configuration).  
 
 The task can download the Liberty runtime archive in three ways:
-* From [The Central Repository](http://search.maven.org/) using the `libertyRuntime` dependencies configuration or the `liberty.runtime` properties. This is the default installation. The default runtime artifact is the latest version of io.openliberty:openliberty-kernel.
+* From [The Central Repository](http://search.maven.org/) using the `libertyRuntime` dependencies configuration or the `liberty.runtime` properties. This is the default installation method. The default runtime artifact is the latest version of io.openliberty:openliberty-kernel.
 * From a specified location using `runtimeUrl`
 * From the [Liberty repository](https://developer.ibm.com/wasdev/downloads/) based on a version and a runtime type.
 
