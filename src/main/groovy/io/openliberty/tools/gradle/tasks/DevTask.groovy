@@ -16,6 +16,7 @@
 package io.openliberty.tools.gradle.tasks
 
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.logging.LogLevel
@@ -148,6 +149,8 @@ class DevTask extends AbstractServerTask {
 
         Set<String> existingFeatures;
 
+        Set<String> existingLibertyFeatureDependencies;
+
         private ServerTask serverTask = null;
 
         DevTaskUtil(File serverDirectory, File sourceDirectory, File testSourceDirectory,
@@ -161,6 +164,12 @@ class DevTask extends AbstractServerTask {
 
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
+
+            this.existingLibertyFeatureDependencies = new HashSet<String>();
+
+            project.configurations.getByName('libertyFeature').dependencies.each {
+                dep -> this.existingLibertyFeatureDependencies.add(dep.name)
+            }
         }
 
         @Override
@@ -257,46 +266,77 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public boolean recompileBuildFile(File buildFile, List<String> artifactPaths, ThreadPoolExecutor executor) {
-            // monitoring project build.gradle file changes in dev mode:
-            // - changes in liberty plugin configuration in the build plugin section
-
             boolean restartServer = false;
+            boolean installFeatures = false;
 
             ProjectBuilder builder = ProjectBuilder.builder();
-            Project newProject = builder
-                    .withProjectDir(project.rootDir)
-                    .withGradleUserHomeDir(project.gradle.gradleUserHomeDir)
-                    .build();
+            Project newProject;
+            try {
+                newProject = builder
+                        .withProjectDir(project.rootDir)
+                        .withGradleUserHomeDir(project.gradle.gradleUserHomeDir)
+                        .build();
 
-            // need this for gradle to evaluate the new project
-            // and load the different plugins and extensions
-            newProject.evaluate();
+                // need this for gradle to evaluate the project
+                // and load the different plugins and extensions
+                newProject.evaluate();
+            } catch (Exception e) {
+                logger.error("Could not parse build.gradle " + e.getMessage());
+                logger.debug(e);
+                return false;
+            }
 
             if(hasServerConfigBootstrapPropertiesChanged(newProject, project)) {
-                println 'Bootstrap properties changed';
+                logger.debug('Bootstrap properties changed');
                 restartServer = true;
                 project.liberty.server.bootstrapProperties = newProject.liberty.server.bootstrapProperties;
             } else if (hasServerConfigBootstrapPropertiesFileChanged(newProject, project)) {
-                println 'Bootstrap properties file changed';
+                logger.debug('Bootstrap properties file changed');
                 restartServer = true;
                 project.liberty.server.bootstrapPropertiesFile = newProject.liberty.server.bootstrapPropertiesFile;
             } else if (hasServerConfigJVMOptionsChanged(newProject, project)) {
-                println 'JVM Options changed';
+                logger.debug('JVM Options changed');
                 restartServer = true;
                 project.liberty.server.jvmOptions = newProject.liberty.server.jvmOptions;
             } else if (hasServerConfigJVMOptionsFileChanged(newProject, project)) {
-                println 'JVM Options file changed';
+                logger.debug('JVM Options file changed');
                 restartServer = true;
                 project.liberty.server.jvmOptionsFile = newProject.liberty.server.jvmOptionsFile;
             } else if (hasServerConfigEnvFileChanged(newProject, project)) {
-                println 'Server Env file changed';
+                logger.debug('Server Env file changed');
                 restartServer = true;
                 project.liberty.server.serverEnvFile = newProject.liberty.server.serverEnvFile;
             } else if (hasServerConfigDirectoryChanged(newProject, project)) {
-                println 'Server config directory changed'
+                logger.debug('Server config directory changed');
                 restartServer = true;
                 project.liberty.server.configDirectory = newProject.liberty.server.configDirectory;
                 initializeConfigDirectory(); // make sure that the config dir is set if it was null in the new project
+            }
+
+            // if we don't already need to restart the server
+            // check if we need to install any additional features
+            if (!restartServer) {
+                List<String> oldFeatureNames = project.liberty.server.features.name;
+                List<String> newFeatureNames = newProject.liberty.server.features.name;
+
+                if (oldFeatureNames != newFeatureNames) {
+                    logger.debug('Server feature changed');
+                    installFeatures = true;
+                    project.liberty.server.features.name = newFeatureNames;
+                }
+
+                Configuration newLibertyFeatureConfiguration = newProject.configurations.getByName('libertyFeature');
+                List<String> newLibertyFeatureDependencies = new ArrayList<String>();
+                newLibertyFeatureConfiguration.dependencies.each { dep -> newLibertyFeatureDependencies.add(dep.name) }
+
+                newLibertyFeatureDependencies.removeAll(existingLibertyFeatureDependencies);
+
+                if (!newLibertyFeatureDependencies.isEmpty()) {
+                    logger.debug('libertyFeature dependency changed');
+                    installFeatures = true;
+                    existingLibertyFeatureDependencies.addAll(newLibertyFeatureDependencies);
+                }
+
             }
 
             if (restartServer) {
@@ -307,41 +347,31 @@ class DevTask extends AbstractServerTask {
                 // - start server
                 util.restartServer();
                 return true;
+            } else if (installFeatures) {
+                libertyInstallFeature();
             }
 
-
             return true;
-
         }
 
         private boolean hasServerConfigBootstrapPropertiesChanged(Project newProject, Project oldProject) {
-            def newServerConfig = newProject.liberty.server;
-            def oldServerConfig = oldProject.liberty.server;
-            return newServerConfig.bootstrapProperties != oldServerConfig.bootstrapProperties;
+            return newProject.liberty.server.bootstrapProperties != oldProject.liberty.server.bootstrapProperties;
         }
 
         private boolean hasServerConfigBootstrapPropertiesFileChanged(Project newProject, Project oldProject) {
-            def newServerConfig = newProject.liberty.server;
-            def oldServerConfig = oldProject.liberty.server;
-            return newServerConfig.bootstrapPropertiesFile != oldServerConfig.bootstrapPropertiesFile;
+            return newProject.liberty.server.bootstrapPropertiesFile != oldProject.liberty.server.bootstrapPropertiesFile;
         }
 
         private boolean hasServerConfigJVMOptionsChanged(Project newProject, Project oldProject) {
-            def newServerConfig = newProject.liberty.server;
-            def oldServerConfig = oldProject.liberty.server;
-            return newServerConfig.jvmOptions != oldServerConfig.jvmOptions;
+            return newProject.liberty.server.jvmOptions != oldProject.liberty.server.jvmOptions;
         }
 
         private boolean hasServerConfigJVMOptionsFileChanged(Project newProject, Project oldProject) {
-            def newServerConfig = newProject.liberty.server;
-            def oldServerConfig = oldProject.liberty.server;
-            return newServerConfig.jvmOptionsFile != oldServerConfig.jvmOptionsFile;
+            return newProject.liberty.server.jvmOptionsFile != oldProject.liberty.server.jvmOptionsFile;
         }
 
         private boolean hasServerConfigEnvFileChanged(Project newProject, Project oldProject) {
-            def newServerConfig = newProject.liberty.server;
-            def oldServerConfig = oldProject.liberty.server;
-            return newServerConfig.serverEnvFile != oldServerConfig.serverEnvFile;
+            return newProject.liberty.server.serverEnvFile != oldProject.liberty.server.serverEnvFile;
         }
 
         private boolean hasServerConfigDirectoryChanged(Project newProject, Project oldProject) {
