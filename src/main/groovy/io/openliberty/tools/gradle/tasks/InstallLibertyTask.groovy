@@ -25,6 +25,7 @@ import org.gradle.api.logging.LogLevel
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolvedConfiguration
 import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.artifacts.ResolveException
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import groovy.xml.MarkupBuilder
@@ -32,7 +33,7 @@ import groovy.xml.MarkupBuilder
 import java.util.Map.Entry
 import java.util.Set
 
-import io.openliberty.tools.common.plugins.util.PluginExecutionException
+import org.gradle.api.GradleException
 
 class InstallLibertyTask extends AbstractTask {
     protected Properties libertyRuntimeProjectProps = new Properties()
@@ -165,27 +166,33 @@ class InstallLibertyTask extends AbstractTask {
             String runtimeFilePath = project.configurations.getByName('libertyRuntime').getAsPath()
             String coordinatesToUse = null
 
-            if (runtimeFilePath) {
-                coordinatesToUse = getLibertyRuntimeCoordinates()
-                String newCoords = getUpdatedLibertyRuntimeCoordinates(coordinatesToUse)
+            try {
+                if (runtimeFilePath) {
+                    coordinatesToUse = getLibertyRuntimeCoordinates()
+                    String newCoords = getUpdatedLibertyRuntimeCoordinates(coordinatesToUse)
 
-                if (newCoords != null && !newCoords.equals(coordinatesToUse)) {
-                    coordinatesToUse = newCoords
+                    if (newCoords != null && !newCoords.equals(coordinatesToUse)) {
+                        coordinatesToUse = newCoords
+                        detachedCoords = coordinatesToUse
+                    }
+                } else {
+                    // default to get the Open Liberty runtime from maven
+                    // if the file cannot be located, throw an error - a maven repo may not be configured
+                    coordinatesToUse = getDefaultLibertyRuntimeCoordinates()
                     detachedCoords = coordinatesToUse
-                    Dependency dep = project.dependencies.create(coordinatesToUse)
+                }
+                if (detachedCoords != null) {
+                    Dependency dep = project.dependencies.create(detachedCoords)
                     Configuration detachedConfig = project.configurations.detachedConfiguration( dep )
+                    ResolvedConfiguration resolvedConfig = detachedConfig.getResolvedConfiguration()
+                    if (resolvedConfig.hasError()) {
+                        resolvedConfig.rethrowFailure()
+                    }
                     detachedConfigFilePath = detachedConfig.getAsPath()
                     runtimeFilePath = detachedConfigFilePath
                 }
-            } else {
-                // default to get the Open Liberty runtime from maven
-                // if the file cannot be located, throw an error - a maven repo may not be configured
-                coordinatesToUse = getDefaultLibertyRuntimeCoordinates()
-                detachedCoords = coordinatesToUse
-                Dependency dep = project.dependencies.create(coordinatesToUse)
-                Configuration detachedConfig = project.configurations.detachedConfiguration( dep )
-                detachedConfigFilePath = detachedConfig.getAsPath()
-                runtimeFilePath = detachedConfigFilePath
+            } catch (ResolveException e) {
+                throw new GradleException("Could not find artifact with coordinates " + coordinatesToUse + ". Verify a Maven repository is configured that contains the corresponding artifact.",e)
             }
 
             File localFile = new File(runtimeFilePath)
@@ -195,7 +202,7 @@ class InstallLibertyTask extends AbstractTask {
                 result.put('runtimeUrl', localFile.toURI().toURL())
             } else {
                 logger.debug 'Liberty archive file does not exist in the local Gradle repository with path: ' + runtimeFilePath
-                throw new PluginExecutionException("Could not find artifact with coordinates " + coordinatesToUse + ". Verify a Maven repository is configured that contains the corresponding artifact.")
+                throw new GradleException("Could not find artifact with coordinates " + coordinatesToUse + ". Verify a Maven repository is configured that contains the corresponding artifact.")
             }
         }
 
