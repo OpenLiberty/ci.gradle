@@ -375,11 +375,8 @@ class DevTask extends AbstractServerTask {
         }
 
         private boolean hasServerConfigDirectoryChanged(Project newProject, Project oldProject) {
-            def newServerConfig = newProject.liberty.server;
-            def oldServerConfig = oldProject.liberty.server;
-
-            def newServerConfigDir = newServerConfig.configDirectory;
-            def oldServerConfigDir = oldServerConfig.configDirectory;
+            def newServerConfigDir = newProject.liberty.server.newServerConfig.configDirectory;
+            def oldServerConfigDir = oldProject.liberty.server.oldServerConfig.configDirectory;
 
             // Since no tasks have been run on the new project the initializeConfigDirectory()
             // method has not been ran yet, so the file may still be null. But for the old project
