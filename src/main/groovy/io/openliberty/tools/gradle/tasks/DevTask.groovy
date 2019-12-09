@@ -282,7 +282,7 @@ class DevTask extends AbstractServerTask {
                 newProject.evaluate();
             } catch (Exception e) {
                 logger.error("Could not parse build.gradle " + e.getMessage());
-                logger.debug(e);
+                logger.debug('Error parsing build.gradle', e);
                 return false;
             }
 
@@ -290,27 +290,55 @@ class DevTask extends AbstractServerTask {
                 logger.debug('Bootstrap properties changed');
                 restartServer = true;
                 project.liberty.server.bootstrapProperties = newProject.liberty.server.bootstrapProperties;
-            } else if (hasServerConfigBootstrapPropertiesFileChanged(newProject, project)) {
+            }
+
+            if (hasServerConfigBootstrapPropertiesFileChanged(newProject, project)) {
                 logger.debug('Bootstrap properties file changed');
                 restartServer = true;
                 project.liberty.server.bootstrapPropertiesFile = newProject.liberty.server.bootstrapPropertiesFile;
-            } else if (hasServerConfigJVMOptionsChanged(newProject, project)) {
+            }
+
+            if (hasServerConfigJVMOptionsChanged(newProject, project)) {
                 logger.debug('JVM Options changed');
                 restartServer = true;
                 project.liberty.server.jvmOptions = newProject.liberty.server.jvmOptions;
-            } else if (hasServerConfigJVMOptionsFileChanged(newProject, project)) {
+            }
+
+            if (hasServerConfigJVMOptionsFileChanged(newProject, project)) {
                 logger.debug('JVM Options file changed');
                 restartServer = true;
                 project.liberty.server.jvmOptionsFile = newProject.liberty.server.jvmOptionsFile;
-            } else if (hasServerConfigEnvFileChanged(newProject, project)) {
+            }
+
+            if (hasServerConfigEnvFileChanged(newProject, project)) {
                 logger.debug('Server Env file changed');
                 restartServer = true;
                 project.liberty.server.serverEnvFile = newProject.liberty.server.serverEnvFile;
-            } else if (hasServerConfigDirectoryChanged(newProject, project)) {
+            }
+
+            if (hasServerConfigDirectoryChanged(newProject, project)) {
                 logger.debug('Server config directory changed');
                 restartServer = true;
                 project.liberty.server.configDirectory = newProject.liberty.server.configDirectory;
                 initializeConfigDirectory(); // make sure that the config dir is set if it was null in the new project
+            }
+
+            if (hasServerConfigEnvChanged(newProject, project)) {
+                logger.debug('Server env changed');
+                restartServer = true;
+                project.liberty.server.env = newProject.liberty.server.env;
+            }
+
+            if (hasServerConfigVarChanged(newProject, project)) {
+                logger.debug('Server var changed');
+                restartServer = true;
+                project.liberty.server.var = newProject.liberty.server.var;
+            }
+
+            if (hasServerConfigDefaultVarChanged(newProject, project)) {
+                logger.debug('Server default var changed');
+                restartServer = true;
+                project.liberty.server.defaultVar = newProject.liberty.server.defaultVar;
             }
 
             // if we don't already need to restart the server
@@ -387,6 +415,18 @@ class DevTask extends AbstractServerTask {
             }
 
             return newServerConfigDir != oldServerConfigDir;
+        }
+
+        private boolean hasServerConfigEnvChanged(Project newProject, Project oldProject) {
+            return newProject.liberty.server.env != oldProject.liberty.server.env;
+        }
+
+        private boolean hasServerConfigVarChanged(Project newProject, Project oldProject) {
+            return newProject.liberty.server.var != oldProject.liberty.server.var;
+        }
+
+        private boolean hasServerConfigDefaultVarChanged(Project newProject, Project oldProject) {
+            return newProject.liberty.server.defaultVar != oldProject.liberty.server.defaultVar;
         }
 
 
