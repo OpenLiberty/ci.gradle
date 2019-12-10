@@ -27,15 +27,9 @@ dependencies {
 }
 
 liberty {
-    if (test_mode == 'online') {
-        serverName = 'libertyOnline'
-    } else {
-        installDir = WLP_DIR
-        serverName = 'libertyOffline'
-    }
     server{
         serverXmlFile = file("src/main/liberty/config/server-installFeature-test.xml")
-        name = serverName
+        name = 'LibertyProjectServer'
         features {
             acceptLicense = true
         }

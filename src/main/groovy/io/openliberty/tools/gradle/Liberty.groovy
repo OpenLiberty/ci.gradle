@@ -38,8 +38,6 @@ class Liberty implements Plugin<Project> {
         project.extensions.create('liberty', LibertyExtension)
         project.extensions.create('arquillianConfiguration', ArquillianExtension)
 
-        project.liberty.servers = project.container(ServerExtension)
-
         project.configurations.create('libertyLicense')
         project.configurations.create('libertyRuntime')
         project.configurations.create('libertyFeature')
@@ -57,19 +55,8 @@ class Liberty implements Plugin<Project> {
         //Create expected server extension from liberty extension data
         project.afterEvaluate {
             setEclipseFacets(project)
-            if (isSingleServerProject(project)) {
-                setDeployExtension(project)
-                new LibertySingleServerTasks(project).applyTasks()
-            } else if (isMultiServerProject(project)) {
-                new LibertyMultiServerTasks(project).applyTasks()
-            } else if (project.liberty.server != null && !project.liberty.servers.isEmpty()){
-                throw new GradleException('Both a \'server\' and \'servers\' extension were found in a build.gradle file that uses the liberty plugin. Please define multiple servers inside of the Liberty \'servers\' extension in your build.gradle file.')
-            }
-            if (project.liberty.server == null && project.liberty.servers.isEmpty()) {
-                project.liberty.server = copyProperties(project.liberty)
-                setDeployExtension(project)
-                new LibertySingleServerTasks(project).applyTasks()
-            }
+            new LibertyTasks(project).applyTasks()
+
             //Checking serverEnv files for server properties
             Liberty.checkEtcServerEnvProperties(project)
 
@@ -130,24 +117,6 @@ class Liberty implements Plugin<Project> {
         }
     }
 
-    private ServerExtension copyProperties(LibertyExtension liberty) {
-        def serverMap = new ServerExtension().getProperties()
-        def libertyMap = liberty.getProperties()
-
-        serverMap.keySet().each { String element ->
-            if (element.equals("name")) {
-                serverMap.put(element, libertyMap.get("serverName"))
-            }
-            else {
-                serverMap.put(element, libertyMap.get(element))
-            }
-        }
-        serverMap.remove('class')
-        serverMap.remove('outputDir')
-
-        return ServerExtension.newInstance(serverMap)
-    }
-
     public static void checkEtcServerEnvProperties(Project project) {
         if (project.liberty.outputDir == null) {
             Properties envProperties = new Properties()
@@ -177,25 +146,5 @@ class Liberty implements Plugin<Project> {
         } else {
            return new File(project.liberty.installDir)
         }
-    }
-
-    private static setDeployExtension(Project project) {
-        if (project.liberty.server.deploy == null) {
-            project.liberty.server.deploy = new DeployExtension()
-        }
-    }
-
-    boolean isSingleServerProject(Project project) {
-        if (project.liberty.server != null && project.liberty.servers.isEmpty()) {
-            return true
-        }
-        return false
-    }
-
-    boolean isMultiServerProject(Project project) {
-        if (!project.liberty.servers.isEmpty() && project.liberty.server == null) {
-            return true
-        }
-        return false
     }
 }

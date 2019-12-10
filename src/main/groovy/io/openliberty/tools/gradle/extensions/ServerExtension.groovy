@@ -49,8 +49,6 @@ class ServerExtension {
 
     int verifyAppStartTimeout = 0
 
-    def numberOfClosures = 0
-
     FeatureExtension features = new FeatureExtension()
     UninstallFeatureExtension uninstallfeatures = new UninstallFeatureExtension()
     CleanExtension cleanDir = new CleanExtension()
@@ -61,12 +59,6 @@ class ServerExtension {
     PackageExtension packageLiberty = new PackageExtension()
     DumpExtension dumpLiberty = new DumpExtension()
     DumpExtension javaDumpLiberty = new DumpExtension()
-
-    public ServerExtension(String name) {
-        if (name != null) {
-            this.name = name
-        }
-    }
 
     def uninstallfeatures(Closure closure) {
         ConfigureUtil.configure(closure, uninstallfeatures)
