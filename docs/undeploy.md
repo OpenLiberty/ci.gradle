@@ -13,8 +13,8 @@ The `undeploy` task uses a `undeploy` block within the `liberty` block to define
 
 | Attribute | Type  | Since | Description | Required |
 | --------- | ----- | ----- | ----------- | -------- |
-| apps | Object[] | 3.0 | Specifies which tasks/files should be undeployed from the `apps` directory. Applications can be passed in as the task that generates the file or as an application file. | No |
-| dropins | Object[] | 3.0 | Specifies which tasks/files should be undeployed from the `dropins` directory. Applications can be passed in as the task that generates the file or as an application file. | No |
+| apps | Object[] | 3.0 | Specifies which tasks/files should be undeployed from the `apps` directory. Applications can be passed in as the task that generates the file or as an application file. | Yes - if `dropins` is not specified. |
+| dropins | Object[] | 3.0 | Specifies which tasks/files should be undeployed from the `dropins` directory. Applications can be passed in as the task that generates the file or as an application file. | Yes - if `apps` is not specified. |
 
 ### Examples
 
@@ -50,4 +50,4 @@ The `undeploy` task uses a `undeploy` block within the `liberty` block to define
     }
   ```
 
-If no property is set for the `undeploy` block nothing will be undeployed. A value must be provided to undeploy an application.
+If no property is set for the `undeploy` block, nothing will be undeployed. A value must be provided to undeploy an application.
