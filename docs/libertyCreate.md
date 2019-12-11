@@ -68,14 +68,14 @@ Those backed by a Properties object can be overridden as a whole or by specifyin
 
 Examples of using build.gradle file:
 ```groovy
-<ext>
+ext {
     liberty.server.env."another.serverenv.var" = "anotherValue"
     liberty.server.defaultVar.someDefaultVar = 'someDefaultValue'
     liberty.server.var.someVar = 'someValue'
     liberty.server.var."my.custom.var" = 'myCustomValue'
     liberty.server.bootstrapProperties."default.http.port" = '9083'
     liberty.server.jvmOptions=['-Xms128m','-Xmx2048m']
-</ext>
+}
 ```
 
 Examples of using gradle.properties file:
