@@ -64,20 +64,18 @@ liberty {
 * jvmOptions
 * var
 
-Those backed by a Properties object can be overridden as a whole or by specifying individual properties. The `jvmOptions` can only be overridden as a whole. When overriding in the `build.gradle` file using an `ext` block, they must be contained in an `afterEvaluate` block so that the `liberty.server` extension exists. 
+Those backed by a Properties object can be overridden as a whole or by specifying individual properties. The `jvmOptions` can only be overridden as a whole.
 
 Examples of using build.gradle file:
-```xml
-<afterEvaluate>
-    <ext>
-        liberty.server.env."another.serverenv.var" = "anotherValue"
-        liberty.server.defaultVar.someDefaultVar = 'someDefaultValue'
-        liberty.server.var.someVar = 'someValue'
-        liberty.server.var."my.custom.var" = 'myCustomValue'
-        liberty.server.bootstrapProperties."default.http.port" = '9083'
-        liberty.server.jvmOptions=['-Xms128m','-Xmx2048m']
-    </ext>
-</afterEvaluate>
+```groovy
+<ext>
+    liberty.server.env."another.serverenv.var" = "anotherValue"
+    liberty.server.defaultVar.someDefaultVar = 'someDefaultValue'
+    liberty.server.var.someVar = 'someValue'
+    liberty.server.var."my.custom.var" = 'myCustomValue'
+    liberty.server.bootstrapProperties."default.http.port" = '9083'
+    liberty.server.jvmOptions=['-Xms128m','-Xmx2048m']
+</ext>
 ```
 
 Examples of using gradle.properties file:
