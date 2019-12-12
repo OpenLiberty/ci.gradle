@@ -451,7 +451,9 @@ class DevTask extends AbstractServerTask {
                     runGradleTask(gradleBuildLauncher, "installFeature", "--serverDir=${serverDir.getAbsolutePath()}");
                     this.existingFeatures.addAll(features);
                 } catch (BuildException e) {
-                    logger.error('Failed to install features from configuration file', e);
+                    // stdout/stderr from the installFeature task is sent to the terminal
+                    // only need to log the actual stacktrace when debugging
+                    logger.debug('Failed to install features from configuration file', e);
                 } finally {
                     gradleConnection.close();
                 }
@@ -473,7 +475,9 @@ class DevTask extends AbstractServerTask {
                 }
                 return true;
             } catch (BuildException e) {
-                logger.error('Unable to compile', e);
+                // stdout/stderr from the compile task is sent to the terminal
+                // only need to log the actual stacktrace when debugging
+                logger.debug('Unable to compile', e);
                 return false;
             } finally {
                 gradleConnection.close();
