@@ -705,8 +705,11 @@ class DevTask extends AbstractServerTask {
         // configuration parameter is not specified.
         try {
             util.watchFiles(buildFile, outputDirectory, testOutputDirectory, executor, artifactPaths, serverXMLFile);
-        } catch (PluginScenarioException e) { // this exception is caught when the server has been stopped by another process
-            logger.info(e.getMessage());
+        } catch (PluginScenarioException e) {
+            if (e.getMessage() != null) {
+                // a proper message is included in the exception if the server has been stopped by another process
+                log.info(e.getMessage());
+            }
             return; // enter shutdown hook
         }
     }
