@@ -45,8 +45,8 @@ The following are optional command line parameters supported by this task.
 | libertyDebug | Whether to allow attaching a debugger to the running server. The default value is `true`. | No |
 | libertyDebugPort | The debug port that you can attach a debugger to. The default value is `7777`. | No |
 | compileWait | Time in seconds to wait before processing Java changes. If you encounter compile errors while refactoring, increase this value to allow all files to be saved before compilation occurs. The default value is `0.5` seconds. | No |
-| serverStartTimeout | Maximum time to wait (in seconds) to verify that the server has started. The default value is `30` seconds. | No |
-| verifyAppStartTimeout | Maximum time to wait (in seconds) to verify that the application has started or updated before running tests. The default value is `30` seconds. | No |
+| serverStartTimeout | Maximum time to wait (in seconds) to verify that the server has started. The value must be an integer greater than or equal to 0. The default value is `30` seconds. | No |
+| verifyAppStartTimeout | Maximum time to wait (in seconds) to verify that the application has started or updated before running tests. The value must be an integer greater than or equal to 0. The default value is `30` seconds. | No |
 
 ### Properties
 
