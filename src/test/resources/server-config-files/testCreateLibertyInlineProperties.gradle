@@ -38,14 +38,12 @@ liberty {
     }
 }
 
-afterEvaluate {
-    ext {
-        liberty.server.env."another.env.var" = "anotherValue"
-        liberty.server.defaultVar.someDefaultVar = 'someDefaultValue'
-        liberty.server.var.someVar = 'someValue'
-        liberty.server.var."my.custom.var" = 'myCustomValue'
-        liberty.server.bootstrapProperties."default.http.port" = '9083'
-    }
+ext {
+    liberty.server.env."another.env.var" = "anotherValue"
+    liberty.server.defaultVar.someDefaultVar = 'someDefaultValue'
+    liberty.server.var.someVar = 'someValue'
+    liberty.server.var."my.custom.var" = 'myCustomValue'
+    liberty.server.bootstrapProperties."default.http.port" = '9083'
 }
 
 repositories {
