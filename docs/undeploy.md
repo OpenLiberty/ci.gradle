@@ -9,7 +9,7 @@ The `undeploy` task supports undeployment of one or more applications from the W
 
 See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.
 
-The `undeploy` task uses a `undeploy` block within the `liberty` block to define task specific behavior.
+The `undeploy` task uses an `undeploy` block within the `server` block to define task specific behavior.
 
 | Attribute | Type  | Since | Description | Required |
 | --------- | ----- | ----- | ----------- | -------- |
@@ -40,12 +40,13 @@ The `undeploy` task uses a `undeploy` block within the `liberty` block to define
     apply plugin: 'war'
 
     liberty {
+        server {
+            name = 'myServer'
 
-        serverName = 'myServer'
-
-        undeploy {
-            apps = [war, file('sample.war')]
-            dropins = [file('test-war.war')]
+            undeploy {
+                apps = [war, file('sample.war')]
+                dropins = [file('test-war.war')]
+            }
         }
     }
   ```
