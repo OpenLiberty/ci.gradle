@@ -275,6 +275,7 @@ class DevTask extends AbstractServerTask {
                 newProject = builder
                         .withProjectDir(project.rootDir)
                         .withGradleUserHomeDir(project.gradle.gradleUserHomeDir)
+                        .withName(project.name)
                         .build();
 
                 // need this for gradle to evaluate the project
