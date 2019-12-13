@@ -48,7 +48,7 @@ public class LibertyTasks {
         project.libertyCreate {
             dependsOn 'installLiberty'
             // Run install features if configured
-            if (dependsOnFeature(project.liberty.server)) finalizedBy 'installFeature'
+            finalizedBy 'installFeature'
         }
 
         project.libertyStart {
@@ -58,7 +58,7 @@ public class LibertyTasks {
         }
 
         project.libertyPackage {
-            dependsOn installDependsOn(project.liberty.server, 'libertyCreate')
+            dependsOn installDependsOn(project.liberty.server)
         }
 
         project.undeploy {
@@ -66,11 +66,7 @@ public class LibertyTasks {
         }
 
         project.installFeature {
-            if (dependsOnFeature(project.liberty.server)) {
-                dependsOn 'libertyCreate'
-            } else {
-                dependsOn 'installLiberty'
-            }
+            dependsOn 'libertyCreate'
         }
 
         project.cleanDirs {
@@ -114,23 +110,17 @@ public class LibertyTasks {
         }
     }
 
-    protected List<String> installDependsOn(ServerExtension server, String elseDepends) {
+    protected List<String> installDependsOn(ServerExtension server) {
         List<String> tasks = new ArrayList<String>()
         boolean apps = dependsOnApps(server)
-        boolean feature = dependsOnFeature(server)
 
         if (apps) tasks.add('deploy')
-        if (feature) tasks.add('installFeature')
-        if (!apps && !feature) tasks.add(elseDepends)
+        tasks.add('installFeature')
         return tasks
     }
 
     protected boolean dependsOnApps(ServerExtension server) {
         return ((server.deploy.apps != null && !server.deploy.apps.isEmpty()) || (server.deploy.dropins != null && !server.deploy.dropins.isEmpty()))
-    }
-
-    protected boolean dependsOnFeature(ServerExtension server) {
-        return (server.features.name != null && !server.features.name.isEmpty())
     }
 
     public void checkServerEnvProperties(ServerExtension server) {
