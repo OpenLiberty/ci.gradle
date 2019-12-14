@@ -713,7 +713,7 @@ class DevTask extends AbstractServerTask {
         } catch (PluginScenarioException e) {
             if (e.getMessage() != null) {
                 // a proper message is included in the exception if the server has been stopped by another process
-                log.info(e.getMessage());
+                logger.info(e.getMessage());
             }
             return; // enter shutdown hook
         }
