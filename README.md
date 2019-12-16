@@ -80,8 +80,8 @@ The Liberty plugin provides the following tasks for your project:
 | [libertyJavaDump](docs/libertyJavaDump.md#libertyjavadump-task) | Dumps diagnostic information from the Liberty server JVM. |
 | [libertyDebug](docs/libertyDebug.md) | Runs the Liberty server in the console foreground after a debugger connects to the debug port (default: 7777). |
 | [libertyStatus](docs/libertyStatus.md) | Checks to see if the Liberty server is running. |
-| [deploy](docs/deploy.md#deploy-task) | Deploys a supported file to a running Liberty server. |
-| [undeploy](docs/undeploy.md#undeploy-task) | Removes an application from the Liberty server. |
+| [deploy](docs/deploy.md#deploy-task) | Deploys one or more applications to a Liberty server. |
+| [undeploy](docs/undeploy.md#undeploy-task) | Removes applications from the Liberty server. |
 | [compileJsp](docs/compileJsp.md) | Compiles the JSP files from the src/main/webapp directory into the build/classes directory. |
 
 ### Task ordering
