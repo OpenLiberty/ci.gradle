@@ -10,7 +10,7 @@ apply plugin: "com.gradle.plugin-publish"
 
 archivesBaseName = 'liberty-gradle-plugin'
 group = 'io.openliberty.tools'
-version = '3.0-M1-SNAPSHOT'
+version = '3.0-M1'
 
 repositories {
     mavenLocal()
@@ -159,8 +159,8 @@ test {
 }
 
 pluginBundle {
-  website = 'https://github.com/WASdev/ci.gradle'
-  vcsUrl = 'https://github.com/WASdev/ci.gradle'
+  website = 'https://github.com/OpenLiberty/ci.gradle'
+  vcsUrl = 'https://github.com/OpenLiberty/ci.gradle'
   description = 'Gradle plugin for managing Liberty servers'
   tags = ['liberty', 'websphere', 'devops']
 
@@ -202,16 +202,16 @@ if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')
                     url 'https://wasdev.github.io'
 
                     scm {
-                        connection 'scm:git:git@github.com:WASdev/ci.gradle.git'
-                        developerConnection 'scm:git:git@github.com:WASdev/ci.gradle.git'
-                        url 'git@github.com:WASdev/ci.gradle.git'
-                        tag 'HEAD'
+                        connection 'scm:git:git@github.com:OpenLiberty/ci.gradle.git'
+                        developerConnection 'scm:git:git@github.com:OpenLiberty/ci.gradle.git'
+                        url 'git@github.com:OpenLiberty/ci.gradle.git'
+                        tag 'liberty-gradle-plugin-3.0-M1'
                     }
 
                     licenses {
                         license {
                             name 'The Apache Software License, Version 2.0'
-                            url 'https://raw.github.com/WASdev/ci.gradle/master/LICENSE'
+                            url 'https://raw.github.com/OpenLiberty/ci.gradle/master/LICENSE'
                         }
                     }
 
