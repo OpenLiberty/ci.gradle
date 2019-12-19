@@ -7,7 +7,7 @@ gradle libertyRun --no-daemon
 
 ### dependsOn
 `libertyRun` depends on `libertyCreate`.  
-`libertyRun` also depends on `installApps` if configured.  
+`libertyRun` also depends on `deploy` if configured.  
 
 ### What is the Gradle Daemon and why --no-daemon?
 The Gradle Daemon is a long-running background process designed to help speed up the build process. It does so by caching project information and staying alive, avoiding constant JVM startup costs. This behavior is default until specified otherwise.  

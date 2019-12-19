@@ -29,7 +29,7 @@ The following properties are supported for server configuration.
 
 | Attribute | Type  | Since | Description | Required |
 | --------- | ----- | ----- | ----------- | -------- |
-| apps | List | 2.0 | List of `war` and `ear` task objects used to create applications to copy to the `apps` folder. If no `apps` or `dropins` are configured and this project applies the `war` or `ear` plugin, the default application is installed using the `installApps` task. If the application is not configured in the server.xml file, application configuration is added to the `configDropins` folder. | No |
+| apps | List | 2.0 | List of `war` and `ear` task objects used to create applications to copy to the `apps` folder. If no `apps` or `dropins` are configured and this project applies the `war` or `ear` plugin, the default application is installed using the `deploy` task. If the application is not configured in the server.xml file, application configuration is added to the `configDropins` folder. | No |
 | dropins | List | 2.0 | List of `war` or `ear` objects used to create applications to copy to the `dropins` folder. | No |
 | bootstrapProperties| Properties | 3.0 | Inline bootstrap `Properties` that are written to the bootstrap.properties file in the server directory. These properties take precedence over a specified bootstrap.properties file. This was changed from a `Map` to a `Properties` object in 3.0.| No|
 | bootstrapPropertiesFile| File | 2.0 | Location of the file containing server properties to copy to the bootstrap.properties file in the server instance.| No |
@@ -50,4 +50,4 @@ The following properties are supported for server configuration.
 | template | String | 1.0 | Name of the template to use when creating a new server. Only used with the `libertyCreate` task. | No |
 | timeout | String | 1.0 | Waiting time before the server starts. The default value is 30 seconds. The unit is seconds. Only used with `libertyStart` and `deploy` tasks. | No |
 | var | Properties | 3.0 | Inline server variables that are written to the `configDropins/overrides/liberty-plugin-variable-config.xml` file in the server directory. The property name is used for the variable `name`, and the property value is used for the variable `value`.| No|
-| verifyAppStartTimeout | int | 2.0 | Wait time for checking message logs for start of all applications installed with the `installApps` task. Only used with the `libertyStart` task. Default value is 0 seconds with no verification. | No |
+| verifyAppStartTimeout | int | 2.0 | Wait time for checking message logs for start of all applications installed with the `deploy` task. Only used with the `libertyStart` task. Default value is 0 seconds with no verification. | No |

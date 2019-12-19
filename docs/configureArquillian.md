@@ -19,7 +19,7 @@ The `configureArquillian` task will perform configuration for the Liberty Manage
 
 ### dependsOn
 
-`configureArquillian` depends on `installApps` and `processTestResources`.
+`configureArquillian` depends on `deploy` and `processTestResources`.
 
 ### Properties
 
@@ -51,7 +51,7 @@ test {
     include '**/*IT*'
     exclude '**/unit/**'
     testLogging.showStandardStreams = true
-    dependsOn 'installApps', 'testClasses', 'configureArquillian'
+    dependsOn 'deploy', 'testClasses', 'configureArquillian'
 }
 ```
 
