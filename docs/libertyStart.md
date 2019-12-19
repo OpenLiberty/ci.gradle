@@ -2,7 +2,7 @@
 Start a Liberty server in the background. The server instance is automatically created if it does not exist.  
 
 ### dependsOn
-`libertyStart` depends on `libertyCreate`, and `installApps` if configured.  
+`libertyStart` depends on `libertyCreate`, and `deploy` if configured.  
 
 ### Parameters
 
@@ -10,7 +10,7 @@ See the [Liberty server configuration](libertyExtensions.md#liberty-server-confi
 
 ### Example
 `clean` is set to `false` by default unless specified in `build.gradle` as shown in this example.  
-To set up verification of applications installed from `installApps`, set `verifyAppStartTimeout` to the number of seconds the server should spend checking for start messages in the message logs before it times out.
+To set up verification of applications installed from `deploy`, set `verifyAppStartTimeout` to the number of seconds the server should spend checking for start messages in the message logs before it times out.
 
 ```groovy
 apply plugin: 'liberty'
