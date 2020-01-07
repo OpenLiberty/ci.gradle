@@ -65,7 +65,7 @@ Integration tests can read the following system properties to obtain information
 
 In order to properly propagate the system properties from the gradle JVM running dev mode to the JVM(s) running your integration tests, you are required to configure your `build.gradle` to set the system properties for the test JVM(s).
 
-This can be done by only setting specific properties to the test JVM.
+This can be done by setting specific properties for the test JVM
 ```groovy
 test {
     systemProperty 'liberty.hostname', System.getProperty('liberty.hostname')
