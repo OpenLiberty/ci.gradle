@@ -51,3 +51,32 @@ The following are optional command line parameters supported by this task.
 ### Properties
 
 See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.
+
+##### System Properties for Integration Tests
+
+Integration tests can read the following system properties to obtain information about the Liberty server.
+
+| Property | Description |
+| --------  | ----------- |
+| wlp.user.dir | The user directory location that contains server definitions and shared resources. |
+| liberty.hostname | The host name of the Liberty server. |
+| liberty.http.port | The port used for client HTTP requests. |
+| liberty.https.port | The port used for client HTTP requests secured with SSL (HTTPS). |
+
+In order to properly propagate the system properties from the gradle JVM running dev mode to the JVM(s) running your integration tests, you are required to configure your `build.gradle` to set the system properties for the test JVM(s).
+
+This can be done by only setting specific properties to the test JVM.
+```groovy
+test {
+    systemProperty 'liberty.hostname', System.getProperty('liberty.hostname')
+    systemProperty 'liberty.http.port', System.getProperty('liberty.http.port')
+    systemProperty 'liberty.https.port', System.getProperty('liberty.https.port')
+}
+```
+
+Or by propagating all system properties from the gradle JVM to the test JVM.
+```groovy
+test {
+    systemProperties = System.properties
+}
+```
