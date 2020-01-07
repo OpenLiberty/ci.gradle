@@ -2,7 +2,7 @@
 
 Start a Liberty server in dev mode. This task also invokes the `libertyCreate`, `installFeature`, and `deploy` tasks before starting the server. **Note:** This task is designed to be executed directly from the Gradle command line.  To exit dev mode, press `Control-C`, or type `q` and press Enter.
 
-Dev mode provides three key features. Code changes are detected, recompiled, and picked up by your running server. Unit and integration tests are run on demand when you press Enter in the command terminal where dev mode is running, or optionally on every code change to give you instant feedback on the status of your code. Finally, it allows you to attach a debugger to the running server at any time to step through your code.
+Dev mode provides three key features. Code changes are detected, recompiled, and picked up by your running server. Tests are run on demand when you press Enter in the command terminal where dev mode is running, or optionally on every code change to give you instant feedback on the status of your code. Finally, it allows you to attach a debugger to the running server at any time to step through your code.
 
 The following are dev mode supported code changes. Changes to your server such as changes to the port, server name, hostname, etc. will require restarting dev mode to be detected.  Changes other than those listed below may also require restarting dev mode to be detected.
 
@@ -52,9 +52,9 @@ The following are optional command line parameters supported by this task.
 
 See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.
 
-### System Properties for Integration Tests
+### System Properties for Tests
 
-Integration tests can read the following system properties to obtain information about the Liberty server.
+Tests can read the following system properties to obtain information about the Liberty server.
 
 | Property | Description |
 | --------  | ----------- |
@@ -63,7 +63,7 @@ Integration tests can read the following system properties to obtain information
 | liberty.http.port | The port used for client HTTP requests. |
 | liberty.https.port | The port used for client HTTP requests secured with SSL (HTTPS). |
 
-In order to properly propagate the system properties from the Gradle JVM running dev mode to the JVM(s) running your integration tests, you must configure your `build.gradle` to set the system properties for the test JVM(s).
+In order to properly propagate the system properties from the Gradle JVM running dev mode to the JVM(s) running your tests, you must configure your `build.gradle` to set the system properties for the test JVM(s).
 
 This can be done by setting specific properties for the test JVM.
 ```groovy
