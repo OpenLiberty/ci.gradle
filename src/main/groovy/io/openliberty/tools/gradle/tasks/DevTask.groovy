@@ -523,7 +523,7 @@ class DevTask extends AbstractServerTask {
             try {
                 systemPropertyArgs.push("-D" + WLP_USER_DIR_PROPERTY_NAME + "=" + getUserDir(project).getCanonicalPath());
             } catch (IOException e) {
-                throw new PluginExecutionException("Could not resolve canonical path of userDirectory parameter: " + getUserDir(project).getAbsolutePath(), e);
+                throw new PluginExecutionException("Could not resolve canonical path of the user directory: " + getUserDir(project).getAbsolutePath(), e);
             }
 
             try {
