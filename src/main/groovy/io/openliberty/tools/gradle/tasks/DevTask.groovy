@@ -17,6 +17,9 @@ package io.openliberty.tools.gradle.tasks
 
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.logging.LogLevel
@@ -58,6 +61,8 @@ class DevTask extends AbstractServerTask {
         })
     }
 
+    @Optional
+    @Input
     DevTaskUtil util = null;
 
     // Default DevMode argument values
@@ -84,6 +89,8 @@ class DevTask extends AbstractServerTask {
         this.skipTests = skipTests;
     }
 
+    @Optional
+    @Input
     Boolean libertyDebug;
 
     // Need to use a string value to allow someone to specify --libertyDebug=false
@@ -94,6 +101,8 @@ class DevTask extends AbstractServerTask {
         this.libertyDebug = Boolean.parseBoolean(libertyDebug)
     }
 
+    @Optional
+    @Input
     Integer libertyDebugPort;
 
     @Option(option = 'libertyDebugPort', description = 'The debug port that you can attach a debugger to. The default value is 7777.')
@@ -142,6 +151,8 @@ class DevTask extends AbstractServerTask {
         }
     }
 
+    @Optional
+    @Input
     Boolean clean;
 
     @Option(option = 'clean', description = 'Clean all cached information on server start up. The default value is false.')
@@ -149,8 +160,12 @@ class DevTask extends AbstractServerTask {
         this.clean = clean;
     }
 
+    @Optional
+    @InputDirectory
     File sourceDirectory;
 
+    @Optional
+    @InputDirectory
     File testSourceDirectory;
 
     private class DevTaskUtil extends DevUtil {
