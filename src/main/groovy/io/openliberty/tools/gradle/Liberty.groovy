@@ -26,6 +26,7 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.execution.TaskExecutionGraph
 import org.gradle.api.GradleException
+import org.gradle.api.tasks.testing.Test
 
 import java.util.Properties
 
@@ -61,6 +62,26 @@ class Liberty implements Plugin<Project> {
             Liberty.checkEtcServerEnvProperties(project)
 
             setEclipseClasspath(project)
+        }
+
+        // Dev-mode needs to propagate these system properties from the gradle JVM
+        // to the JVM that will be used to run the tests.
+        def propagatedSystemProperties = [
+                "liberty.hostname",
+                "liberty.http.port",
+                "liberty.https.port",
+                "microshed_hostname",
+                "microshed_http_port",
+                "microshed_https_port",
+                "wlp.user.dir"
+        ];
+        project.tasks.withType(Test) { testTask ->
+            propagatedSystemProperties.each { propertyKey ->
+                def propertyValue = System.getProperty(propertyKey);
+                if (propertyValue != null) {
+                    testTask.systemProperty(propertyKey, propertyValue);
+                }
+            }
         }
     }
 
