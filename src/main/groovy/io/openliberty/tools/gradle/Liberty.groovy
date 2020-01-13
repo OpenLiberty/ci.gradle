@@ -67,13 +67,13 @@ class Liberty implements Plugin<Project> {
         // Dev-mode needs to propagate these system properties from the gradle JVM
         // to the JVM that will be used to run the tests.
         def propagatedSystemProperties = [
-                "liberty.hostname",
-                "liberty.http.port",
-                "liberty.https.port",
-                "microshed_hostname",
-                "microshed_http_port",
-                "microshed_https_port",
-                "wlp.user.dir"
+            "liberty.hostname",
+            "liberty.http.port",
+            "liberty.https.port",
+            "microshed_hostname",
+            "microshed_http_port",
+            "microshed_https_port",
+            "wlp.user.dir"
         ];
         project.tasks.withType(Test) { testTask ->
             propagatedSystemProperties.each { propertyKey ->
