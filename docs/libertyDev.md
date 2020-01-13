@@ -63,3 +63,20 @@ Tests can read the following system properties to obtain information about the L
 | liberty.http.port | The port used for client HTTP requests. |
 | liberty.https.port | The port used for client HTTP requests secured with SSL (HTTPS). |
 
+The liberty gradle plugin automatically propagates the system properties in the table above from the Gradle JVM to the JVM(s) running your tests. If you wish to add your own additional system properties you must configure your `build.gradle` file to set the system properties for the test JVM(s).
+
+This can be done by setting specific properties for the test JVM.
+```groovy
+test {
+    systemProperty 'example.property.1', System.getProperty('example.property.1')
+    systemProperty 'example.property.2', System.getProperty('example.property.2')
+    systemProperty 'example.property.3', System.getProperty('example.property.3')
+}
+```
+
+Or by propagating all system properties from the Gradle JVM to the test JVM.
+```groovy
+test {
+    systemProperties = System.properties
+}
+```
