@@ -1,108 +1,75 @@
 ## deploy task
-
-The `deploy` task supports deployment of one or more applications to the Liberty server.
+---
+The `deploy` task copies applications to the Liberty server's `dropins` or `apps` directory. If an application is deployed while the server is running, the task will verify that the application has started successfully.
 
 ### dependsOn
-`deploy` depends on `libertyStart` for a running server.
+`deploy` depends on all tasks of type `war` or `ear` so the package is ready before installation.  
+`deploy` also depends on `libertyCreate` to ensure that the server exists.
 
-### Properties
+### Parameters
 
-See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.
+The `deploy` task can be configured using the `deploy` block. It is located in the `server` block. Below are the properties that can be set in the `deploy` block.
 
-The `deploy` task uses a `deploy` block inside the `liberty` block to define task specific behavior.
+| Attribute | Type  | Since | Description | Required |
+| --------- | ----- | ----- | ----------- | -------- |
+| apps | Object[] | 3.0 | Specifies which tasks/files should be deployed to the `apps` directory. Applications can be passed in as the task that generates the file or as an application file. | No |
+| dropins | Object[] | 3.0 | Specifies which tasks/files should be deployed to the `dropins` directory. Applications can be passed in as the task that generates the file or as an application file. | No |
 
-| Attribute | Type | Since | Description | Required |
-| --------- | ---- | ----- | ----------- | ---------|
-| file| String | 1.0 | Location of a single application to be deployed. The application type can be war, ear, rar, eba, zip, or jar. | Yes, only when a single file will be deployed. |
-| dir| String | 1.0 | Location of the directory where are the applications to be deployed.| Yes, only when multiples files will be deployed and `file` is not specified.|
-| include| String | 1.0 | Comma or space-separated list of patterns of files that must be included. All files are included when this attribute is omitted.| No |
-| exclude| String | 1.0 | Comma or space-separated list of patterns of files that must be excluded. No files are excluded when this attribute is omitted.| No |
+In addition to the `deploy` block, the `stripVersion` and `looseApplication` properties are used for application installation. More information on these properties can be found in the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration).
 
-### Examples
+For tasks of type ear, loose application requires Gradle 4.0 or higher.
 
-1. Deploys a single file.
-  ```groovy
-    apply plugin: 'liberty'
+When targeting an application to the `dropins` folder, the application will start automatically when the server is running. No additional configuration is needed. When targeting an application to the `apps` folder, the application must be configured in the `server.xml` file. Note that the `location` attribute is relative to the `apps` folder. If you configure an application to deploy to the `apps` folder and do not specify application configuration in the `server.xml` file, then default configuration is generated in the `configDropins` folder for the application.
 
-    liberty {
-        installDir = 'c:/wlp'
+Multiple applications can be installed to the `apps` or `dropins` directories. This can be done by adding application files, or the tasks that generate these files, to the respective list.
 
-        server {
-            name = 'myServer'
+### Using the libertyApp configuration
 
-            deploy {
-                file = 'c:/files/app.war'
-            }
-        }
-    }
-  ```
+The `libertyApp` dependency configuration can be used to pull in application artifacts as dependencies and then install them to the server's `apps` directory. You can specify the artifact as any type of object that can be resolved in to a Dependency object by Gradle. The application artifact still needs to be a supported application type of `war` or `ear` to be installed.
 
-2. Deploy multiple files. Specifically, deploy `app.war` and `sample.war` but exclude `test-war.war`.
-  ```groovy
-    apply plugin: 'liberty'
-
-    liberty {
-
-        server {
-            name = 'myServer'
-
-            deploy {
-                dir = 'c:/files'
-                include = 'app.war, sample.war'
-                exclude = 'test-war.war'
-            }
-        }
-    }
-  ```
-
-3. Deploy multiple files using multiple blocks.
-  ```groovy
-    apply plugin: 'liberty'
-
-    liberty {
-        installDir = 'c:/wlp'
-
-        server {
-            name = 'myServer'
-
-            deploy {
-                file = 'c:/files/app.war'
-            }
-
-            deploy {
-                file = 'c:/resources/test.war'
-            }
-
-            deploy {
-                dir = 'c:/extras'
-                include = 'sample.war, demo.war'
-            }
-        }
-    }
-  ```
-
-The following examples shows you how to deploy a file using the `WAR` or the `EAR` Gradle plugins:
+### Examples:
 
 ```groovy
-    /* Deploys 'sample.war' using the WAR plugin */
-    apply plugin: 'war'
+apply plugin: 'liberty'
+apply plugin: 'war'
 
-    war {
-        destinationDir = new File ('C:/files')
-        archiveName = 'sample.war'
+task libertyWarTask(type:War){
+    ...
+}
+
+liberty {
+    server {
+        name = 'myServer'
+        deploy {
+            apps = [file('build/libs/libertyApp.war'), libertyWarTask]
+            dropins = [war]
+        }
+        stripVersion = true
     }
+}
 ```
-
-`destinationDir` and `archiveName` are native properties of Gradle's WAR plugin. For more information see [here.](https://gradle.org/docs/current/dsl/org.gradle.api.tasks.bundling.War.html)
 
 ```groovy
-    /* Deploys 'test.ear' using the EAR plugin */
-    apply plugin: 'ear'
+apply plugin: 'liberty'
+apply plugin: 'ear'
 
-    ear {
-        destinationDir = new File ('C:/files')
-        archiveName = 'test.ear'
+
+liberty {
+    server {
+        name = 'myServer'
+        deploy {
+            //assuming ear application is already configured in the server.xml
+            apps = [ear]
+        }
+        stripVersion = true
     }
+}
 ```
 
-`destinationDir` and `archiveName` are native properties of Gradle's EAR plugin. For more information see [here.](https://gradle.org/docs/current/dsl/org.gradle.plugins.ear.Ear.html)
+```groovy
+apply plugin: 'liberty'
+
+dependencies {
+    libertyApp 'example:app:1.0'
+}
+```

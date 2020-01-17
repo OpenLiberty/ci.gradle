@@ -7,7 +7,7 @@ In Open Liberty and WebSphere Liberty versions since 8.5.5.9, it is possible to 
 
 ### dependsOn
 `libertyPackage` depends on `installLiberty`.  
-`libertyPackage` also depends on `installApps` and `installFeature` if configured.  
+`libertyPackage` also depends on `deploy` and `installFeature` if configured.  
   
 ### Properties
 

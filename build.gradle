@@ -62,7 +62,7 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
     compile ('io.openliberty.tools:liberty-ant-tasks:1.9.3')
-    compile ('io.openliberty.tools:ci.common:1.8.2-SNAPSHOT')
+    compile ('io.openliberty.tools:ci.common:1.8.3-SNAPSHOT')
     compile group: 'commons-io', name: 'commons-io', version: '2.5'
     provided group: 'com.ibm.websphere.appserver.api', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
     testCompile 'junit:junit:4.11'
@@ -159,8 +159,8 @@ test {
 }
 
 pluginBundle {
-  website = 'https://github.com/WASdev/ci.gradle'
-  vcsUrl = 'https://github.com/WASdev/ci.gradle'
+  website = 'https://github.com/OpenLiberty/ci.gradle'
+  vcsUrl = 'https://github.com/OpenLiberty/ci.gradle'
   description = 'Gradle plugin for managing Liberty servers'
   tags = ['liberty', 'websphere', 'devops']
 
@@ -202,16 +202,16 @@ if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')
                     url 'https://wasdev.github.io'
 
                     scm {
-                        connection 'scm:git:git@github.com:WASdev/ci.gradle.git'
-                        developerConnection 'scm:git:git@github.com:WASdev/ci.gradle.git'
-                        url 'git@github.com:WASdev/ci.gradle.git'
+                        connection 'scm:git:git@github.com:OpenLiberty/ci.gradle.git'
+                        developerConnection 'scm:git:git@github.com:OpenLiberty/ci.gradle.git'
+                        url 'git@github.com:OpenLiberty/ci.gradle.git'
                         tag 'HEAD'
                     }
 
                     licenses {
                         license {
                             name 'The Apache Software License, Version 2.0'
-                            url 'https://raw.github.com/WASdev/ci.gradle/master/LICENSE'
+                            url 'https://raw.github.com/OpenLiberty/ci.gradle/master/LICENSE'
                         }
                     }
 

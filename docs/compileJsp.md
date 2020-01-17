@@ -31,8 +31,8 @@ liberty {
     }
 }
 
-installApps.dependsOn 'war'
+deploy.dependsOn 'war'
 war.dependsOn 'compileJSP'
-libertyStart.dependsOn 'installApps'
+libertyStart.dependsOn 'deploy'
 
 ```
