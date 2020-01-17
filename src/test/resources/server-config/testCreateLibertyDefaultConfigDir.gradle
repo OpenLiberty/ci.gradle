@@ -16,7 +16,6 @@ buildscript {
 }
 
 apply plugin: 'java'
-apply plugin: 'maven'
 apply plugin: 'liberty'
 
 sourceCompatibility = 1.7
@@ -33,7 +32,7 @@ repositories {
 }
 
 dependencies {
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
     libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
 }
 

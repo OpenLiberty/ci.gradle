@@ -33,8 +33,6 @@ allprojects {
         }
     }
 
-    check.dependsOn.remove(test)
-
     task copyArquillianXml(type: Copy) {
         from '../src/test-profile-resources'
         into '../build/resources/test'
@@ -68,12 +66,12 @@ dependencyManagement {
 }
 
 dependencies {
-    compile ('javax.enterprise:cdi-api:1.2')
+    implementation ('javax.enterprise:cdi-api:1.2')
    
-    testCompile "io.openliberty.tools:ci.common:1.7"
-    testCompile group: "io.openliberty.arquillian", name: "arquillian-liberty-managed-junit", version: "1.1.6"
-    testCompile ('org.jboss.shrinkwrap:shrinkwrap-api')
-    testCompile files("${System.properties['java.home']}/../lib/tools.jar")
+    testImplementation "io.openliberty.tools:ci.common:1.7"
+    testImplementation group: "io.openliberty.arquillian", name: "arquillian-liberty-managed-junit", version: "1.1.6"
+    testImplementation ('org.jboss.shrinkwrap:shrinkwrap-api')
+    testImplementation files("${System.properties['java.home']}/../lib/tools.jar")
 
     arqManaged "io.openliberty.arquillian:arquillian-liberty-managed:1.0.6"
     arqRemote "io.openliberty.arquillian:arquillian-liberty-remote:1.0.6"
@@ -81,7 +79,7 @@ dependencies {
     libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
 
     if(JavaVersion.current().isJava11()) {
-        compile "javax.annotation:javax.annotation-api:1.3.2"
+        implementation "javax.annotation:javax.annotation-api:1.3.2"
     }
 }
 

@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017, 2019.
+ * (C) Copyright IBM Corporation 2017, 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,12 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.Task
+import org.gradle.api.tasks.Internal
 
 abstract class AbstractTask extends DefaultTask {
 
     //params that get built with installLiberty
-    def params
+    protected def params
     protected boolean isWindows = System.properties['os.name'].toLowerCase().indexOf("windows") >= 0
     protected String springBootVersion
     protected Task springBootTask
@@ -100,30 +101,22 @@ abstract class AbstractTask extends DefaultTask {
         }
         return task
     }
-
+    @Internal
     protected boolean isLibertyInstalled(Project project) {
         File installDir = getInstallDir(project)
         return (installDir.exists() && new File(installDir, "lib/ws-launch.jar").exists())
     }
 
-    final String  COM_IBM_WEBSPHERE_PRODUCTID_KEY = "com.ibm.websphere.productId"
-    final String COM_IBM_WEBSPHERE_PRODUCTVERSION_KEY = "com.ibm.websphere.productVersion"
+    private final String  COM_IBM_WEBSPHERE_PRODUCTID_KEY = "com.ibm.websphere.productId"
+    private final String COM_IBM_WEBSPHERE_PRODUCTVERSION_KEY = "com.ibm.websphere.productVersion"
 
-    protected boolean isOpenLiberty() {
-        getLibertyInstallProperties().getProperty(COM_IBM_WEBSPHERE_PRODUCTID_KEY).contains("io.openliberty")
-    }
-
+    @Internal
     protected boolean isClosedLiberty() {
         getLibertyInstallProperties().getProperty(COM_IBM_WEBSPHERE_PRODUCTID_KEY).contains("com.ibm.websphere.appserver")
     }
 
-    protected String getInstallVersion() {
-        getLibertyInstallProperties().getProperty(COM_IBM_WEBSPHERE_PRODUCTVERSION_KEY)
-    }
-
+    @Internal
     protected Properties getLibertyInstallProperties() {
-        String COM_IBM_WEBSPHERE_PRODUCTID_KEY = "com.ibm.websphere.productId"
-        String COM_IBM_WEBSPHERE_PRODUCTVERSION_KEY = "com.ibm.websphere.productVersion"
         File propertiesDir = new File(getInstallDir(project), "lib/versions")
         File wlpProductInfoProperties = new File(propertiesDir, "WebSphereApplicationServer.properties")
         File olProductInfoProperties = new File(propertiesDir, "openliberty.properties")

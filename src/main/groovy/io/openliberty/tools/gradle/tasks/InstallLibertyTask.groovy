@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2019.
+ * (C) Copyright IBM Corporation 2014, 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import javax.xml.parsers.*
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.artifacts.Configuration
@@ -37,10 +38,10 @@ import org.gradle.api.GradleException
 
 class InstallLibertyTask extends AbstractTask {
     protected Properties libertyRuntimeProjectProps = new Properties()
-    String detachedCoords
-    String detachedConfigFilePath
+    protected String detachedCoords
+    protected String detachedConfigFilePath
     // default to install the latest Open Liberty kernel from Maven Central repository
-    String defaultRuntime = "io.openliberty:openliberty-kernel:[19.0.0.9,)"
+    protected String defaultRuntime = "io.openliberty:openliberty-kernel:[19.0.0.9,)"
 
     InstallLibertyTask() {
         configure({
@@ -247,6 +248,7 @@ class InstallLibertyTask extends AbstractTask {
         }
     }
 
+    @Internal
     protected String getLibertyRuntimeCoordinates() {
         String runtimeCoords = null
         Configuration config = project.configurations.getByName('libertyRuntime')
@@ -258,69 +260,70 @@ class InstallLibertyTask extends AbstractTask {
              }
         }
         return runtimeCoords
-     }
+    }
 
-     protected String getUpdatedLibertyRuntimeCoordinates(String coords) {
-         boolean useDefault = true
-         String updatedCoords = defaultRuntime
-         if (coords != null) {
-             updatedCoords = coords
-             useDefault = false
-         } else {
-             logger.debug 'Liberty runtime coordinates were null. Using default coordinates: ' + updatedCoords
-         }
+    protected String getUpdatedLibertyRuntimeCoordinates(String coords) {
+        boolean useDefault = true
+        String updatedCoords = defaultRuntime
+        if (coords != null) {
+            updatedCoords = coords
+            useDefault = false
+        } else {
+            logger.debug 'Liberty runtime coordinates were null. Using default coordinates: ' + updatedCoords
+        }
 
-         String[] coordinates = updatedCoords.split(":")
+        String[] coordinates = updatedCoords.split(":")
 
-         if (project.liberty.runtime != null && !project.liberty.runtime.isEmpty()) {
-             String propGroupId = project.liberty.runtime.getProperty("group")
-             if (propGroupId != null) {
-                 coordinates[0] = propGroupId
-             }
+        if (project.liberty.runtime != null && !project.liberty.runtime.isEmpty()) {
+            String propGroupId = project.liberty.runtime.getProperty("group")
+            if (propGroupId != null) {
+                coordinates[0] = propGroupId
+            }
 
-             String propArtifactId = project.liberty.runtime.getProperty("name")
-             if (propArtifactId != null) {
-                 coordinates[1] = propArtifactId
-             }
+            String propArtifactId = project.liberty.runtime.getProperty("name")
+            if (propArtifactId != null) {
+                coordinates[1] = propArtifactId
+            }
 
-             String propVersion = project.liberty.runtime.getProperty("version")
-             if (propVersion != null) {
-                 coordinates[2] = propVersion
-             }
-         }
+            String propVersion = project.liberty.runtime.getProperty("version")
+            if (propVersion != null) {
+                coordinates[2] = propVersion
+            }
+        }
 
-         // check for overridden liberty runtime properties in project properties
-         if (!libertyRuntimeProjectProps.isEmpty()) {
-             String propGroupId = libertyRuntimeProjectProps.getProperty("group")
-             if (propGroupId != null) {
-                 coordinates[0] = propGroupId
-             }
+        // check for overridden liberty runtime properties in project properties
+        if (!libertyRuntimeProjectProps.isEmpty()) {
+            String propGroupId = libertyRuntimeProjectProps.getProperty("group")
+            if (propGroupId != null) {
+                coordinates[0] = propGroupId
+            }
 
-             String propArtifactId = libertyRuntimeProjectProps.getProperty("name")
-             if (propArtifactId != null) {
-                 coordinates[1] = propArtifactId
-             }
+            String propArtifactId = libertyRuntimeProjectProps.getProperty("name")
+            if (propArtifactId != null) {
+                coordinates[1] = propArtifactId
+            }
 
-             String propVersion = libertyRuntimeProjectProps.getProperty("version")
-             if (propVersion != null) {
-                 coordinates[2] = propVersion
-             }
-         }
+            String propVersion = libertyRuntimeProjectProps.getProperty("version")
+            if (propVersion != null) {
+                coordinates[2] = propVersion
+            }
+        }
 
-         updatedCoords = coordinates[0] + ':' + coordinates[1] + ':' + coordinates[2]
-         if ( (useDefault && !updatedCoords.equals(defaultRuntime)) ||
-              (!useDefault && !updatedCoords.equals(coords)) ) {
-            logger.debug 'Updated Liberty runtime coordinates: ' + updatedCoords
-         }
+        updatedCoords = coordinates[0] + ':' + coordinates[1] + ':' + coordinates[2]
+        if ( (useDefault && !updatedCoords.equals(defaultRuntime)) ||
+            (!useDefault && !updatedCoords.equals(coords)) ) {
+                logger.debug 'Updated Liberty runtime coordinates: ' + updatedCoords
+        }
 
-         return updatedCoords
-     }
+        return updatedCoords
+    }
 
-     protected String getDefaultLibertyRuntimeCoordinates() {
+    @Internal
+    protected String getDefaultLibertyRuntimeCoordinates() {
 
-         // check for overrides in liberty.runtime properties
-         return getUpdatedLibertyRuntimeCoordinates(defaultRuntime)
-     }
+        // check for overrides in liberty.runtime properties
+        return getUpdatedLibertyRuntimeCoordinates(defaultRuntime)
+    }
 
     private void loadLibertyRuntimeProperties() {
         Set<Entry<Object, Object>> entries = project.getProperties().entrySet()
