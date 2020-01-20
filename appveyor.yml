@@ -2,16 +2,16 @@ environment:
     matrix:
         - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
           RUNTIME: wlp
-          RUNTIME_VERSION: 19.0.0.9
+          RUNTIME_VERSION: 20.0.0.1
         - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
           RUNTIME: wlp
-          RUNTIME_VERSION: 19.0.0.6
-        - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
-          RUNTIME: ol
           RUNTIME_VERSION: 19.0.0.9
         - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
           RUNTIME: ol
-          RUNTIME_VERSION: 19.0.0.6
+          RUNTIME_VERSION: 20.0.0.1
+        - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
+          RUNTIME: ol
+          RUNTIME_VERSION: 19.0.0.9
 
 install:
     - cmd: |

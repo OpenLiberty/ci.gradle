@@ -4,10 +4,10 @@ jdk:
     - oraclejdk8
     - openjdk11
 env:
+    - RUNTIME=wlp RUNTIME_VERSION=20.0.0.1
     - RUNTIME=wlp RUNTIME_VERSION=19.0.0.9
-    - RUNTIME=wlp RUNTIME_VERSION=19.0.0.6
+    - RUNTIME=ol RUNTIME_VERSION=20.0.0.1
     - RUNTIME=ol RUNTIME_VERSION=19.0.0.9
-    - RUNTIME=ol RUNTIME_VERSION=19.0.0.6
 before_install:
     - echo 'Installing ci.common lib ....'
     - git clone https://github.com/OpenLiberty/ci.common.git ./ci.common
