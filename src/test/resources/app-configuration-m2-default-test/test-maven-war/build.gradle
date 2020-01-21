@@ -16,6 +16,14 @@ repositories {
     mavenLocal()
 }
 
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact war
+        }
+    }
+}
+
 dependencies {
     implementation group: 'org.apache.httpcomponents', name: 'httpcore', version:'4.4.6'
     implementation group: 'org.apache.httpcomponents', name: 'httpclient', version:'4.5.2'
