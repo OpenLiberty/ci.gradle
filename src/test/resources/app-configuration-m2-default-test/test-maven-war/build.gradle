@@ -1,5 +1,5 @@
 apply plugin: 'war'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 group = 'test'
 version = '1.0-SNAPSHOT'
@@ -16,8 +16,16 @@ repositories {
     mavenLocal()
 }
 
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact war
+        }
+    }
+}
+
 dependencies {
-    compile group: 'org.apache.httpcomponents', name: 'httpcore', version:'4.4.6'
-    compile group: 'org.apache.httpcomponents', name: 'httpclient', version:'4.5.2'
+    implementation group: 'org.apache.httpcomponents', name: 'httpcore', version:'4.4.6'
+    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version:'4.5.2'
     providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
 }

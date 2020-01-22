@@ -1,6 +1,6 @@
 ## undeploy task
 
-The `undeploy` task supports undeployment of one or more applications from the WebSphere Liberty server.
+The `undeploy` task supports undeployment of one or more applications from the WebSphere Liberty server. When an application is undeployed the task will verify that it has stopped.
 
 ### dependsOn
 `undeploy` depends on `libertyStart` for a running server. 

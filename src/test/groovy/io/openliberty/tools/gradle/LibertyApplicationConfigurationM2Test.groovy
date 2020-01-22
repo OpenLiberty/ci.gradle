@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2019.
+ * (C) Copyright IBM Corporation 2019, 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ class LibertyApplicationConfigurationM2Test extends AbstractIntegrationTest {
         createTestProject(buildDir, resourceDir, buildFilename)
         try {
             //Installing the war built by the other gradle project in the src dir
-            runTasks(new File(buildDir, 'test-maven-war'), 'install')
+            runTasks(new File(buildDir, 'test-maven-war'), 'publishToMavenLocal')
             //Then installing that war from m2 to the apps directory through the libertyApp configuration
             runTasks(buildDir, 'deploy')
         } catch (Exception e) {
