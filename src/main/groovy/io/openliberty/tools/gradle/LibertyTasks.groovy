@@ -46,9 +46,7 @@ public class LibertyTasks {
         }
 
         project.libertyCreate {
-            dependsOn 'installLiberty'
-            // Run install features if configured
-            finalizedBy 'installFeature'
+            dependsOn 'installFeature'
         }
 
         project.libertyStart {
@@ -66,7 +64,7 @@ public class LibertyTasks {
         }
 
         project.installFeature {
-            dependsOn 'libertyCreate'
+            dependsOn 'installLiberty'
         }
 
         project.cleanDirs {
