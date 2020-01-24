@@ -471,6 +471,11 @@ class DevTask extends AbstractServerTask {
                 // Call the installFeature gradle task using the temporary serverDir directory that DevMode uses
                 ProjectConnection gradleConnection = initGradleProjectConnection();
                 BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+
+                // Exclude libertyCreate from the task dependencies, so that it will not update the server features
+                // before the features are installed.
+                gradleBuildLauncher.withArguments("--exclude-task", "libertyCreate");
+
                 try {
                     runGradleTask(gradleBuildLauncher, "installFeature", "--serverDir=${serverDir.getAbsolutePath()}");
                     this.existingFeatures.addAll(features);
