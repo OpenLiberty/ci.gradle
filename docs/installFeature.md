@@ -19,7 +19,7 @@ The `libertyFeature` dependency configuration can install features in Liberty ru
 You need to include `group`, `name`, and `version` values that describes the artifacts to use. An `ext` value for the ESA file type is not required.
 
 ### dependsOn
-`installFeature` depends on `installLiberty`. If no specific features are requested, `installFeature` depends on `libertyCreate` to evaluate the set of features in the server configuration file.
+`installFeature` depends on `libertyCreate` to evaluate the set of features in the server configuration file.
 
 ### Properties
 
