@@ -690,7 +690,8 @@ class DevTask extends AbstractServerTask {
         if (serverDirectory.exists()) {
             if (ServerStatusUtil.isServerRunning(serverInstallDir, serverOutputDir, serverName)) {
                 throw new Exception("The server " + serverName
-                        + " is already running. Terminate all instances of the server before starting dev mode.");
+                        + " is already running. Terminate all instances of the server before starting dev mode."
+                        + " You can stop a server instance with the command 'gradle libertyStop'.");
             }
         }
 
