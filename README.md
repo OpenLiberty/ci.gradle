@@ -45,7 +45,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'io.openliberty.tools.gradle:liberty-gradle-plugin:3.0-SNAPSHOT'
+        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.0-SNAPSHOT'
     }
 }
 ```
