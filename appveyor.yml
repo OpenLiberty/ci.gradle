@@ -35,8 +35,8 @@ before_build:
 build_script:
     - cmd: |
         set GRADLE_OPTS="-Dorg.gradle.jvmargs='-XX:MaxMetaspaceSize=512m'"
-        gradlew.bat clean install check -Ptest.exclude="**/*15*","**/*LibertyTest*","**/*OldLibertyTest*","**/*LibertyMultiServerTest*" -Druntime=%RUNTIME% -DruntimeVersion=%RUNTIME_VERSION% --stacktrace --info --no-daemon
+        gradlew.bat clean install check -Ptest.exclude="**/*15*" -Druntime=%RUNTIME% -DruntimeVersion=%RUNTIME_VERSION% --stacktrace --info --no-daemon
         gradlew.bat wrapper --gradle-version 4.10
-        gradlew.bat clean install check -Ptest.include="**/*15*" -Druntime=%RUNTIME% -DruntimeVersion=%RUNTIME_VERSION% --stacktrace --info --no-daemon
+        gradlew.bat check -Ptest.include="**/*15*" -Druntime=%RUNTIME% -DruntimeVersion=%RUNTIME_VERSION% --stacktrace --info --no-daemon
 
 test: off
