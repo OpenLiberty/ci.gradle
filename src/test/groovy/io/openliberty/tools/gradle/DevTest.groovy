@@ -15,7 +15,6 @@
  */
 package io.openliberty.tools.gradle;
 
-import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.*;
 
 import java.io.BufferedWriter;
@@ -43,16 +42,12 @@ class DevTest extends AbstractIntegrationTest {
     static Process process;
 
     @BeforeClass
-    public static void setup() {
+    public static void setup() throws IOException, InterruptedException, FileNotFoundException {
         createDir(buildDir);
         createTestProject(buildDir, resourceDir, buildFilename);
-    }
-    
-    @Test
-    public void testBasicDevProject() {
         runDevMode();
     }
-
+    
     private static void runDevMode() throws IOException, InterruptedException, FileNotFoundException {
         System.out.println("Starting dev mode...");
         startProcess(null, true);
@@ -139,6 +134,121 @@ class DevTest extends AbstractIntegrationTest {
         // verify that the target directory was created
         targetDir = new File(buildDir, "build");
         assertTrue(targetDir.exists());
+    }
+
+    @Test
+    public void configChangeTest() throws Exception {
+        // configuration file change
+        File srcServerXML = new File(buildDir, "/src/main/liberty/config/server.xml");
+        File targetServerXML = new File(targetDir, "/wlp/usr/servers/defaultServer/server.xml");
+        assertTrue(srcServerXML.exists());
+        assertTrue(targetServerXML.exists());
+
+        replaceString("</feature>", "</feature>\n" + "    <feature>mpHealth-2.1</feature>", srcServerXML);
+
+        // check for application updated message
+        assertFalse(checkLogMessage(60000, "CWWKZ0003I"));
+        Thread.sleep(2000);
+        Scanner scanner = new Scanner(targetServerXML);
+        boolean foundUpdate = false;
+        try {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                if (line.contains("<feature>mpHealth-2.1</feature>")) {
+                    foundUpdate = true;
+                    break;
+                }
+            }
+        } finally {
+            scanner.close();
+        }
+        assertTrue("Could not find the updated feature in the target server.xml file", foundUpdate);
+    }
+
+    @Test
+    public void modifyJavaFileTest() throws Exception {
+        // modify a java file
+        File srcHelloWorld = new File(buildDir, "src/main/java/com/demo/HelloWorld.java");
+        File targetHelloWorld = new File(targetDir, "classes/java/main/com/demo/HelloWorld.class");
+        assertTrue(srcHelloWorld.exists());
+        assertTrue(targetHelloWorld.exists());
+
+        long lastModified = targetHelloWorld.lastModified();
+        String str = "// testing";
+        BufferedWriter javaWriter = new BufferedWriter(new FileWriter(srcHelloWorld, true));
+        javaWriter.append(' ');
+        javaWriter.append(str);
+
+        javaWriter.close();
+
+        Thread.sleep(5000); // wait for compilation
+        boolean wasModified = targetHelloWorld.lastModified() > lastModified;
+        assertTrue(wasModified);
+    }
+
+    @Test
+    public void testDirectoryTest() throws Exception {
+        // create the test directory
+        File testDir = new File(buildDir, "src/test/java");
+        assertTrue(testDir.mkdirs());
+
+        // creates a java test file
+        File unitTestSrcFile = new File(testDir, "UnitTest.java");
+        String unitTest = """import org.junit.Test;\n
+        import static org.junit.Assert.*;\n
+        \n
+        public class UnitTest {\n
+        \n
+        @Test\n
+        public void testTrue() {\n
+            assertTrue(true);\n
+            \n
+            }\n
+        }"""
+        Files.write(unitTestSrcFile.toPath(), unitTest.getBytes());
+        assertTrue(unitTestSrcFile.exists());
+
+        Thread.sleep(6000); // wait for compilation
+        File unitTestTargetFile = new File(targetDir, "classes/java/test/UnitTest.class");
+        assertTrue(unitTestTargetFile.exists());
+        long lastModified = unitTestTargetFile.lastModified();
+
+        // modify the test file
+        String str = "// testing";
+        BufferedWriter javaWriter = new BufferedWriter(new FileWriter(unitTestSrcFile, true));
+        javaWriter.append(' ');
+        javaWriter.append(str);
+
+        javaWriter.close();
+
+        Thread.sleep(2000); // wait for compilation
+        assertTrue(unitTestTargetFile.lastModified() > lastModified);
+
+        // delete the test file
+        assertTrue(unitTestSrcFile.delete());
+        Thread.sleep(2000);
+        assertFalse(unitTestTargetFile.exists());
+
+    }
+
+    @Test
+    public void manualTestsInvocationTest() throws Exception {
+        assertFalse(checkLogMessage(2000,  "Press the Enter key to run tests on demand."));
+
+        writer.write("\n");
+        writer.flush();
+
+        assertFalse(checkLogMessage(10000,  "Tests finished."));
+    }
+
+    protected static void replaceString(String str, String replacement, File file) throws IOException {
+        Path path = file.toPath();
+        Charset charset = StandardCharsets.UTF_8;
+
+        String content = new String(Files.readAllBytes(path), charset);
+
+        content = content.replaceAll(str, replacement);
+        Files.write(path, content.getBytes(charset));
     }
 
     @AfterClass
