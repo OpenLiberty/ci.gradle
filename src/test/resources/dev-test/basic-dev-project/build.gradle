@@ -1,0 +1,40 @@
+apply plugin: "liberty"
+apply plugin: "war"
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+// configure liberty-gradle-plugin 
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // provided dependencies
+    providedCompile "jakarta.platform:jakarta.jakartaee-api:8.0.0"
+    providedCompile "org.eclipse.microprofile:microprofile:3.2"
+
+    libertyRuntime "$runtimeGroup:$runtimeArtifactId:$runtimeVersion"
+
+    // test dependencies
+    testCompile "junit:junit:4.12"
+    testCompile "org.apache.cxf:cxf-rt-rs-client:3.2.6"
+    testCompile "org.apache.cxf:cxf-rt-rs-extension-providers:3.2.6"
+    testCompile "org.glassfish:javax.json:1.0.4"
+    testCompile "javax.xml.bind:jaxb-api:2.3.1"
+}
+
+clean.dependsOn "libertyStop"

@@ -23,5 +23,5 @@ script:
   - export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs='-XX:MaxPermSize=1024m -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:+HeapDumpOnOutOfMemoryError -Xmx2048m'"
   - ./gradlew clean install check -Ptest.exclude="**/*15*" -Druntime=$RUNTIME -DruntimeVersion=$RUNTIME_VERSION --stacktrace --info --no-daemon
   - ./gradlew wrapper --gradle-version 4.10
-  - ./gradlew clean install check -Ptest.include="**/*15*" -Druntime=$RUNTIME -DruntimeVersion=$RUNTIME_VERSION --stacktrace --info --no-daemon
+  - ./gradlew check -Ptest.include="**/*15*" -Druntime=$RUNTIME -DruntimeVersion=$RUNTIME_VERSION --stacktrace --info --no-daemon
 dist: trusty
