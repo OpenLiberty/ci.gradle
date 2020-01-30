@@ -144,7 +144,7 @@ class DevTest extends AbstractIntegrationTest {
         assertTrue(srcServerXML.exists());
         assertTrue(targetServerXML.exists());
 
-        replaceString("</feature>", "</feature>\n" + "    <feature>mpHealth-2.1</feature>", srcServerXML);
+        replaceString("</feature>", "</feature>\n" + "    <feature>mpHealth-2.0</feature>", srcServerXML);
 
         // check for application updated message
         assertFalse(checkLogMessage(60000, "CWWKZ0003I"));
@@ -154,7 +154,7 @@ class DevTest extends AbstractIntegrationTest {
         try {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
-                if (line.contains("<feature>mpHealth-2.1</feature>")) {
+                if (line.contains("<feature>mpHealth-2.0</feature>")) {
                     foundUpdate = true;
                     break;
                 }
