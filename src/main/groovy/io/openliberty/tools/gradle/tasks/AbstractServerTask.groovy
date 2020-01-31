@@ -458,7 +458,7 @@ abstract class AbstractServerTask extends AbstractTask {
         File serverConfigFile = new File(getServerDir(project), 'server.xml')
         if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
-                ServerConfigDocument scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(), serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, convertPropertiesToMap(server.bootstrapProperties), server.serverEnvFile, false);
+                ServerConfigDocument scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(project), serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, convertPropertiesToMap(server.bootstrapProperties), server.serverEnvFile, false);
                 if (scd != null && scd.getLocations().contains(fileName)) {
                     logger.debug("Application configuration is found in server.xml : " + fileName)
                     configured = true

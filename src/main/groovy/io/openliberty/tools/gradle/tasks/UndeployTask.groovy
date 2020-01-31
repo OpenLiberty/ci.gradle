@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2019.
+ * (C) Copyright IBM Corporation 2014, 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ class UndeployTask extends AbstractServerTask {
             File serverXML = new File(getServerDir(project).getCanonicalPath(), "server.xml")
 
             try {
-                scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(), serverXML, server.configDirectory,
+                scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(project), serverXML, server.configDirectory,
                         server.bootstrapPropertiesFile, server.bootstrapProperties, server.serverEnvFile, false)
 
                 //appName will be set to a name derived from appFile if no name can be found.

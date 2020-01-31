@@ -25,7 +25,7 @@
     
     </httpEndpoint>
     
-    <variable name="appLocation" defaultValue="test-maven-war-1.0-SNAPSHOT.war"/>
+    <variable name="appLocation" defaultValue="${env.APP_LOCATION}"/>
     <application name="servlet" context-root="${appContext}" location="${appLocation}" type="war"></application>
     
 </server>
