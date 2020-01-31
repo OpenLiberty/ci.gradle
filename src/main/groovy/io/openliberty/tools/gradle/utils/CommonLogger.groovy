@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2019.
+ * (C) Copyright IBM Corporation 2019, 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,10 @@ public class CommonLogger implements CommonLoggerI {
         logger = new CommonLogger(project)
     }
 
-    public static CommonLogger getInstance() {
+    public static CommonLogger getInstance(Project project) {
+        if (logger == null) {
+            CommonLogger.init(project)
+        }
         return logger
     }
 
