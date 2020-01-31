@@ -139,15 +139,15 @@ class DevTest extends AbstractIntegrationTest {
     @Test
     public void configChangeTest() throws Exception {
         // configuration file change
-        File srcServerXML = new File(buildDir, "/src/main/liberty/config/server.xml");
-        File targetServerXML = new File(targetDir, "/wlp/usr/servers/defaultServer/server.xml");
+        File srcServerXML = new File(buildDir, "src/main/liberty/config/server.xml");
+        File targetServerXML = new File(targetDir, "wlp/usr/servers/defaultServer/server.xml");
         assertTrue(srcServerXML.exists());
         assertTrue(targetServerXML.exists());
 
         replaceString("</feature>", "</feature>\n" + "    <feature>mpHealth-2.0</feature>", srcServerXML);
 
-        // check for application updated message
-        assertFalse(checkLogMessage(60000, "CWWKZ0003I"));
+        // check for server configuration was successfully updated message
+        assertFalse(checkLogMessage(60000, "CWWKG0017I"));
         Thread.sleep(2000);
         Scanner scanner = new Scanner(targetServerXML);
         boolean foundUpdate = false;
