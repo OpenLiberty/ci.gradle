@@ -51,7 +51,7 @@ class DevTest extends AbstractIntegrationTest {
     private static void runDevMode() throws IOException, InterruptedException, FileNotFoundException {
         System.out.println("Starting dev mode...");
         startProcess(null, true);
-        System.out.println("Exited dev mode");
+        System.out.println("Started dev mode");
     }
 
     private static ProcessBuilder buildProcess(String processCommand) {
