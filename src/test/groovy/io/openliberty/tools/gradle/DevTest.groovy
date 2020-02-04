@@ -69,13 +69,18 @@ class DevTest extends AbstractIntegrationTest {
 
     protected static boolean checkLogMessage(int timeout, String message)
             throws InterruptedException, FileNotFoundException {
+        checkLogMessage(timeout, message, logFile)
+    }
+
+    protected static boolean checkLogMessage(int timeout, String message, File file)
+            throws InterruptedException, FileNotFoundException {
         int waited = 0;
         boolean startFlag = false;
         while (!startFlag && waited <= timeout) {
             int sleep = 10;
             Thread.sleep(sleep);
             waited += sleep;
-            if (readFile(message, logFile)) {
+            if (readFile(message, file)) {
                 startFlag = true;
                 Thread.sleep(1000);
             }
@@ -146,8 +151,9 @@ class DevTest extends AbstractIntegrationTest {
 
         replaceString("</feature>", "</feature>\n" + "    <feature>mpHealth-2.0</feature>", srcServerXML);
 
-        // check for server configuration was successfully updated message
-        assertFalse(checkLogMessage(60000, "CWWKG0017I"));
+        // check for server configuration was successfully updated message in messages.log
+        File messagesLogFile = new File(targetDir, "wlp/usr/servers/defaultServer/logs/messages.log");
+        assertFalse(checkLogMessage(60000, "CWWKG0017I", messagesLogFile));
         Thread.sleep(2000);
         Scanner scanner = new Scanner(targetServerXML);
         boolean foundUpdate = false;
