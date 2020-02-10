@@ -236,6 +236,11 @@ class DevTask extends AbstractServerTask {
         }
 
         @Override
+        public String getServerStartTimeoutExample() {
+            return "'gradle libertyDev --serverStartTimeout=90'";
+        }
+
+        @Override
         public void stopServer() {
             if (isLibertyInstalled(project)) {
                 if (getServerDir(project).exists()) {
