@@ -162,7 +162,7 @@ class DevTask extends AbstractServerTask {
 
     private Long pollingInterval;
 
-    @Option(option = 'pollingInterval', description = 'Polling interval in milliseconds. The default value is 100 seconds. This parameter is only used if polling is enabled.')
+    @Option(option = 'pollingInterval', description = 'Polling interval in milliseconds. The default value is 100 milliseconds. This parameter is only used if polling is enabled.')
     void setPollingInterval(String pollingInterval) {
         try {
             this.pollingInterval = pollingInterval.toLong();
