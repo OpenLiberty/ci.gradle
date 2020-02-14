@@ -35,7 +35,6 @@ class UndeployTask extends AbstractServerTask {
     UndeployTask() {
         configure({
             description 'Removes an application from the Liberty server.'
-            logging.level = LogLevel.INFO
             group 'Liberty'
         })
     }

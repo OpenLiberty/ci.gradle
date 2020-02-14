@@ -61,7 +61,6 @@ class PackageTask extends AbstractServerTask {
     PackageTask() {
         configure({
             description 'Generates a Liberty server archive.'
-            logging.level = LogLevel.INFO
             group 'Liberty'
         })
     }

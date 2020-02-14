@@ -56,7 +56,6 @@ class DevTask extends AbstractServerTask {
     DevTask() {
         configure({
             description 'Runs a Liberty server in dev mode'
-            logging.level = LogLevel.INFO
             group 'Liberty'
         })
     }

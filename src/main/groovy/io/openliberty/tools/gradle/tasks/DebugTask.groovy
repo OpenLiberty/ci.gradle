@@ -23,7 +23,6 @@ class DebugTask extends AbstractServerTask {
     DebugTask() {
         configure({
             description = 'Runs the Liberty server in the console foreground after a debugger connects to the debug port (default: 7777).'
-            logging.level = LogLevel.INFO
             group = 'Liberty'
         })
     }

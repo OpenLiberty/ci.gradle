@@ -23,7 +23,6 @@ class JavaDumpTask extends AbstractServerTask {
     JavaDumpTask() {
         configure({
             description 'Dumps diagnostic information from the Liberty server JVM.'
-            logging.level = LogLevel.INFO
             group 'Liberty'
         })
     }

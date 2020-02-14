@@ -31,7 +31,6 @@ class InstallFeatureTask extends AbstractServerTask {
     InstallFeatureTask() {
         configure({
             description 'Install a new feature to the Liberty server'
-            logging.level = LogLevel.INFO
             group 'Liberty'
         })
     }

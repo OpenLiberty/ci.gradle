@@ -30,7 +30,6 @@ class CreateTask extends AbstractServerTask {
     CreateTask() {
         configure({
             description 'Creates a Liberty server.'
-            logging.level = LogLevel.INFO
             group 'Liberty'
         })
         outputs.upToDateWhen {

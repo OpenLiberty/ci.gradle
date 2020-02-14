@@ -33,7 +33,6 @@ class StartTask extends AbstractServerTask {
     StartTask() {
         configure({
             description 'Starts the Liberty server.'
-            logging.level = LogLevel.INFO
             group 'Liberty'
         })
     }

@@ -45,7 +45,6 @@ class ConfigureArquillianTask extends AbstractServerTask {
     ConfigureArquillianTask() {
         configure({
             description "Automatically generates arquillian.xml for projects that use Arquillian Liberty Managed or Remote containers."
-            logging.level = LogLevel.INFO
             group 'Liberty'
         })
     }

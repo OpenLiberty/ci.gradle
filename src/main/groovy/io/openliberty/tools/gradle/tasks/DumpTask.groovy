@@ -23,7 +23,6 @@ class DumpTask extends AbstractServerTask {
     DumpTask() {
         configure({
             description 'Dumps diagnostic information from the Liberty server into an archive.'
-            logging.level = LogLevel.INFO
             group 'Liberty'
         })
     }
