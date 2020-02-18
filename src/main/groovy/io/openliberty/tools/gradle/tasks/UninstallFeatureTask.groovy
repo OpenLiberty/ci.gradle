@@ -23,7 +23,6 @@ class UninstallFeatureTask extends AbstractServerTask {
     UninstallFeatureTask() {
         configure({
             description 'Uninstall a feature from the Liberty server'
-            logging.level = LogLevel.INFO
             group 'Liberty'
         })
     }

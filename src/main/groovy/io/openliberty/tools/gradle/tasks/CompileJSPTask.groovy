@@ -37,7 +37,6 @@ class CompileJSPTask extends AbstractServerTask {
     CompileJSPTask() {
         configure({
             description 'Compile the JSP files in the src/main/webapp directory. '
-            logging.level = LogLevel.INFO
             group 'Liberty'
         })
     }

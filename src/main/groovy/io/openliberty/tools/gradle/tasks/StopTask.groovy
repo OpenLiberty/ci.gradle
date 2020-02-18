@@ -24,7 +24,6 @@ class StopTask extends AbstractServerTask {
     StopTask() {
         configure({
             description 'Stops the Liberty server.'
-            logging.level = LogLevel.INFO
             group 'Liberty'
         })
     }

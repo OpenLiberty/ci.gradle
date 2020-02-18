@@ -23,7 +23,6 @@ class StatusTask extends AbstractServerTask {
     StatusTask() {
         configure({
             description 'Checks if the Liberty server is running.'
-            logging.level = LogLevel.INFO
             group 'Liberty'
         })
     }

@@ -24,7 +24,6 @@ class RunTask extends AbstractServerTask {
     RunTask() {
         configure({
             description "Runs a Liberty server under the Gradle process."
-            logging.level = LogLevel.INFO
             group 'Liberty'
         })
     }

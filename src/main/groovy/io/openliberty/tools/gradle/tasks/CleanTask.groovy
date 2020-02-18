@@ -22,7 +22,6 @@ class CleanTask extends AbstractServerTask {
     CleanTask() {
         configure({
             description 'Deletes files from some directories from the Liberty server'
-            logging.level = LogLevel.INFO
             group 'Liberty'
         })
     }

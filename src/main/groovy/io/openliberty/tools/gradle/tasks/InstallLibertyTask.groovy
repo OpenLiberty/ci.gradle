@@ -46,7 +46,6 @@ class InstallLibertyTask extends AbstractTask {
     InstallLibertyTask() {
         configure({
             description 'Installs Liberty from a repository'
-            logging.level = LogLevel.INFO
             group 'Liberty'
         })
         outputs.upToDateWhen {
