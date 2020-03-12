@@ -798,7 +798,8 @@ class DevTask extends AbstractServerTask {
         // which is where the server.xml is located if a specific serverXmlFile
         // configuration parameter is not specified.
         try {
-            util.watchFiles(buildFile, outputDirectory, testOutputDirectory, executor, artifactPaths, serverXMLFile);
+            util.watchFiles(buildFile, outputDirectory, testOutputDirectory, executor, artifactPaths, serverXMLFile,
+                            project.liberty.server.bootstrapPropertiesFile, project.liberty.server.jvmOptionsFile, project.liberty.server.serverEnvFile);
         } catch (PluginScenarioException e) {
             if (e.getMessage() != null) {
                 // a proper message is included in the exception if the server has been stopped by another process

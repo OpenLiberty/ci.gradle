@@ -260,7 +260,7 @@ abstract class AbstractServerTask extends AbstractTask {
             jvmOptionsPath = "inlined configuration"
         } else if (server.jvmOptionsFile != null && server.jvmOptionsFile.exists()) {
             if (jvmOptionsPath != null) {
-                logger.warn("The " + jvmOptionsPath + " file is overwritten by the " + jvmOptionsFile.getCanonicalPath() + " file.");
+                logger.warn("The " + jvmOptionsPath + " file is overwritten by the " + server.jvmOptionsFile.getCanonicalPath() + " file.");
             }
             Files.copy(server.jvmOptionsFile.toPath(), optionsFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
             jvmOptionsPath = server.jvmOptionsFile.getCanonicalPath()
