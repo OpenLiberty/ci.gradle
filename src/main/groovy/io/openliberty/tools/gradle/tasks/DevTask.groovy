@@ -73,6 +73,7 @@ class DevTask extends AbstractServerTask {
     private static final boolean DEFAULT_HOT_TESTS = false;
     private static final boolean  DEFAULT_SKIP_TESTS = false;
     private static final boolean DEFAULT_LIBERTY_DEBUG = true;
+    private static final boolean DEFAULT_POLLING_TEST = false;
 
     private Boolean hotTests;
 
@@ -150,6 +151,13 @@ class DevTask extends AbstractServerTask {
         }
     }
 
+    private Boolean pollingTest;
+
+    @Option(option = 'pollingTest', description = 'If this option is enabled, poll for file changes instead of using file system notifications. This is only used for testing. The default value is false.')
+    void setPollingTest(boolean pollingTest) {
+        this.pollingTest = pollingTest;
+    }
+
     @Optional
     @Input
     Boolean clean;
@@ -178,11 +186,13 @@ class DevTask extends AbstractServerTask {
         DevTaskUtil(File serverDirectory, File sourceDirectory, File testSourceDirectory,
                     File configDirectory, List<File> resourceDirs, boolean  hotTests,
                     boolean  skipTests, String artifactId, int serverStartTimeout,
-                    int verifyAppStartTimeout, int appUpdateTimeout, double compileWait, boolean libertyDebug
+                    int verifyAppStartTimeout, int appUpdateTimeout, double compileWait, 
+                    boolean libertyDebug, boolean pollingTest
         ) throws IOException {
             super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs,
                     hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
-                    verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug, true, true);
+                    verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug, 
+                    true, true, pollingTest);
 
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
@@ -667,6 +677,10 @@ class DevTask extends AbstractServerTask {
         if (libertyDebug == null) {
             libertyDebug = DEFAULT_LIBERTY_DEBUG;
         }
+
+        if (pollingTest == null) {
+            pollingTest = DEFAULT_POLLING_TEST;
+        }
     }
 
     @TaskAction
@@ -737,7 +751,8 @@ class DevTask extends AbstractServerTask {
         util = new DevTaskUtil(
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory,
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
-                verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), libertyDebug.booleanValue()
+                verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
+                libertyDebug.booleanValue(), pollingTest.booleanValue()
         );
 
         util.addShutdownHook(executor);
