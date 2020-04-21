@@ -67,7 +67,7 @@ class DevTask extends AbstractServerTask {
     // Default DevMode argument values
     // DevMode uses CLI Arguments if provided, otherwise it uses ServerExtension properties if one exists, fallback to default value if neither are provided.
     private static final int DEFAULT_VERIFY_TIMEOUT = 30;
-    private static final int DEFAULT_SERVER_TIMEOUT = 30;
+    private static final int DEFAULT_SERVER_TIMEOUT = 90;
     private static final double DEFAULT_COMPILE_WAIT = 0.5;
     private static final int DEFAULT_DEBUG_PORT = 7777;
     private static final boolean DEFAULT_HOT_TESTS = false;
@@ -142,7 +142,7 @@ class DevTask extends AbstractServerTask {
 
     private Integer serverStartTimeout;
 
-    @Option(option = 'serverStartTimeout', description = 'Time in seconds to wait while verifying that the server has started. The default value is 30 seconds.')
+    @Option(option = 'serverStartTimeout', description = 'Time in seconds to wait while verifying that the server has started. The default value is 90 seconds.')
     void setServerStartTimeout(String serverStartTimeout) {
         try {
             this.serverStartTimeout = serverStartTimeout.toInteger();
@@ -259,7 +259,7 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public String getServerStartTimeoutExample() {
-            return "'gradle libertyDev --serverStartTimeout=90'";
+            return "'gradle libertyDev --serverStartTimeout=120'";
         }
 
         @Override
