@@ -47,8 +47,6 @@ The following are optional command line parameters supported by this task.
 | compileWait | Time in seconds to wait before processing Java changes. If you encounter compile errors while refactoring, increase this value to allow all files to be saved before compilation occurs. The default value is `0.5` seconds. | No |
 | serverStartTimeout | Maximum time to wait (in seconds) to verify that the server has started. The value must be an integer greater than or equal to 0. The default value is `90` seconds. | No |
 | verifyAppStartTimeout | Maximum time to wait (in seconds) to verify that the application has started or updated before running tests. The value must be an integer greater than or equal to 0. The default value is `30` seconds. | No |
-| polling | If this option is enabled, poll for file changes instead of using file system notifications. The default value is `false`. | No |
-| pollingInterval | Polling interval in milliseconds. The default value is `100` milliseconds. This parameter is only used if `polling` is enabled. | No |
 
 ### Properties
 

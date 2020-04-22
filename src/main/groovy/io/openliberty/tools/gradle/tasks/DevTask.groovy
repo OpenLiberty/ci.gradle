@@ -73,8 +73,7 @@ class DevTask extends AbstractServerTask {
     private static final boolean DEFAULT_HOT_TESTS = false;
     private static final boolean  DEFAULT_SKIP_TESTS = false;
     private static final boolean DEFAULT_LIBERTY_DEBUG = true;
-    private static final boolean DEFAULT_POLLING = false;
-    private static final long DEFAULT_POLLING_INTERVAL = 100;
+    private static final boolean DEFAULT_POLLING_TEST = false;
 
     private Boolean hotTests;
 
@@ -152,23 +151,11 @@ class DevTask extends AbstractServerTask {
         }
     }
 
-    private Boolean polling;
+    private Boolean pollingTest;
 
-    @Option(option = 'polling', description = 'If this option is enabled, poll for file changes instead of using file system notifications. The default value is false.')
-    void setPolling(boolean polling) {
-        this.polling = polling;
-    }
-
-    private Long pollingInterval;
-
-    @Option(option = 'pollingInterval', description = 'Polling interval in milliseconds. The default value is 100 milliseconds. This parameter is only used if polling is enabled.')
-    void setPollingInterval(String pollingInterval) {
-        try {
-            this.pollingInterval = pollingInterval.toLong();
-        } catch (NumberFormatException e) {
-            logger.error(String.format("Unexpected value: %s for dev mode option pollingInterval. pollingInterval should be a valid long.", pollingInterval));
-            throw e;
-        }
+    @Option(option = 'pollingTest', description = 'This option is only for testing dev mode using polling to track file changes instead of using file system notifications. The default value is false, in which case dev mode will rely on file system notifications but will automatically fall back to polling if file system notifications are not available.')
+    void setPollingTest(boolean pollingTest) {
+        this.pollingTest = pollingTest;
     }
 
     @Optional
@@ -199,13 +186,13 @@ class DevTask extends AbstractServerTask {
         DevTaskUtil(File serverDirectory, File sourceDirectory, File testSourceDirectory,
                     File configDirectory, List<File> resourceDirs, boolean  hotTests,
                     boolean  skipTests, String artifactId, int serverStartTimeout,
-                    int verifyAppStartTimeout, int appUpdateTimeout, double compileWait, boolean libertyDebug,
-                    boolean polling, long pollingInterval
+                    int verifyAppStartTimeout, int appUpdateTimeout, double compileWait, 
+                    boolean libertyDebug, boolean pollingTest
         ) throws IOException {
             super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs,
                     hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
-                    verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug, true, true,
-                    polling, pollingInterval);
+                    verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug, 
+                    true, true, pollingTest);
 
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
@@ -691,12 +678,8 @@ class DevTask extends AbstractServerTask {
             libertyDebug = DEFAULT_LIBERTY_DEBUG;
         }
 
-        if (polling == null) {
-            polling = DEFAULT_POLLING;
-        }
-
-        if (pollingInterval == null) {
-            pollingInterval = DEFAULT_POLLING_INTERVAL;
+        if (pollingTest == null) {
+            pollingTest = DEFAULT_POLLING_TEST;
         }
     }
 
@@ -768,8 +751,8 @@ class DevTask extends AbstractServerTask {
         util = new DevTaskUtil(
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory,
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
-                verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), libertyDebug.booleanValue(),
-                polling.booleanValue(), pollingInterval.longValue()
+                verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
+                libertyDebug.booleanValue(), pollingTest.booleanValue()
         );
 
         util.addShutdownHook(executor);

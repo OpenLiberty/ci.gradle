@@ -40,7 +40,7 @@ class PollingDevTest extends DevTest {
     
     private static void runDevModePolling() throws IOException, InterruptedException, FileNotFoundException {
         System.out.println("Starting dev mode with polling...");
-        startProcess("--polling", true);
+        startProcess("--pollingTest", true);
         System.out.println("Started dev mode with polling");
     }
     
