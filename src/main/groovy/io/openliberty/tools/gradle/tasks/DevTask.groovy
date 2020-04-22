@@ -153,7 +153,7 @@ class DevTask extends AbstractServerTask {
 
     private Boolean pollingTest;
 
-    @Option(option = 'pollingTest', description = 'If this option is enabled, poll for file changes instead of using file system notifications. This is only used for testing. The default value is false.')
+    @Option(option = 'pollingTest', description = 'This option is only for testing dev mode using polling to track file changes instead of using file system notifications. The default value is false, in which case dev mode will rely on file system notifications but will automatically fall back to polling if file system notifications are not available.')
     void setPollingTest(boolean pollingTest) {
         this.pollingTest = pollingTest;
     }
