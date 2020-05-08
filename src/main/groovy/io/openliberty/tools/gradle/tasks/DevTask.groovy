@@ -74,6 +74,7 @@ class DevTask extends AbstractServerTask {
     private static final boolean  DEFAULT_SKIP_TESTS = false;
     private static final boolean DEFAULT_LIBERTY_DEBUG = true;
     private static final boolean DEFAULT_POLLING_TEST = false;
+    private static final boolean DEFAULT_CONTAINER = false;
 
     private Boolean hotTests;
 
