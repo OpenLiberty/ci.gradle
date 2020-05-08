@@ -74,6 +74,7 @@ class DevTask extends AbstractServerTask {
     private static final boolean  DEFAULT_SKIP_TESTS = false;
     private static final boolean DEFAULT_LIBERTY_DEBUG = true;
     private static final boolean DEFAULT_POLLING_TEST = false;
+    private static final boolean DEFAULT_CONTAINER = false;
 
     private Boolean hotTests;
 
@@ -158,6 +159,13 @@ class DevTask extends AbstractServerTask {
         this.pollingTest = pollingTest;
     }
 
+    private Boolean container;
+
+    @Option(option = 'container', description = 'Run the server in a Docker container instead of locally. The default value is false.')
+    void setContainer(boolean container) {
+        this.container = container;
+    }
+
     @Optional
     @Input
     Boolean clean;
@@ -187,12 +195,12 @@ class DevTask extends AbstractServerTask {
                     File configDirectory, List<File> resourceDirs, boolean  hotTests,
                     boolean  skipTests, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait, 
-                    boolean libertyDebug, boolean pollingTest
+                    boolean libertyDebug, boolean pollingTest, container
         ) throws IOException {
             super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs,
                     hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug, 
-                    true, true, pollingTest);
+                    true, true, pollingTest, container);
 
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
@@ -251,6 +259,10 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void stopServer() {
+            if (container) {
+                // TODO stop the container instead
+                return;
+            }
             if (isLibertyInstalled(project)) {
                 if (getServerDir(project).exists()) {
                     ServerTask serverTaskStop = createServerTask(project, "stop");
@@ -681,6 +693,10 @@ class DevTask extends AbstractServerTask {
         if (pollingTest == null) {
             pollingTest = DEFAULT_POLLING_TEST;
         }
+
+        if (container == null) {
+            container = DEFAULT_CONTAINER;
+        }
     }
 
     @TaskAction
@@ -705,13 +721,15 @@ class DevTask extends AbstractServerTask {
         // getOutputDir returns a string
         File serverOutputDir = new File(getOutputDir(project));
 
-        if (serverDirectory.exists()) {
-            if (ServerStatusUtil.isServerRunning(serverInstallDir, serverOutputDir, serverName)) {
-                throw new Exception("The server " + serverName
-                        + " is already running. Terminate all instances of the server before starting dev mode."
-                        + " You can stop a server instance with the command 'gradle libertyStop'.");
+        if (!container) {
+            if (serverDirectory.exists()) {
+                if (ServerStatusUtil.isServerRunning(serverInstallDir, serverOutputDir, serverName)) {
+                    throw new Exception("The server " + serverName
+                            + " is already running. Terminate all instances of the server before starting dev mode."
+                            + " You can stop a server instance with the command 'gradle libertyStop'.");
+                }
             }
-        }
+        } // else TODO check if the container is already running?
 
         if (resourceDirs.isEmpty()) {
             File defaultResourceDir = new File(project.getRootDir() + "/src/main/resources");
@@ -752,7 +770,7 @@ class DevTask extends AbstractServerTask {
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory,
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
-                libertyDebug.booleanValue(), pollingTest.booleanValue()
+                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue()
         );
 
         util.addShutdownHook(executor);
