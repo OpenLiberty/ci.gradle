@@ -274,7 +274,7 @@ class DeployTask extends AbstractServerTask {
         if (outputDir != null && !outputDir.exists() && hasJavaSourceFiles(task.classpath, outputDir)) {
             logger.warn(MessageFormat.format("Installed loose application from project {0}, but the project has not been compiled.", project.name))
         }
-        if (System.getProperty("io.openliberty.tools.gradle.tasks.container")!=null) {
+        if (System.getProperty(LIBERTY_TOOL_OPTION_CONTAINER)!=null) {
             config.setProjectRoot(task.getProject().getProjectDir().getAbsolutePath());
         }
         LooseWarApplication looseWar = new LooseWarApplication(task, config)

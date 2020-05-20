@@ -760,7 +760,7 @@ class DevTask extends AbstractServerTask {
                 :deploy
              */
              if (container) {
-                 gradleBuildLauncher.withArguments("-Dio.openliberty.tools.gradle.tasks.container");
+                 gradleBuildLauncher.withArguments("-D"+LIBERTY_TOOL_OPTION_CONTAINER);
              }
             runGradleTask(gradleBuildLauncher, 'libertyCreate');
             runGradleTask(gradleBuildLauncher, 'installFeature');
