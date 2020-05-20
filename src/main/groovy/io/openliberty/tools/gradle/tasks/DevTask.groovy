@@ -759,6 +759,9 @@ class DevTask extends AbstractServerTask {
                 :war
                 :deploy
              */
+             if (container) {
+                 gradleBuildLauncher.withArguments("-Dio.openliberty.tools.gradle.tasks.container");
+             }
             runGradleTask(gradleBuildLauncher, 'libertyCreate');
             runGradleTask(gradleBuildLauncher, 'installFeature');
             runGradleTask(gradleBuildLauncher, 'deploy');
@@ -787,8 +790,8 @@ class DevTask extends AbstractServerTask {
         File serverXMLFile = server.serverXmlFile;
 
         if (hotTests && testSourceDirectory.exists()) {
-        // if hot testing, run tests on startup and then watch for keypresses
-        util.runTestThread(false, executor, -1, false, false);
+            // if hot testing, run tests on startup and then watch for keypresses
+            util.runTestThread(false, executor, -1, false, false);
         } else {
             // else watch for key presses immediately
             util.runHotkeyReaderThread(executor);
