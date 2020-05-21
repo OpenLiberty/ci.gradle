@@ -59,7 +59,6 @@ abstract class AbstractServerTask extends AbstractTask {
     private static final Pattern pattern = Pattern.compile(LIBERTY_CONFIG_GRADLE_PROPS)
 
     protected final String PLUGIN_VARIABLE_CONFIG_XML = "configDropins/overrides/liberty-plugin-variable-config.xml"
-    protected final String LIBERTY_TOOL_OPTION_CONTAINER = "io.openliberty.tools.option.container"
 
     protected Properties bootstrapProjectProps = new Properties()
     protected Properties envProjectProps = new Properties()

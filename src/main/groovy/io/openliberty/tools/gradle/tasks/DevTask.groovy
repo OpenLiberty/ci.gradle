@@ -759,12 +759,13 @@ class DevTask extends AbstractServerTask {
                 :war
                 :deploy
              */
-             if (container) {
-                 gradleBuildLauncher.withArguments("-D"+LIBERTY_TOOL_OPTION_CONTAINER);
-             }
             runGradleTask(gradleBuildLauncher, 'libertyCreate');
             runGradleTask(gradleBuildLauncher, 'installFeature');
-            runGradleTask(gradleBuildLauncher, 'deploy');
+            if (container) {
+                runGradleTask(gradleBuildLauncher, 'deploy', '--container');
+            } else {
+                runGradleTask(gradleBuildLauncher, 'deploy');
+            }
         } finally {
             gradleConnection.close();
         }
