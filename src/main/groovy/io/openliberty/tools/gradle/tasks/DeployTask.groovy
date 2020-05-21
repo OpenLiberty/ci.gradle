@@ -26,6 +26,7 @@ import org.apache.commons.io.FilenameUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.tasks.options.Option
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.ProjectDependency
@@ -44,6 +45,7 @@ import java.io.File
 class DeployTask extends AbstractServerTask {
 
     protected ApplicationXmlDocument applicationXml = new ApplicationXmlDocument();
+    private static final boolean DEFAULT_CONTAINER = false;
 
 
     DeployTask() {
@@ -58,6 +60,13 @@ class DeployTask extends AbstractServerTask {
         })
     }
 
+    private Boolean container;
+
+    @Option(option = 'container', description = 'Run the server in a Docker container instead of locally. The default value is false.')
+    void setContainer(boolean container) {
+        this.container = container;
+    }
+
     boolean containsTask(List<Task> taskList, String name) {
         return taskList.find { it.getName().equals(name) }
     }
@@ -65,6 +74,10 @@ class DeployTask extends AbstractServerTask {
     @TaskAction
     void deploy() {
         boolean hasSpringBootAppConfigured
+
+        if (container == null) {
+            container = DEFAULT_CONTAINER;
+        }
 
         configureApps(project)
         if (server.deploy.apps != null && !server.deploy.apps.isEmpty()) {
@@ -273,6 +286,9 @@ class DeployTask extends AbstractServerTask {
 
         if (outputDir != null && !outputDir.exists() && hasJavaSourceFiles(task.classpath, outputDir)) {
             logger.warn(MessageFormat.format("Installed loose application from project {0}, but the project has not been compiled.", project.name))
+        }
+        if (container) {
+            config.setProjectRoot(task.getProject().getProjectDir().getAbsolutePath());
         }
         LooseWarApplication looseWar = new LooseWarApplication(task, config)
         looseWar.addSourceDir()
