@@ -29,6 +29,8 @@ import org.gradle.api.Task
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.ProjectDependency
+import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.artifacts.ResolvedDependency
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.TaskAction
@@ -328,18 +330,31 @@ class DeployTask extends AbstractServerTask {
         LooseEarApplication looseEar = new LooseEarApplication(task, config);
         looseEar.addSourceDir();
         looseEar.addApplicationXmlFile();
+        
+        //Checking ear plugin dependency configurations to determine loose-ear content
+        processDeployDependencies(looseEar, task)
+        processEarlibDependencies(looseEar, task)
+
+        File manifestFile = new File(project.buildDir.getAbsolutePath() + "/tmp/ear/MANIFEST.MF")
+        looseEar.addManifestFile(manifestFile)
+    }
+
+    private void processDeployDependencies(LooseEarApplication looseEar, Task task) {
+        HashMap<File, Dependency> completeDeployDeps = new HashMap<File, Dependency>();
 
         File[] filesAsDeps = task.getProject().configurations.deploy.getFiles().toArray()
-        Dependency[] deps = task.getProject().configurations.deploy.getAllDependencies().toArray()
-        HashMap<File, Dependency> completeDeps = new HashMap<File, Dependency>();
-        if(filesAsDeps.size() == deps.size()){
+        Dependency[] deployDeps = task.getProject().configurations.deploy.getAllDependencies().toArray()
+
+        if(filesAsDeps.size() == deployDeps.size()){
             for(int i = 0; i<filesAsDeps.size(); i++) {
-                completeDeps.put(filesAsDeps[i], deps[i])
+                completeDeployDeps.put(filesAsDeps[i], deployDeps[i])
             }
         }
 
-        logger.info(MessageFormat.format("Number of compile dependencies for " + task.project.name + " : " + completeDeps.size()))
-        for (Map.Entry<File, Dependency> entry : completeDeps){
+        task.getProject().configurations.earlib.getResolvedConfiguration().getFirstLevelModuleDependencies()
+
+        logger.info(MessageFormat.format("Number of deploy dependencies for " + task.project.name + " : " + completeDeployDeps.size()))
+        for (Map.Entry<File, Dependency> entry : completeDeployDeps){
             Dependency dependency = entry.getValue();
             File dependencyFile = entry.getKey();
 
@@ -368,9 +383,84 @@ class DeployTask extends AbstractServerTask {
                 logger.warn("Dependency " + dependency.getName() + "could not be added to the looseApplication, as it is neither a ProjectDependency or ExternalModuleDependency")
             }
         }
-        File manifestFile = new File(project.buildDir.getAbsolutePath() + "/tmp/ear/MANIFEST.MF")
-        looseEar.addManifestFile(manifestFile)
     }
+
+    private void processEarlibDependencies (LooseEarApplication looseEar, Task task) {
+        //Add earlib dependencies, requires resolving and checking for transitive dependencies
+        //Using Dependency to determine how to add the resource to the loose ear
+        //Resolved dependencies are used to get the tranistive dependencies to add to the loose ear
+        HashMap<Dependency, ResolvedDependency> completeEarlibDeps = new HashMap<Dependency, ResolvedDependency>()
+
+        Dependency[] earlibDeps = task.getProject().configurations.earlib.getAllDependencies().toArray()
+        ResolvedDependency[] resolvedEarlibDeps = task.getProject().configurations.earlib.getResolvedConfiguration().getFirstLevelModuleDependencies().toArray()
+
+        for (Dependency dep : earlibDeps) {
+            for (ResolvedDependency resolvedDep : resolvedEarlibDeps) {
+                if (dep.getName().equals(resolvedDep.getModuleName())) {
+                    completeEarlibDeps.put(dep, resolvedDep)
+                    break
+                }
+            }
+        }
+
+        logger.info(MessageFormat.format("Number of earlib dependencies for " + task.project.name + " : " + completeEarlibDeps.size()))
+        for (Map.Entry<Dependency, ResolvedDependency> entry : completeEarlibDeps){
+            Dependency dependency = entry.getKey();
+            ResolvedDependency resolvedDependency = entry.getValue();
+
+            if (dependency instanceof ProjectDependency) { //Adding the project archive and it's transitve dependencies to the loose ear
+                Project dependencyProject = dependency.getDependencyProject()
+
+                ResolvedArtifact projectArtifact
+
+                //Getting project artifact to get the file later
+                for (ResolvedArtifact artifact : resolvedDependency.getModuleArtifacts()) {
+                    if (dependency.getName().equals(artifact.getModuleVersion().getId().getName())) { //Only checks the artifacts belonging to this dependency, not its children
+                        projectArtifact = artifact
+                        break
+                    }
+                }
+
+                Set<ResolvedArtifact> projectDependencyArtifacts = resolvedDependency.getAllModuleArtifacts()
+
+                //Removing project artifact from project dependency artifacts
+                if (projectDependencyArtifacts.contains(projectArtifact)) {
+                    projectDependencyArtifacts.remove(projectArtifact)
+                }
+
+                String projectType = FilenameUtils.getExtension(projectArtifact.getFile().toString())
+                switch (projectType) {
+                    case "jar":
+                    case "ejb":
+                    case "rar":
+                        looseEar.addJarModule(dependencyProject)
+                        projectDependencyArtifacts.each { //Adding transitive dependecies from project
+                            looseEar.getConfig().addFile(it.getFile(), "/WEB-INF/lib/" + it.getName())
+                        }
+                        break;
+                    case "war":
+                        Element warElement = looseEar.addWarModule(dependencyProject)
+                        addEmbeddedLib(warElement, dependencyProject, looseEar, "/WEB-INF/lib/")
+                        projectDependencyArtifacts.each { //Adding transitive dependecies from war project
+                            looseEar.getConfig().addFile(it.getFile(), "/WEB-INF/lib/" + it.getName())
+                        }
+                        break;
+                    default:
+                        logger.warn('Application ' + dependencyProject.getName() + ' is expressed as ' + projectType + ' which is not a supported input type. Define applications using Task or File objects of type war, ear, or jar.')
+                        break;
+                }
+            }
+            else if (dependency instanceof ExternalModuleDependency) { //Adding all artifacts belonging to this dependency and its children
+                resolvedDependency.getAllModuleArtifacts().each {
+                    looseEar.getConfig().addFile(it.getFile(), "/WEB-INF/lib/" + it.getName())
+                }
+            }
+            else {
+                logger.warn("Dependency " + dependency.getName() + "could not be added to the looseApplication, as it is neither a ProjectDependency or ExternalModuleDependency")
+            }
+        }
+    }
+
     private void addEmbeddedLib(Element parent, Project proj, LooseApplication looseApp, String dir) throws Exception {
         //Get only the compile dependencies that are included in the war
         File[] filesAsDeps = proj.configurations.compile.minus(proj.configurations.providedCompile).getFiles().toArray()

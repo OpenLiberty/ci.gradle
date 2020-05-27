@@ -1,0 +1,16 @@
+
+apply plugin: 'war'
+
+jar.enabled = false
+description = 'WAR Module'
+dependencies {
+    implementation group: 'commons-io', name: 'commons-io', version: '2.5', transitive:true
+    testImplementation group: 'junit', name: 'junit', version:'4.12'
+    providedCompile group: 'javax', name: 'javaee-api', version:'7.0'
+    providedCompile project(':SampleEJB')
+}
+
+war {
+    archiveName = baseName + '.' + extension
+}
+
