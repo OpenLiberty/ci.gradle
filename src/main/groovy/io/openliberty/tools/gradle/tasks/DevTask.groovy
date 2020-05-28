@@ -166,6 +166,14 @@ class DevTask extends AbstractServerTask {
         this.container = container;
     }
 
+    private File dockerfile;
+
+    @Option(option = 'dockerfile', description = 'Dev mode will build a docker image from the provided Dockerfile and start a container from the new image.')
+    void setDockerfile(String dockerfile) {
+        File tmp = new File(dockerfile);
+        this.dockerfile = new File(tmp.getCanonicalPath()); // ensures the dockerfile is defined with the full path - matches how maven behaves
+    }
+
     @Optional
     @Input
     Boolean clean;
@@ -195,12 +203,12 @@ class DevTask extends AbstractServerTask {
                     File configDirectory, List<File> resourceDirs, boolean  hotTests,
                     boolean  skipTests, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait, 
-                    boolean libertyDebug, boolean pollingTest, container
+                    boolean libertyDebug, boolean pollingTest, boolean container, File dockerfile
         ) throws IOException {
             super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs,
                     hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug, 
-                    true, true, pollingTest, container);
+                    true, true, pollingTest, container, dockerfile);
 
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
@@ -770,7 +778,7 @@ class DevTask extends AbstractServerTask {
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory,
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
-                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue()
+                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile
         );
 
         util.addShutdownHook(executor);
