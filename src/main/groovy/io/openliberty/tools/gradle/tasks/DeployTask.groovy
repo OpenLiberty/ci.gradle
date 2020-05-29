@@ -287,9 +287,10 @@ class DeployTask extends AbstractServerTask {
         if (outputDir != null && !outputDir.exists() && hasJavaSourceFiles(task.classpath, outputDir)) {
             logger.warn(MessageFormat.format("Installed loose application from project {0}, but the project has not been compiled.", project.name))
         }
-        if (container) {
-            config.setProjectRoot(task.getProject().getProjectDir().getAbsolutePath());
-        }
+
+        config.setProjectRoot(task.getProject().getProjectDir().getAbsolutePath());
+        config.setSourceOnDiskName('${'+PROJECT_ROOT_NAME+'}');
+
         LooseWarApplication looseWar = new LooseWarApplication(task, config)
         looseWar.addSourceDir()
         looseWar.addOutputDir(looseWar.getDocumentRoot() , task.classpath.getFiles().toArray()[0], "/WEB-INF/classes/");

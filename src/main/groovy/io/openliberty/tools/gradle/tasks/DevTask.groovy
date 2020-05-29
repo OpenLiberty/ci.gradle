@@ -192,13 +192,13 @@ class DevTask extends AbstractServerTask {
         private ServerTask serverTask = null;
 
         DevTaskUtil(File serverDirectory, File sourceDirectory, File testSourceDirectory,
-                    File configDirectory, List<File> resourceDirs, boolean  hotTests,
-                    boolean  skipTests, String artifactId, int serverStartTimeout,
+                    File configDirectory, File projectDirectory, List<File> resourceDirs,
+                    boolean  hotTests, boolean  skipTests, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait, 
                     boolean libertyDebug, boolean pollingTest, container
         ) throws IOException {
-            super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs,
-                    hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
+            super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory,
+                    resourceDirs, hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug, 
                     true, true, pollingTest, container);
 
@@ -771,7 +771,7 @@ class DevTask extends AbstractServerTask {
         }
 
         util = new DevTaskUtil(
-                serverDirectory, sourceDirectory, testSourceDirectory, configDirectory,
+                serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
                 libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue()
