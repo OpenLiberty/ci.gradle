@@ -773,7 +773,11 @@ class DevTask extends AbstractServerTask {
              */
             runGradleTask(gradleBuildLauncher, 'libertyCreate');
             runGradleTask(gradleBuildLauncher, 'installFeature');
-            runGradleTask(gradleBuildLauncher, 'deploy');
+            if (container) {
+                runGradleTask(gradleBuildLauncher, 'deploy', '--container');
+            } else {
+                runGradleTask(gradleBuildLauncher, 'deploy');
+            }
         } finally {
             gradleConnection.close();
         }
@@ -799,8 +803,8 @@ class DevTask extends AbstractServerTask {
         File serverXMLFile = server.serverXmlFile;
 
         if (hotTests && testSourceDirectory.exists()) {
-        // if hot testing, run tests on startup and then watch for keypresses
-        util.runTestThread(false, executor, -1, false, false);
+            // if hot testing, run tests on startup and then watch for keypresses
+            util.runTestThread(false, executor, -1, false, false);
         } else {
             // else watch for key presses immediately
             util.runHotkeyReaderThread(executor);
