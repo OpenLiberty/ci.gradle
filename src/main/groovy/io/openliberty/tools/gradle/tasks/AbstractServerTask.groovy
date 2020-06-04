@@ -73,6 +73,7 @@ abstract class AbstractServerTask extends AbstractTask {
 
     protected def server
     protected def springBootBuildTask
+    protected Boolean container = null;
 
     private enum PropertyType {
         BOOTSTRAP("liberty.server.bootstrapProperties"),
@@ -284,8 +285,12 @@ abstract class AbstractServerTask extends AbstractTask {
             bootStrapPropertiesPath = server.bootstrapPropertiesFile.getCanonicalPath()
         }
 
-        // Define the variable used in the loose app. configuration file.
-        appendToBootstrap(bootstrapFile, PROJECT_ROOT_NAME+" = "+project.getProjectDir().getAbsolutePath());
+        if (container != null && container.booleanValue()) {
+            // Define the variable used in the loose app. configuration file.
+            if (!serverDirectory.isEmpty()) {
+                appendToBootstrap(bootstrapFile, PROJECT_ROOT_NAME+" = "+project.getProjectDir().getAbsolutePath())
+            }
+        }
 
         // envProjectProps and serverEnvFile take precedence over server.env from configDirectory
         File envFile = new File(serverDirectory, "server.env")
@@ -707,6 +712,7 @@ abstract class AbstractServerTask extends AbstractTask {
     }
 
     protected void appendToBootstrap(File bootstrapFile, String line) throws IOException {
+        logger.debug("bootstrapFile name:"+bootstrapFile.getName()+" new line:"+line)
         PrintWriter writer = null;
         try {
             FileWriter fwriter = new FileWriter(bootstrapFile, true);
