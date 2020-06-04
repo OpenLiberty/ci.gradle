@@ -733,6 +733,16 @@ class DevTask extends AbstractServerTask {
         // getOutputDir returns a string
         File serverOutputDir = new File(getOutputDir(project));
 
+        if (dockerfile != null) {
+            if (dockerfile.exists()) {
+                setContainer(true);
+            }
+            else {
+                throw new Exception("The file " + dockerfile + " used for dev mode option dockerfile does not exist."
+                    + " dockerfile should be a valid Dockerfile");
+            }
+        }
+
         if (!container) {
             if (serverDirectory.exists()) {
                 if (ServerStatusUtil.isServerRunning(serverInstallDir, serverOutputDir, serverName)) {
