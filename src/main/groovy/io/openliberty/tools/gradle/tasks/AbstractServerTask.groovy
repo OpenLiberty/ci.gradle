@@ -59,6 +59,7 @@ abstract class AbstractServerTask extends AbstractTask {
     private static final Pattern pattern = Pattern.compile(LIBERTY_CONFIG_GRADLE_PROPS)
 
     protected final String PLUGIN_VARIABLE_CONFIG_XML = "configDropins/overrides/liberty-plugin-variable-config.xml"
+    protected final String PROJECT_ROOT_NAME = "io.openliberty.projectRoot";
 
     protected Properties bootstrapProjectProps = new Properties()
     protected Properties envProjectProps = new Properties()
@@ -72,6 +73,7 @@ abstract class AbstractServerTask extends AbstractTask {
 
     protected def server
     protected def springBootBuildTask
+    protected Boolean container = null;
 
     private enum PropertyType {
         BOOTSTRAP("liberty.server.bootstrapProperties"),
@@ -281,6 +283,13 @@ abstract class AbstractServerTask extends AbstractTask {
             }
             Files.copy(server.bootstrapPropertiesFile.toPath(), bootstrapFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
             bootStrapPropertiesPath = server.bootstrapPropertiesFile.getCanonicalPath()
+        }
+
+        if (container != null && container.booleanValue()) {
+            // Define the variable used in the loose app. configuration file.
+            if (!serverDirectory.isEmpty()) {
+                appendToBootstrap(bootstrapFile, PROJECT_ROOT_NAME+" = "+project.getProjectDir().getAbsolutePath())
+            }
         }
 
         // envProjectProps and serverEnvFile take precedence over server.env from configDirectory
@@ -698,6 +707,22 @@ abstract class AbstractServerTask extends AbstractTask {
         } finally {
             if (writer != null) {
                 writer.close()
+            }
+        }
+    }
+
+    protected void appendToBootstrap(File bootstrapFile, String line) throws IOException {
+        logger.debug("bootstrapFile name:"+bootstrapFile.getName()+" new line:"+line)
+        PrintWriter writer = null;
+        try {
+            FileWriter fwriter = new FileWriter(bootstrapFile, true);
+            writer = new PrintWriter(fwriter);
+            writer.println();
+            writer.println(HEADER);
+            writer.println(line);
+        } finally {
+            if (writer != null) {
+                writer.close();
             }
         }
     }
