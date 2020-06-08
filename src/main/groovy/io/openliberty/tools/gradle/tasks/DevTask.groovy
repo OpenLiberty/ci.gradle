@@ -213,7 +213,7 @@ class DevTask extends AbstractServerTask {
             super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory,
                     resourceDirs, hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
-                    true, true, pollingTest.booleanValue(), container.booleanValue(), dockerfile);
+                    true, true, pollingTest, container, dockerfile);
 
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
