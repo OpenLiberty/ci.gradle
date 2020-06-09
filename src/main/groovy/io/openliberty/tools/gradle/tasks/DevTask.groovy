@@ -167,6 +167,18 @@ class DevTask extends AbstractServerTask {
         super.@container = container;
     }
 
+    private File dockerfile;
+
+    @Option(option = 'dockerfile', description = 'Dev mode will build a docker image from the provided Dockerfile and start a container from the new image.')
+    void setDockerfile(String dockerfile) {
+        File temp = new File(dockerfile);
+        try {
+            this.dockerfile = new File(temp.getCanonicalPath()); // ensures the dockerfile is defined with the full path - matches how maven behaves
+        } catch (IOException e) {
+            throw new PluginExecutionException("Could not resolve canonical path of the dockerfile parameter: " + temp.getAbsolutePath(), e);
+        }
+    }
+
     @Optional
     @Input
     Boolean clean;
@@ -195,13 +207,13 @@ class DevTask extends AbstractServerTask {
         DevTaskUtil(File serverDirectory, File sourceDirectory, File testSourceDirectory,
                     File configDirectory, File projectDirectory, List<File> resourceDirs,
                     boolean  hotTests, boolean  skipTests, String artifactId, int serverStartTimeout,
-                    int verifyAppStartTimeout, int appUpdateTimeout, double compileWait, 
-                    boolean libertyDebug, boolean pollingTest, boolean container
+                    int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
+                    boolean libertyDebug, boolean pollingTest, boolean container, File dockerfile
         ) throws IOException {
             super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory,
                     resourceDirs, hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
-                    verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug, 
-                    true, true, pollingTest.booleanValue(), container.booleanValue());
+                    verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
+                    true, true, pollingTest, container, dockerfile);
 
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
@@ -723,6 +735,16 @@ class DevTask extends AbstractServerTask {
         // getOutputDir returns a string
         File serverOutputDir = new File(getOutputDir(project));
 
+        if (dockerfile != null) {
+            if (dockerfile.exists()) {
+                setContainer(true);
+            }
+            else {
+                throw new Exception("The file " + dockerfile + " used for dev mode option dockerfile does not exist."
+                    + " dockerfile should be a valid Dockerfile");
+            }
+        }
+
         if (!container) {
             if (serverDirectory.exists()) {
                 if (ServerStatusUtil.isServerRunning(serverInstallDir, serverOutputDir, serverName)) {
@@ -776,7 +798,7 @@ class DevTask extends AbstractServerTask {
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
-                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue()
+                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile
         );
 
         util.addShutdownHook(executor);
