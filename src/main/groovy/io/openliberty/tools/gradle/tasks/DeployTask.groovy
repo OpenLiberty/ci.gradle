@@ -351,8 +351,6 @@ class DeployTask extends AbstractServerTask {
             }
         }
 
-        task.getProject().configurations.earlib.getResolvedConfiguration().getFirstLevelModuleDependencies()
-
         logger.info(MessageFormat.format("Number of deploy dependencies for " + task.project.name + " : " + completeDeployDeps.size()))
         for (Map.Entry<File, Dependency> entry : completeDeployDeps){
             Dependency dependency = entry.getValue();
