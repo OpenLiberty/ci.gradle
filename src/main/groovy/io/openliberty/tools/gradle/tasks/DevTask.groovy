@@ -60,6 +60,8 @@ class DevTask extends AbstractServerTask {
         })
     }
 
+    protected def dev
+
     @Optional
     @Input
     DevTaskUtil util = null;
@@ -721,8 +723,20 @@ class DevTask extends AbstractServerTask {
         }
 
         if (container == null) {
-            container = DEFAULT_CONTAINER;
-            super.@container = DEFAULT_CONTAINER;
+            boolean buildContainerSetting = project.liberty.dev.container; // get from build.gradle
+            if (buildContainerSetting == null) {
+                setContainer(DEFAULT_CONTAINER);
+            } else {
+                setContainer(buildContainerSetting);
+            }
+        }
+        
+        if (dockerfile == null) {
+            setDockerfile(project.liberty.dev.dockerfile) // get from build.gradle
+        }
+
+        if (dockerRunOpts == null) {
+            setDockerRunOpts(project.liberty.dev.dockerRunOpts) // get from build.gradle
         }
     }
 

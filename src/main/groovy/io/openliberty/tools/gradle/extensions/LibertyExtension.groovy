@@ -38,6 +38,8 @@ class LibertyExtension {
 
     ServerExtension server = server = new ServerExtension()
 
+    DevExtension dev = new DevExtension();
+
     def jsp(Closure closure) {
         ConfigureUtil.configure(closure, jsp)
     }
@@ -52,6 +54,10 @@ class LibertyExtension {
 
     def server(Closure closure){
         ConfigureUtil.configure(closure, server)
+    }
+
+    def dev(Closure closure) {
+        ConfigureUtil.configure(closure, dev)
     }
 
 }
