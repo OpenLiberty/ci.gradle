@@ -278,6 +278,7 @@ class DevTask extends AbstractServerTask {
         public void stopServer() {
             if (container) {
                 // Shouldn't get here, DevUtil should stop the container instead
+                logger.debug('DevUtil called stopServer when the server should be running in a container.')
                 return;
             }
             if (isLibertyInstalled(project)) {
