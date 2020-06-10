@@ -179,6 +179,13 @@ class DevTask extends AbstractServerTask {
         }
     }
 
+    private String dockerRunOpts;
+
+    @Option(option = 'dockerRunOpts', description = 'Additional options for the docker run command when dev mode starts a container.')
+    void setDockerRunOpts(String dockerRunOpts) {
+        this.dockerRunOpts = dockerRunOpts;
+    }
+
     @Optional
     @Input
     Boolean clean;
