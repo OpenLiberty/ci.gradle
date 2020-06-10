@@ -167,6 +167,10 @@ class DevTask extends AbstractServerTask {
         super.@container = container;
     }
 
+    Boolean getContainer() {
+        return container;
+    }
+
     private File dockerfile;
 
     @Option(option = 'dockerfile', description = 'Dev mode will build a docker image from the provided Dockerfile and start a container from the new image.')
@@ -280,7 +284,8 @@ class DevTask extends AbstractServerTask {
         @Override
         public void stopServer() {
             if (container) {
-                // TODO stop the container instead
+                // Shouldn't get here, DevUtil should stop the container instead
+                logger.debug('DevUtil called stopServer when the server should be running in a container.')
                 return;
             }
             if (isLibertyInstalled(project)) {
