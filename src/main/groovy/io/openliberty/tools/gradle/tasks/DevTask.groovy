@@ -60,8 +60,6 @@ class DevTask extends AbstractServerTask {
         })
     }
 
-    protected def dev
-
     @Optional
     @Input
     DevTaskUtil util = null;
