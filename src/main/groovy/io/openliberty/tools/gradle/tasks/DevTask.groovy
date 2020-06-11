@@ -175,11 +175,13 @@ class DevTask extends AbstractServerTask {
 
     @Option(option = 'dockerfile', description = 'Dev mode will build a docker image from the provided Dockerfile and start a container from the new image.')
     void setDockerfile(String dockerfile) {
-        File temp = new File(dockerfile);
-        try {
-            this.dockerfile = new File(temp.getCanonicalPath()); // ensures the dockerfile is defined with the full path - matches how maven behaves
-        } catch (IOException e) {
-            throw new PluginExecutionException("Could not resolve canonical path of the dockerfile parameter: " + temp.getAbsolutePath(), e);
+        if (dockerfile != null) {
+            File temp = new File(dockerfile);
+            try {
+                this.dockerfile = new File(temp.getCanonicalPath()); // ensures the dockerfile is defined with the full path - matches how maven behaves
+            } catch (IOException e) {
+                throw new PluginExecutionException("Could not resolve canonical path of the dockerfile parameter: " + temp.getAbsolutePath(), e);
+            }
         }
     }
 
@@ -721,8 +723,26 @@ class DevTask extends AbstractServerTask {
         }
 
         if (container == null) {
-            container = DEFAULT_CONTAINER;
-            super.@container = DEFAULT_CONTAINER;
+            boolean buildContainerSetting = project.liberty.dev.container; // get from build.gradle
+            if (buildContainerSetting == null) {
+                setContainer(DEFAULT_CONTAINER);
+            } else {
+                setContainer(buildContainerSetting);
+            }
+        }
+        
+        if (dockerfile == null) {
+            String buildDockerfileSetting = project.liberty.dev.dockerfile; // get from build.gradle
+            if (buildDockerfileSetting != null) {
+                setDockerfile(buildDockerfileSetting);
+            }
+        }
+
+        if (dockerRunOpts == null) {
+            String buildDockerRunOptsSetting = project.liberty.dev.dockerRunOpts; // get from build.gradle
+            if (buildDockerRunOptsSetting != null) {
+                setDockerRunOpts(buildDockerRunOptsSetting);
+            }
         }
     }
 
