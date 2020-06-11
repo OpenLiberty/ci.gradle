@@ -183,6 +183,13 @@ class DevTask extends AbstractServerTask {
         }
     }
 
+    private String dockerRunOpts;
+
+    @Option(option = 'dockerRunOpts', description = 'Additional options for the docker run command when dev mode starts a container.')
+    void setDockerRunOpts(String dockerRunOpts) {
+        this.dockerRunOpts = dockerRunOpts;
+    }
+
     @Optional
     @Input
     Boolean clean;
@@ -212,12 +219,13 @@ class DevTask extends AbstractServerTask {
                     File configDirectory, File projectDirectory, List<File> resourceDirs,
                     boolean  hotTests, boolean  skipTests, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
-                    boolean libertyDebug, boolean pollingTest, boolean container, File dockerfile
+                    boolean libertyDebug, boolean pollingTest, boolean container, File dockerfile,
+                    String dockerRunOpts
         ) throws IOException {
             super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory,
                     resourceDirs, hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
-                    true, true, pollingTest, container, dockerfile);
+                    true, true, pollingTest, container, dockerfile, dockerRunOpts);
 
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
@@ -803,7 +811,7 @@ class DevTask extends AbstractServerTask {
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
-                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile
+                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerRunOpts
         );
 
         util.addShutdownHook(executor);
