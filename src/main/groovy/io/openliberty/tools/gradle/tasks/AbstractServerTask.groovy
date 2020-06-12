@@ -301,6 +301,10 @@ abstract class AbstractServerTask extends AbstractTask {
             serverEnvPath = server.serverEnvFile.getCanonicalPath()
         }
 
+        if (container != null && container.booleanValue()) {
+            // Set PROJECT_ROOT_NAME so it will be written in config file.
+            server.var."io.openliberty.tools.projectRoot" = project.getProjectDir().getAbsolutePath()
+        }
         // generate a config file on the server with any Liberty configuration variables specified via project properties
         if ((server.var != null && !server.var.isEmpty()) || (server.defaultVar != null && !server.defaultVar.isEmpty()) || 
              !varProjectProps.isEmpty() || !defaultVarProjectProps.isEmpty()) {
@@ -783,9 +787,6 @@ abstract class AbstractServerTask extends AbstractTask {
             String key = entry.getKey()
             existingVarNames.add(key)
             configDocument.createVariableWithValue(entry.getKey(), entry.getValue(), false)
-        }
-        if (container != null && container.booleanValue()) {
-            configDocument.createVariableWithValue(PROJECT_ROOT_NAME, project.getProjectDir().getAbsolutePath(), false)
         }
 
         for (Map.Entry<String, String> entry : defaultVarProjectProps.entrySet()) {
