@@ -59,7 +59,7 @@ abstract class AbstractServerTask extends AbstractTask {
     private static final Pattern pattern = Pattern.compile(LIBERTY_CONFIG_GRADLE_PROPS)
 
     protected final String PLUGIN_VARIABLE_CONFIG_XML = "configDropins/overrides/liberty-plugin-variable-config.xml"
-    protected final String PROJECT_ROOT_NAME = "io.openliberty.projectRoot";
+    protected final String PROJECT_ROOT_NAME = "io.openliberty.tools.projectRoot";
 
     protected Properties bootstrapProjectProps = new Properties()
     protected Properties envProjectProps = new Properties()
@@ -285,13 +285,6 @@ abstract class AbstractServerTask extends AbstractTask {
             bootStrapPropertiesPath = server.bootstrapPropertiesFile.getCanonicalPath()
         }
 
-        if (container != null && container.booleanValue()) {
-            // Define the variable used in the loose app. configuration file.
-            if (!serverDirectory.isEmpty()) {
-                appendToBootstrap(bootstrapFile, PROJECT_ROOT_NAME+" = "+project.getProjectDir().getAbsolutePath())
-            }
-        }
-
         // envProjectProps and serverEnvFile take precedence over server.env from configDirectory
         File envFile = new File(serverDirectory, "server.env")
         if ((server.env != null && !server.env.isEmpty()) || !envProjectProps.isEmpty()) {
@@ -308,6 +301,10 @@ abstract class AbstractServerTask extends AbstractTask {
             serverEnvPath = server.serverEnvFile.getCanonicalPath()
         }
 
+        if (container != null && container.booleanValue()) {
+            // Set PROJECT_ROOT_NAME so it will be written in config file.
+            server.var."io.openliberty.tools.projectRoot" = project.getProjectDir().getAbsolutePath()
+        }
         // generate a config file on the server with any Liberty configuration variables specified via project properties
         if ((server.var != null && !server.var.isEmpty()) || (server.defaultVar != null && !server.defaultVar.isEmpty()) || 
              !varProjectProps.isEmpty() || !defaultVarProjectProps.isEmpty()) {
@@ -707,22 +704,6 @@ abstract class AbstractServerTask extends AbstractTask {
         } finally {
             if (writer != null) {
                 writer.close()
-            }
-        }
-    }
-
-    protected void appendToBootstrap(File bootstrapFile, String line) throws IOException {
-        logger.debug("bootstrapFile name:"+bootstrapFile.getName()+" new line:"+line)
-        PrintWriter writer = null;
-        try {
-            FileWriter fwriter = new FileWriter(bootstrapFile, true);
-            writer = new PrintWriter(fwriter);
-            writer.println();
-            writer.println(HEADER);
-            writer.println(line);
-        } finally {
-            if (writer != null) {
-                writer.close();
             }
         }
     }
