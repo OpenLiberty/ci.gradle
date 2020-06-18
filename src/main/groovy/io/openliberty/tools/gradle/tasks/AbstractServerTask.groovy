@@ -301,8 +301,8 @@ abstract class AbstractServerTask extends AbstractTask {
             serverEnvPath = server.serverEnvFile.getCanonicalPath()
         }
 
-        if (container != null && container.booleanValue() ||
-            System.getProperty(PROJECT_ROOT_NAME) != null) { // property set by CreateTask
+        if (container != null && container.booleanValue() ||  // option used by DevTask
+            System.getProperty(PROJECT_ROOT_NAME) != null) {  // property used when calling CreateTask
             // Set PROJECT_ROOT_NAME so it will be written in config dropin file.
             server.var."${PROJECT_ROOT_NAME}" = project.getProjectDir().getAbsolutePath()
         }
