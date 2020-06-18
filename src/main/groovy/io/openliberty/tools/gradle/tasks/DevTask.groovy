@@ -620,7 +620,11 @@ class DevTask extends AbstractServerTask {
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
             try {
-                runGradleTask(gradleBuildLauncher, 'deploy');
+                if (container) {
+                    runGradleTask(gradleBuildLauncher, 'deploy', '--container');
+                } else {
+                    runGradleTask(gradleBuildLauncher, 'deploy');
+                }
             } catch (BuildException e) {
                 throw new PluginExecutionException(e);
             } finally {
@@ -646,9 +650,12 @@ class DevTask extends AbstractServerTask {
         public void libertyDeploy() {
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
-
             try {
-                runGradleTask(gradleBuildLauncher, 'deploy');
+                if (container) {
+                    runGradleTask(gradleBuildLauncher, 'deploy', '--container');
+                } else {
+                    runGradleTask(gradleBuildLauncher, 'deploy');
+                }
             } catch (BuildException e) {
                 throw new PluginExecutionException(e);
             } finally {
@@ -664,7 +671,9 @@ class DevTask extends AbstractServerTask {
             // need to force liberty-create to re-run
             // else it will just say up-to-date and skip the task
             gradleBuildLauncher.withArguments('--rerun-tasks');
-
+            if (container) {
+                System.setProperty(PROJECT_ROOT_NAME, "true") // no --container in CreateTask
+            }
             try {
                 runGradleTask(gradleBuildLauncher, 'libertyCreate');
             } catch (BuildException e) {
