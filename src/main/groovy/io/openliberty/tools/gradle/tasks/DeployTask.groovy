@@ -375,7 +375,7 @@ class DeployTask extends AbstractServerTask {
                 }
             }
             else if (dependency instanceof ExternalModuleDependency) {
-                looseEar.getConfig().addFile(dependencyFile, "/WEB-INF/lib/" + it.getName())
+                addLibrary(looseEar.getDocumentRoot(), looseEar, "/WEB-INF/lib/", dependencyFile);
             }
             else {
                 logger.warn("Dependency " + dependency.getName() + "could not be added to the looseApplication, as it is neither a ProjectDependency or ExternalModuleDependency")
