@@ -319,7 +319,6 @@ class DeployTask extends AbstractServerTask {
                 File manifestFile = project.sourceSets.main.getOutput().getResourcesDir().getParentFile()
                 looseApp.addManifestFileWithParent(archive, manifestFile);
             } else if(FilenameUtils.getExtension(dep.getAbsolutePath()).equalsIgnoreCase("jar")){
-                //looseApp.getConfig().addFile(parent, dep, "/WEB-INF/lib/" + dep.getName());
                 addLibrary(parent, looseApp, "/WEB-INF/lib/", dep);
             } else {
                 looseApp.addOutputDir(looseApp.getDocumentRoot(), dep , "/WEB-INF/classes/");
@@ -466,7 +465,6 @@ class DeployTask extends AbstractServerTask {
         for (File f : filesAsDeps){
             String extension = FilenameUtils.getExtension(f.getAbsolutePath())
             if(extension.equals("jar")){
-                //looseApp.getConfig().addFile(parent, f, dir + f.getName());
                 addLibrary(parent, looseApp, dir, f);
             }
         }
@@ -481,11 +479,9 @@ class DeployTask extends AbstractServerTask {
                 throw new GradleException("copyLibsDirectory must be a directory.")
             } else {
                 looseApp.getConfig().addFile(parent, lib, dir + lib.getName(), server.deploy.copyLibsDirectory)
-                logger.info("Adding loose app library entry: "+dir+lib.getName()+" pointing to "+server.deploy.copyLibsDirectory.getAbsolutePath())
             }
         } else {
             looseApp.getConfig().addFile(parent, lib, dir + lib.getName())
-            logger.info("Adding loose app library entry: "+dir+lib.getName())
         }
     }
 
