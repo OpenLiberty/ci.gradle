@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2015, 2019.
+ * (C) Copyright IBM Corporation 2015, 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ class DeployExtension {
   
     List<Object> apps
     List<Object> dropins
+    File copyLibsDirectory
 }
 
 
