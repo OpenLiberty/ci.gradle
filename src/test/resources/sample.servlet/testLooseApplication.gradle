@@ -45,6 +45,7 @@ liberty {
         name = wlpServerName
         deploy {
             apps = [war]
+            copyLibsDirectory = file("${project.buildDir}/libs")
         }
         
         stripVersion = true
