@@ -14,6 +14,7 @@ The `deploy` task can be configured using the `deploy` block. It is located in t
 | --------- | ----- | ----- | ----------- | -------- |
 | apps | Object[] | 3.0 | Specifies which tasks/files should be deployed to the `apps` directory. Applications can be passed in as the task that generates the file or as an application file. | No |
 | dropins | Object[] | 3.0 | Specifies which tasks/files should be deployed to the `dropins` directory. Applications can be passed in as the task that generates the file or as an application file. | No |
+| copyLibsDirectory | File | 3.1 | The optional directory to which loose application dependencies referenced by the loose application configuration file are copied. For example, if you want loose application dependencies to be contained within the build directory, you could set this parameter to target. The loose application configuration file will reference this directory for the loose application dependencies instead of the local repository cache. Only applicable when `looseApplication` is true, which is the default. | No |
 
 In addition to the `deploy` block, the `stripVersion` and `looseApplication` properties are used for application installation. More information on these properties can be found in the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration).
 

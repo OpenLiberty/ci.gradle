@@ -23,9 +23,9 @@ repositories {
 }
 
 dependencies {
-    deploy project(':ejb-ejb')
-    deploy project(path:':ejb-war', configuration:'archives')
-    deploy 'org.apache.commons:commons-text:1.1'
+    deploy project(':SampleEJB')
+    earlib project(path:':SampleWAR', configuration:'archives')
+    earlib project(path:':SampleWAR2', configuration:'archives')
     testImplementation group: 'commons-httpclient', name: 'commons-httpclient', version:'3.1'
     testImplementation group: 'junit', name: 'junit', version:'4.12'
     libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
@@ -34,8 +34,9 @@ dependencies {
 ear {
     archiveName = baseName + '.' + extension
     deploymentDescriptor {
-        module ('ejb-ejb.jar', 'ejb')
-        webModule ('ejb-war.war', '/ejb-war')
+        module ('SampleEJB.jar', 'ejb')
+        webModule ('SampleWAR.war', '/SampleWAR')
+        webModule ('SampleWAR2.war', '/SampleWAR2')
     }
 }
 
@@ -44,7 +45,6 @@ liberty {
         name = "ejbServer"
         deploy {
             apps = [ear]
-            copyLibsDirectory = file("${project.buildDir}/libs")
         }
         verifyAppStartTimeout = 30
         looseApplication = true
@@ -53,4 +53,4 @@ liberty {
 
 clean.dependsOn 'libertyStop'
 deploy.dependsOn 'ear'
-ear.dependsOn ':ejb-war:jar', ':ejb-war:war'
+ear.dependsOn ':SampleEJB:jar', ':SampleWAR:war', ':SampleWAR2:war'

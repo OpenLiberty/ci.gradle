@@ -1,0 +1,10 @@
+rootProject.name = 'loose-ear-earlibs-test'
+include ':SampleEAR'
+include ':SampleEJB'
+include ':SampleWAR'
+include ':SampleWAR2'
+
+project(':SampleEAR').projectDir = "$rootDir/SampleEAR" as File
+project(':SampleEJB').projectDir = "$rootDir/SampleEJB" as File
+project(':SampleWAR').projectDir = "$rootDir/SampleWAR" as File
+project(':SampleWAR2').projectDir = "$rootDir/SampleWAR2" as File
