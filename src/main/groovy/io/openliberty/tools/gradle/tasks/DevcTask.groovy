@@ -19,6 +19,13 @@ import org.gradle.api.tasks.TaskAction
 
 class DevcTask extends DevTask {
 
+    DevcTask() {
+        configure({
+            description 'Runs a Liberty server in dev mode inside of a Docker container'
+            group 'Liberty'
+        })
+    }
+
     @TaskAction
     void action() {
         // set container variable for DevTask

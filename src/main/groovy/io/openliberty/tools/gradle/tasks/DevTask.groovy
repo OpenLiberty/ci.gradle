@@ -161,7 +161,7 @@ class DevTask extends AbstractServerTask {
 
     private Boolean container = null;
 
-    @Option(option = 'container', description = 'Run the server in a Docker container instead of locally. The default value is false.')
+    @Option(option = 'container', description = 'Run the server in a Docker container instead of locally. The default value is false for the libertyDev task, and true for the libertyDevc task.')
     void setContainer(boolean container) {
         this.container = container;
         super.@container = container;
