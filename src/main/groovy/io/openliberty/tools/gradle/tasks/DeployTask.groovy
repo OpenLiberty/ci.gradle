@@ -48,6 +48,7 @@ class DeployTask extends AbstractServerTask {
 
     protected ApplicationXmlDocument applicationXml = new ApplicationXmlDocument();
     private static final boolean DEFAULT_CONTAINER = false;
+    private static final String PROJECT_ROOT_BUILD_LIBS = "build/libs";
 
     DeployTask() {
         configure({
@@ -294,6 +295,22 @@ class DeployTask extends AbstractServerTask {
         if (container) {
             config.setProjectRoot(task.getProject().getProjectDir().getAbsolutePath());
             config.setSourceOnDiskName('${'+PROJECT_ROOT_NAME+'}');
+
+            if (server.deploy.copyLibsDirectory == null) { // in container mode, copy dependencies from .m2 dir to the build dir to mount in container
+                server.deploy.copyLibsDirectory = new File(task.getProject().getProjectDir(), PROJECT_ROOT_BUILD_LIBS);
+            } else {
+                 // test the user defined copyLibsDirectory parameter for use in a container
+                try {
+                    String projectPath = task.getProject().getProjectDir().getCanonicalPath();
+                    String copyLibsPath = server.deploy.copyLibsDirectory.getCanonicalPath();
+                    if (!copyLibsPath.startsWith(projectPath)) {
+                        // Flag an error but allow processing to continue in case dependencies, if any, are not actually referenced by the app.
+                        logger.error("The directory indicated by the copyLibsDirectory extension must be within the Gradle project directory when the container option is specified.");
+                    }
+                } catch (IOException i) {
+                    logger.error("IOException occurred trying to get the path of the Gradle project or the directory specified in the copyLibsDirectory extension. Exception message:"+i.getMessage());
+                }
+            }
         }
 
         LooseWarApplication looseWar = new LooseWarApplication(task, config)
