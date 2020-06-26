@@ -531,7 +531,7 @@ class DevTask extends AbstractServerTask {
                 gradleBuildLauncher.withArguments("--exclude-task", "libertyCreate");
 
                 try {
-                    runGradleTask(gradleBuildLauncher, "installFeature", "--serverDir=${serverDir.getAbsolutePath()}");
+                    runInstallFeatureTask(gradleBuildLauncher, "--serverDir=${serverDir.getAbsolutePath()}");
                     this.existingFeatures.addAll(features);
                 } catch (BuildException e) {
                     // stdout/stderr from the installFeature task is sent to the terminal
@@ -634,15 +634,17 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void libertyInstallFeature() {
-            ProjectConnection gradleConnection = initGradleProjectConnection();
-            BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+            if (!container) { // for now, container mode does not support installing features
+                ProjectConnection gradleConnection = initGradleProjectConnection();
+                BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
-            try {
-                runGradleTask(gradleBuildLauncher, 'installFeature');
-            } catch (BuildException e) {
-                throw new PluginExecutionException(e);
-            } finally {
-                gradleConnection.close();
+                try {
+                    runInstallFeatureTask(gradleBuildLauncher);
+                } catch (BuildException e) {
+                    throw new PluginExecutionException(e);
+                } finally {
+                    gradleConnection.close();
+                }
             }
         }
 
@@ -681,6 +683,15 @@ class DevTask extends AbstractServerTask {
             } finally {
                 gradleConnection.close();
             }
+        }
+    }
+
+    public void runInstallFeatureTask(BuildLauncher gradleBuildLauncher, String... options) throws BuildException {
+        if (!container) {
+            ArrayList tasks = new ArrayList(options.length + 1);
+            tasks.add('installFeature');
+            tasks.addAll(options);
+            runGradleTask(gradleBuildLauncher, tasks.toArray(new String[tasks.size()]));
         }
     }
 
@@ -826,7 +837,7 @@ class DevTask extends AbstractServerTask {
                 :deploy
              */
             runGradleTask(gradleBuildLauncher, 'libertyCreate');
-            runGradleTask(gradleBuildLauncher, 'installFeature');
+            runInstallFeatureTask(gradleBuildLauncher);
             if (container) {
                 runGradleTask(gradleBuildLauncher, 'deploy', '--container');
             } else {
