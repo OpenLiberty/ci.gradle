@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017, 2019.
+ * (C) Copyright IBM Corporation 2017, 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.gradle.api.logging.LogLevel
 import org.apache.tools.ant.Project;
 import io.openliberty.tools.ant.jsp.CompileJSPs;
 
-class CompileJSPTask extends AbstractServerTask {
+class CompileJSPTask extends AbstractFeatureTask {
     protected Project ant = new Project();
 
     CompileJSPTask() {
@@ -85,12 +85,41 @@ class CompileJSPTask extends AbstractServerTask {
         logger.debug("Classpath: " + classpathStr)
         compileJsp.setClasspath(classpathStr)
 
-        if (project.liberty.jsp.jspVersion != null) {
-            compileJsp.setJspVersion(project.liberty.jsp.jspVersion)
+        //Feature list
+        Set<String> installedFeatures = getInstalledFeatures();
+
+        //Set JSP Feature Version
+        setJspVersion(compileJsp, installedFeatures);
+
+        //Removing jsp features at it is already set at this point 
+        installedFeatures.remove("jsp-2.3");
+        installedFeatures.remove("jsp-2.2");
+        
+        if(installedFeatures != null && !installedFeatures.isEmpty()) {
+            compileJsp.setFeatures(installedFeatures.toString().replace("[", "").replace("]", ""));
         }
 
         compileJsp.init()
         compileJsp.execute()
+    }
+
+        private void setJspVersion(CompileJSPs compile, Set<String> installedFeatures) {
+            //If no conditions are met, defaults to 2.3 from the ant task
+            if (project.liberty.jsp.jspVersion != null) {
+                compile.setJspVersion(project.liberty.jsp.jspVersion);
+            }
+            else {
+                Iterator it = installedFeatures.iterator();
+                String currentFeature;
+                while (it.hasNext()) {
+                    currentFeature = (String) it.next();
+                    if(currentFeature.startsWith("jsp-")) {
+                        String version = currentFeature.replace("jsp-", "");
+                        compile.setJspVersion(version);
+                        break;
+                    }
+                }
+            }
     }
 
     protected void setCompileDependencies(Task task, Set<String> classpaths) {
