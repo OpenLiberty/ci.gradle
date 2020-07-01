@@ -29,6 +29,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.tasks.testing.Test
 
 import java.util.Properties
+import java.text.MessageFormat
 
 class Liberty implements Plugin<Project> {
 
@@ -169,6 +170,7 @@ class Liberty implements Plugin<Project> {
             if (project.liberty.installDir.endsWith("wlp")) {
                 installDir = new File(project.liberty.installDir)
             } else { // not valid wlp dir
+                project.getLogger().warn(MessageFormat.format("The installDir {0} is not pointing to a wlp folder. Trying {0}/wlp", project.liberty.installDir))
                 installDir = new File(project.liberty.installDir, 'wlp')
             }
 
