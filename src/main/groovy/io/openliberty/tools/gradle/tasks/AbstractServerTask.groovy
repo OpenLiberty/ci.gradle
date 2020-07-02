@@ -285,17 +285,45 @@ abstract class AbstractServerTask extends AbstractTask {
 
         // envProjectProps and serverEnvFile take precedence over server.env from configDirectory
         File envFile = new File(serverDirectory, "server.env")
+        Properties serverEnvProps = convertServerEnvToProperties(envFile);
+        
         if ((server.env != null && !server.env.isEmpty()) || !envProjectProps.isEmpty()) {
-            if (serverEnvPath != null) {
-                logger.warn("The " + serverEnvPath + " file is overwritten by inlined configuration.")
+            Properties configuredProps = combineServerEnvProperties(server.env, envProjectProps);
+            if(server.appendServerEnv) {
+                if (serverEnvPath != null) {
+                    logger.warn("The " + serverEnvPath + " file is merged with inlined configuration.")
+                }
+
+                //Create properties from existing server env
+                //Merge server.env props with generated serverEnvPath
+                Properties mergedProperties = combineServerEnvProperties(serverEnvProps, configuredProps);
+                writeServerEnvProperties(envFile, mergedProperties);
+                
             }
-            writeServerEnvProperties(envFile, server.env, envProjectProps)
+            else {
+                if (serverEnvPath != null) {
+                    logger.warn("The " + serverEnvPath + " file is overwritten by inlined configuration.")
+                }
+                writeServerEnvProperties(envFile, configuredProps)
+            }
             serverEnvPath = "inlined configuration"
         } else if (server.serverEnvFile != null && server.serverEnvFile.exists()) {
-             if (serverEnvPath != null) {
-                logger.warn("The " + serverEnvPath + " file is overwritten by the " + server.serverEnvFile.getCanonicalPath() + " file.")
+            if(server.appendServerEnv) {
+                if (serverEnvPath != null) {
+                    logger.warn("The " + serverEnvPath + " file is merged with the " + server.serverEnvFile.getCanonicalPath() + " file.")
+                }
+                //Merge this server.env file with what's generated. 
+                Properties configuredServerEnvProps = convertServerEnvToProperties(server.serverEnvFile);
+                Properties mergedProperties = (Properties) combineServerEnvProperties(serverEnvProps, configuredServerEnvProps);
+                writeServerEnvProperties(envFile, mergedProperties);
+
             }
-            Files.copy(server.serverEnvFile.toPath(), envFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            else {
+                if (serverEnvPath != null) {
+                    logger.warn("The " + serverEnvPath + " file is overwritten by the " + server.serverEnvFile.getCanonicalPath() + " file.")
+                }
+                Files.copy(server.serverEnvFile.toPath(), envFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            }
             serverEnvPath = server.serverEnvFile.getCanonicalPath()
         }
 
@@ -731,7 +759,32 @@ abstract class AbstractServerTask extends AbstractTask {
         }
     }
 
-    private void writeServerEnvProperties(File file, Properties properties, Properties projectProperties) throws IOException {
+    private Properties convertServerEnvToProperties(File serverEnv) {
+        if(serverEnv == null) {
+            return null;
+        }
+
+
+        Properties serverEnvProps = new Properties();
+
+        BufferedReader bf = new BufferedReader(new FileReader(serverEnv));
+        String line;
+        while((line = bf.readLine()) != null) {
+            
+            //Skip comments
+            if(!line.startsWith("#")) {
+                String[] keyValue = line.split("=", 2);
+                String key = keyValue[0];
+                String value = keyValue[1];
+
+                serverEnvProps.put(key,value);
+            }
+        }
+
+        return serverEnvProps;
+    }
+
+    private Properties combineServerEnvProperties(Properties properties, Properties projectProperties) {
         Properties combinedEnvProperties = null
         if (! projectProperties.isEmpty()) {
             if (properties.isEmpty()) {
@@ -746,6 +799,10 @@ abstract class AbstractServerTask extends AbstractTask {
             combinedEnvProperties = properties
         }
 
+        return combinedEnvProperties;
+    }
+    
+    private void writeServerEnvProperties(File file, Properties combinedEnvProperties) throws IOException {
         makeParentDirectory(file)
         PrintWriter writer = null
         try {
