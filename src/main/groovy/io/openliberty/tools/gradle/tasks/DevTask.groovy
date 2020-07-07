@@ -752,9 +752,9 @@ class DevTask extends AbstractServerTask {
         }
         
         if (dockerfile == null) {
-            String buildDockerfileSetting = project.liberty.dev.dockerfile; // get from build.gradle
+            File buildDockerfileSetting = project.liberty.dev.dockerfile; // get from build.gradle
             if (buildDockerfileSetting != null) {
-                setDockerfile(buildDockerfileSetting);
+                setDockerfile(buildDockerfileSetting.getAbsolutePath()); // setDockerfile will convert it to canonical path
             }
         }
 

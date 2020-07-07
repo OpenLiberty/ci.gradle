@@ -18,6 +18,6 @@ package io.openliberty.tools.gradle.extensions
 
 class DevExtension {
     boolean container = false
-    String dockerfile
+    File dockerfile
     String dockerRunOpts
 }
