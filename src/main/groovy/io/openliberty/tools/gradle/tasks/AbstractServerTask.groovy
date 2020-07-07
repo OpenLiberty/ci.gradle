@@ -32,6 +32,7 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
 import org.apache.commons.io.FilenameUtils
+import org.apache.commons.io.filefilter.FileFilterUtils
 
 import io.openliberty.tools.ant.ServerTask
 import io.openliberty.tools.common.plugins.config.ServerConfigDropinXmlDocument;
@@ -200,6 +201,32 @@ abstract class AbstractServerTask extends AbstractTask {
         }
     }
 
+    protected void copyConfigDirectory() {
+        //merge default server.env with one in config directory
+        if(server.configDirectory != null && server.appendServerEnv) {
+            FileFilter fileFilter =   FileFilterUtils.notFileFilter(FileFilterUtils.nameFileFilter("server.env", null))
+            FileUtils.copyDirectory(server.configDirectory, getServerDir(project), fileFilter)
+
+            File configDirServerEnv = new File(server.configDirectory, "server.env")
+
+            if(configDirServerEnv.exists()) {
+                Properties configDirServerEnvProps = convertServerEnvToProperties(configDirServerEnv)
+
+                File defaultEnvFile = new File(getServerDir(project).toString(), "server.env")
+                Properties defaultServerEnvProps = convertServerEnvToProperties(defaultEnvFile)
+
+                Properties mergedProperties = combineServerEnvProperties(defaultServerEnvProps, configDirServerEnvProps)
+                
+                writeServerEnvProperties(defaultEnvFile, mergedProperties)
+            }
+
+        }
+        else {
+            // replace entire directory with configured configDirectory 
+            FileUtils.copyDirectory(server.configDirectory, getServerDir(project))
+        }
+    }
+
     /**
      * @throws IOException
      * @throws FileNotFoundException
@@ -219,8 +246,9 @@ abstract class AbstractServerTask extends AbstractTask {
         initializeConfigDirectory();
 
         if(server.configDirectory.exists()) {
+            
             // copy configuration files from configuration directory to server directory if end-user set it
-            FileUtils.copyDirectory(server.configDirectory, getServerDir(project))
+            copyConfigDirectory()
 
             File configDirServerXML = new File(server.configDirectory, "server.xml")
             if (configDirServerXML.exists()) {
