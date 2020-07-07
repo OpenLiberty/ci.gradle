@@ -100,6 +100,22 @@ abstract class AbstractTask extends DefaultTask {
         return (installDir.exists() && new File(installDir, "lib/ws-launch.jar").exists())
     }
 
+    @Internal
+    protected boolean isLibertyInstalledAndValid(Project project) {
+        // only used for installLibertyTask, where it should throw an exception instead of returning false when the installDir is invalid.
+        if(project.liberty.installDir != null) {
+            project.getLogger().info("Found user-specified installDir. Checking if valid " + project.liberty.installDir)
+            String installDirPath = Liberty.checkAndAppendWlp(project)
+            if (!(new File(installDirPath, "lib/ws-launch.jar").exists())) {
+                throw new GradleException("Unable to find a valid Liberty installation at installDir path " + installDirPath +". Please specify a valid path for the installDir property.")
+            } else {
+                return true;
+            }
+        } else {
+            return isLibertyInstalled(project)
+        }
+    }
+
     private final String  COM_IBM_WEBSPHERE_PRODUCTID_KEY = "com.ibm.websphere.productId"
     private final String COM_IBM_WEBSPHERE_PRODUCTVERSION_KEY = "com.ibm.websphere.productVersion"
 
