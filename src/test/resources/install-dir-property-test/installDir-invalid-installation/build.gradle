@@ -27,7 +27,7 @@ allprojects {
 }
 
 dependencies {
-    libertyRuntime "io.openliberty:openliberty-runtime:18.0.0.4"
+    libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
 }
 
 defaultTasks 'installLiberty'

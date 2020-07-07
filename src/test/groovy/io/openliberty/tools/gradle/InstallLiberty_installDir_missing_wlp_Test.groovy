@@ -22,14 +22,11 @@ import org.junit.Test
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 
-class InstallDirPropertyTest extends AbstractIntegrationTest {
-    static File resourceDir = new File("build/resources/test/install-dir-property-test")
-    static File buildDir = new File(integTestDir, "/InstallDirPropertyTest")
-    static String buildFilename = "testInstallDirProperty.gradle"
+class InstallLiberty_installDir_missing_wlp_Test extends AbstractIntegrationTest {
+    static File resourceDir = new File("build/resources/test/install-dir-property-test/installDir-missing-wlp")
 
-    static File runtimeInstallDir = new File(buildDir, 'wlp')
-    static File parentProjectBuildDir = new File(buildDir, 'build')
-    static File subProjectBuildDir = new File(buildDir, 'webapp/build')
+    static File buildDir = new File(integTestDir, "/InstallLiberty_installDir_missing_wlp")
+    static String buildFilename = "build.gradle"
 
     @BeforeClass
     public static void setup() {
@@ -38,14 +35,14 @@ class InstallDirPropertyTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void test_installLiberty_invalid_installDir_fail() {
+    void test_installLiberty_installDir_missing_wlp() {
         BuildResult result = GradleRunner.create()
             .withProjectDir(buildDir)
             .forwardOutput()
             .withArguments('installLiberty', '-i', '-s')
-            .buildAndFail()
+            .build()
 
         String output = result.getOutput()
-        assert output.contains("Please specify a valid installDir") : "Expected installLiberty to fail with GradleException"
+        assert output.contains("path does not reference a wlp folder") : "Expected warning about installDir path not containing wlp"
     }
 }

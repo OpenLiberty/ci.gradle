@@ -33,7 +33,7 @@ abstract class AbstractTask extends DefaultTask {
     protected Task springBootTask
 
     protected getInstallDir = { Project project ->
-        Liberty.getInstallDir(project);
+        return Liberty.getInstallDir(project);
     }
 
     protected File getUserDir(Project project) {

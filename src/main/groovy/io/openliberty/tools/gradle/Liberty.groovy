@@ -170,14 +170,15 @@ class Liberty implements Plugin<Project> {
             if (project.liberty.installDir.endsWith("wlp")) {
                 installDir = new File(project.liberty.installDir)
             } else { // not valid wlp dir
-                project.getLogger().warn(MessageFormat.format("The installDir {0} is not pointing to a wlp folder. Trying {0}/wlp", project.liberty.installDir))
+                project.getLogger().warn(MessageFormat.format("The installDir {0} path does not reference a wlp folder. Checking for a valid Liberty installation at path {0}/wlp instead.", project.liberty.installDir))
                 installDir = new File(project.liberty.installDir, 'wlp')
             }
 
             //check if installDir is a valid Liberty installation
             if (!(new File(installDir, "lib/ws-launch.jar").exists())) {
-                throw new GradleException("Unable to find valid Liberty installation at the specified path. Please specify a valid installDir.")
+                throw new GradleException("Unable to find a valid Liberty installation at installDir path " + project.liberty.installDir +". Please specify a valid path for the installDir property.")
             }
+            return installDir;
         }
     }
 }
