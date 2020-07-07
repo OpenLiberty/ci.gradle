@@ -13,21 +13,14 @@ buildscript {
     }
 }
 
-allprojects {
-    apply plugin: 'base'
-    apply plugin: 'liberty'
+apply plugin: 'liberty'
 
-    liberty {
-        installDir = file("${project(':installDir-valid-install').buildDir}")
+liberty {
+    installDir = file("${project(':installDir-valid-install').buildDir}")
+
+    server{
+        name = 'test'
     }
-
-    repositories {
-        addAll rootProject.buildscript.repositories
-    }
-}
-
-dependencies {
-    libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
 }
 
 installLiberty.dependsOn ':installDir-valid-install:installLiberty'
