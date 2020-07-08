@@ -61,7 +61,7 @@ class InstallLibertyTask extends AbstractTask {
 
     @TaskAction
     void install() {
-        if (!isLibertyInstalled(project)) {
+        if (!isLibertyInstalledAndValid(project)) {
             def params = buildInstallLibertyMap(project)
 
             project.ant.taskdef(name: 'installLiberty',

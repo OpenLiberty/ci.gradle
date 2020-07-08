@@ -15,6 +15,7 @@
  */
 package io.openliberty.tools.gradle.tasks
 
+import io.openliberty.tools.gradle.Liberty
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -32,15 +33,7 @@ abstract class AbstractTask extends DefaultTask {
     protected Task springBootTask
 
     protected getInstallDir = { Project project ->
-        if (project.liberty.installDir == null) {
-            if (project.liberty.baseDir == null) {
-                return new File(project.buildDir, 'wlp')
-            } else {
-                return new File(project.liberty.baseDir, 'wlp')
-            }
-        } else {
-            return new File(project.liberty.installDir)
-        }
+        return Liberty.getInstallDir(project);
     }
 
     protected File getUserDir(Project project) {
@@ -74,7 +67,7 @@ abstract class AbstractTask extends DefaultTask {
                 }
             } catch (MissingPropertyException e) {
                 project.getLogger().warn('No buildscript configuration found.')
-                throw new GradleException("Unable to determe version of spring boot gradle plugin.")
+                throw new GradleException("Unable to determine version of spring boot gradle plugin.")
             }
         }
         return version
@@ -102,9 +95,13 @@ abstract class AbstractTask extends DefaultTask {
         return task
     }
     @Internal
-    protected boolean isLibertyInstalled(Project project) {
+    protected boolean isLibertyInstalledAndValid(Project project) {
         File installDir = getInstallDir(project)
-        return (installDir.exists() && new File(installDir, "lib/ws-launch.jar").exists())
+        boolean installationExists = installDir.exists() && new File(installDir,"lib/ws-launch.jar").exists()
+        if (!installationExists && (project.liberty.installDir != null)) {
+            throw new GradleException("Unable to find a valid Liberty installation at installDir path " + installDir +". Please specify a valid path for the installDir property.")
+        }
+        return installationExists
     }
 
     private final String  COM_IBM_WEBSPHERE_PRODUCTID_KEY = "com.ibm.websphere.productId"

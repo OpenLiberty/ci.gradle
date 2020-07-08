@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2019.
+ * (C) Copyright IBM Corporation 2014, 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ class StopTask extends AbstractServerTask {
 
     @TaskAction
     void stop() {
-        if (isLibertyInstalled(project)) {
+        if (isLibertyInstalledAndValid(project)) {
             if (getServerDir(project).exists()) {
                 ServerTask serverTaskStop = createServerTask(project, "stop");
                 serverTaskStop.setUseEmbeddedServer(server.embedded)
