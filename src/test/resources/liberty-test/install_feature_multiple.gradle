@@ -32,7 +32,7 @@ liberty {
         }
 
         uninstallfeatures {
-            name = ["mongodb-2.0", "adminCenter-1.0"]
+            name = ["couchdb-1.0", "mongodb-2.0", "adminCenter-1.0"]
         }
     }
 }
