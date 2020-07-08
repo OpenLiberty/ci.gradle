@@ -96,17 +96,12 @@ abstract class AbstractTask extends DefaultTask {
     }
     @Internal
     protected boolean isLibertyInstalledAndValid(Project project) {
-        if(project.liberty.installDir != null) {
-            String installDirPath = Liberty.checkAndAppendWlp(project)
-            if (!(new File(installDirPath, "lib/ws-launch.jar").exists())) {
-                throw new GradleException("Unable to find a valid Liberty installation at installDir path " + installDirPath +". Please specify a valid path for the installDir property.")
-            } else {
-                return true;
-            }
-        } else {
-            File installDir = getInstallDir(project)
-            return (installDir.exists() && new File(installDir, "lib/ws-launch.jar").exists())
+        File installDir = getInstallDir(project)
+        boolean installationExists = installDir.exists() && new File(installDir,"lib/ws-launch.jar").exists()
+        if (!installationExists && (project.liberty.installDir != null)) {
+            throw new GradleException("Unable to find a valid Liberty installation at installDir path " + installDir +". Please specify a valid path for the installDir property.")
         }
+        return installationExists
     }
 
     private final String  COM_IBM_WEBSPHERE_PRODUCTID_KEY = "com.ibm.websphere.productId"
