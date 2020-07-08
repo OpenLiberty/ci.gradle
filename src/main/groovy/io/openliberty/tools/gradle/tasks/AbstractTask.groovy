@@ -95,14 +95,7 @@ abstract class AbstractTask extends DefaultTask {
         return task
     }
     @Internal
-    protected boolean isLibertyInstalled(Project project) {
-        File installDir = getInstallDir(project)
-        return (installDir.exists() && new File(installDir, "lib/ws-launch.jar").exists())
-    }
-
-    @Internal
     protected boolean isLibertyInstalledAndValid(Project project) {
-        // only used for installLibertyTask, where it should throw an exception instead of returning false when the installDir is invalid.
         if(project.liberty.installDir != null) {
             String installDirPath = Liberty.checkAndAppendWlp(project)
             if (!(new File(installDirPath, "lib/ws-launch.jar").exists())) {
@@ -111,7 +104,8 @@ abstract class AbstractTask extends DefaultTask {
                 return true;
             }
         } else {
-            return isLibertyInstalled(project)
+            File installDir = getInstallDir(project)
+            return (installDir.exists() && new File(installDir, "lib/ws-launch.jar").exists())
         }
     }
 

@@ -251,7 +251,7 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void stopServer() {
-            if (isLibertyInstalled(project)) {
+            if (isLibertyInstalledAndValid(project)) {
                 if (getServerDir(project).exists()) {
                     ServerTask serverTaskStop = createServerTask(project, "stop");
                     serverTaskStop.execute();

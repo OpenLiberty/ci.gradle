@@ -30,7 +30,7 @@ class StopTask extends AbstractServerTask {
 
     @TaskAction
     void stop() {
-        if (isLibertyInstalled(project)) {
+        if (isLibertyInstalledAndValid(project)) {
             if (getServerDir(project).exists()) {
                 ServerTask serverTaskStop = createServerTask(project, "stop");
                 serverTaskStop.setUseEmbeddedServer(server.embedded)

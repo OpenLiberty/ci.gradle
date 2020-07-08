@@ -29,7 +29,7 @@ class UninstallFeatureTask extends AbstractServerTask {
 
     @TaskAction
     void uninstallFeature() {
-        if (isLibertyInstalled(project)) {
+        if (isLibertyInstalledAndValid(project)) {
             def params = buildLibertyMap(project);
             if (server.uninstallfeatures.name != null) {
                 params.put('name', server.uninstallfeatures.name.join(","))
