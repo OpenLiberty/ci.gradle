@@ -178,7 +178,7 @@ class Liberty implements Plugin<Project> {
         if (installDir.endsWith("wlp")) {
             return installDir
         } else { // not valid wlp dir
-            project.getLogger().warn(MessageFormat.format("The installDir {0} path does not reference a wlp folder. Checking for a valid Liberty installation at path {0}/wlp instead.", installDir))
+            project.getLogger().warn(MessageFormat.format("The installDir {0} path does not reference a wlp folder. Using path {0}/wlp instead.", installDir))
             return new File(installDir, 'wlp').toString()
         }
     }
