@@ -1,12 +1,15 @@
 ## Liberty extension properties
 The Liberty Gradle plugin defines properties in the `liberty` block to customize task behavior.
-These properties are divided in two groups:
+These properties are divided in three groups:
 * The [general runtime properties](#general-runtime-properties) which control how the runtime is installed with the `installLiberty` task.
 * The [Liberty server configuration](#liberty-server-configuration) properties control how a server is initialized and the applications that are installed. These properties are defined in a `server` block within the `liberty` block.
+* The [dev extension properties](#dev-extension-properties) that are specific to dev mode when using containers. These properties are defined in a `dev` block within the `liberty` block.
 
 The [installLiberty](installLiberty.md) and [compileJSP](compileJsp.md) tasks can be configured with their related extension inside the `liberty` block.
 
 The [deploy](deploy.md), [undeploy](undeploy.md), [libertyPackage](libertyPackage.md), [installFeature](installFeature.md), [uninstallFeature](uninstallFeature.md), [cleanDirs](clean.md), [libertyDump](libertyDump.md), and [libertyJavaDump](libertyJavaDump.md) tasks can be configured with their related extension inside the `server` block.
+
+The [libertyDevc](libertyDev.md#libertydevc-task-container-mode) task can be configured with its related extension inside the `dev` block.
 
 ### General runtime properties
 
@@ -51,3 +54,15 @@ The following properties are supported for server configuration.
 | timeout | String | 1.0 | Waiting time before the server starts. The default value is 30 seconds. The unit is seconds. Only used with `libertyStart` and `deploy` tasks. | No |
 | var | Properties | 3.0 | Inline server variables that are written to the `configDropins/overrides/liberty-plugin-variable-config.xml` file in the server directory. The property name is used for the variable `name`, and the property value is used for the variable `value`.| No|
 | verifyAppStartTimeout | int | 2.0 | Wait time for checking message logs for start of all applications installed with the `deploy` task. Only used with the `libertyStart` task. Default value is 0 seconds with no verification. | No |
+
+### Dev extension properties
+
+The following is a technology preview. The properties described below may change in future milestones or releases of the Liberty Gradle plugin.
+
+The `dev` extension allows you to configure properties for the [libertyDevc](libertyDev.md#libertydevc-task-container-mode) task.
+
+| Attribute | Type  | Since | Description | Required |
+| --------- | ----- | ----- | ----------- | -------- |
+| container | boolean | 3.1-M1 (tech preview) | If set to `true`, run the server in the container specified by the `dockerfile` parameter. Setting this to `true` and using the `libertyDev` task is equivalent to using the `libertyDevc` task. The default value is `false` when the `libertyDev` task is used, and `true` when the `libertyDevc` task is used. | No |
+| dockerRunOpts | String | 3.1-M1 (tech preview) | Specifies options to add to the `docker run` command when using dev mode to launch your server in a container. For example, `-e key=value` is recognized by `docker run` to define an environment variable with the name `key` and value `value`. Setting this parameter overrides the `container` parameter to `true`. | No |
+| dockerfile | File | 3.1-M1 (tech preview) | Location of a Dockerfile to be used by dev mode to build the container that runs your server and to specify the context used to build the container image. The default location is `Dockerfile` in the project root. Setting this parameter overrides the `container` parameter to `true`. | No |
