@@ -47,6 +47,8 @@ import java.io.File
 class DeployTask extends AbstractServerTask {
 
     protected ApplicationXmlDocument applicationXml = new ApplicationXmlDocument();
+    private static final String LIBS = "libs";
+    private static final String BUILD_LIBS = "build/" + LIBS;
 
     DeployTask() {
         configure({
@@ -278,8 +280,34 @@ class DeployTask extends AbstractServerTask {
         }
 
         if (project.liberty.dev.container) {
-            config.setProjectRoot(task.getProject().getProjectDir().getAbsolutePath());
-            config.setSourceOnDiskName('${'+PROJECT_ROOT_NAME+'}');
+            try {
+                // Set up the config to replace the absolute path names with ${variable}/target type references
+                config.setProjectRoot(project.getProjectDir().getCanonicalPath());
+                config.setSourceOnDiskName('${'+PROJECT_ROOT_NAME+'}');
+
+                if (server.deploy.copyLibsDirectory == null) { // in container mode, copy dependencies from .m2 dir to the build dir to mount in container
+                    // if buildDir is subdirectory of projectDir, use buildDir/libs.  Otherwise use projectDir/build/libs since it must be under the project root in order to make use of PROJECT_ROOT_NAME
+                    if (project.getBuildDir().getCanonicalFile().toPath().startsWith(project.getProjectDir().getCanonicalFile().toPath())) {
+                        server.deploy.copyLibsDirectory = new File(project.getBuildDir(), LIBS);
+                        logger.debug("Setting copyLibsDirectory to " + server.deploy.copyLibsDirectory);
+                    } else {
+                        server.deploy.copyLibsDirectory = new File(project.getProjectDir(), BUILD_LIBS);
+                        // This is temporary until we add variable substitution for the build dir root.
+                        logger.debug("The directory indicated by the buildDir property should be within the Gradle project directory when the container option is specified.  Setting copyLibsDirectory to " + server.deploy.copyLibsDirectory);
+                    }
+                } else {
+                    // test the user defined copyLibsDirectory extension for use in a container
+                    String projectPath = project.getProjectDir().getCanonicalPath();
+                    String copyLibsPath = server.deploy.copyLibsDirectory.getCanonicalPath();
+                    if (!copyLibsPath.startsWith(projectPath)) {
+                        // Flag an error but allow processing to continue in case dependencies, if any, are not actually referenced by the app.
+                        logger.error("The directory indicated by the copyLibsDirectory extension must be within the Gradle project directory when the container option is specified.");
+                    }
+                }
+            } catch (IOException i) {
+                // an IOException here should fail the build
+                throw new GradleException("Could not resolve the canonical path of the Gradle project, build directory, or the directory specified in the copyLibsDirectory extension. Exception message:"+i.getMessage(), i);
+            }
         }
 
         LooseWarApplication looseWar = new LooseWarApplication(task, config)
