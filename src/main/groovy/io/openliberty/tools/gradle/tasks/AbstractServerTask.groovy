@@ -203,11 +203,10 @@ abstract class AbstractServerTask extends AbstractTask {
 
     protected void copyConfigDirectory() {
         //merge default server.env with one in config directory
-        if(server.configDirectory != null && server.appendServerEnv) {
+        File configDirServerEnv = new File(server.configDirectory, "server.env")
+        if (configDirServerEnv.exists() && server.appendServerEnv) {
             FileFilter fileFilter =   FileFilterUtils.notFileFilter(FileFilterUtils.nameFileFilter("server.env", null))
             FileUtils.copyDirectory(server.configDirectory, getServerDir(project), fileFilter)
-
-            File configDirServerEnv = new File(server.configDirectory, "server.env")
 
             if(configDirServerEnv.exists()) {
                 Properties configDirServerEnvProps = convertServerEnvToProperties(configDirServerEnv)
@@ -312,9 +311,7 @@ abstract class AbstractServerTask extends AbstractTask {
         }
 
         // envProjectProps and serverEnvFile take precedence over server.env from configDirectory
-        // envCode goes here 
-        File envFile = new File(serverDirectory, "server.env")
-        setServerEnv(envFile, serverEnvPath)
+        handleServerEnvFileAndProperties(serverEnvPath, serverDirectory)
 
         // generate a config file on the server with any Liberty configuration variables specified via project properties
         if ((server.var != null && !server.var.isEmpty()) || (server.defaultVar != null && !server.defaultVar.isEmpty()) || 
@@ -748,7 +745,8 @@ abstract class AbstractServerTask extends AbstractTask {
         }
     }
 
-    private void setServerEnv(File envFile, String serverEnvPath) {
+    private void handleServerEnvFileAndProperties(String serverEnvPath, String serverDirectory) {
+        File envFile = new File(serverDirectory, "server.env")
         Properties configuredProps = combineServerEnvProperties(server.env, envProjectProps);
 
         if(server.appendServerEnv) {
@@ -763,26 +761,21 @@ abstract class AbstractServerTask extends AbstractTask {
         Properties serverEnvProps = convertServerEnvToProperties(envFile);
         Properties mergedProperties = new Properties();
 
-        if ((server.env != null && !server.env.isEmpty()) || !envProjectProps.isEmpty()) {
-            if (serverEnvPath != null) {
-                logger.warn("The " + serverEnvPath + " file is merged with inlined configuration.")
-            }
-
-            //Create properties from existing server env
-            //Merge server.env props with generated serverEnvPath
-            mergedProperties = combineServerEnvProperties(serverEnvProps, configuredProps);
-            // writeServerEnvProperties(envFile, mergedProperties);
-        }
-
         if (server.serverEnvFile != null && server.serverEnvFile.exists()) {
             if (serverEnvPath != null) {
                 logger.warn("The " + serverEnvPath + " file is merged with the " + server.serverEnvFile.getCanonicalPath() + " file.")
             }
             Properties configuredServerEnvProps = convertServerEnvToProperties(server.serverEnvFile);
             //Merge with either default server.env or with what has already been merged if
-            Properties propsToMergeWith = mergedProperties.isEmpty() ? serverEnvProps : mergedProperties;
+            mergedProperties = (Properties) combineServerEnvProperties(serverEnvProps, configuredServerEnvProps);
+        }
 
-            mergedProperties = (Properties) combineServerEnvProperties(propsToMergeWith, configuredServerEnvProps);
+        if ((server.env != null && !server.env.isEmpty()) || !envProjectProps.isEmpty()) {
+            if (serverEnvPath != null) {
+                logger.warn("The " + serverEnvPath + " file is merged with inlined configuration.")
+            }
+
+            mergedProperties = combineServerEnvProperties(mergedProperties, configuredProps);
         }
 
         if(!mergedProperties.isEmpty()) {
@@ -832,7 +825,6 @@ abstract class AbstractServerTask extends AbstractTask {
 
     private Properties combineServerEnvProperties(Properties properties, Properties projectProperties) {
         Properties combinedEnvProperties = new Properties()
-        //Create new properties object
         if (! projectProperties.isEmpty()) {
             if (properties.isEmpty()) {
                 combinedEnvProperties.putAll(projectProperties)
