@@ -45,7 +45,6 @@ class TestAppendServerEnvWithConfigServerEnv extends AbstractIntegrationTest {
 
         # Configured server.env
         CONFIG_SERVER_ENV=TEST
-        TEST_PROP_2=blue
         TEST_PROP_3=blue
 
         # Merged server.env
@@ -54,7 +53,6 @@ class TestAppendServerEnvWithConfigServerEnv extends AbstractIntegrationTest {
         CONFIG_SERVER_ENV=TEST
         WLP_SKIP_MAXPERMSIZE=true
         TEST_PROP_3=blue
-        TEST_PROP_2=blue
     */
     @Test
     public void check_server_env_contents() {
@@ -77,13 +75,11 @@ class TestAppendServerEnvWithConfigServerEnv extends AbstractIntegrationTest {
             line = bf.readLine();
         }
         
-
-        Assert.assertTrue("Number of env properties is ",  	serverEnvContents.size() == 5)
+        Assert.assertTrue("Number of env properties is ",  	serverEnvContents.size() == 4)
         Assert.assertTrue("keystore_password mapping found", serverEnvContents.containsKey("keystore_password"))
         Assert.assertTrue("CONFIG_SERVER_ENV=TEST", serverEnvContents.get("CONFIG_SERVER_ENV").equals("TEST"))
         Assert.assertTrue("WLP_SKIP_MAXPERMSIZE=true", serverEnvContents.get("WLP_SKIP_MAXPERMSIZE").equals("true"))
         Assert.assertTrue("TEST_PROP_3=blue", serverEnvContents.get("TEST_PROP_3").equals("blue"))
-        Assert.assertTrue("TEST_PROP_2=blue", serverEnvContents.get("TEST_PROP_2").equals("blue"))
     }
 
 }

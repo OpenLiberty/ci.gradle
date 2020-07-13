@@ -48,8 +48,9 @@ liberty {
             copyLibsDirectory = file("${project.buildDir}/libs")
         }
         appendServerEnv = true
+        serverEnvFile = file("src/resources/server.env")
         configDirectory = file('src/resources/config')
-        env = ['TEST_PROP_3':'white', 'CONFIG_SERVER_ENV_PROPS':'TEST']
+        env = ['TEST_PROP_2':'white', 'CONFIG_SERVER_ENV_PROPS':'TEST']
     }
 }
 

@@ -761,6 +761,7 @@ abstract class AbstractServerTask extends AbstractTask {
 
     private void setServerEnvWithAppendServerEnvHelper(File envFile, String serverEnvPath, Properties configuredProps) {
         Properties serverEnvProps = convertServerEnvToProperties(envFile);
+        Properties mergedProperties = new Properties();
 
         if ((server.env != null && !server.env.isEmpty()) || !envProjectProps.isEmpty()) {
             if (serverEnvPath != null) {
@@ -769,17 +770,22 @@ abstract class AbstractServerTask extends AbstractTask {
 
             //Create properties from existing server env
             //Merge server.env props with generated serverEnvPath
-            Properties mergedProperties = combineServerEnvProperties(serverEnvProps, configuredProps);
-            writeServerEnvProperties(envFile, mergedProperties);
+            mergedProperties = combineServerEnvProperties(serverEnvProps, configuredProps);
+            // writeServerEnvProperties(envFile, mergedProperties);
         }
 
         if (server.serverEnvFile != null && server.serverEnvFile.exists()) {
             if (serverEnvPath != null) {
                 logger.warn("The " + serverEnvPath + " file is merged with the " + server.serverEnvFile.getCanonicalPath() + " file.")
             }
-            //Merge this server.env file with what's generated. 
             Properties configuredServerEnvProps = convertServerEnvToProperties(server.serverEnvFile);
-            Properties mergedProperties = (Properties) combineServerEnvProperties(serverEnvProps, configuredServerEnvProps);
+            //Merge with either default server.env or with what has already been merged if
+            Properties propsToMergeWith = mergedProperties.isEmpty() ? serverEnvProps : mergedProperties;
+
+            mergedProperties = (Properties) combineServerEnvProperties(propsToMergeWith, configuredServerEnvProps);
+        }
+
+        if(!mergedProperties.isEmpty()) {
             writeServerEnvProperties(envFile, mergedProperties);
         }
     }
