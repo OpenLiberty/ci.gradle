@@ -831,11 +831,11 @@ abstract class AbstractServerTask extends AbstractTask {
     }
 
     private Properties combineServerEnvProperties(Properties properties, Properties projectProperties) {
-        Properties combinedEnvProperties = null
+        Properties combinedEnvProperties = new Properties()
         //Create new properties object
         if (! projectProperties.isEmpty()) {
             if (properties.isEmpty()) {
-                combinedEnvProperties = projectProperties
+                combinedEnvProperties.putAll(projectProperties)
             } else {
                 combinedEnvProperties = new Properties()
                 // add the project properties (which come from the command line) last so that they take precedence over the properties specified in build.gradle
@@ -843,7 +843,7 @@ abstract class AbstractServerTask extends AbstractTask {
                 combinedEnvProperties.putAll(projectProperties)
             }
         } else {
-            combinedEnvProperties = properties
+            combinedEnvProperties.putAll(properties)
         }
 
         return combinedEnvProperties;
