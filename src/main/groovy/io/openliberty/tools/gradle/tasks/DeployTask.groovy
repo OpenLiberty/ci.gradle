@@ -47,6 +47,7 @@ import java.io.File
 class DeployTask extends AbstractServerTask {
 
     protected ApplicationXmlDocument applicationXml = new ApplicationXmlDocument();
+
     private static final String LIBS = "libs";
     private static final String BUILD_LIBS = "build/" + LIBS;
 

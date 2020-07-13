@@ -163,7 +163,7 @@ class DevTask extends AbstractServerTask {
 
     private Boolean container = null;
 
-    @Option(option = 'container', description = 'Run the server in a Docker container instead of locally. The default value is false.')
+    @Option(option = 'container', description = 'Run the server in a Docker container instead of locally. The default value is false for the libertyDev task, and true for the libertyDevc task.')
     void setContainer(boolean container) {
         this.container = container;
         project.liberty.dev.container = container; // Needed in DeployTask and AbstractServerTask
@@ -533,7 +533,7 @@ class DevTask extends AbstractServerTask {
                 gradleBuildLauncher.withArguments("--exclude-task", "libertyCreate");
 
                 try {
-                    runGradleTask(gradleBuildLauncher, "installFeature", "--serverDir=${serverDir.getAbsolutePath()}");
+                    runInstallFeatureTask(gradleBuildLauncher, "--serverDir=${serverDir.getAbsolutePath()}");
                     this.existingFeatures.addAll(features);
                 } catch (BuildException e) {
                     // stdout/stderr from the installFeature task is sent to the terminal
@@ -635,15 +635,17 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void libertyInstallFeature() {
-            ProjectConnection gradleConnection = initGradleProjectConnection();
-            BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+            if (!container) { // for now, container mode does not support installing features
+                ProjectConnection gradleConnection = initGradleProjectConnection();
+                BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
-            try {
-                runGradleTask(gradleBuildLauncher, 'installFeature');
-            } catch (BuildException e) {
-                throw new PluginExecutionException(e);
-            } finally {
-                gradleConnection.close();
+                try {
+                    runInstallFeatureTask(gradleBuildLauncher);
+                } catch (BuildException e) {
+                    throw new PluginExecutionException(e);
+                } finally {
+                    gradleConnection.close();
+                }
             }
         }
 
@@ -681,6 +683,15 @@ class DevTask extends AbstractServerTask {
             } finally {
                 gradleConnection.close();
             }
+        }
+    }
+
+    public void runInstallFeatureTask(BuildLauncher gradleBuildLauncher, String... options) throws BuildException {
+        if (!container) {
+            ArrayList tasks = new ArrayList(options.length + 1);
+            tasks.add('installFeature');
+            tasks.addAll(options);
+            runGradleTask(gradleBuildLauncher, tasks.toArray(new String[tasks.size()]));
         }
     }
 
@@ -741,9 +752,9 @@ class DevTask extends AbstractServerTask {
         }
 
         if (dockerfile == null) {
-            String buildDockerfileSetting = project.liberty.dev.dockerfile; // get from build.gradle
+            File buildDockerfileSetting = project.liberty.dev.dockerfile; // get from build.gradle
             if (buildDockerfileSetting != null) {
-                setDockerfile(buildDockerfileSetting);
+                setDockerfile(buildDockerfileSetting.getAbsolutePath()); // setDockerfile will convert it to canonical path
             }
         }
 
@@ -826,7 +837,7 @@ class DevTask extends AbstractServerTask {
                 :deploy
              */
             runGradleTask(gradleBuildLauncher, 'libertyCreate');
-            runGradleTask(gradleBuildLauncher, 'installFeature');
+            runInstallFeatureTask(gradleBuildLauncher);
             if (container) {
                 gradleBuildLauncher.withArguments(CONTAINER_PROPERTY_ARG);
             }
