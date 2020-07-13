@@ -60,6 +60,7 @@ abstract class AbstractServerTask extends AbstractTask {
 
     protected final String PLUGIN_VARIABLE_CONFIG_XML = "configDropins/overrides/liberty-plugin-variable-config.xml"
     protected final String PROJECT_ROOT_NAME = "io.openliberty.tools.projectRoot";
+    protected final String CONTAINER_PROPERTY = 'dev_mode_container'
 
     protected Properties bootstrapProjectProps = new Properties()
     protected Properties envProjectProps = new Properties()
@@ -73,7 +74,6 @@ abstract class AbstractServerTask extends AbstractTask {
 
     protected def server
     protected def springBootBuildTask
-    protected Boolean container = null;
 
     private enum PropertyType {
         BOOTSTRAP("liberty.server.bootstrapProperties"),
@@ -301,9 +301,8 @@ abstract class AbstractServerTask extends AbstractTask {
             serverEnvPath = server.serverEnvFile.getCanonicalPath()
         }
 
-        if (container != null && container.booleanValue() ||  // option used by DevTask
-            System.getProperty(PROJECT_ROOT_NAME) != null) {  // property used when calling CreateTask
-            // Set PROJECT_ROOT_NAME so it will be written in config dropin file.
+        if (project.liberty.dev.container) {
+            // Set PROJECT_ROOT_NAME so it will be written in config dropin overrides file.
             server.var."${PROJECT_ROOT_NAME}" = project.getProjectDir().getAbsolutePath()
         }
         // generate a config file on the server with any Liberty configuration variables specified via project properties

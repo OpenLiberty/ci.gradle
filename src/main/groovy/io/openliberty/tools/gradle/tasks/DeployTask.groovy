@@ -47,7 +47,7 @@ import java.io.File
 class DeployTask extends AbstractServerTask {
 
     protected ApplicationXmlDocument applicationXml = new ApplicationXmlDocument();
-    private static final boolean DEFAULT_CONTAINER = false;
+
     private static final String LIBS = "libs";
     private static final String BUILD_LIBS = "build/" + LIBS;
 
@@ -63,14 +63,6 @@ class DeployTask extends AbstractServerTask {
         })
     }
 
-    private Boolean container = null;
-
-    @Option(option = 'container', description = 'Run the server in a Docker container instead of locally. The default value is false.')
-    void setContainer(boolean container) {
-        this.container = container;
-        super.@container = container;
-    }
-
     boolean containsTask(List<Task> taskList, String name) {
         return taskList.find { it.getName().equals(name) }
     }
@@ -78,11 +70,6 @@ class DeployTask extends AbstractServerTask {
     @TaskAction
     void deploy() {
         boolean hasSpringBootAppConfigured
-
-        if (container == null) {
-            container = DEFAULT_CONTAINER;
-            super.@container = DEFAULT_CONTAINER;
-        }
 
         configureApps(project)
         if (server.deploy.apps != null && !server.deploy.apps.isEmpty()) {
@@ -293,7 +280,7 @@ class DeployTask extends AbstractServerTask {
             logger.warn(MessageFormat.format("Installed loose application from project {0}, but the project has not been compiled.", project.name))
         }
 
-        if (container) {
+        if (project.liberty.dev.container) {
             try {
                 // Set up the config to replace the absolute path names with ${variable}/target type references
                 config.setProjectRoot(project.getProjectDir().getCanonicalPath());

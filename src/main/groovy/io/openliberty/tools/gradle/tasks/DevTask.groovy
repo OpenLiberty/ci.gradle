@@ -76,6 +76,8 @@ class DevTask extends AbstractServerTask {
     private static final boolean DEFAULT_POLLING_TEST = false;
     private static final boolean DEFAULT_CONTAINER = false;
 
+    protected final String CONTAINER_PROPERTY_ARG = '-P'+CONTAINER_PROPERTY+'=true';
+
     private Boolean hotTests;
 
     @Option(option = 'hotTests', description = 'If this option is enabled, run tests automatically after every change. The default value is false.')
@@ -164,7 +166,7 @@ class DevTask extends AbstractServerTask {
     @Option(option = 'container', description = 'Run the server in a Docker container instead of locally. The default value is false for the libertyDev task, and true for the libertyDevc task.')
     void setContainer(boolean container) {
         this.container = container;
-        super.@container = container;
+        project.liberty.dev.container = container; // Needed in DeployTask and AbstractServerTask
     }
 
     Boolean getContainer() {
@@ -621,10 +623,9 @@ class DevTask extends AbstractServerTask {
 
             try {
                 if (container) {
-                    runGradleTask(gradleBuildLauncher, 'deploy', '--container');
-                } else {
-                    runGradleTask(gradleBuildLauncher, 'deploy');
+                    gradleBuildLauncher.withArguments(CONTAINER_PROPERTY_ARG);
                 }
+                runGradleTask(gradleBuildLauncher, 'deploy');
             } catch (BuildException e) {
                 throw new PluginExecutionException(e);
             } finally {
@@ -654,10 +655,9 @@ class DevTask extends AbstractServerTask {
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
             try {
                 if (container) {
-                    runGradleTask(gradleBuildLauncher, 'deploy', '--container');
-                } else {
-                    runGradleTask(gradleBuildLauncher, 'deploy');
+                    gradleBuildLauncher.withArguments(CONTAINER_PROPERTY_ARG)
                 }
+                runGradleTask(gradleBuildLauncher, 'deploy');
             } catch (BuildException e) {
                 throw new PluginExecutionException(e);
             } finally {
@@ -674,7 +674,7 @@ class DevTask extends AbstractServerTask {
             // else it will just say up-to-date and skip the task
             gradleBuildLauncher.withArguments('--rerun-tasks');
             if (container) {
-                System.setProperty(PROJECT_ROOT_NAME, "true") // no --container in CreateTask
+                gradleBuildLauncher.withArguments(CONTAINER_PROPERTY_ARG)
             }
             try {
                 runGradleTask(gradleBuildLauncher, 'libertyCreate');
@@ -743,14 +743,14 @@ class DevTask extends AbstractServerTask {
         }
 
         if (container == null) {
-            boolean buildContainerSetting = project.liberty.dev.container; // get from build.gradle
+            boolean buildContainerSetting = project.liberty.dev.container; // get from build.gradle or from -Pdev_mode_container=true
             if (buildContainerSetting == null) {
                 setContainer(DEFAULT_CONTAINER);
             } else {
                 setContainer(buildContainerSetting);
             }
         }
-        
+
         if (dockerfile == null) {
             File buildDockerfileSetting = project.liberty.dev.dockerfile; // get from build.gradle
             if (buildDockerfileSetting != null) {
@@ -839,10 +839,9 @@ class DevTask extends AbstractServerTask {
             runGradleTask(gradleBuildLauncher, 'libertyCreate');
             runInstallFeatureTask(gradleBuildLauncher);
             if (container) {
-                runGradleTask(gradleBuildLauncher, 'deploy', '--container');
-            } else {
-                runGradleTask(gradleBuildLauncher, 'deploy');
+                gradleBuildLauncher.withArguments(CONTAINER_PROPERTY_ARG);
             }
+            runGradleTask(gradleBuildLauncher, 'deploy');
         } finally {
             gradleConnection.close();
         }
