@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2019.
+ * (C) Copyright IBM Corporation 2019, 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -293,7 +293,7 @@ class DevTask extends AbstractServerTask {
                 logger.debug('DevUtil called stopServer when the server should be running in a container.')
                 return;
             }
-            if (isLibertyInstalled(project)) {
+            if (isLibertyInstalledAndValid(project)) {
                 if (getServerDir(project).exists()) {
                     ServerTask serverTaskStop = createServerTask(project, "stop");
                     serverTaskStop.execute();
