@@ -697,7 +697,7 @@ class DevTask extends AbstractServerTask {
 
     // If a argument has not been set using CLI arguments set a default value
     // Using the ServerExtension properties if available, otherwise use hardcoded defaults
-    private void initializeDefaultValues() {
+    private void initializeDefaultValues() throws Exception {
         if (verifyAppStartTimeout == null) {
             if (server.verifyAppStartTimeout != 0) {
                 verifyAppStartTimeout = server.verifyAppStartTimeout;
@@ -742,28 +742,7 @@ class DevTask extends AbstractServerTask {
             pollingTest = DEFAULT_POLLING_TEST;
         }
 
-        if (container == null) {
-            boolean buildContainerSetting = project.liberty.dev.container; // get from build.gradle or from -Pdev_mode_container=true
-            if (buildContainerSetting == null) {
-                setContainer(DEFAULT_CONTAINER);
-            } else {
-                setContainer(buildContainerSetting);
-            }
-        }
-
-        if (dockerfile == null) {
-            File buildDockerfileSetting = project.liberty.dev.dockerfile; // get from build.gradle
-            if (buildDockerfileSetting != null) {
-                setDockerfile(buildDockerfileSetting.getAbsolutePath()); // setDockerfile will convert it to canonical path
-            }
-        }
-
-        if (dockerRunOpts == null) {
-            String buildDockerRunOptsSetting = project.liberty.dev.dockerRunOpts; // get from build.gradle
-            if (buildDockerRunOptsSetting != null) {
-                setDockerRunOpts(buildDockerRunOptsSetting);
-            }
-        }
+        processContainerParams();
     }
 
     @TaskAction
@@ -787,8 +766,6 @@ class DevTask extends AbstractServerTask {
         File configDirectory = server.configDirectory;
         // getOutputDir returns a string
         File serverOutputDir = new File(getOutputDir(project));
-
-        processContainerParams();
 
         if (!container) {
             if (serverDirectory.exists()) {
@@ -883,6 +860,31 @@ class DevTask extends AbstractServerTask {
     }
 
     private void processContainerParams() throws Exception {
+        // process parameters from dev extension
+        if (container == null) {
+            boolean buildContainerSetting = project.liberty.dev.container; // get from build.gradle or from -Pdev_mode_container=true
+            if (buildContainerSetting == null) {
+                setContainer(DEFAULT_CONTAINER);
+            } else {
+                setContainer(buildContainerSetting);
+            }
+        }
+
+        if (dockerfile == null) {
+            File buildDockerfileSetting = project.liberty.dev.dockerfile; // get from build.gradle
+            if (buildDockerfileSetting != null) {
+                setDockerfile(buildDockerfileSetting.getAbsolutePath()); // setDockerfile will convert it to canonical path
+            }
+        }
+
+        if (dockerRunOpts == null) {
+            String buildDockerRunOptsSetting = project.liberty.dev.dockerRunOpts; // get from build.gradle
+            if (buildDockerRunOptsSetting != null) {
+                setDockerRunOpts(buildDockerRunOptsSetting);
+            }
+        }
+
+        // set container param if dockerfile or dockerRunOpts are set
         if (!container) {
             if (dockerfile != null) {
                 if (dockerfile.exists()) {
