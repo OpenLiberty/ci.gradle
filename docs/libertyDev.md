@@ -117,7 +117,7 @@ Start dev mode with the server in a container using the Dockerfile in the projec
 $ gradle libertyDevc
 ```
 
-Customizing the container configuration using [dev extension properties](libertyExtensions.md#dev-extension-properties) in `build.gradle`.  Note that changing these while dev mode is running is not supported.
+Customizing the container configuration using `dev` extension properties in `build.gradle`.  Note that changing these while dev mode is running is not supported.
 ```
 liberty {
     dev {
@@ -128,12 +128,14 @@ liberty {
 }
 ```
 
-### Command Line Parameters
+### Properties
 
-These parameters are available in addition to the ones in the `libertyDev` section above.
+The `dev` extension allows you to configure properties for the `libertyDevc` task.
 
-| Parameter | Description | Required |
-| --------  | ----------- | -------  |
-| container | If set to `true`, run the server in the container specified by the `dockerfile` parameter. Setting this to `true` is equivalent to using the `libertyDevc` task. The default value is `false` when the `libertyDev` task is used, and `true` when the `libertyDevc` task is used. | No |
-| dockerRunOpts | Specifies options to add to the `docker run` command when using dev mode to launch your server in a container. For example, `-e key=value` is recognized by `docker run` to define an environment variable with the name `key` and value `value`. Setting this parameter overrides the `container` parameter to `true`. | No |
-| dockerfile | Location of a Dockerfile to be used by dev mode to build the container that runs your server and to specify the context used to build the container image. The default value is `Dockerfile`. Setting this parameter overrides the `container` parameter to `true`. | No |
+These can also be specified as command line parameters in addition to the ones in the `libertyDev` section above.
+
+| Attribute | Type  | Since | Description | Required |
+| --------- | ----- | ----- | ----------- | -------- |
+| container | boolean | 3.1-M1 (tech preview) | If set to `true`, run the server in the container specified by the `dockerfile` parameter. Setting this to `true` and using the `libertyDev` task is equivalent to using the `libertyDevc` task. The default value is `false` when the `libertyDev` task is used, and `true` when the `libertyDevc` task is used. | No |
+| dockerRunOpts | String | 3.1-M1 (tech preview) | Specifies options to add to the `docker run` command when using dev mode to launch your server in a container. For example, `-e key=value` is recognized by `docker run` to define an environment variable with the name `key` and value `value`. Setting this parameter overrides the `container` parameter to `true`. | No |
+| dockerfile | File | 3.1-M1 (tech preview) | Location of a Dockerfile to be used by dev mode to build the container that runs your server and to specify the context used to build the container image. The default location is `Dockerfile` in the project root. Setting this parameter overrides the `container` parameter to `true`. | No |
