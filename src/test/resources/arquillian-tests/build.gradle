@@ -54,6 +54,11 @@ liberty {
     }
 }
 
+ext {
+    liberty.server.var."default.http.port" = '9080'
+    liberty.server.var."default.https.port" = '9443'
+}
+
 configurations {
     arqManaged.extendsFrom runtime
     arqRemote.extendsFrom runtime

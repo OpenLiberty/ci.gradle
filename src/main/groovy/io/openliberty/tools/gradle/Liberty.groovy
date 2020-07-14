@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2018.
+ * (C) Copyright IBM Corporation 2014, 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.tasks.testing.Test
 
 import java.util.Properties
+import java.text.MessageFormat
 
 class Liberty implements Plugin<Project> {
 
@@ -173,8 +174,21 @@ class Liberty implements Plugin<Project> {
            } else {
                return new File(project.liberty.baseDir, 'wlp')
            }
-        } else {
-           return new File(project.liberty.installDir)
+        } else { // installDir is specified
+            String installDirPath = checkAndAppendWlp(project)
+            File installDir = new File(installDirPath)
+
+            return installDir;
+        }
+    }
+
+    private static String checkAndAppendWlp(Project project) {
+        String installDir = project.liberty.installDir
+        if (installDir.endsWith("wlp")) {
+            return installDir
+        } else { // not valid wlp dir
+            project.getLogger().warn(MessageFormat.format("The installDir {0} path does not reference a wlp folder. Using path {0}/wlp instead.", installDir))
+            return new File(installDir, 'wlp').toString()
         }
     }
 }
