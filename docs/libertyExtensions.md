@@ -4,7 +4,7 @@ These properties are divided in two groups:
 * The [general runtime properties](#general-runtime-properties) which control how the runtime is installed with the `installLiberty` task.
 * The [Liberty server configuration](#liberty-server-configuration) properties control how a server is initialized and the applications that are installed. These properties are defined in a `server` block within the `liberty` block.
 
-The [installLiberty](installLiberty.md) and [compileJSP](compileJsp.md) tasks can be configured with their related extension inside the `liberty` block.  The [libertyDevc](libertyDev.md#libertydevc-task-container-mode) task can be configured with its related extension inside the `dev` block.
+The [installLiberty](installLiberty.md), [compileJSP](compileJsp.md) and [libertyDevc](libertyDev.md#libertydevc-task-container-mode) tasks can be configured with their related extension inside the `liberty` block.
 
 The [deploy](deploy.md), [undeploy](undeploy.md), [libertyPackage](libertyPackage.md), [installFeature](installFeature.md), [uninstallFeature](uninstallFeature.md), [cleanDirs](clean.md), [libertyDump](libertyDump.md), and [libertyJavaDump](libertyJavaDump.md) tasks can be configured with their related extension inside the `server` block.
 
