@@ -74,6 +74,7 @@ The Liberty plugin provides the following tasks for your project:
 | [libertyCreate](docs/libertyCreate.md#libertycreate-task) | Creates a Liberty server. |
 | [libertyDebug](docs/libertyDebug.md) | Runs the Liberty server in the console foreground after a debugger connects to the debug port (default: 7777). |
 | [libertyDev](docs/libertyDev.md) | Start a Liberty server in dev mode. |
+| [libertyDevc](docs/libertyDev.md#libertydevc-task-container-mode) | Start a Liberty server in dev mode in a container. |
 | [libertyDump](docs/libertyDump.md#libertydump-task) | Dumps diagnostic information from the Liberty server into an archive. |
 | [libertyJavaDump](docs/libertyJavaDump.md#libertyjavadump-task) | Dumps diagnostic information from the Liberty server JVM. |
 | [libertyPackage](docs/libertyPackage.md#libertypackage-task) | Packages a Liberty server. |

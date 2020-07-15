@@ -59,6 +59,8 @@ abstract class AbstractServerTask extends AbstractTask {
     private static final Pattern pattern = Pattern.compile(LIBERTY_CONFIG_GRADLE_PROPS)
 
     protected final String PLUGIN_VARIABLE_CONFIG_XML = "configDropins/overrides/liberty-plugin-variable-config.xml"
+    protected final String PROJECT_ROOT_NAME = "io.openliberty.tools.projectRoot";
+    protected final String CONTAINER_PROPERTY = 'dev_mode_container'
 
     protected Properties bootstrapProjectProps = new Properties()
     protected Properties envProjectProps = new Properties()
@@ -299,6 +301,10 @@ abstract class AbstractServerTask extends AbstractTask {
             serverEnvPath = server.serverEnvFile.getCanonicalPath()
         }
 
+        if (project.liberty.dev.container) {
+            // Set PROJECT_ROOT_NAME so it will be written in config dropin overrides file.
+            server.var."${PROJECT_ROOT_NAME}" = project.getProjectDir().getAbsolutePath()
+        }
         // generate a config file on the server with any Liberty configuration variables specified via project properties
         if ((server.var != null && !server.var.isEmpty()) || (server.defaultVar != null && !server.defaultVar.isEmpty()) || 
              !varProjectProps.isEmpty() || !defaultVarProjectProps.isEmpty()) {

@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2019.
+ * (C) Copyright IBM Corporation 2014, 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ class LibertyExtension {
 
     ServerExtension server = server = new ServerExtension()
 
+    DevExtension dev = new DevExtension();
+
     def jsp(Closure closure) {
         ConfigureUtil.configure(closure, jsp)
     }
@@ -52,6 +54,10 @@ class LibertyExtension {
 
     def server(Closure closure){
         ConfigureUtil.configure(closure, server)
+    }
+
+    def dev(Closure closure) {
+        ConfigureUtil.configure(closure, dev)
     }
 
 }

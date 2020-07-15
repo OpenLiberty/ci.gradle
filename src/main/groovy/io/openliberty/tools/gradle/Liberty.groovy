@@ -63,6 +63,7 @@ class Liberty implements Plugin<Project> {
             Liberty.checkEtcServerEnvProperties(project)
 
             setEclipseClasspath(project)
+            setDevProperties(project)
         }
 
         // Dev-mode needs to propagate these system properties from the gradle JVM
@@ -106,6 +107,14 @@ class Liberty implements Plugin<Project> {
                     }
                 }
             }
+        }
+    }
+
+    private void setDevProperties(Project project) {
+        // At plugin start up copy the command line property into the extension as if the ext. had been set in the build file.
+        boolean container = project.findProperty('dev_mode_container') //null value sets boolean to false
+        if(container) {
+            project.liberty.dev.container = true
         }
     }
 

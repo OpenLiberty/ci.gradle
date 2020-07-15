@@ -74,6 +74,9 @@ class DevTask extends AbstractServerTask {
     private static final boolean  DEFAULT_SKIP_TESTS = false;
     private static final boolean DEFAULT_LIBERTY_DEBUG = true;
     private static final boolean DEFAULT_POLLING_TEST = false;
+    private static final boolean DEFAULT_CONTAINER = false;
+
+    protected final String CONTAINER_PROPERTY_ARG = '-P'+CONTAINER_PROPERTY+'=true';
 
     private Boolean hotTests;
 
@@ -158,6 +161,39 @@ class DevTask extends AbstractServerTask {
         this.pollingTest = pollingTest;
     }
 
+    private Boolean container = null;
+
+    @Option(option = 'container', description = 'Run the server in a Docker container instead of locally. The default value is false for the libertyDev task, and true for the libertyDevc task.')
+    void setContainer(boolean container) {
+        this.container = container;
+        project.liberty.dev.container = container; // Needed in DeployTask and AbstractServerTask
+    }
+
+    Boolean getContainer() {
+        return container;
+    }
+
+    private File dockerfile;
+
+    @Option(option = 'dockerfile', description = 'Dev mode will build a docker image from the provided Dockerfile and start a container from the new image.')
+    void setDockerfile(String dockerfile) {
+        if (dockerfile != null) {
+            File temp = new File(dockerfile);
+            try {
+                this.dockerfile = new File(temp.getCanonicalPath()); // ensures the dockerfile is defined with the full path - matches how maven behaves
+            } catch (IOException e) {
+                throw new PluginExecutionException("Could not resolve canonical path of the dockerfile parameter: " + temp.getAbsolutePath(), e);
+            }
+        }
+    }
+
+    private String dockerRunOpts;
+
+    @Option(option = 'dockerRunOpts', description = 'Additional options for the docker run command when dev mode starts a container.')
+    void setDockerRunOpts(String dockerRunOpts) {
+        this.dockerRunOpts = dockerRunOpts;
+    }
+
     @Optional
     @Input
     Boolean clean;
@@ -184,15 +220,16 @@ class DevTask extends AbstractServerTask {
         private ServerTask serverTask = null;
 
         DevTaskUtil(File serverDirectory, File sourceDirectory, File testSourceDirectory,
-                    File configDirectory, List<File> resourceDirs, boolean  hotTests,
-                    boolean  skipTests, String artifactId, int serverStartTimeout,
-                    int verifyAppStartTimeout, int appUpdateTimeout, double compileWait, 
-                    boolean libertyDebug, boolean pollingTest
+                    File configDirectory, File projectDirectory, List<File> resourceDirs,
+                    boolean  hotTests, boolean  skipTests, String artifactId, int serverStartTimeout,
+                    int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
+                    boolean libertyDebug, boolean pollingTest, boolean container, File dockerfile,
+                    String dockerRunOpts
         ) throws IOException {
-            super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs,
-                    hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
-                    verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug, 
-                    true, true, pollingTest);
+            super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory,
+                    resourceDirs, hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
+                    verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
+                    true, true, pollingTest, container, dockerfile, dockerRunOpts);
 
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
@@ -251,6 +288,11 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void stopServer() {
+            if (container) {
+                // Shouldn't get here, DevUtil should stop the container instead
+                logger.debug('DevUtil called stopServer when the server should be running in a container.')
+                return;
+            }
             if (isLibertyInstalledAndValid(project)) {
                 if (getServerDir(project).exists()) {
                     ServerTask serverTaskStop = createServerTask(project, "stop");
@@ -491,7 +533,7 @@ class DevTask extends AbstractServerTask {
                 gradleBuildLauncher.withArguments("--exclude-task", "libertyCreate");
 
                 try {
-                    runGradleTask(gradleBuildLauncher, "installFeature", "--serverDir=${serverDir.getAbsolutePath()}");
+                    runInstallFeatureTask(gradleBuildLauncher, "--serverDir=${serverDir.getAbsolutePath()}");
                     this.existingFeatures.addAll(features);
                 } catch (BuildException e) {
                     // stdout/stderr from the installFeature task is sent to the terminal
@@ -580,6 +622,9 @@ class DevTask extends AbstractServerTask {
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
             try {
+                if (container) {
+                    gradleBuildLauncher.withArguments(CONTAINER_PROPERTY_ARG);
+                }
                 runGradleTask(gradleBuildLauncher, 'deploy');
             } catch (BuildException e) {
                 throw new PluginExecutionException(e);
@@ -590,15 +635,17 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void libertyInstallFeature() {
-            ProjectConnection gradleConnection = initGradleProjectConnection();
-            BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+            if (!container) { // for now, container mode does not support installing features
+                ProjectConnection gradleConnection = initGradleProjectConnection();
+                BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
-            try {
-                runGradleTask(gradleBuildLauncher, 'installFeature');
-            } catch (BuildException e) {
-                throw new PluginExecutionException(e);
-            } finally {
-                gradleConnection.close();
+                try {
+                    runInstallFeatureTask(gradleBuildLauncher);
+                } catch (BuildException e) {
+                    throw new PluginExecutionException(e);
+                } finally {
+                    gradleConnection.close();
+                }
             }
         }
 
@@ -606,8 +653,10 @@ class DevTask extends AbstractServerTask {
         public void libertyDeploy() {
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
-
             try {
+                if (container) {
+                    gradleBuildLauncher.withArguments(CONTAINER_PROPERTY_ARG)
+                }
                 runGradleTask(gradleBuildLauncher, 'deploy');
             } catch (BuildException e) {
                 throw new PluginExecutionException(e);
@@ -624,7 +673,9 @@ class DevTask extends AbstractServerTask {
             // need to force liberty-create to re-run
             // else it will just say up-to-date and skip the task
             gradleBuildLauncher.withArguments('--rerun-tasks');
-
+            if (container) {
+                gradleBuildLauncher.withArguments(CONTAINER_PROPERTY_ARG)
+            }
             try {
                 runGradleTask(gradleBuildLauncher, 'libertyCreate');
             } catch (BuildException e) {
@@ -635,9 +686,18 @@ class DevTask extends AbstractServerTask {
         }
     }
 
+    public void runInstallFeatureTask(BuildLauncher gradleBuildLauncher, String... options) throws BuildException {
+        if (!container) {
+            ArrayList tasks = new ArrayList(options.length + 1);
+            tasks.add('installFeature');
+            tasks.addAll(options);
+            runGradleTask(gradleBuildLauncher, tasks.toArray(new String[tasks.size()]));
+        }
+    }
+
     // If a argument has not been set using CLI arguments set a default value
     // Using the ServerExtension properties if available, otherwise use hardcoded defaults
-    private void initializeDefaultValues() {
+    private void initializeDefaultValues() throws Exception {
         if (verifyAppStartTimeout == null) {
             if (server.verifyAppStartTimeout != 0) {
                 verifyAppStartTimeout = server.verifyAppStartTimeout;
@@ -681,6 +741,8 @@ class DevTask extends AbstractServerTask {
         if (pollingTest == null) {
             pollingTest = DEFAULT_POLLING_TEST;
         }
+
+        processContainerParams();
     }
 
     @TaskAction
@@ -705,13 +767,15 @@ class DevTask extends AbstractServerTask {
         // getOutputDir returns a string
         File serverOutputDir = new File(getOutputDir(project));
 
-        if (serverDirectory.exists()) {
-            if (ServerStatusUtil.isServerRunning(serverInstallDir, serverOutputDir, serverName)) {
-                throw new Exception("The server " + serverName
-                        + " is already running. Terminate all instances of the server before starting dev mode."
-                        + " You can stop a server instance with the command 'gradle libertyStop'.");
+        if (!container) {
+            if (serverDirectory.exists()) {
+                if (ServerStatusUtil.isServerRunning(serverInstallDir, serverOutputDir, serverName)) {
+                    throw new Exception("The server " + serverName
+                            + " is already running. Terminate all instances of the server before starting dev mode."
+                            + " You can stop a server instance with the command 'gradle libertyStop'.");
+                }
             }
-        }
+        } // else TODO check if the container is already running?
 
         if (resourceDirs.isEmpty()) {
             File defaultResourceDir = new File(project.getRootDir() + "/src/main/resources");
@@ -742,17 +806,20 @@ class DevTask extends AbstractServerTask {
                 :deploy
              */
             runGradleTask(gradleBuildLauncher, 'libertyCreate');
-            runGradleTask(gradleBuildLauncher, 'installFeature');
+            runInstallFeatureTask(gradleBuildLauncher);
+            if (container) {
+                gradleBuildLauncher.withArguments(CONTAINER_PROPERTY_ARG);
+            }
             runGradleTask(gradleBuildLauncher, 'deploy');
         } finally {
             gradleConnection.close();
         }
 
         util = new DevTaskUtil(
-                serverDirectory, sourceDirectory, testSourceDirectory, configDirectory,
+                serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
-                libertyDebug.booleanValue(), pollingTest.booleanValue()
+                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerRunOpts
         );
 
         util.addShutdownHook(executor);
@@ -769,8 +836,8 @@ class DevTask extends AbstractServerTask {
         File serverXMLFile = server.serverXmlFile;
 
         if (hotTests && testSourceDirectory.exists()) {
-        // if hot testing, run tests on startup and then watch for keypresses
-        util.runTestThread(false, executor, -1, false, false);
+            // if hot testing, run tests on startup and then watch for keypresses
+            util.runTestThread(false, executor, -1, false, false);
         } else {
             // else watch for key presses immediately
             util.runHotkeyReaderThread(executor);
@@ -789,6 +856,50 @@ class DevTask extends AbstractServerTask {
                 logger.info(e.getMessage());
             }
             return; // enter shutdown hook
+        }
+    }
+
+    private void processContainerParams() throws Exception {
+        // process parameters from dev extension
+        if (container == null) {
+            boolean buildContainerSetting = project.liberty.dev.container; // get from build.gradle or from -Pdev_mode_container=true
+            if (buildContainerSetting == null) {
+                setContainer(DEFAULT_CONTAINER);
+            } else {
+                setContainer(buildContainerSetting);
+            }
+        }
+
+        if (dockerfile == null) {
+            File buildDockerfileSetting = project.liberty.dev.dockerfile; // get from build.gradle
+            if (buildDockerfileSetting != null) {
+                setDockerfile(buildDockerfileSetting.getAbsolutePath()); // setDockerfile will convert it to canonical path
+            }
+        }
+
+        if (dockerRunOpts == null) {
+            String buildDockerRunOptsSetting = project.liberty.dev.dockerRunOpts; // get from build.gradle
+            if (buildDockerRunOptsSetting != null) {
+                setDockerRunOpts(buildDockerRunOptsSetting);
+            }
+        }
+
+        // set container param if dockerfile or dockerRunOpts are set
+        if (!container) {
+            if (dockerfile != null) {
+                if (dockerfile.exists()) {
+                    setContainer(true);
+                    return;
+                } else {
+                    throw new Exception("The file " + dockerfile + " used for dev mode option dockerfile does not exist."
+                        + " dockerfile should be a valid Dockerfile");
+                }
+            }
+    
+            if (dockerRunOpts != null) {
+                setContainer(true);
+                return;
+            }
         }
     }
 
