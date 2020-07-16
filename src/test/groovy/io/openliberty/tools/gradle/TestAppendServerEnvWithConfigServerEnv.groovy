@@ -75,7 +75,7 @@ class TestAppendServerEnvWithConfigServerEnv extends AbstractIntegrationTest {
             line = bf.readLine();
         }
         
-        Assert.assertTrue("Number of env properties is ",  	serverEnvContents.size() == 4)
+        Assert.assertTrue("Number of env properties is ",  	serverEnvContents.size() == 5)
         Assert.assertTrue("keystore_password mapping found", serverEnvContents.containsKey("keystore_password"))
         Assert.assertTrue("CONFIG_SERVER_ENV=TEST", serverEnvContents.get("CONFIG_SERVER_ENV").equals("TEST"))
         Assert.assertTrue("WLP_SKIP_MAXPERMSIZE=true", serverEnvContents.get("WLP_SKIP_MAXPERMSIZE").equals("true"))
