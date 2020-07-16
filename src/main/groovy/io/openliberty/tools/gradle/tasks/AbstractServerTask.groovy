@@ -790,22 +790,26 @@ abstract class AbstractServerTask extends AbstractTask {
     }
 
     private String setServerEnvPathHelperForAppendServerEnv(File envFile, Properties configuredProps, String serverEnvPath) {
-        boolean configDirEnvMerged = envFile != null;
+        boolean configDirEnvMerged = serverEnvPath != null;
         boolean serverEnvFileMerged = server.serverEnvFile != null && server.serverEnvFile.exists()
         boolean inlineEnvPropsMerged = !configuredProps.isEmpty()
 
-        if(configDirEnvMerged && serverEnvFileMerged && inlineEnvPropsMerged) {
-            return "merging env properties, serverEnvFile" +  server.serverEnvFile.getCanonicalPath() + ", and configDir server.env" +  serverEnvPath
+        StringBuilder updatedServerEnvPath = new StringBuilder("merging");
+
+        if(configDirEnvMerged) {
+            updatedServerEnvPath.append(" configDir server.env " +  serverEnvPath) + ", "
         }
-        if (configDirEnvMerged && serverEnvFileMerged) {
-            return "merging serverEnvFile" +  server.serverEnvFile.getCanonicalPath() + ", and configDir server.env" +  serverEnvPath
+        if (serverEnvFileMerged) {
+            updatedServerEnvPath.append(" serverEnvFile" +  server.serverEnvFile.getCanonicalPath()) + ", "
         }
-        if (configDirEnvMerged && inlineEnvPropsMerged) {
-            return "merging env properties and configDir server.env" + serverEnvPath 
+        if (inlineEnvPropsMerged) {
+            updatedServerEnvPath.append(" env properties, ")
         }
-        if (serverEnvFileMerged && inlineEnvPropsMerged) {
-            return "merging env properties and serverEnvFile" +  server.serverEnvFile.getCanonicalPath() 
-        }
+
+        int lastCommaIndex = updatedServerEnvPath.lastIndexOf(", ")
+        updatedServerEnvPath.charAt(lastCommaIndex, ".")
+
+        return updatedServerEnvPath.toString();
     }
 
     private String setServerEnvHelper(File envFile, String serverEnvPath, Properties configuredProps) {
