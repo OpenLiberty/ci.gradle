@@ -797,17 +797,24 @@ abstract class AbstractServerTask extends AbstractTask {
         StringBuilder updatedServerEnvPath = new StringBuilder("merging");
 
         if(configDirEnvMerged) {
-            updatedServerEnvPath.append(" configDir server.env " +  serverEnvPath) + ", "
+            updatedServerEnvPath.append(" configDir server.env " +  serverEnvPath + ", ")
         }
         if (serverEnvFileMerged) {
-            updatedServerEnvPath.append(" serverEnvFile" +  server.serverEnvFile.getCanonicalPath()) + ", "
+            updatedServerEnvPath.append(" serverEnvFile " +  server.serverEnvFile.getCanonicalPath() + ", ")
         }
         if (inlineEnvPropsMerged) {
             updatedServerEnvPath.append(" env properties, ")
         }
-
+        // remove excess comma and space
         int lastCommaIndex = updatedServerEnvPath.lastIndexOf(", ")
-        updatedServerEnvPath.charAt(lastCommaIndex, ".")
+        updatedServerEnvPath = updatedServerEnvPath.replace(lastCommaIndex, lastCommaIndex + 2, ".")
+        
+        //replace last comma and space with and
+        lastCommaIndex = updatedServerEnvPath.lastIndexOf(", ")
+        if(lastCommaIndex > 0) {
+            updatedServerEnvPath = updatedServerEnvPath.replace(lastCommaIndex, lastCommaIndex + 2, "")
+            updatedServerEnvPath = updatedServerEnvPath.insert(lastCommaIndex, " and")
+        }
 
         return updatedServerEnvPath.toString();
     }
