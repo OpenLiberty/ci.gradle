@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017, 2019.
+ * (C) Copyright IBM Corporation 2017, 2020.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ class ServerExtension {
     File bootstrapPropertiesFile
     File jvmOptionsFile
     File serverEnvFile
+    boolean appendServerEnv = false;
 
     Properties bootstrapProperties = new Properties()
     List<String> jvmOptions

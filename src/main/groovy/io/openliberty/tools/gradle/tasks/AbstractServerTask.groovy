@@ -32,6 +32,7 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
 import org.apache.commons.io.FilenameUtils
+import org.apache.commons.io.filefilter.FileFilterUtils
 
 import io.openliberty.tools.ant.ServerTask
 import io.openliberty.tools.common.plugins.config.ServerConfigDropinXmlDocument;
@@ -202,6 +203,28 @@ abstract class AbstractServerTask extends AbstractTask {
         }
     }
 
+    protected void copyConfigDirectory() {
+        //merge default server.env with one in config directory
+        File configDirServerEnv = new File(server.configDirectory, "server.env")
+        if (configDirServerEnv.exists() && server.appendServerEnv) {
+            FileFilter fileFilter =   FileFilterUtils.notFileFilter(FileFilterUtils.nameFileFilter("server.env", null))
+            FileUtils.copyDirectory(server.configDirectory, getServerDir(project), fileFilter)
+
+            Properties configDirServerEnvProps = convertServerEnvToProperties(configDirServerEnv)
+
+            File defaultEnvFile = new File(getServerDir(project), "server.env")
+            Properties defaultServerEnvProps = convertServerEnvToProperties(defaultEnvFile)
+
+            Properties mergedProperties = combineServerEnvProperties(defaultServerEnvProps, configDirServerEnvProps)
+            writeServerEnvProperties(defaultEnvFile, mergedProperties)
+
+        }
+        else {
+            // replace entire directory with configured configDirectory 
+            FileUtils.copyDirectory(server.configDirectory, getServerDir(project))
+        }
+    }
+
     /**
      * @throws IOException
      * @throws FileNotFoundException
@@ -221,8 +244,9 @@ abstract class AbstractServerTask extends AbstractTask {
         initializeConfigDirectory();
 
         if(server.configDirectory.exists()) {
+            
             // copy configuration files from configuration directory to server directory if end-user set it
-            FileUtils.copyDirectory(server.configDirectory, getServerDir(project))
+            copyConfigDirectory()
 
             File configDirServerXML = new File(server.configDirectory, "server.xml")
             if (configDirServerXML.exists()) {
@@ -286,20 +310,7 @@ abstract class AbstractServerTask extends AbstractTask {
         }
 
         // envProjectProps and serverEnvFile take precedence over server.env from configDirectory
-        File envFile = new File(serverDirectory, "server.env")
-        if ((server.env != null && !server.env.isEmpty()) || !envProjectProps.isEmpty()) {
-            if (serverEnvPath != null) {
-                logger.warn("The " + serverEnvPath + " file is overwritten by inlined configuration.")
-            }
-            writeServerEnvProperties(envFile, server.env, envProjectProps)
-            serverEnvPath = "inlined configuration"
-        } else if (server.serverEnvFile != null && server.serverEnvFile.exists()) {
-             if (serverEnvPath != null) {
-                logger.warn("The " + serverEnvPath + " file is overwritten by the " + server.serverEnvFile.getCanonicalPath() + " file.")
-            }
-            Files.copy(server.serverEnvFile.toPath(), envFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
-            serverEnvPath = server.serverEnvFile.getCanonicalPath()
-        }
+        serverEnvPath = handleServerEnvFileAndProperties(serverEnvPath, serverDirectory)
 
         if (project.liberty.dev.container) {
             // Set PROJECT_ROOT_NAME so it will be written in config dropin overrides file.
@@ -737,21 +748,141 @@ abstract class AbstractServerTask extends AbstractTask {
         }
     }
 
-    private void writeServerEnvProperties(File file, Properties properties, Properties projectProperties) throws IOException {
-        Properties combinedEnvProperties = null
+    private String handleServerEnvFileAndProperties(String serverEnvPath, String serverDirectory) {
+        File envFile = new File(serverDirectory, "server.env")
+        Properties configuredProps = combineServerEnvProperties(server.env, envProjectProps);
+
+        if(server.appendServerEnv) {
+            return setServerEnvWithAppendServerEnvHelper(envFile, serverEnvPath, configuredProps)
+        }
+        else {
+            return setServerEnvHelper(envFile, serverEnvPath, configuredProps)
+        }
+    }
+
+    private String setServerEnvWithAppendServerEnvHelper(File envFile, String serverEnvPath, Properties configuredProps) {
+        Properties serverEnvProps = convertServerEnvToProperties(envFile);
+        Properties mergedProperties = new Properties();
+
+        if (server.serverEnvFile != null && server.serverEnvFile.exists()) {
+            if (serverEnvPath != null) {
+                logger.debug("The serverEnvFile "+ server.serverEnvFile.getCanonicalPath() + " is merged with the " + serverEnvPath + " file.")
+            }
+            else {
+                logger.debug("The serverEnvFile "+ server.serverEnvFile.getCanonicalPath() + " is merged with the " + getServerDir(project).getCanonicalPath() + " file.")
+            }
+            Properties configuredServerEnvProps = convertServerEnvToProperties(server.serverEnvFile);
+            //Merge with either default server.env or with what has already been merged if
+            mergedProperties = (Properties) combineServerEnvProperties(serverEnvProps, configuredServerEnvProps);
+        }
+
+        if (!configuredProps.isEmpty()) {
+            if (serverEnvPath != null) {
+                logger.debug("The " + serverEnvPath + " file is merged with inlined configuration.")
+            }
+            else {
+                logger.debug("The " + getServerDir(project).getCanonicalPath() + " file is merged with inlined configuration.")
+            }
+
+            mergedProperties = combineServerEnvProperties(mergedProperties, configuredProps);
+        }
+
+        if(!mergedProperties.isEmpty()) {
+            writeServerEnvProperties(envFile, mergedProperties);
+            return setServerEnvPathHelperForAppendServerEnv(envFile, configuredProps, serverEnvPath)
+        }
+
+        return serverEnvPath;
+    }
+
+    private String setServerEnvPathHelperForAppendServerEnv(File envFile, Properties configuredProps, String serverEnvPath) {
+        boolean configDirEnvMerged = serverEnvPath != null;
+        boolean serverEnvFileMerged = server.serverEnvFile != null && server.serverEnvFile.exists()
+        boolean inlineEnvPropsMerged = !configuredProps.isEmpty()
+
+        StringBuilder updatedServerEnvPath = new StringBuilder("merging");
+
+        if(configDirEnvMerged) {
+            updatedServerEnvPath.append(" configDir server.env " +  serverEnvPath + ", ")
+        }
+        if (serverEnvFileMerged) {
+            updatedServerEnvPath.append(" serverEnvFile " +  server.serverEnvFile.getCanonicalPath() + ", ")
+        }
+        if (inlineEnvPropsMerged) {
+            updatedServerEnvPath.append(" env properties, ")
+        }
+        // remove excess comma and space
+        int lastCommaIndex = updatedServerEnvPath.lastIndexOf(", ")
+        updatedServerEnvPath = updatedServerEnvPath.replace(lastCommaIndex, lastCommaIndex + 2, ".")
+        
+        //replace last comma and space with and
+        lastCommaIndex = updatedServerEnvPath.lastIndexOf(", ")
+        if(lastCommaIndex > 0) {
+            updatedServerEnvPath = updatedServerEnvPath.replace(lastCommaIndex, lastCommaIndex + 2, "")
+            updatedServerEnvPath = updatedServerEnvPath.insert(lastCommaIndex, " and")
+        }
+
+        return updatedServerEnvPath.toString();
+    }
+
+    private String setServerEnvHelper(File envFile, String serverEnvPath, Properties configuredProps) {
+        if ((server.env != null && !server.env.isEmpty()) || !envProjectProps.isEmpty()) {
+            if (serverEnvPath != null) {
+                logger.warn("The " + serverEnvPath + " file is overwritten by inlined configuration.")
+            }
+            writeServerEnvProperties(envFile, configuredProps)
+            return "inlined configuration"
+        } else if (server.serverEnvFile != null && server.serverEnvFile.exists()) {
+            if (serverEnvPath != null) {
+                logger.warn("The " + serverEnvPath + " file is overwritten by the " + server.serverEnvFile.getCanonicalPath() + " file.")
+            }
+            Files.copy(server.serverEnvFile.toPath(), envFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            return server.serverEnvFile.getCanonicalPath()
+        }
+    }
+
+    private Properties convertServerEnvToProperties(File serverEnv) {
+        Properties serverEnvProps = new Properties();
+
+        if ((serverEnv == null) || !serverEnv.exists()) {
+            return serverEnvProps;
+        }
+
+        BufferedReader bf = new BufferedReader(new FileReader(serverEnv));
+        String line;
+        while((line = bf.readLine()) != null) {
+            
+            //Skip comments
+            if(!line.startsWith("#")) {
+                String[] keyValue = line.split("=", 2);
+                String key = keyValue[0];
+                String value = keyValue[1];
+
+                serverEnvProps.put(key,value);
+            }
+        }
+
+        return serverEnvProps;
+    }
+
+    private Properties combineServerEnvProperties(Properties properties, Properties projectProperties) {
+        Properties combinedEnvProperties = new Properties()
         if (! projectProperties.isEmpty()) {
             if (properties.isEmpty()) {
-                combinedEnvProperties = projectProperties
+                combinedEnvProperties.putAll(projectProperties)
             } else {
-                combinedEnvProperties = new Properties()
                 // add the project properties (which come from the command line) last so that they take precedence over the properties specified in build.gradle
                 combinedEnvProperties.putAll(properties)
                 combinedEnvProperties.putAll(projectProperties)
             }
         } else {
-            combinedEnvProperties = properties
+            combinedEnvProperties.putAll(properties)
         }
 
+        return combinedEnvProperties;
+    }
+    
+    private void writeServerEnvProperties(File file, Properties combinedEnvProperties) throws IOException {
         makeParentDirectory(file)
         PrintWriter writer = null
         try {
