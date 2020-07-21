@@ -278,7 +278,7 @@ class DevTest extends AbstractIntegrationTest {
 
         if (buildDir != null && buildDir.exists()) {
             try {
-                // FileUtils.deleteDirectory(buildDir);
+                FileUtils.deleteDirectory(buildDir);
             } catch (IOException e) {
                 // https://github.com/OpenLiberty/open-liberty/issues/10562 prevents a file from being deleted.
                 // Instead of failing here, just print an error until the above is fixed
@@ -287,9 +287,9 @@ class DevTest extends AbstractIntegrationTest {
             } 
         }
 
-        // if (logFile != null && logFile.exists()) {
-        //     assertTrue(logFile.delete());
-        // }
+        if (logFile != null && logFile.exists()) {
+            assertTrue(logFile.delete());
+        }
     }
 
     private static void stopProcess(boolean isDevMode) throws IOException, InterruptedException, FileNotFoundException {
