@@ -675,10 +675,13 @@ class DevTask extends AbstractServerTask {
 
             // need to force liberty-create to re-run
             // else it will just say up-to-date and skip the task
-            gradleBuildLauncher.withArguments('--rerun-tasks');
             if (container) {
-                gradleBuildLauncher.withArguments(CONTAINER_PROPERTY_ARG)
+                // for container, also append a container command line property for the task to enable the liberty.dev.container extension
+                gradleBuildLauncher.withArguments('--rerun-tasks', CONTAINER_PROPERTY_ARG);
+            } else {
+                gradleBuildLauncher.withArguments('--rerun-tasks');
             }
+
             try {
                 runGradleTask(gradleBuildLauncher, 'libertyCreate');
             } catch (BuildException e) {
