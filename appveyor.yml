@@ -2,16 +2,16 @@ environment:
     matrix:
         - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
           RUNTIME: wlp
-          RUNTIME_VERSION: 20.0.0.1
+          RUNTIME_VERSION: 20.0.0.6
         - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
           RUNTIME: wlp
-          RUNTIME_VERSION: 19.0.0.9
+          RUNTIME_VERSION: 20.0.0.3
         - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
           RUNTIME: ol
-          RUNTIME_VERSION: 20.0.0.1
+          RUNTIME_VERSION: 20.0.0.6
         - jdk: "C:\\Program Files\\Java\\jdk1.8.0\\bin:"
           RUNTIME: ol
-          RUNTIME_VERSION: 19.0.0.9
+          RUNTIME_VERSION: 20.0.0.3
 
 install:
     - cmd: |
@@ -20,12 +20,12 @@ install:
         where mvn
 
 before_build:
-    - cmd: |
-        echo "Installing ci.common lib ...."
-        git clone https://github.com/OpenLiberty/ci.common.git ci.common
-        cd ci.common
-        mvn clean install
-        cd..
+#    - cmd: |
+#        echo "Installing ci.common lib ...."
+#        git clone https://github.com/OpenLiberty/ci.common.git ci.common
+#        cd ci.common
+#        mvn clean install
+#        cd..
 #        echo "Installing ci.ant lib ...."
 #        git clone https://github.com/OpenLiberty/ci.ant.git ci.ant
 #        cd ci.ant
