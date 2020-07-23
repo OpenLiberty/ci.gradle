@@ -313,6 +313,9 @@ class DevTask extends AbstractServerTask {
 
             copyConfigFiles();
 
+            if (container) {
+                generateDevModeConfig(project.getProjectDir().getAbsolutePath(), HEADER);
+            }
             if (libertyDebug) {
                 serverTask = createServerTask(project, "debug");
                 setLibertyDebugPort(libertyDebugPort);

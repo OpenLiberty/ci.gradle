@@ -21,6 +21,7 @@ import io.openliberty.tools.common.plugins.config.ApplicationXmlDocument
 import io.openliberty.tools.common.plugins.config.LooseApplication
 import io.openliberty.tools.common.plugins.config.LooseConfigData
 import io.openliberty.tools.common.plugins.config.ServerConfigDocument
+import io.openliberty.tools.common.plugins.util.DevUtil;
 
 import org.apache.commons.io.FilenameUtils
 import org.gradle.api.GradleException
@@ -283,10 +284,10 @@ class DeployTask extends AbstractServerTask {
             try {
                 // Set up the config to replace the absolute path names with ${variable}/target type references
                 config.setProjectRoot(project.getProjectDir().getCanonicalPath());
-                config.setSourceOnDiskName('${'+PROJECT_ROOT_NAME+'}');
+                config.setSourceOnDiskName('${'+DevUtil.DEVMODE_PROJECT_ROOT+'}');
 
                 if (server.deploy.copyLibsDirectory == null) { // in container mode, copy dependencies from .m2 dir to the build dir to mount in container
-                    // if buildDir is subdirectory of projectDir, use buildDir/libs.  Otherwise use projectDir/build/libs since it must be under the project root in order to make use of PROJECT_ROOT_NAME
+                    // if buildDir is subdirectory of projectDir, use buildDir/libs.  Otherwise use projectDir/build/libs since it must be under the project root in order to make use of DEVMODE_PROJECT_ROOT
                     if (project.getBuildDir().getCanonicalFile().toPath().startsWith(project.getProjectDir().getCanonicalFile().toPath())) {
                         server.deploy.copyLibsDirectory = new File(project.getBuildDir(), LIBS);
                         logger.debug("Setting copyLibsDirectory to " + server.deploy.copyLibsDirectory);
