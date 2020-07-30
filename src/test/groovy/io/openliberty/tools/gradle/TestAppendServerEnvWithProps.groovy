@@ -48,10 +48,10 @@ class TestAppendServerEnvWithProps extends AbstractIntegrationTest {
         
         # default server.env
         keystore_password=sfKRrA1ioLdtIFQC9bEfkua
-        WLP_SKIP_MAXPERMSIZE=true
 
         # Configured server.env
         CONFIG_SERVER_ENV=TEST
+        TEST_PROP_2=green
         TEST_PROP_3=blue
 
         # server.env in configDir
@@ -65,7 +65,6 @@ class TestAppendServerEnvWithProps extends AbstractIntegrationTest {
         keystore_password=sfKRrA1ioLdtIFQC9bEfkua
         CONFIG_SERVER_ENV=TEST
         ConfigDir=TEST
-        WLP_SKIP_MAXPERMSIZE=true
         TEST_PROP_3=blue
         CONFIG_SERVER_ENV_PROPS=TEST
         TEST_PROP_2=white
@@ -92,11 +91,13 @@ class TestAppendServerEnvWithProps extends AbstractIntegrationTest {
             line = bf.readLine();
         }
         
-        Assert.assertTrue("Number of env properties is ",  	serverEnvContents.size() == 8)
+        // The contents of the default server.env can change over time.
+        // After 20.0.0.3, for example, the WLP_SKIP_MAXPERMSIZE was removed.
+        // Just confirm the keystore_password is present to prove the default server.env was merged with the plugin config.
+        Assert.assertTrue("Number of env properties should be >= 7, but is "+serverEnvContents.size(),  	serverEnvContents.size() >= 7)
         Assert.assertTrue("keystore_password mapping found", serverEnvContents.containsKey("keystore_password"))
         Assert.assertTrue("ConfigDir=TEST mapping found", serverEnvContents.get("ConfigDir").equals("TEST"))
         Assert.assertTrue("CONFIG_SERVER_ENV=TEST mapping found", serverEnvContents.get("CONFIG_SERVER_ENV").equals("TEST"))
-        Assert.assertTrue("WLP_SKIP_MAXPERMSIZE=true", serverEnvContents.get("WLP_SKIP_MAXPERMSIZE").equals("true"))
         Assert.assertTrue("TEST_PROP_3=blue", serverEnvContents.get("TEST_PROP_3").equals("blue"))
         Assert.assertTrue("CONFIG_SERVER_ENV_PROPS=TEST", serverEnvContents.get("CONFIG_SERVER_ENV_PROPS").equals("TEST"))
         Assert.assertTrue("TEST_PROP_2=white", serverEnvContents.get("TEST_PROP_2").equals("white"))
