@@ -277,6 +277,9 @@ abstract class AbstractServerTask extends AbstractTask {
 
         // jvmOptions, jvmOptionsFile and jvmProjectProps take precedence over jvm.options from configDirectory
         File optionsFile = new File(serverDirectory, "jvm.options")
+        if (optionsFile.exists() && jvmOptionsPath == null) {
+            optionsFile.delete();
+        }
         if((server.jvmOptions != null && !server.jvmOptions.isEmpty()) || !jvmProjectProps.isEmpty()){
             if (jvmOptionsPath != null) {
                 logger.warn("The " + jvmOptionsPath + " file is overwritten by inlined configuration.")
@@ -294,6 +297,9 @@ abstract class AbstractServerTask extends AbstractTask {
         // bootstrapProperties, bootstrapPropertiesFile and bootstrapProjectProps take precedence over 
         // bootstrap.properties from configDirectory
         File bootstrapFile = new File(serverDirectory, "bootstrap.properties")
+        if (bootstrapFile.exists() && bootStrapPropertiesPath == null) {
+            bootstrapFile.delete();
+        }
         if((server.bootstrapProperties != null && !server.bootstrapProperties.isEmpty()) || !bootstrapProjectProps.isEmpty()){
             if (bootStrapPropertiesPath != null) {
                 logger.warn("The " + bootStrapPropertiesPath + " file is overwritten by inlined configuration.")
@@ -312,9 +318,12 @@ abstract class AbstractServerTask extends AbstractTask {
         serverEnvPath = handleServerEnvFileAndProperties(serverEnvPath, serverDirectory)
 
         // generate a config file on the server with any Liberty configuration variables specified via project properties
+        File pluginVariableConfig = new File(serverDirectory, PLUGIN_VARIABLE_CONFIG_XML)
+        if (pluginVariableConfig.exists()) {
+            pluginVariableConfig.delete();
+        }
         if ((server.var != null && !server.var.isEmpty()) || (server.defaultVar != null && !server.defaultVar.isEmpty()) || 
              !varProjectProps.isEmpty() || !defaultVarProjectProps.isEmpty()) {
-            File pluginVariableConfig = new File(serverDirectory, PLUGIN_VARIABLE_CONFIG_XML)
             writeConfigDropinsServerVariables(pluginVariableConfig, server.var, server.defaultVar, varProjectProps, defaultVarProjectProps)
             logger.info("Generate server configuration file " + pluginVariableConfig.getCanonicalPath())
         }
