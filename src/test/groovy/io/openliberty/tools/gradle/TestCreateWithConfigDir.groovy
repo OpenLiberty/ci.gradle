@@ -37,4 +37,46 @@ public class TestCreateWithConfigDir extends AbstractIntegrationTest{
         assert configFile.text.equals(new File("build/testBuilds/test-create-with-config-dir/src/test/resources/server.xml").text) : "server.xml file did not copy properly"
 
     }
+
+    @Test
+    public void test_micro_clean_from_config() {
+
+        runTasks(testBuildDir, 'libertyCreate')
+
+        def bootstrapFile = new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/bootstrap.properties")
+        def jvmOptionsFile = new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/jvm.options")
+
+        assert bootstrapFile.exists() : "build/bootstap.properties not found"
+        assert jvmOptionsFile.exists() : "build/jvm.options not found"
+
+        def bootstrapSrcFile = new File("build/testBuilds/test-create-with-config-dir/src/test/resources/bootstrap.properties")
+        def jvmOptionsSrcFile = new File("build/testBuilds/test-create-with-config-dir/src/test/resources/jvm.options")
+
+        // invalidating while keeping
+        bootstrapSrcFile.renameTo 'bootstrap.properties~'
+        jvmOptionsSrcFile.renameTo 'jvm.options~'
+
+        runTasks(testBuildDir, 'libertyCreate')
+
+        assert !bootstrapFile.exists() : "bootstrap.properties should be cleaned for new build"
+        assert !jvmOptionsFile.exists() : "jvm.options should be cleaned for new build"
+
+    }
+
+    @Test
+    public void test_micro_clean_liberty_plugin_variable_config() {
+
+        def gradleProperties = new File("build/testBuilds/test-create-with-config-dir/gradle.properties")
+        def libertyPluginVariableConfig = new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/configDropins/overrides/liberty-plugin-variable-config.xml")
+
+        gradleProperties.append("liberty.server.defaultVar.postgres.port=51432")
+        runTasks(testBuildDir, 'libertyCreate')
+        assert libertyPluginVariableConfig.exists() : "liberty plugin generation did not occur"
+
+        gradleProperties.write(gradleProperties.text.replaceAll("liberty.server.defaultVar.postgres.port=51432", ""))
+        runTasks(testBuildDir, 'libertyCreate')
+        assert ! libertyPluginVariableConfig.exists() : "xml should be cleaned for new build"
+        
+    }
+
 }

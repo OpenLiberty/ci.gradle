@@ -61,3 +61,4 @@ task integrationTest(type: Test) {
 check.dependsOn 'integrationTest'
 libertyCreate.dependsOn 'installLiberty'
 integrationTest.dependsOn 'libertyCreate'
+libertyCreate.outputs.upToDateWhen { false }
