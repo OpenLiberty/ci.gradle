@@ -46,8 +46,8 @@ public class TestCreateWithConfigDir extends AbstractIntegrationTest{
         def bootstrapFile = new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/bootstrap.properties")
         def jvmOptionsFile = new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/jvm.options")
 
-        assert bootstrapFile.exists() : "build/bootstap.properties not found"
-        assert jvmOptionsFile.exists() : "build/jvm.options not found"
+        assert bootstrapFile.exists() : "bootstap.properties was not generated"
+        assert jvmOptionsFile.exists() : "jvm.options was not generated"
 
         def bootstrapSrcFile = new File("build/testBuilds/test-create-with-config-dir/src/test/resources/bootstrap.properties")
         def jvmOptionsSrcFile = new File("build/testBuilds/test-create-with-config-dir/src/test/resources/jvm.options")
@@ -71,11 +71,12 @@ public class TestCreateWithConfigDir extends AbstractIntegrationTest{
 
         gradleProperties.append("liberty.server.defaultVar.postgres.port=51432")
         runTasks(testBuildDir, 'libertyCreate')
-        assert libertyPluginVariableConfig.exists() : "liberty plugin generation did not occur"
+        assert libertyPluginVariableConfig.exists() : "liberty variable xml was not generated"
 
         gradleProperties.write(gradleProperties.text.replaceAll("liberty.server.defaultVar.postgres.port=51432", ""))
         runTasks(testBuildDir, 'libertyCreate')
-        assert ! libertyPluginVariableConfig.exists() : "xml should be cleaned for new build"
+        assert new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/configDropins/overrides").exists() : "verify liberty variable xml path generation"
+        assert !libertyPluginVariableConfig.exists() : "liberty variable xml should be cleaned for new build"
         
     }
 
