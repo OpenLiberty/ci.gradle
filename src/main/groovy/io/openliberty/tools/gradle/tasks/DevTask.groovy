@@ -424,6 +424,18 @@ class DevTask extends AbstractServerTask {
                 project.liberty.server.defaultVar = newProject.liberty.server.defaultVar;
             }
 
+            if (hasCopyLibsDirectoryChanged(newProject, project)) {
+                logger.debug('copyLibsDirectory changed');
+                restartServer = true;
+                project.liberty.server.deploy.copyLibsDirectory = newProject.liberty.server.deploy.copyLibsDirectory;
+            }
+
+            if (hasMergeServerEnvChanged(newProject, project)) {
+                logger.debug('mergeServerEnv changed');
+                restartServer = true;
+                project.liberty.server.mergeServerEnv = newProject.liberty.server.mergeServerEnv;
+            }
+
             // if we don't already need to restart the server
             // check if we need to install any additional features
             if (!restartServer) {
@@ -510,6 +522,17 @@ class DevTask extends AbstractServerTask {
 
         private boolean hasServerConfigDefaultVarChanged(Project newProject, Project oldProject) {
             return newProject.liberty.server.defaultVar != oldProject.liberty.server.defaultVar;
+        }
+
+        private boolean hasMergeServerEnvChanged(Project newProject, Project oldProject) {
+            return newProject.liberty.server.mergeServerEnv != oldProject.liberty.server.mergeServerEnv;
+        }
+
+        private boolean hasCopyLibsDirectoryChanged(Project newProject, Project oldProject) {
+            File newCopyLibsDir = newProject.liberty.server.deploy.copyLibsDirectory;
+            File oldCopyLibsDirDir = oldProject.liberty.server.deploy.copyLibsDirectory;
+
+            return newCopyLibsDir != oldCopyLibsDirDir;
         }
 
 

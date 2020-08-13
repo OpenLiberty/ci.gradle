@@ -47,7 +47,7 @@ liberty {
             apps = [war]
             copyLibsDirectory = file("${project.buildDir}/libs")
         }
-        appendServerEnv = true
+        mergeServerEnv = true
         serverEnvFile = file("src/resources/server.env")
         configDirectory = file('src/resources/config')
         env = ['TEST_PROP_2':'white', 'CONFIG_SERVER_ENV_PROPS':'TEST']
