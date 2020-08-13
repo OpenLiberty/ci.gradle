@@ -205,7 +205,7 @@ abstract class AbstractServerTask extends AbstractTask {
     protected void copyConfigDirectory() {
         //merge default server.env with one in config directory
         File configDirServerEnv = new File(server.configDirectory, "server.env")
-        if (configDirServerEnv.exists() && server.appendServerEnv) {
+        if (configDirServerEnv.exists() && server.mergeServerEnv) {
             FileFilter fileFilter =   FileFilterUtils.notFileFilter(FileFilterUtils.nameFileFilter("server.env", null))
             FileUtils.copyDirectory(server.configDirectory, getServerDir(project), fileFilter)
 
@@ -747,7 +747,7 @@ abstract class AbstractServerTask extends AbstractTask {
         File envFile = new File(serverDirectory, "server.env")
         Properties configuredProps = combineServerEnvProperties(server.env, envProjectProps);
 
-        if(server.appendServerEnv) {
+        if(server.mergeServerEnv) {
             return setServerEnvWithAppendServerEnvHelper(envFile, serverEnvPath, configuredProps)
         }
         else {

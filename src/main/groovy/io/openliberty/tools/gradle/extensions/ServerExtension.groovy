@@ -34,7 +34,7 @@ class ServerExtension {
     File bootstrapPropertiesFile
     File jvmOptionsFile
     File serverEnvFile
-    boolean appendServerEnv = false;
+    boolean mergeServerEnv = false;
 
     Properties bootstrapProperties = new Properties()
     List<String> jvmOptions
