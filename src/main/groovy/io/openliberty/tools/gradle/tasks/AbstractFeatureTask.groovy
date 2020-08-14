@@ -23,6 +23,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
 
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
+import io.openliberty.tools.common.plugins.util.InstallFeatureUtil.ProductProperties
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.PluginScenarioException
 
@@ -34,14 +35,16 @@ public class AbstractFeatureTask extends AbstractServerTask {
     
     public boolean installFeaturesFromAnt;
 
+    private InstallFeatureUtil util;
+
     @Option(option = 'serverDir', description = '(Optional) Server directory to get the list of features from.')
     void setServerDirectoryParam(String serverDir) {
         this.serverDirectoryParam = serverDir;
     }
 
     private class InstallFeatureTaskUtil extends InstallFeatureUtil {
-        public InstallFeatureTaskUtil(File installDir, String from, String to, Set<String> pluginListedEsas)  throws PluginScenarioException, PluginExecutionException {
-            super(installDir, from, to, pluginListedEsas)
+        public InstallFeatureTaskUtil(File installDir, String from, String to, Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion)  throws PluginScenarioException, PluginExecutionException {
+            super(installDir, from, to, pluginListedEsas, propertiesList, openLibertyVerion)
         }
 
         @Override
@@ -122,9 +125,13 @@ public class AbstractFeatureTask extends AbstractServerTask {
 
     protected Set<String> getInstalledFeatures() throws PluginExecutionException {
         def pluginListedFeatures = getPluginListedFeatures(false)
-        def pluginListedEsas = getPluginListedFeatures(true)
 
-        InstallFeatureUtil util = getInstallFeatureUtil(pluginListedEsas)
+        if (util == null) {
+            def pluginListedEsas = getPluginListedFeatures(true)
+            def propertiesList = InstallFeatureUtil.loadProperties(getInstallDir(project))
+            def openLibertyVersion = InstallFeatureUtil.getOpenLibertyVersion(propertiesList)
+            createNewInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVersion)
+        }
 
         def dependencyFeatures = getDependencyFeatures()
 
@@ -149,18 +156,20 @@ public class AbstractFeatureTask extends AbstractServerTask {
 
     }
 
-    protected InstallFeatureUtil getInstallFeatureUtil(Set<String> pluginListedEsas) throws PluginExecutionException {
-        
-        InstallFeatureUtil util = null;
+    private void createNewInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion) throws PluginExecutionException {
         try {
-            util = new InstallFeatureTaskUtil(getInstallDir(project), server.features.from, server.features.to, pluginListedEsas)
+            util = new InstallFeatureTaskUtil(getInstallDir(project), server.features.from, server.features.to, pluginListedEsas, propertiesList, openLibertyVerion)
         } catch (PluginScenarioException e) {
             logger.debug(e.getMessage())
             logger.debug("Installing features from installUtility.")
             installFeaturesFromAnt = true
             return
         }
-        return util;
+    }
+
+    protected InstallFeatureUtil getInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion) throws PluginExecutionException {
+        createNewInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVerion)
+        return util
     }
 
 }

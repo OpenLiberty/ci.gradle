@@ -37,12 +37,17 @@ class InstallFeatureTask extends AbstractFeatureTask {
 
     @TaskAction
     void installFeature() {
+        def propertiesList = InstallFeatureUtil.loadProperties(getInstallDir(project))
+        def openLibertyVersion = InstallFeatureUtil.getOpenLibertyVersion(propertiesList)
+
+        if (InstallFeatureUtil.isOpenLibertyBetaVersion(openLibertyVersion)) {
+            logger.warn("Beta version of Open Liberty does not support installing features.")
+            return
+        }
     
         def pluginListedEsas = getPluginListedFeatures(true)
-        InstallFeatureUtil util = getInstallFeatureUtil(pluginListedEsas)
-
+        InstallFeatureUtil util = getInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVersion)
         Set<String> featuresToInstall = getInstalledFeatures()
-
 
         util.installFeatures(server.features.acceptLicense, new ArrayList<String>(featuresToInstall))
     }
