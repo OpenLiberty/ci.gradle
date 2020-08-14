@@ -61,3 +61,7 @@ task integrationTest(type: Test) {
 check.dependsOn 'integrationTest'
 libertyCreate.dependsOn 'installLiberty'
 integrationTest.dependsOn 'libertyCreate'
+
+// To re-run libertyCreate when only gradle.properties gets tweaked
+// See micro_clean tests in TestCreateWithConfigDir.groovy
+libertyCreate.outputs.upToDateWhen { false }
