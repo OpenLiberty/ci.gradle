@@ -1,0 +1,24 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+    dependencies {
+        classpath ("io.openliberty.tools:liberty-ant-tasks:$antVersion")
+        classpath ("io.openliberty.tools:ci.common:$commonVersion")
+    }
+}
+
+plugins {
+    id "io.openliberty.tools.gradle.Liberty" version "$lgpVersion"
+    id 'war'
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
+}

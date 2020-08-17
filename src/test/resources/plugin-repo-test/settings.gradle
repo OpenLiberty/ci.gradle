@@ -1,0 +1,7 @@
+pluginManagement {
+    repositories {
+        maven {
+            url = uri("../../plugin-test-repository")
+        }
+    }
+}
