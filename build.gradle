@@ -177,6 +177,43 @@ pluginBundle {
     }
 }
 
+publishing {
+    publications {
+        libertyGradle (MavenPublication) {
+            artifactId = archivesBaseName
+
+            from components.java
+
+            pom {
+                name = 'liberty-gradle-plugin'
+                packaging = 'jar'
+                description = 'Liberty Gradle Plug-in.'
+                url = 'https://wasdev.github.io'
+                licenses {
+                    license {
+                        name = 'The Apache Software License, Version 2.0'
+                        url = 'https://raw.github.com/OpenLiberty/ci.gradle/master/LICENSE'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'jgawor'
+                        name = 'Jarek Gawor'
+                        email = 'jgawor@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git@github.com:OpenLiberty/ci.gradle.git'
+                    developerConnection = 'scm:git:git@github.com:OpenLiberty/ci.gradle.git'
+                    url = 'git@github.com:OpenLiberty/ci.gradle.git'
+                    tag = 'HEAD'
+                }
+            }
+        }
+    }
+}
+
 if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
     
     if (!version.endsWith("SNAPSHOT")) {
@@ -188,40 +225,6 @@ if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')
     }
 
     publishing {
-        publications {
-            libertyGradle (MavenPublication) {
-                artifactId = archivesBaseName
-
-                from components.java
-
-                pom {
-                    name = 'liberty-gradle-plugin'
-                    packaging = 'jar'
-                    description = 'Liberty Gradle Plug-in.'
-                    url = 'https://wasdev.github.io'
-                    licenses {
-                        license {
-                            name = 'The Apache Software License, Version 2.0'
-                            url = 'https://raw.github.com/OpenLiberty/ci.gradle/master/LICENSE'
-                        }
-                    }
-
-                    developers {
-                        developer {
-                            id = 'jgawor'
-                            name = 'Jarek Gawor'
-                            email = 'jgawor@gmail.com'
-                        }
-                    }
-                    scm {
-                        connection = 'scm:git:git@github.com:OpenLiberty/ci.gradle.git'
-                        developerConnection = 'scm:git:git@github.com:OpenLiberty/ci.gradle.git'
-                        url = 'git@github.com:OpenLiberty/ci.gradle.git'
-                        tag = 'HEAD'
-                    }
-                }
-            }
-        }
         repositories {
             maven {
                 name = "Nexus"
