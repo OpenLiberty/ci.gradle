@@ -239,7 +239,7 @@ if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')
 }
 
 task install {
-    dependsOn "publishLibertyGradlePublicationToMavenLocal", ":pluginRepo:publishTestPublicationToTestRepository"
+    dependsOn "publishToMavenLocal", ":pluginRepo:publishTestPublicationToTestRepository"
 }
 
 groovydoc.enabled = false

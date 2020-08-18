@@ -10,7 +10,7 @@ buildscript {
 }
 
 plugins {
-    id "io.openliberty.tools.gradle.Liberty" version "$lgpVersion"
+    id "io.openliberty.tools.gradle.Liberty"
     id 'war'
 }
 

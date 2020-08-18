@@ -56,7 +56,7 @@ To use the Liberty Gradle Plugin, include the following code in your build scrip
 apply plugin: 'liberty'
 ```
 
-Alternatively, you can apply the plugin through the `plugins` block. You'll need to add the plugin's runtime dependencies to the buildscript classpath with this method.
+Alternatively, you can apply the plugin through the `plugins` block. You'll need to add the plugin's runtime dependencies to the buildscript classpath when using this method.
 
 ```groovy
 buildscript {

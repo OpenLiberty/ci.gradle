@@ -1,4 +1,11 @@
 pluginManagement {
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == 'io.openliberty.tools.gradle.Liberty') {
+                useModule("io.openliberty.tools.gradle.Liberty:io.openliberty.tools.gradle.Liberty.gradle.plugin:$lgpVersion")
+            }
+        }
+    }
     repositories {
         maven {
             url = uri("../../plugin-test-repository")
