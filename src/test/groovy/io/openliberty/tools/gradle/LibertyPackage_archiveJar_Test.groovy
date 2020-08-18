@@ -38,6 +38,7 @@ class LibertyPackage_archiveJar_Test extends AbstractIntegrationTest{
     public static void setup() {
         createDir(buildDir)
         copyBuildFiles(buildFilename, buildDir)
+        copySettingsFile(resourceDir, buildDir)
         try {
             runTasks(buildDir, 'installLiberty', 'libertyStart', 'libertyStop')
         } catch (Exception e) {
