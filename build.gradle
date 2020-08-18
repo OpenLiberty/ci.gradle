@@ -163,10 +163,6 @@ test {
     }
 }
 
-task install {
-    dependsOn "publishLibertyGradlePublicationToMavenLocal", ":pluginRepo:publishTestPublicationToTestRepository"
-}
-
 pluginBundle {
     website = 'https://github.com/OpenLiberty/ci.gradle'
     vcsUrl = 'https://github.com/OpenLiberty/ci.gradle'
@@ -240,6 +236,10 @@ if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')
             }
         }
     }
+}
+
+task install {
+    dependsOn "publishLibertyGradlePublicationToMavenLocal", ":pluginRepo:publishTestPublicationToTestRepository"
 }
 
 groovydoc.enabled = false
