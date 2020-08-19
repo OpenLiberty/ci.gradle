@@ -948,11 +948,6 @@ class DevTask extends AbstractServerTask {
                 setContainer(true);
                 return;
             }
-
-            if (dockerTimeout != null) {
-                setContainer(true);
-                return;
-            }
         }
     }
 
