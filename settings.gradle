@@ -1,0 +1,5 @@
+rootProject.name = 'ci.gradle'
+
+include ':pluginRepo'
+
+project(':pluginRepo').projectDir = "$rootDir/pluginRepo" as File

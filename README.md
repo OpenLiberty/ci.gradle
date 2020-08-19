@@ -56,6 +56,25 @@ To use the Liberty Gradle Plugin, include the following code in your build scrip
 apply plugin: 'liberty'
 ```
 
+Alternatively, you can apply the plugin through the `plugins` block. You'll need to add the plugin's runtime dependencies to the buildscript classpath when using this method.
+
+```groovy
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+    dependencies {
+        classpath ('io.openliberty.tools:liberty-ant-tasks:1.9.4')
+        classpath ('io.openliberty.tools:ci.common:1.8.8-SNAPSHOT')
+    }
+}
+
+plugins {
+    id "io.openliberty.tools.gradle.Liberty" version "3.1-M2-SNAPSHOT"
+}
+```
+
 ## Plugin Configuration
 
 See the [Liberty extension properties](docs/libertyExtensions.md#liberty-extension-properties) reference for the properties used to configure the Liberty plugin. See each task for additional configuration and examples.
