@@ -196,7 +196,7 @@ class DevTask extends AbstractServerTask {
 
     private int dockerBuildTimeout;
 
-    @Option(option = 'dockerBuildTimeout', description = 'Specifies the amount of time to wait (in seconds) for the completion of the docker operation to build the container.')
+    @Option(option = 'dockerBuildTimeout', description = 'Specifies the amount of time to wait (in seconds) for the completion of the Docker operation to build the image.')
     void setDockerBuildTimeout(String inputValue) {
         try {
             this.dockerBuildTimeout = inputValue.toInteger();
