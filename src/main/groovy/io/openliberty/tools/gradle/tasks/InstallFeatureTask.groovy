@@ -41,7 +41,7 @@ class InstallFeatureTask extends AbstractFeatureTask {
         def openLibertyVersion = InstallFeatureUtil.getOpenLibertyVersion(propertiesList)
 
         if (InstallFeatureUtil.isOpenLibertyBetaVersion(openLibertyVersion)) {
-            logger.warn("Beta version of Open Liberty does not support installing features.")
+            logger.warn("Downloading additional features is not supported for beta releases.")
             return
         }
     
