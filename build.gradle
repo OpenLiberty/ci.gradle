@@ -183,6 +183,8 @@ publishing {
             artifactId = archivesBaseName
 
             from components.java
+            artifact groovydocJar
+            artifact sourcesJar 
 
             pom {
                 name = 'liberty-gradle-plugin'
