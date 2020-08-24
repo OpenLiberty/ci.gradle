@@ -119,4 +119,4 @@ Extensions are tasks that improve the compatibility or user experience of third 
 | Extension | Description |
 | --------- | ------------ |
 | [configureArquillian](docs/configureArquillian.md) | Integrates `arquillian.xml` configuration for the Liberty Managed and Remote Arquillian containers in the `liberty-gradle-plugin`. Automatically configures required `arquillian.xml` parameters for the Liberty Managed container. |
-| [Spring Boot Support](docs/spring-boot-support.md#spring-boot-support) | The Liberty Maven Plugin provides support for Spring Boot applications, allowing you to install Spring Boot executable JARs directly to the Liberty runtime. |
+| [Spring Boot Support](docs/spring-boot-support.md#spring-boot-support) | The Liberty Gradle Plugin supports thinning and installing Spring Boot applications onto the Liberty server. |
