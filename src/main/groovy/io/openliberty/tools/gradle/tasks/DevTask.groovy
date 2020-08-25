@@ -194,6 +194,18 @@ class DevTask extends AbstractServerTask {
         this.dockerRunOpts = dockerRunOpts;
     }
 
+    private int dockerBuildTimeout;
+
+    @Option(option = 'dockerBuildTimeout', description = 'Specifies the amount of time to wait (in seconds) for the completion of the Docker operation to build the image.')
+    void setDockerBuildTimeout(String inputValue) {
+        try {
+            this.dockerBuildTimeout = inputValue.toInteger();
+        } catch (NumberFormatException e) {
+            logger.error(String.format("Unexpected value: %s for dev mode option dockerBuildTimeout. dockerBuildTimeout should be a valid integer.", inputValue));
+            throw e;
+        }
+    }
+
     @Optional
     @Input
     Boolean clean;
@@ -224,12 +236,12 @@ class DevTask extends AbstractServerTask {
                     boolean  hotTests, boolean  skipTests, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
                     boolean libertyDebug, boolean pollingTest, boolean container, File dockerfile,
-                    String dockerRunOpts
+                    String dockerRunOpts, int dockerBuildTimeout
         ) throws IOException {
             super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory,
                     resourceDirs, hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
-                    true, true, pollingTest, container, dockerfile, dockerRunOpts);
+                    true, true, pollingTest, container, dockerfile, dockerRunOpts, dockerBuildTimeout);
 
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
@@ -848,7 +860,7 @@ class DevTask extends AbstractServerTask {
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
-                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerRunOpts
+                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerRunOpts, dockerBuildTimeout
         );
 
         util.addShutdownHook(executor);
@@ -913,6 +925,13 @@ class DevTask extends AbstractServerTask {
             }
         }
 
+        if (dockerBuildTimeout == 0) {
+            String buildDockerBuildTimeoutSetting = project.liberty.dev.dockerBuildTimeout; // get from build.gradle
+            if (buildDockerBuildTimeoutSetting != null) {
+                setDockerBuildTimeout(buildDockerBuildTimeoutSetting);
+            }
+        }
+
         // set container param if dockerfile or dockerRunOpts are set
         if (!container) {
             if (dockerfile != null) {
@@ -924,7 +943,7 @@ class DevTask extends AbstractServerTask {
                         + " dockerfile should be a valid Dockerfile");
                 }
             }
-    
+
             if (dockerRunOpts != null) {
                 setContainer(true);
                 return;
