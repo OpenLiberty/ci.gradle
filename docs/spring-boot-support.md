@@ -11,8 +11,7 @@ The `liberty-gradle-plugin` provides support for Spring Boot applications, allow
 | targetLibCachePath | The directory path that is used to save the library cache. If this option is not specified, a `lib.index.cache` directory is created in the parent directory of the source application. | No |
 | targetThinAppPath | The path that is used to save the thin application file. If this option is not specified, a new file is created with the `.spring` extension in the parent directory of the source application. | No |
 
-
-The `server.xml` provided by the `serverXml` parameter should enable the one of the following Spring Boot features.
+The `server.xml` file provided by the `configDirectory` or `serverXmlFile` parameter should enable the one of the following Spring Boot features.
 
 | Feature | Description |
 | ------- | ----------- |
@@ -24,12 +23,11 @@ The Liberty features that support the Spring Boot starters can be found [here](h
 
 ### Gradle Compatibility
 
-There is a known build conflict that Spring Boot Gradle plugin 1.5.x is incompatible with Gradle 5.x. As the Spring Boot 1.5.x plugin won't be updated to support Gradle 5.x, consider upgrading the Spring Boot plugin or downgrading Gradle. 
+There is a known build conflict that Spring Boot Gradle plugin 1.5.x is incompatible with Gradle 5.x. As the Spring Boot 1.5.x plugin will not be updated to support Gradle 5.x, consider upgrading the Spring Boot plugin or downgrading Gradle. 
 
-| Spring Boot version | Gradle version |
+| Spring Boot version | Advised Gradle version |
 | ------------------- | -------------- |
-| 2.3.x | 6.x, 5.6 supported but to be deprecated |
-| 2.2.x | 5.x or 6.x, 4.10 supported but to be deprecated |
-| 2.1.x | 4.x or 5.x |
 | 2.0.x | 4.x+ |
-| 1.5.x | 2.9 or 3.x |
+| 1.5.x | 2.9 or 3.x (Although we observed compatibility up to 4.10, proceed at your own risk)|
+
+Refer to the [current release Spring docs](https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/html/#introduction) to be advised on Gradle compatibility for the latest Spring Boot Gradle plugin.
