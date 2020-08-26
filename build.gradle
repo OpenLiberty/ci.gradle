@@ -58,8 +58,8 @@ compileTestGroovy {
     targetCompatibility = JavaVersion.VERSION_1_7
 }
 
-def libertyAntVersion = "1.9.4"
-def libertyCommonVersion = "1.8.8"
+def libertyAntVersion = "1.9.5-SNAPSHOT"
+def libertyCommonVersion = "1.8.9-SNAPSHOT"
 
 dependencies {
     implementation gradleApi()
