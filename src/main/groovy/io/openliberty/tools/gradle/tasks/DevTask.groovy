@@ -591,6 +591,10 @@ class DevTask extends AbstractServerTask {
             try {
                 if (dir.equals(sourceDirectory)) {
                     runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources');
+
+                    if("springboot".equals(getPackagingType())) {
+                        redeployApp();
+                    }
                 }
 
                 if (dir.equals(testSourceDirectory)) {
