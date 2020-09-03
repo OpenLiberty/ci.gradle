@@ -299,6 +299,11 @@ class DevTask extends AbstractServerTask {
         }
 
         @Override
+        public String getProjectName() {
+            return project.getName();
+        }
+
+        @Override
         public void stopServer() {
             if (container) {
                 // Shouldn't get here, DevUtil should stop the container instead
