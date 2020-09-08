@@ -44,7 +44,7 @@ class InstallFeatureTask extends AbstractFeatureTask {
         if(installFeaturesFromAnt) {
             installFeatureFromAnt();
         }
-        else if (util != null ) {
+        else {
             Set<String> featuresToInstall = getInstalledFeatures()
             util.installFeatures(server.features.acceptLicense, new ArrayList<String>(featuresToInstall))
         }
