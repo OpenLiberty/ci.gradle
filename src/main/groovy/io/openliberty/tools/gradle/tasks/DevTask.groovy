@@ -725,6 +725,11 @@ class DevTask extends AbstractServerTask {
                 gradleConnection.close();
             }
         }
+
+        @Override
+        public boolean isLooseApplication() {
+            return server.looseApplication && DeployTask.isSupportedLooseAppType(getPackagingType());
+        }
     }
 
     public void runInstallFeatureTask(BuildLauncher gradleBuildLauncher, String... options) throws BuildException {
