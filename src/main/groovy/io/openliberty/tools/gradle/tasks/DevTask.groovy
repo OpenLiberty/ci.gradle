@@ -905,6 +905,7 @@ class DevTask extends AbstractServerTask {
         }
     }
 
+    // Get container option values from build.gradle if not specified on the command line
     private void processContainerParams() throws Exception {
         // process parameters from dev extension
         if (container == null) {
@@ -934,24 +935,6 @@ class DevTask extends AbstractServerTask {
             String buildDockerBuildTimeoutSetting = project.liberty.dev.dockerBuildTimeout; // get from build.gradle
             if (buildDockerBuildTimeoutSetting != null) {
                 setDockerBuildTimeout(buildDockerBuildTimeoutSetting);
-            }
-        }
-
-        // set container param if dockerfile or dockerRunOpts are set
-        if (!container) {
-            if (dockerfile != null) {
-                if (dockerfile.exists()) {
-                    setContainer(true);
-                    return;
-                } else {
-                    throw new Exception("The file " + dockerfile + " used for dev mode option dockerfile does not exist."
-                        + " dockerfile should be a valid Dockerfile");
-                }
-            }
-
-            if (dockerRunOpts != null) {
-                setContainer(true);
-                return;
             }
         }
     }
