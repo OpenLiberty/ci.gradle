@@ -105,8 +105,7 @@ For the current technology preview, the following limitations apply.
 
   - Supported on macOS and Windows with Docker Desktop installed.
   - Supported on Linux. Note the following.
-    - Configuration files: the Open Liberty server runs on the UID (user identifier) of the current user inside the container. Dev mode makes the server configuration files from your project available inside the container. Therefore dev mode makes all the files in the server directory (`defaultServer`) in your project readable by all users. It also makes all the directories but `workarea` usable by all users.
-    - Log files: the container will write the Open Liberty log files into the logs directory in the server directory in your project. When running with root permissions dev mode will change the owner of the logs directory and all the files inside to UID 1001. The GID will be 0 (root). When running as a non-root user the set GID bit will be set so that log files will be owned by current user and the group id will be that of the current user.
+    - In dev mode the Open Liberty server runs in the container on the UID (user identifier) of the current user. This is so that the server can access the configuration files from your project and you can access the Open Liberty log files. Outside of dev mode the Open Liberty server will run on the UID specified in the Docker image.
     - Use of editors like `vim`: when you edit a configuration file with `vim` it will delete the file and rewrite it when you save. This necessitates a container restart. To avoid the restart edit your .vimrc file and add the line `set backupcopy=yes`
 
 - Dockerfile limitations:
@@ -141,5 +140,5 @@ These can also be specified as command line parameters in addition to the ones i
 | --------- | ----- | ----- | ----------- | -------- |
 | container | boolean | 3.1-M1 (tech preview) | If set to `true`, run the server in the container specified by the `dockerfile` parameter. Setting this to `true` and using the `libertyDev` task is equivalent to using the `libertyDevc` task. The default value is `false` when the `libertyDev` task is used, and `true` when the `libertyDevc` task is used. | No |
 | dockerRunOpts | String | 3.1-M1 (tech preview) | Specifies options to add to the `docker run` command when using dev mode to launch your server in a container. For example, `-e key=value` is recognized by `docker run` to define an environment variable with the name `key` and value `value`. | No |
-| dockerfile | File | 3.1-M1 (tech preview) | Location of a Dockerfile to be used by dev mode to build the container that runs your server and to specify the context used to build the container image. The default location is `Dockerfile` in the project root. | No |
+| dockerfile | File | 3.1-M1 (tech preview) | Location of a Dockerfile to be used by dev mode to build the Docker image for the container that will run your Liberty server.  The directory containing the Dockerfile will also be the context for the `docker build`. The default location is `Dockerfile` in the project root. | No |
 | dockerBuildTimeout | integer | 3.1-M3 (tech preview) | Maximum time to wait (in seconds) for the completion of the Docker operation to build the image. The value must be an integer greater than 0. The default value is `60` seconds. | No |
