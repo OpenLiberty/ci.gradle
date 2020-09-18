@@ -206,6 +206,13 @@ class DevTask extends AbstractServerTask {
         }
     }
 
+    private String dockerPortOverrides;
+
+    @Option(option = 'dockerPortOverrides', description = 'If specified, these port mappings override the default Docker port mappings.')
+    void setDockerPortOverrides(String dockerPortOverrides) {
+        this.dockerPortOverrides = dockerPortOverrides;
+    }
+
     @Optional
     @Input
     Boolean clean;
@@ -236,12 +243,12 @@ class DevTask extends AbstractServerTask {
                     boolean  hotTests, boolean  skipTests, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
                     boolean libertyDebug, boolean pollingTest, boolean container, File dockerfile,
-                    String dockerRunOpts, int dockerBuildTimeout
+                    String dockerRunOpts, int dockerBuildTimeout, String dockerPortOverrides
         ) throws IOException {
             super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory,
                     resourceDirs, hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
-                    true, true, pollingTest, container, dockerfile, dockerRunOpts, dockerBuildTimeout);
+                    true, true, pollingTest, container, dockerfile, dockerRunOpts, dockerBuildTimeout, dockerPortOverrides);
 
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
@@ -865,7 +872,8 @@ class DevTask extends AbstractServerTask {
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
-                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerRunOpts, dockerBuildTimeout
+                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerRunOpts, 
+                dockerBuildTimeout, dockerPortOverrides
         );
 
         util.addShutdownHook(executor);
