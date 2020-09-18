@@ -540,6 +540,16 @@ class DeployTask extends AbstractServerTask {
         }
     }
 
+    public static boolean isSupportedLooseAppType(String type) {
+        switch (type) {
+            case "ear":
+            case "war":
+                return true;
+            default:
+                return false;
+        }
+    }
+
     //Cleans up the application if the install style is switched from loose application to archive and vice versa
     protected void deleteApplication(File parent, File artifactFile) throws IOException {
         deleteApplication(parent, artifactFile.getName());

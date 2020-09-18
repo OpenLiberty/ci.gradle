@@ -121,13 +121,24 @@ public class AbstractFeatureTask extends AbstractServerTask {
     }
 
     protected Set<String> getInstalledFeatures() throws PluginExecutionException {
-        def pluginListedFeatures = getPluginListedFeatures(false)
+        // If getInstallFeatureUtil returns null, then features are installed via ant 
         def pluginListedEsas = getPluginListedFeatures(true)
-
         InstallFeatureUtil util = getInstallFeatureUtil(pluginListedEsas)
+        if(installFeaturesFromAnt) {
+            Set<String> featuresInstalledFromAnt;
+            if(server.features.name != null) {
+                featuresInstalledFromAnt = new HashSet<String>(server.features.name);
+                return featuresInstalledFromAnt;
+            }
+            else {
+                featuresInstalledFromAnt = new HashSet<String>();
+                return featuresInstalledFromAnt;
+            }
+        }
 
+        
+        def pluginListedFeatures = getPluginListedFeatures(false)
         def dependencyFeatures = getDependencyFeatures()
-
         def serverFeatures = null;
 
         // if DevMode provides a server directory parameter use that for finding the server features
@@ -137,15 +148,8 @@ public class AbstractFeatureTask extends AbstractServerTask {
             serverFeatures = util.getServerFeatures(getServerDir(project))
         }
 
-        if(util == null) {
-            // Features installed from ant
-            return new HashSet<String>(Arrays.asList(server.features.name.join(",")))
-        }
-        else {
-            Set<String> featuresToInstall = InstallFeatureUtil.combineToSet(pluginListedFeatures, dependencyFeatures, serverFeatures)
-            return featuresToInstall 
-        }
-
+        Set<String> featuresToInstall = InstallFeatureUtil.combineToSet(pluginListedFeatures, dependencyFeatures, serverFeatures)
+        return featuresToInstall 
 
     }
 
