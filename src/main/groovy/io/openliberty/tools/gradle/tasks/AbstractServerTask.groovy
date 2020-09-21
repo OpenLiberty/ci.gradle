@@ -788,7 +788,11 @@ abstract class AbstractServerTask extends AbstractTask {
                 logger.debug("The " + getServerDir(project).getCanonicalPath() + " file is merged with inlined configuration.")
             }
 
-            mergedProperties = combineServerEnvProperties(mergedProperties, configuredProps);
+            if (mergedProperties.isEmpty()) {
+                mergedProperties = combineServerEnvProperties(serverEnvProps, configuredProps);
+            } else {
+                mergedProperties = combineServerEnvProperties(mergedProperties, configuredProps);
+            }
         }
 
         if(!mergedProperties.isEmpty()) {
