@@ -75,6 +75,7 @@ class DevTask extends AbstractServerTask {
     private static final boolean DEFAULT_LIBERTY_DEBUG = true;
     private static final boolean DEFAULT_POLLING_TEST = false;
     private static final boolean DEFAULT_CONTAINER = false;
+    private static final boolean DEFAULT_SKIP_DEFAULT_PORTS = false;
 
     protected final String CONTAINER_PROPERTY_ARG = '-P'+CONTAINER_PROPERTY+'=true';
 
@@ -206,6 +207,13 @@ class DevTask extends AbstractServerTask {
         }
     }
 
+    private Boolean skipDefaultPorts;
+
+    @Option(option = 'skipDefaultPorts', description = 'If true, the default Docker port mappings are skipped in the docker run command.')
+    void setSkipDefaultPorts(boolean skipDefaultPorts) {
+        this.skipDefaultPorts = skipDefaultPorts;
+    }
+
     @Optional
     @Input
     Boolean clean;
@@ -236,12 +244,12 @@ class DevTask extends AbstractServerTask {
                     boolean  hotTests, boolean  skipTests, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
                     boolean libertyDebug, boolean pollingTest, boolean container, File dockerfile,
-                    String dockerRunOpts, int dockerBuildTimeout
+                    String dockerRunOpts, int dockerBuildTimeout, boolean skipDefaultPorts
         ) throws IOException {
             super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory,
                     resourceDirs, hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
-                    true, true, pollingTest, container, dockerfile, dockerRunOpts, dockerBuildTimeout);
+                    true, true, pollingTest, container, dockerfile, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts);
 
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
@@ -296,6 +304,11 @@ class DevTask extends AbstractServerTask {
         @Override
         public String getServerStartTimeoutExample() {
             return "'gradle libertyDev --serverStartTimeout=120'";
+        }
+
+        @Override
+        public String getProjectName() {
+            return project.getName();
         }
 
         @Override
@@ -865,7 +878,8 @@ class DevTask extends AbstractServerTask {
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
-                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerRunOpts, dockerBuildTimeout
+                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerRunOpts, 
+                dockerBuildTimeout, skipDefaultPorts.booleanValue()
         );
 
         util.addShutdownHook(executor);
@@ -935,6 +949,15 @@ class DevTask extends AbstractServerTask {
             String buildDockerBuildTimeoutSetting = project.liberty.dev.dockerBuildTimeout; // get from build.gradle
             if (buildDockerBuildTimeoutSetting != null) {
                 setDockerBuildTimeout(buildDockerBuildTimeoutSetting);
+            }
+        }
+
+        if (skipDefaultPorts == null) {
+            boolean buildSkipDefaultPortsSetting = project.liberty.dev.skipDefaultPorts; // get from build.gradle
+            if (buildSkipDefaultPortsSetting == null) {
+                setSkipDefaultPorts(DEFAULT_SKIP_DEFAULT_PORTS);
+            } else {
+                setSkipDefaultPorts(buildSkipDefaultPortsSetting);
             }
         }
     }
