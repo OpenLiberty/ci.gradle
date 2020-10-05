@@ -133,7 +133,7 @@ class DevTest extends AbstractIntegrationTest {
         Thread.sleep(5000);
         assertFalse(checkLogMessage(120000, "CWWKF0011I"));
         if (isDevMode) {
-            assertFalse(checkLogMessage(60000, "Liberty dev mode has started!"));
+            assertFalse(checkLogMessage(60000, "Liberty is running in dev mode."));
         }
 
         // verify that the target directory was created
