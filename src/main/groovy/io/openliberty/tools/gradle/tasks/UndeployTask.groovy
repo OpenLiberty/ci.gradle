@@ -80,7 +80,7 @@ class UndeployTask extends AbstractServerTask {
 
             try {
                 scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(project), serverXML, server.configDirectory,
-                        server.bootstrapPropertiesFile, server.bootstrapProperties, server.serverEnvFile, false)
+                        server.bootstrapPropertiesFile, combinedBootstrapProperties, server.serverEnvFile, false)
 
                 //appName will be set to a name derived from appFile if no name can be found.
                 appName = scd.findNameForLocation(file)
