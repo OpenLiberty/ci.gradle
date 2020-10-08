@@ -540,6 +540,16 @@ class DeployTask extends AbstractServerTask {
         }
     }
 
+    public static boolean isSupportedLooseAppType(String type) {
+        switch (type) {
+            case "ear":
+            case "war":
+                return true;
+            default:
+                return false;
+        }
+    }
+
     //Cleans up the application if the install style is switched from loose application to archive and vice versa
     protected void deleteApplication(File parent, File artifactFile) throws IOException {
         deleteApplication(parent, artifactFile.getName());
@@ -604,7 +614,7 @@ class DeployTask extends AbstractServerTask {
 
                 try {
                     scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(project), serverXML, server.configDirectory,
-                            server.bootstrapPropertiesFile, server.bootstrapProperties, server.serverEnvFile, false)
+                            server.bootstrapPropertiesFile, combinedBootstrapProperties, server.serverEnvFile, false)
 
                     //appName will be set to a name derived from appFile if no name can be found.
                     appName = scd.findNameForLocation(appFile)

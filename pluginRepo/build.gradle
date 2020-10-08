@@ -1,0 +1,19 @@
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        test (MavenPublication) {     
+            group = 'io.openliberty.tools.gradle.Liberty'
+            artifactId = 'io.openliberty.tools.gradle.Liberty.gradle.plugin'
+            version = rootProject.version
+
+            from rootProject.components.java
+        }
+    }
+    repositories {
+        maven {
+            name = "test"
+            url = uri("${rootProject.buildDir}/plugin-test-repository")
+        }
+    }
+}

@@ -20,4 +20,6 @@ class DevExtension {
     boolean container = false
     File dockerfile
     String dockerRunOpts
+    int dockerBuildTimeout
+    boolean skipDefaultPorts = false
 }

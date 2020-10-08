@@ -75,6 +75,7 @@ class DevTask extends AbstractServerTask {
     private static final boolean DEFAULT_LIBERTY_DEBUG = true;
     private static final boolean DEFAULT_POLLING_TEST = false;
     private static final boolean DEFAULT_CONTAINER = false;
+    private static final boolean DEFAULT_SKIP_DEFAULT_PORTS = false;
 
     protected final String CONTAINER_PROPERTY_ARG = '-P'+CONTAINER_PROPERTY+'=true';
 
@@ -194,6 +195,25 @@ class DevTask extends AbstractServerTask {
         this.dockerRunOpts = dockerRunOpts;
     }
 
+    private int dockerBuildTimeout;
+
+    @Option(option = 'dockerBuildTimeout', description = 'Specifies the amount of time to wait (in seconds) for the completion of the Docker operation to build the image.')
+    void setDockerBuildTimeout(String inputValue) {
+        try {
+            this.dockerBuildTimeout = inputValue.toInteger();
+        } catch (NumberFormatException e) {
+            logger.error(String.format("Unexpected value: %s for dev mode option dockerBuildTimeout. dockerBuildTimeout should be a valid integer.", inputValue));
+            throw e;
+        }
+    }
+
+    private Boolean skipDefaultPorts;
+
+    @Option(option = 'skipDefaultPorts', description = 'If true, the default Docker port mappings are skipped in the docker run command.')
+    void setSkipDefaultPorts(boolean skipDefaultPorts) {
+        this.skipDefaultPorts = skipDefaultPorts;
+    }
+
     @Optional
     @Input
     Boolean clean;
@@ -224,12 +244,12 @@ class DevTask extends AbstractServerTask {
                     boolean  hotTests, boolean  skipTests, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
                     boolean libertyDebug, boolean pollingTest, boolean container, File dockerfile,
-                    String dockerRunOpts
+                    String dockerRunOpts, int dockerBuildTimeout, boolean skipDefaultPorts
         ) throws IOException {
             super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory,
                     resourceDirs, hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
-                    true, true, pollingTest, container, dockerfile, dockerRunOpts);
+                    true, true, pollingTest, container, dockerfile, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts);
 
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
@@ -284,6 +304,11 @@ class DevTask extends AbstractServerTask {
         @Override
         public String getServerStartTimeoutExample() {
             return "'gradle libertyDev --serverStartTimeout=120'";
+        }
+
+        @Override
+        public String getProjectName() {
+            return project.getName();
         }
 
         @Override
@@ -424,6 +449,18 @@ class DevTask extends AbstractServerTask {
                 project.liberty.server.defaultVar = newProject.liberty.server.defaultVar;
             }
 
+            if (hasCopyLibsDirectoryChanged(newProject, project)) {
+                logger.debug('copyLibsDirectory changed');
+                restartServer = true;
+                project.liberty.server.deploy.copyLibsDirectory = newProject.liberty.server.deploy.copyLibsDirectory;
+            }
+
+            if (hasMergeServerEnvChanged(newProject, project)) {
+                logger.debug('mergeServerEnv changed');
+                restartServer = true;
+                project.liberty.server.mergeServerEnv = newProject.liberty.server.mergeServerEnv;
+            }
+
             // if we don't already need to restart the server
             // check if we need to install any additional features
             if (!restartServer) {
@@ -510,6 +547,17 @@ class DevTask extends AbstractServerTask {
 
         private boolean hasServerConfigDefaultVarChanged(Project newProject, Project oldProject) {
             return newProject.liberty.server.defaultVar != oldProject.liberty.server.defaultVar;
+        }
+
+        private boolean hasMergeServerEnvChanged(Project newProject, Project oldProject) {
+            return newProject.liberty.server.mergeServerEnv != oldProject.liberty.server.mergeServerEnv;
+        }
+
+        private boolean hasCopyLibsDirectoryChanged(Project newProject, Project oldProject) {
+            File newCopyLibsDir = newProject.liberty.server.deploy.copyLibsDirectory;
+            File oldCopyLibsDirDir = oldProject.liberty.server.deploy.copyLibsDirectory;
+
+            return newCopyLibsDir != oldCopyLibsDirDir;
         }
 
 
@@ -690,6 +738,11 @@ class DevTask extends AbstractServerTask {
                 gradleConnection.close();
             }
         }
+
+        @Override
+        public boolean isLooseApplication() {
+            return server.looseApplication && DeployTask.isSupportedLooseAppType(getPackagingType());
+        }
     }
 
     public void runInstallFeatureTask(BuildLauncher gradleBuildLauncher, String... options) throws BuildException {
@@ -825,7 +878,8 @@ class DevTask extends AbstractServerTask {
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
-                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerRunOpts
+                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerRunOpts, 
+                dockerBuildTimeout, skipDefaultPorts.booleanValue()
         );
 
         util.addShutdownHook(executor);
@@ -865,6 +919,7 @@ class DevTask extends AbstractServerTask {
         }
     }
 
+    // Get container option values from build.gradle if not specified on the command line
     private void processContainerParams() throws Exception {
         // process parameters from dev extension
         if (container == null) {
@@ -890,21 +945,19 @@ class DevTask extends AbstractServerTask {
             }
         }
 
-        // set container param if dockerfile or dockerRunOpts are set
-        if (!container) {
-            if (dockerfile != null) {
-                if (dockerfile.exists()) {
-                    setContainer(true);
-                    return;
-                } else {
-                    throw new Exception("The file " + dockerfile + " used for dev mode option dockerfile does not exist."
-                        + " dockerfile should be a valid Dockerfile");
-                }
+        if (dockerBuildTimeout == 0) {
+            String buildDockerBuildTimeoutSetting = project.liberty.dev.dockerBuildTimeout; // get from build.gradle
+            if (buildDockerBuildTimeoutSetting != null) {
+                setDockerBuildTimeout(buildDockerBuildTimeoutSetting);
             }
-    
-            if (dockerRunOpts != null) {
-                setContainer(true);
-                return;
+        }
+
+        if (skipDefaultPorts == null) {
+            boolean buildSkipDefaultPortsSetting = project.liberty.dev.skipDefaultPorts; // get from build.gradle
+            if (buildSkipDefaultPortsSetting == null) {
+                setSkipDefaultPorts(DEFAULT_SKIP_DEFAULT_PORTS);
+            } else {
+                setSkipDefaultPorts(buildSkipDefaultPortsSetting);
             }
         }
     }

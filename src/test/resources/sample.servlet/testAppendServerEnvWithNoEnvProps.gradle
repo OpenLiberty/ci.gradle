@@ -48,7 +48,6 @@ liberty {
             copyLibsDirectory = file("${project.buildDir}/libs")
         }
         mergeServerEnv = true
-        serverEnvFile = file("src/resources/server.env")
     }
 }
 

@@ -32,6 +32,7 @@ class InstallFeature_single extends AbstractIntegrationTest{
     public static void setup() {
         createDir(buildDir)
         copyBuildFiles(buildFilename, buildDir)
+        copySettingsFile(resourceDir, buildDir)
     }
 
     @Test

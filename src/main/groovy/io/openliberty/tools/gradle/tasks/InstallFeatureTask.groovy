@@ -47,9 +47,15 @@ class InstallFeatureTask extends AbstractFeatureTask {
     
         def pluginListedEsas = getPluginListedFeatures(true)
         InstallFeatureUtil util = getInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVersion)
-        Set<String> featuresToInstall = getInstalledFeatures()
 
-        util.installFeatures(server.features.acceptLicense, new ArrayList<String>(featuresToInstall))
+        // if getInstallFeatureUtil failed to retrieve an InstallFeatureUtil instance for util, then features are installed via ant
+        if(installFeaturesFromAnt) {
+            installFeatureFromAnt();
+        }
+        else {
+            Set<String> featuresToInstall = getInstalledFeatures()
+            util.installFeatures(server.features.acceptLicense, new ArrayList<String>(featuresToInstall))
+        }
     }
 
     private def buildAntParams() {

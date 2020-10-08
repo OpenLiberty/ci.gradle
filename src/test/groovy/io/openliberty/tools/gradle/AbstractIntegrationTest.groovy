@@ -66,6 +66,10 @@ abstract class AbstractIntegrationTest {
         }
     }
 
+    protected static File copySettingsFile(File resourceDir, File destDir) {
+        copyFile(new File(resourceDir, "settings.gradle"), new File(destDir, "settings.gradle"))
+    }
+
     protected static File createTestProject(File parent, File sourceDir, String buildFilename) {
         createTestProject(parent, sourceDir, buildFilename, false)
     }

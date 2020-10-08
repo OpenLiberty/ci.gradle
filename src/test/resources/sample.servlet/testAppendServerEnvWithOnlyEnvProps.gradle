@@ -48,7 +48,7 @@ liberty {
             copyLibsDirectory = file("${project.buildDir}/libs")
         }
         mergeServerEnv = true
-        serverEnvFile = file("src/resources/server.env")
+        env = ['TEST_PROP_2':'white', 'CONFIG_SERVER_ENV_PROPS':'TEST']
     }
 }
 

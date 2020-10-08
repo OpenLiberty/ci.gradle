@@ -9,16 +9,17 @@ env:
     - RUNTIME=ol RUNTIME_VERSION=20.0.0.6
     - RUNTIME=ol RUNTIME_VERSION=20.0.0.3
 before_install:
+    - echo 'Installing ci.ant lib ....'
+    - git clone https://github.com/OpenLiberty/ci.ant.git ./ci.ant
+    - cd ./ci.ant
+    - mvn clean install
+    - cd ..
+    # - echo 'Skip Installing ci.common lib ....'
     - echo 'Installing ci.common lib ....'
     - git clone https://github.com/OpenLiberty/ci.common.git ./ci.common
     - cd ./ci.common
     - mvn clean install
     - cd ..
-#    - echo 'Installing ci.ant lib ....'
-#    - git clone https://github.com/OpenLiberty/ci.ant.git ./ci.ant
-#    - cd ./ci.ant
-#    - mvn clean install
-#    - cd ..
 script:
   - export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs='-XX:MaxPermSize=1024m -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:+HeapDumpOnOutOfMemoryError -Xmx2048m'"
   - ./gradlew clean install check -Ptest.exclude="**/*15*" -Druntime=$RUNTIME -DruntimeVersion=$RUNTIME_VERSION --stacktrace --info --no-daemon

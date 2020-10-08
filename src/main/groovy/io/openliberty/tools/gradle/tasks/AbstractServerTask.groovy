@@ -205,7 +205,7 @@ abstract class AbstractServerTask extends AbstractTask {
     protected void copyConfigDirectory() {
         //merge default server.env with one in config directory
         File configDirServerEnv = new File(server.configDirectory, "server.env")
-        if (configDirServerEnv.exists() && server.appendServerEnv) {
+        if (configDirServerEnv.exists() && server.mergeServerEnv) {
             FileFilter fileFilter =   FileFilterUtils.notFileFilter(FileFilterUtils.nameFileFilter("server.env", null))
             FileUtils.copyDirectory(server.configDirectory, getServerDir(project), fileFilter)
 
@@ -277,6 +277,9 @@ abstract class AbstractServerTask extends AbstractTask {
 
         // jvmOptions, jvmOptionsFile and jvmProjectProps take precedence over jvm.options from configDirectory
         File optionsFile = new File(serverDirectory, "jvm.options")
+        if (optionsFile.exists() && jvmOptionsPath == null) {
+            optionsFile.delete();
+        }
         if((server.jvmOptions != null && !server.jvmOptions.isEmpty()) || !jvmProjectProps.isEmpty()){
             if (jvmOptionsPath != null) {
                 logger.warn("The " + jvmOptionsPath + " file is overwritten by inlined configuration.")
@@ -294,6 +297,9 @@ abstract class AbstractServerTask extends AbstractTask {
         // bootstrapProperties, bootstrapPropertiesFile and bootstrapProjectProps take precedence over 
         // bootstrap.properties from configDirectory
         File bootstrapFile = new File(serverDirectory, "bootstrap.properties")
+        if (bootstrapFile.exists() && bootStrapPropertiesPath == null) {
+            bootstrapFile.delete();
+        }
         if((server.bootstrapProperties != null && !server.bootstrapProperties.isEmpty()) || !bootstrapProjectProps.isEmpty()){
             if (bootStrapPropertiesPath != null) {
                 logger.warn("The " + bootStrapPropertiesPath + " file is overwritten by inlined configuration.")
@@ -312,9 +318,12 @@ abstract class AbstractServerTask extends AbstractTask {
         serverEnvPath = handleServerEnvFileAndProperties(serverEnvPath, serverDirectory)
 
         // generate a config file on the server with any Liberty configuration variables specified via project properties
+        File pluginVariableConfig = new File(serverDirectory, PLUGIN_VARIABLE_CONFIG_XML)
+        if (pluginVariableConfig.exists()) {
+            pluginVariableConfig.delete();
+        }
         if ((server.var != null && !server.var.isEmpty()) || (server.defaultVar != null && !server.defaultVar.isEmpty()) || 
              !varProjectProps.isEmpty() || !defaultVarProjectProps.isEmpty()) {
-            File pluginVariableConfig = new File(serverDirectory, PLUGIN_VARIABLE_CONFIG_XML)
             writeConfigDropinsServerVariables(pluginVariableConfig, server.var, server.defaultVar, varProjectProps, defaultVarProjectProps)
             logger.info("Generate server configuration file " + pluginVariableConfig.getCanonicalPath())
         }
@@ -470,7 +479,8 @@ abstract class AbstractServerTask extends AbstractTask {
         File serverConfigFile = new File(getServerDir(project), 'server.xml')
         if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
-                ServerConfigDocument scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(project), serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, convertPropertiesToMap(server.bootstrapProperties), server.serverEnvFile, false);
+                Map<String,String> props = combinedBootstrapProperties == null ? convertPropertiesToMap(server.bootstrapProperties) : combinedBootstrapProperties;
+                ServerConfigDocument scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(project), serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, props, server.serverEnvFile, false);
                 if (scd != null && scd.getLocations().contains(fileName)) {
                     logger.debug("Application configuration is found in server.xml : " + fileName)
                     configured = true
@@ -747,7 +757,7 @@ abstract class AbstractServerTask extends AbstractTask {
         File envFile = new File(serverDirectory, "server.env")
         Properties configuredProps = combineServerEnvProperties(server.env, envProjectProps);
 
-        if(server.appendServerEnv) {
+        if(server.mergeServerEnv) {
             return setServerEnvWithAppendServerEnvHelper(envFile, serverEnvPath, configuredProps)
         }
         else {
@@ -779,7 +789,11 @@ abstract class AbstractServerTask extends AbstractTask {
                 logger.debug("The " + getServerDir(project).getCanonicalPath() + " file is merged with inlined configuration.")
             }
 
-            mergedProperties = combineServerEnvProperties(mergedProperties, configuredProps);
+            if (mergedProperties.isEmpty()) {
+                mergedProperties = combineServerEnvProperties(serverEnvProps, configuredProps);
+            } else {
+                mergedProperties = combineServerEnvProperties(mergedProperties, configuredProps);
+            }
         }
 
         if(!mergedProperties.isEmpty()) {

@@ -4,13 +4,13 @@ import java.io.OutputStream
 import java.util.Properties
 
 apply plugin: 'groovy'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply plugin: "com.gradle.plugin-publish"
 
 archivesBaseName = 'liberty-gradle-plugin'
 group = 'io.openliberty.tools'
-version = '3.1-M2-SNAPSHOT'
+version = '3.1-M3-SNAPSHOT'
 
 repositories {
     mavenLocal()
@@ -30,7 +30,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.9.7"
+        classpath "com.gradle.publish:plugin-publish-plugin:0.12.0"
     }
 }
 
@@ -58,11 +58,14 @@ compileTestGroovy {
     targetCompatibility = JavaVersion.VERSION_1_7
 }
 
+def libertyAntVersion = "1.9.5"
+def libertyCommonVersion = "1.8.9-SNAPSHOT"
+
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
-    implementation ('io.openliberty.tools:liberty-ant-tasks:1.9.4')
-    implementation ('io.openliberty.tools:ci.common:1.8.8-SNAPSHOT')
+    implementation ("io.openliberty.tools:liberty-ant-tasks:$libertyAntVersion")
+    implementation ("io.openliberty.tools:ci.common:$libertyCommonVersion")
     implementation group: 'commons-io', name: 'commons-io', version: '2.5'
     provided group: 'com.ibm.websphere.appserver.api', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
     testImplementation 'junit:junit:4.11'
@@ -130,6 +133,8 @@ test {
         prop.setProperty("runtimeArtifactId", runtimeArtifactId)
         prop.setProperty("kernelArtifactId", kernelArtifactId)
         prop.setProperty("runtimeVersion", runtimeVersion)
+        prop.setProperty("antVersion", libertyAntVersion)
+        prop.setProperty("commonVersion", libertyCommonVersion)
 
         // save properties to project root folder
         prop.store(output, null)
@@ -159,73 +164,89 @@ test {
 }
 
 pluginBundle {
-  website = 'https://github.com/OpenLiberty/ci.gradle'
-  vcsUrl = 'https://github.com/OpenLiberty/ci.gradle'
-  description = 'Gradle plugin for managing Liberty servers'
-  tags = ['liberty', 'websphere', 'devops']
+    website = 'https://github.com/OpenLiberty/ci.gradle'
+    vcsUrl = 'https://github.com/OpenLiberty/ci.gradle'
+    description = 'Gradle plugin for managing Liberty servers'
+    tags = ['liberty', 'websphere', 'devops']
 
-  plugins {
-    cigradle {
-      id = 'io.openliberty.tools.gradle.Liberty'
-      displayName = 'ci.gradle'
+    plugins {
+        cigradle {
+            id = 'io.openliberty.tools.gradle.Liberty'
+            displayName = 'ci.gradle'
+        }
     }
-  }
+}
+
+publishing {
+    publications {
+        libertyGradle (MavenPublication) {
+            artifactId = archivesBaseName
+
+            from components.java
+            artifact groovydocJar
+            artifact sourcesJar 
+
+            pom {
+                name = 'liberty-gradle-plugin'
+                packaging = 'jar'
+                description = 'Liberty Gradle Plug-in.'
+                url = 'https://wasdev.github.io'
+                licenses {
+                    license {
+                        name = 'The Apache Software License, Version 2.0'
+                        url = 'https://raw.github.com/OpenLiberty/ci.gradle/master/LICENSE'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'jgawor'
+                        name = 'Jarek Gawor'
+                        email = 'jgawor@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git@github.com:OpenLiberty/ci.gradle.git'
+                    developerConnection = 'scm:git:git@github.com:OpenLiberty/ci.gradle.git'
+                    url = 'git@github.com:OpenLiberty/ci.gradle.git'
+                    tag = 'HEAD'
+                }
+            }
+        }
+    }
 }
 
 if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
     
     if (!version.endsWith("SNAPSHOT")) {
         signing {
-            sign configurations.archives
+            sign publishing.publications.libertyGradle
         }
     } else {
         signing.required = false
     }
 
-    uploadArchives {
+    publishing {
         repositories {
-            mavenDeployer {
-                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+            maven {
+                name = "Nexus"
+                def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+                def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
 
-                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                    authentication(userName: ossrhUsername, password: ossrhPassword)
-                }
-
-                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                    authentication(userName: ossrhUsername, password: ossrhPassword)
-                }
-
-                pom.project {
-                    name 'liberty-gradle-plugin'
-                    packaging 'jar'
-                    description 'Liberty Gradle Plug-in.'
-                    url 'https://wasdev.github.io'
-
-                    scm {
-                        connection 'scm:git:git@github.com:OpenLiberty/ci.gradle.git'
-                        developerConnection 'scm:git:git@github.com:OpenLiberty/ci.gradle.git'
-                        url 'git@github.com:OpenLiberty/ci.gradle.git'
-                        tag 'HEAD'
-                    }
-
-                    licenses {
-                        license {
-                            name 'The Apache Software License, Version 2.0'
-                            url 'https://raw.github.com/OpenLiberty/ci.gradle/master/LICENSE'
-                        }
-                    }
-
-                    developers {
-                        developer {
-                            id 'jgawor'
-                            name 'Jarek Gawor'
-                            email 'jgawor@gmail.com'
-                        }
-                    }
+                credentials {
+                    username = ossrhUsername
+                    password = ossrhPassword
                 }
             }
         }
     }
 }
+
+task install {
+    dependsOn "publishToMavenLocal", ":pluginRepo:publishTestPublicationToTestRepository"
+}
+
+publishToMavenLocal.dependsOn jar
 
 groovydoc.enabled = false
