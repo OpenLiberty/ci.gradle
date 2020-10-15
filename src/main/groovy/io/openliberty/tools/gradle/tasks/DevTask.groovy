@@ -674,7 +674,7 @@ class DevTask extends AbstractServerTask {
 
             try {
                 if (container) {
-                    gradleBuildLauncher.withArguments(CONTAINER_PROPERTY_ARG);
+                    gradleBuildLauncher.addArguments(CONTAINER_PROPERTY_ARG);
                 }
                 runGradleTask(gradleBuildLauncher, 'deploy');
             } catch (BuildException e) {
@@ -686,7 +686,7 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void libertyInstallFeature() {
-            if (!container) { // for now, container mode does not support installing features
+            if (!container) { // Container should have features required, container mode does not support installing features
                 ProjectConnection gradleConnection = initGradleProjectConnection();
                 BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
@@ -706,7 +706,7 @@ class DevTask extends AbstractServerTask {
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
             try {
                 if (container) {
-                    gradleBuildLauncher.withArguments(CONTAINER_PROPERTY_ARG)
+                    gradleBuildLauncher.addArguments(CONTAINER_PROPERTY_ARG)
                 }
                 runGradleTask(gradleBuildLauncher, 'deploy');
             } catch (BuildException e) {
@@ -718,24 +718,22 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void libertyCreate() {
-            ProjectConnection gradleConnection = initGradleProjectConnection();
-            BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
-
-            // need to force liberty-create to re-run
-            // else it will just say up-to-date and skip the task
             if (container) {
-                // for container, also append a container command line property for the task to enable the liberty.dev.container extension
-                gradleBuildLauncher.withArguments('--rerun-tasks', CONTAINER_PROPERTY_ARG);
+                createServerDirectories();
             } else {
-                gradleBuildLauncher.withArguments('--rerun-tasks');
-            }
+                // need to force liberty-create to re-run
+                // else it will just say up-to-date and skip the task
+                ProjectConnection gradleConnection = initGradleProjectConnection();
+                BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
-            try {
-                runGradleTask(gradleBuildLauncher, 'libertyCreate');
-            } catch (BuildException e) {
-                throw new PluginExecutionException(e);
-            } finally {
-                gradleConnection.close();
+                gradleBuildLauncher.addArguments('--rerun-tasks');
+                try {
+                    runGradleTask(gradleBuildLauncher, 'libertyCreate');
+                } catch (BuildException e) {
+                    throw new PluginExecutionException(e);
+                } finally {
+                    gradleConnection.close();
+                }
             }
         }
 
@@ -864,10 +862,14 @@ class DevTask extends AbstractServerTask {
                 :war
                 :deploy
              */
-            runGradleTask(gradleBuildLauncher, 'libertyCreate');
-            runInstallFeatureTask(gradleBuildLauncher);
-            if (container) {
-                gradleBuildLauncher.withArguments(CONTAINER_PROPERTY_ARG);
+            if (!container) {
+                runGradleTask(gradleBuildLauncher, 'libertyCreate');
+                runInstallFeatureTask(gradleBuildLauncher);
+            } else {
+                // skip creating the server and installing features and just propagate the option to 'deploy'
+                createServerDirectories();
+                gradleBuildLauncher.addArguments("--exclude-task", "installFeature");
+                gradleBuildLauncher.addArguments(CONTAINER_PROPERTY_ARG);
             }
             runGradleTask(gradleBuildLauncher, 'deploy');
         } finally {
@@ -916,6 +918,17 @@ class DevTask extends AbstractServerTask {
                 logger.info(e.getMessage());
             }
             return; // enter shutdown hook
+        }
+    }
+
+    void createServerDirectories() {
+        File installDirectory = getInstallDir(project);
+        if (!installDirectory.isDirectory()) {
+            installDirectory.mkdirs();
+        }
+        File serverDirectory = getServerDir(project);
+        if (!serverDirectory.isDirectory()) {
+            serverDirectory.mkdirs();
         }
     }
 
