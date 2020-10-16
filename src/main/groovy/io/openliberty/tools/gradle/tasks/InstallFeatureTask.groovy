@@ -40,9 +40,16 @@ class InstallFeatureTask extends AbstractFeatureTask {
         def propertiesList = InstallFeatureUtil.loadProperties(getInstallDir(project))
         def openLibertyVersion = InstallFeatureUtil.getOpenLibertyVersion(propertiesList)
 
+        System.out.println("---------------------------------------------------------------------------");
+        System.out.println(System.getProperty("skipBetaInstallFeatureWarning"));
+        System.out.println("---------------------------------------------------------------------------");
+
+        Boolean skipBetaInstallFeatureWarning = Boolean.parseBoolean(System.getProperty("skipBetaInstallFeatureWarning"))
         if (InstallFeatureUtil.isOpenLibertyBetaVersion(openLibertyVersion)) {
-            logger.warn("Downloading additional features is not supported for beta releases.")
-            return
+            if (!skipBetaInstallFeatureWarning) {
+                logger.warn("Downloading additional features is not supported for beta releases.")
+            }
+            return // do not install features if the runtime is a beta version
         }
     
         def pluginListedEsas = getPluginListedFeatures(true)
