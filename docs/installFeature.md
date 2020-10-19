@@ -29,7 +29,7 @@ The `installFeature` task uses a `features` extension to define task specific pr
 
 | Attribute | Type  | Since | Description | Required |
 | --------- | ----- | ----- | ----------- | -------- |
-| name | String[] | 1.0 | Specifies the list of feature names to be installed. This can be an ESA file, an IBM-Shortname or a Subsystem-SymbolicName of the Subsystem archive. The value can be a file name or a URL to the ESA file. If this list is not provided, the server must be created so that the configured feature list is used. | No |
+| name | String[] | 1.0 | Specifies the list of feature names to be installed. This can be a local ESA file, an IBM-Shortname or a Subsystem-SymbolicName of the Subsystem archive. If this list is not provided, the server must be created so that the configured feature list is used. | No |
 | acceptLicense | boolean | 1.0 | Accept feature license terms and conditions. The default value is `false`, so you must add this property to get features installed if it is required.  | Required for runtime versions 18.0.0.1 and below, or for features that are not from Open Liberty. <p/> Not required for Open Liberty features on runtime versions 18.0.0.2 and above. |
 | to | String | 1.0 | Specify where to install the feature. The feature can be installed to any configured product extension location, or as a user feature (usr, extension). If this option is not specified the feature will be installed as a user feature. | No |
 | from | String | 1.0 | Specifies a single directory-based repository as the source of the assets. The default is to install from the online Liberty repository. | No |
