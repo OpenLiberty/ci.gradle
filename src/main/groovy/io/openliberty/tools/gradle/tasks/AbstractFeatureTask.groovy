@@ -46,17 +46,17 @@ public class AbstractFeatureTask extends AbstractServerTask {
 
         @Override
         public void debug(String msg) {
-            logger.debug(msg)
+           logger.debug(msg)
         }
 
         @Override
         public void debug(String msg, Throwable e) {
-            logger.debug(msg, e)
+           logger.debug(msg, (Throwable) e)
         }
 
         @Override
         public void debug(Throwable e) {
-            logger.debug(e)
+            logger.debug("Throwable exception received: "+e.getMessage(), (Throwable) e)
         }
 
         @Override
