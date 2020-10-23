@@ -18,6 +18,7 @@ package io.openliberty.tools.gradle.tasks
 import groovy.xml.StreamingMarkupBuilder
 import io.openliberty.tools.common.plugins.config.ApplicationXmlDocument
 import io.openliberty.tools.common.plugins.config.ServerConfigDocument
+import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 import io.openliberty.tools.gradle.utils.CommonLogger
 
 import org.apache.commons.io.FileUtils
@@ -1036,5 +1037,57 @@ abstract class AbstractServerTask extends AbstractTask {
         return serverTask
     }
 
+    static public Map<String,File> getLibertyDirectoryPropertyFiles(File installDir, File userDir, File serverDir) throws Exception {
+        Map<String, File> libertyDirectoryPropertyToFile = new HashMap<String,File>()
+
+        if (serverDir.exists()) {
+            libertyDirectoryPropertyToFile.put(ServerFeatureUtil.SERVER_CONFIG_DIR, serverDir.getCanonicalFile())
+
+            libertyDirectoryPropertyToFile.put(ServerFeatureUtil.WLP_INSTALL_DIR, installDir.getCanonicalFile())
+ 
+            libertyDirectoryPropertyToFile.put(ServerFeatureUtil.WLP_USER_DIR, userDir.getCanonicalFile())
+
+            File userExtDir = new File(userDir, "extension")
+            libertyDirectoryPropertyToFile.put(ServerFeatureUtil.USR_EXTENSION_DIR, userExtDir.getCanonicalFile())
+
+            File userSharedDir = new File(userDir, "shared")
+            File userSharedAppDir = new File(userSharedDir, "app")
+            File userSharedConfigDir = new File(userSharedDir, "config")
+            File userSharedResourcesDir = new File(userSharedDir, "resources")
+            File userSharedStackGroupsDir = new File(userSharedDir, "stackGroups")
+
+            libertyDirectoryPropertyToFile.put(ServerFeatureUtil.SHARED_APP_DIR, userSharedAppDir.getCanonicalFile())
+            libertyDirectoryPropertyToFile.put(ServerFeatureUtil.SHARED_CONFIG_DIR, userSharedConfigDir.getCanonicalFile())
+            libertyDirectoryPropertyToFile.put(ServerFeatureUtil.SHARED_RESOURCES_DIR, userSharedResourcesDir.getCanonicalFile())
+            libertyDirectoryPropertyToFile.put(ServerFeatureUtil.SHARED_STACKGROUP_DIR, userSharedStackGroupsDir.getCanonicalFile())
+        }
+        return libertyDirectoryPropertyToFile
+    }
+
+    protected Map<String,File> getLibertyDirectoryPropertyFiles(String serverDirectoryParam) {
+        
+        File serverConfigDir = getServerDir(project)
+
+        // if DevMode provides a server directory parameter use that for finding the server config dir
+        if (serverDirectoryParam != null) {
+            serverConfigDir = new File(serverDirectoryParam)
+        }
+
+        if (serverConfigDir.exists()) {
+            try {
+                File wlpInstallDir = getInstallDir(project)
+                File wlpUserDir = getUserDir(project, wlpInstallDir)
+
+                return getLibertyDirectoryPropertyFiles(wlpInstallDir, wlpUserDir, serverConfigDir)
+            } catch (Exception e) {
+                logger.warn("The properties for directories could not be initialized because an error occurred when accessing the directories.")
+                logger.debug("Exception received: "+e.getMessage(), (Throwable) e)
+            }
+        } else {
+            logger.warn("The " + serverConfigDir + " directory cannot be accessed. The properties for directories could not be initialized.")
+        }
+
+        return new HashMap<String,File> ()
+    }
 
 }

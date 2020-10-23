@@ -237,9 +237,11 @@ class DevTask extends AbstractServerTask {
 
         Set<String> existingLibertyFeatureDependencies;
 
+        Map<String, File> libertyDirPropertyFiles = new HashMap<String, File> ();
+
         private ServerTask serverTask = null;
 
-        DevTaskUtil(File serverDirectory, File sourceDirectory, File testSourceDirectory,
+        DevTaskUtil(File installDirectory, File userDirectory, File serverDirectory, File sourceDirectory, File testSourceDirectory,
                     File configDirectory, File projectDirectory, List<File> resourceDirs,
                     boolean  hotTests, boolean  skipTests, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
@@ -252,7 +254,8 @@ class DevTask extends AbstractServerTask {
                     true, true, pollingTest, container, dockerfile, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts);
 
             ServerFeature servUtil = getServerFeatureUtil();
-            this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
+            this.libertyDirPropertyFiles = AbstractServerTask.getLibertyDirectoryPropertyFiles(installDirectory, userDirectory, serverDirectory);
+            this.existingFeatures = servUtil.getServerFeatures(serverDirectory, libertyDirPropertyFiles);
 
             this.existingLibertyFeatureDependencies = new HashSet<String>();
 
@@ -564,7 +567,7 @@ class DevTask extends AbstractServerTask {
         @Override
         public void checkConfigFile(File configFile, File serverDir) {
             ServerFeature servUtil = getServerFeatureUtil();
-            Set<String> features = servUtil.getServerFeatures(serverDir);
+            Set<String> features = servUtil.getServerFeatures(serverDir, libertyDirPropertyFiles);
 
             if (features == null) {
                 return;
@@ -876,7 +879,7 @@ class DevTask extends AbstractServerTask {
             gradleConnection.close();
         }
 
-        util = new DevTaskUtil(
+        util = new DevTaskUtil(serverInstallDir, getUserDir(project, serverInstallDir),
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
@@ -1013,12 +1016,12 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void debug(String msg, Throwable e) {
-            logger.debug(msg, e);
+            logger.debug(msg, (Throwable) e);
         }
 
         @Override
         public void debug(Throwable e) {
-            logger.debug(e);
+            logger.debug("Exception received: "+e.getMessage(), (Throwable) e);
         }
 
         @Override
