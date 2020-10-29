@@ -249,9 +249,11 @@ class DevTask extends AbstractServerTask {
                     String dockerRunOpts, int dockerBuildTimeout, boolean skipDefaultPorts
         ) throws IOException {
             super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory,
-                    resourceDirs, hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
+                    resourceDirs, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
-                    true, true, pollingTest, container, dockerfile, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts);
+                    true /* useBuildRecompile */, true /* gradle */, pollingTest, container, dockerfile, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts,
+                    null /* compileOptions not needed since useBuildRecompile is true */ 
+                );
 
             ServerFeature servUtil = getServerFeatureUtil();
             this.libertyDirPropertyFiles = AbstractServerTask.getLibertyDirectoryPropertyFiles(installDirectory, userDirectory, serverDirectory);
