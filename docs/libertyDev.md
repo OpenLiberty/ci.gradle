@@ -108,12 +108,12 @@ When dev mode runs with container support it still provides the same features. I
 The Dockerfile must copy the application .war file and the server configuration files that the application requires into the container. A sample Dockerfile is shown in [Building an application image](https://github.com/openliberty/ci.docker/#building-an-application-image). Note that the context of the `docker build` command used to generate the container image is the directory containing the Dockerfile. When dev mode exits the container is stopped and deleted and the logs are preserved as described.
 
 Dev mode offers different levels of file tracking and deployment depending on the way the file is specified in the Dockerfile. 
-1. When you use the COPY command on an individual file dev mode can track file changes and hot deploy them to the container subject to the limitations below. **This is the most productive way to deploy files.**
-- E.g. `COPY src/main/liberty/config/server.xml /config/` 
-- Note that the Dockerfile must copy only one .war file for the application.  Other application archive formats or multiple .war files are not supported.
-2. You can use the COPY command to deploy an entire directory and its sub-directories. In this case, dev mode will detect file changes and use a regular deployment strategy. Dev mode will rebuild the image and restart the container. 
-3. The ADD command can be used on individual files including tar files as well as on directories. Again, dev mode will rebuild the image and restart the container. 
-4. Certain Dockerfile features are not supported by dev mode. In these cases the files are not tracked so if you change these files you must restart the container manually. **Type 'r' and press Enter to restart the container.**
+1. When you use the COPY command on an individual file, dev mode can track file changes and hot deploy them to the container subject to the limitations below. **This is the recommended way to deploy files.**
+ - E.g. `COPY src/main/liberty/config/server.xml /config/` 
+ - Note that the Dockerfile must copy only one .war file for the application.  Multiple .war files are not supported.
+2. You can use the COPY command to deploy an entire directory and its sub-directories. In this case, dev mode will detect file changes and automatically rebuild the image and restart the container upon changes.
+3. The ADD command can be used on individual files including tar files as well as on directories. Again, dev mode will rebuild the image and restart the container when it detects file changes. 
+4. Certain Dockerfile features are not supported by dev mode. In these cases the files are not tracked so if you change these files you must rebuild the image and restart the container manually. **Type 'r' and press Enter to restart the container.**
    - variable substitution used in the COPY or ADD command e.g. `$PROJECT/config`
    - wildcards used in the COPY or ADD command e.g. `src/main/liberty/config/*`
    - paths relative to WORKDIR e.g. `WORKDIR /other/project` with `ADD test.txt relativeDir/`
