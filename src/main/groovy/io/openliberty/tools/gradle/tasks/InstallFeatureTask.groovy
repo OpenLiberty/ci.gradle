@@ -43,7 +43,7 @@ class InstallFeatureTask extends AbstractFeatureTask {
         Boolean skipBetaInstallFeatureWarning = Boolean.parseBoolean(System.getProperty("skipBetaInstallFeatureWarning"))
         if (InstallFeatureUtil.isOpenLibertyBetaVersion(openLibertyVersion)) {
             if (!skipBetaInstallFeatureWarning) {
-                logger.warn("Installing downloaded features is not supported for beta releases.")
+                logger.warn("Features that are not included with the beta runtime cannot be installed. Features that are included with the beta runtime can be enabled by adding them to your server.xml file.")
             }
             return // do not install features if the runtime is a beta version
         }
