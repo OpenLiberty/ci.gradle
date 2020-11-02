@@ -23,6 +23,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
 
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
+import io.openliberty.tools.common.plugins.util.DevUtil
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.PluginScenarioException
 
@@ -40,7 +41,7 @@ class InstallFeatureTask extends AbstractFeatureTask {
         def propertiesList = InstallFeatureUtil.loadProperties(getInstallDir(project))
         def openLibertyVersion = InstallFeatureUtil.getOpenLibertyVersion(propertiesList)
 
-        Boolean skipBetaInstallFeatureWarning = Boolean.parseBoolean(System.getProperty("skipBetaInstallFeatureWarning"))
+        Boolean skipBetaInstallFeatureWarning = Boolean.parseBoolean(System.getProperty(DevUtil.SKIP_BETA_INSTALL_WARNING))
         if (InstallFeatureUtil.isOpenLibertyBetaVersion(openLibertyVersion)) {
             if (!skipBetaInstallFeatureWarning) {
                 logger.warn("Features that are not included with the beta runtime cannot be installed. Features that are included with the beta runtime can be enabled by adding them to your server.xml file.")
