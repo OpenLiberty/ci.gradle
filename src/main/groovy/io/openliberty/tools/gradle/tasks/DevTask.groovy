@@ -865,6 +865,7 @@ class DevTask extends AbstractServerTask {
                 :deploy
              */
             runGradleTask(gradleBuildLauncher, 'libertyCreate');
+            gradleBuildLauncher.addArguments("-D" + DevUtil.SKIP_BETA_INSTALL_WARNING + "=true");
             runInstallFeatureTask(gradleBuildLauncher);
             if (container) {
                 gradleBuildLauncher.withArguments(CONTAINER_PROPERTY_ARG);
