@@ -46,12 +46,12 @@ public class CommonLogger implements CommonLoggerI {
 
     @Override
     public void debug(String msg, Throwable e) {
-        project.getLogger().debug(msg, e)
+        project.getLogger().debug(msg, (Throwable) e)
     }
 
     @Override
     public void debug(Throwable e) {
-        project.getLogger().debug(e)
+        project.getLogger().debug("Exception received: "+e.getMessage(), (Throwable) e)
     }
 
     @Override

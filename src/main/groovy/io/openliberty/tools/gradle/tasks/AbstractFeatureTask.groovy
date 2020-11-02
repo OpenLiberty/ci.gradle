@@ -49,17 +49,17 @@ public class AbstractFeatureTask extends AbstractServerTask {
 
         @Override
         public void debug(String msg) {
-            logger.debug(msg)
+           logger.debug(msg)
         }
 
         @Override
         public void debug(String msg, Throwable e) {
-            logger.debug(msg, e)
+           logger.debug(msg, (Throwable) e)
         }
 
         @Override
         public void debug(Throwable e) {
-            logger.debug(e)
+            logger.debug("Throwable exception received: "+e.getMessage(), (Throwable) e)
         }
 
         @Override
@@ -149,9 +149,9 @@ public class AbstractFeatureTask extends AbstractServerTask {
 
         // if DevMode provides a server directory parameter use that for finding the server features
         if (serverDirectoryParam != null) {
-            serverFeatures = util.getServerFeatures(new File(serverDirectoryParam))
+            serverFeatures = util.getServerFeatures(new File(serverDirectoryParam), getLibertyDirectoryPropertyFiles(serverDirectoryParam))
         } else if (getServerDir(project).exists()) {
-            serverFeatures = util.getServerFeatures(getServerDir(project))
+            serverFeatures = util.getServerFeatures(getServerDir(project), getLibertyDirectoryPropertyFiles(null))
         }
 
         Set<String> featuresToInstall = InstallFeatureUtil.combineToSet(pluginListedFeatures, dependencyFeatures, serverFeatures)
@@ -162,7 +162,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
         try {
             util = new InstallFeatureTaskUtil(getInstallDir(project), server.features.from, server.features.to, pluginListedEsas, propertiesList, openLibertyVerion)
         } catch (PluginScenarioException e) {
-            logger.debug(e.getMessage())
+            logger.debug("Exception received: "+e.getMessage(),(Throwable)e)
             logger.debug("Installing features from installUtility.")
             installFeaturesFromAnt = true
             return

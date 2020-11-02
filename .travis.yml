@@ -5,9 +5,9 @@ jdk:
     - openjdk11
 env:
     - RUNTIME=wlp RUNTIME_VERSION=20.0.0.6
-    - RUNTIME=wlp RUNTIME_VERSION=20.0.0.3
+    - RUNTIME=wlp RUNTIME_VERSION=20.0.0.9
     - RUNTIME=ol RUNTIME_VERSION=20.0.0.6
-    - RUNTIME=ol RUNTIME_VERSION=20.0.0.3
+    - RUNTIME=ol RUNTIME_VERSION=20.0.0.9
 before_install:
     - echo 'Installing ci.ant lib ....'
     - git clone https://github.com/OpenLiberty/ci.ant.git ./ci.ant
