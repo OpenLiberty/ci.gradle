@@ -869,8 +869,8 @@ class DevTask extends AbstractServerTask {
              */
             if (!container) {
                 runGradleTask(gradleBuildLauncher, 'libertyCreate');
-                // suppress extra install feature warnings (one would have shown up already from libertyCreate task on the line above)
-                gradleBuildLauncher.addArguments("-D" + DevUtil.SKIP_BETA_INSTALL_WARNING + "=true");
+                // suppress extra install feature warnings (one would have shown up already from the libertyCreate task on the line above)
+                gradleBuildLauncher.addArguments("-D" + DevUtil.SKIP_BETA_INSTALL_WARNING + "=" + Boolean.TRUE.toString());
                 runInstallFeatureTask(gradleBuildLauncher);
             } else {
                 // skip creating the server and installing features and just propagate the option to 'deploy'
