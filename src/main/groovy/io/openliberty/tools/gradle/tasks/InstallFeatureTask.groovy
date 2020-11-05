@@ -23,6 +23,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
 
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
+import io.openliberty.tools.common.plugins.util.DevUtil
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.PluginScenarioException
 
@@ -37,10 +38,21 @@ class InstallFeatureTask extends AbstractFeatureTask {
 
     @TaskAction
     void installFeature() {
+        def propertiesList = InstallFeatureUtil.loadProperties(getInstallDir(project))
+        def openLibertyVersion = InstallFeatureUtil.getOpenLibertyVersion(propertiesList)
+
+        boolean skipBetaInstallFeatureWarning = Boolean.parseBoolean(System.getProperty(DevUtil.SKIP_BETA_INSTALL_WARNING))
+        if (InstallFeatureUtil.isOpenLibertyBetaVersion(openLibertyVersion)) {
+            if (!skipBetaInstallFeatureWarning) {
+                logger.warn("Features that are not included with the beta runtime cannot be installed. Features that are included with the beta runtime can be enabled by adding them to your server.xml file.")
+            }
+            return // do not install features if the runtime is a beta version
+        }
     
         def pluginListedEsas = getPluginListedFeatures(true)
-        InstallFeatureUtil util = getInstallFeatureUtil(pluginListedEsas)
+        InstallFeatureUtil util = getInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVersion)
 
+        // if getInstallFeatureUtil failed to retrieve an InstallFeatureUtil instance for util, then features are installed via ant
         if(installFeaturesFromAnt) {
             installFeatureFromAnt();
         }
