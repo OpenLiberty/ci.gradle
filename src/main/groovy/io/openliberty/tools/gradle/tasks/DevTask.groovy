@@ -76,6 +76,7 @@ class DevTask extends AbstractServerTask {
     private static final boolean DEFAULT_POLLING_TEST = false;
     private static final boolean DEFAULT_CONTAINER = false;
     private static final boolean DEFAULT_SKIP_DEFAULT_PORTS = false;
+    private static final boolean DEFAULT_KEEP_TEMP_DOCKERFILE = false;
 
     protected final String CONTAINER_PROPERTY_ARG = '-P'+CONTAINER_PROPERTY+'=true';
 
@@ -214,6 +215,13 @@ class DevTask extends AbstractServerTask {
         this.skipDefaultPorts = skipDefaultPorts;
     }
 
+    private Boolean keepTempDockerfile;
+
+    @Option(option = 'keepTempDockerfile', description = 'If true, preserve the temporary Dockerfile used to build the container.')
+    void setKeepTempDockerfile(boolean keepTempDockerfile) {
+        this.keepTempDockerfile = keepTempDockerfile;
+    }
+
     @Optional
     @Input
     Boolean clean;
@@ -246,13 +254,13 @@ class DevTask extends AbstractServerTask {
                     boolean  hotTests, boolean  skipTests, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
                     boolean libertyDebug, boolean pollingTest, boolean container, File dockerfile,
-                    String dockerRunOpts, int dockerBuildTimeout, boolean skipDefaultPorts
+                    String dockerRunOpts, int dockerBuildTimeout, boolean skipDefaultPorts, boolean keepTempDockerfile
         ) throws IOException {
             super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory,
                     resourceDirs, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, dockerfile, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts,
-                    null /* compileOptions not needed since useBuildRecompile is true */ 
+                    null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile
                 );
 
             ServerFeature servUtil = getServerFeatureUtil();
@@ -888,7 +896,7 @@ class DevTask extends AbstractServerTask {
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
                 libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerRunOpts, 
-                dockerBuildTimeout, skipDefaultPorts.booleanValue()
+                dockerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempDockerfile.booleanValue()
         );
 
         util.addShutdownHook(executor);
@@ -978,6 +986,15 @@ class DevTask extends AbstractServerTask {
                 setSkipDefaultPorts(DEFAULT_SKIP_DEFAULT_PORTS);
             } else {
                 setSkipDefaultPorts(buildSkipDefaultPortsSetting);
+            }
+        }
+
+        if (keepTempDockerfile == null) {
+            boolean buildKeepTempDockerfileSetting = project.liberty.dev.keepTempDockerfile; // get from build.gradle
+            if (buildKeepTempDockerfileSetting == null) {
+                setKeepTempDockerfile(DEFAULT_KEEP_TEMP_DOCKERFILE);
+            } else {
+                setKeepTempDockerfile(buildKeepTempDockerfileSetting);
             }
         }
     }
