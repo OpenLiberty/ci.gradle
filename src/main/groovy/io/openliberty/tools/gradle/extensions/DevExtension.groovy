@@ -22,4 +22,5 @@ class DevExtension {
     String dockerRunOpts
     int dockerBuildTimeout
     boolean skipDefaultPorts = false
+    boolean keepTempDockerfile = false
 }
