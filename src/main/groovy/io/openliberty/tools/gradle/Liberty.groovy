@@ -139,7 +139,7 @@ class Liberty implements Plugin<Project> {
                 file.whenMerged {
                     entries.each {
                         source ->
-                            if (source.kind == 'src' && source.hasProperty('output')) {
+                            if (source.kind == 'src' && source.hasProperty('output') && source.output == 'bin/main') {
                                 source.output = warTaskOutput
                             }
                     }
