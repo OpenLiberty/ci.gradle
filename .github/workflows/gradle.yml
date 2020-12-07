@@ -1,0 +1,85 @@
+# This workflow will build a Java project with Gradle
+# For more information see: https://docs.github.com/en/free-pro-team@latest/actions/guides/building-and-testing-java-with-gradle
+
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: '**'
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    strategy:
+      fail-fast: false
+      matrix:
+        # test against latest update of each major Java version, as well as specific updates of LTS versions:
+        os: [ubuntu-18.04, windows-latest]
+        RUNTIME: [ol, wlp]
+        RUNTIME_VERSION: [20.0.0.12, 20.0.0.9]
+        java: [11, 8]
+        exclude:
+        - java: 8
+          RUNTIME_VERSION: 20.0.0.9
+
+    name: ${{ matrix.RUNTIME }} ${{ matrix.RUNTIME_VERSION }}, Java ${{ matrix.java }}, ${{ matrix.os }}
+    steps:
+    - name: Setup Java ${{ matrix.java }}
+      uses: joschi/setup-jdk@v2
+      with:
+        java-version: ${{ matrix.java }}
+    - name: Checkout ci.gradle
+      uses: actions/checkout@v2
+    - name: Checkout ci.common
+      uses: actions/checkout@v2
+      with:
+        repository: OpenLiberty/ci.common
+        path: ci.common
+    - name: Checkout ci.ant
+      uses: actions/checkout@v2
+      with:
+        repository: OpenLiberty/ci.ant
+        path: ci.ant
+    - name: Cache maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    - name: Cache Gradle packages
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+          ${{ runner.os }}-
+    - name: Install ci.ant and ci.common
+      run: |
+        cd ./ci.ant
+        mvn clean install
+        cd ../ci.common
+        mvn clean install
+        cd ..
+    - name: Run tests with Gradle on Ubuntu
+      run: |
+        export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs='-XX:MaxPermSize=1024m -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:+HeapDumpOnOutOfMemoryError -Xmx2048m'"
+        ./gradlew clean install check -P"test.exclude"="**/*15*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
+      if: matrix.os=='ubuntu-18.04'
+    - name: Run SpringBoot tests with Gradle 4.10 wrapper on Ubuntu
+      run: |
+        ./gradlew wrapper --gradle-version 4.10
+        ./gradlew check -P"test.include"="**/*15*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
+      if: matrix.os=='ubuntu-18.04'
+    - name: Run tests with Gradle on Windows
+      run: ./gradlew clean install check -P"test.exclude"="**/*15*,**/Polling*,**/TestLoose*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" ${GRADLE_OPTS} --stacktrace --info --no-daemon
+      env:
+        GRADLE_OPTS: "-Dorg.gradle.jvmargs='-XX:MaxMetaspaceSize=512m'"
+      if: matrix.os=='windows-latest'
+
