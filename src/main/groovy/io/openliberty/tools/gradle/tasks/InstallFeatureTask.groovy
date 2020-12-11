@@ -35,29 +35,41 @@ class InstallFeatureTask extends AbstractFeatureTask {
             group 'Liberty'
         })
     }
+    
+    private String containerName;
+
+    @Option(option = 'containerName', description = 'This parameter is intended for internal use only. If set, features will be installed to the specified Docker container instead of the local server.')
+    void setContainerName(String containerName) {
+        this.containerName = containerName;
+    }
 
     @TaskAction
     void installFeature() {
-        def propertiesList = InstallFeatureUtil.loadProperties(getInstallDir(project))
-        def openLibertyVersion = InstallFeatureUtil.getOpenLibertyVersion(propertiesList)
+        // If non-container mode, check for Beta version and skip if needed.  Container mode does not need to check since featureUtility will check when it is called.
+        def propertiesList = null;
+        def openLibertyVersion = null;
+        if (containerName == null) {
+            propertiesList = InstallFeatureUtil.loadProperties(getInstallDir(project))
+            openLibertyVersion = InstallFeatureUtil.getOpenLibertyVersion(propertiesList)
 
-        boolean skipBetaInstallFeatureWarning = Boolean.parseBoolean(System.getProperty(DevUtil.SKIP_BETA_INSTALL_WARNING))
-        if (InstallFeatureUtil.isOpenLibertyBetaVersion(openLibertyVersion)) {
-            if (!skipBetaInstallFeatureWarning) {
-                logger.warn("Features that are not included with the beta runtime cannot be installed. Features that are included with the beta runtime can be enabled by adding them to your server.xml file.")
+            boolean skipBetaInstallFeatureWarning = Boolean.parseBoolean(System.getProperty(DevUtil.SKIP_BETA_INSTALL_WARNING))
+            if (InstallFeatureUtil.isOpenLibertyBetaVersion(openLibertyVersion)) {
+                if (!skipBetaInstallFeatureWarning) {
+                    logger.warn("Features that are not included with the beta runtime cannot be installed. Features that are included with the beta runtime can be enabled by adding them to your server.xml file.")
+                }
+                return // do not install features if the runtime is a beta version
             }
-            return // do not install features if the runtime is a beta version
         }
     
         def pluginListedEsas = getPluginListedFeatures(true)
-        InstallFeatureUtil util = getInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVersion)
+        InstallFeatureUtil util = getInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVersion, containerName)
 
         // if getInstallFeatureUtil failed to retrieve an InstallFeatureUtil instance for util, then features are installed via ant
         if(installFeaturesFromAnt) {
             installFeatureFromAnt();
         }
         else {
-            Set<String> featuresToInstall = getInstalledFeatures()
+            Set<String> featuresToInstall = getSpecifiedFeatures(containerName);
             util.installFeatures(server.features.acceptLicense, new ArrayList<String>(featuresToInstall))
         }
     }
