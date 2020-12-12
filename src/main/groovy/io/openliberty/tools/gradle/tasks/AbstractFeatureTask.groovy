@@ -43,8 +43,8 @@ public class AbstractFeatureTask extends AbstractServerTask {
     }
 
     private class InstallFeatureTaskUtil extends InstallFeatureUtil {
-        public InstallFeatureTaskUtil(File installDir, String from, String to, Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion)  throws PluginScenarioException, PluginExecutionException {
-            super(installDir, from, to, pluginListedEsas, propertiesList, openLibertyVerion)
+        public InstallFeatureTaskUtil(File installDir, String from, String to, Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName)  throws PluginScenarioException, PluginExecutionException {
+            super(installDir, from, to, pluginListedEsas, propertiesList, openLibertyVerion, containerName)
         }
 
         @Override
@@ -75,6 +75,11 @@ public class AbstractFeatureTask extends AbstractServerTask {
         @Override
         public boolean isDebugEnabled() {
             return logger.isEnabled(LogLevel.DEBUG)
+        }
+
+        @Override
+        public void error(String msg, Throwable e) {
+            logger.error(msg, e);
         }
 
         @Override
@@ -123,12 +128,16 @@ public class AbstractFeatureTask extends AbstractServerTask {
         return features
     }
 
-    protected Set<String> getInstalledFeatures() throws PluginExecutionException {
+    protected Set<String> getSpecifiedFeatures(String containerName) throws PluginExecutionException {
         if (util == null) {
             def pluginListedEsas = getPluginListedFeatures(true)
-            def propertiesList = InstallFeatureUtil.loadProperties(getInstallDir(project))
-            def openLibertyVersion = InstallFeatureUtil.getOpenLibertyVersion(propertiesList)
-            createNewInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVersion)
+            def propertiesList = null;
+            def openLibertyVersion = null;
+            if (containerName == null) {
+                propertiesList = InstallFeatureUtil.loadProperties(getInstallDir(project))
+                openLibertyVersion = InstallFeatureUtil.getOpenLibertyVersion(propertiesList)
+            }
+            createNewInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVersion, containerName)
         }
         // if createNewInstallFeatureUtil failed to create a new InstallFeatureUtil instance, then features are installed via ant
         if(installFeaturesFromAnt) {
@@ -158,9 +167,9 @@ public class AbstractFeatureTask extends AbstractServerTask {
         return featuresToInstall 
     }
 
-    private void createNewInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion) throws PluginExecutionException {
+    private void createNewInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName) throws PluginExecutionException {
         try {
-            util = new InstallFeatureTaskUtil(getInstallDir(project), server.features.from, server.features.to, pluginListedEsas, propertiesList, openLibertyVerion)
+            util = new InstallFeatureTaskUtil(getInstallDir(project), server.features.from, server.features.to, pluginListedEsas, propertiesList, openLibertyVerion, containerName)
         } catch (PluginScenarioException e) {
             logger.debug("Exception received: "+e.getMessage(),(Throwable)e)
             logger.debug("Installing features from installUtility.")
@@ -169,8 +178,8 @@ public class AbstractFeatureTask extends AbstractServerTask {
         }
     }
 
-    protected InstallFeatureUtil getInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion) throws PluginExecutionException {
-        createNewInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVerion)
+    protected InstallFeatureUtil getInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName) throws PluginExecutionException {
+        createNewInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVerion, containerName)
         return util
     }
 

@@ -86,7 +86,7 @@ class CompileJSPTask extends AbstractFeatureTask {
         compileJsp.setClasspath(classpathStr)
 
         //Feature list
-        Set<String> installedFeatures = getInstalledFeatures();
+        Set<String> installedFeatures = getSpecifiedFeatures(null);
 
         //Set JSP Feature Version
         setJspVersion(compileJsp, installedFeatures);
