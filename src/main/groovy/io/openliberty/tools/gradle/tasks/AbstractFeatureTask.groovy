@@ -78,6 +78,11 @@ public class AbstractFeatureTask extends AbstractServerTask {
         }
 
         @Override
+        public void error(String msg) {
+            logger.error(msg);
+        }
+
+        @Override
         public void error(String msg, Throwable e) {
             logger.error(msg, e);
         }
