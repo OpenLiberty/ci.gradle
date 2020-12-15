@@ -727,6 +727,8 @@ class DevTask extends AbstractServerTask {
             try {
                 if (container) {
                     gradleBuildLauncher.addArguments(CONTAINER_PROPERTY_ARG)
+                    // skip installFeature since that will be called separately by DevUtil.restartServer() if needed
+                    gradleBuildLauncher.addArguments("--exclude-task", "installFeature");
                 }
                 runGradleTask(gradleBuildLauncher, 'deploy');
             } catch (BuildException e) {
