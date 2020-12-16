@@ -326,6 +326,8 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void stopServer() {
+            super.serverFullyStarted.set(false);
+
             if (container) {
                 // Shouldn't get here, DevUtil should stop the container instead
                 logger.debug('DevUtil called stopServer when the server should be running in a container.')
