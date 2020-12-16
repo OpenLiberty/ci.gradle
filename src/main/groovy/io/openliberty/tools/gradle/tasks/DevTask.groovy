@@ -727,6 +727,9 @@ class DevTask extends AbstractServerTask {
             try {
                 if (container) {
                     gradleBuildLauncher.addArguments(CONTAINER_PROPERTY_ARG)
+                    // Skip installFeature since it is not needed here in container mode.
+                    // Container mode should call installFeature separately with the containerName parameter where needed.
+                    gradleBuildLauncher.addArguments("--exclude-task", "installFeature");
                 }
                 runGradleTask(gradleBuildLauncher, 'deploy');
             } catch (BuildException e) {
