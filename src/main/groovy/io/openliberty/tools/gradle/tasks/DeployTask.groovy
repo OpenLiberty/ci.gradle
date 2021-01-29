@@ -236,13 +236,24 @@ class DeployTask extends AbstractServerTask {
         String application = looseConfigFileName.substring(0, looseConfigFileName.length()-4)
         File destDir = new File(getServerDir(project), appsDir)
         File looseConfigFile = new File(destDir, looseConfigFileName)
+        
+        File devcDestDir = new File(new File(project.buildDir, DevUtil.DEVC_HIDDEN_FOLDER), appsDir)
+        File devcLooseConfigFile = new File(devcDestDir, looseConfigFileName)
+
         LooseConfigData config = new LooseConfigData()
+
         switch(getPackagingType()){
             case "war":
                 validateAppConfig(application, task.baseName, appsDir)
                 logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFile.getAbsolutePath()))
-                installLooseConfigWar(config, task)
+                installLooseConfigWar(config, task, false)
                 installAndVerify(config, looseConfigFile, application, appsDir)
+                if (project.liberty.dev.container) {
+                    // install another copy that is container specific
+                    config = new LooseConfigData()
+                    installLooseConfigWar(config, task, true)
+                    config.toXmlFile(devcLooseConfigFile)
+                }
                 break
             case "ear":
                 if ((String.valueOf(project.getGradle().getGradleVersion().charAt(0)) as int) < 4) {
@@ -268,7 +279,7 @@ class DeployTask extends AbstractServerTask {
         verifyAppStarted(applicationName, appsDir)
     }
 
-    protected void installLooseConfigWar(LooseConfigData config, Task task) throws Exception {
+    protected void installLooseConfigWar(LooseConfigData config, Task task, boolean container) throws Exception {
         Task compileJava = task.getProject().tasks.findByPath(':compileJava')
 
         File outputDir;
@@ -280,7 +291,7 @@ class DeployTask extends AbstractServerTask {
             logger.warn(MessageFormat.format("Installed loose application from project {0}, but the project has not been compiled.", project.name))
         }
 
-        if (project.liberty.dev.container) {
+        if (container) {
             try {
                 // Set up the config to replace the absolute path names with ${variable}/target type references
                 config.setProjectRoot(project.getProjectDir().getCanonicalPath());
