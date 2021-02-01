@@ -249,14 +249,14 @@ class DevTask extends AbstractServerTask {
 
         private ServerTask serverTask = null;
 
-        DevTaskUtil(File installDirectory, File userDirectory, File serverDirectory, File sourceDirectory, File testSourceDirectory,
+        DevTaskUtil(File buildDir, File installDirectory, File userDirectory, File serverDirectory, File sourceDirectory, File testSourceDirectory,
                     File configDirectory, File projectDirectory, List<File> resourceDirs,
                     boolean  hotTests, boolean  skipTests, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
                     boolean libertyDebug, boolean pollingTest, boolean container, File dockerfile,
                     String dockerRunOpts, int dockerBuildTimeout, boolean skipDefaultPorts, boolean keepTempDockerfile, String mavenCacheLocation
         ) throws IOException {
-            super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory,
+            super(buildDir, serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory,
                     resourceDirs, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, dockerfile, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts,
@@ -353,9 +353,6 @@ class DevTask extends AbstractServerTask {
 
             copyConfigFiles();
 
-            if (container) {
-                generateDevModeConfig(project.getProjectDir().getAbsolutePath(), HEADER);
-            }
             if (libertyDebug) {
                 serverTask = createServerTask(project, "debug");
                 setLibertyDebugPort(libertyDebugPort);
@@ -908,7 +905,7 @@ class DevTask extends AbstractServerTask {
 
         String localMavenRepoForFeatureUtility = new File(new File(System.getProperty("user.home"), ".m2"), "repository");
 
-        util = new DevTaskUtil(serverInstallDir, getUserDir(project, serverInstallDir),
+        util = new DevTaskUtil(project.buildDir, serverInstallDir, getUserDir(project, serverInstallDir),
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
