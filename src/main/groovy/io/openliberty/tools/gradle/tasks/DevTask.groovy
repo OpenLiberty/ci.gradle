@@ -367,24 +367,7 @@ class DevTask extends AbstractServerTask {
         }
 
         @Override
-        public List<String> getArtifacts() {
-            // https://docs.gradle.org/current/userguide/java_plugin.html#sec:java_plugin_and_dependency_management
-            String[] dependencyConfigurationNames = ['compileClasspath', 'testCompileClasspath'];
-
-            Set<String> artifactPaths = new HashSet<String>();
-
-            dependencyConfigurationNames.each { name ->
-               def configuration = project.configurations.getByName(name);
-                configuration.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-                    artifactPaths.add(artifact.file.getCanonicalPath());
-               }
-            }
-
-            return artifactPaths.toList();
-        }
-
-        @Override
-        public boolean recompileBuildFile(File buildFile, List<String> artifactPaths, ThreadPoolExecutor executor) {
+        public boolean recompileBuildFile(File buildFile, List<String> compileArtifactPaths, List<String> testArtifactPaths, ThreadPoolExecutor executor) {
             boolean restartServer = false;
             boolean installFeatures = false;
 
@@ -922,7 +905,6 @@ class DevTask extends AbstractServerTask {
 
         util.startServer();
 
-        List<String> artifactPaths = util.getArtifacts();
         File buildFile = project.getBuildFile();
         File serverXMLFile = server.serverXmlFile;
 
@@ -939,7 +921,7 @@ class DevTask extends AbstractServerTask {
         // which is where the server.xml is located if a specific serverXmlFile
         // configuration parameter is not specified.
         try {
-            util.watchFiles(buildFile, outputDirectory, testOutputDirectory, executor, artifactPaths, serverXMLFile,
+            util.watchFiles(buildFile, outputDirectory, testOutputDirectory, executor, null, null, serverXMLFile,
                             project.liberty.server.bootstrapPropertiesFile, project.liberty.server.jvmOptionsFile);
         } catch (PluginScenarioException e) {
             if (e.getMessage() != null) {
