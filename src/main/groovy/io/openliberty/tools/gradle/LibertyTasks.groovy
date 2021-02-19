@@ -72,6 +72,10 @@ public class LibertyTasks {
         project.cleanDirs {
             dependsOn 'libertyStop'
         }
+		
+		project.prepareFeature {
+			dependsOn 'libertyCreate'
+		}
 
         project.deploy {
             if (AbstractServerTask.findSpringBootVersion(project) != null) {
