@@ -59,25 +59,57 @@ class InstallLibertyTask extends AbstractTask {
         return project.configurations.libertyRuntime
     }
 
+    @Input
+    @Optional
+    String getLibertyRuntimeUrl() {
+        return project.liberty.install.runtimeUrl
+    }
+
+    @Input
+    @Optional
+    String getLibertyLicenseCode() {
+        return project.liberty.install.licenseCode
+    }
+
+    @Input
+    @Optional
+    String getLibertyVersion() {
+        return project.liberty.install.version
+    }
+
+
+    @Input
+    @Optional
+    String getLibertyUsername() {
+        return project.liberty.install.username
+    }
+
+    @Input
+    @Optional
+    String getLibertyPassword() {
+        return project.liberty.install.password
+    }
+
+    @Input
+    @Optional
+    String getLibertyType() {
+        return project.liberty.install.type
+    }
+
+
     @TaskAction
     void install() {
-        if (!isLibertyInstalledAndValid(project)) {
-            def params = buildInstallLibertyMap(project)
+        def params = buildInstallLibertyMap(project)
+        project.ant.taskdef(name: 'installLiberty',
+                            classname: 'io.openliberty.tools.ant.install.InstallLibertyTask',
+                            classpath: project.buildscript.configurations.classpath.asPath)
+        project.ant.installLiberty(params)
 
-            project.ant.taskdef(name: 'installLiberty',
-                                classname: 'io.openliberty.tools.ant.install.InstallLibertyTask',
-                                classpath: project.buildscript.configurations.classpath.asPath)
-            project.ant.installLiberty(params)
-
-            String licenseFilePath = project.configurations.getByName('libertyLicense').getAsPath()
-            if (licenseFilePath) {
-                def command = "java -jar " + licenseFilePath + " --acceptLicense " + project.buildDir
-                def process = command.execute()
-                process.waitFor()
-            }
-            
-        } else {
-            logger.info ("Liberty is already installed at: " + getInstallDir(project))
+        String licenseFilePath = project.configurations.getByName('libertyLicense').getAsPath()
+        if (licenseFilePath) {
+            def command = "java -jar " + licenseFilePath + " --acceptLicense " + project.buildDir
+            def process = command.execute()
+            process.waitFor()
         }
         createPluginXmlFile()
     }
