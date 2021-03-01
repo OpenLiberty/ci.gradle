@@ -98,25 +98,31 @@ class InstallLibertyTask extends AbstractTask {
 
     @Input
     @Optional
-    Properties getLibertyGeneralRuntimeProperties_() {
+    Properties getLibertyGeneralRuntimeProperties() {
         return project.liberty.runtime
     }
 
 
     @TaskAction
     void install() {
-        def params = buildInstallLibertyMap(project)
-        project.ant.taskdef(name: 'installLiberty',
-                            classname: 'io.openliberty.tools.ant.install.InstallLibertyTask',
-                            classpath: project.buildscript.configurations.classpath.asPath)
-        project.ant.installLiberty(params)
+        // If installDir is set, then use the configured wlp or throw error if it is invalid
+        if(project.liberty.installDir != null && isLibertyInstalledAndValid(project)) {
+            logger.info ("Liberty is already installed at: " + getInstallDir(project))
+        } else {
+            def params = buildInstallLibertyMap(project)
+            project.ant.taskdef(name: 'installLiberty',
+                                classname: 'io.openliberty.tools.ant.install.InstallLibertyTask',
+                                classpath: project.buildscript.configurations.classpath.asPath)
+            project.ant.installLiberty(params)
 
-        String licenseFilePath = project.configurations.getByName('libertyLicense').getAsPath()
-        if (licenseFilePath) {
-            def command = "java -jar " + licenseFilePath + " --acceptLicense " + project.buildDir
-            def process = command.execute()
-            process.waitFor()
+            String licenseFilePath = project.configurations.getByName('libertyLicense').getAsPath()
+            if (licenseFilePath) {
+                def command = "java -jar " + licenseFilePath + " --acceptLicense " + project.buildDir
+                def process = command.execute()
+                process.waitFor()
+            }
         }
+
         createPluginXmlFile()
     }
 
