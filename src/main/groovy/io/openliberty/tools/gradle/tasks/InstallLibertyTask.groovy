@@ -96,6 +96,12 @@ class InstallLibertyTask extends AbstractTask {
         return project.liberty.install.type
     }
 
+    @Input
+    @Optional
+    Properties getLibertyGeneralRuntimeProperties_() {
+        return project.liberty.runtime
+    }
+
 
     @TaskAction
     void install() {
@@ -249,6 +255,7 @@ class InstallLibertyTask extends AbstractTask {
         }
 
         result.put('offline', project.gradle.startParameter.offline)
+        result.put('skipAlreadyInstalledCheck', "true")
 
         return result
     }
