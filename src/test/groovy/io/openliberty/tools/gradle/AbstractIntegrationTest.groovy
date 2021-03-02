@@ -27,6 +27,7 @@ import org.apache.commons.io.FileUtils
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
+import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
 import org.gradle.api.GradleException
 import io.openliberty.tools.common.plugins.util.OSUtil
 
@@ -118,6 +119,22 @@ abstract class AbstractIntegrationTest {
                 assert SUCCESS == result.task(":$it").getOutcome()
             }
         }
+    }
+
+    protected static boolean runTaskCheckForUpToDate(File projectDir, String task, String argument) {
+        List<String> args = new ArrayList<String>()
+        args.add(task)
+        args.add(argument)
+        args.add("-i")
+        args.add("-s")
+
+        BuildResult result = GradleRunner.create()
+            .withProjectDir(projectDir)
+            .forwardOutput()
+            .withArguments(args)
+            .build()
+
+        return UP_TO_DATE == result.task(":" + task + "").getOutcome()
     }
 
     protected static File copyFile(File sourceFile, File destFile) {
