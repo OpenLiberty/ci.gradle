@@ -19,6 +19,7 @@ package io.openliberty.tools.gradle.extensions
 class DevExtension {
     boolean container = false
     File dockerfile
+    File dockerBuildContext
     String dockerRunOpts
     int dockerBuildTimeout
     boolean skipDefaultPorts = false

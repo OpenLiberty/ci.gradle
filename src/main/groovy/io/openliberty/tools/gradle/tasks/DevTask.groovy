@@ -180,13 +180,36 @@ class DevTask extends AbstractServerTask {
     @Option(option = 'dockerfile', description = 'Dev mode will build a docker image from the provided Dockerfile and start a container from the new image.')
     void setDockerfile(String dockerfile) {
         if (dockerfile != null) {
-            File temp = new File(dockerfile);
+            // ensures the dockerfile is defined with the full path - matches how maven behaves
+            this.dockerfile = convertParameterToCanonicalFile(dockerfile, "dockerfile");      
+        }
+    }
+
+    private File dockerBuildContext;
+
+    @Option(option = 'dockerBuildContext', description = 'The Docker build context used when building the container in dev mode. Defaults to the directory of the Dockerfile if not specified.')
+    void setDockerBuildContext(String dockerBuildContext) {
+        if (dockerBuildContext != null) {
+            // ensures the dockerBuildContext is defined with the full path - matches how maven behaves
+            this.dockerBuildContext = convertParameterToCanonicalFile(dockerBuildContext, "dockerBuildContext");      
+        }
+    }
+
+    private convertParameterToCanonicalFile(String relativeOrAbsolutePath, String parameterName) {
+        File result = null;
+        if (relativeOrAbsolutePath != null) {
+            File file = new File(relativeOrAbsolutePath);
             try {
-                this.dockerfile = new File(temp.getCanonicalPath()); // ensures the dockerfile is defined with the full path - matches how maven behaves
+                if (file.isAbsolute()) {
+                    result = file.getCanonicalFile();
+                } else {
+                    result = new File(project.getRootDir(), relativeOrAbsolutePath).getCanonicalFile(); 
+                }
             } catch (IOException e) {
-                throw new PluginExecutionException("Could not resolve canonical path of the dockerfile parameter: " + temp.getAbsolutePath(), e);
+                throw new PluginExecutionException("Could not resolve canonical path of the " + parameterName + " parameter: " + parameterName, e);
             }
         }
+        return result;
     }
 
     private String dockerRunOpts;
@@ -253,13 +276,13 @@ class DevTask extends AbstractServerTask {
                     File configDirectory, File projectDirectory, List<File> resourceDirs,
                     boolean  hotTests, boolean  skipTests, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
-                    boolean libertyDebug, boolean pollingTest, boolean container, File dockerfile,
+                    boolean libertyDebug, boolean pollingTest, boolean container, File dockerfile, File dockerBuildContext,
                     String dockerRunOpts, int dockerBuildTimeout, boolean skipDefaultPorts, boolean keepTempDockerfile, String mavenCacheLocation
         ) throws IOException {
-            super(buildDir, serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory,
+            super(buildDir, serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory, /* multi module project directory */ projectDirectory,
                     resourceDirs, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
-                    true /* useBuildRecompile */, true /* gradle */, pollingTest, container, dockerfile, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts,
+                    true /* useBuildRecompile */, true /* gradle */, pollingTest, container, dockerfile, dockerBuildContext, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts,
                     null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation
                 );
 
@@ -892,7 +915,7 @@ class DevTask extends AbstractServerTask {
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
-                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerRunOpts, 
+                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerBuildContext, dockerRunOpts, 
                 dockerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempDockerfile.booleanValue(), localMavenRepoForFeatureUtility
         );
 
@@ -959,6 +982,13 @@ class DevTask extends AbstractServerTask {
             File buildDockerfileSetting = project.liberty.dev.dockerfile; // get from build.gradle
             if (buildDockerfileSetting != null) {
                 setDockerfile(buildDockerfileSetting.getAbsolutePath()); // setDockerfile will convert it to canonical path
+            }
+        }
+
+        if (dockerBuildContext == null) {
+            File buildDockerBuildContextSetting = project.liberty.dev.dockerBuildContext; // get from build.gradle
+            if (buildDockerBuildContextSetting != null) {
+                setDockerBuildContext(buildDockerBuildContextSetting.getAbsolutePath()); // setDockerBuildContext will convert it to canonical path
             }
         }
 
