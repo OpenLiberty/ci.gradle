@@ -180,16 +180,8 @@ class DevTask extends AbstractServerTask {
     @Option(option = 'dockerfile', description = 'Dev mode will build a docker image from the provided Dockerfile and start a container from the new image.')
     void setDockerfile(String dockerfile) {
         if (dockerfile != null) {
-            File file = new File(dockerfile);
-            try {
-                if (file.isAbsolute()) {
-                    this.dockerfile = file.getCanonicalFile();
-                } else {
-                    this.dockerfile = new File(project.getRootDir(), dockerfile).getCanonicalFile(); // ensures the dockerfile is defined with the full path - matches how maven behaves                
-                }
-            } catch (IOException e) {
-                throw new PluginExecutionException("Could not resolve canonical path of the dockerfile parameter: " + temp.getAbsolutePath(), e);
-            }
+            // ensures the dockerfile is defined with the full path - matches how maven behaves
+            this.dockerfile = convertParameterToCanonicalFile(dockerfile, "dockerfile");      
         }
     }
 
@@ -198,17 +190,26 @@ class DevTask extends AbstractServerTask {
     @Option(option = 'dockerBuildContext', description = 'The Docker build context used when building the container in dev mode. Defaults to the directory of the Dockerfile if not specified.')
     void setDockerBuildContext(String dockerBuildContext) {
         if (dockerBuildContext != null) {
-            File file = new File(dockerBuildContext);
+            // ensures the dockerBuildContext is defined with the full path - matches how maven behaves
+            this.dockerBuildContext = convertParameterToCanonicalFile(dockerBuildContext, "dockerBuildContext");      
+        }
+    }
+
+    private convertParameterToCanonicalFile(String relativeOrAbsolutePath, String parameterName) {
+        File result = null;
+        if (relativeOrAbsolutePath != null) {
+            File file = new File(relativeOrAbsolutePath);
             try {
                 if (file.isAbsolute()) {
-                    this.dockerBuildContext = file.getCanonicalFile();
+                    result = file.getCanonicalFile();
                 } else {
-                    this.dockerBuildContext = new File(project.getRootDir(), dockerBuildContext).getCanonicalFile(); // ensures the dockerBuildContext is defined with the full path - matches how maven behaves                
+                    result = new File(project.getRootDir(), relativeOrAbsolutePath).getCanonicalFile(); 
                 }
             } catch (IOException e) {
-                throw new PluginExecutionException("Could not resolve canonical path of the dockerBuildContext parameter: " + temp.getAbsolutePath(), e);
+                throw new PluginExecutionException("Could not resolve canonical path of the " + parameterName + " parameter: " + parameterName, e);
             }
         }
+        return result;
     }
 
     private String dockerRunOpts;
