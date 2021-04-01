@@ -163,6 +163,8 @@ class DevTask extends AbstractServerTask {
         this.pollingTest = pollingTest;
     }
 
+    @Optional
+    @Input
     private Boolean container = null;
 
     @Option(option = 'container', description = 'Run the server in a Docker container instead of locally. The default value is false for the libertyDev task, and true for the libertyDevc task.')
