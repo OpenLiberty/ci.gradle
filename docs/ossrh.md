@@ -32,15 +32,15 @@ $ gradle uploadArchives
 
 Use these steps to create and publish a release. 
 
-1. On the `master` branch, update the `build.gradle` file with:
+1. On the `main` branch, update the `build.gradle` file with:
    * Set the `version` property to the right release version. For example: `1.2`. 
    * Set the `tag` property to `liberty-gradle-plugin-${version}`. For example: `liberty-gradle-plugin-1.2`.
    * Make sure that the version of dependencies match between the main `build.gradle` file and `src/integTest/resources/build.gradle` file.
 
-2. Commit and push the changes to the `master` branch:
+2. Commit and push the changes to the `main` branch:
   ```bash
   $ git commit -m "prepare release liberty-gradle-plugin-${version}"
-  $ git push origin master
+  $ git push origin main
   ```
 
 3. Next, upload the release artifacts to the staging site:
@@ -59,14 +59,14 @@ Use these steps to create and publish a release.
   $ git push origin liberty-gradle-plugin-${version}
   ```
 
-5. Prepare the `master` branch for the next development iteration by updating the `build.gradle` with:
+5. Prepare the `main` branch for the next development iteration by updating the `build.gradle` with:
  * Set the `version` property to the next version with `-SNAPSHOT` suffix. For example: `1.3-SNAPSHOT`. 
  * Set the `tag` property to `HEAD`.
 
-6. Commit and push the changes to the `master` branch:
+6. Commit and push the changes to the `main` branch:
   ```bash
   $ git commit -m "prepare for next development iteration"
-  $ git push origin master
+  $ git push origin main
   ```
 
 7. Next, publish the new snaphost artifacts:
