@@ -59,7 +59,7 @@ compileTestGroovy {
 }
 
 def libertyAntVersion = "1.9.8-SNAPSHOT"
-def libertyCommonVersion = "1.8.14-SNAPSHOT"
+def libertyCommonVersion = "1.8.15-SNAPSHOT"
 
 dependencies {
     implementation gradleApi()
@@ -194,7 +194,7 @@ publishing {
                 licenses {
                     license {
                         name = 'The Apache Software License, Version 2.0'
-                        url = 'https://raw.github.com/OpenLiberty/ci.gradle/master/LICENSE'
+                        url = 'https://raw.github.com/OpenLiberty/ci.gradle/main/LICENSE'
                     }
                 }
 
