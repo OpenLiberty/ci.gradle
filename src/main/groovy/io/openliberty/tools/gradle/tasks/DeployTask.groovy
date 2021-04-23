@@ -24,6 +24,7 @@ import io.openliberty.tools.common.plugins.config.ServerConfigDocument
 import io.openliberty.tools.common.plugins.util.DevUtil;
 
 import org.apache.commons.io.FilenameUtils
+import org.gradle.api.artifacts.UnknownConfigurationException
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -505,14 +506,20 @@ class DeployTask extends AbstractServerTask {
         }
     }
 
-    private void addEmbeddedLib(Element parent, Project proj, LooseApplication looseApp, String dir) throws Exception {
-        //Get only the compile dependencies that are included in the war
-        File[] filesAsDeps = proj.configurations.compile.minus(proj.configurations.providedCompile).getFiles().toArray()
-        for (File f : filesAsDeps){
-            String extension = FilenameUtils.getExtension(f.getAbsolutePath())
-            if(extension.equals("jar")){
-                addLibrary(parent, looseApp, dir, f);
+    private void addEmbeddedLib(Element parent, Project project, LooseApplication looseApp, String dir) throws Exception {
+        try {
+            if (project.configurations.getByName('compile') != null) {
+                //Get only the compile dependencies that are included in the war
+                File[] filesAsDeps = project.configurations.compile.minus(project.configurations.providedCompile).getFiles().toArray()
+                for (File f : filesAsDeps){
+                    String extension = FilenameUtils.getExtension(f.getAbsolutePath())
+                    if(extension.equals("jar")){
+                        addLibrary(parent, looseApp, dir, f);
+                    }
+                }
             }
+        } catch (UnknownConfigurationException uce) {
+            logger.debug("No compile configuration detected when adding embedded libs to loose ear file.")
         }
     }
 

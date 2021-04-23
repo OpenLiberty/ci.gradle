@@ -27,7 +27,7 @@ repositories {
     mavenCentral()
     maven {
         name 'liberty-starter-maven-repo'
-        url 'http://liberty-starter.wasdev.developer.ibm.com/start/api/v1/repo'
+        url 'https://liberty-starter.wasdev.developer.ibm.com/start/api/v1/repo'
     }
 }
 

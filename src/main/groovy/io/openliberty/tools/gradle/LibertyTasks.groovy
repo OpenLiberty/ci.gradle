@@ -38,7 +38,9 @@ public class LibertyTasks {
         project.libertyRun {
             dependsOn 'libertyCreate'
 
-            if (dependsOnApps(project.liberty.server)) dependsOn 'deploy'
+            if (dependsOnApps(project.liberty.server)) {
+                dependsOn 'deploy'
+            }
         }
 
         project.libertyStatus {
@@ -54,7 +56,9 @@ public class LibertyTasks {
         project.libertyStart {
             dependsOn 'libertyCreate'
 
-            if (dependsOnApps(project.liberty.server)) dependsOn 'deploy'
+            if (dependsOnApps(project.liberty.server)) {
+                dependsOn 'deploy'
+            }
         }
 
         project.libertyPackage {
@@ -114,7 +118,9 @@ public class LibertyTasks {
         List<String> tasks = new ArrayList<String>()
         boolean apps = dependsOnApps(server)
 
-        if (apps) tasks.add('deploy')
+        if (apps) { 
+            tasks.add('deploy')
+        }
         tasks.add('installFeature')
         return tasks
     }

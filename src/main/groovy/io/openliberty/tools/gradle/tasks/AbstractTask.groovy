@@ -24,7 +24,7 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.Task
 import org.gradle.api.tasks.Internal
 
-abstract class AbstractTask extends DefaultTask {
+abstract class AbstractLibertyTask extends DefaultTask {
 
     //params that get built with installLiberty
     protected def params
