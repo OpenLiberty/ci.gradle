@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017, 2020.
+ * (C) Copyright IBM Corporation 2017, 2021.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.Task
 import org.gradle.api.tasks.Internal
 
-abstract class AbstractTask extends DefaultTask {
+abstract class AbstractLibertyTask extends DefaultTask {
 
     //params that get built with installLiberty
     protected def params

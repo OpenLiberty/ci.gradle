@@ -1,5 +1,5 @@
 /**
-* (C) Copyright IBM Corporation 2020.
+* (C) Copyright IBM Corporation 2021.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import java.util.Set
 
 import org.gradle.api.artifacts.ResolveException
 import org.gradle.api.logging.LogLevel
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
 
@@ -124,6 +125,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
         return result
     }
 
+    @Internal
     protected Set<String> getDependencyFeatures() {
         Set<String> features = new HashSet<String>()
         project.configurations.libertyFeature.dependencies.each { dep ->
