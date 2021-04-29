@@ -82,4 +82,3 @@ jobs:
       env:
         GRADLE_OPTS: "-Dorg.gradle.jvmargs='-XX:MaxMetaspaceSize=512m'"
       if: matrix.os=='windows-latest'
-
