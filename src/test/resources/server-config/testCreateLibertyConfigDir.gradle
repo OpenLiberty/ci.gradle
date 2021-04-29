@@ -46,7 +46,7 @@ repositories {
 
 dependencies {
     testImplementation 'junit:junit:4.12'
-    libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
+    libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: runtimeVersion
 }
 
 task integrationTest(type: Test) {

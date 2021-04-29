@@ -81,7 +81,7 @@ dependencies {
     arqManaged "io.openliberty.arquillian:arquillian-liberty-managed:1.0.7"
     arqRemote "io.openliberty.arquillian:arquillian-liberty-remote:1.0.7"
     
-    libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
+    libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: runtimeVersion
 
     if(JavaVersion.current().isJava11()) {
         implementation "javax.annotation:javax.annotation-api:1.3.2"
