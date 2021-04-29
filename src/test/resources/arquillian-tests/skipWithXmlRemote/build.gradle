@@ -16,7 +16,7 @@ buildscript {
 project.buildDir = '../build'
 
 dependencies {
-    implementation 'io.openliberty.arquillian:arquillian-liberty-remote:1.0.7'
+    implementation 'io.openliberty.arquillian:arquillian-liberty-remote:1.0.8'
 }
 
 task configArq (type:ConfigureArquillianTask) {
