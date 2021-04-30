@@ -115,8 +115,9 @@ class ConfigureArquillianTask extends AbstractServerTask {
 
     private void configureArquillianManaged(File arquillianXml) throws GradleException {
         try {
+            String usrDir = isUserDirSpecified() ? getUserDir(project) : null;
             LibertyManagedObject arquillianManaged = new LibertyManagedObject(getInstallDir(project).getCanonicalPath(), server.name,
-                    getHttpPort(), LibertyProperty.getArquillianProperties(arquillianProperties, LibertyManagedObject.LibertyManagedProperty.class));
+                    usrDir, getHttpPort(), LibertyProperty.getArquillianProperties(arquillianProperties, LibertyManagedObject.LibertyManagedProperty.class));
             arquillianManaged.build(arquillianXml);
         } catch (Exception e) {
             throw new GradleException("Error configuring Arquillian.", e);

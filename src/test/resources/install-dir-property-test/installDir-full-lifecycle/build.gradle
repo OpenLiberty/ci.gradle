@@ -20,6 +20,7 @@ liberty {
 
     server{
         name = 'test'
+        timeout = '60'
         features {
             name= ['mongodb-2.0']
             acceptLicense = true

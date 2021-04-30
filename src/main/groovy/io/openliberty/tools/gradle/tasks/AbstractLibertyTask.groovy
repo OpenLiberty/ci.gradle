@@ -44,6 +44,10 @@ abstract class AbstractLibertyTask extends DefaultTask {
         return (project.liberty.userDir == null) ? new File(installDir, 'usr') : new File(project.liberty.userDir)
     }
 
+    protected boolean isUserDirSpecified() {
+        return (project.liberty.userDir != null)
+    }
+
     protected File getOutputDir(Map<String, String> params) {
         if (params.get('outputDir') == null ) {
             return (params.get('outputDir'))
