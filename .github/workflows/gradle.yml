@@ -18,13 +18,16 @@ jobs:
       fail-fast: false
       matrix:
         # test against latest update of each major Java version, as well as specific updates of LTS versions:
-        os: [windows-latest]
+        os: [ubuntu-18.04, windows-latest]
         RUNTIME: [ol, wlp]
-        RUNTIME_VERSION: [21.0.0.3]
+        RUNTIME_VERSION: [21.0.0.3, 20.0.0.12]
         java: [11, 8]
         exclude:
         - java: 8
           RUNTIME_VERSION: 20.0.0.12
+        - java: 8
+          RUNTIME: wlp
+          os: windows-latest
 
     name: ${{ matrix.RUNTIME }} ${{ matrix.RUNTIME_VERSION }}, Java ${{ matrix.java }}, ${{ matrix.os }}
     steps:
@@ -78,6 +81,7 @@ jobs:
         ./gradlew check -P"test.include"="**/*15*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
       if: matrix.os=='ubuntu-18.04'
     - name: Run tests with Gradle on Windows
+      timeout-minutes: 60
       run: ./gradlew clean install check -P"test.exclude"="**/*15*,**/Polling*,**/TestLoose*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" ${GRADLE_OPTS} --stacktrace --info --no-daemon
       env:
         GRADLE_OPTS: "-Dorg.gradle.jvmargs='-XX:MaxMetaspaceSize=512m'"
