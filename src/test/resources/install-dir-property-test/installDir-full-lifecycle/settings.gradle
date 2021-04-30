@@ -1,1 +1,3 @@
 include ':prebuild'
+
+startParameter.excludedTaskNames = [':prebuild:libertyCreate', ':prebuild:installFeature', ':prebuild:libertyStart', ':prebuild:libertyStop', ':prebuild:uninstallFeature']
