@@ -30,7 +30,7 @@ dependencies {
     libertyRuntime "$runtimeGroup:$runtimeArtifactId:$runtimeVersion"
 
     // test dependencies
-    testImplementation "junit:junit:4.12"
+    testImplementation "junit:junit:4.13.1"
     testImplementation "org.apache.cxf:cxf-rt-rs-client:3.2.6"
     testImplementation "org.apache.cxf:cxf-rt-rs-extension-providers:3.2.6"
     testImplementation "org.glassfish:javax.json:1.0.4"

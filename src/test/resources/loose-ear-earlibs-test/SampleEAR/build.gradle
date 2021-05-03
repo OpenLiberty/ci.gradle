@@ -27,7 +27,7 @@ dependencies {
     earlib project(path:':SampleWAR', configuration:'archives')
     earlib project(path:':SampleWAR2', configuration:'archives')
     testImplementation group: 'commons-httpclient', name: 'commons-httpclient', version:'3.1'
-    testImplementation group: 'junit', name: 'junit', version:'4.12'
+    testImplementation group: 'junit', name: 'junit', version:'4.13.1'
     libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: runtimeVersion
 }
 
