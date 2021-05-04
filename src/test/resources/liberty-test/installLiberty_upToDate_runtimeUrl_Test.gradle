@@ -1,5 +1,3 @@
-apply plugin: 'liberty'
-
 buildscript {
     repositories {
         mavenLocal()
@@ -10,26 +8,27 @@ buildscript {
         }
     }
     dependencies {
-        classpath fileTree(dir: '../libs', include: '*.jar', exclude: ['*-groovydoc.jar', '*-sources.jar'])
         classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
     }
 }
 
+apply plugin: 'liberty'
+
+ext {
+    libertyRuntimeUrl = project.hasProperty('libertyRuntimeUrl') ? project.getProperty('libertyRuntimeUrl') : "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-01-13_1459/openliberty-javaee8-21.0.0.1.zip"
+}
+
+
 repositories {
-    mavenLocal()
     mavenCentral()
 }
 
-dependencies {
-    libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: runtimeVersion
-}
 
 liberty {
+    install {
+        runtimeUrl = libertyRuntimeUrl
+    }
     server{
-        name = 'LibertyProjectServer'
-        packageLiberty {
-            packageName = 'testPackage'
-            packageType = 'tar'
-        }
+        name ='LibertyProjectServer'
     }
 }

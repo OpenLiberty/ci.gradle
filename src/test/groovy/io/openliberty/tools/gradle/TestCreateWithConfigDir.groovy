@@ -67,7 +67,7 @@ public class TestCreateWithConfigDir extends AbstractIntegrationTest{
     public void test_micro_clean_liberty_plugin_variable_config() {
 
         def gradleProperties = new File("build/testBuilds/test-create-with-config-dir/gradle.properties")
-        def libertyPluginVariableConfig = new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/configDropins/overrides/liberty-plugin-variable-config.xml")
+        def libertyPluginVariableConfig = new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/configDropins/defaults/liberty-plugin-variable-config.xml")
 
         gradleProperties.append("liberty.server.defaultVar.postgres.port=51432")
         runTasks(testBuildDir, 'libertyCreate')
@@ -75,7 +75,7 @@ public class TestCreateWithConfigDir extends AbstractIntegrationTest{
 
         gradleProperties.write(gradleProperties.text.replaceAll("liberty.server.defaultVar.postgres.port=51432", ""))
         runTasks(testBuildDir, 'libertyCreate')
-        assert new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/configDropins/overrides").exists() : "verify liberty variable xml path generation"
+        assert new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/configDropins/defaults").exists() : "verify liberty variable xml path generation"
         assert !libertyPluginVariableConfig.exists() : "liberty variable xml should be cleaned for new build"
         
     }

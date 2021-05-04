@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2018, 2019, 2021.
+ * (C) Copyright IBM Corporation 2018, 2021.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,9 @@ public class LibertyTasks {
         project.libertyRun {
             dependsOn 'libertyCreate'
 
-            if (dependsOnApps(project.liberty.server)) dependsOn 'deploy'
+            if (dependsOnApps(project.liberty.server)) {
+                dependsOn 'deploy'
+            }
         }
 
         project.libertyStatus {
@@ -54,7 +56,9 @@ public class LibertyTasks {
         project.libertyStart {
             dependsOn 'libertyCreate'
 
-            if (dependsOnApps(project.liberty.server)) dependsOn 'deploy'
+            if (dependsOnApps(project.liberty.server)) {
+                dependsOn 'deploy'
+            }
         }
 
         project.libertyPackage {
@@ -118,7 +122,9 @@ public class LibertyTasks {
         List<String> tasks = new ArrayList<String>()
         boolean apps = dependsOnApps(server)
 
-        if (apps) tasks.add('deploy')
+        if (apps) { 
+            tasks.add('deploy')
+        }
         tasks.add('installFeature')
         return tasks
     }

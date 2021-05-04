@@ -69,17 +69,17 @@ compileTestGroovy {
     targetCompatibility = JavaVersion.VERSION_1_7
 }
 
-def libertyAntVersion = "1.9.7"
-def libertyCommonVersion = "1.8.14-SNAPSHOT"
+def libertyAntVersion = "1.9.8-SNAPSHOT"
+def libertyCommonVersion = "1.8.15-SNAPSHOT"
 
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
     implementation ("io.openliberty.tools:liberty-ant-tasks:$libertyAntVersion")
     implementation ("io.openliberty.tools:ci.common:$libertyCommonVersion")
-    implementation group: 'commons-io', name: 'commons-io', version: '2.5'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
     provided group: 'com.ibm.websphere.appserver.spi', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
-    testImplementation 'junit:junit:4.11'
+    testImplementation 'junit:junit:4.13.1'
     testImplementation gradleTestKit()
 }
 
@@ -205,7 +205,7 @@ publishing {
                 licenses {
                     license {
                         name = 'The Apache Software License, Version 2.0'
-                        url = 'https://raw.github.com/OpenLiberty/ci.gradle/master/LICENSE'
+                        url = 'https://raw.github.com/OpenLiberty/ci.gradle/main/LICENSE'
                     }
                 }
 

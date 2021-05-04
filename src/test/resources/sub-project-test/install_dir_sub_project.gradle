@@ -27,7 +27,7 @@ allprojects {
 }
 
 dependencies {
-    libertyRuntime "io.openliberty:openliberty-runtime:18.0.0.4"
+    libertyRuntime "io.openliberty:openliberty-kernel:$testRuntimeVersion"
 }
 
 defaultTasks 'libertyCreate'

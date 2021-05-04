@@ -27,13 +27,13 @@ repositories {
     mavenCentral()
     maven {
         name 'liberty-starter-maven-repo'
-        url 'http://liberty-starter.wasdev.developer.ibm.com/start/api/v1/repo'
+        url 'https://liberty-starter.wasdev.developer.ibm.com/start/api/v1/repo'
     }
 }
 
 dependencies {
-    testImplementation 'junit:junit:4.12'
-    libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
+    testImplementation 'junit:junit:4.13.1'
+    libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: runtimeVersion
 }
 
 task integrationTest(type: Test) {

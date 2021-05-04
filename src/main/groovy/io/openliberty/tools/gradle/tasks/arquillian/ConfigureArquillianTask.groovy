@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017, 2020.
+ * (C) Copyright IBM Corporation 2017, 2021.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,10 @@ import java.io.FileNotFoundException
 import java.io.IOException
 import javax.xml.parsers.ParserConfigurationException
 import javax.xml.xpath.XPathExpressionException
+import org.gradle.api.artifacts.UnknownConfigurationException
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.logging.LogLevel
 import org.xml.sax.SAXException
@@ -49,33 +51,48 @@ class ConfigureArquillianTask extends AbstractServerTask {
         })
     }
 
-    @Input
     public boolean skipIfArquillianXmlExists = false;
 
-    @Input
     public Map<String, String> arquillianProperties = null;
+
+    @Input
+    public boolean getSkipIfArquillianXmlExists() {
+        return skipIfArquillianXmlExists
+    }
+
+    @Input
+    @Optional
+    public Map<String, String> getArquillianProperties() {
+        return arquillianProperties
+    }
 
     @TaskAction
     void doExecute() throws GradleException {
         File arquillianXml = new File(project.getBuildDir(), "resources/test/arquillian.xml");
-        project.configurations.testCompile.find {
-            for(ArtifactCoordinates coors : Constants.ARQUILLIAN_REMOTE_DEPENDENCY) {
-                String artifactId = coors.getArtifactId();
-                if (it.toString().contains(artifactId)) {
-                    type = TypeProperty.REMOTE;
-                    logger.info("Automatically detected the Arquillian Liberty Remote container artifact: " + artifactId + ".")
-                    return true;
+        try {
+            if (project.configurations.getByName('testCompile') != null) {
+                project.configurations.testCompile.find {
+                    for(ArtifactCoordinates coors : Constants.ARQUILLIAN_REMOTE_DEPENDENCY) {
+                        String artifactId = coors.getArtifactId();
+                        if (it.toString().contains(artifactId)) {
+                            type = TypeProperty.REMOTE;
+                            logger.info("Automatically detected the Arquillian Liberty Remote container artifact: " + artifactId + ".")
+                            return true;
+                        }
+                    }
+                    for(ArtifactCoordinates coors : Constants.ARQUILLIAN_MANAGED_DEPENDENCY) {
+                        String artifactId = coors.getArtifactId();
+                        if (it.toString().contains(artifactId)) {
+                            type = TypeProperty.MANAGED
+                            logger.info("Automatically detected the Arquillian Liberty Managed container artifact: " + artifactId + ".")
+                            return true;
+                        }
+                    }
+                    return false;
                 }
             }
-            for(ArtifactCoordinates coors : Constants.ARQUILLIAN_MANAGED_DEPENDENCY) {
-                String artifactId = coors.getArtifactId();
-                if (it.toString().contains(artifactId)) {
-                    type = TypeProperty.MANAGED
-                    logger.info("Automatically detected the Arquillian Liberty Managed container artifact: " + artifactId + ".")
-                    return true;
-                }
-            }
-            return false;
+        } catch (UnknownConfigurationException uce) {
+            logger.debug("No testCompile configuration detected when executing the configureArquillian task.")
         }
 
         if(type == TypeProperty.NOTFOUND) {
@@ -98,8 +115,9 @@ class ConfigureArquillianTask extends AbstractServerTask {
 
     private void configureArquillianManaged(File arquillianXml) throws GradleException {
         try {
+            String usrDir = isUserDirSpecified() ? getUserDir(project) : null;
             LibertyManagedObject arquillianManaged = new LibertyManagedObject(getInstallDir(project).getCanonicalPath(), server.name,
-                    getHttpPort(), LibertyProperty.getArquillianProperties(arquillianProperties, LibertyManagedObject.LibertyManagedProperty.class));
+                    usrDir, getHttpPort(), LibertyProperty.getArquillianProperties(arquillianProperties, LibertyManagedObject.LibertyManagedProperty.class));
             arquillianManaged.build(arquillianXml);
         } catch (Exception e) {
             throw new GradleException("Error configuring Arquillian.", e);

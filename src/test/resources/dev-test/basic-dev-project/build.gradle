@@ -30,11 +30,11 @@ dependencies {
     libertyRuntime "$runtimeGroup:$runtimeArtifactId:$runtimeVersion"
 
     // test dependencies
-    testCompile "junit:junit:4.12"
-    testCompile "org.apache.cxf:cxf-rt-rs-client:3.2.6"
-    testCompile "org.apache.cxf:cxf-rt-rs-extension-providers:3.2.6"
-    testCompile "org.glassfish:javax.json:1.0.4"
-    testCompile "javax.xml.bind:jaxb-api:2.3.1"
+    testImplementation "junit:junit:4.13.1"
+    testImplementation "org.apache.cxf:cxf-rt-rs-client:3.2.6"
+    testImplementation "org.apache.cxf:cxf-rt-rs-extension-providers:3.2.6"
+    testImplementation "org.glassfish:javax.json:1.0.4"
+    testImplementation "javax.xml.bind:jaxb-api:2.3.1"
 }
 
 clean.dependsOn "libertyStop"

@@ -15,8 +15,11 @@
  */
 package io.openliberty.tools.gradle
 
+import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.junit.Assert.*
 
+import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.GradleRunner
 import org.junit.BeforeClass
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -40,7 +43,7 @@ class InstallDirSubProject extends AbstractIntegrationTest {
 
     @Test
     void testProjectDirectoriesBeforeClean() {
-        runTasks(buildDir, 'libertyCreate')
+        runTasksWithVersion("21.0.0.4", buildDir, 'libertyCreate')
         assert runtimeInstallDir.exists()
         assert parentProjectBuildDir.exists()
         assert new File(parentProjectBuildDir, "liberty-plugin-config.xml").exists()
@@ -50,10 +53,35 @@ class InstallDirSubProject extends AbstractIntegrationTest {
 
     @Test
     void testProjectDirectoriesPostClean() {
-        runTasks(buildDir, "clean", "libertyCreate")
+        runTasksWithVersion("20.0.0.12", buildDir, "clean", "libertyCreate")
         assert parentProjectBuildDir.exists()
         assert new File(parentProjectBuildDir, "liberty-plugin-config.xml").exists()
         assert subProjectBuildDir.exists()
         assert new File(subProjectBuildDir, "liberty-plugin-config.xml").exists()
+    }
+
+    protected static void runTasksWithVersion(String runtimeVersion, File projectDir, String... tasks) {
+        String runtimeVersionArg = "-PtestRuntimeVersion=" + runtimeVersion
+
+        List<String> args = new ArrayList<String>()
+        tasks.each {
+            args.add(it)
+        }
+        args.add(runtimeVersionArg)
+        args.add("-i")
+        args.add("-s")
+
+        BuildResult result = GradleRunner.create()
+            .withProjectDir(projectDir)
+            .forwardOutput()
+            .withArguments(args)
+            .build()
+
+        //'it' is null if tasks is a single String
+        if(tasks.length > 1) {
+            tasks.each {
+                assert SUCCESS == result.task(":$it").getOutcome()
+            }
+        }
     }
 }

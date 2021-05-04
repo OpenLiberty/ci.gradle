@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2020.
+ * (C) Copyright IBM Corporation 2014, 2021.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import javax.xml.parsers.*
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.logging.LogLevel
@@ -36,7 +37,7 @@ import java.util.Set
 
 import org.gradle.api.GradleException
 
-class InstallLibertyTask extends AbstractTask {
+class InstallLibertyTask extends AbstractLibertyTask {
     protected Properties libertyRuntimeProjectProps = new Properties()
     protected String detachedCoords
     protected String detachedConfigFilePath
@@ -53,17 +54,63 @@ class InstallLibertyTask extends AbstractTask {
         }
     }
 
-    @Input
+    @InputFiles
     @Optional
     Configuration getLibertyRuntimeConfiguration() {
         return project.configurations.libertyRuntime
     }
 
+    @Input
+    @Optional
+    String getLibertyRuntimeUrl() {
+        return project.liberty.install.runtimeUrl
+    }
+
+    @Input
+    @Optional
+    String getLibertyLicenseCode() {
+        return project.liberty.install.licenseCode
+    }
+
+    @Input
+    @Optional
+    String getLibertyVersion() {
+        return project.liberty.install.version
+    }
+
+
+    @Input
+    @Optional
+    String getLibertyUsername() {
+        return project.liberty.install.username
+    }
+
+    @Input
+    @Optional
+    String getLibertyPassword() {
+        return project.liberty.install.password
+    }
+
+    @Input
+    @Optional
+    String getLibertyType() {
+        return project.liberty.install.type
+    }
+
+    @Input
+    @Optional
+    Properties getLibertyGeneralRuntimeProperties() {
+        return project.liberty.runtime
+    }
+
+
     @TaskAction
     void install() {
-        if (!isLibertyInstalledAndValid(project)) {
+        // If installDir is set, then use the configured wlp or throw error if it is invalid
+        if(project.liberty.installDir != null && isLibertyInstalledAndValid(project)) {
+            logger.info ("Liberty is already installed at: " + getInstallDir(project))
+        } else {
             def params = buildInstallLibertyMap(project)
-
             project.ant.taskdef(name: 'installLiberty',
                                 classname: 'io.openliberty.tools.ant.install.InstallLibertyTask',
                                 classpath: project.buildscript.configurations.classpath.asPath)
@@ -75,10 +122,8 @@ class InstallLibertyTask extends AbstractTask {
                 def process = command.execute()
                 process.waitFor()
             }
-            
-        } else {
-            logger.info ("Liberty is already installed at: " + getInstallDir(project))
         }
+
         createPluginXmlFile()
     }
 
@@ -217,6 +262,7 @@ class InstallLibertyTask extends AbstractTask {
         }
 
         result.put('offline', project.gradle.startParameter.offline)
+        result.put('skipAlreadyInstalledCheck', "true")
 
         return result
     }
