@@ -41,7 +41,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: hermankailey/ci.common
-        ref:userFeature
+        ref: userFeature
         path: ci.common
     - name: Checkout ci.ant
       uses: actions/checkout@v2
