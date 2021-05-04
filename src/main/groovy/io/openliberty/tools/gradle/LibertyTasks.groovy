@@ -48,9 +48,9 @@ public class LibertyTasks {
         }
 
         project.libertyCreate {
-            dependsOn 'installLiberty'
+            dependsOn 'installLiberty'   
             // Run install features if configured
-            finalizedBy 'installFeature'
+            finalizedBy 'installFeature'      
         }
 
         project.libertyStart {
@@ -78,7 +78,7 @@ public class LibertyTasks {
         }
 		
 		project.prepareFeature {
-			dependsOn 'libertyCreate'
+			dependsOn 'installLiberty'		
 		}
 
         project.deploy {

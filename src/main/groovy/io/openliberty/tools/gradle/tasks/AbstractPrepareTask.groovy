@@ -33,7 +33,7 @@ public class AbstractPrepareTask extends AbstractServerTask {
 
 
     private class PrepareFeatureTaskUtil extends PrepareFeatureUtil {
-        public PrepareFeatureTaskUtil(File installDir, String openLibertyVerion)  throws PluginScenarioException, PluginExecutionException {
+        public PrepareFeatureTaskUtil(File installDir, String openLibertyVerion) throws PluginScenarioException, PluginExecutionException {
             super(installDir, openLibertyVerion)
         }
 
@@ -91,11 +91,11 @@ public class AbstractPrepareTask extends AbstractServerTask {
                     debug(artifactFile.toString())
                 }
             } catch (ResolveException e) {
-                throw new PluginExecutionException("Could not find artifact with coordinates " + coordinates, e)
+                throw new PluginExecutionException("Could not find artifact with coordinates " + coordinates)  
             }
 
             if (!files) {
-                throw new PluginExecutionException("Could not find artifact with coordinates " + coordinates)
+                throw new ResolveException("Could not find artifact with coordinates " + coordinates)
             }
             return files.iterator().next()
         }
@@ -115,8 +115,7 @@ public class AbstractPrepareTask extends AbstractServerTask {
         try {
             util = new PrepareFeatureTaskUtil(getInstallDir(project), openLibertyVerion)
         } catch (PluginScenarioException e) {
-            logger.debug("Exception received: "+e.getMessage(),(Throwable)e)
-            return
+            throw new PluginExecutionException("Exception received: "+e.getMessage())
         }
     }
 
