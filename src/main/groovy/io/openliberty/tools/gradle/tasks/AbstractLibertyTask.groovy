@@ -44,6 +44,7 @@ abstract class AbstractLibertyTask extends DefaultTask {
         return (project.liberty.userDir == null) ? new File(installDir, 'usr') : new File(project.liberty.userDir)
     }
 
+    @Internal
     protected boolean isUserDirSpecified() {
         return (project.liberty.userDir != null)
     }

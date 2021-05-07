@@ -15,6 +15,7 @@
  */
 package io.openliberty.tools.gradle.tasks
 
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.logging.LogLevel
 
@@ -69,11 +70,8 @@ class PackageTask extends AbstractServerTask {
     void packageServer() {
 
         def params = buildLibertyMap(project)
-        def fileType = getPackageFileType()
-        def projectBuildDir = getPackageDirectory()
-        def projectBuildName = getPackageName()
         
-        def packageFile = new File(projectBuildDir, projectBuildName + "." + fileType.getValue())
+        def packageFile = getPackageFile()
         params.put('archive', packageFile)
         logger.info 'Packaging ' + packageFile
 
@@ -88,6 +86,11 @@ class PackageTask extends AbstractServerTask {
         }
 
         executeServerCommand(project, 'package', params)
+    }
+
+    @OutputFile
+    public File getPackageFile() throws IOException {
+        return new File(getPackageDirectory(), getPackageName() + "." + getPackageFileType().getValue())
     }
 
     private static void createDir(File dir) {
