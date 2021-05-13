@@ -71,6 +71,9 @@ public class LibertyTasks {
 
         project.installFeature {
             dependsOn 'libertyCreate'
+			if (project.configurations.featuresBom.dependencies) {
+				dependsOn 'prepareFeature'
+			}
         }
 
         project.cleanDirs {

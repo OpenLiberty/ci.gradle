@@ -22,6 +22,8 @@ import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
+import org.gradle.api.Project
+import org.gradle.testfixtures.ProjectBuilder
 
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil.ProductProperties
@@ -37,6 +39,8 @@ public class AbstractFeatureTask extends AbstractServerTask {
     public boolean installFeaturesFromAnt;
 
     private InstallFeatureUtil util;
+	
+	Project newProject = project;
 
     @Option(option = 'serverDir', description = '(Optional) Server directory to get the list of features from.')
     void setServerDirectoryParam(String serverDir) {
@@ -44,9 +48,13 @@ public class AbstractFeatureTask extends AbstractServerTask {
     }
 
     private class InstallFeatureTaskUtil extends InstallFeatureUtil {
+		
+		
         public InstallFeatureTaskUtil(File installDir, String from, String to, Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons)  throws PluginScenarioException, PluginExecutionException {
             super(installDir, from, to, pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons)
         }
+		
+		public Project 
 
         @Override
         public void debug(String msg) {
@@ -90,25 +98,27 @@ public class AbstractFeatureTask extends AbstractServerTask {
 
         @Override
         public File downloadArtifact(String groupId, String artifactId, String type, String version) throws PluginExecutionException {
-            String coordinates = groupId + ":" + artifactId + ":" + version + "@" + type
-            def dep = project.dependencies.create(coordinates)
-            def config = project.configurations.detachedConfiguration(dep)
-
-            Set<File> files = new HashSet<File>()
-            try {
-                config.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-                    File artifactFile = artifact.file
-                    files.add(artifactFile)
-                    debug(artifactFile.toString())
-                }
-            } catch (ResolveException e) {
-                throw new PluginExecutionException("Could not find artifact with coordinates " + coordinates, e)
-            }
-
-            if (!files) {
-                throw new PluginExecutionException("Could not find artifact with coordinates " + coordinates)
-            }
-            return files.iterator().next()
+			
+			String coordinates = groupId + ":" + artifactId + ":" + version + "@" + type
+			def dep = newProject.dependencies.create(coordinates)
+			def config = newProject.configurations.detachedConfiguration(dep)
+	
+			Set<File> files = new HashSet<File>()
+			try {
+				config.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+					File artifactFile = artifact.file
+					files.add(artifactFile)
+					debug(artifactFile.toString())
+				}
+			} catch (ResolveException e) {
+				throw new PluginExecutionException("Could not find artifact with coordinates " + coordinates, e)
+			}
+	
+			if (!files) {
+				throw new PluginExecutionException("Could not find artifact with coordinates " + coordinates)
+			}
+			return files.iterator().next()
+		
         }
     }
 
@@ -197,7 +207,25 @@ public class AbstractFeatureTask extends AbstractServerTask {
     }
 
     protected InstallFeatureUtil getInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons) throws PluginExecutionException {
-        createNewInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons)
+		//if installing userFeature, recompile gradle to find mavenLocal artifacts created by prepareFeature task. 
+		if(project.configurations.featuresBom.dependencies) {  
+			try {
+				ProjectBuilder builder = ProjectBuilder.builder();
+				newProject = builder
+						.withProjectDir(project.rootDir)
+						.withGradleUserHomeDir(project.gradle.gradleUserHomeDir)
+						.withName(project.name)
+						.build();
+
+				// need this for gradle to evaluate the project
+				// and load the different plugins and extensions
+				newProject.evaluate();
+			} catch (Exception e) {
+				logger.error("Could not parse build.gradle " + e.getMessage());
+				logger.debug('Error parsing build.gradle', e);
+			}
+		}
+		createNewInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons)
         return util
     }
 
