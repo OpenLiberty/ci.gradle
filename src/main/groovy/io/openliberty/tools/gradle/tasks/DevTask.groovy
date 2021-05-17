@@ -392,6 +392,13 @@ class DevTask extends AbstractServerTask {
         }
 
         @Override
+        public boolean updateArtifactPaths(File buildFile, List<String> compileArtifactPaths,
+                ThreadPoolExecutor executor) throws PluginExecutionException {
+            // not supported for Gradle, only used for multi module Maven projects
+            return false;
+        }
+
+        @Override
         public boolean recompileBuildFile(File buildFile, List<String> compileArtifactPaths, List<String> testArtifactPaths, ThreadPoolExecutor executor) {
             boolean restartServer = false;
             boolean installFeatures = false;
@@ -947,7 +954,7 @@ class DevTask extends AbstractServerTask {
         // configuration parameter is not specified.
         try {
             util.watchFiles(buildFile, outputDirectory, testOutputDirectory, executor, null, null, serverXMLFile,
-                            project.liberty.server.bootstrapPropertiesFile, project.liberty.server.jvmOptionsFile);
+                            project.liberty.server.bootstrapPropertiesFile, project.liberty.server.jvmOptionsFile, null);
         } catch (PluginScenarioException e) {
             if (e.getMessage() != null) {
                 // a proper message is included in the exception if the server has been stopped by another process
