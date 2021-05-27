@@ -53,8 +53,6 @@ public class AbstractFeatureTask extends AbstractServerTask {
         public InstallFeatureTaskUtil(File installDir, String from, String to, Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons)  throws PluginScenarioException, PluginExecutionException {
             super(installDir, from, to, pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons)
         }
-		
-		public Project 
 
         @Override
         public void debug(String msg) {
