@@ -285,7 +285,7 @@ class DevTask extends AbstractServerTask {
                     resourceDirs, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, dockerfile, dockerBuildContext, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts,
-                    null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation
+                    null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation, null /* multi module upstream projects */
                 );
 
             ServerFeature servUtil = getServerFeatureUtil();
@@ -393,7 +393,8 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public boolean updateArtifactPaths(File buildFile, List<String> compileArtifactPaths,
-                ThreadPoolExecutor executor) throws PluginExecutionException {
+                List<String> testArtifactPaths,boolean redeployCheck, ThreadPoolExecutor executor)
+                throws PluginExecutionException {
             // not supported for Gradle, only used for multi module Maven projects
             return false;
         }
@@ -653,12 +654,14 @@ class DevTask extends AbstractServerTask {
         }
 
         @Override
-        public void runUnitTests() throws PluginExecutionException, PluginScenarioException {
+        public void runUnitTests(File buildFile) throws PluginExecutionException, PluginScenarioException {
             // Not needed for gradle.
         }
 
         @Override
-        public void runIntegrationTests() throws PluginExecutionException, PluginScenarioException {
+        public void runIntegrationTests(File buildFile) throws PluginExecutionException, PluginScenarioException {
+            // buildFile parameter is not used, implemented for multi module projects, which is not supported in Gradle
+
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
@@ -954,7 +957,7 @@ class DevTask extends AbstractServerTask {
         // configuration parameter is not specified.
         try {
             util.watchFiles(buildFile, outputDirectory, testOutputDirectory, executor, null, null, serverXMLFile,
-                            project.liberty.server.bootstrapPropertiesFile, project.liberty.server.jvmOptionsFile, null);
+                            project.liberty.server.bootstrapPropertiesFile, project.liberty.server.jvmOptionsFile);
         } catch (PluginScenarioException e) {
             if (e.getMessage() != null) {
                 // a proper message is included in the exception if the server has been stopped by another process
