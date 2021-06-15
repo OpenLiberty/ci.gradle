@@ -42,6 +42,7 @@ import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 import io.openliberty.tools.common.plugins.util.ServerStatusUtil
 
 import java.util.concurrent.TimeUnit
+import java.util.Map.Entry
 
 class DevTask extends AbstractServerTask {
 
@@ -767,6 +768,7 @@ class DevTask extends AbstractServerTask {
                 BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
                 gradleBuildLauncher.addArguments('--rerun-tasks');
+                addLibertyRuntimeProperties(gradleBuildLauncher);
                 try {
                     runGradleTask(gradleBuildLauncher, 'libertyCreate');
                 } catch (BuildException e) {
@@ -906,6 +908,7 @@ class DevTask extends AbstractServerTask {
                 :deploy
              */
             if (!container) {
+                addLibertyRuntimeProperties(gradleBuildLauncher);               
                 runGradleTask(gradleBuildLauncher, 'libertyCreate');
                 // suppress extra install feature warnings (one would have shown up already from the libertyCreate task on the line above)
                 gradleBuildLauncher.addArguments("-D" + DevUtil.SKIP_BETA_INSTALL_WARNING + "=" + Boolean.TRUE.toString());
@@ -964,6 +967,16 @@ class DevTask extends AbstractServerTask {
                 logger.info(e.getMessage());
             }
             return; // enter shutdown hook
+        }
+    }
+
+    private void addLibertyRuntimeProperties(BuildLauncher gradleBuildLauncher) {
+        Set<Entry<Object, Object>> entries = project.getProperties().entrySet()
+        for (Entry<Object, Object> entry : entries) {
+            String key = (String) entry.getKey()
+            if (key.startsWith("liberty.runtime")) {
+                gradleBuildLauncher.addArguments("-P" + key + "=" + project.getProperty(key));
+            }
         }
     }
 
