@@ -1051,12 +1051,14 @@ class DevTask extends AbstractServerTask {
     }
 
     ProjectConnection initGradleProjectConnection() {
-        return initGradleConnection(project.getRootDir());
+        logger.debug("Gradle user home: " + project.gradle.gradleUserHomeDir)
+        return initGradleConnection(project.getRootDir(), project.gradle.gradleUserHomeDir);
     }
 
-    static ProjectConnection initGradleConnection(File rootDir) {
+    static ProjectConnection initGradleConnection(File rootDir, File gradleUserHomeDir) {
         ProjectConnection connection = GradleConnector.newConnector()
                 .forProjectDirectory(rootDir)
+                .useGradleUserHomeDir(gradleUserHomeDir)
                 .connect();
 
         return connection;
