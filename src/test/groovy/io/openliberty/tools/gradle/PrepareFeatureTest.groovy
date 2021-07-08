@@ -22,6 +22,7 @@ import org.junit.AfterClass
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runners.MethodSorters
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 class PrepareFeatureTest extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/prepare-feature-test")
@@ -33,6 +34,8 @@ class PrepareFeatureTest extends AbstractIntegrationTest{
 	static File userTestRepo = new File(mavenLocalRepo, "test/user/test/features")
 	static File featuresBom = new File(userTestRepo, "features-bom/19.0.0.8/features-bom-19.0.0.8.pom")
 	static File testEsa = new File(userTestRepo, "testesa1/19.0.0.8/testesa1-19.0.0.8.esa")
+	
+	private static final String MIN_USER_FEATURE_VERSION = "21.0.0.6";
 	
 	public static boolean deleteFolder(final File directory) {
 		if (directory.isDirectory()) {
@@ -56,9 +59,19 @@ class PrepareFeatureTest extends AbstractIntegrationTest{
 		return true;
 	}
 	
+	public static boolean checkOpenLibertyVersion() {
+		DefaultArtifactVersion minVersion = new DefaultArtifactVersion(MIN_USER_FEATURE_VERSION);
+		DefaultArtifactVersion version = new DefaultArtifactVersion(System.getProperty("runtimeVersion"))
+		if (version.compareTo(minVersion) >= 0) {
+			return true
+		}
+		return false
+	}
+	
 
     @BeforeClass
     public static void setup() {
+		org.junit.Assume.assumeTrue(checkOpenLibertyVersion());
         createDir(buildDir)
         copyBuildFiles(buildFilename, buildDir)
         copySettingsFile(resourceDir, buildDir)
