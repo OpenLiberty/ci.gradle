@@ -121,6 +121,21 @@ class DevTask extends AbstractServerTask {
         }
     }
 
+    @Option(option = "recompileDependencies", description = 'Whether to recompile the entire project on a file change. The default value is false.')
+    void setRecompileDependencies(String recompileDependencies) {
+        if (recompileDependencies == null) {
+            log.debug(
+                "The recompileDependencies parameter was not explicitly set. The default value -DrecompileDependencies=false will be used.");
+            recompileDependencies = "false";
+        }
+        this.recompileDependencies = Boolean.parseBoolean(recompileDependencies)
+        if (this.recompileDependencies) {
+            log.info("The recompileDependencies parameter is set to \"true\". On a file change the entire project will be recompiled.");
+        } else {
+            log.info("The recompileDependencies parameter is set to \"false\". On a file change only the affected classes will be recompiled.");
+        }
+    }
+
     private Double compileWait;
 
     @Option(option = 'compileWait', description = 'Time in seconds to wait before processing Java changes and deletions. The default value is 0.5 seconds.')
@@ -280,13 +295,13 @@ class DevTask extends AbstractServerTask {
                     boolean  hotTests, boolean  skipTests, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
                     boolean libertyDebug, boolean pollingTest, boolean container, File dockerfile, File dockerBuildContext,
-                    String dockerRunOpts, int dockerBuildTimeout, boolean skipDefaultPorts, boolean keepTempDockerfile, String mavenCacheLocation
+                    String dockerRunOpts, int dockerBuildTimeout, boolean skipDefaultPorts, boolean keepTempDockerfile, String mavenCacheLocation, boolean recompileDeps
         ) throws IOException {
             super(buildDir, serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory, /* multi module project directory */ projectDirectory,
                     resourceDirs, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, dockerfile, dockerBuildContext, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts,
-                    null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation, null /* multi module upstream projects */
+                    null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation, null /* multi module upstream projects */, recompileDeps
                 );
 
             ServerFeature servUtil = getServerFeatureUtil();
