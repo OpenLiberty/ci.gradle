@@ -307,7 +307,8 @@ class DevTask extends AbstractServerTask {
                     resourceDirs, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, dockerfile, dockerBuildContext, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts,
-                    null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation, null /* multi module upstream projects */, recompileDeps
+                    null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation, null /* multi module upstream projects */, recompileDeps, 
+                    getPackagingType()
                 );
 
             ServerFeature servUtil = getServerFeatureUtil();
