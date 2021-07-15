@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2019, 2020.
+ * (C) Copyright IBM Corporation 2019, 2021.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,6 @@ class DevTask extends AbstractServerTask {
     private static final boolean DEFAULT_CONTAINER = false;
     private static final boolean DEFAULT_SKIP_DEFAULT_PORTS = false;
     private static final boolean DEFAULT_KEEP_TEMP_DOCKERFILE = false;
-    private static final boolean DEFAULT_RECOMPILE_DEPENDENCIES = false;
 
     protected final String CONTAINER_PROPERTY_ARG = '-P'+CONTAINER_PROPERTY+'=true';
 
@@ -119,26 +118,6 @@ class DevTask extends AbstractServerTask {
         } catch (NumberFormatException e) {
             logger.error(String.format("Unexpected value: %s for dev mode option libertyDebugPort. libertyDebugPort should be a valid integer.", libertyDebugPort));
             throw e;
-        }
-    }
-
-    @Optional
-    @Input
-    Boolean recompileDependencies;
-
-    // Need to use a string value to allow someone to specify --recompileDependencies=false
-    @Option(option = "recompileDependencies", description = 'Whether to recompile the entire project on a file change. The default value is false.')
-    void setRecompileDependencies(String recompileDependencies) {
-        if (recompileDependencies == null) {
-            logger.debug(
-                "The recompileDependencies parameter was not explicitly set. The default value -DrecompileDependencies=false will be used.");
-            recompileDependencies = "false";
-        }
-        this.recompileDependencies = Boolean.parseBoolean(recompileDependencies)
-        if (this.recompileDependencies) {
-            logger.info("The recompileDependencies parameter is set to \"true\". On a file change the entire project will be recompiled.");
-        } else {
-            logger.info("The recompileDependencies parameter is set to \"false\". On a file change only the affected classes will be recompiled.");
         }
     }
 
@@ -301,14 +280,14 @@ class DevTask extends AbstractServerTask {
                     boolean  hotTests, boolean  skipTests, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
                     boolean libertyDebug, boolean pollingTest, boolean container, File dockerfile, File dockerBuildContext,
-                    String dockerRunOpts, int dockerBuildTimeout, boolean skipDefaultPorts, boolean keepTempDockerfile, String mavenCacheLocation, boolean recompileDeps
+                    String dockerRunOpts, int dockerBuildTimeout, boolean skipDefaultPorts, boolean keepTempDockerfile, String mavenCacheLocation
         ) throws IOException {
             super(buildDir, serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory, /* multi module project directory */ projectDirectory,
                     resourceDirs, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, dockerfile, dockerBuildContext, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts,
-                    null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation, null /* multi module upstream projects */, recompileDeps, 
-                    getPackagingType()
+                    null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation, null /* multi module upstream projects */, 
+                    false /* recompileDependencies only currently supported in ci.maven */, getPackagingType()
                 );
 
             ServerFeature servUtil = getServerFeatureUtil();
@@ -866,10 +845,6 @@ class DevTask extends AbstractServerTask {
             pollingTest = DEFAULT_POLLING_TEST;
         }
 
-        if (recompileDependencies == null) {
-            recompileDependencies = DEFAULT_RECOMPILE_DEPENDENCIES;
-        }
-
         processContainerParams();
     }
 
@@ -957,7 +932,7 @@ class DevTask extends AbstractServerTask {
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
                 libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerBuildContext, dockerRunOpts, 
-                dockerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempDockerfile.booleanValue(), localMavenRepoForFeatureUtility, recompileDependencies.booleanValue()
+                dockerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempDockerfile.booleanValue(), localMavenRepoForFeatureUtility
         );
 
         util.addShutdownHook(executor);
