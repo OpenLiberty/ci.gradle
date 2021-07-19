@@ -30,6 +30,16 @@ class RunTask extends AbstractServerTask {
 
     @TaskAction
     void run() {
+        addShutdownHook {
+            if (isLibertyInstalledAndValid(project)) {
+                if (getServerDir(project).exists()) {
+                    ServerTask serverTaskStop = createServerTask(project, "stop");
+                    serverTaskStop.setUseEmbeddedServer(server.embedded)
+                    serverTaskStop.execute()
+                }
+            }
+        }
+
         if (server.embedded) {
             ServerTask serverTaskRun = createServerTask(project, "run");
             serverTaskRun.setUseEmbeddedServer(server.embedded)
@@ -44,9 +54,7 @@ class RunTask extends AbstractServerTask {
             pb.environment().put('WLP_USER_DIR', getUserDir(project).getCanonicalPath())
 
             def run_process = pb.redirectErrorStream(true).start()
-            addShutdownHook {
-                run_process.waitFor()
-            }
+
             run_process.inputStream.eachLine {
                 println it
             }
