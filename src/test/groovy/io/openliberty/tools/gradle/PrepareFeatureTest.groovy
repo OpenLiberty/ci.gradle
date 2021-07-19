@@ -17,7 +17,7 @@ package io.openliberty.tools.gradle
 
 import static org.junit.Assert.*
 
-import org.junit.BeforeClass
+import org.junit.Before
 import org.junit.AfterClass
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -69,8 +69,8 @@ class PrepareFeatureTest extends AbstractIntegrationTest{
 	}
 	
 
-    @BeforeClass
-    public static void setup() {
+    @Before
+    public void setup() {
 		org.junit.Assume.assumeTrue(checkOpenLibertyVersion());
         createDir(buildDir)
         copyBuildFiles(buildFilename, buildDir)
