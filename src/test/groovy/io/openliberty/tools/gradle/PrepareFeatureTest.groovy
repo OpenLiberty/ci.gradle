@@ -39,22 +39,22 @@ class PrepareFeatureTest extends AbstractIntegrationTest{
 	
 	public static boolean deleteFolder(final File directory) {
 		if (directory.isDirectory()) {
-				File[] files = directory.listFiles();
-				if (null != files) {
-						for (File file : files) {
-								if (file.isDirectory()) {
-										deleteFolder(file);
-								} else {
-										if (!file.delete()) {
-												file.deleteOnExit();
-										}
-								}
+			File[] files = directory.listFiles();
+			if (null != files) {
+				for (File file : files) {
+					if (file.isDirectory()) {
+							deleteFolder(file);
+					} else {
+						if (!file.delete()) {
+								file.deleteOnExit();
 						}
+					}
 				}
+			}
 		}
 		if(!directory.delete()){
-				directory.deleteOnExit();
-				return false;
+			directory.deleteOnExit();
+			return false;
 		}
 		return true;
 	}
