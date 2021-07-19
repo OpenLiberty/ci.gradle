@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2019, 2020.
+ * (C) Copyright IBM Corporation 2019, 2021.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 import io.openliberty.tools.common.plugins.util.ServerStatusUtil
 
 import java.util.concurrent.TimeUnit
+import java.util.Map.Entry
 
 class DevTask extends AbstractServerTask {
 
@@ -285,7 +286,8 @@ class DevTask extends AbstractServerTask {
                     resourceDirs, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, dockerfile, dockerBuildContext, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts,
-                    null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation
+                    null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation, null /* multi module upstream projects */, 
+                    false /* recompileDependencies only currently supported in ci.maven */, getPackagingType()
                 );
 
             ServerFeature servUtil = getServerFeatureUtil();
@@ -393,7 +395,8 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public boolean updateArtifactPaths(File buildFile, List<String> compileArtifactPaths,
-                ThreadPoolExecutor executor) throws PluginExecutionException {
+                List<String> testArtifactPaths,boolean redeployCheck, ThreadPoolExecutor executor)
+                throws PluginExecutionException {
             // not supported for Gradle, only used for multi module Maven projects
             return false;
         }
@@ -653,12 +656,14 @@ class DevTask extends AbstractServerTask {
         }
 
         @Override
-        public void runUnitTests() throws PluginExecutionException, PluginScenarioException {
+        public void runUnitTests(File buildFile) throws PluginExecutionException, PluginScenarioException {
             // Not needed for gradle.
         }
 
         @Override
-        public void runIntegrationTests() throws PluginExecutionException, PluginScenarioException {
+        public void runIntegrationTests(File buildFile) throws PluginExecutionException, PluginScenarioException {
+            // buildFile parameter is not used, implemented for multi module projects, which is not supported in Gradle
+
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
@@ -764,6 +769,7 @@ class DevTask extends AbstractServerTask {
                 BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
                 gradleBuildLauncher.addArguments('--rerun-tasks');
+                addLibertyRuntimeProperties(gradleBuildLauncher);
                 try {
                     runGradleTask(gradleBuildLauncher, 'libertyCreate');
                 } catch (BuildException e) {
@@ -903,6 +909,7 @@ class DevTask extends AbstractServerTask {
                 :deploy
              */
             if (!container) {
+                addLibertyRuntimeProperties(gradleBuildLauncher);               
                 runGradleTask(gradleBuildLauncher, 'libertyCreate');
                 // suppress extra install feature warnings (one would have shown up already from the libertyCreate task on the line above)
                 gradleBuildLauncher.addArguments("-D" + DevUtil.SKIP_BETA_INSTALL_WARNING + "=" + Boolean.TRUE.toString());
@@ -954,13 +961,23 @@ class DevTask extends AbstractServerTask {
         // configuration parameter is not specified.
         try {
             util.watchFiles(buildFile, outputDirectory, testOutputDirectory, executor, null, null, serverXMLFile,
-                            project.liberty.server.bootstrapPropertiesFile, project.liberty.server.jvmOptionsFile, null);
+                            project.liberty.server.bootstrapPropertiesFile, project.liberty.server.jvmOptionsFile);
         } catch (PluginScenarioException e) {
             if (e.getMessage() != null) {
                 // a proper message is included in the exception if the server has been stopped by another process
                 logger.info(e.getMessage());
             }
             return; // enter shutdown hook
+        }
+    }
+
+    private void addLibertyRuntimeProperties(BuildLauncher gradleBuildLauncher) {
+        Set<Entry<Object, Object>> entries = project.getProperties().entrySet()
+        for (Entry<Object, Object> entry : entries) {
+            String key = (String) entry.getKey()
+            if (key.startsWith("liberty.runtime")) {
+                gradleBuildLauncher.addArguments("-P" + key + "=" + project.getProperty(key));
+            }
         }
     }
 
@@ -1035,12 +1052,14 @@ class DevTask extends AbstractServerTask {
     }
 
     ProjectConnection initGradleProjectConnection() {
-        return initGradleConnection(project.getRootDir());
+        logger.debug("Gradle user home: " + project.gradle.gradleUserHomeDir)
+        return initGradleConnection(project.getRootDir(), project.gradle.gradleUserHomeDir);
     }
 
-    static ProjectConnection initGradleConnection(File rootDir) {
+    static ProjectConnection initGradleConnection(File rootDir, File gradleUserHomeDir) {
         ProjectConnection connection = GradleConnector.newConnector()
                 .forProjectDirectory(rootDir)
+                .useGradleUserHomeDir(gradleUserHomeDir)
                 .connect();
 
         return connection;
