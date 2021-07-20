@@ -40,6 +40,7 @@ import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.PluginScenarioException
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 import io.openliberty.tools.common.plugins.util.ServerStatusUtil
+import io.openliberty.tools.common.plugins.util.ProjectModule
 
 import java.util.concurrent.TimeUnit
 import java.util.Map.Entry
@@ -653,6 +654,12 @@ class DevTask extends AbstractServerTask {
             } finally {
                 gradleConnection.close();
             }
+        }
+
+        @Override
+        public boolean compile(File dir, ProjectModule project) {
+            // used for multi module scenario, not yet supported in ci.gradle
+            return false;
         }
 
         @Override
