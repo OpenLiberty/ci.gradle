@@ -24,18 +24,24 @@ import org.junit.Test
 import org.junit.runners.MethodSorters
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
-class PrepareFeatureTest extends AbstractIntegrationTest{
+class InstallUsrFeature_toExt extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/prepare-feature-test")
-    static File buildDir = new File(integTestDir, "/PrepareFeature_single")
+    static File buildDir = new File(integTestDir, "/InstallUsrFeature")
     static File resourceBom = new File(resourceDir, "features-bom-19.0.0.8.pom")
 	static File resourceEsa = new File(resourceDir, "testesa1-19.0.0.8.esa")
-	static File buildFilename = new File(resourceDir, "build.gradle")
+	static File resourceExtProp = new File(resourceDir, "testExt.properties")
+	static File buildFilename = new File(resourceDir, "build_wlp.gradle")
 	static File mavenLocalRepo = new File(System.getProperty("user.home")+ "/.m2/repository")
 	static File userTestRepo = new File(mavenLocalRepo, "test/user/test/features")
 	static File featuresBom = new File(userTestRepo, "features-bom/19.0.0.8/features-bom-19.0.0.8.pom")
 	static File testEsa = new File(userTestRepo, "testesa1/19.0.0.8/testesa1-19.0.0.8.esa")
+	static File extensionsDir = new File(buildDir, "build/wlp/etc/extensions/testExt.properties");
+	//User feature will be installed to "testExt" extension dir
+	static File extensionsInstallDir = new File(buildDir, "build/wlp/usr/cik/extensions/testExt");
 	
 	private static final String MIN_USER_FEATURE_VERSION = "21.0.0.10";
+	
+
 	
 	public static boolean deleteFolder(final File directory) {
 		if (directory.isDirectory()) {
@@ -77,41 +83,25 @@ class PrepareFeatureTest extends AbstractIntegrationTest{
         copySettingsFile(resourceDir, buildDir)
 		copyFile(resourceBom, featuresBom)
 		copyFile(resourceEsa, testEsa)
+		copyFile(resourceExtProp, extensionsDir)
     }
 
     @Test
-    public void test_prepareFeature() {
+    public void test_usrFeatureExt() {
         try {
-			def jsonFile = new File(userTestRepo, "features/19.0.0.8/features-19.0.0.8.json")
-			
-            runTasks(buildDir, 'prepareFeature')
-
-            assert jsonFile.exists() : "features.json cannot be generated"	
-            
-        } catch (Exception e) {
-            throw new AssertionError ("Fail on task prepareFeature. "+e)
-        }
-    }
-	
-	@Test
-	public void test_usrFeatureInstall() {
-		try {
-			def jsonFile = new File(userTestRepo, "features/19.0.0.8/features-19.0.0.8.json")
-			def file = new File(buildDir, "build/wlp/usr/extension/lib/features/testesa1.mf")
+			def file = new File(extensionsInstallDir, "lib/features/testesa1.mf")
 			
 			//installFeature will call prepareFeature when featuresBom is specified.
             runTasks(buildDir, 'installFeature')
-
-            assert jsonFile.exists() : "features.json cannot be generated"
 			
 			assert file.exists() : "testesa1.mf is not installed"
 			assert file.canRead() : "testesa1.mf cannot be read"
 			
-			deleteFolder(file)
+            
         } catch (Exception e) {
             throw new AssertionError ("Fail to install user feature. "+e)
         }
-	}
+    }
 	
 	
 	@AfterClass

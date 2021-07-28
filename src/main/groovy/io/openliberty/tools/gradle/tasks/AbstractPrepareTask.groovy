@@ -16,6 +16,7 @@
 package io.openliberty.tools.gradle.tasks
 
 import java.util.Set
+import org.apache.commons.io.FileUtils
 
 import org.gradle.api.artifacts.ResolveException
 import org.gradle.api.logging.LogLevel
@@ -86,9 +87,21 @@ public class AbstractPrepareTask extends AbstractServerTask {
             Set<File> files = new HashSet<File>()
             try {
                 config.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-                    File artifactFile = artifact.file
-                    files.add(artifactFile)
-                    debug(artifactFile.toString())
+					File artifactFile = artifact.file
+					if(artifactFile.absolutePath.contains(groupId)){
+						//loaded from remote repository
+						String mavenLocalRepo = System.getenv("FEATURE_LOCAL_REPO")
+						if(!mavenLocalRepo) {
+							mavenLocalRepo = new File(System.getProperty("user.home")+ "/.m2/repository")
+						}
+						groupId = groupId.replace(".", "/");
+						String artifactPath = String.format("%s/%s/%s/%s-%s.%s", groupId, artifactId, version, artifactId, version,type);
+						File artifactMavenLocal = new File(mavenLocalRepo + File.separator + artifactPath)
+						FileUtils.copyFile(artifactFile, artifactMavenLocal) //copy downloaded artifacts from gradle cache to maven local repo
+						files.add(artifactMavenLocal)
+					}else {
+						files.add(artifactFile)
+					}
                 }
             } catch (ResolveException e) {
                 throw new PluginExecutionException("Could not find artifact with coordinates " + coordinates)  

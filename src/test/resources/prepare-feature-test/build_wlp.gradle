@@ -15,13 +15,13 @@ buildscript {
 apply plugin: 'liberty'
 
 repositories {
-    mavenCentral()
-	mavenLocal() {
+	mavenLocal()     {
         metadataSources {
             mavenPom()
             artifact()
         }
     }
+    mavenCentral()
 }
 
 dependencies {
@@ -33,6 +33,7 @@ liberty {
         name = 'LibertyProjectServer'
         features {
             name = ["testesa1"]
+			to = 'testExt'
             acceptLicense = true
         }
     }
