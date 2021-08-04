@@ -281,14 +281,14 @@ class DevTask extends AbstractServerTask {
                     boolean  hotTests, boolean  skipTests, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
                     boolean libertyDebug, boolean pollingTest, boolean container, File dockerfile, File dockerBuildContext,
-                    String dockerRunOpts, int dockerBuildTimeout, boolean skipDefaultPorts, boolean keepTempDockerfile, String mavenCacheLocation
+                    String dockerRunOpts, int dockerBuildTimeout, boolean skipDefaultPorts, boolean keepTempDockerfile, String mavenCacheLocation, File buildFile
         ) throws IOException {
             super(buildDir, serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory, /* multi module project directory */ projectDirectory,
                     resourceDirs, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, dockerfile, dockerBuildContext, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts,
                     null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation, null /* multi module upstream projects */, 
-                    false /* recompileDependencies only currently supported in ci.maven */, getPackagingType()
+                    false /* recompileDependencies only supported in ci.maven */, getPackagingType(), buildFile, null /* parent build files */
                 );
 
             ServerFeature servUtil = getServerFeatureUtil();
@@ -395,15 +395,20 @@ class DevTask extends AbstractServerTask {
         }
 
         @Override
-        public boolean updateArtifactPaths(File buildFile, List<String> compileArtifactPaths,
-                List<String> testArtifactPaths,boolean redeployCheck, ThreadPoolExecutor executor)
+        public boolean updateArtifactPaths(ProjectModule projectModule, boolean redeployCheck, ThreadPoolExecutor executor)
                 throws PluginExecutionException {
             // not supported for Gradle, only used for multi module Maven projects
             return false;
         }
 
         @Override
-        public boolean recompileBuildFile(File buildFile, List<String> compileArtifactPaths, List<String> testArtifactPaths, ThreadPoolExecutor executor) {
+        public boolean updateArtifactPaths(File parentBuildFile) {
+            // not supported for Gradle, only used for multi module Maven projects
+            return false;
+        }
+
+        @Override
+        public boolean recompileBuildFile(File buildFile, Set<String> compileArtifactPaths, Set<String> testArtifactPaths, ThreadPoolExecutor executor) {
             boolean restartServer = false;
             boolean installFeatures = false;
 
@@ -934,12 +939,14 @@ class DevTask extends AbstractServerTask {
 
         String localMavenRepoForFeatureUtility = new File(new File(System.getProperty("user.home"), ".m2"), "repository");
 
+        File buildFile = project.getBuildFile();
+
         util = new DevTaskUtil(project.buildDir, serverInstallDir, getUserDir(project, serverInstallDir),
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
                 libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerBuildContext, dockerRunOpts, 
-                dockerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempDockerfile.booleanValue(), localMavenRepoForFeatureUtility
+                dockerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempDockerfile.booleanValue(), localMavenRepoForFeatureUtility, buildFile
         );
 
         util.addShutdownHook(executor);
@@ -951,7 +958,7 @@ class DevTask extends AbstractServerTask {
 
         util.startServer();
 
-        File buildFile = project.getBuildFile();
+       
         File serverXMLFile = server.serverXmlFile;
 
         if (hotTests && testSourceDirectory.exists()) {
@@ -967,7 +974,7 @@ class DevTask extends AbstractServerTask {
         // which is where the server.xml is located if a specific serverXmlFile
         // configuration parameter is not specified.
         try {
-            util.watchFiles(buildFile, outputDirectory, testOutputDirectory, executor, null, null, serverXMLFile,
+            util.watchFiles(outputDirectory, testOutputDirectory, executor, null, null, serverXMLFile,
                             project.liberty.server.bootstrapPropertiesFile, project.liberty.server.jvmOptionsFile);
         } catch (PluginScenarioException e) {
             if (e.getMessage() != null) {
