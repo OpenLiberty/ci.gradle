@@ -221,6 +221,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
 			} catch (Exception e) {
 				logger.error("Could not parse build.gradle " + e.getMessage());
 				logger.debug('Error parsing build.gradle', e);
+				return
 			}
 		}
 		createNewInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons)
