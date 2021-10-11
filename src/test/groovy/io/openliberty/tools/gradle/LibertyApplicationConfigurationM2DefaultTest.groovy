@@ -45,7 +45,7 @@ class LibertyApplicationConfigurationM2DefaultTest extends AbstractIntegrationTe
 
     @Test
     public void checkAppInstalled() {
-        assert new File(buildDir, 'build/wlp/usr/servers/defaultServer/apps/test-maven-war-1.0-SNAPSHOT.war').exists()
+        assert new File(buildDir, 'build/wlp/usr/servers/defaultServer/apps/test-maven-war.war').exists()
     }
 
 
