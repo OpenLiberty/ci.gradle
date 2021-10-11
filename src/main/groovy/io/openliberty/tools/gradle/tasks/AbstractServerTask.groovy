@@ -25,6 +25,8 @@ import org.apache.commons.io.FileUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.tasks.bundling.War
 import org.gradle.api.tasks.Internal
 import org.gradle.plugins.ear.Ear
@@ -982,12 +984,24 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
     protected List<File> getApplicationFilesFromConfiguration() {
         List<File> appFiles = new ArrayList<File>()
 
-        //This loops all the Dependency objects that get created by the configuration treating them as File objects
-        //Should also include transitive dependencies
-        //Can't use the resolved configuration unless we do a check separate from this one, not sure if there is an advantage since we want the applicaitons
-        project.configurations.libertyApp.each {
-            if (FilenameUtils.getExtension(it.name).equals('war') || FilenameUtils.getExtension(it.name).equals('ear')) {
-                appFiles.add(it)
+        //This loops thorugh all the Dependency objects that get created by the configuration
+        for (Dependency dep : project.configurations.libertyApp.getDependencies()) {
+            if (dep instanceof ModuleDependency) { //Check that dep isn't a File dependency
+                dep.setTransitive(false) //Only want main artifacts, one for Maven and one or more for Gradle/Ivy dependencies
+            }
+
+            Set<File> depArtifacts = project.configurations.libertyApp.files(dep) //Resolve the artifacts
+            for (File depArtifact : depArtifacts) {
+                File appFile = depArtifact
+                if (dep instanceof ModuleDependency && server.stripVersion && depArtifact.getName().contains(dep.getVersion())) {
+                    String noVersionName = depArtifact.getName().minus("-" + dep.getVersion()) //Assuming default Gradle naming scheme
+                    File noVersionDependencyFile = new File(project.getBuildDir(), 'libs/' + noVersionName) //Copying the file to build/libs with no version
+                    FileUtils.copyFile(depArtifact, noVersionDependencyFile)
+                    appFile = noVersionDependencyFile
+                }
+                if (FilenameUtils.getExtension(appFile.getName()).equals('war') || FilenameUtils.getExtension(appFile.getName()).equals('ear')) {
+                    appFiles.add(appFile)
+                }
             }
         }
 
