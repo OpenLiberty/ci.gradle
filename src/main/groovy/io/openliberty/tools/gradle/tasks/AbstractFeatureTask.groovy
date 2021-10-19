@@ -136,16 +136,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
     }
 
     protected Set<String> getSpecifiedFeatures(String containerName) throws PluginExecutionException {
-        if (util == null) {
-            def pluginListedEsas = getPluginListedFeatures(true)
-            def propertiesList = null;
-            def openLibertyVersion = null;
-            if (containerName == null) {
-                propertiesList = InstallFeatureUtil.loadProperties(getInstallDir(project))
-                openLibertyVersion = InstallFeatureUtil.getOpenLibertyVersion(propertiesList)
-            }
-            createNewInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVersion, containerName)
-        }
+        InstallFeatureUtil util = getInstallFeatureUtil(null, containerName);
         // if createNewInstallFeatureUtil failed to create a new InstallFeatureUtil instance, then features are installed via ant
         if(installFeaturesFromAnt) {
             Set<String> featuresInstalledFromAnt;
@@ -182,6 +173,23 @@ public class AbstractFeatureTask extends AbstractServerTask {
             logger.debug("Installing features from installUtility.")
             installFeaturesFromAnt = true
             return
+        }
+    }
+
+    protected InstallFeatureUtil getInstallFeatureUtil(Set<String> pluginListedEsas, String containerName) throws PluginExecutionException {
+        if (util == null) {
+            if (pluginListedEsas == null) {
+                pluginListedEsas = getPluginListedFeatures(true);
+            }
+            def propertiesList = null;
+            def openLibertyVersion = null;
+            if (containerName == null) {
+                propertiesList = InstallFeatureUtil.loadProperties(getInstallDir(project))
+                openLibertyVersion = InstallFeatureUtil.getOpenLibertyVersion(propertiesList)
+            }
+            return getInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVersion, containerName);
+        } else {
+            return util;
         }
     }
 

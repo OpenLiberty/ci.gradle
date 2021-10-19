@@ -288,7 +288,7 @@ class DevTask extends AbstractServerTask {
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, dockerfile, dockerBuildContext, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts,
                     null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation, null /* multi module upstream projects */, 
-                    false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, null /* parent build files */
+                    false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, null /* parent build files */, true /*generateFeatures*/
                 );
 
             ServerFeature servUtil = getServerFeatureUtil();
@@ -734,6 +734,21 @@ class DevTask extends AbstractServerTask {
         }
 
         @Override
+        public void libertyGenerateFeatures() {
+            ProjectConnection gradleConnection = initGradleProjectConnection();
+            BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+
+            try {
+                List<String> options = new ArrayList<String>();
+                runGenerateFeaturesTask(gradleBuildLauncher, options);
+            } catch (BuildException e) {
+                throw new PluginExecutionException(e);
+            } finally {
+                gradleConnection.close();
+            }
+        }
+
+        @Override
         public void libertyInstallFeature() {
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
@@ -801,6 +816,18 @@ class DevTask extends AbstractServerTask {
     public void runInstallFeatureTask(BuildLauncher gradleBuildLauncher, List<String> options) throws BuildException {
         String[] tasks = new String[options != null ? options.size() + 1 : 1];
         tasks[0] = 'installFeature';
+        if (options != null) {
+            for(int i = 0; i < options.size(); i++) {
+                tasks[i+1] = options.get(i);
+            }
+        }
+
+        runGradleTask(gradleBuildLauncher, tasks);
+    }
+
+    public void runGenerateFeaturesTask(BuildLauncher gradleBuildLauncher, List<String> options) throws BuildException {
+        String[] tasks = new String[options != null ? options.size() + 1 : 1];
+        tasks[0] = 'generateFeatures';
         if (options != null) {
             for(int i = 0; i < options.size(); i++) {
                 tasks[i+1] = options.get(i);

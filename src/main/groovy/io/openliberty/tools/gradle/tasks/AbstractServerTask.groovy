@@ -38,7 +38,7 @@ import org.apache.commons.io.FilenameUtils
 import org.apache.commons.io.filefilter.FileFilterUtils
 
 import io.openliberty.tools.ant.ServerTask
-import io.openliberty.tools.common.plugins.config.ServerConfigDropinXmlDocument;
+import io.openliberty.tools.common.plugins.config.ServerConfigXmlDocument;
 
 import java.util.ArrayList
 import java.util.List
@@ -926,7 +926,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
 
     private void writeConfigDropinsServerVariables(File file, Properties varProps, Properties varProjectProps, boolean isDefaultVar) throws IOException, TransformerException, ParserConfigurationException {
 
-        ServerConfigDropinXmlDocument configDocument = ServerConfigDropinXmlDocument.newInstance()
+        ServerConfigXmlDocument configDocument = ServerConfigXmlDocument.newInstance()
 
         configDocument.createComment(HEADER)
 
