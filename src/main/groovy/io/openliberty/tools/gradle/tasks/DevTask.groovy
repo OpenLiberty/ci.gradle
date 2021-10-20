@@ -79,6 +79,7 @@ class DevTask extends AbstractServerTask {
     private static final boolean DEFAULT_CONTAINER = false;
     private static final boolean DEFAULT_SKIP_DEFAULT_PORTS = false;
     private static final boolean DEFAULT_KEEP_TEMP_DOCKERFILE = false;
+    private static final boolean DEFAULT_GENERATE_FEATURES = true;
 
     protected final String CONTAINER_PROPERTY_ARG = '-P'+CONTAINER_PROPERTY+'=true';
 
@@ -249,6 +250,18 @@ class DevTask extends AbstractServerTask {
         this.keepTempDockerfile = keepTempDockerfile;
     }
 
+    private Boolean generateFeatures;
+
+    @Option(option = 'generateFeatures', description = 'If true, scan the application binary files to determine which Liberty features are used.')
+    void setGenerateFeatures(boolean generateFeatures) {
+        this.generateFeatures = generateFeatures;
+        logger.debug(" ")
+        logger.debug(" ")
+        logger.debug("setting generateFeatures to "+ generateFeatures)
+        logger.debug(" ")
+        logger.debug(" ")
+    }
+
     @Optional
     @Input
     Boolean clean;
@@ -281,14 +294,15 @@ class DevTask extends AbstractServerTask {
                     boolean  hotTests, boolean  skipTests, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
                     boolean libertyDebug, boolean pollingTest, boolean container, File dockerfile, File dockerBuildContext,
-                    String dockerRunOpts, int dockerBuildTimeout, boolean skipDefaultPorts, boolean keepTempDockerfile, String mavenCacheLocation, String packagingType, File buildFile
+                    String dockerRunOpts, int dockerBuildTimeout, boolean skipDefaultPorts, boolean keepTempDockerfile, 
+                    String mavenCacheLocation, String packagingType, File buildFile, boolean generateFeatures
         ) throws IOException {
             super(buildDir, serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory, /* multi module project directory */ projectDirectory,
                     resourceDirs, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, dockerfile, dockerBuildContext, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts,
                     null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation, null /* multi module upstream projects */, 
-                    false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, null /* parent build files */, true /*generateFeatures*/
+                    false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, null /* parent build files */, generateFeatures
                 );
 
             ServerFeature servUtil = getServerFeatureUtil();
@@ -884,6 +898,15 @@ class DevTask extends AbstractServerTask {
             pollingTest = DEFAULT_POLLING_TEST;
         }
 
+        if (generateFeatures == null) {
+            boolean buildGenerateFeatures = project.liberty.dev.generateFeatures; // get from build.gradle
+            if (buildGenerateFeatures == null) {
+                setGenerateFeatures(DEFAULT_GENERATE_FEATURES);
+            } else {
+                setGenerateFeatures(buildGenerateFeatures);
+            }
+
+        }
         processContainerParams();
     }
 
@@ -973,7 +996,8 @@ class DevTask extends AbstractServerTask {
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
                 libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerBuildContext, dockerRunOpts, 
-                dockerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempDockerfile.booleanValue(), localMavenRepoForFeatureUtility, getPackagingType(), buildFile
+                dockerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempDockerfile.booleanValue(), localMavenRepoForFeatureUtility, 
+                getPackagingType(), buildFile, generateFeatures.booleanValue()
         );
 
         util.addShutdownHook(executor);
