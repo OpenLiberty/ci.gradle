@@ -255,11 +255,6 @@ class DevTask extends AbstractServerTask {
     @Option(option = 'generateFeatures', description = 'If true, scan the application binary files to determine which Liberty features are used.')
     void setGenerateFeatures(boolean generateFeatures) {
         this.generateFeatures = generateFeatures;
-        logger.debug(" ")
-        logger.debug(" ")
-        logger.debug("setting generateFeatures to "+ generateFeatures)
-        logger.debug(" ")
-        logger.debug(" ")
     }
 
     @Optional
@@ -905,8 +900,8 @@ class DevTask extends AbstractServerTask {
             } else {
                 setGenerateFeatures(buildGenerateFeatures);
             }
-
         }
+
         processContainerParams();
     }
 
