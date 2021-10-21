@@ -24,5 +24,4 @@ class DevExtension {
     int dockerBuildTimeout
     boolean skipDefaultPorts = false
     boolean keepTempDockerfile = false
-    boolean generateFeatures = true
 }

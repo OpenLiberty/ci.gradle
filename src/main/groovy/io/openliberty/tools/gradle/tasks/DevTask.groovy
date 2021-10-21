@@ -252,7 +252,7 @@ class DevTask extends AbstractServerTask {
 
     private Boolean generateFeatures;
 
-    @Option(option = 'generateFeatures', description = 'If true, scan the application binary files to determine which Liberty features are used.')
+    @Option(option = 'generateFeatures', description = 'If true, scan the application binary files to determine which Liberty features should be used.')
     void setGenerateFeatures(boolean generateFeatures) {
         this.generateFeatures = generateFeatures;
     }
@@ -894,12 +894,7 @@ class DevTask extends AbstractServerTask {
         }
 
         if (generateFeatures == null) {
-            boolean buildGenerateFeatures = project.liberty.dev.generateFeatures; // get from build.gradle
-            if (buildGenerateFeatures == null) {
-                setGenerateFeatures(DEFAULT_GENERATE_FEATURES);
-            } else {
-                setGenerateFeatures(buildGenerateFeatures);
-            }
+            setGenerateFeatures(DEFAULT_GENERATE_FEATURES);
         }
 
         processContainerParams();

@@ -222,7 +222,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
     private String[] getClassesDirectories() {
         List<String> classesDirectories = new ArrayList<String>();
-        project.sourceSets.main.getOutput().getClassesDirs().each{classesDirectories.add(it.getAbsolutePath())}
+        project.sourceSets.main.getOutput().getClassesDirs().each {
+            classesDirectories.add( it.getAbsolutePath() );
+        }
         String[] result = new String[classesDirectories.size()];
         result = classesDirectories.toArray(result);
         return result;
