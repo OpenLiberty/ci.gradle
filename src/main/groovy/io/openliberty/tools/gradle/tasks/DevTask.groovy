@@ -288,7 +288,7 @@ class DevTask extends AbstractServerTask {
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, dockerfile, dockerBuildContext, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts,
                     null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation, null /* multi module upstream projects */, 
-                    false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, null /* parent build files */
+                    false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, null /* parent build files */, null /* compileArtifactPaths */, null /* testArtifactPaths */
                 );
 
             ServerFeature servUtil = getServerFeatureUtil();
@@ -796,6 +796,12 @@ class DevTask extends AbstractServerTask {
         public boolean isLooseApplication() {
             return server.looseApplication && DeployTask.isSupportedLooseAppType(getPackagingType());
         }
+
+        @Override
+        public boolean isClasspathResolved(File buildFile) {
+            /* not needed for Gradle */
+            return true;
+        }
     }
 
     public void runInstallFeatureTask(BuildLauncher gradleBuildLauncher, List<String> options) throws BuildException {
@@ -974,7 +980,7 @@ class DevTask extends AbstractServerTask {
         // which is where the server.xml is located if a specific serverXmlFile
         // configuration parameter is not specified.
         try {
-            util.watchFiles(outputDirectory, testOutputDirectory, executor, null, null, serverXMLFile,
+            util.watchFiles(outputDirectory, testOutputDirectory, executor, serverXMLFile,
                             project.liberty.server.bootstrapPropertiesFile, project.liberty.server.jvmOptionsFile);
         } catch (PluginScenarioException e) {
             if (e.getMessage() != null) {
