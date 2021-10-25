@@ -1,8 +1,13 @@
 ## libertyDev Task
 
-Start a Liberty server in dev mode. This task also invokes the `libertyCreate`, `installFeature`, and `deploy` tasks before starting the server. **Note:** This task is designed to be executed directly from the Gradle command line.
+Start a Liberty server in dev mode. This task also invokes the `libertyCreate`, `installFeature`, and `deploy` tasks before starting the server.
 
 To start the server in a container, see the [libertyDevc](#libertydevc-task-container-mode) section below. 
+
+**Notes:** 
+
+* This task is designed to be executed directly from the Gradle command line.
+* This task is not supported with Spring Boot applications.
 
 ### Console Actions
 
