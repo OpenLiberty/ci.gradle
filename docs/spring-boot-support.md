@@ -2,6 +2,8 @@
 
 The `liberty-gradle-plugin` provides support for Spring Boot applications, allowing you to thin out and install Spring Boot executable JARs to Open Liberty and WebSphere Liberty runtime versions 18.0.0.2 and above. You can [package executable JAR or WAR archives](https://docs.spring.io/spring-boot/docs/2.3.3.RELEASE/gradle-plugin/reference/html/#packaging-executable) using `spring-boot-dependencies`.
 
+**Limitations:** Spring Boot applications are not supported with `looseApplication=true` from the [Liberty extension properties](libertyExtensions.md#liberty-extension-properties). Since both `libertyDev` and `libertyDevc` tasks require `looseApplication=true`, Spring Boot applications are not supported with either of those tasks.
+
 ### Additional Parameters
 
 | Parameter | Description | Required |
