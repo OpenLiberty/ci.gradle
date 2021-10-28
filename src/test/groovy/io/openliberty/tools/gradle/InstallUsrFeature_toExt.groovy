@@ -39,7 +39,7 @@ class InstallUsrFeature_toExt extends AbstractIntegrationTest{
 	//User feature will be installed to "testExt" extension dir
 	static File extensionsInstallDir = new File(buildDir, "build/wlp/usr/cik/extensions/testExt");
 	
-	private static final String MIN_USER_FEATURE_VERSION = "21.0.0.10";
+	private static final String MIN_USER_FEATURE_VERSION = "21.0.0.11";
 	
 
 	

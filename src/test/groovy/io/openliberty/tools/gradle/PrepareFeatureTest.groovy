@@ -35,7 +35,7 @@ class PrepareFeatureTest extends AbstractIntegrationTest{
 	static File featuresBom = new File(userTestRepo, "features-bom/19.0.0.8/features-bom-19.0.0.8.pom")
 	static File testEsa = new File(userTestRepo, "testesa1/19.0.0.8/testesa1-19.0.0.8.esa")
 	
-	private static final String MIN_USER_FEATURE_VERSION = "21.0.0.10";
+	private static final String MIN_USER_FEATURE_VERSION = "21.0.0.11";
 	
 	public static boolean deleteFolder(final File directory) {
 		if (directory.isDirectory()) {
