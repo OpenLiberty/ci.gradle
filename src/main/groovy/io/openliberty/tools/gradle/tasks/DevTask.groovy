@@ -250,11 +250,14 @@ class DevTask extends AbstractServerTask {
         this.keepTempDockerfile = keepTempDockerfile;
     }
 
-    private Boolean generateFeatures;
+    @Optional
+    @Input
+    Boolean generateFeatures;
 
-    @Option(option = 'generateFeatures', description = 'If true, scan the application binary files to determine which Liberty features should be used.')
-    void setGenerateFeatures(boolean generateFeatures) {
-        this.generateFeatures = generateFeatures;
+    // Need to use a string value to allow someone to specify --generateFeatures=false
+    @Option(option = 'generateFeatures', description = 'If true, scan the application binary files to determine which Liberty features should be used. The default value is true.')
+    void setGenerateFeatures(String generateFeatures) {
+        this.generateFeatures = Boolean.parseBoolean(generateFeatures);
     }
 
     @Optional
@@ -900,7 +903,7 @@ class DevTask extends AbstractServerTask {
         }
 
         if (generateFeatures == null) {
-            setGenerateFeatures(DEFAULT_GENERATE_FEATURES);
+            generateFeatures = DEFAULT_GENERATE_FEATURES;
         }
 
         processContainerParams();
