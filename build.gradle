@@ -25,6 +25,7 @@ repositories {
 
 buildscript {
     repositories {
+        mavenLocal()
         maven {
             url "https://plugins.gradle.org/m2/"
         }
@@ -59,7 +60,7 @@ compileTestGroovy {
 }
 
 def libertyAntVersion = "1.9.8"
-def libertyCommonVersion = "1.8.17-SNAPSHOT"
+def libertyCommonVersion = "1.8.17"
 
 dependencies {
     implementation gradleApi()
