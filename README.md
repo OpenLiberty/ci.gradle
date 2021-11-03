@@ -101,6 +101,7 @@ The Liberty plugin provides the following tasks for your project:
 | [libertyStart](docs/libertyStart.md#libertystart-task) | Starts the Liberty server in a background process. |
 | [libertyStatus](docs/libertyStatus.md) | Checks to see if the Liberty server is running. |
 | [libertyStop](docs/libertyStop.md#libertystop-task) | Stops the Liberty server. |
+| [prepare-feature](docs/prepareFeature.md#prepareFeature-task) | Prepares a user feature installation onto Liberty runtime. |
 | [undeploy](docs/undeploy.md#undeploy-task) | Removes applications from the Liberty server. |
 | [uninstallFeature](docs/uninstallFeature.md#uninstallfeature-task) | Remove a feature from the Liberty runtime. |
 
