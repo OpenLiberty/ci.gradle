@@ -33,7 +33,7 @@ In Open Liberty and WebSphere Liberty runtime versions 21.0.0.11 and above, this
 
  ```
 
-2. Provide the maven coordinate of the custom made `features-bom` file:
+2. Provide the Maven coordinate of the custom made `features-bom` file:
  ```xml
 apply plugin: 'liberty'
 
