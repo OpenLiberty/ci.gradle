@@ -758,6 +758,24 @@ class DevTask extends AbstractServerTask {
         }
 
         @Override
+        public void libertyGenerateFeatures(Collection<String> classes) {
+            ProjectConnection gradleConnection = initGradleProjectConnection();
+            BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+
+            try {
+                List<String> options = new ArrayList<String>();
+                classes.each {
+                    options.add("--classFile="+it);
+                }
+                runGenerateFeaturesTask(gradleBuildLauncher, options);
+            } catch (BuildException e) {
+                throw new PluginExecutionException(e);
+            } finally {
+                gradleConnection.close();
+            }
+        }
+
+        @Override
         public void libertyInstallFeature() {
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
