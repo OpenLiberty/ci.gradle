@@ -54,6 +54,13 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 //        this.binaryScanner = jarFile;
 //    }
 
+    private List<String> classFiles;
+
+    @Option(option = 'classFile', description = 'If set, will generate features for the list of classes passed.')
+    void setClassFiles(List<String> classFiles) {
+        this.classFiles = classFiles;
+    }
+
     @TaskAction
     void generateFeatures() {
 
@@ -64,6 +71,10 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             logger.debug("Exception creating the server utility object", e);
             logger.error("Error attempting to generate server feature list.");
             return;
+        }
+
+        if (!classFiles.isEmpty()) {
+            logger.debug("Generate features for the following class files: " + classFiles);
         }
 
         util.setLowerCaseFeatures(false);
