@@ -157,7 +157,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         try {
             return ArtifactDownloadUtil.downloadArtifact(project, BINARY_SCANNER_MAVEN_GROUP_ID, BINARY_SCANNER_MAVEN_ARTIFACT_ID, BINARY_SCANNER_MAVEN_TYPE, BINARY_SCANNER_MAVEN_VERSION);
         } catch (Exception e) {
-            throw new PluginExecutionException("Could not retrieve the binary scanner jar. Ensure you have a connection to Maven Central or another repository that contains the jar", e);
+            throw new PluginExecutionException("Could not retrieve the binary scanner jar. Ensure you have a connection to Maven Central or another repository that contains the jar configured in your build.gradle: " + e.getMessage(), e);
         }
     }
 
