@@ -45,7 +45,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     private static final String BINARY_SCANNER_MAVEN_GROUP_ID = "com.ibm.websphere.appmod.tools";
     private static final String BINARY_SCANNER_MAVEN_ARTIFACT_ID = "binaryAppScanner";
     private static final String BINARY_SCANNER_MAVEN_TYPE = "jar";
-    private static final String BINARY_SCANNER_MAVEN_VERSION = "[0.0.1,)";
+    private static final String BINARY_SCANNER_MAVEN_VERSION = "latest.release";
 
     GenerateFeaturesTask() {
         configure({
