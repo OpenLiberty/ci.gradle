@@ -27,6 +27,7 @@ import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil.ProductProperties
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.PluginScenarioException
+import io.openliberty.tools.gradle.utils.ArtifactDownloadUtil
 
 public class AbstractFeatureTask extends AbstractServerTask {
 
@@ -90,25 +91,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
 
         @Override
         public File downloadArtifact(String groupId, String artifactId, String type, String version) throws PluginExecutionException {
-            String coordinates = groupId + ":" + artifactId + ":" + version + "@" + type
-            def dep = project.dependencies.create(coordinates)
-            def config = project.configurations.detachedConfiguration(dep)
-
-            Set<File> files = new HashSet<File>()
-            try {
-                config.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-                    File artifactFile = artifact.file
-                    files.add(artifactFile)
-                    debug(artifactFile.toString())
-                }
-            } catch (ResolveException e) {
-                throw new PluginExecutionException("Could not find artifact with coordinates " + coordinates, e)
-            }
-
-            if (!files) {
-                throw new PluginExecutionException("Could not find artifact with coordinates " + coordinates)
-            }
-            return files.iterator().next()
+            return ArtifactDownloadUtil.downloadArtifact(project, groupId, artifactId, type, version);
         }
     }
 
