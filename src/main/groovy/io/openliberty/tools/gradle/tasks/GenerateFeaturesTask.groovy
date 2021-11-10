@@ -83,13 +83,10 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             return;
         }
 
-        if (!classFiles.isEmpty()) {
+        if (classFiles != null && !classFiles.isEmpty()) {
             logger.debug("Generate features for the following class files: " + classFiles);
         }
 
-        util.setLowerCaseFeatures(false);
-        Set<String> visibleServerFeatures = util.getAllServerFeatures();
-        util.setLowerCaseFeatures(true);
         initializeConfigDirectory();
         logger.debug(" ");
         logger.debug(" ");
