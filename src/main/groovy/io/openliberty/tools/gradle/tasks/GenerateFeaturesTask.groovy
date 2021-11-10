@@ -74,26 +74,11 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             binaryScanner = getBinaryScannerJarFromRepository();
         }
 
-        InstallFeatureUtil util;
-        try {
-            util = getInstallFeatureUtil(new HashSet<String>(), null);
-        } catch (PluginScenarioException e) {
-            logger.debug("Exception creating the server utility object", e);
-            logger.error("Error attempting to generate server feature list.");
-            return;
-        }
-
         if (classFiles != null && !classFiles.isEmpty()) {
             logger.debug("Generate features for the following class files: " + classFiles);
         }
 
         initializeConfigDirectory();
-        logger.debug(" ");
-        logger.debug(" ");
-        logger.debug(" server.serverXmlFile="+server.serverXmlFile);
-        def serverDirectory = getServerDir(project);
-        def newServerXmlSrc = new File(server.configDirectory, PLUGIN_ADDED_FEATURES_FILE);
-        def newServerXmlTarget = new File(serverDirectory, PLUGIN_ADDED_FEATURES_FILE);
         def libertyDirPropertyFiles;
         try {
             libertyDirPropertyFiles = getLibertyDirectoryPropertyFiles(getInstallDir(project), getUserDir(project), serverDirectory);
@@ -103,19 +88,34 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             return;
         }
         // get existing installed server features
+        InstallFeatureUtil util;
+        try {
+            util = getInstallFeatureUtil(new HashSet<String>(), null);
+        } catch (PluginScenarioException e) {
+            logger.debug("Exception creating the server utility object", e);
+            logger.error("Error attempting to generate server feature list.");
+            return;
+        }
+
         util.setLowerCaseFeatures(false);
         Set<String> existingFeatures = util.getServerFeatures(serverDirectory, libertyDirPropertyFiles);
-        util.setLowerCaseFeatures(true);
         if (existingFeatures == null) {
             existingFeatures = new HashSet<String>();
         }
         logger.debug("Existing features:" + existingFeatures);
+        util.setLowerCaseFeatures(true);
+
         Set<String> scannedFeatureList = runBinaryScanner(existingFeatures);
         def missingLibertyFeatures = new HashSet<String>();
         if (scannedFeatureList != null) {
             missingLibertyFeatures.addAll(scannedFeatureList);
             missingLibertyFeatures.removeAll(existingFeatures);
         }
+        logger.debug("Features detected by binary scanner which are not in server.xml : " + missingLibertyFeatures);
+
+        def serverDirectory = getServerDir(project);
+        def newServerXmlSrc = new File(server.configDirectory, PLUGIN_ADDED_FEATURES_FILE);
+        def newServerXmlTarget = new File(serverDirectory, PLUGIN_ADDED_FEATURES_FILE);
         if (missingLibertyFeatures.size() > 0) {
             // Create specialized server.xml
             try {
@@ -126,6 +126,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                     configDocument.createFeature(missing);
                 }
                 configDocument.writeXMLDocument(newServerXmlSrc);
+                newServerXmlTarget.getParentFile().mkdirs();
                 Files.copy(newServerXmlSrc.toPath(), newServerXmlTarget.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                 logger.debug("Created file "+newServerXmlSrc);
                 // Add a reference to this new file in existing server.xml.
