@@ -79,6 +79,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         }
 
         initializeConfigDirectory();
+        def serverDirectory = getServerDir(project);
         def libertyDirPropertyFiles;
         try {
             libertyDirPropertyFiles = getLibertyDirectoryPropertyFiles(getInstallDir(project), getUserDir(project), serverDirectory);
@@ -113,7 +114,6 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         }
         logger.debug("Features detected by binary scanner which are not in server.xml : " + missingLibertyFeatures);
 
-        def serverDirectory = getServerDir(project);
         def newServerXmlSrc = new File(server.configDirectory, PLUGIN_ADDED_FEATURES_FILE);
         def newServerXmlTarget = new File(serverDirectory, PLUGIN_ADDED_FEATURES_FILE);
         if (missingLibertyFeatures.size() > 0) {
