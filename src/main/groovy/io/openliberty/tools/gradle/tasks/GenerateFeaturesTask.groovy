@@ -47,18 +47,13 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     private static final String BINARY_SCANNER_MAVEN_TYPE = "jar";
     private static final String BINARY_SCANNER_MAVEN_VERSION = "latest.release";
 
+    private File binaryScanner;
+
     GenerateFeaturesTask() {
         configure({
             description 'Generate the features used by an application and add to the configuration of a Liberty server'
             group 'Liberty'
         })
-    }
-
-    private File binaryScanner;
-
-    @Option(option = 'featureScannerJar', description = 'This parameter is intended for internal use only. If set, the jar file will be used to scan the application for Liberty features.')
-    void setBinaryScanner(File jarFile) {
-        this.binaryScanner = jarFile;
     }
 
     private List<String> classFiles;
@@ -70,9 +65,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
     @TaskAction
     void generateFeatures() {
-        if (binaryScanner == null) {
-            binaryScanner = getBinaryScannerJarFromRepository();
-        }
+        binaryScanner = getBinaryScannerJarFromRepository();
 
         if (classFiles != null && !classFiles.isEmpty()) {
             logger.debug("Generate features for the following class files: " + classFiles);
