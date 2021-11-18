@@ -45,4 +45,16 @@ class InstallLiberty_installDir_missing_wlp_Test extends AbstractIntegrationTest
         String output = result.getOutput()
         assert output.contains("path does not reference a wlp folder") : "Expected warning about installDir path not containing wlp"
     }
+
+    @Test
+    void test_installLiberty_installDir__cli_property() {
+        BuildResult result = GradleRunner.create()
+            .withProjectDir(buildDir)
+            .forwardOutput()
+            .withArguments('installLiberty', '-Pliberty.installDir=installDir-valid-install/build/wlp', '-i', '-s')
+            .build()
+
+        String output = result.getOutput()
+        assert output.contains("installDir project property detected")
+    }
 }

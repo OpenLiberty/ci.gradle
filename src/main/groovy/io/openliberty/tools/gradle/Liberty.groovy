@@ -170,7 +170,9 @@ class Liberty implements Plugin<Project> {
 
     private static File getInstallDir(Project project) {
         if (project.hasProperty('liberty.installDir')) {
-            return new File(project.getProperties().getByName('liberty.installDir'))
+            File installDirPropertyFile = new File(project.projectDir, project.getProperties().get('liberty.installDir'))
+            project.getLogger().info(MessageFormat.format("installDir project property detected. Using {0}.", installDirPropertyFile.getCanonicalPath()))
+            return installDirPropertyFile
         } else if (project.liberty.installDir == null) {
            if (project.liberty.baseDir == null) {
                return new File(project.buildDir, 'wlp')
