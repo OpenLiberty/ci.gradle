@@ -26,6 +26,8 @@ class InstallLiberty_installDir_missing_wlp_Test extends AbstractIntegrationTest
     static File resourceDir = new File("build/resources/test/install-dir-property-test/installDir-missing-wlp")
 
     static File buildDir = new File(integTestDir, "/InstallLiberty_installDir_missing_wlp")
+    static String expectedPropertyDir = new File(buildDir, 'installDir-valid-install/build/wlp').getCanonicalPath()
+
     static String buildFilename = "build.gradle"
 
     @BeforeClass
@@ -47,7 +49,7 @@ class InstallLiberty_installDir_missing_wlp_Test extends AbstractIntegrationTest
     }
 
     @Test
-    void test_installLiberty_installDir__cli_property() {
+    void test_installLiberty_installDir_cli_property_wlp() {
         BuildResult result = GradleRunner.create()
             .withProjectDir(buildDir)
             .forwardOutput()
@@ -55,6 +57,19 @@ class InstallLiberty_installDir_missing_wlp_Test extends AbstractIntegrationTest
             .build()
 
         String output = result.getOutput()
-        assert output.contains("installDir project property detected")
+        assert output.contains("installDir project property detected. Using $expectedPropertyDir")
+    }
+
+    @Test
+    void test_installLiberty_installDir_cli_property() {
+        BuildResult result = GradleRunner.create()
+            .withProjectDir(buildDir)
+            .forwardOutput()
+            .withArguments('installLiberty', '-Pliberty.installDir=installDir-valid-install/build', '-i', '-s')
+            .build()
+
+        String output = result.getOutput()
+        assert output.contains("installDir project property detected. Using $expectedPropertyDir".drop(4))
+        assert output.contains("Using path $expectedPropertyDir instead.")
     }
 }
