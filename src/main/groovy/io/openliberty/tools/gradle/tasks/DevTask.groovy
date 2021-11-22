@@ -798,6 +798,18 @@ class DevTask extends AbstractServerTask {
         }
 
         @Override
+        public File getLooseApplicationFile() {
+            configureApps(project)
+            String appsDir
+            if (server.deploy.apps != null && !server.deploy.apps.isEmpty()) {
+                appsDir = 'apps'
+            } else if (server.deploy.dropins != null && !server.deploy.dropins.isEmpty()) {
+                appsDir = 'dropins'
+            }
+            return getLooseAppConfigFile(container, appsDir);
+        }
+
+        @Override
         public boolean isClasspathResolved(File buildFile) {
             /* not needed for Gradle */
             return true;
