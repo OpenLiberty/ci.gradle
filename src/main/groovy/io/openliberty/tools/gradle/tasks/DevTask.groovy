@@ -44,6 +44,7 @@ import io.openliberty.tools.common.plugins.util.ProjectModule
 
 import java.util.concurrent.TimeUnit
 import java.util.Map.Entry
+import java.nio.file.Path;
 
 class DevTask extends AbstractServerTask {
 
@@ -288,7 +289,7 @@ class DevTask extends AbstractServerTask {
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, dockerfile, dockerBuildContext, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts,
                     null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation, null /* multi module upstream projects */, 
-                    false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, null /* parent build files */, null /* compileArtifactPaths */, null /* testArtifactPaths */
+                    false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, null /* parent build files */, null /* compileArtifactPaths */, null /* testArtifactPaths */, new ArrayList<Path>() /* webResources */
                 );
 
             ServerFeature servUtil = getServerFeatureUtil();
@@ -405,6 +406,26 @@ class DevTask extends AbstractServerTask {
         public boolean updateArtifactPaths(File parentBuildFile) {
             // not supported for Gradle, only used for multi module Maven projects
             return false;
+        }
+        
+        @Override
+        protected void updateLooseApp() throws PluginExecutionException {
+        	// not supported for Gradle, only used for exploded war Maven projects
+        }
+        
+        @Override
+        protected void resourceDirectoryCreated() throws IOException {
+            // Nothing to do
+        }
+
+        @Override
+        protected void resourceModifiedOrCreated(File fileChanged, File resourceParent, File outputDirectory) throws IOException {
+            copyFile(fileChanged, resourceParent, outputDirectory, null);
+        }
+
+        @Override
+        protected void resourceDeleted(File fileChanged, File resourceParent, File outputDirectory) throws IOException {
+            deleteFile(fileChanged, resourceParent, outputDirectory, null);
         }
 
         @Override
