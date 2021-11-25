@@ -299,6 +299,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                     String problemMessage = scannerException.getMessage();
                     if (problemMessage == null || problemMessage.isEmpty()) {
                         logger.debug("RuntimeException from binary scanner without descriptive message", scannerException);
+                        logger.error("Error scanning the application for Liberty features.");
                     } else {
                         Set<String> conflicts = parseScannerMessage(problemMessage);
                         Set<String> sampleFeatureList = null;
@@ -306,8 +307,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                             sampleFeatureList = runBinaryScanner(null, getBinaryInputs(null, getClassesDirectories()));
                         } catch (InvocationTargetException retryException) {
                             // binary scanner should not return a RuntimeException since there is no list of app features passed in
-                            sampleFeatureList = new HashSet<String>();
-                            sampleFeatureList.add(BINARY_SCANNER_CONFLICT_MESSAGE4);
+                            sampleFeatureList = getNoSampleFeatureList();
                         }
                         throw new RecommendationSetException(true, conflicts, sampleFeatureList);
                     }
@@ -326,6 +326,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                             } else {
                                 logger.debug("Unexpected failure on retry call to binary scanner", scannerSecondException);
                                 logger.debug("Passed directories to binary scanner:"+getClassesDirectories());
+                                sampleFeatureList = getNoSampleFeatureList();
                             }
                         }
                         throw new RecommendationSetException(false, conflicts, sampleFeatureList);
@@ -351,6 +352,12 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             }
         }
         return featureList;
+    }
+
+    private Set getNoSampleFeatureList() {
+        Set sampleFeatureList = new HashSet<String>();
+        sampleFeatureList.add(BINARY_SCANNER_CONFLICT_MESSAGE4)
+        return sampleFeatureList
     }
 
     private ClassLoader getScannerClassLoader() throws MalformedURLException {
