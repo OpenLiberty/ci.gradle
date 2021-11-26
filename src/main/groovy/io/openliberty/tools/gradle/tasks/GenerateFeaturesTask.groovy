@@ -15,6 +15,7 @@
  */
 package io.openliberty.tools.gradle.tasks
 
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.util.Set
 import java.net.URL;
@@ -251,9 +252,13 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             return;
         }
         try {
-            if (doc.findFMComment(FEATURES_FILE_MESSAGE) == null) {
-                doc.createFMComment(FEATURES_FILE_MESSAGE);
-                doc.writeXMLDocument(serverXml);    
+            if (doc.createFMComment(FEATURES_FILE_MESSAGE)) {
+                doc.writeXMLDocument(serverXml);
+                // look for "<?xml version="1.0" ... ?><server .../>" and add a newline
+                byte[] contents = Files.readAllBytes(serverXml.toPath());
+                String xmlContents = new String(contents, StandardCharsets.UTF_8);
+                xmlContents = xmlContents.replace("?><", "?>"+System.getProperty("line.separator")+"<");
+                Files.write(serverXml.toPath(), xmlContents.getBytes());
             }
         } catch (IOException | TransformerException e) {
             log.debug("Exception adding comment to server.xml", e);
