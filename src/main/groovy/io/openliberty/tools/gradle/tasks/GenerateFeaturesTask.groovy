@@ -33,6 +33,7 @@ import org.xml.sax.SAXException
 
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
 import io.openliberty.tools.common.plugins.config.ServerConfigXmlDocument
+import io.openliberty.tools.common.plugins.config.XmlDocument
 import io.openliberty.tools.common.plugins.util.DevUtil
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.PluginScenarioException
@@ -254,11 +255,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         try {
             if (doc.createFMComment(FEATURES_FILE_MESSAGE)) {
                 doc.writeXMLDocument(serverXml);
-                // look for "<?xml version="1.0" ... ?><server .../>" and add a newline
-                byte[] contents = Files.readAllBytes(serverXml.toPath());
-                String xmlContents = new String(contents, StandardCharsets.UTF_8);
-                xmlContents = xmlContents.replace("?><", "?>"+System.getProperty("line.separator")+"<");
-                Files.write(serverXml.toPath(), xmlContents.getBytes());
+                XmlDocument.addNewlineBeforeFirstElement(serverXml);
             }
         } catch (IOException | TransformerException e) {
             log.debug("Exception adding comment to server.xml", e);
