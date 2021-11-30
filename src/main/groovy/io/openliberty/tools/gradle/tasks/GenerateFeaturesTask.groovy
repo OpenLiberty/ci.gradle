@@ -15,10 +15,7 @@
  */
 package io.openliberty.tools.gradle.tasks
 
-import java.nio.file.Files
 import java.util.Set
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.xml.parsers.ParserConfigurationException
@@ -52,7 +49,6 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     private static final String BINARY_SCANNER_MAVEN_VERSION = "latest.release";
 
     private File binaryScanner;
-    private URLClassLoader binaryScannerClassLoader = null;
 
     GenerateFeaturesTask() {
         configure({
