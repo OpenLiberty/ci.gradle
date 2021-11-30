@@ -15,7 +15,6 @@
  */
 package io.openliberty.tools.gradle.tasks
 
-import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.util.Set
 import java.net.URL;
