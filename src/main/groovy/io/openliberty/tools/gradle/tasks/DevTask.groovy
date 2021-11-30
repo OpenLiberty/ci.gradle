@@ -808,12 +808,6 @@ class DevTask extends AbstractServerTask {
             }
             return getLooseAppConfigFile(container, appsDir);
         }
-
-        @Override
-        public boolean isClasspathResolved(File buildFile) {
-            /* not needed for Gradle */
-            return true;
-        }
     }
 
     public void runInstallFeatureTask(BuildLauncher gradleBuildLauncher, List<String> options) throws BuildException {
