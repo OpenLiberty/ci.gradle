@@ -323,7 +323,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         }
         @Override
         public void info(String msg) {
-            logger.info(msg);
+            logger.lifecycle(msg);
         }
     }
 }
