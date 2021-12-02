@@ -160,7 +160,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                 logger.debug("Xml document we'll try to update after generate features doc="+doc+" file="+serverXml);
                 addGenerationCommentToConfig(doc, serverXml);
 
-                logger.info("Generated the following additional features: " + missingLibertyFeatures);
+                logger.lifecycle("Generated the following features: " + missingLibertyFeatures); // use logger.lifecycle so that message appears without --info tag on
             } catch(ParserConfigurationException | TransformerException | IOException e) {
                 logger.debug("Exception creating the server features file", e);
                 logger.error("Error attempting to create the server feature file. Ensure your id has write permission to the server installation directory.");

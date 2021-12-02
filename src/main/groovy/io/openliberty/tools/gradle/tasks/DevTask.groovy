@@ -534,9 +534,9 @@ class DevTask extends AbstractFeatureTask {
                 }
 
             }
-            // TODO should we regenerate features here?
             if (restartServer) {
                 // - stop Server
+                // - generate features (if generateFeatures=true)
                 // - create server or runBoostMojo
                 // - install feature
                 // - deploy app
@@ -544,6 +544,11 @@ class DevTask extends AbstractFeatureTask {
                 util.restartServer();
                 return true;
             } else if (installFeatures) {
+                if (generateFeatures) {
+                    runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources'); // ensure class files exist
+                    libertyGenerateFeatures();
+                    libertyCreate(); // need to run create in order to copy generated config file to target
+                }
                 libertyInstallFeature();
             }
 
@@ -987,9 +992,12 @@ class DevTask extends AbstractFeatureTask {
                 :war
                 :deploy
              */
+            if (generateFeatures) {
+                runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources'); // ensure class files exist
+                runGenerateFeaturesTask(gradleBuildLauncher, null);
+            }
             if (!container) {
-                // TODO should generate features run here? If so should it run regardless of whether it is a container or not
-                addLibertyRuntimeProperties(gradleBuildLauncher);               
+                addLibertyRuntimeProperties(gradleBuildLauncher);
                 runGradleTask(gradleBuildLauncher, 'libertyCreate');
                 // suppress extra install feature warnings (one would have shown up already from the libertyCreate task on the line above)
                 gradleBuildLauncher.addArguments("-D" + DevUtil.SKIP_BETA_INSTALL_WARNING + "=" + Boolean.TRUE.toString());
