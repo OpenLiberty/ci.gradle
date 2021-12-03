@@ -185,14 +185,9 @@ public class AbstractFeatureTask extends AbstractServerTask {
         return featuresToInstall
     }
 
-    private void createNewServerFeatureUtil() {
-        servUtil = new ServerFeatureTaskUtil();
-        return;
-    }
-
     protected ServerFeatureUtil getServerFeatureUtil() {
         if (servUtil == null) {
-            createNewServerFeatureUtil();
+            servUtil = new ServerFeatureTaskUtil();
         }
         return servUtil;
     }
