@@ -15,26 +15,20 @@
  */
 package io.openliberty.tools.gradle.tasks
 
-import java.util.Set
-import java.lang.reflect.InvocationTargetException;
 
-import javax.xml.parsers.ParserConfigurationException
-import javax.xml.transform.TransformerException
-
-import org.gradle.api.artifacts.ResolveException
-import org.gradle.api.logging.LogLevel
+import io.openliberty.tools.common.plugins.config.ServerConfigXmlDocument
+import io.openliberty.tools.common.plugins.config.XmlDocument
+import io.openliberty.tools.common.plugins.util.BinaryScannerUtil
+import io.openliberty.tools.common.plugins.util.PluginExecutionException
+import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
+import io.openliberty.tools.gradle.utils.ArtifactDownloadUtil
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
 import org.xml.sax.SAXException
 
-import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
-import io.openliberty.tools.common.plugins.config.ServerConfigXmlDocument
-import io.openliberty.tools.common.plugins.config.XmlDocument
-import io.openliberty.tools.common.plugins.util.BinaryScannerUtil
-import io.openliberty.tools.common.plugins.util.DevUtil
-import io.openliberty.tools.common.plugins.util.PluginExecutionException
-import io.openliberty.tools.common.plugins.util.PluginScenarioException
-import io.openliberty.tools.gradle.utils.ArtifactDownloadUtil
+import javax.xml.parsers.ParserConfigurationException
+import javax.xml.transform.TransformerException
+import java.lang.reflect.InvocationTargetException
 
 class GenerateFeaturesTask extends AbstractFeatureTask {
 
@@ -76,7 +70,10 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         }
 
         initializeConfigDirectory();
-        def serverDirectory = getServerDir(project);
+
+        // TODO add support for env variables
+        // commented out for now as the current logic depends on the server dir existing and specifying features with env variables is an edge case
+        /* def serverDirectory = getServerDir(project);
         def libertyDirPropertyFiles;
         try {
             libertyDirPropertyFiles = getLibertyDirectoryPropertyFiles(getInstallDir(project), getUserDir(project), serverDirectory);
@@ -84,29 +81,23 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             logger.debug("Exception reading the server property files", e);
             logger.error("Error attempting to generate server feature list. Ensure your user account has read permission to the property files in the server installation directory.");
             return;
-        }
-        // get existing installed server features
-        InstallFeatureUtil util;
-        try {
-            util = getInstallFeatureUtil(new HashSet<String>(), null);
-        } catch (PluginScenarioException e) {
-            logger.debug("Exception creating the server utility object", e);
-            logger.error("Error attempting to generate server feature list.");
-            return;
-        }
+        } */
+
+        // get existing server features from source directory
+        ServerFeatureUtil servUtil = getServerFeatureUtil();
 
         final boolean optimize = (classFiles == null || classFiles.isEmpty()) ? true : false;
         Set<String> generatedFiles = new HashSet<String>();
-        generatedFiles.add(GENERATED_FEATURES_FILE_NAME);    
+        generatedFiles.add(GENERATED_FEATURES_FILE_NAME);
 
-        util.setLowerCaseFeatures(false);
+        servUtil.setLowerCaseFeatures(false);
         // if optimizing, ignore generated files when passing in existing features to binary scanner
-        Set<String> existingFeatures = util.getServerFeatures(serverDirectory, libertyDirPropertyFiles, optimize ? generatedFiles : null);
+        Set<String> existingFeatures = servUtil.getServerFeatures(server.configDirectory, server.serverXmlFile, new HashMap<String,File>(), optimize ? generatedFiles : null);
         if (existingFeatures == null) {
             existingFeatures = new HashSet<String>();
         }
         logger.debug("Existing features:" + existingFeatures);
-        util.setLowerCaseFeatures(true);
+        servUtil.setLowerCaseFeatures(true);
 
         Set<String> scannedFeatureList;
         try {
@@ -140,11 +131,11 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         if (scannedFeatureList != null) {
             missingLibertyFeatures.addAll(scannedFeatureList);
 
-            util.setLowerCaseFeatures(false);
+            servUtil.setLowerCaseFeatures(false);
             // get set of user defined features so they can be omitted from the generated file that will be written
-            Set<String> userDefinedFeatures = optimize ? existingFeatures : util.getServerFeatures(serverDirectory, libertyDirPropertyFiles, generatedFiles);
+            Set<String> userDefinedFeatures = optimize ? existingFeatures : servUtil.getServerFeatures(server.configDirectory, server.serverXmlFile, new HashMap<String,File>(), generatedFiles);
             logger.debug("User defined features:" + userDefinedFeatures);
-            util.setLowerCaseFeatures(true);
+            servUtil.setLowerCaseFeatures(true);
             if (userDefinedFeatures != null) {
                 missingLibertyFeatures.removeAll(userDefinedFeatures);
             }
@@ -169,7 +160,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                 logger.debug("Xml document we'll try to update after generate features doc="+doc+" file="+serverXml);
                 addGenerationCommentToConfig(doc, serverXml);
 
-                logger.info("Generated the following additional features: " + missingLibertyFeatures);
+                logger.lifecycle("Generated the following features: " + missingLibertyFeatures); // use logger.lifecycle so that message appears without --info tag on
             } catch(ParserConfigurationException | TransformerException | IOException e) {
                 logger.debug("Exception creating the server features file", e);
                 logger.error("Error attempting to create the server feature file. Ensure your id has write permission to the server installation directory.");

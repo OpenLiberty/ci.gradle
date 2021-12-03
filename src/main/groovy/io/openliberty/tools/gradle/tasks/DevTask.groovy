@@ -45,7 +45,7 @@ import io.openliberty.tools.common.plugins.util.ProjectModule
 import java.util.concurrent.TimeUnit
 import java.util.Map.Entry
 
-class DevTask extends AbstractServerTask {
+class DevTask extends AbstractFeatureTask {
 
     private static final String LIBERTY_HOSTNAME = "liberty.hostname";
     private static final String LIBERTY_HTTP_PORT = "liberty.http.port";
@@ -303,7 +303,7 @@ class DevTask extends AbstractServerTask {
                     false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, null /* parent build files */, generateFeatures, null /* compileArtifactPaths */, null /* testArtifactPaths */
                 );
 
-            ServerFeature servUtil = getServerFeatureUtil();
+            ServerFeatureUtil servUtil = getServerFeatureUtil();
             this.libertyDirPropertyFiles = AbstractServerTask.getLibertyDirectoryPropertyFiles(installDirectory, userDirectory, serverDirectory);
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory, libertyDirPropertyFiles);
 
@@ -534,9 +534,9 @@ class DevTask extends AbstractServerTask {
                 }
 
             }
-
             if (restartServer) {
                 // - stop Server
+                // - generate features (if generateFeatures=true)
                 // - create server or runBoostMojo
                 // - install feature
                 // - deploy app
@@ -544,6 +544,11 @@ class DevTask extends AbstractServerTask {
                 util.restartServer();
                 return true;
             } else if (installFeatures) {
+                if (generateFeatures) {
+                    runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources'); // ensure class files exist
+                    libertyGenerateFeatures();
+                    libertyCreate(); // need to run create in order to copy generated config file to target
+                }
                 libertyInstallFeature();
             }
 
@@ -611,7 +616,7 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void checkConfigFile(File configFile, File serverDir) {
-            ServerFeature servUtil = getServerFeatureUtil();
+            ServerFeatureUtil servUtil = getServerFeatureUtil();
             Set<String> features = servUtil.getServerFeatures(serverDir, libertyDirPropertyFiles);
 
             if (features == null) {
@@ -987,8 +992,12 @@ class DevTask extends AbstractServerTask {
                 :war
                 :deploy
              */
+            if (generateFeatures) {
+                runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources'); // ensure class files exist
+                runGenerateFeaturesTask(gradleBuildLauncher, null);
+            }
             if (!container) {
-                addLibertyRuntimeProperties(gradleBuildLauncher);               
+                addLibertyRuntimeProperties(gradleBuildLauncher);
                 runGradleTask(gradleBuildLauncher, 'libertyCreate');
                 // suppress extra install feature warnings (one would have shown up already from the libertyCreate task on the line above)
                 gradleBuildLauncher.addArguments("-D" + DevUtil.SKIP_BETA_INSTALL_WARNING + "=" + Boolean.TRUE.toString());
@@ -1155,46 +1164,4 @@ class DevTask extends AbstractServerTask {
         buildLauncher.run();
     }
 
-    private static ServerFeature serverFeatureUtil;
-
-    private ServerFeature getServerFeatureUtil() {
-        if (serverFeatureUtil == null) {
-            serverFeatureUtil = new ServerFeature();
-        }
-        return serverFeatureUtil;
-    }
-
-    private class ServerFeature extends ServerFeatureUtil {
-
-        @Override
-        public void debug(String msg) {
-            logger.debug(msg);
-        }
-
-        @Override
-        public void debug(String msg, Throwable e) {
-            logger.debug(msg, (Throwable) e);
-        }
-
-        @Override
-        public void debug(Throwable e) {
-            logger.debug("Exception received: "+e.getMessage(), (Throwable) e);
-        }
-
-        @Override
-        public void warn(String msg) {
-            logger.warn(msg);
-        }
-
-        @Override
-        public void info(String msg) {
-            logger.info(msg);
-        }
-
-        @Override
-        public void error(String msg, Throwable e) {
-            logger.error(msg, e);
-        }
-
-    }
 }

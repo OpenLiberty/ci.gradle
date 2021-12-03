@@ -1,19 +1,22 @@
 /**
-* (C) Copyright IBM Corporation 2021.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * (C) Copyright IBM Corporation 2021.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.openliberty.tools.gradle.tasks
+
+import com.ibm.wsspi.kernel.embeddable.Server
+import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 
 import java.util.Set
 
@@ -34,34 +37,69 @@ public class AbstractFeatureTask extends AbstractServerTask {
     // DevMode uses this option to provide the location of the
     // temporary serverDir it uses after a change to the server.xml
     private String serverDirectoryParam;
-    
+
     public boolean installFeaturesFromAnt;
 
     private InstallFeatureUtil util;
+
+    private ServerFeatureUtil servUtil;
 
     @Option(option = 'serverDir', description = '(Optional) Server directory to get the list of features from.')
     void setServerDirectoryParam(String serverDir) {
         this.serverDirectoryParam = serverDir;
     }
 
+    private class ServerFeatureTaskUtil extends ServerFeatureUtil {
+
+        @Override
+        void debug(String msg) {
+            logger.debug(msg);
+        }
+
+        @Override
+        void error(String msg, Throwable throwable) {
+            logger.error(msg, e);
+        }
+
+        @Override
+        void debug(String msg, Throwable throwable) {
+            logger.debug(msg, (Throwable) e);
+        }
+
+        @Override
+        void debug(Throwable throwable) {
+            logger.debug("Throwable exception received: " + e.getMessage(), (Throwable) e);
+        }
+
+        @Override
+        void warn(String msg) {
+            logger.warn(msg);
+        }
+
+        @Override
+        void info(String msg) {
+            logger.lifecycle(msg);
+        }
+    }
+
     private class InstallFeatureTaskUtil extends InstallFeatureUtil {
-        public InstallFeatureTaskUtil(File installDir, String from, String to, Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName)  throws PluginScenarioException, PluginExecutionException {
+        public InstallFeatureTaskUtil(File installDir, String from, String to, Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName) throws PluginScenarioException, PluginExecutionException {
             super(installDir, from, to, pluginListedEsas, propertiesList, openLibertyVerion, containerName)
         }
 
         @Override
         public void debug(String msg) {
-           logger.debug(msg)
+            logger.debug(msg)
         }
 
         @Override
         public void debug(String msg, Throwable e) {
-           logger.debug(msg, (Throwable) e)
+            logger.debug(msg, (Throwable) e)
         }
 
         @Override
         public void debug(Throwable e) {
-            logger.debug("Throwable exception received: "+e.getMessage(), (Throwable) e)
+            logger.debug("Throwable exception received: " + e.getMessage(), (Throwable) e)
         }
 
         @Override
@@ -121,18 +159,17 @@ public class AbstractFeatureTask extends AbstractServerTask {
     protected Set<String> getSpecifiedFeatures(String containerName) throws PluginExecutionException {
         InstallFeatureUtil util = getInstallFeatureUtil(null, containerName);
         // if createNewInstallFeatureUtil failed to create a new InstallFeatureUtil instance, then features are installed via ant
-        if(installFeaturesFromAnt) {
+        if (installFeaturesFromAnt) {
             Set<String> featuresInstalledFromAnt;
-            if(server.features.name != null) {
+            if (server.features.name != null) {
                 featuresInstalledFromAnt = new HashSet<String>(server.features.name);
                 return featuresInstalledFromAnt;
-            }
-            else {
+            } else {
                 featuresInstalledFromAnt = new HashSet<String>();
                 return featuresInstalledFromAnt;
             }
         }
-        
+
         def pluginListedFeatures = getPluginListedFeatures(false)
         def dependencyFeatures = getDependencyFeatures()
         def serverFeatures = null;
@@ -145,14 +182,21 @@ public class AbstractFeatureTask extends AbstractServerTask {
         }
 
         Set<String> featuresToInstall = InstallFeatureUtil.combineToSet(pluginListedFeatures, dependencyFeatures, serverFeatures)
-        return featuresToInstall 
+        return featuresToInstall
+    }
+
+    protected ServerFeatureUtil getServerFeatureUtil() {
+        if (servUtil == null) {
+            servUtil = new ServerFeatureTaskUtil();
+        }
+        return servUtil;
     }
 
     private void createNewInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName) throws PluginExecutionException {
         try {
             util = new InstallFeatureTaskUtil(getInstallDir(project), server.features.from, server.features.to, pluginListedEsas, propertiesList, openLibertyVerion, containerName)
         } catch (PluginScenarioException e) {
-            logger.debug("Exception received: "+e.getMessage(),(Throwable)e)
+            logger.debug("Exception received: " + e.getMessage(), (Throwable) e)
             logger.debug("Installing features from installUtility.")
             installFeaturesFromAnt = true
             return
@@ -180,5 +224,6 @@ public class AbstractFeatureTask extends AbstractServerTask {
         createNewInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVerion, containerName)
         return util
     }
+
 
 }
