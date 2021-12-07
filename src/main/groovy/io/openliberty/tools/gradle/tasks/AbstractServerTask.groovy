@@ -54,6 +54,7 @@ import java.util.regex.Matcher
 
 import javax.xml.transform.TransformerException
 import javax.xml.parsers.ParserConfigurationException
+import io.openliberty.tools.common.plugins.util.DevUtil;
 
 abstract class AbstractServerTask extends AbstractLibertyTask {
 
@@ -1082,6 +1083,22 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         }
 
         return new HashMap<String,File> ()
+    }
+
+    // Return the loose application configuration xml file
+    public File getLooseAppConfigFile(Boolean container, String appsDir){
+        String looseConfigFileName
+        Tuple applications = splitAppList(server.deploy.apps)
+            applications[0].each{ Task task ->
+              looseConfigFileName = getLooseConfigFileName(task)
+            }
+        if (container) {
+            File devcDestDir = new File(new File(project.buildDir, DevUtil.DEVC_HIDDEN_FOLDER), appsDir)
+            return (new File(devcDestDir, looseConfigFileName));
+        } else {
+            File destDir = new File(getServerDir(project), appsDir)
+            return (new File(destDir, looseConfigFileName));
+        }
     }
 
 }

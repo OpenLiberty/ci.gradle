@@ -1,0 +1,40 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+apply plugin: 'liberty'
+
+repositories {
+	mavenLocal()     {
+        metadataSources {
+            mavenPom()
+            artifact()
+        }
+    }
+    mavenCentral()
+}
+
+dependencies {
+    featuresBom 'test.user.test.features:features-bom:19.0.0.8'
+}
+
+liberty {
+    server{
+        name = 'LibertyProjectServer'
+        features {
+            name = ["testesa1"]
+			to = 'testExt'
+            acceptLicense = true
+        }
+    }
+}

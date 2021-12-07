@@ -25,6 +25,8 @@ import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
+import org.gradle.api.Project
+import org.gradle.testfixtures.ProjectBuilder
 
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil.ProductProperties
@@ -41,6 +43,8 @@ public class AbstractFeatureTask extends AbstractServerTask {
     public boolean installFeaturesFromAnt;
 
     private InstallFeatureUtil util;
+
+    Project newProject = project;
 
     private ServerFeatureUtil servUtil;
 
@@ -83,8 +87,8 @@ public class AbstractFeatureTask extends AbstractServerTask {
     }
 
     private class InstallFeatureTaskUtil extends InstallFeatureUtil {
-        public InstallFeatureTaskUtil(File installDir, String from, String to, Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName) throws PluginScenarioException, PluginExecutionException {
-            super(installDir, from, to, pluginListedEsas, propertiesList, openLibertyVerion, containerName)
+        public InstallFeatureTaskUtil(File installDir, String from, String to, Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons)  throws PluginScenarioException, PluginExecutionException {
+            super(installDir, from, to, pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons)
         }
 
         @Override
@@ -156,6 +160,16 @@ public class AbstractFeatureTask extends AbstractServerTask {
         return features
     }
 
+    protected List<String> getAdditionalJsonList() {
+        List<String> result = new ArrayList<String>()
+        project.configurations.featuresBom.dependencies.each { dep ->
+            def coordinate = dep.group + ":" + "features" + ":" + dep.version
+            logger.debug("feature Json: " + coordinate)
+            result.add(coordinate)
+        }
+        return result;
+    }
+
     protected Set<String> getSpecifiedFeatures(String containerName) throws PluginExecutionException {
         InstallFeatureUtil util = getInstallFeatureUtil(null, containerName);
         // if createNewInstallFeatureUtil failed to create a new InstallFeatureUtil instance, then features are installed via ant
@@ -192,9 +206,9 @@ public class AbstractFeatureTask extends AbstractServerTask {
         return servUtil;
     }
 
-    private void createNewInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName) throws PluginExecutionException {
+    private void createNewInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons) throws PluginExecutionException {
         try {
-            util = new InstallFeatureTaskUtil(getInstallDir(project), server.features.from, server.features.to, pluginListedEsas, propertiesList, openLibertyVerion, containerName)
+            util = new InstallFeatureTaskUtil(getInstallDir(project), server.features.from, server.features.to, pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons)
         } catch (PluginScenarioException e) {
             logger.debug("Exception received: " + e.getMessage(), (Throwable) e)
             logger.debug("Installing features from installUtility.")
@@ -214,14 +228,32 @@ public class AbstractFeatureTask extends AbstractServerTask {
                 propertiesList = InstallFeatureUtil.loadProperties(getInstallDir(project))
                 openLibertyVersion = InstallFeatureUtil.getOpenLibertyVersion(propertiesList)
             }
-            return getInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVersion, containerName);
+            def additionalJsons = getAdditionalJsonList()
+            createNewInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVersion, containerName, additionalJsons)
         } else {
             return util;
         }
     }
 
-    protected InstallFeatureUtil getInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName) throws PluginExecutionException {
-        createNewInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVerion, containerName)
+    protected InstallFeatureUtil getInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons) throws PluginExecutionException {
+        //if installing userFeature, recompile gradle to find mavenLocal artifacts created by prepareFeature task.
+        if (project.configurations.featuresBom.dependencies) {
+            try {
+                ProjectBuilder builder = ProjectBuilder.builder();
+                newProject = builder
+                        .withProjectDir(project.rootDir)
+                        .withGradleUserHomeDir(project.gradle.gradleUserHomeDir)
+                        .withName(project.name)
+                        .build();
+
+                // need this for gradle to evaluate the project
+                // and load the different plugins and extensions
+                newProject.evaluate();
+            } catch (Exception e) {
+                throw new PluginExecutionException("Could not parse build.gradle " + e.getMessage());
+            }
+        }
+        createNewInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons)
         return util
     }
 

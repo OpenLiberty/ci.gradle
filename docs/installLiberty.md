@@ -120,6 +120,18 @@ This will get version 19.0.0.11 of `com.ibm.websphere.appserver.runtime:wlp-webP
     }
   ```
 
+#### Override installDir 
+
+In gradle.properties:
+```
+liberty.installDir=<path to installed wlp>
+```
+
+From the command line:
+```
+gradle build -Pliberty.installDir=<path to installed wlp>
+```
+
 #### Using Maven artifact
 
 Use the [dependencies block](#dependencies) to specify the name of the repository artifact that contains your custom Liberty server or use one of the provided artifacts on [The Central Repository](http://search.maven.org/#search%7Cga%7C1%7Ccom.ibm.websphere.appserver.runtime).  
