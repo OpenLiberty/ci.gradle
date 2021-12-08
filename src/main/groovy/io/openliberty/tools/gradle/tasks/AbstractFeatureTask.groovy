@@ -22,6 +22,7 @@ import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
+import org.gradle.api.tasks.Input
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 
@@ -40,6 +41,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
 
     private InstallFeatureUtil util;
 	
+    @Internal
 	Project newProject = project;
 
     @Option(option = 'serverDir', description = '(Optional) Server directory to get the list of features from.')
@@ -98,6 +100,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
         public File downloadArtifact(String groupId, String artifactId, String type, String version) throws PluginExecutionException {
 			
 			String coordinates = groupId + ":" + artifactId + ":" + version + "@" + type
+
 			def dep = newProject.dependencies.create(coordinates)
 			def config = newProject.configurations.detachedConfiguration(dep)
 	
@@ -143,6 +146,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
         return features
     }
 	
+	@Internal
 	protected List<String> getAdditionalJsonList() {
 		List<String> result = new ArrayList<String>()
 		project.configurations.featuresBom.dependencies.each { dep ->
@@ -205,7 +209,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
     }
 
     protected InstallFeatureUtil getInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons) throws PluginExecutionException {
-		//if installing userFeature, recompile gradle to find mavenLocal artifacts created by prepareFeature task. 
+		//if installing userFeature, recompile gradle to find mavenLocal artifacts created by prepareFeature task.
 		if(project.configurations.featuresBom.dependencies) {  
 			try {
 				ProjectBuilder builder = ProjectBuilder.builder();
