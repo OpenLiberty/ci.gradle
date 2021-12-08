@@ -117,6 +117,7 @@ class DevTest extends AbstractIntegrationTest {
         if (params != null) {
             command.append(" " + params);
         }
+        command.append(" " + "--generateFeatures=false"); // TODO add feature generation tests
         System.out.println("Running command: " + command.toString());
         ProcessBuilder builder = buildProcess(command.toString());
 
@@ -246,7 +247,7 @@ class DevTest extends AbstractIntegrationTest {
 
     @Test
     public void manualTestsInvocationTest() throws Exception {
-        assertFalse(checkLogMessage(2000,  "To run tests on demand, press Enter."));
+//        assertFalse(checkLogMessage(2000,  "To run tests on demand, press Enter."));
 
         writer.write("\n");
         writer.flush();
