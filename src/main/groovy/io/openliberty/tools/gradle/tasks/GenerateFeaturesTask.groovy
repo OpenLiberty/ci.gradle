@@ -59,12 +59,13 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     void setClassFiles(List<String> classFiles) {
         this.classFiles = classFiles;
     }
-
+    
     private Boolean optimize = null;
 
-    @Option(option = 'optimize', description = 'Generate features based on all classes and only user specified features.')
-    void setOptimize(boolean optimize) {
-        this.optimize = optimize;
+    // Need to use a string value to allow the ability to specify a value for the parameter (ie. --optimize=false)
+    @Option(option = 'optimize', description = 'Optimize generating features by passing in all classes and only user specified features.')
+    void setOptimize(String optimize) {
+        this.optimize = Boolean.parseBoolean(optimize);
     }
 
     @TaskAction
@@ -94,11 +95,10 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
         // get existing server features from source directory
         ServerFeatureUtil servUtil = getServerFeatureUtil();
-
+        
         if (optimize == null) {
             optimize = DEFAULT_OPTIMIZE;
         }
-
         Set<String> generatedFiles = new HashSet<String>();
         generatedFiles.add(GENERATED_FEATURES_FILE_NAME);
 
