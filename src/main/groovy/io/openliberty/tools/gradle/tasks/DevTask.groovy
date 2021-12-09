@@ -546,6 +546,8 @@ class DevTask extends AbstractFeatureTask {
             } else if (installFeatures) {
                 if (generateFeatures) {
                     // Increment generate features on build dependency change
+                    ProjectConnection gradleConnection = initGradleProjectConnection();
+                    BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
                     runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources'); // ensure class files exist
                     Collection<String> javaSourceClassPaths = getJavaSourceClassPaths();
                     libertyGenerateFeatures(javaSourceClassPaths, false);
