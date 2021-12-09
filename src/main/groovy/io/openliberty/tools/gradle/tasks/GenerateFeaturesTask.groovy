@@ -42,6 +42,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     private static final String BINARY_SCANNER_MAVEN_TYPE = "jar";
     private static final String BINARY_SCANNER_MAVEN_VERSION = "latest.release";
 
+    private static final boolean DEFAULT_OPTIMIZE = true;
+
     private File binaryScanner;
 
     GenerateFeaturesTask() {
@@ -53,9 +55,16 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
     private List<String> classFiles;
 
-    @Option(option = 'classFile', description = 'If set, will generate features for the list of classes passed.')
+    @Option(option = 'classFile', description = 'If set and optimize is false, will generate features for the list of classes passed.')
     void setClassFiles(List<String> classFiles) {
         this.classFiles = classFiles;
+    }
+
+    private Boolean optimize = null;
+
+    @Option(option = 'optimize', description = 'Generate features based on all classes and only user specified features.')
+    void setOptimize(boolean optimize) {
+        this.optimize = optimize;
     }
 
     @TaskAction
@@ -86,7 +95,10 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         // get existing server features from source directory
         ServerFeatureUtil servUtil = getServerFeatureUtil();
 
-        final boolean optimize = (classFiles == null || classFiles.isEmpty()) ? true : false;
+        if (optimize == null) {
+            optimize = DEFAULT_OPTIMIZE;
+        }
+
         Set<String> generatedFiles = new HashSet<String>();
         generatedFiles.add(GENERATED_FEATURES_FILE_NAME);
 
@@ -104,7 +116,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             Set<String> directories = getClassesDirectories();
             String eeVersion = getEEVersion(project);
             String mpVersion = getMPVersion(project);
-            scannedFeatureList = binaryScannerHandler.runBinaryScanner(existingFeatures, classFiles, directories, eeVersion, mpVersion);
+            scannedFeatureList = binaryScannerHandler.runBinaryScanner(existingFeatures, classFiles, directories, eeVersion, mpVersion, optimize);
         } catch (BinaryScannerUtil.NoRecommendationException noRecommendation) {
             logger.error(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE3, noRecommendation.getConflicts()));
             return;
