@@ -59,7 +59,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     void setClassFiles(List<String> classFiles) {
         this.classFiles = classFiles;
     }
-    
+
     private Boolean optimize = null;
 
     // Need to use a string value to allow the ability to specify a value for the parameter (ie. --optimize=false)
@@ -73,10 +73,14 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         binaryScanner = getBinaryScannerJarFromRepository();
         BinaryScannerHandler binaryScannerHandler = new BinaryScannerHandler(binaryScanner);
 
+        if (optimize == null) {
+            optimize = DEFAULT_OPTIMIZE;
+        }
+
+        logger.debug("--- Generate Features values ---");
+        logger.debug("optimize generate features: " + optimize);
         if (classFiles != null && !classFiles.isEmpty()) {
             logger.debug("Generate features for the following class files: " + classFiles);
-        } else {
-            logger.debug("Generate features for all class files");
         }
 
         initializeConfigDirectory();
@@ -96,9 +100,6 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         // get existing server features from source directory
         ServerFeatureUtil servUtil = getServerFeatureUtil();
         
-        if (optimize == null) {
-            optimize = DEFAULT_OPTIMIZE;
-        }
         Set<String> generatedFiles = new HashSet<String>();
         generatedFiles.add(GENERATED_FEATURES_FILE_NAME);
 
