@@ -26,6 +26,18 @@ public class ArtifactDownloadUtil {
         def dep = project.dependencies.create(coordinates)
         def config = project.configurations.detachedConfiguration(dep)
 
+        return downloadFile(project, config, coordinates)
+    }
+
+    public static File downloadBuildArtifact(Project project, String groupId, String artifactId, String type, String version) throws PluginExecutionException {
+        String coordinates = groupId + ":" + artifactId + ":" + version + "@" + type
+        def dep = project.buildscript.dependencies.create(coordinates)
+        def config = project.buildscript.configurations.detachedConfiguration(dep)
+
+        return downloadFile(project, config, coordinates)
+    }
+
+    private static File downloadFile(project, config, coordinates) {
         Set<File> files = new HashSet<File>()
         try {
             config.resolvedConfiguration.resolvedArtifacts.each { artifact ->
@@ -42,5 +54,4 @@ public class ArtifactDownloadUtil {
         }
         return files.iterator().next()
     }
-
 }
