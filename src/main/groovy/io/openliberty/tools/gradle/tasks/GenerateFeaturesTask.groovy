@@ -45,6 +45,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     private static final String BINARY_SCANNER_MAVEN_TYPE = "jar";
     private static final String BINARY_SCANNER_MAVEN_VERSION = "[21.0.0.4-SNAPSHOT,)";
 
+    private static final boolean DEFAULT_OPTIMIZE = true;
+
     private File binaryScanner;
 
     GenerateFeaturesTask() {
@@ -56,9 +58,17 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
     private List<String> classFiles;
 
-    @Option(option = 'classFile', description = 'If set, will generate features for the list of classes passed.')
+    @Option(option = 'classFile', description = 'If set and optimize is false, will generate features for the list of classes passed.')
     void setClassFiles(List<String> classFiles) {
         this.classFiles = classFiles;
+    }
+
+    private Boolean optimize = null;
+
+    // Need to use a string value to allow the ability to specify a value for the parameter (ie. --optimize=false)
+    @Option(option = 'optimize', description = 'Optimize generating features by passing in all classes and only user specified features.')
+    void setOptimize(String optimize) {
+        this.optimize = Boolean.parseBoolean(optimize);
     }
 
     @TaskAction
@@ -66,10 +76,14 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         binaryScanner = getBinaryScannerJarFromRepository();
         BinaryScannerHandler binaryScannerHandler = new BinaryScannerHandler(binaryScanner);
 
+        if (optimize == null) {
+            optimize = DEFAULT_OPTIMIZE;
+        }
+
+        logger.debug("--- Generate Features values ---");
+        logger.debug("optimize generate features: " + optimize);
         if (classFiles != null && !classFiles.isEmpty()) {
             logger.debug("Generate features for the following class files: " + classFiles);
-        } else {
-            logger.debug("Generate features for all class files");
         }
 
         initializeConfigDirectory();
@@ -88,8 +102,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
         // get existing server features from source directory
         ServerFeatureUtil servUtil = getServerFeatureUtil();
-
-        final boolean optimize = (classFiles == null || classFiles.isEmpty()) ? true : false;
+        
         Set<String> generatedFiles = new HashSet<String>();
         generatedFiles.add(GENERATED_FEATURES_FILE_NAME);
 
@@ -107,7 +120,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             Set<String> directories = getClassesDirectories();
             String eeVersion = getEEVersion(project);
             String mpVersion = getMPVersion(project);
-            scannedFeatureList = binaryScannerHandler.runBinaryScanner(existingFeatures, classFiles, directories, eeVersion, mpVersion);
+            scannedFeatureList = binaryScannerHandler.runBinaryScanner(existingFeatures, classFiles, directories, eeVersion, mpVersion, optimize);
         } catch (BinaryScannerUtil.NoRecommendationException noRecommendation) {
             logger.error(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE3, noRecommendation.getConflicts()));
             return;
