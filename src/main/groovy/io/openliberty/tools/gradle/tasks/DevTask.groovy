@@ -767,7 +767,8 @@ class DevTask extends AbstractFeatureTask {
                 options.add("--optimize="+optimize);
                 runGenerateFeaturesTask(gradleBuildLauncher, options);
             } catch (BuildException e) {
-                throw new PluginExecutionException(e);
+                // log as error instead of throwing an exception so we do not flood console with stacktrace
+                logger.error(e.getMessage() + ".\n To disable the automatic generation of features, type 'g' and press Enter.");
             } finally {
                 gradleConnection.close();
             }
@@ -991,7 +992,12 @@ class DevTask extends AbstractFeatureTask {
             if (generateFeatures) {
                 // Optimize generate features on startup
                 runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources'); // ensure class files exist
-                runGenerateFeaturesTask(gradleBuildLauncher, true);
+                try {
+                    runGenerateFeaturesTask(gradleBuildLauncher, true);
+                } catch (BuildException e) {
+                    logger.error("To disable the automatic generation of features, start dev mode with --generateFeatures=false.");
+                    throw e;
+                }
             }
             if (!container) {
                 addLibertyRuntimeProperties(gradleBuildLauncher);
