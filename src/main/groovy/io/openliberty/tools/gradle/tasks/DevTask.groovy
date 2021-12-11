@@ -995,8 +995,7 @@ class DevTask extends AbstractFeatureTask {
                 try {
                     runGenerateFeaturesTask(gradleBuildLauncher, true);
                 } catch (BuildException e) {
-                    logger.error("To disable the automatic generation of features, start dev mode with --generateFeatures=false.");
-                    throw e;
+                    throw new BuildException(e.getCause().getMessage() + " To disable the automatic generation of features, start dev mode with --generateFeatures=false.", e);
                 }
             }
             if (!container) {
