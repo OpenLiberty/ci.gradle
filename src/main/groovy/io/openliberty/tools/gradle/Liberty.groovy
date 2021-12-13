@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2020.
+ * (C) Copyright IBM Corporation 2014, 2021.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ class Liberty implements Plugin<Project> {
         project.configurations.create('libertyLicense')
         project.configurations.create('libertyRuntime')
         project.configurations.create('libertyFeature')
+		project.configurations.create('featuresBom')
         project.configurations.create('libertyApp')
         if (project.configurations.find { it.name == 'compileOnly' }) {
             project.configurations.libertyFeature.extendsFrom(project.configurations.compileOnly)
@@ -168,27 +169,28 @@ class Liberty implements Plugin<Project> {
     }
 
     private static File getInstallDir(Project project) {
-        if (project.liberty.installDir == null) {
-           if (project.liberty.baseDir == null) {
-               return new File(project.buildDir, 'wlp')
-           } else {
-               return new File(project.liberty.baseDir, 'wlp')
-           }
+        if (project.hasProperty('liberty.installDir')) {
+            File installDir = checkAndAppendWlp(project, new File(project.projectDir, project.getProperties().get('liberty.installDir')))
+            project.getLogger().info("installDir project property detected. Using ${installDir.getCanonicalPath()}.")
+            return installDir
+        } else if (project.liberty.installDir == null) {
+            if (project.liberty.baseDir == null) {
+                return new File(project.buildDir, 'wlp')
+            } else {
+                return new File(project.liberty.baseDir, 'wlp')
+            }
         } else { // installDir is specified
-            String installDirPath = checkAndAppendWlp(project)
-            File installDir = new File(installDirPath)
-
-            return installDir;
+            return checkAndAppendWlp(project, new File(project.liberty.installDir));
         }
     }
 
-    private static String checkAndAppendWlp(Project project) {
-        String installDir = project.liberty.installDir
-        if (installDir.endsWith("wlp")) {
+    private static File checkAndAppendWlp(Project project, File installDir) {        
+        if (installDir.toString().endsWith("wlp")) {
             return installDir
         } else { // not valid wlp dir
             project.getLogger().warn(MessageFormat.format("The installDir {0} path does not reference a wlp folder. Using path {0}/wlp instead.", installDir))
-            return new File(installDir, 'wlp').toString()
+            return new File(installDir, 'wlp')
         }
     }
+
 }

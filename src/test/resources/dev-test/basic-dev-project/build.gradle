@@ -6,7 +6,11 @@ targetCompatibility = 1.8
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
 }
-
+repositories {
+    maven {
+        url "https://oss.sonatype.org/content/repositories"
+    }
+}
 // configure liberty-gradle-plugin 
 buildscript {
     repositories {

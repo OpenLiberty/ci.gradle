@@ -44,6 +44,7 @@ import io.openliberty.tools.common.plugins.util.ProjectModule
 
 import java.util.concurrent.TimeUnit
 import java.util.Map.Entry
+import java.nio.file.Path;
 
 class DevTask extends AbstractFeatureTask {
 
@@ -299,8 +300,8 @@ class DevTask extends AbstractFeatureTask {
                     resourceDirs, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, dockerfile, dockerBuildContext, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts,
-                    null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation, null /* multi module upstream projects */, 
-                    false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, null /* parent build files */, generateFeatures, null /* compileArtifactPaths */, null /* testArtifactPaths */
+                    null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation, null /* multi module upstream projects */,
+                    false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, null /* parent build files */, generateFeatures, null /* compileArtifactPaths */, null /* testArtifactPaths */, new ArrayList<Path>() /* webResources */
                 );
 
             ServerFeatureUtil servUtil = getServerFeatureUtil();
@@ -417,6 +418,26 @@ class DevTask extends AbstractFeatureTask {
         public boolean updateArtifactPaths(File parentBuildFile) {
             // not supported for Gradle, only used for multi module Maven projects
             return false;
+        }
+        
+        @Override
+        protected void updateLooseApp() throws PluginExecutionException {
+        	// not supported for Gradle, only used for exploded war Maven projects
+        }
+        
+        @Override
+        protected void resourceDirectoryCreated() throws IOException {
+            // Nothing to do
+        }
+
+        @Override
+        protected void resourceModifiedOrCreated(File fileChanged, File resourceParent, File outputDirectory) throws IOException {
+            copyFile(fileChanged, resourceParent, outputDirectory, null);
+        }
+
+        @Override
+        protected void resourceDeleted(File fileChanged, File resourceParent, File outputDirectory) throws IOException {
+            deleteFile(fileChanged, resourceParent, outputDirectory, null);
         }
 
         @Override
@@ -839,9 +860,15 @@ class DevTask extends AbstractFeatureTask {
         }
 
         @Override
-        public boolean isClasspathResolved(File buildFile) {
-            /* not needed for Gradle */
-            return true;
+        public File getLooseApplicationFile() {
+            configureApps(project)
+            String appsDir
+            if (server.deploy.apps != null && !server.deploy.apps.isEmpty()) {
+                appsDir = 'apps'
+            } else if (server.deploy.dropins != null && !server.deploy.dropins.isEmpty()) {
+                appsDir = 'dropins'
+            }
+            return getLooseAppConfigFile(container, appsDir);
         }
     }
 
