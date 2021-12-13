@@ -22,6 +22,7 @@ import org.gradle.api.artifacts.ResolveException
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
+import org.gradle.api.tasks.Internal
 
 import io.openliberty.tools.common.plugins.util.PrepareFeatureUtil
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
@@ -114,6 +115,7 @@ public class AbstractPrepareTask extends AbstractServerTask {
         }
     }
 	
+	@Internal
 	protected List<String> getDependencyBoms() {
 		List<String> result = new ArrayList<String>()
 		project.configurations.featuresBom.dependencies.each { dep ->

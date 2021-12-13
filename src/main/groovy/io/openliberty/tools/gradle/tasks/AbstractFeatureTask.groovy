@@ -25,6 +25,7 @@ import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
+import org.gradle.api.tasks.Input
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 
@@ -44,6 +45,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
 
     private InstallFeatureUtil util;
 
+    @Internal
     Project newProject = project;
 
     private ServerFeatureUtil servUtil;
@@ -160,6 +162,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
         return features
     }
 
+    @Internal
     protected List<String> getAdditionalJsonList() {
         List<String> result = new ArrayList<String>()
         project.configurations.featuresBom.dependencies.each { dep ->
