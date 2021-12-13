@@ -566,8 +566,12 @@ class DevTask extends AbstractFeatureTask {
                 return true;
             } else if (installFeatures) {
                 if (generateFeatures) {
+                    // Increment generate features on build dependency change
+                    ProjectConnection gradleConnection = initGradleProjectConnection();
+                    BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
                     runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources'); // ensure class files exist
-                    libertyGenerateFeatures();
+                    Collection<String> javaSourceClassPaths = getJavaSourceClassPaths();
+                    libertyGenerateFeatures(javaSourceClassPaths, false);
                     libertyCreate(); // need to run create in order to copy generated config file to target
                 }
                 libertyInstallFeature();
@@ -772,22 +776,7 @@ class DevTask extends AbstractFeatureTask {
         }
 
         @Override
-        public void libertyGenerateFeatures() {
-            ProjectConnection gradleConnection = initGradleProjectConnection();
-            BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
-
-            try {
-                List<String> options = new ArrayList<String>();
-                runGenerateFeaturesTask(gradleBuildLauncher, options);
-            } catch (BuildException e) {
-                throw new PluginExecutionException(e);
-            } finally {
-                gradleConnection.close();
-            }
-        }
-
-        @Override
-        public void libertyGenerateFeatures(Collection<String> classes) {
+        public void libertyGenerateFeatures(Collection<String> classes, boolean optimize) {
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
@@ -796,9 +785,11 @@ class DevTask extends AbstractFeatureTask {
                 classes.each {
                     options.add("--classFile="+it);
                 }
+                options.add("--optimize="+optimize);
                 runGenerateFeaturesTask(gradleBuildLauncher, options);
             } catch (BuildException e) {
-                throw new PluginExecutionException(e);
+                // log as error instead of throwing an exception so we do not flood console with stacktrace
+                logger.error(e.getMessage() + ".\n To disable the automatic generation of features, type 'g' and press Enter.");
             } finally {
                 gradleConnection.close();
             }
@@ -891,6 +882,12 @@ class DevTask extends AbstractFeatureTask {
         }
 
         runGradleTask(gradleBuildLauncher, tasks);
+    }
+
+    public void runGenerateFeaturesTask(BuildLauncher gradleBuildLauncher, boolean optimize) throws BuildException {
+        List<String> options = new ArrayList<String>();
+        options.add("--optimize="+optimize);
+        runGenerateFeaturesTask(gradleBuildLauncher, options);
     }
 
     public void runGenerateFeaturesTask(BuildLauncher gradleBuildLauncher, List<String> options) throws BuildException {
@@ -1020,8 +1017,13 @@ class DevTask extends AbstractFeatureTask {
                 :deploy
              */
             if (generateFeatures) {
+                // Optimize generate features on startup
                 runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources'); // ensure class files exist
-                runGenerateFeaturesTask(gradleBuildLauncher, null);
+                try {
+                    runGenerateFeaturesTask(gradleBuildLauncher, true);
+                } catch (BuildException e) {
+                    throw new BuildException(e.getCause().getMessage() + " To disable the automatic generation of features, start dev mode with --generateFeatures=false.", e);
+                }
             }
             if (!container) {
                 addLibertyRuntimeProperties(gradleBuildLauncher);
