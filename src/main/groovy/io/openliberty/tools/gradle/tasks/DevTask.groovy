@@ -776,20 +776,23 @@ class DevTask extends AbstractFeatureTask {
         }
 
         @Override
-        public void libertyGenerateFeatures(Collection<String> classes, boolean optimize) {
+        public boolean libertyGenerateFeatures(Collection<String> classes, boolean optimize) {
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
             try {
                 List<String> options = new ArrayList<String>();
                 classes.each {
-                    options.add("--classFile="+it);
+                    // generate features for only the classFiles passed (if any)
+                    options.add("--classFile=" + it);
                 }
-                options.add("--optimize="+optimize);
+                options.add("--optimize=" + optimize);
                 runGenerateFeaturesTask(gradleBuildLauncher, options);
+                return true; // successfully generated features
             } catch (BuildException e) {
                 // log as error instead of throwing an exception so we do not flood console with stacktrace
                 logger.error(e.getMessage() + ".\n To disable the automatic generation of features, type 'g' and press Enter.");
+                return false;
             } finally {
                 gradleConnection.close();
             }
