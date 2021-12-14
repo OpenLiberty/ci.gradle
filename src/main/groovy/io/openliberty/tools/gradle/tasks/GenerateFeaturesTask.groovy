@@ -129,14 +129,14 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                 throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE2, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
             }
             throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE1, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
-        } catch (InvocationTargetException x) {
+        } catch (InvocationTargetException | PluginExecutionException x) {
             // throw an error when there is a problem not caught in runBinaryScanner()
             Object o = x.getCause();
             if (o != null) {
                 logger.debug("Caused by exception:" + x.getCause().getClass().getName());
                 logger.debug("Caused by exception message:" + x.getCause().getMessage());
             }
-            throw new GradleException("Failed to generate a working set of features.", x);
+            throw new GradleException("Failed to generate a working set of features. " + x.getMessage(), x);
         }
 
         def missingLibertyFeatures = new HashSet<String>();
