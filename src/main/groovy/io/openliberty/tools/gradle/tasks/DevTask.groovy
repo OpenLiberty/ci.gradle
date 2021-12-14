@@ -255,7 +255,7 @@ class DevTask extends AbstractFeatureTask {
     @Input
     Boolean generateFeatures;
 
-    // Need to use a string value to allow someone to specify --generateFeatures=false
+    // Need to use a string value to allow someone to specify --generateFeatures=false, if not explicitly set defaults to true
     @Option(option = 'generateFeatures', description = 'If true, scan the application binary files to determine which Liberty features should be used. The default value is true.')
     void setGenerateFeatures(String generateFeatures) {
         this.generateFeatures = Boolean.parseBoolean(generateFeatures);
