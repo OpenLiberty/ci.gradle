@@ -15,25 +15,18 @@
  */
 package io.openliberty.tools.gradle.tasks
 
-import com.ibm.wsspi.kernel.embeddable.Server
-import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
-
-import java.util.Set
-
-import org.gradle.api.artifacts.ResolveException
-import org.gradle.api.logging.LogLevel
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.options.Option
-import org.gradle.api.tasks.Input
-import org.gradle.api.Project
-import org.gradle.testfixtures.ProjectBuilder
 
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil.ProductProperties
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.PluginScenarioException
+import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 import io.openliberty.tools.gradle.utils.ArtifactDownloadUtil
+import org.gradle.api.Project
+import org.gradle.api.logging.LogLevel
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.options.Option
+import org.gradle.testfixtures.ProjectBuilder
 
 public class AbstractFeatureTask extends AbstractServerTask {
 
