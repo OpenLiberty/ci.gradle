@@ -6,16 +6,16 @@ targetCompatibility = 1.8
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
 }
-repositories {
-    maven {
-        url "https://oss.sonatype.org/content/repositories"
-    }
-}
+
 // configure liberty-gradle-plugin 
 buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
+        // sonatype repo for getting the latest binary scanner jar snapshot
+        maven {
+            url "https://oss.sonatype.org/content/repositories"
+        }
     }
     dependencies {
         classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
