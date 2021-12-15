@@ -274,21 +274,15 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         String eeVersion = null
         project.configurations.compile.allDependencies.each {
             dependency ->
-                if (dependency.group.equals("io.openliberty.features")) {
-                    if (dependency.name.equals("javaee-7.0")) {
+                if (dependency.group.equals("javax") && dependency.name.equals("javaee-api")) {
+                    if (dependency.version.startsWith("7.")) {
                         eeVersion = "ee7"
-                    } else if (dependency.name.equals("javaee-8.0")) {
-                        eeVersion = "ee8"
-                    } else if (dependency.name.equals("javaeeClient-7.0")) {
-                        eeVersion = "ee7"
-                    } else if (dependency.name.equals("javaeeClient-8.0")) {
-                        eeVersion = "ee8"
-                    } else if (dependency.name.equals("jakartaee-8.0")) {
+                    } else if (dependency.version.startsWith("8.")) {
                         eeVersion = "ee8"
                     }
                 } else if (dependency.group.equals("jakarta.platform") &&
                         dependency.name.equals("jakarta.jakartaee-api") &&
-                        dependency.version.equals("8.0.0")) {
+                        dependency.version.startsWith("8.")) {
                     eeVersion = "ee8";
                 }
         }
