@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit
 import java.util.Map.Entry
 import java.nio.file.Path;
 
-class DevTask extends AbstractServerTask {
+class DevTask extends AbstractFeatureTask {
 
     private static final String LIBERTY_HOSTNAME = "liberty.hostname";
     private static final String LIBERTY_HTTP_PORT = "liberty.http.port";
@@ -80,6 +80,7 @@ class DevTask extends AbstractServerTask {
     private static final boolean DEFAULT_CONTAINER = false;
     private static final boolean DEFAULT_SKIP_DEFAULT_PORTS = false;
     private static final boolean DEFAULT_KEEP_TEMP_DOCKERFILE = false;
+    private static final boolean DEFAULT_GENERATE_FEATURES = true;
 
     protected final String CONTAINER_PROPERTY_ARG = '-P'+CONTAINER_PROPERTY+'=true';
 
@@ -252,6 +253,16 @@ class DevTask extends AbstractServerTask {
 
     @Optional
     @Input
+    Boolean generateFeatures;
+
+    // Need to use a string value to allow someone to specify --generateFeatures=false, if not explicitly set defaults to true
+    @Option(option = 'generateFeatures', description = 'If true, scan the application binary files to determine which Liberty features should be used. The default value is true.')
+    void setGenerateFeatures(String generateFeatures) {
+        this.generateFeatures = Boolean.parseBoolean(generateFeatures);
+    }
+
+    @Optional
+    @Input
     Boolean clean;
 
     @Option(option = 'clean', description = 'Clean all cached information on server start up. The default value is false.')
@@ -282,17 +293,18 @@ class DevTask extends AbstractServerTask {
                     boolean  hotTests, boolean  skipTests, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
                     boolean libertyDebug, boolean pollingTest, boolean container, File dockerfile, File dockerBuildContext,
-                    String dockerRunOpts, int dockerBuildTimeout, boolean skipDefaultPorts, boolean keepTempDockerfile, String mavenCacheLocation, String packagingType, File buildFile
+                    String dockerRunOpts, int dockerBuildTimeout, boolean skipDefaultPorts, boolean keepTempDockerfile, 
+                    String mavenCacheLocation, String packagingType, File buildFile, boolean generateFeatures
         ) throws IOException {
             super(buildDir, serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory, /* multi module project directory */ projectDirectory,
                     resourceDirs, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, dockerfile, dockerBuildContext, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts,
-                    null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation, null /* multi module upstream projects */, 
-                    false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, null /* parent build files */, null /* compileArtifactPaths */, null /* testArtifactPaths */, new ArrayList<Path>() /* webResources */
+                    null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation, null /* multi module upstream projects */,
+                    false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, null /* parent build files */, generateFeatures, null /* compileArtifactPaths */, null /* testArtifactPaths */, new ArrayList<Path>() /* webResources */
                 );
 
-            ServerFeature servUtil = getServerFeatureUtil();
+            ServerFeatureUtil servUtil = getServerFeatureUtil();
             this.libertyDirPropertyFiles = AbstractServerTask.getLibertyDirectoryPropertyFiles(installDirectory, userDirectory, serverDirectory);
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory, libertyDirPropertyFiles);
 
@@ -543,9 +555,9 @@ class DevTask extends AbstractServerTask {
                 }
 
             }
-
             if (restartServer) {
                 // - stop Server
+                // - generate features (if generateFeatures=true)
                 // - create server or runBoostMojo
                 // - install feature
                 // - deploy app
@@ -553,6 +565,15 @@ class DevTask extends AbstractServerTask {
                 util.restartServer();
                 return true;
             } else if (installFeatures) {
+                if (generateFeatures) {
+                    // Increment generate features on build dependency change
+                    ProjectConnection gradleConnection = initGradleProjectConnection();
+                    BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+                    runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources'); // ensure class files exist
+                    Collection<String> javaSourceClassPaths = getJavaSourceClassPaths();
+                    libertyGenerateFeatures(javaSourceClassPaths, false);
+                    libertyCreate(); // need to run create in order to copy generated config file to target
+                }
                 libertyInstallFeature();
             }
 
@@ -620,7 +641,7 @@ class DevTask extends AbstractServerTask {
 
         @Override
         public void checkConfigFile(File configFile, File serverDir) {
-            ServerFeature servUtil = getServerFeatureUtil();
+            ServerFeatureUtil servUtil = getServerFeatureUtil();
             Set<String> features = servUtil.getServerFeatures(serverDir, libertyDirPropertyFiles);
 
             if (features == null) {
@@ -755,6 +776,29 @@ class DevTask extends AbstractServerTask {
         }
 
         @Override
+        public boolean libertyGenerateFeatures(Collection<String> classes, boolean optimize) {
+            ProjectConnection gradleConnection = initGradleProjectConnection();
+            BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+
+            try {
+                List<String> options = new ArrayList<String>();
+                classes.each {
+                    // generate features for only the classFiles passed (if any)
+                    options.add("--classFile=" + it);
+                }
+                options.add("--optimize=" + optimize);
+                runGenerateFeaturesTask(gradleBuildLauncher, options);
+                return true; // successfully generated features
+            } catch (BuildException e) {
+                // log as error instead of throwing an exception so we do not flood console with stacktrace
+                logger.error(e.getMessage() + ".\n To disable the automatic generation of features, type 'g' and press Enter.");
+                return false;
+            } finally {
+                gradleConnection.close();
+            }
+        }
+
+        @Override
         public void libertyInstallFeature() {
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
@@ -843,6 +887,24 @@ class DevTask extends AbstractServerTask {
         runGradleTask(gradleBuildLauncher, tasks);
     }
 
+    public void runGenerateFeaturesTask(BuildLauncher gradleBuildLauncher, boolean optimize) throws BuildException {
+        List<String> options = new ArrayList<String>();
+        options.add("--optimize="+optimize);
+        runGenerateFeaturesTask(gradleBuildLauncher, options);
+    }
+
+    public void runGenerateFeaturesTask(BuildLauncher gradleBuildLauncher, List<String> options) throws BuildException {
+        String[] tasks = new String[options != null ? options.size() + 1 : 1];
+        tasks[0] = 'generateFeatures';
+        if (options != null) {
+            for(int i = 0; i < options.size(); i++) {
+                tasks[i+1] = options.get(i);
+            }
+        }
+
+        runGradleTask(gradleBuildLauncher, tasks);
+    }
+
     // If a argument has not been set using CLI arguments set a default value
     // Using the ServerExtension properties if available, otherwise use hardcoded defaults
     private void initializeDefaultValues() throws Exception {
@@ -888,6 +950,10 @@ class DevTask extends AbstractServerTask {
 
         if (pollingTest == null) {
             pollingTest = DEFAULT_POLLING_TEST;
+        }
+
+        if (generateFeatures == null) {
+            generateFeatures = DEFAULT_GENERATE_FEATURES;
         }
 
         processContainerParams();
@@ -953,8 +1019,17 @@ class DevTask extends AbstractServerTask {
                 :war
                 :deploy
              */
+            if (generateFeatures) {
+                // Optimize generate features on startup
+                runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources'); // ensure class files exist
+                try {
+                    runGenerateFeaturesTask(gradleBuildLauncher, true);
+                } catch (BuildException e) {
+                    throw new BuildException(e.getCause().getMessage() + " To disable the automatic generation of features, start dev mode with --generateFeatures=false.", e);
+                }
+            }
             if (!container) {
-                addLibertyRuntimeProperties(gradleBuildLauncher);               
+                addLibertyRuntimeProperties(gradleBuildLauncher);
                 runGradleTask(gradleBuildLauncher, 'libertyCreate');
                 // suppress extra install feature warnings (one would have shown up already from the libertyCreate task on the line above)
                 gradleBuildLauncher.addArguments("-D" + DevUtil.SKIP_BETA_INSTALL_WARNING + "=" + Boolean.TRUE.toString());
@@ -979,7 +1054,8 @@ class DevTask extends AbstractServerTask {
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
                 libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerBuildContext, dockerRunOpts, 
-                dockerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempDockerfile.booleanValue(), localMavenRepoForFeatureUtility, getPackagingType(), buildFile
+                dockerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempDockerfile.booleanValue(), localMavenRepoForFeatureUtility, 
+                getPackagingType(), buildFile, generateFeatures.booleanValue()
         );
 
         util.addShutdownHook(executor);
@@ -1120,46 +1196,4 @@ class DevTask extends AbstractServerTask {
         buildLauncher.run();
     }
 
-    private static ServerFeature serverFeatureUtil;
-
-    private ServerFeature getServerFeatureUtil() {
-        if (serverFeatureUtil == null) {
-            serverFeatureUtil = new ServerFeature();
-        }
-        return serverFeatureUtil;
-    }
-
-    private class ServerFeature extends ServerFeatureUtil {
-
-        @Override
-        public void debug(String msg) {
-            logger.debug(msg);
-        }
-
-        @Override
-        public void debug(String msg, Throwable e) {
-            logger.debug(msg, (Throwable) e);
-        }
-
-        @Override
-        public void debug(Throwable e) {
-            logger.debug("Exception received: "+e.getMessage(), (Throwable) e);
-        }
-
-        @Override
-        public void warn(String msg) {
-            logger.warn(msg);
-        }
-
-        @Override
-        public void info(String msg) {
-            logger.info(msg);
-        }
-
-        @Override
-        public void error(String msg, Throwable e) {
-            logger.error(msg, e);
-        }
-
-    }
 }

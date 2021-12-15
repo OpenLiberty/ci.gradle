@@ -30,6 +30,7 @@ import io.openliberty.tools.gradle.tasks.DebugTask
 import io.openliberty.tools.gradle.tasks.DeployTask
 import io.openliberty.tools.gradle.tasks.UndeployTask
 import io.openliberty.tools.gradle.tasks.InstallFeatureTask
+import io.openliberty.tools.gradle.tasks.GenerateFeaturesTask
 import io.openliberty.tools.gradle.tasks.PrepareFeatureTask
 import io.openliberty.tools.gradle.tasks.InstallLibertyTask
 import io.openliberty.tools.gradle.tasks.UninstallFeatureTask
@@ -62,7 +63,8 @@ class LibertyTaskFactory {
         project.tasks.create('deploy', DeployTask)
         project.tasks.create('undeploy', UndeployTask)
         project.tasks.create('installFeature', InstallFeatureTask)
-		project.tasks.create('prepareFeature', PrepareFeatureTask)
+        project.tasks.create('generateFeatures', GenerateFeaturesTask)
+        project.tasks.create('prepareFeature', PrepareFeatureTask)
         project.tasks.create('uninstallFeature', UninstallFeatureTask)
         project.tasks.create('cleanDirs', CleanTask)
         project.tasks.create('configureArquillian', ConfigureArquillianTask)
