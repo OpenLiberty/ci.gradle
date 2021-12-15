@@ -226,9 +226,8 @@ public class AbstractFeatureTask extends AbstractServerTask {
             }
             def additionalJsons = getAdditionalJsonList()
             createNewInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVersion, containerName, additionalJsons)
-        } else {
-            return util;
         }
+        return util;
     }
 
     protected InstallFeatureUtil getInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons) throws PluginExecutionException {
