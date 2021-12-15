@@ -42,7 +42,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     protected static final String NO_NEW_FEATURES_COMMENT = "No additional features generated";
 
     private static final String BINARY_SCANNER_MAVEN_GROUP_ID = "com.ibm.websphere.appmod.tools";
-    private static final String BINARY_SCANNER_MAVEN_ARTIFACT_ID = "binary-app-scanner";
+    private static final String BINARY_SCANNER_MAVEN_ARTIFACT_ID = "binary-app-scanner-test";
     private static final String BINARY_SCANNER_MAVEN_TYPE = "jar";
     private static final String BINARY_SCANNER_MAVEN_VERSION = "[21.0.0.4-SNAPSHOT,)";
 
@@ -199,14 +199,19 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
      * Downloads it first from connected repositories such as Maven Central if a newer release is available than the cached version.
      * Note: Maven updates artifacts daily by default based on the last updated timestamp. Users should use 'mvn -U' to force updates if needed.
      *
-     * @return The File object of the binary scanner jar in the local cache.
-     * @throws PluginExecutionException
+     * @return The File object of the binary-app-scanner.jar in the local cache.
+     * @throws PluginExecutionException indicates the binary-app-scanner.jar could not be found
      */
     private File getBinaryScannerJarFromRepository() throws PluginExecutionException {
         try {
             return ArtifactDownloadUtil.downloadBuildArtifact(project, BINARY_SCANNER_MAVEN_GROUP_ID, BINARY_SCANNER_MAVEN_ARTIFACT_ID, BINARY_SCANNER_MAVEN_TYPE, BINARY_SCANNER_MAVEN_VERSION);
         } catch (Exception e) {
-            throw new PluginExecutionException("Could not retrieve the binary scanner jar. Ensure you have a connection to Maven Central or another repository that contains the jar configured in your build.gradle: " + e.getMessage(), e);
+            throw new PluginExecutionException("Could not retrieve the artifact " + BINARY_SCANNER_MAVEN_GROUP_ID + "."
+                    + BINARY_SCANNER_MAVEN_ARTIFACT_ID
+                    + " needed for liberty:generate-features. Ensure you have a connection to Maven Central or another repository that contains the "
+                    + BINARY_SCANNER_MAVEN_GROUP_ID + "." + BINARY_SCANNER_MAVEN_ARTIFACT_ID
+                    + ".jar configured in your build.gradle",
+                    e);
         }
     }
 
