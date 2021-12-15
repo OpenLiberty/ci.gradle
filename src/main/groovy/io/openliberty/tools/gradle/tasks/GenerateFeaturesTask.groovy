@@ -275,10 +275,12 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         project.configurations.compile.allDependencies.each {
             dependency ->
                 if (dependency.group.equals("javax") && dependency.name.equals("javaee-api")) {
-                    if (dependency.version.startsWith("7.")) {
-                        eeVersion = "ee7"
-                    } else if (dependency.version.startsWith("8.")) {
+                    if (dependency.version.startsWith("8.")) {
                         eeVersion = "ee8"
+                    } else if (dependency.version.startsWith("7.")) {
+                        eeVersion = "ee7"
+                    } else if (dependency.version.startsWith("6.")) {
+                        eeVersion = "ee6"
                     }
                 } else if (dependency.group.equals("jakarta.platform") &&
                         dependency.name.equals("jakarta.jakartaee-api") &&
