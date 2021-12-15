@@ -208,7 +208,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         } catch (Exception e) {
             throw new PluginExecutionException("Could not retrieve the artifact " + BINARY_SCANNER_MAVEN_GROUP_ID + "."
                     + BINARY_SCANNER_MAVEN_ARTIFACT_ID
-                    + " needed for liberty:generate-features. Ensure you have a connection to Maven Central or another repository that contains the "
+                    + " needed for generateFeatures. Ensure you have a connection to Maven Central or another repository that contains the "
                     + BINARY_SCANNER_MAVEN_GROUP_ID + "." + BINARY_SCANNER_MAVEN_ARTIFACT_ID
                     + ".jar configured in your build.gradle",
                     e);
