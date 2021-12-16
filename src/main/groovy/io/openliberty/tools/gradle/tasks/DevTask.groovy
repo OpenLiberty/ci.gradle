@@ -790,8 +790,15 @@ class DevTask extends AbstractFeatureTask {
                 runGenerateFeaturesTask(gradleBuildLauncher, options);
                 return true; // successfully generated features
             } catch (BuildException e) {
-                // log as error instead of throwing an exception so we do not flood console with stacktrace
-                logger.error(e.getMessage() + ".\n To disable the automatic generation of features, type 'g' and press Enter.");
+                // log errors instead of throwing an exception so we do not flood console with stacktrace
+                Exception pluginEx = getPluginExecutionException(e);
+                if (pluginEx != null) {
+                    // PluginExecutionException indicates that the binary scanner jar could not be found
+                    logger.error(pluginEx.getMessage() + ".\nDisabling the automatic generation of features.");
+                    setFeatureGeneration(false);
+                } else {
+                    logger.error(e.getMessage() + ".\nTo disable the automatic generation of features, type 'g' and press Enter.");
+                }
                 return false;
             } finally {
                 gradleConnection.close();
@@ -1025,7 +1032,16 @@ class DevTask extends AbstractFeatureTask {
                 try {
                     runGenerateFeaturesTask(gradleBuildLauncher, true);
                 } catch (BuildException e) {
-                    throw new BuildException(e.getCause().getMessage() + " To disable the automatic generation of features, start dev mode with --generateFeatures=false.", e);
+                    Exception pluginEx = getPluginExecutionException(e);
+                    if (pluginEx != null) {
+                        // PluginExecutionException indicates that the binary scanner jar could not be found
+                        logger.error(pluginEx.getMessage() + ".\nDisabling the automatic generation of features.");
+                        generateFeatures = false;
+                    } else if (e.getCause() != null) {
+                        throw new BuildException(e.getCause().getMessage() + " To disable the automatic generation of features, start dev mode with --generateFeatures=false.", e.getCause());
+                    } else {
+                        throw new BuildException("Failed to run the generateFeaturesTask. To disable the automatic generation of features, start dev mode with --generateFeatures=false.", e)
+                    }
                 }
             }
             if (!container) {
@@ -1194,6 +1210,25 @@ class DevTask extends AbstractFeatureTask {
                 .setStandardError(System.err);
         buildLauncher.forTasks(tasks);
         buildLauncher.run();
+    }
+
+    /**
+     * Traces root causes of the passed exception and returns a PluginExecutionException if found
+     * @param e Exception to search
+     * @return PluginExecutionException or null if could not be found
+     */
+    Exception getPluginExecutionException(Exception exception) {
+        Exception rootCause = exception;
+        while (rootCause.getCause() != null && rootCause.getCause() != exception) {
+            // compare class strings to verify if a PluginExecutionException is present
+            // using "rootCause instanceof PluginExecutionException" will return false
+            if (rootCause.getClass().toString().equals(PluginExecutionException.toString())) {
+                logger.debug("Found PluginExecutionException indicating that the binary-app-scanner.jar could not be resolved")
+                return rootCause;
+            }
+            rootCause = rootCause.getCause();
+        }
+        return null;
     }
 
 }
