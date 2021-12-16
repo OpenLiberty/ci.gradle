@@ -195,6 +195,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
         return featuresToInstall
     }
 
+    @Internal
     protected ServerFeatureUtil getServerFeatureUtil() {
         if (servUtil == null) {
             servUtil = new ServerFeatureTaskUtil();
