@@ -44,6 +44,9 @@ buildscript {
             url "https://oss.sonatype.org/content/repositories/snapshots"
         }
     }
+    dependencies {
+        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.3.1-SNAPSHOT'
+    }
 }
 ```
 
