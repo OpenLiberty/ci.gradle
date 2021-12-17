@@ -8,7 +8,7 @@ This feature is best accessed through dev mode. When you start up `libertyDev` i
 
 If you need to disable feature generation you can use the parameter `--generateFeatures=false`.
 
-Lifecycle
+##### Lifecycle
 
 This task is not part of the lifecycle, so to use it in your build you will need to understand its dependencies. Since it will scan the class files of your application, it must be run after the `compileJava` task. The list of features that it generates will be used by the `libertyCreate` and the `installFeature` tasks, so run this task first.
 
@@ -26,7 +26,7 @@ The task also considers the features you have already specified in `server.xml` 
 
 If there are conflicts with features specified in Liberty configuration files or features used in the application code, the task will print an error message. If available, the task will also print a list of suggested features with no conflicts.
 
-Tech Preview Limitations
+##### Tech Preview Limitations
  
 * For MicroProfile, this task will generate the latest features available in a given major release. (e.g. even if you specify `org.eclipse.microprofile:microprofile:3.2` and you use mpHealth APIs this task will generate the feature `mpHealth-2.2`, which is the latest version available for MicroProfile 3.x)
 * Jakarta version 9 is not supported at this time
@@ -47,7 +47,7 @@ buildscript {
 }
 ```
 
-Example (outside of dev mode):
+##### Example (outside of dev mode):
 
 Compile the application code and generate Liberty features.
 
