@@ -277,7 +277,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
     private getEEVersion(Object project) {
         String eeVersion = null
-        project.configurations.compile.allDependencies.each {
+        project.configurations.compileClasspath.allDependencies.each {
             dependency ->
                 if (dependency.group.equals("javax") && dependency.name.equals("javaee-api")) {
                     if (dependency.version.startsWith("8.")) {
@@ -298,7 +298,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
     private getMPVersion(Object project) {
         String mpVersion = null
-        project.configurations.compile.allDependencies.each {
+        project.configurations.compileClasspath.allDependencies.each {
             if (it.group.equals("org.eclipse.microprofile") &&
                     it.name.equals("microprofile")) {
                 if (it.version.startsWith("1")) {
