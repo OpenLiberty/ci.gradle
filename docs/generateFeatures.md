@@ -14,7 +14,7 @@ This task is not part of the lifecycle, so to use it in your build you will need
 
 If this task detects Liberty features used in your project but not present in your Liberty configuration, it will create a new file `configDropins/overrides/generated-features.xml` in the `src/main/liberty/config` directory of your project. The `generated-features.xml` file will contain a list of features required for your project. If the `generated-features.xml` file has been created in the past and no additional features have been detected, this file will be retained and will contain a comment indicating that there are no additional features generated.
 
-The task examines the `build.gradle` dependencies to determine what version of Java EE and what version of MicroProfile you may be using. It will then generate features which are compatible. For Java EE the task looks for coordinates:
+The task examines the `build.gradle` dependencies to determine what version of Java EE and what version of MicroProfile you may be using. It will then generate features which are compatible. For Java EE the task looks for these coordinates:
 * javax:javaee-api:6.0
 * javax:javaee-api:7.0
 * javax:javaee-api:8.0
