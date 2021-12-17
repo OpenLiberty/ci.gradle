@@ -22,7 +22,7 @@ The task examines the `build.gradle` dependencies to determine what version of J
 
 For MicroProfile it looks for `org.eclipse.microprofile:microprofile` and generates features according to the version number. The task uses these compile dependencies to determine the best Liberty features to use with your application. 
 
-The task also considers the features you have already specified in `server.xml` or other files that Liberty will use (e.g. `include` elements and `configDropins` files). The task will attempt to find a set of features that are valid to work together.
+The task also considers the features you have already specified in `server.xml` or other files that Liberty will use (e.g. `include` elements and `configDropins` files). The task will attempt to find a working set of features that are compatible with each other.
 
 If there are conflicts with features specified in Liberty configuration files or features used in the application code, the task will print an error message. If available, the task will also print a list of suggested features with no conflicts.
 
