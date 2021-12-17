@@ -6,6 +6,8 @@ This task is available as a tech preview in the 3.3.1-SNAPSHOT. Please provide f
 
 This feature is best accessed through dev mode. When you start up `libertyDev` it will compile your application and scan the files to verify that all the Liberty features that you need are part of your configuration. Then as you work, dev mode will continue to monitor the project to confirm the Liberty features are up to date. If you implement a new interface in Java the scanner will determine if that API is one of Liberty's, update the configuration and install the feature. If you remove a feature from `server.xml`, dev mode will determine if it is actually necessary and if so add it to the configuration file described below. For this snapshot you need to add the Sonatype repository to `build.gradle` (shown below) but in the future all the dependencies will be in Maven Central.
 
+If, for some reason, you need to disable feature generation you can use the parameter `--generateFeatures=false`.
+
 Lifecycle
 
 This task is not part of the lifecycle so to use it in your build you will need to understand its dependencies. Since it will scan the class files of your application it must be run after the `compileJava` task. The list of features that it generates will be used by the `libertyCreate` and the `installFeature` tasks so run this task first.
