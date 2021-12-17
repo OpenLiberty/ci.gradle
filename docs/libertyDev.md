@@ -2,6 +2,8 @@
 
 Start a Liberty server in dev mode. This task also invokes the `libertyCreate`, `installFeature`, and `deploy` tasks before starting the server.
 
+N.B. starting in the tech preview 3.3.1-SNAPSHOT, dev mode also invokes `generateFeatures`. See [generateFeatures](generateFeatures.md) for details.
+
 **Note:** This task is designed to be executed directly from the Gradle command line.
 
 **Limitations:** This task is not supported with Spring Boot applications.
