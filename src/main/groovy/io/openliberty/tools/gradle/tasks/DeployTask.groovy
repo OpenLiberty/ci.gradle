@@ -643,7 +643,7 @@ class DeployTask extends AbstractServerTask {
 
             long appTimeout = 30 * 1000
             if (server.timeout != null && !server.timeout.isEmpty()) {
-                appTimeout = server.timeout * 1000
+                appTimeout = Long.valueOf(server.timeout) * 1000
             }
             
             ServerTask serverTask = createServerTask(project, null) //Using a server task without an opertation to check logs for app start
