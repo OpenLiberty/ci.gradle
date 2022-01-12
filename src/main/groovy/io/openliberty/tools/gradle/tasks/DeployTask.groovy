@@ -648,7 +648,7 @@ class DeployTask extends AbstractServerTask {
                     appTimeout = Long.valueOf(server.timeout) * 1000
                 }
             } catch (NumberFormatException nfe) {
-                throw new GradleException("The server.timeout parameter could not be parsed into a long value. Ensure the value is properly formatted.")
+                throw new GradleException("The server.timeout parameter " + server.timeout + " could not be parsed into a long value. Ensure the value is formatted correctly.")
             }
             
             ServerTask serverTask = createServerTask(project, null) //Using a server task without an opertation to check logs for app start
