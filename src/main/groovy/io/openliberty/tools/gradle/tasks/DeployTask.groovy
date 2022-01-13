@@ -38,6 +38,7 @@ import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.TaskAction
 import org.w3c.dom.Element
 
+import java.lang.NumberFormatException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.text.MessageFormat
@@ -642,8 +643,12 @@ class DeployTask extends AbstractServerTask {
             }
 
             long appTimeout = 30 * 1000
-            if (server.timeout != null && !server.timeout.isEmpty()) {
-                appTimeout = server.timeout * 1000
+            try {
+                if (server.timeout != null && !server.timeout.isEmpty()) {
+                    appTimeout = Long.valueOf(server.timeout) * 1000
+                }
+            } catch (NumberFormatException nfe) {
+                throw new GradleException("The server.timeout parameter " + server.timeout + " could not be parsed into a long value. Ensure the value is formatted correctly.")
             }
             
             ServerTask serverTask = createServerTask(project, null) //Using a server task without an opertation to check logs for app start
