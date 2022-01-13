@@ -924,7 +924,7 @@ class DevTask extends AbstractFeatureTask {
         }
 
         if (serverStartTimeout == null) {
-            if (server.timeout != null && server.timeout.isInteger()) {
+            if (server.timeout != null && !server.timeout.isEmpty()) {
                 try {
                     serverStartTimeout = Integer.valueOf(server.timeout);
                 } catch (NumberFormatException e) {
