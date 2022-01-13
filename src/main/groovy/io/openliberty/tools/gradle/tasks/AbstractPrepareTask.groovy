@@ -23,10 +23,12 @@ import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
 import org.gradle.api.tasks.Internal
+import org.gradle.api.artifacts.dsl.DependencyHandler
 
 import io.openliberty.tools.common.plugins.util.PrepareFeatureUtil
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.PluginScenarioException
+import io.openliberty.tools.gradle.utils.ArtifactDownloadUtil
 
 public class AbstractPrepareTask extends AbstractServerTask {
 
@@ -81,38 +83,16 @@ public class AbstractPrepareTask extends AbstractServerTask {
 
         @Override
         public File downloadArtifact(String groupId, String artifactId, String type, String version) throws PluginExecutionException {
-            String coordinates = groupId + ":" + artifactId + ":" + version + "@" + type
-            def dep = project.dependencies.create(coordinates)
-            def config = project.configurations.detachedConfiguration(dep)
-
-            Set<File> files = new HashSet<File>()
-            try {
-                config.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-					File artifactFile = artifact.file
-					if(artifactFile.absolutePath.contains(groupId)){
-						//loaded from remote repository
-						String mavenLocalRepo = System.getenv("FEATURE_LOCAL_REPO")
-						if(!mavenLocalRepo) {
-							mavenLocalRepo = new File(System.getProperty("user.home")+ "/.m2/repository")
-						}
-						groupId = groupId.replace(".", "/");
-						String artifactPath = String.format("%s/%s/%s/%s-%s.%s", groupId, artifactId, version, artifactId, version,type);
-						File artifactMavenLocal = new File(mavenLocalRepo + File.separator + artifactPath)
-						FileUtils.copyFile(artifactFile, artifactMavenLocal) //copy downloaded artifacts from gradle cache to maven local repo
-						files.add(artifactMavenLocal)
-					}else {
-						files.add(artifactFile)
-					}
-                }
-            } catch (ResolveException e) {
-                throw new PluginExecutionException("Could not find artifact with coordinates " + coordinates)  
-            }
-
-            if (!files) {
-                throw new ResolveException("Could not find artifact with coordinates " + coordinates)
-            }
-            return files.iterator().next()
+			return ArtifactDownloadUtil.downloadArtifact(project, groupId, artifactId, type, version);
         }
+		
+		@Override
+		public void provideJsonFileDependency(File file) {
+			project.getConfigurations().create('jsonProvided')
+			DependencyHandler dependencies = project.getDependencies();
+			dependencies.add("jsonProvided", project.files(file))
+		}
+	
     }
 	
 	@Internal
