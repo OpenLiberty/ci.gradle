@@ -117,7 +117,7 @@ class DevTask extends AbstractFeatureTask {
     @Option(option = 'libertyDebugPort', description = 'The debug port that you can attach a debugger to. The default value is 7777.')
     void setLibertyDebugPort(String libertyDebugPort) {
         try {
-            this.libertyDebugPort = libertyDebugPort.toInteger();
+            this.libertyDebugPort = Integer.valueOf(libertyDebugPort);
         } catch (NumberFormatException e) {
             logger.error(String.format("Unexpected value: %s for dev mode option libertyDebugPort. libertyDebugPort should be a valid integer.", libertyDebugPort));
             throw e;
@@ -129,7 +129,7 @@ class DevTask extends AbstractFeatureTask {
     @Option(option = 'compileWait', description = 'Time in seconds to wait before processing Java changes and deletions. The default value is 0.5 seconds.')
     void setCompileWait(String compileWait) {
         try {
-            this.compileWait = compileWait.toDouble();
+            this.compileWait = Double.valueOf(compileWait);
         } catch (NumberFormatException e) {
             logger.error(String.format("Unexpected value: %s for dev mode option compileWait. compileWait should be a valid number.", compileWait));
             throw e;
@@ -141,7 +141,7 @@ class DevTask extends AbstractFeatureTask {
     @Option(option = 'verifyAppStartTimeout', description = 'Maximum time to wait (in seconds) to verify that the application has started or updated before running tests. The default value is 30 seconds.')
     void setVerifyAppStartTimeout(String verifyAppStartTimeout) {
         try {
-            this.verifyAppStartTimeout = verifyAppStartTimeout.toInteger();
+            this.verifyAppStartTimeout = Integer.valueOf(verifyAppStartTimeout);
         } catch (NumberFormatException e) {
             logger.error(String.format("Unexpected value: %s for dev mode option verifyAppStartTimeout. verifyAppStartTimeout should be a valid integer.", verifyAppStartTimeout));
             throw e;
@@ -153,7 +153,7 @@ class DevTask extends AbstractFeatureTask {
     @Option(option = 'serverStartTimeout', description = 'Time in seconds to wait while verifying that the server has started. The default value is 90 seconds.')
     void setServerStartTimeout(String serverStartTimeout) {
         try {
-            this.serverStartTimeout = serverStartTimeout.toInteger();
+            this.serverStartTimeout = Integer.valueOf(serverStartTimeout);
         } catch (NumberFormatException e) {
             logger.error(String.format("Unexpected value: %s for dev mode option serverStartTimeout. serverStartTimeout should be a valid integer.", serverStartTimeout));
             throw e;
@@ -230,7 +230,7 @@ class DevTask extends AbstractFeatureTask {
     @Option(option = 'dockerBuildTimeout', description = 'Specifies the amount of time to wait (in seconds) for the completion of the Docker operation to build the image.')
     void setDockerBuildTimeout(String inputValue) {
         try {
-            this.dockerBuildTimeout = inputValue.toInteger();
+            this.dockerBuildTimeout = Integer.valueOf(inputValue);
         } catch (NumberFormatException e) {
             logger.error(String.format("Unexpected value: %s for dev mode option dockerBuildTimeout. dockerBuildTimeout should be a valid integer.", inputValue));
             throw e;
@@ -925,7 +925,12 @@ class DevTask extends AbstractFeatureTask {
 
         if (serverStartTimeout == null) {
             if (server.timeout != null && server.timeout.isInteger()) {
-                serverStartTimeout = server.timeout.toInteger();
+                try {
+                    serverStartTimeout = Integer.valueOf(server.timeout);
+                } catch (NumberFormatException e) {
+                    logger.error(String.format("Unexpected value: %s for dev mode option server.timeout. server.timeout should be a valid integer.", server.timeout));
+                    throw e;
+                }
             } else {
                 serverStartTimeout = DEFAULT_SERVER_TIMEOUT;
             }
