@@ -92,11 +92,11 @@ class DevTest extends AbstractIntegrationTest {
        int waited = 0;
        int sleep = 100;
        while (waited <= timeout) {
-          Thread.sleep(sleep);
-          waited += sleep;
           if (file.exists()) {
              return true;
           }
+          Thread.sleep(sleep);
+          waited += sleep;
        }
        return false;
     }
@@ -259,8 +259,6 @@ class DevTest extends AbstractIntegrationTest {
 
     @Test
     public void manualTestsInvocationTest() throws Exception {
-//        assertTrue(verifyLogMessage(2000,  "To run tests on demand, press Enter."));
-
         writer.write("\n");
         writer.flush();
 
