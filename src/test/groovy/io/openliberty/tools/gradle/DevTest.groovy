@@ -306,7 +306,6 @@ class DevTest extends AbstractIntegrationTest {
         File helloBatchObj = new File(targetDir, "classes/com/demo/HelloBatch.class");
         verifyFileExists(helloBatchObj, 15000);
         // ... and run the proper task.
-        assertTrue(verifyLogMessage(10000, "Task :generateFeatures")); // task ran
         assertTrue(verifyFileExists(newFeatureFile, 5000)); // task created file
         assertTrue(verifyFileExists(newTargetFeatureFile, 5000)); // dev mode copied file
         assertTrue(verifyLogMessage(10000, "batch-1.0", newFeatureFile));
