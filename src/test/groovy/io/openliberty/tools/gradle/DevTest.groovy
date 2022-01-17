@@ -174,21 +174,8 @@ class DevTest extends AbstractIntegrationTest {
         // check for server configuration was successfully updated message in messages.log
         File messagesLogFile = new File(targetDir, "wlp/usr/servers/defaultServer/logs/messages.log");
         assertTrue(verifyLogMessage(60000, "CWWKG0017I", messagesLogFile));
-        Thread.sleep(2000);
-        Scanner scanner = new Scanner(targetServerXML);
-        boolean foundUpdate = false;
-        try {
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                if (line.contains("<feature>mpHealth-2.0</feature>")) {
-                    foundUpdate = true;
-                    break;
-                }
-            }
-        } finally {
-            scanner.close();
-        }
-        assertTrue("Could not find the updated feature in the target server.xml file", foundUpdate);
+        assertTrue("Could not find the updated feature in the target server.xml file",
+            verifyLogMessage(60000, "<feature>mpHealth-2.0</feature>", targetServerXML));
     }
 
     @Test
