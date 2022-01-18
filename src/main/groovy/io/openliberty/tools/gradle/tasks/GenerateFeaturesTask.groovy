@@ -23,6 +23,7 @@ import static io.openliberty.tools.common.plugins.util.BinaryScannerUtil.*;
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 import io.openliberty.tools.gradle.utils.ArtifactDownloadUtil
+
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
@@ -31,7 +32,6 @@ import org.w3c.dom.Element;
 
 import javax.xml.parsers.ParserConfigurationException
 import javax.xml.transform.TransformerException
-import java.lang.reflect.InvocationTargetException
 
 class GenerateFeaturesTask extends AbstractFeatureTask {
 
@@ -123,6 +123,17 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             scannedFeatureList = binaryScannerHandler.runBinaryScanner(existingFeatures, classFiles, directories, eeVersion, mpVersion, optimize);
         } catch (BinaryScannerUtil.NoRecommendationException noRecommendation) {
             throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE3, noRecommendation.getConflicts()));
+        } catch (BinaryScannerUtil.FeatureModifiedException featuresModified) {
+            Set<String> featureSet = featuresModified.getFeatures();
+            // compare scanner features to user features. Scanner could modify webProfile-7.0 into webProfile-8.0 so ignore the feature version numbers.
+            if (BinaryScannerUtil.noVersionCompare(existingFeatures, featureSet)) {
+                // the scanner only needs to change features which it generated earlier. Merge the sets.
+                scannedFeatureList = featureSet;
+                scannedFeatureList.addAll(existingFeatures);
+            } else {
+                featureSet.addAll(existingFeatures); // report the entire set of conflicting features
+                throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE1, featureSet, featuresModified.getSuggestions()));
+            }
         } catch (BinaryScannerUtil.RecommendationSetException showRecommendation) {
             if (showRecommendation.isExistingFeaturesConflict()) {
                 throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE2, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
