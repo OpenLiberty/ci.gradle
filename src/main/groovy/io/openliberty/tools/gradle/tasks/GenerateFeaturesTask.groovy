@@ -280,16 +280,16 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             dependency ->
                 if (dependency.group.equals("javax") && dependency.name.equals("javaee-api")) {
                     if (dependency.version.startsWith("8.")) {
-                        eeVersion = "ee8"
+                        eeVersion = BINARY_SCANNER_EEV8
                     } else if (dependency.version.startsWith("7.")) {
-                        eeVersion = "ee7"
+                        eeVersion = BINARY_SCANNER_EEV7
                     } else if (dependency.version.startsWith("6.")) {
-                        eeVersion = "ee6"
+                        eeVersion = BINARY_SCANNER_EEV6
                     }
                 } else if (dependency.group.equals("jakarta.platform") &&
                         dependency.name.equals("jakarta.jakartaee-api") &&
                         dependency.version.startsWith("8.")) {
-                    eeVersion = "ee8";
+                    eeVersion = BINARY_SCANNER_EEV8
                 }
         }
         return eeVersion;
@@ -301,13 +301,13 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             if (it.group.equals("org.eclipse.microprofile") &&
                     it.name.equals("microprofile")) {
                 if (it.version.startsWith("1")) {
-                    mpVersion = "mp1"
+                    mpVersion = BINARY_SCANNER_MPV1
                 } else if (it.version.startsWith("2")) {
-                    mpVersion = "mp2"
+                    mpVersion = BINARY_SCANNER_MPV2
                 } else if (it.version.startsWith("3")) {
-                    mpVersion = "mp3"
+                    mpVersion = BINARY_SCANNER_MPV3
                 } else if (it.version.startsWith("4")) {
-                    mpVersion = "mp4"
+                    mpVersion = BINARY_SCANNER_MPV4
                 }
             }
         }
