@@ -131,7 +131,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
         public File downloadArtifact(String groupId, String artifactId, String type, String version) throws PluginExecutionException {
  			//check if jsonCoordinate is provided from prepareFeature task
 			def coordinates = groupId + ":" + artifactId + ":" + version
- 			if(jsonCoordinate && jsonCoordinate.equals(coordinates)) {
+ 			if(jsonCoordinate != null && !jsonCoordinate.isEmpty() && jsonCoordinate.equals(coordinates)) {
  				Configuration provided = project.getConfigurations().findByName("jsonProvided");
  				if (provided != null) {
  					return provided.getFiles().iterator().next()
