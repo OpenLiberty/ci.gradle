@@ -15,8 +15,8 @@
  */
 package io.openliberty.tools.gradle;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test
 import org.w3c.dom.Document
 
@@ -51,15 +51,15 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
     static final String GENERATED_FEATURES_FILE_NAME = "generated-features.xml";
     static final String GENERATED_FEATURES_FILE_PATH = "/src/main/liberty/config/configDropins/overrides/" + GENERATED_FEATURES_FILE_NAME;
 
-    @BeforeClass
-    public static void setup() throws IOException, InterruptedException, FileNotFoundException {
+    @Before
+    public void setUp() throws IOException, InterruptedException, FileNotFoundException {
         createDir(buildDir);
         createTestProject(buildDir, resourceDir, buildFilename);
         runProcess(" compileJava generateFeatures");
     }
 
-    @AfterClass
-    public static void cleanUpAfterClass() throws Exception {
+    @After
+    public void cleanUp() throws Exception {
         Path path = logFile.toPath();
         Charset charset = StandardCharsets.UTF_8;
         String content = new String(Files.readAllBytes(path), charset);
