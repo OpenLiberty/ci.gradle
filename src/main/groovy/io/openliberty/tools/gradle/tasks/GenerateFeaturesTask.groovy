@@ -112,6 +112,11 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         Set<String> scannedFeatureList;
         try {
             Set<String> directories = getClassesDirectories();
+            if (directories.isEmpty() && (classFiles == null || classFiles.isEmpty())) {
+                // log as warning and continue to call binary scanner to detect conflicts in user specified features
+                logger.warn("Could not find class files to generate features against. Liberty features will not be generated. "
+                        + "Ensure your project has first been compiled.");
+            }
             String eeVersion = getEEVersion(project);
             String mpVersion = getMPVersion(project);
             scannedFeatureList = binaryScannerHandler.runBinaryScanner(existingFeatures, classFiles, directories, eeVersion, mpVersion, optimize);
@@ -229,7 +234,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                     + BINARY_SCANNER_MAVEN_ARTIFACT_ID
                     + " needed for generateFeatures. Ensure you have a connection to Maven Central or another repository that contains the "
                     + BINARY_SCANNER_MAVEN_GROUP_ID + "." + BINARY_SCANNER_MAVEN_ARTIFACT_ID
-                    + ".jar configured in your build.gradle",
+                    + ".jar configured in your build.gradle.",
                     e);
         }
     }
@@ -289,7 +294,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     private Set<String> getClassesDirectories() {
         Set<String> classesDirectories = new ArrayList<String>();
         project.sourceSets.main.getOutput().getClassesDirs().each {
-            classesDirectories.add(it.getAbsolutePath());
+            if (it.exists()) {
+                classesDirectories.add(it.getAbsolutePath());
+            }
         }
         return classesDirectories;
     }
