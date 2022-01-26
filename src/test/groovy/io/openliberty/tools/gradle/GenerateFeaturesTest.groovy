@@ -15,6 +15,7 @@
  */
 package io.openliberty.tools.gradle
 
+import io.openliberty.tools.gradle.tasks.GenerateFeaturesTask
 import org.codehaus.plexus.util.FileUtils
 import org.junit.After
 import org.junit.Before
@@ -98,8 +99,7 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
         assertFalse(newFeatureFile.exists());
 
         // verify class files not found warning message
-        assertTrue(processOutput.contains("Could not find class files to generate features against. "
-                + "Liberty features will not be generated. Ensure your project has first been compiled."));
+        assertTrue(processOutput.contains(GenerateFeaturesTask.NO_CLASS_FILES_WARNING));
 
     }
 
