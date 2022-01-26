@@ -100,12 +100,14 @@ jobs:
         - java: 8
           RUNTIME_VERSION: 20.0.0.12
     steps:
-    - name: Setup Java ${{ matrix.java }}
-      uses: joschi/setup-jdk@v2
-      with:
-        java-version: ${{ matrix.java }}
     - name: Checkout ci.gradle
       uses: actions/checkout@v2
+    - name: Setup Java ${{ matrix.java }}
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: ${{ matrix.java }}
+        cache: 'gradle'
     - name: Checkout ci.common
       uses: actions/checkout@v2
       with:
