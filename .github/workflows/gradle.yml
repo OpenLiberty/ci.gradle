@@ -10,33 +10,9 @@ on:
     branches: [ main ]
 
 jobs:
-  cache:
-    name: Cache Maven and Gradle packages
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-18.04, windows-latest]
-    steps:
-    - name: Cache Maven packages
-      uses: actions/cache@v2
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
-    - name: Cache Gradle packages
-      uses: actions/cache@v2
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-          ${{ runner.os }}-
   build-windows:
     runs-on: windows-latest
     name: ${{ matrix.RUNTIME }} ${{ matrix.RUNTIME_VERSION }}, Java ${{ matrix.java }}, Windows
-    needs: cache
     strategy:
       fail-fast: false
       matrix:
@@ -50,17 +26,34 @@ jobs:
         - java: 8
           RUNTIME: wlp
     steps:
-    - name: Setup Java ${{ matrix.java }}
-      uses: joschi/setup-jdk@v2
-      with:
-        java-version: ${{ matrix.java }}
     - name: Checkout ci.gradle
       uses: actions/checkout@v2
+    - name: Setup Java ${{ matrix.java }}
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: ${{ matrix.java }}
+        cache: 'gradle'
     - name: Clone ci.ant, ci.common, ci.gradle repos to C drive
       run: |
         cp -r D:/a/ci.gradle/ci.gradle C:/ci.gradle
         git clone https://github.com/OpenLiberty/ci.common/ C:/ci.common
         git clone https://github.com/OpenLiberty/ci.ant C:/ci.ant
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    - name: Cache Gradle packages
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
     - name: Install ci.ant and ci.common
       run: |
         cd C:/ci.ant
@@ -87,7 +80,6 @@ jobs:
   build-unix:
     runs-on: ubuntu-18.04
     name: ${{ matrix.RUNTIME }} ${{ matrix.RUNTIME_VERSION }}, Java ${{ matrix.java }}, Linux
-    needs: cache
     # Steps represent a sequence of tasks that will be executed as part of the job
     strategy:
       fail-fast: false
@@ -118,6 +110,21 @@ jobs:
       with:
         repository: OpenLiberty/ci.ant
         path: ci.ant
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    - name: Cache Gradle packages
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
     - name: Install ci.ant and ci.common
       run: |
         cd ./ci.ant
