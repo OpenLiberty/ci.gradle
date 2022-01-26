@@ -797,7 +797,7 @@ class DevTask extends AbstractFeatureTask {
                     logger.error(pluginEx.getMessage() + ".\nDisabling the automatic generation of features.");
                     setFeatureGeneration(false);
                 } else {
-                    logger.error(e.getMessage() + ".\nTo disable the automatic generation of features, type 'g' and press Enter.");
+                    logger.error(e.getMessage() + "\nTo disable the automatic generation of features, type 'g' and press Enter.");
                 }
                 return false;
             } finally {

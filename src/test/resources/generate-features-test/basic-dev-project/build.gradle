@@ -10,8 +10,8 @@ tasks.withType(JavaCompile) {
 // configure liberty-gradle-plugin 
 buildscript {
     repositories {
-        mavenLocal()
         mavenCentral()
+        mavenLocal()
         // Sonatype repo for getting the latest binary scanner jar snapshot
         maven {
             url 'https://oss.sonatype.org/content/repositories/snapshots/'

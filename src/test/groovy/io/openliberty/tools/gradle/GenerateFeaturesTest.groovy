@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.openliberty.tools.gradle;
+package io.openliberty.tools.gradle
 
-import org.junit.After;
-import org.junit.Before;
+import io.openliberty.tools.gradle.tasks.GenerateFeaturesTask
+import org.codehaus.plexus.util.FileUtils
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import org.w3c.dom.Document
 
@@ -24,17 +26,14 @@ import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.xpath.XPath
 import javax.xml.xpath.XPathConstants
-import javax.xml.xpath.XPathFactory;
-import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import javax.xml.xpath.XPathFactory
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*
 
 class GenerateFeaturesTest extends AbstractIntegrationTest {
     static final String projectName = "basic-dev-project";
@@ -47,6 +46,8 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
     static BufferedWriter writer;
     static File logFile = new File(buildDir, "output.log");
     static Process process;
+    static String processOutput = "";
+    static File newFeatureFile;
 
     static final String GENERATED_FEATURES_FILE_NAME = "generated-features.xml";
     static final String GENERATED_FEATURES_FILE_PATH = "/src/main/liberty/config/configDropins/overrides/" + GENERATED_FEATURES_FILE_NAME;
@@ -55,27 +56,31 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
     public void setUp() throws IOException, InterruptedException, FileNotFoundException {
         createDir(buildDir);
         createTestProject(buildDir, resourceDir, buildFilename);
-        runProcess(" compileJava generateFeatures");
+        newFeatureFile = new File(buildDir, GENERATED_FEATURES_FILE_PATH);
     }
 
     @After
     public void cleanUp() throws Exception {
-        Path path = logFile.toPath();
-        Charset charset = StandardCharsets.UTF_8;
-        String content = new String(Files.readAllBytes(path), charset);
-        System.out.println("Process output: " + content);
-
         if (writer != null) {
                 process.destroy(); // stop run
             writer.flush();
             writer.close();
         }
+
+        // clean up build directory
+        if (buildDir.exists()) {
+            FileUtils.deleteDirectory(buildDir);
+        }
     }
 
     @Test
     public void basicTest() throws Exception {
+        runProcess(" compileJava generateFeatures");
+        // verify that the target directory was created
+        targetDir = new File(buildDir, "build");
+        assertTrue(targetDir.exists());
+
         // verify that the generated features file was created
-        File newFeatureFile = new File(buildDir, GENERATED_FEATURES_FILE_PATH);
         assertTrue(newFeatureFile.exists());
 
         // verify that the correct features are in the generated-features.xml
@@ -83,6 +88,19 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
         assertEquals(1, features.size());
         List<String> expectedFeatures = Arrays.asList("servlet-4.0");
         assertEquals(expectedFeatures, features);
+    }
+
+    @Test
+    public void noClassFiles() throws Exception {
+        // do not compile before running generateFeatures
+        runProcess(" generateFeatures");
+
+        // verify that generated features file was not created
+        assertFalse(newFeatureFile.exists());
+
+        // verify class files not found warning message
+        assertTrue(processOutput.contains(GenerateFeaturesTask.NO_CLASS_FILES_WARNING));
+
     }
 
     private static ProcessBuilder buildProcess(String processCommand) {
@@ -126,9 +144,11 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
         process.waitFor(20, TimeUnit.SECONDS);
         assertFalse(process.isAlive());
 
-        // verify that the target directory was created
-        targetDir = new File(buildDir, "build");
-        assertTrue(targetDir.exists());
+        // save and print process output
+        Path path = logFile.toPath();
+        Charset charset = StandardCharsets.UTF_8;
+        processOutput = new String(Files.readAllBytes(path), charset);
+        System.out.println("Process output: " + processOutput);
     }
 
     /**
