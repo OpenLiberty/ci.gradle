@@ -29,6 +29,7 @@ jobs:
 
     name: ${{ matrix.RUNTIME }} ${{ matrix.RUNTIME_VERSION }}, Java ${{ matrix.java }}, ${{ matrix.os }}
     steps:
+# Checkout repos
     - name: Checkout ci.gradle
       uses: actions/checkout@v2
     - name: Setup Java ${{ matrix.java }}
@@ -49,12 +50,14 @@ jobs:
       with:
         repository: OpenLiberty/ci.ant
         path: ci.ant
+    # Moving and cloning to C: drive for Windows for more disk space
     - name: Clone ci.ant, ci.common, ci.gradle repos to C drive (Windows)
       if: ${{ runner.os == 'Windows' }}
       run: |
         cp -r D:/a/ci.gradle/ci.gradle C:/ci.gradle
         git clone https://github.com/OpenLiberty/ci.common/ C:/ci.common
         git clone https://github.com/OpenLiberty/ci.ant C:/ci.ant
+# Cache mvn/gradle packages
     - name: Cache Maven packages
       uses: actions/cache@v2
       with:
@@ -70,6 +73,7 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
+# Install dependencies
     - name: Install ci.ant and ci.common (Windows)
       if: ${{ runner.os == 'Windows' }}
       run: |
@@ -85,6 +89,7 @@ jobs:
         cd ../ci.common
         mvn clean install
         cd ..
+# Run tests
     - name: Run tests with Gradle on Ubuntu
       if: ${{ runner.os == 'Linux' }}
       run: |
@@ -103,6 +108,7 @@ jobs:
       timeout-minutes: 60
       env:
         GRADLE_OPTS: "-Dorg.gradle.jvmargs='-XX:MaxMetaspaceSize=512m'"
+# Copy build reports and upload artifact if build failed
     - name: Copy build/report/tests/test for upload (Linux)
       if: ${{ runner.os == 'Linux' && always() }}
       run: mkdir -p ${BUILD_REPORTS_PATH} && cp -r build/reports/tests/test ${BUILD_REPORTS_PATH}
