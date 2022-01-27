@@ -27,6 +27,7 @@ import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.options.Option
 import org.gradle.testfixtures.ProjectBuilder
+import org.gradle.api.artifacts.Configuration
 
 public class AbstractFeatureTask extends AbstractServerTask {
 
@@ -38,10 +39,10 @@ public class AbstractFeatureTask extends AbstractServerTask {
 
     private InstallFeatureUtil util;
 
-    @Internal
-    Project newProject = project;
-
     private ServerFeatureUtil servUtil;
+	
+	@Internal
+ 	String jsonCoordinate;
 
     @Option(option = 'serverDir', description = '(Optional) Server directory to get the list of features from.')
     void setServerDirectoryParam(String serverDir) {
@@ -128,8 +129,18 @@ public class AbstractFeatureTask extends AbstractServerTask {
 
         @Override
         public File downloadArtifact(String groupId, String artifactId, String type, String version) throws PluginExecutionException {
-            return ArtifactDownloadUtil.downloadArtifact(project, groupId, artifactId, type, version);
-        }
+ 			//check if jsonCoordinate is provided from prepareFeature task
+			def coordinates = groupId + ":" + artifactId + ":" + version
+ 			if(jsonCoordinate != null && !jsonCoordinate.isEmpty() && jsonCoordinate.equals(coordinates)) {
+ 				Configuration provided = project.getConfigurations().findByName("jsonProvided");
+ 				if (provided != null) {
+ 					return provided.getFiles().iterator().next()
+ 				}else {
+ 					return ArtifactDownloadUtil.downloadArtifact(project, groupId, artifactId, type, version);
+ 				}
+ 			}
+ 			return ArtifactDownloadUtil.downloadArtifact(project, groupId, artifactId, type, version);
+ 		}
     }
 
     protected Set<String> getPluginListedFeatures(boolean findEsaFiles) {
@@ -160,6 +171,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
         List<String> result = new ArrayList<String>()
         project.configurations.featuresBom.dependencies.each { dep ->
             def coordinate = dep.group + ":" + "features" + ":" + dep.version
+			jsonCoordinate = coordinate
             logger.debug("feature Json: " + coordinate)
             result.add(coordinate)
         }
@@ -232,23 +244,6 @@ public class AbstractFeatureTask extends AbstractServerTask {
     }
 
     protected InstallFeatureUtil getInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons) throws PluginExecutionException {
-        //if installing userFeature, recompile gradle to find mavenLocal artifacts created by prepareFeature task.
-        if (project.configurations.featuresBom.dependencies) {
-            try {
-                ProjectBuilder builder = ProjectBuilder.builder();
-                newProject = builder
-                        .withProjectDir(project.rootDir)
-                        .withGradleUserHomeDir(project.gradle.gradleUserHomeDir)
-                        .withName(project.name)
-                        .build();
-
-                // need this for gradle to evaluate the project
-                // and load the different plugins and extensions
-                newProject.evaluate();
-            } catch (Exception e) {
-                throw new PluginExecutionException("Could not parse build.gradle " + e.getMessage());
-            }
-        }
         createNewInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons)
         return util
     }
