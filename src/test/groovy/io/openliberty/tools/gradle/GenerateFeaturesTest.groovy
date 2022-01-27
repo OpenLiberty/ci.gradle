@@ -75,7 +75,7 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
 
     @Test
     public void basicTest() throws Exception {
-        runProcess(" compileJava generateFeatures");
+        runProcess("compileJava generateFeatures");
         // verify that the target directory was created
         targetDir = new File(buildDir, "build");
         assertTrue(targetDir.exists());
@@ -93,14 +93,13 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
     @Test
     public void noClassFiles() throws Exception {
         // do not compile before running generateFeatures
-        runProcess(" generateFeatures");
+        runProcess("generateFeatures");
 
         // verify that generated features file was not created
         assertFalse(newFeatureFile.exists());
 
         // verify class files not found warning message
         assertTrue(processOutput.contains(GenerateFeaturesTask.NO_CLASS_FILES_WARNING));
-
     }
 
     private static ProcessBuilder buildProcess(String processCommand) {
@@ -126,7 +125,7 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
             gradlew = new File("gradlew");
         }
 
-        StringBuilder command = new StringBuilder(gradlew.getAbsolutePath() + processCommand);
+        StringBuilder command = new StringBuilder(gradlew.getAbsolutePath() + " " + processCommand);
 
         System.out.println("Running command: " + command.toString());
         ProcessBuilder builder = buildProcess(command.toString());
@@ -152,7 +151,7 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
     }
 
     /**
-     * Given an configuration XML file return the features in the featureManager
+     * Given a configuration XML file return the features in the featureManager
      * element if any
      *
      * @param file configuration XML file
