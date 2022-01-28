@@ -147,7 +147,6 @@ jobs:
         mvn clean install
 # Run tests
     - name: Run tests with Gradle on Windows
-      if: ${{ runner.os == 'Windows' }}
       working-directory: C:/ci.gradle
       # LibertyTest is excluded because test0_run hangs
       run: ./gradlew clean install check -P"test.exclude"="**/*15*,**/Polling*,**/TestLoose*,**/LibertyTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" ${GRADLE_OPTS} --stacktrace --info --no-daemon
