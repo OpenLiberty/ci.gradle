@@ -566,13 +566,20 @@ class DevTask extends AbstractFeatureTask {
                 return true;
             } else if (installFeatures) {
                 if (generateFeatures) {
+                    // TODO confirm a call to generate features is required when a build file's compilation dependencies are modified
                     // Increment generate features on build dependency change
                     ProjectConnection gradleConnection = initGradleProjectConnection();
                     BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
                     runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources'); // ensure class files exist
+
+                    // only call generateFeatures if classes
                     Collection<String> javaSourceClassPaths = getJavaSourceClassPaths();
-                    libertyGenerateFeatures(javaSourceClassPaths, false);
-                    libertyCreate(); // need to run create in order to copy generated config file to target
+                    if (!javaSourceClassPaths.isEmpty()) {
+                        if (libertyGenerateFeatures(javaSourceClassPaths, false)) {
+                            util.javaSourceClassPaths.clear();
+                        };
+                        libertyCreate(); // need to run create in order to copy generated config file to target
+                    }
                 }
                 libertyInstallFeature();
             }
