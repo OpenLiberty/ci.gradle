@@ -86,7 +86,25 @@ class DevTest extends AbstractIntegrationTest {
         }
         return false;
     }
- 
+    protected static boolean verifyLogMessage(int timeout, String message, int occurrences)
+            throws InterruptedException, FileNotFoundException {
+        verifyLogMessage(timeout, message, logFile, occurrences)
+    }
+
+    protected static boolean verifyLogMessage(int timeout, String message, File file, int occurrences)
+            throws InterruptedException, FileNotFoundException {
+        int waited = 0;
+        int sleep = 10;
+        while (waited <= timeout) {
+            Thread.sleep(sleep);
+            waited += sleep;
+            if (countOccurrences(message, file) == occurrences) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     protected static boolean verifyFileExists(File file, int timeout)
           throws InterruptedException {
        int waited = 0;
@@ -343,18 +361,38 @@ class DevTest extends AbstractIntegrationTest {
     private static void stopProcess(boolean isDevMode) throws IOException, InterruptedException, FileNotFoundException {
         // shut down dev mode
         if (writer != null) {
-            if(isDevMode) {
+            int serverStoppedOccurrences = countOccurrences("CWWKE0036I", logFile);
+            if (isDevMode) {
                 writer.write("exit"); // trigger dev mode to shut down
-            }
-            else {
+            } else {
                 process.destroy(); // stop run
             }
             writer.flush();
             writer.close();
 
             // test that dev mode has stopped running
-            assertTrue(verifyLogMessage(100000, "CWWKE0036I"));
+            assertTrue(verifyLogMessage(100000, "CWWKE0036I", ++serverStoppedOccurrences));
         }
     }
-    
+
+    /**
+     * Count number of lines that contain the given string
+     */
+    protected static int countOccurrences(String str, File file) throws FileNotFoundException, IOException {
+        int occurrences = 0;
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String line = br.readLine();
+        try {
+            while (line != null) {
+                if (line.contains(str)) {
+                    occurrences++;
+                }
+                line = br.readLine();
+            }
+        } finally {
+            br.close();
+        }
+        return occurrences;
+    }
+
 }
