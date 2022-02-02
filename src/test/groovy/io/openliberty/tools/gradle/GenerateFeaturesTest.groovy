@@ -126,6 +126,23 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
         assertEquals(expectedFeatures, features);
     }
 
+    @Test
+    public void serverXmlCommentTest() throws Exception {
+        // initially the expected comment is not found in server.xml
+        File serverXmlFile = new File(buildDir, "src/main/liberty/config/server.xml");
+        assertFalse(verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 10, serverXmlFile));
+        // also we wish to test behaviour when there is no <featureManager> element so test that
+        assertFalse(verifyLogMessageExists("<featureManager>", 10, serverXmlFile));
+
+        runProcess("compileJava generateFeatures");
+
+        // verify that generated features file was created
+        assertTrue(newFeatureFile.exists());
+
+        // verify expected comment found in server.xml
+        assertTrue(verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
+    }
+
     protected static void replaceString(String str, String replacement, File file) throws IOException {
         Path path = file.toPath();
         Charset charset = StandardCharsets.UTF_8;
@@ -182,6 +199,36 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
         Charset charset = StandardCharsets.UTF_8;
         processOutput = new String(Files.readAllBytes(path), charset);
         System.out.println("Process output: " + processOutput);
+    }
+
+    protected static boolean verifyLogMessageExists(String message, int timeout, File log)
+        throws InterruptedException, FileNotFoundException, IOException {
+        int waited = 0;
+        int sleep = 10;
+        while (waited <= timeout) {
+            if (readFile(message, log)) {
+                return true;
+            }
+            Thread.sleep(sleep);
+            waited += sleep;
+        }
+        return false;
+    }
+
+    protected static boolean readFile(String str, File file) throws FileNotFoundException, IOException {
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String line = br.readLine();
+        try {
+            while (line != null) {
+                if (line.contains(str)) {
+                    return true;
+                }
+                line = br.readLine();
+            }
+        } finally {
+            br.close();
+        }
+        return false;
     }
 
     /**
