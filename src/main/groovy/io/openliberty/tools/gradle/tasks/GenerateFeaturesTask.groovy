@@ -104,6 +104,11 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
         Set<String> existingFeatures = getServerFeatures(servUtil, generatedFiles, optimize);
         logger.debug("Existing features:" + existingFeatures);
+        Set<String> nonCustomFeatures = new HashSet<String>(); // binary scanner only handles actual Liberty features
+        for (String feature : existingFeatures) { // custom features are "usr:feature-1.0" or "myExt:feature-2.0"
+            if (!feature.contains(":")) nonCustomFeatures.add(feature);
+        }
+        logger.debug("Non-custom features:" + nonCustomFeatures);
 
         Set<String> scannedFeatureList;
         try {
@@ -114,7 +119,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             }
             String eeVersion = getEEVersion(project);
             String mpVersion = getMPVersion(project);
-            scannedFeatureList = binaryScannerHandler.runBinaryScanner(existingFeatures, classFiles, directories, eeVersion, mpVersion, optimize);
+            scannedFeatureList = binaryScannerHandler.runBinaryScanner(nonCustomFeatures, classFiles, directories, eeVersion, mpVersion, optimize);
         } catch (BinaryScannerUtil.NoRecommendationException noRecommendation) {
             throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE3, noRecommendation.getConflicts()));
         } catch (BinaryScannerUtil.FeatureModifiedException featuresModified) {

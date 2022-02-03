@@ -62,7 +62,7 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
     @After
     public void cleanUp() throws Exception {
         if (writer != null) {
-                process.destroy(); // stop run
+            process.destroy(); // stop run
             writer.flush();
             writer.close();
         }
@@ -75,7 +75,7 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
 
     @Test
     public void basicTest() throws Exception {
-        runProcess(" compileJava generateFeatures");
+        runProcess("compileJava generateFeatures");
         // verify that the target directory was created
         targetDir = new File(buildDir, "build");
         assertTrue(targetDir.exists());
@@ -93,7 +93,7 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
     @Test
     public void noClassFiles() throws Exception {
         // do not compile before running generateFeatures
-        runProcess(" generateFeatures");
+        runProcess("generateFeatures");
 
         // verify that generated features file was not created
         assertFalse(newFeatureFile.exists());
@@ -101,6 +101,39 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
         // verify class files not found warning message
         assertTrue(processOutput.contains(GenerateFeaturesTask.NO_CLASS_FILES_WARNING));
 
+    }
+
+    @Test
+    public void customFeaturesTest() throws Exception {
+        // complete the setup of the test
+        File serverXmlFile = new File(buildDir, "src/main/liberty/config/server.xml");
+        replaceString("<!--replaceable-->",
+        "<featureManager>\n" +
+        "  <feature>jaxrs-2.1</feature>\n" +
+        "  <feature>usr:custom-1.0</feature>\n" +
+        "</featureManager>\n", serverXmlFile);
+        assertFalse("Before running", newFeatureFile.exists());
+        // run the test
+        runProcess("compileJava generateFeatures");
+
+        // verify that the generated features file was created
+        assertTrue(newFeatureFile.exists());
+
+        // verify that the correct features are in the generated-features.xml
+        List<String> features = readFeatures(newFeatureFile);
+        assertEquals(1, features.size());
+        List<String> expectedFeatures = Arrays.asList("servlet-4.0");
+        assertEquals(expectedFeatures, features);
+    }
+
+    protected static void replaceString(String str, String replacement, File file) throws IOException {
+        Path path = file.toPath();
+        Charset charset = StandardCharsets.UTF_8;
+
+        String content = new String(Files.readAllBytes(path), charset);
+
+        content = content.replaceAll(str, replacement);
+        Files.write(path, content.getBytes(charset));
     }
 
     private static ProcessBuilder buildProcess(String processCommand) {
@@ -126,7 +159,7 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
             gradlew = new File("gradlew");
         }
 
-        StringBuilder command = new StringBuilder(gradlew.getAbsolutePath() + processCommand);
+        StringBuilder command = new StringBuilder(gradlew.getAbsolutePath() + " " + processCommand);
 
         System.out.println("Running command: " + command.toString());
         ProcessBuilder builder = buildProcess(command.toString());
