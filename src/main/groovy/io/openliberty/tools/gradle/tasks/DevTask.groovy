@@ -444,6 +444,7 @@ class DevTask extends AbstractFeatureTask {
         public boolean recompileBuildFile(File buildFile, Set<String> compileArtifactPaths, Set<String> testArtifactPaths, ThreadPoolExecutor executor) {
             boolean restartServer = false;
             boolean installFeatures = false;
+            boolean compileProject = false;
 
             ProjectBuilder builder = ProjectBuilder.builder();
             Project newProject;
@@ -537,9 +538,24 @@ class DevTask extends AbstractFeatureTask {
                 List<String> newFeatureNames = newProject.liberty.server.features.name;
 
                 if (oldFeatureNames != newFeatureNames) {
-                    logger.debug('Server feature changed');
+                    logger.warn('Server feature changed');
                     installFeatures = true;
                     project.liberty.server.features.name = newFeatureNames;
+                }
+
+                // check if compile dependencies have changed
+                Configuration existingProjectCompileConfiguration = project.configurations.getByName('providedCompile');
+                List<String> existingProjectCompileDependencies = new ArrayList<String>();
+                existingProjectCompileConfiguration.dependencies.each { dep -> existingProjectCompileDependencies.add(dep.group + ":" + dep.name + ":" + dep.version) }
+
+                Configuration newProjectCompileConfiguration = newProject.configurations.getByName('providedCompile');
+                List<String> newProjectCompileDependencies = new ArrayList<String>();
+                newProjectCompileConfiguration.dependencies.each { dep -> newProjectCompileDependencies.add(dep.group + ":" + dep.name + ":" + dep.version) }
+
+                newProjectCompileDependencies.removeAll(existingProjectCompileDependencies);
+                if (!newProjectCompileDependencies.isEmpty()) {
+                    logger.debug("Compile dependencies changed");
+                    compileProject = true;
                 }
 
                 Configuration newLibertyFeatureConfiguration = newProject.configurations.getByName('libertyFeature');
@@ -564,23 +580,21 @@ class DevTask extends AbstractFeatureTask {
                 // - start server
                 util.restartServer();
                 return true;
-            } else if (installFeatures) {
-                if (generateFeatures) {
-                    // TODO: if we generate features here we will also need to skip installing features on a failure
-                    ProjectConnection gradleConnection = initGradleProjectConnection();
-                    BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
-                    runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources'); // ensure class files exist
-
-                    // optimize generate features on build dependency change
-                    Collection<String> javaSourceClassPaths = getJavaSourceClassPaths();
-                    boolean generateFeaturesSuccess = libertyGenerateFeatures(javaSourceClassPaths, true);
-                    if (generateFeaturesSuccess) {
-                        util.javaSourceClassPaths.clear();
-                    };
-                    libertyCreate(); // need to run create in order to copy generated config file to target
-
-                }
+            } else if (installFeatures && !compileProject) {
                 libertyInstallFeature();
+            } else if (compileProject && generateFeatures) { // generate features if compile dependencies have been modified
+                ProjectConnection gradleConnection = initGradleProjectConnection();
+                BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+                runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources'); // ensure class files exist
+
+                // optimize generate features on build dependency change
+                Collection<String> javaSourceClassPaths = getJavaSourceClassPaths();
+                boolean generateFeaturesSuccess = libertyGenerateFeatures(javaSourceClassPaths, true);
+                if (generateFeaturesSuccess) {
+                    util.javaSourceClassPaths.clear();
+                    libertyCreate(); // need to run create in order to copy generated config file to target
+                    libertyInstallFeature(); // install newly generated features
+                };
             }
 
             return true;
