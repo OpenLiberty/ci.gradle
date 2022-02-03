@@ -108,10 +108,10 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
         // complete the setup of the test
         File serverXmlFile = new File(buildDir, "src/main/liberty/config/server.xml");
         replaceString("<!--replaceable-->",
-        "<featureManager>\n" +
-        "  <feature>jaxrs-2.1</feature>\n" +
-        "  <feature>usr:custom-1.0</feature>\n" +
-        "</featureManager>\n", serverXmlFile);
+            "<featureManager>\n" +
+            "  <feature>jaxrs-2.1</feature>\n" +
+            "  <feature>usr:custom-1.0</feature>\n" +
+            "</featureManager>\n", serverXmlFile);
         assertFalse("Before running", newFeatureFile.exists());
         // run the test
         runProcess("compileJava generateFeatures");
@@ -124,6 +124,52 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
         assertEquals(1, features.size());
         List<String> expectedFeatures = Arrays.asList("servlet-4.0");
         assertEquals(expectedFeatures, features);
+    }
+
+    @Test
+    public void serverXmlCommentNoFMTest() throws Exception {
+        // initially the expected comment is not found in server.xml
+        File serverXmlFile = new File(buildDir, "src/main/liberty/config/server.xml");
+        assertFalse(verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 10, serverXmlFile));
+        // also we wish to test behaviour when there is no <featureManager> element so test that
+        assertFalse(verifyLogMessageExists("<featureManager>", 10, serverXmlFile));
+
+        runProcess("compileJava generateFeatures");
+
+        // verify that generated features file was created
+        assertTrue(newFeatureFile.exists());
+
+        // verify expected comment found in server.xml
+        Charset charset = StandardCharsets.UTF_8;
+        String serverXmlContents = new String(Files.readAllBytes(serverXmlFile.toPath()), charset);
+        serverXmlContents = "\n" + serverXmlContents;
+        assertTrue(serverXmlContents,
+            verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
+    }
+
+    @Test
+    public void serverXmlCommentFMTest() throws Exception {
+        File serverXmlFile = new File(buildDir, "src/main/liberty/config/server.xml");
+        replaceString("<!--replaceable-->",
+            "<!--Feature generation comment goes below this line-->\n" +
+            "  <featureManager>\n" +
+            "    <feature>jaxrs-2.1</feature>\n" +
+            "  </featureManager>\n", serverXmlFile);
+
+        // initially the expected comment is not found in server.xml
+        assertFalse(verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 10, serverXmlFile));
+
+        runProcess("compileJava generateFeatures");
+
+        // verify that generated features file was created
+        assertTrue(newFeatureFile.exists());
+
+        // verify expected comment found in server.xml
+        Charset charset = StandardCharsets.UTF_8;
+        String serverXmlContents = new String(Files.readAllBytes(serverXmlFile.toPath()), charset);
+        serverXmlContents = "\n" + serverXmlContents;
+        assertTrue(serverXmlContents,
+            verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
     }
 
     protected static void replaceString(String str, String replacement, File file) throws IOException {
@@ -182,6 +228,36 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
         Charset charset = StandardCharsets.UTF_8;
         processOutput = new String(Files.readAllBytes(path), charset);
         System.out.println("Process output: " + processOutput);
+    }
+
+    protected static boolean verifyLogMessageExists(String message, int timeout, File log)
+        throws InterruptedException, FileNotFoundException, IOException {
+        int waited = 0;
+        int sleep = 10;
+        while (waited <= timeout) {
+            if (readFile(message, log)) {
+                return true;
+            }
+            Thread.sleep(sleep);
+            waited += sleep;
+        }
+        return false;
+    }
+
+    protected static boolean readFile(String str, File file) throws FileNotFoundException, IOException {
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String line = br.readLine();
+        try {
+            while (line != null) {
+                if (line.contains(str)) {
+                    return true;
+                }
+                line = br.readLine();
+            }
+        } finally {
+            br.close();
+        }
+        return false;
     }
 
     /**
