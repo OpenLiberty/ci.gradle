@@ -108,10 +108,10 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
         // complete the setup of the test
         File serverXmlFile = new File(buildDir, "src/main/liberty/config/server.xml");
         replaceString("<!--replaceable-->",
-        "<featureManager>\n" +
-        "  <feature>jaxrs-2.1</feature>\n" +
-        "  <feature>usr:custom-1.0</feature>\n" +
-        "</featureManager>\n", serverXmlFile);
+            "<featureManager>\n" +
+            "  <feature>jaxrs-2.1</feature>\n" +
+            "  <feature>usr:custom-1.0</feature>\n" +
+            "</featureManager>\n", serverXmlFile);
         assertFalse("Before running", newFeatureFile.exists());
         // run the test
         runProcess("compileJava generateFeatures");
@@ -127,7 +127,7 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void serverXmlCommentTest() throws Exception {
+    public void serverXmlCommentNoFMTest() throws Exception {
         // initially the expected comment is not found in server.xml
         File serverXmlFile = new File(buildDir, "src/main/liberty/config/server.xml");
         assertFalse(verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 10, serverXmlFile));
@@ -140,7 +140,36 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
         assertTrue(newFeatureFile.exists());
 
         // verify expected comment found in server.xml
-        assertTrue(verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
+        Charset charset = StandardCharsets.UTF_8;
+        String serverXmlContents = new String(Files.readAllBytes(serverXmlFile.toPath()), charset);
+        serverXmlContents = "\n" + serverXmlContents;
+        assertTrue(serverXmlContents,
+            verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
+    }
+
+    @Test
+    public void serverXmlCommentFMTest() throws Exception {
+        File serverXmlFile = new File(buildDir, "src/main/liberty/config/server.xml");
+        replaceString("<!--replaceable-->",
+            "<!--Feature generation comment goes below this line-->\n" +
+            "  <featureManager>\n" +
+            "    <feature>jaxrs-2.1</feature>\n" +
+            "  </featureManager>\n", serverXmlFile);
+
+        // initially the expected comment is not found in server.xml
+        assertFalse(verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 10, serverXmlFile));
+
+        runProcess("compileJava generateFeatures");
+
+        // verify that generated features file was created
+        assertTrue(newFeatureFile.exists());
+
+        // verify expected comment found in server.xml
+        Charset charset = StandardCharsets.UTF_8;
+        String serverXmlContents = new String(Files.readAllBytes(serverXmlFile.toPath()), charset);
+        serverXmlContents = "\n" + serverXmlContents;
+        assertTrue(serverXmlContents,
+            verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
     }
 
     protected static void replaceString(String str, String replacement, File file) throws IOException {
