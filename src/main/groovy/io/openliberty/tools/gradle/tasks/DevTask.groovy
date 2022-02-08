@@ -580,13 +580,11 @@ class DevTask extends AbstractFeatureTask {
                 // - start server
                 util.restartServer();
                 return true;
-            } else if ((installFeatures || compileDependenciesChanged) && generateFeatures) { // generate features if compile dependencies have been modified
+            } else if (compileDependenciesChanged && generateFeatures) { // generate features if compile dependencies have been modified
                 // optimize generate features on build dependency change
                 boolean generateFeaturesSuccess = libertyGenerateFeatures(null, true);
                 if (generateFeaturesSuccess) {
                     util.javaSourceClassPaths.clear();
-                    libertyCreate(); // need to run create in order to copy generated config file to target
-                    libertyInstallFeature(); // install newly generated features
                 };
             } else if (installFeatures) {
                 libertyInstallFeature();
