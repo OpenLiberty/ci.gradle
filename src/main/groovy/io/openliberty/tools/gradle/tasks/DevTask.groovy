@@ -538,7 +538,7 @@ class DevTask extends AbstractFeatureTask {
                 List<String> newFeatureNames = newProject.liberty.server.features.name;
 
                 if (oldFeatureNames != newFeatureNames) {
-                    logger.warn('Server feature changed');
+                    logger.debug('Server feature changed');
                     installFeatures = true;
                     project.liberty.server.features.name = newFeatureNames;
                 }
