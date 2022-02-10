@@ -35,11 +35,11 @@ import java.util.concurrent.TimeUnit
 import static org.junit.Assert.*
 
 /**
- * Liberty generate-features task tests for various MicroProfile and Java EE versions
+ * Liberty generateFeatures task tests for various MicroProfile and Java EE versions
  * Test to ensure the binary scanner honours the version of MicroProfile and Java EE
- * specified in the pom.xml
+ * specified in the build.gradle.
  * When you use MicroProfile the binary scanner assumes you use the lastest subversion
- * in the version you specify:
+ * in the MicroProfile version you specify:
  * You specify | binary scanner generates features in
  * MP 1.1-1.4  | MicroProfile 1.4
  * MP 2.0-2.2  | MicroProfile 2.2
