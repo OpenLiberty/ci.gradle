@@ -1,0 +1,50 @@
+apply plugin: "liberty"
+apply plugin: "war"
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+// configure liberty-gradle-plugin 
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        // Sonatype repo for getting the latest binary scanner jar snapshot
+        maven {
+            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // provided dependencies
+    providedCompile "javax:javaee-api:EE_VERSION"
+    providedCompile "org.eclipse.microprofile:microprofile:MP_VERSION"
+    providedCompile "javax.json.bind:javax.json.bind-api:1.0"
+    providedCompile "org.apache.commons:commons-lang3:3.0"
+    providedCompile "javax.xml.bind:jaxb-api:2.2.11"
+    providedCompile "com.sun.xml.bind:jaxb-core:2.2.11"
+    providedCompile "com.sun.xml.bind:jaxb-impl:2.2.11"
+    providedCompile "javax.activation:activation:1.1.1"
+
+    libertyRuntime "$runtimeGroup:$runtimeArtifactId:$runtimeVersion"
+
+    // test dependencies
+    testImplementation "junit:junit:4.13.1"
+    testImplementation "org.apache.cxf:cxf-rt-rs-client:3.2.6"
+    testImplementation "org.apache.cxf:cxf-rt-rs-extension-providers:3.2.6"
+    testImplementation "org.glassfish:javax.json:1.0.4"
+    testImplementation "javax.xml.bind:jaxb-api:2.3.1"
+}
+
+clean.dependsOn "libertyStop"
