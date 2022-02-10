@@ -42,12 +42,14 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
     static File buildDir = new File(integTestDir, "generate-features-test/" + projectName + System.currentTimeMillis());
     static String buildFilename = "build.gradle";
 
-    static File targetDir;
     static BufferedWriter writer;
     static File logFile = new File(buildDir, "output.log");
     static Process process;
     static String processOutput = "";
+
     static File newFeatureFile;
+    static File serverXmlFile;
+    static File targetDir;
 
     static final String GENERATED_FEATURES_FILE_NAME = "generated-features.xml";
     static final String GENERATED_FEATURES_FILE_PATH = "/src/main/liberty/config/configDropins/overrides/" + GENERATED_FEATURES_FILE_NAME;
@@ -56,7 +58,10 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
     public void setUp() throws IOException, InterruptedException, FileNotFoundException {
         createDir(buildDir);
         createTestProject(buildDir, resourceDir, buildFilename);
+
         newFeatureFile = new File(buildDir, GENERATED_FEATURES_FILE_PATH);
+        serverXmlFile = new File(buildDir, "src/main/liberty/config/server.xml");
+        targetDir = new File(buildDir, "build");
     }
 
     @After
@@ -75,38 +80,47 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
 
     @Test
     public void basicTest() throws Exception {
-        runProcess("compileJava generateFeatures");
+        runCompileAndGenerateFeatures();
         // verify that the target directory was created
-        targetDir = new File(buildDir, "build");
         assertTrue(targetDir.exists());
 
         // verify that the generated features file was created
         assertTrue(newFeatureFile.exists());
 
         // verify that the correct features are in the generated-features.xml
-        List<String> features = readFeatures(newFeatureFile);
+        Set<String> features = readFeatures(newFeatureFile);
         assertEquals(1, features.size());
-        List<String> expectedFeatures = Arrays.asList("servlet-4.0");
+        Set<String> expectedFeatures = new HashSet<String>(Arrays.asList("servlet-4.0"));
         assertEquals(expectedFeatures, features);
+
+        // place generated features in server.xml
+        replaceString("<!--replaceable-->",
+                "<featureManager>\n" +
+                        "  <feature>servlet-4.0</feature>\n" +
+                        "</featureManager>\n", serverXmlFile);
+
+        runGenerateFeatures();
+        // no additional features should be generated
+        assertTrue(newFeatureFile.exists());
+        features = readFeatures(newFeatureFile);
+        assertEquals(0, features.size());
     }
 
     @Test
     public void noClassFiles() throws Exception {
         // do not compile before running generateFeatures
-        runProcess("generateFeatures");
+        runGenerateFeatures();
 
         // verify that generated features file was not created
         assertFalse(newFeatureFile.exists());
 
         // verify class files not found warning message
         assertTrue(processOutput.contains(GenerateFeaturesTask.NO_CLASS_FILES_WARNING));
-
     }
 
     @Test
     public void customFeaturesTest() throws Exception {
         // complete the setup of the test
-        File serverXmlFile = new File(buildDir, "src/main/liberty/config/server.xml");
         replaceString("<!--replaceable-->",
             "<featureManager>\n" +
             "  <feature>jaxrs-2.1</feature>\n" +
@@ -114,27 +128,26 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
             "</featureManager>\n", serverXmlFile);
         assertFalse("Before running", newFeatureFile.exists());
         // run the test
-        runProcess("compileJava generateFeatures");
+        runCompileAndGenerateFeatures();
 
         // verify that the generated features file was created
         assertTrue(newFeatureFile.exists());
 
         // verify that the correct features are in the generated-features.xml
-        List<String> features = readFeatures(newFeatureFile);
+        Set<String> features = readFeatures(newFeatureFile);
         assertEquals(1, features.size());
-        List<String> expectedFeatures = Arrays.asList("servlet-4.0");
+        Set<String> expectedFeatures = new HashSet<String>(Arrays.asList("servlet-4.0"));
         assertEquals(expectedFeatures, features);
     }
 
     @Test
     public void serverXmlCommentNoFMTest() throws Exception {
         // initially the expected comment is not found in server.xml
-        File serverXmlFile = new File(buildDir, "src/main/liberty/config/server.xml");
         assertFalse(verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 10, serverXmlFile));
         // also we wish to test behaviour when there is no <featureManager> element so test that
         assertFalse(verifyLogMessageExists("<featureManager>", 10, serverXmlFile));
 
-        runProcess("compileJava generateFeatures");
+        runCompileAndGenerateFeatures();
 
         // verify that generated features file was created
         assertTrue(newFeatureFile.exists());
@@ -149,7 +162,6 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
 
     @Test
     public void serverXmlCommentFMTest() throws Exception {
-        File serverXmlFile = new File(buildDir, "src/main/liberty/config/server.xml");
         replaceString("<!--replaceable-->",
             "<!--Feature generation comment goes below this line-->\n" +
             "  <featureManager>\n" +
@@ -159,7 +171,7 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
         // initially the expected comment is not found in server.xml
         assertFalse(verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 10, serverXmlFile));
 
-        runProcess("compileJava generateFeatures");
+        runCompileAndGenerateFeatures();
 
         // verify that generated features file was created
         assertTrue(newFeatureFile.exists());
@@ -265,10 +277,10 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
      * element if any
      *
      * @param file configuration XML file
-     * @return list of features, empty list if no features are found
+     * @return set of features, empty list if no features are found
      */
-    private static List<String> readFeatures(File configurationFile) throws Exception {
-        List<String> features = new ArrayList<String>();
+    private static Set<String> readFeatures(File configurationFile) throws Exception {
+        Set<String> features = new HashSet<String>();
 
         // return empty list if file does not exist or is not an XML file
         if (!configurationFile.exists() || !configurationFile.getName().endsWith(".xml")) {
@@ -291,5 +303,13 @@ class GenerateFeaturesTest extends AbstractIntegrationTest {
             features.add(nodes.item(i).getTextContent());
         }
         return features;
+    }
+
+    private static void runCompileAndGenerateFeatures() throws IOException, InterruptedException, FileNotFoundException {
+        runProcess("compileJava generateFeatures");
+    }
+
+    private static void runGenerateFeatures() throws IOException, InterruptedException, FileNotFoundException {
+        runProcess("generateFeatures");
     }
 }
