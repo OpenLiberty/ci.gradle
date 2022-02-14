@@ -444,6 +444,7 @@ class DevTask extends AbstractFeatureTask {
         public boolean recompileBuildFile(File buildFile, Set<String> compileArtifactPaths, Set<String> testArtifactPaths, ThreadPoolExecutor executor) {
             boolean restartServer = false;
             boolean installFeatures = false;
+            boolean compileDependenciesChanged = false;
 
             ProjectBuilder builder = ProjectBuilder.builder();
             Project newProject;
@@ -542,6 +543,21 @@ class DevTask extends AbstractFeatureTask {
                     project.liberty.server.features.name = newFeatureNames;
                 }
 
+                // check if compile dependencies have changed
+                Configuration existingProjectCompileConfiguration = project.configurations.getByName('providedCompile');
+                List<String> existingProjectCompileDependencies = new ArrayList<String>();
+                existingProjectCompileConfiguration.dependencies.each { dep -> existingProjectCompileDependencies.add(dep.group + ":" + dep.name + ":" + dep.version) }
+
+                Configuration newProjectCompileConfiguration = newProject.configurations.getByName('providedCompile');
+                List<String> newProjectCompileDependencies = new ArrayList<String>();
+                newProjectCompileConfiguration.dependencies.each { dep -> newProjectCompileDependencies.add(dep.group + ":" + dep.name + ":" + dep.version) }
+
+                newProjectCompileDependencies.removeAll(existingProjectCompileDependencies);
+                if (!newProjectCompileDependencies.isEmpty()) {
+                    logger.debug("Compile dependencies changed");
+                    compileDependenciesChanged = true;
+                }
+
                 Configuration newLibertyFeatureConfiguration = newProject.configurations.getByName('libertyFeature');
                 List<String> newLibertyFeatureDependencies = new ArrayList<String>();
                 newLibertyFeatureConfiguration.dependencies.each { dep -> newLibertyFeatureDependencies.add(dep.name) }
@@ -564,19 +580,15 @@ class DevTask extends AbstractFeatureTask {
                 // - start server
                 util.restartServer();
                 return true;
+            } else if (compileDependenciesChanged && generateFeatures) { // generate features if compile dependencies have been modified
+                // optimize generate features on build dependency change
+                boolean generateFeaturesSuccess = libertyGenerateFeatures(null, true);
+                if (generateFeaturesSuccess) {
+                    util.javaSourceClassPaths.clear();
+                };
             } else if (installFeatures) {
-                if (generateFeatures) {
-                    // Increment generate features on build dependency change
-                    ProjectConnection gradleConnection = initGradleProjectConnection();
-                    BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
-                    runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources'); // ensure class files exist
-                    Collection<String> javaSourceClassPaths = getJavaSourceClassPaths();
-                    libertyGenerateFeatures(javaSourceClassPaths, false);
-                    libertyCreate(); // need to run create in order to copy generated config file to target
-                }
                 libertyInstallFeature();
             }
-
             return true;
         }
 
