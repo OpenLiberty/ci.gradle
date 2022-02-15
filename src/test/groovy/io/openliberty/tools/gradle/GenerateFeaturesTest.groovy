@@ -182,6 +182,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
                         "  </featureManager>\n", serverXmlFile);
         runCompileAndGenerateFeatures();
         Set<String> modifiedSet = new HashSet<String>();
+        modifiedSet.addAll("cdi-2.0");
         modifiedSet.addAll("servlet-4.0");
         // search log file instead of process output because warning message in process output may be interrupted
         verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE1, getCdi12ConflictingFeatures(), modifiedSet), 1000, logFile);

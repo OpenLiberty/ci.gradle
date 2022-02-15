@@ -341,18 +341,9 @@ class DevTest extends AbstractIntegrationTest {
 
     protected static void cleanUpAfterClass(boolean isDevMode) throws Exception {
         stopProcess(isDevMode);
-
         if (buildDir != null && buildDir.exists()) {
-            try {
-                FileUtils.deleteDirectory(buildDir);
-            } catch (IOException e) {
-                // https://github.com/OpenLiberty/open-liberty/issues/10562 prevents a file from being deleted.
-                // Instead of failing here, just print an error until the above is fixed
-                System.out.println("Could not clean up the build directory " + buildDir + ", IOException: " + e.getMessage());
-                e.printStackTrace();
-            } 
+            FileUtils.deleteDirectory(buildDir);
         }
-
         if (logFile != null && logFile.exists()) {
             assertTrue(logFile.delete());
         }
@@ -372,6 +363,7 @@ class DevTest extends AbstractIntegrationTest {
 
             // test that dev mode has stopped running
             assertTrue(verifyLogMessage(100000, "CWWKE0036I", ++serverStoppedOccurrences));
+            Thread.sleep(5000); // wait 5s to ensure java process has stopped
         }
     }
 
