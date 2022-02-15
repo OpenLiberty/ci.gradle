@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 
 import static org.junit.Assert.*
+import static io.openliberty.tools.common.plugins.util.BinaryScannerUtil.*;
 
 class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
@@ -85,10 +86,10 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     public void customFeaturesTest() throws Exception {
         // complete the setup of the test
         replaceString("<!--replaceable-->",
-            "<featureManager>\n" +
-            "  <feature>jaxrs-2.1</feature>\n" +
-            "  <feature>usr:custom-1.0</feature>\n" +
-            "</featureManager>\n", serverXmlFile);
+                "<featureManager>\n" +
+                        "  <feature>jaxrs-2.1</feature>\n" +
+                        "  <feature>usr:custom-1.0</feature>\n" +
+                        "</featureManager>\n", serverXmlFile);
         assertFalse("Before running", newFeatureFile.exists());
         // run the test
         runCompileAndGenerateFeatures();
@@ -120,16 +121,16 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         String serverXmlContents = new String(Files.readAllBytes(serverXmlFile.toPath()), charset);
         serverXmlContents = "\n" + serverXmlContents;
         assertTrue(serverXmlContents,
-            verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
+                verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
     }
 
     @Test
     public void serverXmlCommentFMTest() throws Exception {
         replaceString("<!--replaceable-->",
-            "<!--Feature generation comment goes below this line-->\n" +
-            "  <featureManager>\n" +
-            "    <feature>jaxrs-2.1</feature>\n" +
-            "  </featureManager>\n", serverXmlFile);
+                "<!--Feature generation comment goes below this line-->\n" +
+                        "  <featureManager>\n" +
+                        "    <feature>jaxrs-2.1</feature>\n" +
+                        "  </featureManager>\n", serverXmlFile);
 
         // initially the expected comment is not found in server.xml
         assertFalse(verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 10, serverXmlFile));
@@ -144,7 +145,56 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         String serverXmlContents = new String(Files.readAllBytes(serverXmlFile.toPath()), charset);
         serverXmlContents = "\n" + serverXmlContents;
         assertTrue(serverXmlContents,
-            verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
+                verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
+    }
+
+    /**
+     * Conflict between user specified features
+     *
+     * @throws Exception
+     */
+    @Test
+    public void userConflictTest() throws Exception {
+        replaceString("<!--replaceable-->",
+                "<!--Feature generation comment goes below this line-->\n" +
+                        "  <featureManager>\n" +
+                        "    <feature>servlet-4.0</feature>\n" +
+                        "    <feature>cdi-1.2</feature>\n" +
+                        "  </featureManager>\n", serverXmlFile);
+        runCompileAndGenerateFeatures();
+        Set<String> modifiedSet = new HashSet<String>();
+        modifiedSet.addAll("servlet-4.0");
+        // search log file instead of process output because warning message in process output may be interrupted
+        verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE2, getCdi12ConflictingFeatures(), modifiedSet), 1000, logFile);
+    }
+
+    /**
+     * Conflict between user specified features and API usage
+     *
+     * @throws Exception
+     */
+    @Test
+    public void userAndGeneratedConflictTest() throws Exception {
+        replaceString("<!--replaceable-->",
+                "<!--Feature generation comment goes below this line-->\n" +
+                        "  <featureManager>\n" +
+                        "    <feature>cdi-1.2</feature>\n" +
+                        "  </featureManager>\n", serverXmlFile);
+        runCompileAndGenerateFeatures();
+        Set<String> modifiedSet = new HashSet<String>();
+        modifiedSet.addAll("servlet-4.0");
+        // search log file instead of process output because warning message in process output may be interrupted
+        verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE1, getCdi12ConflictingFeatures(), modifiedSet), 1000, logFile);
+    }
+
+    // TODO add an integration test for feature conflict for API usage (BINARY_SCANNER_CONFLICT_MESSAGE3), ie. MP4 and EE 9
+
+    protected Set<String> getCdi12ConflictingFeatures() {
+        // servlet-4.0 (EE8) conflicts with cdi-1.2 (EE7)
+        Set<String> conflictingFeatures = new HashSet<String>();
+        conflictingFeatures.add("servlet-4.0");
+        conflictingFeatures.add("cdi-1.2");
+        return conflictingFeatures;
     }
 
 }
