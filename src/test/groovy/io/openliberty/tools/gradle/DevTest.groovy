@@ -29,17 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-class DevTest extends AbstractIntegrationTest {
-    static final String projectName = "basic-dev-project";
-
-    static File resourceDir = new File("build/resources/test/dev-test/" + projectName);
-    static File buildDir = new File(integTestDir, "dev-test/" + projectName + System.currentTimeMillis()); // append timestamp in case previous build was not deleted
-    static String buildFilename = "build.gradle";
-
-    static File targetDir;
-    static BufferedWriter writer;
-    static File logFile = new File(buildDir, "output.log");
-    static Process process;
+class DevTest extends BaseDevTest {
 
     @BeforeClass
     public static void setup() throws IOException, InterruptedException, FileNotFoundException {
@@ -47,135 +37,11 @@ class DevTest extends AbstractIntegrationTest {
         createTestProject(buildDir, resourceDir, buildFilename);
         runDevMode();
     }
-    
-    private static void runDevMode() throws IOException, InterruptedException, FileNotFoundException {
-        System.out.println("Starting dev mode...");
-        startProcess(null, true);
-        System.out.println("Started dev mode");
-    }
-
-    private static ProcessBuilder buildProcess(String processCommand) {
-        ProcessBuilder builder = new ProcessBuilder();
-        builder.directory(buildDir);
-
-        String os = System.getProperty("os.name");
-        if (os != null && os.toLowerCase().startsWith("windows")) {
-            builder.command("CMD", "/C", processCommand);
-        } else {
-            builder.command("bash", "-c", processCommand);
-        }
-        return builder;
-    }
-
-    protected static boolean verifyLogMessage(int timeout, String message)
-            throws InterruptedException, FileNotFoundException {
-        verifyLogMessage(timeout, message, logFile)
-    }
-
-    protected static boolean verifyLogMessage(int timeout, String message, File file)
-            throws InterruptedException, FileNotFoundException {
-        int waited = 0;
-        int sleep = 100;
-        while (waited <= timeout) {
-            if (readFile(message, file)) {
-                Thread.sleep(1000);
-                return true;
-            }
-            Thread.sleep(sleep);
-            waited += sleep;
-        }
-        return false;
-    }
-    protected static boolean verifyLogMessage(int timeout, String message, int occurrences)
-            throws InterruptedException, FileNotFoundException {
-        verifyLogMessage(timeout, message, logFile, occurrences)
-    }
-
-    protected static boolean verifyLogMessage(int timeout, String message, File file, int occurrences)
-            throws InterruptedException, FileNotFoundException {
-        int waited = 0;
-        int sleep = 10;
-        while (waited <= timeout) {
-            Thread.sleep(sleep);
-            waited += sleep;
-            if (countOccurrences(message, file) == occurrences) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    protected static boolean verifyFileExists(File file, int timeout)
-          throws InterruptedException {
-       int waited = 0;
-       int sleep = 100;
-       while (waited <= timeout) {
-          if (file.exists()) {
-             return true;
-          }
-          Thread.sleep(sleep);
-          waited += sleep;
-       }
-       return false;
-    }
-
-    private static boolean readFile(String str, File file) throws FileNotFoundException {
-        Scanner scanner = new Scanner(file);
-        try {
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                if (line.contains(str)) {
-                    return true;
-                }
-            }
-        } finally {
-            scanner.close();
-        }
-        return false;
-    }
-
-    private static void startProcess(String params, boolean isDevMode) throws IOException, InterruptedException, FileNotFoundException {
-        // get gradle wrapper from project root dir
-        File gradlew;
-        String os = System.getProperty("os.name");
-        if (os != null && os.toLowerCase().startsWith("windows")) {
-            gradlew = new File("gradlew.bat")
-        } else {
-            gradlew = new File("gradlew")
-        }
-        
-        StringBuilder command = new StringBuilder(gradlew.getAbsolutePath() + " libertyDev");
-        if (params != null) {
-            command.append(" " + params);
-        }
-        System.out.println("Running command: " + command.toString());
-        ProcessBuilder builder = buildProcess(command.toString());
-
-        builder.redirectOutput(logFile);
-        builder.redirectError(logFile);
-        process = builder.start();
-        assertTrue(process.isAlive());
-
-        OutputStream stdin = process.getOutputStream();
-
-        writer = new BufferedWriter(new OutputStreamWriter(stdin));
-
-        // check that the server has started
-        Thread.sleep(5000);
-        assertTrue(verifyLogMessage(120000, "CWWKF0011I"));
-        if (isDevMode) {
-            assertTrue(verifyLogMessage(60000, "Liberty is running in dev mode."));
-        }
-
-        // verify that the target directory was created
-        targetDir = new File(buildDir, "build");
-        assertTrue(targetDir.exists());
-    }
 
     @Test
     /* simple double check. if failure, check parse in ci.common */
     public void verifyJsonHost() throws Exception {
-        assertTrue(verifyLogMessage(2000, "CWWKT0016I"));   // Verify web app code triggered
+        assertTrue(verifyLogMessage(2000, "CWWKT0016I", errFile));   // Verify web app code triggered
         // TODO assertTrue(verifyLogMessage(2000, "http:\\/\\/"));  // Verify escape char seq passes
     }
 
@@ -276,8 +142,11 @@ class DevTest extends AbstractIntegrationTest {
         final String GENERATED_FEATURES_FILE_NAME = "generated-features.xml";
         final String SERVER_XML_COMMENT = "Plugin has generated Liberty features"; // the explanation added to server.xml
         final String NEW_FILE_INFO_MESSAGE = "This file was generated by the Liberty Gradle Plugin and will be overwritten"; // the explanation added to the generated features file
+        final String RUNNING_GENERATE_FEATURES = "Generated the following features";
 
-        assertFalse(verifyLogMessage(10000, "batch-1.0")); // not present yet
+        // Verify generate features runs when dev mode first starts
+        assertTrue(verifyLogMessage(10000, RUNNING_GENERATE_FEATURES));
+        assertFalse(verifyLogMessage(10000, "batch-1.0", errFile)); // not present on server yet
 
         File newFeatureFile = new File(buildDir, "src/main/liberty/config/configDropins/overrides/"+GENERATED_FEATURES_FILE_NAME);
         File newTargetFeatureFile = new File(targetDir, "wlp/usr/servers/defaultServer/configDropins/overrides/"+GENERATED_FEATURES_FILE_NAME);
@@ -316,17 +185,48 @@ class DevTest extends AbstractIntegrationTest {
         assertTrue(verifyLogMessage(10000, "batch-1.0", newFeatureFile));
         assertTrue(verifyLogMessage(10000, NEW_FILE_INFO_MESSAGE, newFeatureFile));
         assertTrue(verifyLogMessage(10000, SERVER_XML_COMMENT, serverXmlFile));
-        assertTrue(verifyLogMessage(10000, "batch-1.0")); // should appear in the message "CWWKF0012I: The server installed the following features:"
-    }
+        // should appear as part of the message "CWWKF0012I: The server installed the following features:"
+        assertTrue(verifyLogMessage(10000, "batch-1.0", errFile));
 
-    protected static void replaceString(String str, String replacement, File file) throws IOException {
-        Path path = file.toPath();
-        Charset charset = StandardCharsets.UTF_8;
+        // When there is a compilation error the generate features process should not run
+        int generateFeaturesCount = countOccurrences(RUNNING_GENERATE_FEATURES, logFile);
+        final String goodCode = "import javax.ws.rs.GET;";
+        final String badCode  = "import javax.ws.rs.GET";
+        final String errMsg = "Source compilation had errors.";
+        int errCount = countOccurrences(errMsg, logFile);
+        replaceString(goodCode, badCode, helloBatchSrc);
 
-        String content = new String(Files.readAllBytes(path), charset);
+        assertTrue(verifyLogMessage(10000, errMsg, errCount+1)); // wait for compilation
+        int updatedgenFeaturesCount = countOccurrences(RUNNING_GENERATE_FEATURES, logFile);
+        assertEquals(generateFeaturesCount, updatedgenFeaturesCount);
 
-        content = content.replaceAll(str, replacement);
-        Files.write(path, content.getBytes(charset));
+        // Need valid code for testing
+        String goodCompile = "Source compilation was successful.";
+        int goodCount = countOccurrences(goodCompile, logFile);
+        replaceString(badCode, goodCode, helloBatchSrc);
+        assertTrue(verifyLogMessage(10000, goodCompile, goodCount+1));
+
+        final String autoGenOff = "Setting automatic generation of features to: [ Off ]";
+        final String autoGenOn  = "Setting automatic generation of features to: [ On ]";
+        // toggle off
+        writer.write("g\n");
+        writer.flush();
+        assertTrue(autoGenOff, verifyLogMessage(10000, autoGenOff));
+        // toggle on
+        writer.write("g\n");
+        writer.flush();
+        assertTrue(autoGenOn, verifyLogMessage(20000, autoGenOn)); // allow time to run scanner
+
+        // Remove a class and use 'optimize' to rebuild the generated features
+        assertTrue(helloBatchSrc.delete());
+        assertTrue(verifyFileDoesNotExist(helloBatchSrc, 15000));
+        assertTrue(verifyFileDoesNotExist(helloBatchObj, 15000));
+        // Just removing the class file does not remove the feature because the feature
+        // list is built in an incremental way.
+        assertTrue(verifyLogMessage(100, "batch-1.0", newFeatureFile, 1));
+        writer.write("o\n");
+        writer.flush();
+        assertTrue(verifyLogMessage(10000, "batch-1.0", newFeatureFile, 0)); // exist 0 times
     }
 
     @AfterClass
@@ -334,65 +234,9 @@ class DevTest extends AbstractIntegrationTest {
         Path path = logFile.toPath();
         Charset charset = StandardCharsets.UTF_8;
         String content = new String(Files.readAllBytes(path), charset);
-        System.out.println("Dev mode output: " + content);
-
+        System.out.println("Dev mode output (" + content.length() + " chars): ");
+        System.out.println(content);
+        System.out.println("End of Dev mode output (" + content.length() + " chars)");
         cleanUpAfterClass(true);
     }
-
-    protected static void cleanUpAfterClass(boolean isDevMode) throws Exception {
-        stopProcess(isDevMode);
-
-        if (buildDir != null && buildDir.exists()) {
-            try {
-                FileUtils.deleteDirectory(buildDir);
-            } catch (IOException e) {
-                // https://github.com/OpenLiberty/open-liberty/issues/10562 prevents a file from being deleted.
-                // Instead of failing here, just print an error until the above is fixed
-                System.out.println("Could not clean up the build directory " + buildDir + ", IOException: " + e.getMessage());
-                e.printStackTrace();
-            } 
-        }
-
-        if (logFile != null && logFile.exists()) {
-            assertTrue(logFile.delete());
-        }
-    }
-
-    private static void stopProcess(boolean isDevMode) throws IOException, InterruptedException, FileNotFoundException {
-        // shut down dev mode
-        if (writer != null) {
-            int serverStoppedOccurrences = countOccurrences("CWWKE0036I", logFile);
-            if (isDevMode) {
-                writer.write("exit"); // trigger dev mode to shut down
-            } else {
-                process.destroy(); // stop run
-            }
-            writer.flush();
-            writer.close();
-
-            // test that dev mode has stopped running
-            assertTrue(verifyLogMessage(100000, "CWWKE0036I", ++serverStoppedOccurrences));
-        }
-    }
-
-    /**
-     * Count number of lines that contain the given string
-     */
-    protected static int countOccurrences(String str, File file) throws FileNotFoundException, IOException {
-        int occurrences = 0;
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        String line = br.readLine();
-        try {
-            while (line != null) {
-                if (line.contains(str)) {
-                    occurrences++;
-                }
-                line = br.readLine();
-            }
-        } finally {
-            br.close();
-        }
-        return occurrences;
-    }
-
 }
