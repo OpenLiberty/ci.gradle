@@ -52,6 +52,43 @@ class BaseDevTest extends AbstractIntegrationTest {
         System.out.println("Started dev mode");
     }
 
+    private static void startProcess(String params, boolean isDevMode) throws IOException, InterruptedException, FileNotFoundException {
+        // get gradle wrapper from project root dir
+        File gradlew;
+        String os = System.getProperty("os.name");
+        if (os != null && os.toLowerCase().startsWith("windows")) {
+            gradlew = new File("gradlew.bat")
+        } else {
+            gradlew = new File("gradlew")
+        }
+
+        StringBuilder command = new StringBuilder(gradlew.getAbsolutePath() + " libertyDev");
+        if (params != null) {
+            command.append(" " + params);
+        }
+        System.out.println("Running command: " + command.toString());
+        ProcessBuilder builder = buildProcess(command.toString());
+
+        builder.redirectOutput(logFile);
+        builder.redirectError(errFile);
+        process = builder.start();
+        assertTrue(process.isAlive());
+
+        OutputStream stdin = process.getOutputStream();
+
+        writer = new BufferedWriter(new OutputStreamWriter(stdin));
+
+        // check that the server has started
+        assertTrue(verifyLogMessage(120000, "CWWKF0011I", errFile));
+        if (isDevMode) {
+            assertTrue(verifyLogMessage(60000, "Liberty is running in dev mode."));
+        }
+
+        // verify that the target directory was created
+        targetDir = new File(buildDir, "build");
+        assertTrue(targetDir.exists());
+    }
+
     protected static ProcessBuilder buildProcess(String processCommand) {
         ProcessBuilder builder = new ProcessBuilder();
         builder.directory(buildDir);
@@ -147,43 +184,11 @@ class BaseDevTest extends AbstractIntegrationTest {
         return false;
     }
 
-    private static void startProcess(String params, boolean isDevMode) throws IOException, InterruptedException, FileNotFoundException {
-        // get gradle wrapper from project root dir
-        File gradlew;
-        String os = System.getProperty("os.name");
-        if (os != null && os.toLowerCase().startsWith("windows")) {
-            gradlew = new File("gradlew.bat")
-        } else {
-            gradlew = new File("gradlew")
-        }
-        
-        StringBuilder command = new StringBuilder(gradlew.getAbsolutePath() + " libertyDev");
-        if (params != null) {
-            command.append(" " + params);
-        }
-        System.out.println("Running command: " + command.toString());
-        ProcessBuilder builder = buildProcess(command.toString());
-
-        builder.redirectOutput(logFile);
-        builder.redirectError(errFile);
-        process = builder.start();
-        assertTrue(process.isAlive());
-
-        OutputStream stdin = process.getOutputStream();
-
-        writer = new BufferedWriter(new OutputStreamWriter(stdin));
-
-        // check that the server has started
-        assertTrue(verifyLogMessage(120000, "CWWKF0011I", errFile));
-        if (isDevMode) {
-            assertTrue(verifyLogMessage(60000, "Liberty is running in dev mode."));
-        }
-
-        // verify that the target directory was created
-        targetDir = new File(buildDir, "build");
-        assertTrue(targetDir.exists());
-    }
-
+    /**
+     * Retrieve the contents of a file, store it in a string and wrap it with
+     * some headers and footers that make it easy to navigate when the contents
+     * are saved in the output log.
+     */
     protected static String getContents(File f, String hdr) {
         Path path = f.toPath();
         Charset charset = StandardCharsets.UTF_8;
@@ -193,6 +198,10 @@ class BaseDevTest extends AbstractIntegrationTest {
         content +=  "\n" + hdr + " ^(" + s.length() + ")\n"
         return content
     }
+
+    /**
+     * Read a file, replace occurrences of 'str' with 'replacement' and write the file.
+     */
     protected static void replaceString(String str, String replacement, File file) throws IOException {
         Path path = file.toPath();
         Charset charset = StandardCharsets.UTF_8;
@@ -201,6 +210,26 @@ class BaseDevTest extends AbstractIntegrationTest {
 
         content = content.replaceAll(str, replacement);
         Files.write(path, content.getBytes(charset));
+    }
+
+    /**
+     * Count number of lines that contain the given string
+     */
+    protected static int countOccurrences(String str, File file) throws FileNotFoundException, IOException {
+        int occurrences = 0;
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String line = br.readLine();
+        try {
+            while (line != null) {
+                if (line.contains(str)) {
+                    occurrences++;
+                }
+                line = br.readLine();
+            }
+        } finally {
+            br.close();
+        }
+        return occurrences;
     }
 
     protected static void cleanUpAfterClass(boolean isDevMode) throws Exception {
@@ -232,25 +261,5 @@ class BaseDevTest extends AbstractIntegrationTest {
             assertTrue(verifyLogMessage(100000, "CWWKE0036I", errFile, ++serverStoppedOccurrences));
             Thread.sleep(5000); // wait 5s to ensure java process has stopped
         }
-    }
-
-    /**
-     * Count number of lines that contain the given string
-     */
-    protected static int countOccurrences(String str, File file) throws FileNotFoundException, IOException {
-        int occurrences = 0;
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        String line = br.readLine();
-        try {
-            while (line != null) {
-                if (line.contains(str)) {
-                    occurrences++;
-                }
-                line = br.readLine();
-            }
-        } finally {
-            br.close();
-        }
-        return occurrences;
     }
 }
