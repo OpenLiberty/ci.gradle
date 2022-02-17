@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 
 import static org.junit.Assert.*
+import static io.openliberty.tools.common.plugins.util.BinaryScannerUtil.*;
 
 class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
@@ -58,10 +59,9 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
         // place generated features in server.xml
         replaceString("<!--replaceable-->",
-                "<featureManager>\n" +
-                        "  <feature>servlet-4.0</feature>\n" +
-                        "</featureManager>\n", serverXmlFile);
-
+            "<featureManager>\n" +
+            "  <feature>servlet-4.0</feature>\n" +
+            "</featureManager>\n", serverXmlFile);
         runGenerateFeatures();
         // no additional features should be generated
         assertTrue(newFeatureFile.exists());
@@ -145,6 +145,64 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         serverXmlContents = "\n" + serverXmlContents;
         assertTrue(serverXmlContents,
             verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
+    }
+
+    /**
+     * Conflict between user specified features.
+     * Check for BINARY_SCANNER_CONFLICT_MESSAGE2 (conflict between configured features)
+     *
+     * @throws Exception
+     */
+    @Test
+    public void userConflictTest() throws Exception {
+        // app only uses servlet-4.0, servlet-4.0 conflicts with cdi-1.2
+        replaceString("<!--replaceable-->",
+            "<!--Feature generation comment goes below this line-->\n" +
+            "  <featureManager>\n" +
+            "    <feature>servlet-4.0</feature>\n" +
+            "    <feature>cdi-1.2</feature>\n" +
+            "  </featureManager>\n", serverXmlFile);
+        runCompileAndGenerateFeatures();
+
+        // Verify BINARY_SCANNER_CONFLICT_MESSAGE2 error is thrown (BinaryScannerUtil.RecommendationSetException)
+        Set<String> recommendedFeatureSet = new HashSet<String>();
+        recommendedFeatureSet.addAll("servlet-4.0");
+        // search log file instead of process output because warning message in process output may be interrupted
+        verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE2, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, logFile);
+    }
+
+    /**
+     * Conflict between user specified features and API usage.
+     * Check for BINARY_SCANNER_CONFLICT_MESSAGE1 (conflict between configured features and API usage)
+     *
+     * @throws Exception
+     */
+    @Test
+    public void userAndGeneratedConflictTest() throws Exception {
+        // app only uses servlet-4.0 (which will be generated), cdi-1.2 conflicts with servlet-4.0
+        replaceString("<!--replaceable-->",
+            "<!--Feature generation comment goes below this line-->\n" +
+            "  <featureManager>\n" +
+            "    <feature>cdi-1.2</feature>\n" +
+            "  </featureManager>\n", serverXmlFile);
+        runCompileAndGenerateFeatures();
+
+        // Verify BINARY_SCANNER_CONFLICT_MESSAGE1 error is thrown (BinaryScannerUtil.FeatureModifiedException)
+        Set<String> recommendedFeatureSet = new HashSet<String>();
+        recommendedFeatureSet.addAll("cdi-2.0");
+        recommendedFeatureSet.addAll("servlet-4.0");
+        // search log file instead of process output because warning message in process output may be interrupted
+        verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE1, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, logFile);
+    }
+
+    // TODO add an integration test for feature conflict for API usage (BINARY_SCANNER_CONFLICT_MESSAGE3), ie. MP4 and EE9
+
+    protected Set<String> getCdi12ConflictingFeatures() {
+        // servlet-4.0 (EE8) conflicts with cdi-1.2 (EE7)
+        Set<String> conflictingFeatures = new HashSet<String>();
+        conflictingFeatures.add("servlet-4.0");
+        conflictingFeatures.add("cdi-1.2");
+        return conflictingFeatures;
     }
 
 }

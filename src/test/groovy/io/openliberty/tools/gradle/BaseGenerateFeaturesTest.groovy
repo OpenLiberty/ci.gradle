@@ -77,6 +77,10 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
         if (buildDir.exists()) {
             FileUtils.deleteDirectory(buildDir);
         }
+        // delete log file
+        if (logFile != null && logFile.exists()) {
+            assertTrue(logFile.delete());
+        }
     }
 
     protected static void replaceString(String str, String replacement, File file) throws IOException {
