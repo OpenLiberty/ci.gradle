@@ -79,7 +79,7 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
         }
         // delete log file
         if (logFile != null && logFile.exists()) {
-            logFile.delete();
+            assertTrue(logFile.delete());
         }
     }
 
