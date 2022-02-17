@@ -222,7 +222,7 @@ class BaseDevTest extends AbstractIntegrationTest {
         }
 
         if (errFile != null && errFile.exists()) {
-            errFile.delete();
+            assertTrue(errFile.delete());
         }
     }
 
