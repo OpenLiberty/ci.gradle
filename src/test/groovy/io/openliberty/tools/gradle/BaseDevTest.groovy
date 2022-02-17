@@ -220,6 +220,10 @@ class BaseDevTest extends AbstractIntegrationTest {
         if (logFile != null && logFile.exists()) {
             assertTrue(logFile.delete());
         }
+
+        if (errFile != null && errFile.exists()) {
+            errFile.delete();
+        }
     }
 
     private static void stopProcess(boolean isDevMode) throws IOException, InterruptedException, FileNotFoundException {
