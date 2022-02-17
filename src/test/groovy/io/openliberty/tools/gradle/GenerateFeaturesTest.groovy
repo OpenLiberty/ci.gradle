@@ -59,10 +59,9 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
         // place generated features in server.xml
         replaceString("<!--replaceable-->",
-                "<featureManager>\n" +
-                        "  <feature>servlet-4.0</feature>\n" +
-                        "</featureManager>\n", serverXmlFile);
-
+            "<featureManager>\n" +
+            "  <feature>servlet-4.0</feature>\n" +
+            "</featureManager>\n", serverXmlFile);
         runGenerateFeatures();
         // no additional features should be generated
         assertTrue(newFeatureFile.exists());
@@ -86,10 +85,10 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     public void customFeaturesTest() throws Exception {
         // complete the setup of the test
         replaceString("<!--replaceable-->",
-                "<featureManager>\n" +
-                        "  <feature>jaxrs-2.1</feature>\n" +
-                        "  <feature>usr:custom-1.0</feature>\n" +
-                        "</featureManager>\n", serverXmlFile);
+            "<featureManager>\n" +
+            "  <feature>jaxrs-2.1</feature>\n" +
+            "  <feature>usr:custom-1.0</feature>\n" +
+            "</featureManager>\n", serverXmlFile);
         assertFalse("Before running", newFeatureFile.exists());
         // run the test
         runCompileAndGenerateFeatures();
@@ -121,16 +120,16 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         String serverXmlContents = new String(Files.readAllBytes(serverXmlFile.toPath()), charset);
         serverXmlContents = "\n" + serverXmlContents;
         assertTrue(serverXmlContents,
-                verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
+            verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
     }
 
     @Test
     public void serverXmlCommentFMTest() throws Exception {
         replaceString("<!--replaceable-->",
-                "<!--Feature generation comment goes below this line-->\n" +
-                        "  <featureManager>\n" +
-                        "    <feature>jaxrs-2.1</feature>\n" +
-                        "  </featureManager>\n", serverXmlFile);
+            "<!--Feature generation comment goes below this line-->\n" +
+            "  <featureManager>\n" +
+            "    <feature>jaxrs-2.1</feature>\n" +
+            "  </featureManager>\n", serverXmlFile);
 
         // initially the expected comment is not found in server.xml
         assertFalse(verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 10, serverXmlFile));
@@ -145,7 +144,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         String serverXmlContents = new String(Files.readAllBytes(serverXmlFile.toPath()), charset);
         serverXmlContents = "\n" + serverXmlContents;
         assertTrue(serverXmlContents,
-                verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
+            verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
     }
 
     /**
@@ -158,11 +157,11 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     public void userConflictTest() throws Exception {
         // app only uses servlet-4.0, servlet-4.0 conflicts with cdi-1.2
         replaceString("<!--replaceable-->",
-                "<!--Feature generation comment goes below this line-->\n" +
-                        "  <featureManager>\n" +
-                        "    <feature>servlet-4.0</feature>\n" +
-                        "    <feature>cdi-1.2</feature>\n" +
-                        "  </featureManager>\n", serverXmlFile);
+            "<!--Feature generation comment goes below this line-->\n" +
+            "  <featureManager>\n" +
+            "    <feature>servlet-4.0</feature>\n" +
+            "    <feature>cdi-1.2</feature>\n" +
+            "  </featureManager>\n", serverXmlFile);
         runCompileAndGenerateFeatures();
 
         // Verify BINARY_SCANNER_CONFLICT_MESSAGE2 error is thrown (BinaryScannerUtil.RecommendationSetException)
@@ -182,10 +181,10 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     public void userAndGeneratedConflictTest() throws Exception {
         // app only uses servlet-4.0 (which will be generated), cdi-1.2 conflicts with servlet-4.0
         replaceString("<!--replaceable-->",
-                "<!--Feature generation comment goes below this line-->\n" +
-                        "  <featureManager>\n" +
-                        "    <feature>cdi-1.2</feature>\n" +
-                        "  </featureManager>\n", serverXmlFile);
+            "<!--Feature generation comment goes below this line-->\n" +
+            "  <featureManager>\n" +
+            "    <feature>cdi-1.2</feature>\n" +
+            "  </featureManager>\n", serverXmlFile);
         runCompileAndGenerateFeatures();
 
         // Verify BINARY_SCANNER_CONFLICT_MESSAGE1 error is thrown (BinaryScannerUtil.FeatureModifiedException)
