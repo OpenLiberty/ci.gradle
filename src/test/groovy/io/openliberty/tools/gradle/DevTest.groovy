@@ -231,12 +231,10 @@ class DevTest extends BaseDevTest {
 
     @AfterClass
     public static void cleanUpAfterClass() throws Exception {
-        Path path = logFile.toPath();
-        Charset charset = StandardCharsets.UTF_8;
-        String content = new String(Files.readAllBytes(path), charset);
-        System.out.println("Dev mode output (" + content.length() + " chars): ");
-        System.out.println(content);
-        System.out.println("End of Dev mode output (" + content.length() + " chars)");
+        String stdout = getContents(logFile, "Dev mode std output");
+        System.out.println(stdout);
+        String stderr = getContents(errFile, "Dev mode std error");
+        System.out.println(stderr);
         cleanUpAfterClass(true);
     }
 }
