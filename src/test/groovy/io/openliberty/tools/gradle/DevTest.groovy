@@ -146,6 +146,7 @@ class DevTest extends BaseDevTest {
 
         // Verify generate features runs when dev mode first starts
         assertTrue(verifyLogMessage(10000, RUNNING_GENERATE_FEATURES));
+        int generateFeaturesCount = countOccurrences(RUNNING_GENERATE_FEATURES, logFile);
         assertFalse(verifyLogMessage(10000, "batch-1.0", errFile)); // not present on server yet
 
         File newFeatureFile = new File(buildDir, "src/main/liberty/config/configDropins/overrides/"+GENERATED_FEATURES_FILE_NAME);
@@ -180,6 +181,7 @@ class DevTest extends BaseDevTest {
         File helloBatchObj = new File(targetDir, "classes/com/demo/HelloBatch.class");
         verifyFileExists(helloBatchObj, 15000);
         // ... and run the proper task.
+        assertTrue(verifyLogMessage(10000, RUNNING_GENERATE_FEATURES, ++generateFeaturesCount));
         assertTrue(verifyFileExists(newFeatureFile, 5000)); // task created file
         assertTrue(verifyFileExists(newTargetFeatureFile, 5000)); // dev mode copied file
         assertTrue(verifyLogMessage(10000, "batch-1.0", newFeatureFile));
@@ -189,7 +191,6 @@ class DevTest extends BaseDevTest {
         assertTrue(verifyLogMessage(10000, "batch-1.0", errFile));
 
         // When there is a compilation error the generate features process should not run
-        int generateFeaturesCount = countOccurrences(RUNNING_GENERATE_FEATURES, logFile);
         final String goodCode = "import javax.ws.rs.GET;";
         final String badCode  = "import javax.ws.rs.GET";
         final String errMsg = "Source compilation had errors.";
@@ -221,6 +222,8 @@ class DevTest extends BaseDevTest {
         assertTrue(helloBatchSrc.delete());
         assertTrue(verifyFileDoesNotExist(helloBatchSrc, 15000));
         assertTrue(verifyFileDoesNotExist(helloBatchObj, 15000));
+        assertTrue(verifyLogMessage(10000, "HelloBatch.class was deleted"));
+        Thread.sleep(500); // let dev mode and the server finish
         // Just removing the class file does not remove the feature because the feature
         // list is built in an incremental way.
         assertTrue(verifyLogMessage(100, "batch-1.0", newFeatureFile, 1));
