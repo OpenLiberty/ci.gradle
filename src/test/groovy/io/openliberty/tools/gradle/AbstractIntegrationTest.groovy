@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2015, 2018.
+ * (C) Copyright IBM Corporation 2015, 2022.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,6 +119,23 @@ abstract class AbstractIntegrationTest {
                 assert SUCCESS == result.task(":$it").getOutcome()
             }
         }
+    }
+
+    protected static BuildResult runTasksResult(File projectDir, String... tasks) {
+        List<String> args = new ArrayList<String>()
+        tasks.each {
+            args.add(it)
+        }
+        args.add("-i")
+        args.add("-s")
+
+        BuildResult result = GradleRunner.create()
+            .withProjectDir(projectDir)
+            .forwardOutput()
+            .withArguments(args)
+            .build()
+
+        return result
     }
 
     protected static boolean runTaskCheckForUpToDate(File projectDir, String task, String argument) {

@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2020.
+ * (C) Copyright IBM Corporation 2014, 2022.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,8 @@ class CreateTask extends AbstractServerTask {
     File getConfigDir() {
         if(server.configDirectory != null && server.configDirectory.exists()) {
             return server.configDirectory
+        } else {
+            return new File(project.projectDir, "src/main/liberty/config")
         }
     }
 
