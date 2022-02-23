@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2020.
+ * (C) Copyright IBM Corporation 2014, 2022.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,11 @@ class CreateTask extends AbstractServerTask {
 
     @InputDirectory @Optional
     File getConfigDir() {
+        File defaultConfigDir = new File(DEFAULT_PATH)
         if(server.configDirectory != null && server.configDirectory.exists()) {
             return server.configDirectory
+        } else if (defaultConfigDir.exists()) {
+            return defaultConfigDir
         }
     }
 
