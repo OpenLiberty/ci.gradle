@@ -10,6 +10,8 @@ import org.gradle.testkit.runner.BuildResult
 import org.junit.BeforeClass
 import org.junit.Test
 
+import io.openliberty.tools.common.plugins.util.OSUtil
+
 public class TestCreateConfigDirUpToDate extends AbstractIntegrationTest {
     static File sourceDir = new File("build/resources/test/server-config")
     static File testBuildDir = new File(integTestDir, "/test-create-config-dir-up-to-date")
@@ -48,7 +50,13 @@ public class TestCreateConfigDirUpToDate extends AbstractIntegrationTest {
         String configDirMessageString = "Input property 'configDir' file"
         String testFileMessageString = "/build/testBuilds/test-create-config-dir-up-to-date/src/main/liberty/config/test.txt has changed."
 
-        assert result.getOutput().contains(configDirMessageString) && result.getOutput().contains(testFileMessageString)
+        if (OSUtil.isWindows()) {
+            configDirMessageString = "Input property \'configDir\' file"
+            testFileMessageString = "\\build\\testBuilds\\test-create-config-dir-up-to-date\\src\\main\\liberty\\config\\test.txt has changed."
+        } 
+
+        assert result.getOutput().contains(configDirMessageString)
+        assert result.getOutput().contains(testFileMessageString)
 
         //Check updated file was copied to server directory
         assert serverTestTextFile.text.contains('Test Comment 2')
