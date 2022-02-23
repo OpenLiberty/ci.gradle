@@ -39,10 +39,11 @@ class CreateTask extends AbstractServerTask {
 
     @InputDirectory @Optional
     File getConfigDir() {
+        File defaultConfigDir = new File(DEFAULT_PATH)
         if(server.configDirectory != null && server.configDirectory.exists()) {
             return server.configDirectory
-        } else {
-            return new File(project.projectDir, "src/main/liberty/config")
+        } else if (defaultConfigDir.exists()) {
+            return defaultConfigDir
         }
     }
 
