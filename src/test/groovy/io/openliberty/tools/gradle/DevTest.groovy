@@ -118,7 +118,8 @@ class DevTest extends BaseDevTest {
 
         javaWriter.close();
 
-        Thread.sleep(2000); // wait for compilation
+        // The resolution of File.lastModified() is 1000 ms so wait long enough for lastModified() to register the modification.
+        Thread.sleep(2000);
         assertTrue(unitTestTargetFile.lastModified() > lastModified);
 
         // delete the test file
