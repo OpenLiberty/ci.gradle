@@ -301,44 +301,65 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         return classesDirectories;
     }
 
+    /**
+     * Return the latest EE major version detected in the project dependencies
+     *
+     * @param project
+     * @return latest EE major version corresponding to the EE umbrella dependency, null if an EE umbrella dependency is not found
+     */
     private getEEVersion(Object project) {
         String eeVersion = null
         project.configurations.compileClasspath.allDependencies.each {
             dependency ->
                 if (dependency.group.equals("javax") && dependency.name.equals("javaee-api")) {
-                    if (dependency.version.startsWith("8.")) {
+                    if (dependency.version.startsWith("8.") && (isLatestVersion(eeVersion, BINARY_SCANNER_EEV8, "ee"))) {
                         eeVersion = BINARY_SCANNER_EEV8
-                    } else if (dependency.version.startsWith("7.")) {
+                    } else if (dependency.version.startsWith("7.") && (isLatestVersion(eeVersion, BINARY_SCANNER_EEV7, "ee"))) {
                         eeVersion = BINARY_SCANNER_EEV7
-                    } else if (dependency.version.startsWith("6.")) {
+                    } else if (dependency.version.startsWith("6.") && (isLatestVersion(eeVersion, BINARY_SCANNER_EEV6, "ee"))) {
                         eeVersion = BINARY_SCANNER_EEV6
                     }
                 } else if (dependency.group.equals("jakarta.platform") &&
                         dependency.name.equals("jakarta.jakartaee-api") &&
-                        dependency.version.startsWith("8.")) {
-                    eeVersion = BINARY_SCANNER_EEV8
-                }
+                        dependency.version.startsWith("8.") && (isLatestVersion(eeVersion, BINARY_SCANNER_EEV8, "ee")) ) {
+                eeVersion = BINARY_SCANNER_EEV8
+            }
         }
         return eeVersion;
     }
 
+    /**
+     * Returns the latest MicroProfile major version detected in the project dependencies
+     *
+     * @param project
+     * @return latest MP major version corresponding to the MP umbrella dependency, null if an MP umbrella dependency is not found
+     */
     private getMPVersion(Object project) {
         String mpVersion = null
         project.configurations.compileClasspath.allDependencies.each {
             if (it.group.equals("org.eclipse.microprofile") &&
                     it.name.equals("microprofile")) {
-                if (it.version.startsWith("1")) {
+                if (it.version.startsWith("1") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV1, "mp"))) {
                     mpVersion = BINARY_SCANNER_MPV1
-                } else if (it.version.startsWith("2")) {
+                } else if (it.version.startsWith("2") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV2, "mp"))) {
                     mpVersion = BINARY_SCANNER_MPV2
-                } else if (it.version.startsWith("3")) {
+                } else if (it.version.startsWith("3") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV3, "mp"))) {
                     mpVersion = BINARY_SCANNER_MPV3
-                } else if (it.version.startsWith("4")) {
+                } else if (it.version.startsWith("4") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV4, "mp"))) {
                     mpVersion = BINARY_SCANNER_MPV4
                 }
             }
         }
         return mpVersion;
+    }
+
+    // Return true if the newVer > latestVer, programming model is "ee" or "mp"
+    private static boolean isLatestVersion(String latestVer, String newVer, String programmingModel) {
+        if (latestVer == null)  {
+            return true;
+        }
+        return (Integer.parseInt(newVer.substring(newVer.lastIndexOf(programmingModel) + 2)) > Integer
+                .parseInt(latestVer.substring(latestVer.lastIndexOf(programmingModel) + 2)));
     }
 
     // Define the logging functions of the binary scanner handler and make it available in this plugin
