@@ -307,7 +307,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
      * @param project
      * @return latest EE major version corresponding to the EE umbrella dependency, null if an EE umbrella dependency is not found
      */
-    private getEEVersion(Object project) {
+    protected getEEVersion(Object project) {
         String eeVersion = null
         project.configurations.compileClasspath.allDependencies.each {
             dependency ->
@@ -321,9 +321,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                     }
                 } else if (dependency.group.equals("jakarta.platform") &&
                         dependency.name.equals("jakarta.jakartaee-api") &&
-                        dependency.version.startsWith("8.") && (isLatestVersion(eeVersion, BINARY_SCANNER_EEV8, "ee")) ) {
-                eeVersion = BINARY_SCANNER_EEV8
-            }
+                        dependency.version.startsWith("8.") && (isLatestVersion(eeVersion, BINARY_SCANNER_EEV8, "ee"))) {
+                    eeVersion = BINARY_SCANNER_EEV8
+                }
         }
         return eeVersion;
     }
@@ -334,7 +334,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
      * @param project
      * @return latest MP major version corresponding to the MP umbrella dependency, null if an MP umbrella dependency is not found
      */
-    private getMPVersion(Object project) {
+    protected getMPVersion(Object project) {
         String mpVersion = null
         project.configurations.compileClasspath.allDependencies.each {
             if (it.group.equals("org.eclipse.microprofile") &&
@@ -354,8 +354,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     }
 
     // Return true if the newVer > latestVer, programming model is "ee" or "mp"
-    private static boolean isLatestVersion(String latestVer, String newVer, String programmingModel) {
-        if (latestVer == null)  {
+    protected static boolean isLatestVersion(String latestVer, String newVer, String programmingModel) {
+        if (latestVer == null || latestVer.isEmpty())  {
             return true;
         }
         return (Integer.parseInt(newVer.substring(newVer.lastIndexOf(programmingModel) + 2)) > Integer
