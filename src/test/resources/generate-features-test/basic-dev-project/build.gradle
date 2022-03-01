@@ -30,6 +30,9 @@ dependencies {
     // provided dependencies
     providedCompile "jakarta.platform:jakarta.jakartaee-api:8.0.0"
     providedCompile "org.eclipse.microprofile:microprofile:3.2"
+    // EE7 and MP1 are ignored as latest version takes precedence
+    providedCompile 'javax:javaee-api:7.0'
+    providedCompile 'org.eclipse.microprofile:microprofile:1.2'
 
     libertyRuntime "$runtimeGroup:$runtimeArtifactId:$runtimeVersion"
 
