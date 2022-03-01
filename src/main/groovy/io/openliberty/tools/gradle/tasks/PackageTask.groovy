@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2021.
+ * (C) Copyright IBM Corporation 2014, 2022.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,10 @@ class PackageTask extends AbstractServerTask {
 
     @TaskAction
     void packageServer() {
+        // Set default server.outputDir to liberty-alt-output-dir for libertyPackage task.
+        if (getOutputDir(project).equals(getUserDir(project).toString() + "/servers")) {
+            server.outputDir = new File(project.getBuildDir(), "liberty-alt-output-dir");
+        }
 
         def params = buildLibertyMap(project)
         
