@@ -312,7 +312,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         project.configurations.compileClasspath.allDependencies.each {
             dependency ->
                 if (dependency.group.equals("javax") && dependency.name.equals("javaee-api")) {
-                    if (dependency.version.startsWith("8.") && (isLatestVersion(eeVersion, BINARY_SCANNER_EEV8, "ee"))) {
+                    if (dependency.version.startsWith("8.")) {
                         eeVersion = BINARY_SCANNER_EEV8
                     } else if (dependency.version.startsWith("7.") && (isLatestVersion(eeVersion, BINARY_SCANNER_EEV7, "ee"))) {
                         eeVersion = BINARY_SCANNER_EEV7
@@ -321,7 +321,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                     }
                 } else if (dependency.group.equals("jakarta.platform") &&
                         dependency.name.equals("jakarta.jakartaee-api") &&
-                        dependency.version.startsWith("8.") && (isLatestVersion(eeVersion, BINARY_SCANNER_EEV8, "ee"))) {
+                        dependency.version.startsWith("8.")) {
                     eeVersion = BINARY_SCANNER_EEV8
                 }
         }
@@ -346,7 +346,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                         mpVersion = BINARY_SCANNER_MPV2
                     } else if (dependency.version.startsWith("3") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV3, "mp"))) {
                         mpVersion = BINARY_SCANNER_MPV3
-                    } else if (dependency.version.startsWith("4") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV4, "mp"))) {
+                    } else if (dependency.version.startsWith("4")) {
                         mpVersion = BINARY_SCANNER_MPV4
                     }
                 }
@@ -354,13 +354,13 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         return mpVersion;
     }
 
-    // Return true if the newVer > latestVer, programming model is "ee" or "mp"
-    protected static boolean isLatestVersion(String latestVer, String newVer, String programmingModel) {
-        if (latestVer == null || latestVer.isEmpty())  {
+    // Return true if the newVer > currentVer, programming model is "ee" or "mp"
+    protected static boolean isLatestVersion(String currentVer, String newVer, String programmingModel) {
+        if (currentVer == null || currentVer.isEmpty())  {
             return true;
         }
         return (Integer.parseInt(newVer.substring(newVer.lastIndexOf(programmingModel) + 2)) > Integer
-                .parseInt(latestVer.substring(latestVer.lastIndexOf(programmingModel) + 2)));
+                .parseInt(currentVer.substring(currentVer.lastIndexOf(programmingModel) + 2)));
     }
 
     // Define the logging functions of the binary scanner handler and make it available in this plugin
