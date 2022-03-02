@@ -337,18 +337,19 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     protected getMPVersion(Object project) {
         String mpVersion = null
         project.configurations.compileClasspath.allDependencies.each {
-            if (it.group.equals("org.eclipse.microprofile") &&
-                    it.name.equals("microprofile")) {
-                if (it.version.startsWith("1") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV1, "mp"))) {
-                    mpVersion = BINARY_SCANNER_MPV1
-                } else if (it.version.startsWith("2") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV2, "mp"))) {
-                    mpVersion = BINARY_SCANNER_MPV2
-                } else if (it.version.startsWith("3") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV3, "mp"))) {
-                    mpVersion = BINARY_SCANNER_MPV3
-                } else if (it.version.startsWith("4") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV4, "mp"))) {
-                    mpVersion = BINARY_SCANNER_MPV4
+            dependency ->
+                if (dependency.group.equals("org.eclipse.microprofile") &&
+                        dependency.name.equals("microprofile")) {
+                    if (dependency.version.startsWith("1") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV1, "mp"))) {
+                        mpVersion = BINARY_SCANNER_MPV1
+                    } else if (dependency.version.startsWith("2") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV2, "mp"))) {
+                        mpVersion = BINARY_SCANNER_MPV2
+                    } else if (dependency.version.startsWith("3") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV3, "mp"))) {
+                        mpVersion = BINARY_SCANNER_MPV3
+                    } else if (dependency.version.startsWith("4") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV4, "mp"))) {
+                        mpVersion = BINARY_SCANNER_MPV4
+                    }
                 }
-            }
         }
         return mpVersion;
     }
