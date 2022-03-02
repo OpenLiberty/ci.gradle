@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2021.
+ * (C) Copyright IBM Corporation 2014, 2022.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,6 +92,11 @@ class InstallFeatureTask extends AbstractFeatureTask {
     }
 
     void installFeatureFromAnt() {
+        // Set default server.outputDir to liberty-alt-output-dir for installFeature task.
+        if (getOutputDir(project).equals(getUserDir(project).toString() + "/servers")) {
+            server.outputDir = new File(project.getBuildDir(), "liberty-alt-output-dir");
+        }
+
         def params = buildAntParams()
         project.ant.taskdef(name: 'installFeature',
                             classname: 'io.openliberty.tools.ant.InstallFeatureTask',
