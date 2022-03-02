@@ -55,6 +55,9 @@ class LibertyPackage_DefaultOutputDir_Test extends AbstractIntegrationTest{
            BuildResult result = runTasksResult(buildDir, 'libertyPackage')
 
            assertFalse("Running server message found in logs.", result.getOutput().contains('[ant:server] Server defaultServer package failed. It must be stopped before it can be packaged.'))
+
+           assert new File(buildDir, 'build/liberty-alt-output-dir').exists()
+           assert new File(buildDir, 'build/liberty-alt-output-dir/defaultServer').exists()
         } catch (Exception e) {
            throw new AssertionError ("Fail on task libertyPackage. "+ e)
         }
