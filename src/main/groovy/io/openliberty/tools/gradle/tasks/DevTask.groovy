@@ -15,6 +15,7 @@
  */
 package io.openliberty.tools.gradle.tasks
 
+import io.openliberty.tools.common.plugins.util.BinaryScannerUtil
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.tasks.Input
@@ -652,7 +653,7 @@ class DevTask extends AbstractFeatureTask {
 
 
         @Override
-        public void checkConfigFile(File configFile, File serverDir) {
+        public void installFeatures(File configFile, File serverDir) {
             ServerFeatureUtil servUtil = getServerFeatureUtil();
             Set<String> features = servUtil.getServerFeatures(serverDir, libertyDirPropertyFiles);
 
@@ -689,6 +690,40 @@ class DevTask extends AbstractFeatureTask {
                     gradleConnection.close();
                 }
             }
+        }
+
+        @Override
+        public boolean serverFeaturesModified(File configDirectory) {
+            ServerFeatureUtil servUtil = getServerFeatureUtil();
+            servUtil.setSuppressLogs(true); // suppress logs from ServerFeatureUtil, otherwise will flood dev console
+            // get server features from the config directory, exclude generated-features.xml
+            Set<String> generatedFiles = new HashSet<String>();
+            generatedFiles.add(BinaryScannerUtil.GENERATED_FEATURES_FILE_NAME);
+            File serverXmlFile = server.serverXmlFile; // can be null
+            Set<String> features = servUtil.getServerFeatures(configDirectory, serverXmlFile, new HashMap<String, File>(), generatedFiles);
+            servUtil.setSuppressLogs(false); // re-enable logs from ServerFeatureUtil
+
+            if (features == null) {
+                return false;
+            }
+
+            // check if features have been added
+            Set<String> featuresCopy = new HashSet<String>();
+            featuresCopy.addAll(features);
+            featuresCopy.removeAll(existingFeatures);
+            if (!featuresCopy.isEmpty()) {
+                return true;
+            }
+
+            // check if features have been removed
+            Set<String> existingFeaturesCopy = new HashSet<String>();
+            existingFeaturesCopy.addAll(existingFeatures);
+            existingFeaturesCopy.removeAll(features);
+            if (!existingFeaturesCopy.isEmpty()) {
+                return true;
+            }
+
+            return false;
         }
 
         @Override
