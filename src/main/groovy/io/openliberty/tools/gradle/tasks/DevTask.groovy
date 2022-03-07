@@ -707,7 +707,7 @@ class DevTask extends AbstractFeatureTask {
             servUtil.setSuppressLogs(false); // re-enable logs from ServerFeatureUtil
 
             if (features != null) {
-                // remove generaetd features in the case that they have been manually added to the server config
+                // remove generated features in the case that they have been manually added to the server config
                 if (generatedFeatures != null) {
                     features.removeAll(generatedFeatures);
                 }
