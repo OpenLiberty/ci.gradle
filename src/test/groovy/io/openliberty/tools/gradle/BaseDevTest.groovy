@@ -31,6 +31,7 @@ class BaseDevTest extends AbstractIntegrationTest {
     static File resourceDir = new File("build/resources/test/dev-test/" + projectName);
     static File buildDir = new File(integTestDir, "dev-test/" + projectName + System.currentTimeMillis()); // append timestamp in case previous build was not deleted
     static String buildFilename = "build.gradle";
+    final String RUNNING_GENERATE_FEATURES = "Task :generateFeatures";
 
     static File targetDir;
     static BufferedWriter writer;

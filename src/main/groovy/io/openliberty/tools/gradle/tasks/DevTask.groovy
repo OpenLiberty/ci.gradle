@@ -15,6 +15,7 @@
  */
 package io.openliberty.tools.gradle.tasks
 
+import io.openliberty.tools.common.plugins.util.BinaryScannerUtil
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.tasks.Input
@@ -652,7 +653,7 @@ class DevTask extends AbstractFeatureTask {
 
 
         @Override
-        public void checkConfigFile(File configFile, File serverDir) {
+        public void installFeatures(File configFile, File serverDir) {
             ServerFeatureUtil servUtil = getServerFeatureUtil();
             Set<String> features = servUtil.getServerFeatures(serverDir, libertyDirPropertyFiles);
 
@@ -660,7 +661,17 @@ class DevTask extends AbstractFeatureTask {
                 return;
             }
 
-            features.removeAll(existingFeatures);
+            Set<String> featuresCopy = new HashSet<String>(features);
+            if (existingFeatures != null) {
+                features.removeAll(existingFeatures);
+                // check if features have been removed
+                Set<String> existingFeaturesCopy = new HashSet<String> (existingFeatures);
+                existingFeaturesCopy.removeAll(featuresCopy);
+                if (!existingFeaturesCopy.isEmpty()) {
+                    logger.info("Configuration features have been removed");
+                    existingFeatures.removeAll(existingFeaturesCopy);
+                }
+            }
 
             if (!features.isEmpty()) {
                 logger.info("Configuration features have been added");
@@ -680,7 +691,7 @@ class DevTask extends AbstractFeatureTask {
                         options.add("--containerName=${super.getContainerName()}");
                     }
                     runInstallFeatureTask(gradleBuildLauncher, options);
-                    this.existingFeatures.addAll(features);
+                    existingFeatures.addAll(features);
                 } catch (BuildException e) {
                     // stdout/stderr from the installFeature task is sent to the terminal
                     // only need to log the actual stacktrace when debugging
@@ -689,6 +700,16 @@ class DevTask extends AbstractFeatureTask {
                     gradleConnection.close();
                 }
             }
+        }
+
+        @Override
+        public ServerFeatureUtil getServerFeatureUtilObj() {
+            return getServerFeatureUtil();
+        }
+
+        @Override
+        public Set<String> getExistingFeatures() {
+            return this.existingFeatures;
         }
 
         @Override

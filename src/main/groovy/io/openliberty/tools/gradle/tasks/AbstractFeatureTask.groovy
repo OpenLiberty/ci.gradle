@@ -73,12 +73,16 @@ public class AbstractFeatureTask extends AbstractServerTask {
 
         @Override
         void warn(String msg) {
-            logger.warn(msg);
+            if (!suppressLogs) {
+                logger.warn(msg);
+            }
         }
 
         @Override
         void info(String msg) {
-            logger.lifecycle(msg);
+            if (!suppressLogs) {
+                logger.lifecycle(msg);
+            }
         }
     }
 
