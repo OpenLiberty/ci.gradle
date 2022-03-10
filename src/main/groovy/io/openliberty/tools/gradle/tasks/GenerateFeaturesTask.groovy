@@ -117,9 +117,10 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                 // log as warning and continue to call binary scanner to detect conflicts in user specified features
                 logger.warn(NO_CLASS_FILES_WARNING);
             }
+            String logLocation = project.getBuildDir().getCanonicalPath();
             String eeVersion = getEEVersion(project);
             String mpVersion = getMPVersion(project);
-            scannedFeatureList = binaryScannerHandler.runBinaryScanner(nonCustomFeatures, classFiles, directories, eeVersion, mpVersion, optimize);
+            scannedFeatureList = binaryScannerHandler.runBinaryScanner(nonCustomFeatures, classFiles, directories, logLocation, eeVersion, mpVersion, optimize);
         } catch (BinaryScannerUtil.NoRecommendationException noRecommendation) {
             throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE3, noRecommendation.getConflicts()));
         } catch (BinaryScannerUtil.FeatureModifiedException featuresModified) {
