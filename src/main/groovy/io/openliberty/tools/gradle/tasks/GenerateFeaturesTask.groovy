@@ -27,6 +27,7 @@ import io.openliberty.tools.gradle.utils.ArtifactDownloadUtil
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
+import org.gradle.api.logging.LogLevel
 import org.xml.sax.SAXException
 import org.w3c.dom.Element;
 
@@ -393,6 +394,11 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         @Override
         public void info(String msg) {
             logger.lifecycle(msg);
+        }
+
+        @Override
+        public boolean isDebugEnabled() {
+            return logger.isEnabled(LogLevel.DEBUG);
         }
     }
 }
