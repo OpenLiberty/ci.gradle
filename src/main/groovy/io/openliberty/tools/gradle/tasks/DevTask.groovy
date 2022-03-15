@@ -1227,7 +1227,7 @@ class DevTask extends AbstractFeatureTask {
                 .setStandardError(System.err)
                 .forTasks(tasks);
         if (logger.isEnabled(LogLevel.DEBUG)) {
-            buildLauncher.withArguments("--debug");
+            buildLauncher.addArguments("--debug");
         }
         buildLauncher.run();
     }
