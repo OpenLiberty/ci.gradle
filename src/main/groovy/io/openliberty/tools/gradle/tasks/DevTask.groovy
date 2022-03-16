@@ -1242,11 +1242,14 @@ class DevTask extends AbstractFeatureTask {
         return connection;
     }
 
-    static void runGradleTask(BuildLauncher buildLauncher, String ... tasks)  {
+    void runGradleTask(BuildLauncher buildLauncher, String ... tasks)  {
         buildLauncher
                 .setStandardOutput(System.out)
-                .setStandardError(System.err);
-        buildLauncher.forTasks(tasks);
+                .setStandardError(System.err)
+                .forTasks(tasks);
+        if (logger.isEnabled(LogLevel.DEBUG)) {
+            buildLauncher.addArguments("--debug");
+        }
         buildLauncher.run();
     }
 

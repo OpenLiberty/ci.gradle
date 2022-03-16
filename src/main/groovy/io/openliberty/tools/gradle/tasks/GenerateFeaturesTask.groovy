@@ -27,6 +27,7 @@ import io.openliberty.tools.gradle.utils.ArtifactDownloadUtil
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
+import org.gradle.api.logging.LogLevel
 import org.xml.sax.SAXException
 import org.w3c.dom.Element;
 
@@ -117,9 +118,10 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                 // log as warning and continue to call binary scanner to detect conflicts in user specified features
                 logger.warn(NO_CLASS_FILES_WARNING);
             }
+            String logLocation = project.getBuildDir().getCanonicalPath();
             String eeVersion = getEEVersion(project);
             String mpVersion = getMPVersion(project);
-            scannedFeatureList = binaryScannerHandler.runBinaryScanner(nonCustomFeatures, classFiles, directories, eeVersion, mpVersion, optimize);
+            scannedFeatureList = binaryScannerHandler.runBinaryScanner(nonCustomFeatures, classFiles, directories, logLocation, eeVersion, mpVersion, optimize);
         } catch (BinaryScannerUtil.NoRecommendationException noRecommendation) {
             throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE3, noRecommendation.getConflicts()));
         } catch (BinaryScannerUtil.FeatureModifiedException featuresModified) {
@@ -392,6 +394,11 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         @Override
         public void info(String msg) {
             logger.lifecycle(msg);
+        }
+
+        @Override
+        public boolean isDebugEnabled() {
+            return logger.isEnabled(LogLevel.DEBUG);
         }
     }
 }
