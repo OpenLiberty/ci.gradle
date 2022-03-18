@@ -442,7 +442,7 @@ class DevTask extends AbstractFeatureTask {
         }
 
         @Override
-        public boolean recompileBuildFile(File buildFile, Set<String> compileArtifactPaths, Set<String> testArtifactPaths, ThreadPoolExecutor executor) {
+        public boolean recompileBuildFile(File buildFile, Set<String> compileArtifactPaths, Set<String> testArtifactPaths, boolean generateFeatures, ThreadPoolExecutor executor) {
             boolean restartServer = false;
             boolean installFeatures = false;
             boolean compileDependenciesChanged = false;
@@ -573,8 +573,8 @@ class DevTask extends AbstractFeatureTask {
 
             }
             if (restartServer) {
+                // TODO check if features are generated here
                 // - stop Server
-                // - generate features (if generateFeatures=true)
                 // - create server or runBoostMojo
                 // - install feature
                 // - deploy app
@@ -586,7 +586,9 @@ class DevTask extends AbstractFeatureTask {
                 boolean generateFeaturesSuccess = libertyGenerateFeatures(null, true);
                 if (generateFeaturesSuccess) {
                     util.javaSourceClassPaths.clear();
-                };
+                } else {
+                    installFeatures = false;
+                }
             } else if (installFeatures) {
                 libertyInstallFeature();
             }
