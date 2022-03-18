@@ -166,8 +166,7 @@ class DevTest extends BaseDevTest {
 
     @Test
     public void restartServerTest() throws Exception {
-        String TASK_GENERATE = "Task :generateFeatures";
-        int taskGenerateCount = countOccurrences(TASK_GENERATE, logFile);
+        int runningGenerateCount = countOccurrences(RUNNING_GENERATE_FEATURES, logFile);
         String RESTARTED = "The server has been restarted.";
         int restartedCount = countOccurrences(RESTARTED, logFile);
         writer.write("r\n"); // command to restart liberty
@@ -175,7 +174,7 @@ class DevTest extends BaseDevTest {
 
         assertTrue(verifyLogMessage(20000, RESTARTED, ++restartedCount));
         // not supposed to rerun generate features just because of a server restart
-        assertTrue(verifyLogMessage(2000, TASK_GENERATE, logFile, taskGenerateCount));
+        assertTrue(verifyLogMessage(2000, RUNNING_GENERATE_FEATURES, logFile, runningGenerateCount));
     }
 
     @Test
