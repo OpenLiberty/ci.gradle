@@ -409,7 +409,7 @@ class DevTask extends AbstractFeatureTask {
         }
 
         @Override
-        public boolean updateArtifactPaths(ProjectModule projectModule, boolean redeployCheck, ThreadPoolExecutor executor)
+        public boolean updateArtifactPaths(ProjectModule projectModule, boolean redeployCheck, boolean generateFeatures, ThreadPoolExecutor executor)
                 throws PluginExecutionException {
             // not supported for Gradle, only used for multi module Maven projects
             return false;
@@ -445,7 +445,7 @@ class DevTask extends AbstractFeatureTask {
         public boolean recompileBuildFile(File buildFile, Set<String> compileArtifactPaths, Set<String> testArtifactPaths, boolean generateFeatures, ThreadPoolExecutor executor) {
             boolean restartServer = false;
             boolean installFeatures = false;
-            boolean compileDependenciesChanged = false;
+            boolean optimizeGenerateFeatures = false;
 
             ProjectBuilder builder = ProjectBuilder.builder();
             Project newProject;
@@ -556,7 +556,7 @@ class DevTask extends AbstractFeatureTask {
                 newProjectCompileDependencies.removeAll(existingProjectCompileDependencies);
                 if (!newProjectCompileDependencies.isEmpty()) {
                     logger.debug("Compile dependencies changed");
-                    compileDependenciesChanged = true;
+                    optimizeGenerateFeatures = true;
                 }
 
                 Configuration newLibertyFeatureConfiguration = newProject.configurations.getByName('libertyFeature');
@@ -572,16 +572,8 @@ class DevTask extends AbstractFeatureTask {
                 }
 
             }
-            if (restartServer) {
-                // TODO check if features are generated here
-                // - stop Server
-                // - create server or runBoostMojo
-                // - install feature
-                // - deploy app
-                // - start server
-                util.restartServer();
-                return true;
-            } else if (compileDependenciesChanged && generateFeatures) { // generate features if compile dependencies have been modified
+            if (optimizeGenerateFeatures && generateFeatures) {
+                logger.debug("Detected a change in the compile dependencies, regenerating features");
                 // optimize generate features on build dependency change
                 boolean generateFeaturesSuccess = libertyGenerateFeatures(null, true);
                 if (generateFeaturesSuccess) {
@@ -589,6 +581,15 @@ class DevTask extends AbstractFeatureTask {
                 } else {
                     installFeatures = false;
                 }
+            }
+            if (restartServer) {
+                // - stop Server
+                // - create server or runBoostMojo
+                // - install feature
+                // - deploy app
+                // - start server
+                util.restartServer();
+                return true;
             } else if (installFeatures) {
                 libertyInstallFeature();
             }
