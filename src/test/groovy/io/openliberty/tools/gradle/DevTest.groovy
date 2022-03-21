@@ -165,6 +165,19 @@ class DevTest extends BaseDevTest {
     }
 
     @Test
+    public void restartServerTest() throws Exception {
+        int runningGenerateCount = countOccurrences(RUNNING_GENERATE_FEATURES, logFile);
+        String RESTARTED = "The server has been restarted.";
+        int restartedCount = countOccurrences(RESTARTED, logFile);
+        writer.write("r\n"); // command to restart liberty
+        writer.flush();
+
+        assertTrue(verifyLogMessage(20000, RESTARTED, ++restartedCount));
+        // not supposed to rerun generate features just because of a server restart
+        assertTrue(verifyLogMessage(2000, RUNNING_GENERATE_FEATURES, logFile, runningGenerateCount));
+    }
+
+    @Test
     public void generateFeatureTest() throws Exception {
 
         final String GENERATED_FEATURES_FILE_NAME = "generated-features.xml";
