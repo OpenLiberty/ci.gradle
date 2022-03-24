@@ -316,9 +316,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                 if (dependency.group.equals("javax") && dependency.name.equals("javaee-api")) {
                     if (dependency.version.startsWith("8.")) {
                         eeVersion = BINARY_SCANNER_EEV8
-                    } else if (dependency.version.startsWith("7.") && (isLatestVersion(eeVersion, BINARY_SCANNER_EEV7, "ee"))) {
+                    } else if (dependency.version.startsWith("7.") && (isLatestVersion(eeVersion, BINARY_SCANNER_EEV7))) {
                         eeVersion = BINARY_SCANNER_EEV7
-                    } else if (dependency.version.startsWith("6.") && (isLatestVersion(eeVersion, BINARY_SCANNER_EEV6, "ee"))) {
+                    } else if (dependency.version.startsWith("6.") && (isLatestVersion(eeVersion, BINARY_SCANNER_EEV6))) {
                         eeVersion = BINARY_SCANNER_EEV6
                     }
                 } else if (dependency.group.equals("jakarta.platform") &&
@@ -342,11 +342,17 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             dependency ->
                 if (dependency.group.equals("org.eclipse.microprofile") &&
                         dependency.name.equals("microprofile")) {
-                    if (dependency.version.startsWith("1") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV1, "mp"))) {
+                    String version = null;
+                    if (dependency.version.length() == 3) { // version is 'm.n'
+                        version = BINARY_SCANNER_MP.get(dependency.version);
+                    }
+                    if ((version != null) && (isLatestVersion(mpVersion, version))) {
+                        mpVersion = version;
+                    } else if (dependency.version.startsWith("1") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV1))) {
                         mpVersion = BINARY_SCANNER_MPV1
-                    } else if (dependency.version.startsWith("2") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV2, "mp"))) {
+                    } else if (dependency.version.startsWith("2") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV2))) {
                         mpVersion = BINARY_SCANNER_MPV2
-                    } else if (dependency.version.startsWith("3") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV3, "mp"))) {
+                    } else if (dependency.version.startsWith("3") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV3))) {
                         mpVersion = BINARY_SCANNER_MPV3
                     } else if (dependency.version.startsWith("4")) {
                         mpVersion = BINARY_SCANNER_MPV4
@@ -356,13 +362,13 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         return mpVersion;
     }
 
-    // Return true if the newVer > currentVer, programming model is "ee" or "mp"
-    protected static boolean isLatestVersion(String currentVer, String newVer, String programmingModel) {
+    // Return true if the newVer > currentVer
+    protected static boolean isLatestVersion(String currentVer, String newVer) {
         if (currentVer == null || currentVer.isEmpty())  {
             return true;
         }
-        return (Integer.parseInt(newVer.substring(newVer.lastIndexOf(programmingModel) + 2)) > Integer
-                .parseInt(currentVer.substring(currentVer.lastIndexOf(programmingModel) + 2)));
+        // Comparing versions: mp4 > mp3.3 > mp3.0 > mp3
+        return (currentVer.compareTo(newVer) < 0);
     }
 
     // Define the logging functions of the binary scanner handler and make it available in this plugin
