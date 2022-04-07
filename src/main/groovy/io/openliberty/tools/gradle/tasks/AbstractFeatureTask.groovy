@@ -75,6 +75,8 @@ public class AbstractFeatureTask extends AbstractServerTask {
         void warn(String msg) {
             if (!suppressLogs) {
                 logger.warn(msg);
+            } else {
+                logger.debug(msg);
             }
         }
 
@@ -82,6 +84,8 @@ public class AbstractFeatureTask extends AbstractServerTask {
         void info(String msg) {
             if (!suppressLogs) {
                 logger.lifecycle(msg);
+            } else {
+                logger.debug(msg);
             }
         }
     }
@@ -211,10 +215,21 @@ public class AbstractFeatureTask extends AbstractServerTask {
         return featuresToInstall
     }
 
+    /**
+     * Get a new instance of ServerFeatureUtil
+     *
+     * @param suppressLogs if true info and warning will be logged as debug
+     * @return instance of ServerFeatureUtil
+     */
     @Internal
-    protected ServerFeatureUtil getServerFeatureUtil() {
+    protected ServerFeatureUtil getServerFeatureUtil(boolean suppressLogs) {
         if (servUtil == null) {
             servUtil = new ServerFeatureTaskUtil();
+        }
+        if (suppressLogs) {
+            servUtil.setSuppressLogs(true);
+        } else {
+            servUtil.setSuppressLogs(false);
         }
         return servUtil;
     }
