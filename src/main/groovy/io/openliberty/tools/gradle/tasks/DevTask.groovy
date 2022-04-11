@@ -305,7 +305,7 @@ class DevTask extends AbstractFeatureTask {
                     false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, null /* parent build files */, generateFeatures, null /* compileArtifactPaths */, null /* testArtifactPaths */, new ArrayList<Path>() /* webResources */
                 );
 
-            ServerFeatureUtil servUtil = getServerFeatureUtil();
+            ServerFeatureUtil servUtil = getServerFeatureUtil(true);
             this.libertyDirPropertyFiles = AbstractServerTask.getLibertyDirectoryPropertyFiles(installDirectory, userDirectory, serverDirectory);
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory, libertyDirPropertyFiles);
 
@@ -657,7 +657,7 @@ class DevTask extends AbstractFeatureTask {
 
         @Override
         public void installFeatures(File configFile, File serverDir) {
-            ServerFeatureUtil servUtil = getServerFeatureUtil();
+            ServerFeatureUtil servUtil = getServerFeatureUtil(true);
             Set<String> features = servUtil.getServerFeatures(serverDir, libertyDirPropertyFiles);
 
             if (features == null) {
@@ -707,7 +707,8 @@ class DevTask extends AbstractFeatureTask {
 
         @Override
         public ServerFeatureUtil getServerFeatureUtilObj() {
-            return getServerFeatureUtil();
+            // suppress logs from ServerFeatureUtil so that dev console is not flooded
+            return getServerFeatureUtil(true);
         }
 
         @Override

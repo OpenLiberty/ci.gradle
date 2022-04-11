@@ -98,8 +98,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         } */
 
         // get existing server features from source directory
-        ServerFeatureUtil servUtil = getServerFeatureUtil();
-
+        ServerFeatureUtil servUtil = getServerFeatureUtil(true);
         Set<String> generatedFiles = new HashSet<String>();
         generatedFiles.add(GENERATED_FEATURES_FILE_NAME);
 
