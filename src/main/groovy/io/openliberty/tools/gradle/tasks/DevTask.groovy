@@ -671,13 +671,13 @@ class DevTask extends AbstractFeatureTask {
                 Set<String> existingFeaturesCopy = new HashSet<String> (existingFeatures);
                 existingFeaturesCopy.removeAll(featuresCopy);
                 if (!existingFeaturesCopy.isEmpty()) {
-                    logger.info("Configuration features have been removed");
+                    logger.info("Configuration features have been removed: " + existingFeaturesCopy);
                     existingFeatures.removeAll(existingFeaturesCopy);
                 }
             }
 
             if (!features.isEmpty()) {
-                logger.info("Configuration features have been added");
+                logger.info("Configuration features have been added: " + features);
 
                 // Call the installFeature gradle task using the temporary serverDir directory that DevMode uses
                 ProjectConnection gradleConnection = initGradleProjectConnection();
