@@ -656,7 +656,7 @@ class DevTask extends AbstractFeatureTask {
 
 
         @Override
-        public void installFeatures(File configFile, File serverDir) {
+        public void installFeatures(File configFile, File serverDir, boolean generateFeatures) {
             ServerFeatureUtil servUtil = getServerFeatureUtil(true);
             Set<String> features = servUtil.getServerFeatures(serverDir, libertyDirPropertyFiles);
 
@@ -698,7 +698,12 @@ class DevTask extends AbstractFeatureTask {
                 } catch (BuildException e) {
                     // stdout/stderr from the installFeature task is sent to the terminal
                     // only need to log the actual stacktrace when debugging
-                    logger.debug('Failed to install features from configuration file', e);
+                    logger.error('Failed to install features from configuration file', e);
+                    if (generateFeatures && !project.configurations.getByName('libertyFeature').dependencies.isEmpty()) {
+                        logger.warn("Liberty feature dependencies were detected in the build.gradle file and automatic generation of features is [On]. "
+                                + "Automatic generation of features does not support Liberty feature dependencies. "
+                                + "Remove any Liberty feature dependencies from the build.gradle file or disable automatic generation of features by typing 'g' and press Enter.");
+                    }
                 } finally {
                     gradleConnection.close();
                 }
