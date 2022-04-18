@@ -700,18 +700,15 @@ class DevTask extends AbstractFeatureTask {
                     // stdout/stderr from the installFeature task is sent to the terminal
                     // only need to log the actual stacktrace when debugging
                     logger.error('Failed to install features from configuration file', e);
-
-                    boolean containsConflictMessage = false;
-                    if (e.getCause() != null && e.getCause().getCause() != null && e.getCause().getCause().getCause() != null) {
-                        if (e.getCause().getCause().getCause().getMessage().contains(InstallFeatureUtil.CONFLICT_MESSAGE)) {
+                    if (generateFeatures && !project.configurations.getByName('libertyFeature').dependencies.isEmpty()) {
+                        if (e.getCause() != null && e.getCause().getCause() != null && e.getCause().getCause().getCause() != null) {
                             // PluginExecutionException from installFeature will be 3 layers deep
-                            containsConflictMessage = true;
+                            if (e.getCause().getCause().getCause().getMessage().contains(InstallFeatureUtil.CONFLICT_MESSAGE)) {
+                                logger.warn("Liberty feature dependencies were detected in the build.gradle file and automatic generation of features is [On]. "
+                                        + "Automatic generation of features does not support Liberty feature dependencies. "
+                                        + "Remove any Liberty feature dependencies from the build.gradle file or disable automatic generation of features by typing 'g' and press Enter.");
+                            }
                         }
-                    }
-                    if (generateFeatures && !project.configurations.getByName('libertyFeature').dependencies.isEmpty() && containsConflictMessage) {
-                        logger.warn("Liberty feature dependencies were detected in the build.gradle file and automatic generation of features is [On]. "
-                                + "Automatic generation of features does not support Liberty feature dependencies. "
-                                + "Remove any Liberty feature dependencies from the build.gradle file or disable automatic generation of features by typing 'g' and press Enter.");
                     }
                 } finally {
                     gradleConnection.close();
