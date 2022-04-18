@@ -37,6 +37,7 @@ import java.util.concurrent.ThreadPoolExecutor
 import io.openliberty.tools.ant.ServerTask
 
 import io.openliberty.tools.common.plugins.util.DevUtil
+import io.openliberty.tools.common.plugins.util.InstallFeatureUtil;
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.PluginScenarioException
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
@@ -699,7 +700,15 @@ class DevTask extends AbstractFeatureTask {
                     // stdout/stderr from the installFeature task is sent to the terminal
                     // only need to log the actual stacktrace when debugging
                     logger.error('Failed to install features from configuration file', e);
-                    if (generateFeatures && !project.configurations.getByName('libertyFeature').dependencies.isEmpty()) {
+
+                    boolean containsConflictMessage = false;
+                    if (e.getCause() != null && e.getCause().getCause() != null && e.getCause().getCause().getCause() != null) {
+                        if (e.getCause().getCause().getCause().getMessage().contains(InstallFeatureUtil.CONFLICT_MESSAGE)) {
+                            // PluginExecutionException from installFeature will be 3 layers deep
+                            containsConflictMessage = true;
+                        }
+                    }
+                    if (generateFeatures && !project.configurations.getByName('libertyFeature').dependencies.isEmpty() && containsConflictMessage) {
                         logger.warn("Liberty feature dependencies were detected in the build.gradle file and automatic generation of features is [On]. "
                                 + "Automatic generation of features does not support Liberty feature dependencies. "
                                 + "Remove any Liberty feature dependencies from the build.gradle file or disable automatic generation of features by typing 'g' and press Enter.");
