@@ -25,13 +25,6 @@ import static org.junit.Assert.assertTrue
  * Liberty generateFeatures task tests for various MicroProfile and Java EE versions
  * Test to ensure the binary scanner honours the version of MicroProfile and Java EE
  * specified in the build.gradle.
- * When you use MicroProfile the binary scanner assumes you use the lastest subversion
- * in the MicroProfile version you specify:
- * You specify | binary scanner generates features in
- * MP 1.1-1.4  | MicroProfile 1.4
- * MP 2.0-2.2  | MicroProfile 2.2
- * MP 3.0-3.3  | MicroProfile 3.3
- * MP 4.0-4.1  | MicroProfile 4.1
  */
 class GenerateFeaturesRestTest extends BaseGenerateFeaturesTest {
 
@@ -79,7 +72,7 @@ class GenerateFeaturesRestTest extends BaseGenerateFeaturesTest {
     }
 
     @Test
-    public void mp2Test() throws Exception {
+    public void mp21Test() throws Exception {
         // Test Java EE 8.0 and MicroProfile 2.x
         // MicroProfile 2.1 uses cdi-2.0 so it requires EE8
         replaceString("EE_VERSION", "8.0", buildFile);
@@ -91,12 +84,12 @@ class GenerateFeaturesRestTest extends BaseGenerateFeaturesTest {
 
         // verify that the correct features are in the generated-features.xml
         Set<String> features = readFeatures(newFeatureFile);
-        assertTrue(features.contains("mpRestClient-1.2"));
+        assertTrue(features.contains("mpRestClient-1.1"));
         assertTrue(features.contains("cdi-2.0"));
     }
 
     @Test
-    public void mp3Test() throws Exception {
+    public void mp30Test() throws Exception {
         // Test Java EE 8.0 and MicroProfile 3.x
         replaceString("EE_VERSION", "8.0", buildFile);
         replaceString("MP_VERSION", "3.0", buildFile);
@@ -107,12 +100,12 @@ class GenerateFeaturesRestTest extends BaseGenerateFeaturesTest {
 
         // verify that the correct features are in the generated-features.xml
         Set<String> features = readFeatures(newFeatureFile);
-        assertTrue(features.contains("mpRestClient-1.4"));
+        assertTrue(features.contains("mpRestClient-1.3"));
         assertTrue(features.contains("cdi-2.0"));
     }
 
     @Test
-    public void mp4Test() throws Exception {
+    public void mp41Test() throws Exception {
         // Test Java EE 8.0 and MicroProfile 4.x
         replaceString("EE_VERSION", "8.0", buildFile);
         replaceString("MP_VERSION", "4.1", buildFile);
