@@ -49,7 +49,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         assertTrue(targetDir.exists());
 
         // verify that the generated features file was created
-        assertTrue(newFeatureFile.exists());
+        assertTrue(formatOutput(getProcessOutput()), newFeatureFile.exists());
 
         // verify that the correct features are in the generated-features.xml
         Set<String> features = readFeatures(newFeatureFile);
@@ -168,7 +168,8 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         Set<String> recommendedFeatureSet = new HashSet<String>();
         recommendedFeatureSet.addAll("servlet-4.0");
         // search log file instead of process output because warning message in process output may be interrupted
-        verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE2, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, logFile);
+        boolean b = verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE2, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, logFile);
+        assertTrue(formatOutput(getProcessOutput()), b);
     }
 
     /**
@@ -192,7 +193,8 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         recommendedFeatureSet.addAll("cdi-2.0");
         recommendedFeatureSet.addAll("servlet-4.0");
         // search log file instead of process output because warning message in process output may be interrupted
-        verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE1, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, logFile);
+        boolean b = verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE1, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, logFile);
+        assertTrue(formatOutput(getProcessOutput()), b);
     }
 
     // TODO add an integration test for feature conflict for API usage (BINARY_SCANNER_CONFLICT_MESSAGE3), ie. MP4 and EE9
