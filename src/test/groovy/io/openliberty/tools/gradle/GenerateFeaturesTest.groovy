@@ -217,7 +217,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
         // use just beginning of BINARY_SCANNER_CONFLICT_MESSAGE5 as error message in logFile may be interrupted with "1 actionable task: 1 executed"
         assertTrue("Could not find the feature unavailable conflict message in the process output.\n" + processOutput,
-                verifyLogMessageExists("A working set of features could not be generated due to conflicts in the required features: [servlet-4.0, mpOpenAPI-1.0]" +
+                verifyLogMessageExists("required features: [servlet-4.0, mpOpenAPI-1.0]" +
                         " and required levels of MicroProfile: mp1.2, Java EE or Jakarta EE: ee8", 1000, logFile));
 
     }
