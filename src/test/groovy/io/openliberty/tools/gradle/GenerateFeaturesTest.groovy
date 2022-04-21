@@ -165,8 +165,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         runCompileAndGenerateFeatures();
 
         // Verify BINARY_SCANNER_CONFLICT_MESSAGE2 error is thrown (BinaryScannerUtil.RecommendationSetException)
-        Set<String> recommendedFeatureSet = new HashSet<String>();
-        recommendedFeatureSet.addAll("servlet-4.0");
+        Set<String> recommendedFeatureSet = new HashSet<String>(Arrays.asList("servlet-4.0"));
         // search log file instead of process output because warning message in process output may be interrupted
         boolean b = verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE2, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, logFile);
         assertTrue(formatOutput(getProcessOutput()), b);
@@ -189,15 +188,39 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         runCompileAndGenerateFeatures();
 
         // Verify BINARY_SCANNER_CONFLICT_MESSAGE1 error is thrown (BinaryScannerUtil.FeatureModifiedException)
-        Set<String> recommendedFeatureSet = new HashSet<String>();
-        recommendedFeatureSet.addAll("cdi-2.0");
-        recommendedFeatureSet.addAll("servlet-4.0");
+        Set<String> recommendedFeatureSet = new HashSet<String>(Arrays.asList("cdi-2.0", "servlet-4.0"));
         // search log file instead of process output because warning message in process output may be interrupted
         boolean b = verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE1, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, logFile);
         assertTrue(formatOutput(getProcessOutput()), b);
     }
 
     // TODO add an integration test for feature conflict for API usage (BINARY_SCANNER_CONFLICT_MESSAGE3), ie. MP4 and EE9
+
+    /**
+     * Conflict between required features in API usage or configured features and MP/EE level specified
+     * Check for BINARY_SCANNER_CONFLICT_MESSAGE5 (feature unavailable for required MP/EE levels)
+     *
+     * @throws Exception
+     */
+    @Test
+    public void featureUnavailableConflictTest() throws Exception {
+        // use EE 8 and MP 1.2
+        replaceString("org.eclipse.microprofile:microprofile:3.2", "org.eclipse.microprofile:microprofile:1.2", buildFile);
+
+        // add mpOpenAPI-1.0 feature to server.xml, not available in MP 1.2
+        replaceString("<!--replaceable-->",
+                "<!--Feature generation comment goes below this line-->\n" +
+                        "  <featureManager>\n" +
+                        "    <feature>mpOpenAPI-1.0</feature>\n" +
+                        "  </featureManager>\n", serverXmlFile);
+        runCompileAndGenerateFeatures();
+
+        // use just beginning of BINARY_SCANNER_CONFLICT_MESSAGE5 as error message in logFile may be interrupted with "1 actionable task: 1 executed"
+        assertTrue("Could not find the feature unavailable conflict message in the process output.\n" + processOutput,
+                verifyLogMessageExists("required features: [servlet-4.0, mpOpenAPI-1.0]" +
+                        " and required levels of MicroProfile: mp1.2, Java EE or Jakarta EE: ee8", 1000, logFile));
+
+    }
 
     protected Set<String> getCdi12ConflictingFeatures() {
         // servlet-4.0 (EE8) conflicts with cdi-1.2 (EE7)

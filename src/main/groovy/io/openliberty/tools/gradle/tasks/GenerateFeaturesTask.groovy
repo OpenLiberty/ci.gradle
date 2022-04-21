@@ -143,6 +143,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                 throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE2, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
             }
             throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE1, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
+        } catch (BinaryScannerUtil.FeatureUnavailableException featureUnavailable) {
+            throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE5, featureUnavailable.getConflicts(), featureUnavailable.getMPLevel(),
+                    featureUnavailable.getEELevel(), featureUnavailable.getUnavailableFeatures()));
         } catch (PluginExecutionException x) {
             // throw an error when there is a problem not caught in runBinaryScanner()
             Object o = x.getCause();
