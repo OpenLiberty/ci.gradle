@@ -80,7 +80,7 @@ class DevTest extends BaseDevTest {
         replaceString("<!-- replace -->", "<feature>servlet-4.0</feature>", srcServerXMLIncludes);
 
         // check that features have been generated (no additional features generated)
-        assertTrue(verifyLogMessage(10000, RUNNING_GENERATE_FEATURES, ++generateFeaturesCount)); // task ran
+        assertTrue("Could not verify that features had been generated: " + getContents(logFile, "Dev mode std output"), verifyLogMessage(18000, RUNNING_GENERATE_FEATURES, ++generateFeaturesCount)); // task ran
 
         // check for server configuration update
         File messagesLogFile = new File(targetDir, "wlp/usr/servers/defaultServer/logs/messages.log");
