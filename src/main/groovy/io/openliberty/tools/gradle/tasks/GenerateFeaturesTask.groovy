@@ -131,6 +131,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             if (modifiedSet.containsAll(userFeatures)) {
                 // none of the user features were modified, only features which were generated earlier.
                 logger.debug("FeatureModifiedException, modifiedSet containsAll userFeatures, pass modifiedSet on to generateFeatures");
+                // features were modified to get a working set with the application's API usage, display warning to users and use modified set
+                logger.warn(featuresModified.getMessage());
                 scannedFeatureList = modifiedSet;
             } else {
                 Set<String> allAppFeatures = featuresModified.getSuggestions(); // suggestions are scanned from binaries
