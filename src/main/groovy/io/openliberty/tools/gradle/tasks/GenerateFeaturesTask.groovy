@@ -235,7 +235,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     private Set<String> getGeneratedFeatures(ServerFeatureUtil servUtil, File generatedFeaturesFile) {
         servUtil.setLowerCaseFeatures(false);
         Set<String> genFeatSet = new HashSet<String>();
-        servUtil.getServerXmlFeatures(genFeatSet, configDirectory,
+        servUtil.getServerXmlFeatures(genFeatSet, server.configDirectory,
                 generatedFeaturesFile, null, null);
         servUtil.setLowerCaseFeatures(true);
         return genFeatSet;
