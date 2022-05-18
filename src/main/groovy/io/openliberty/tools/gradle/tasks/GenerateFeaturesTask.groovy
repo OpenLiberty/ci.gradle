@@ -176,25 +176,31 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         def newServerXmlSrc = new File(server.configDirectory, GENERATED_FEATURES_FILE_PATH);
         try {
             if (missingLibertyFeatures.size() > 0) {
-                // Create specialized server.xml
-                ServerConfigXmlDocument configDocument = ServerConfigXmlDocument.newInstance();
-                configDocument.createComment(HEADER);
-                Element featureManagerElem = configDocument.createFeatureManager();
-                configDocument.createComment(featureManagerElem, GENERATED_FEATURES_COMMENT);
-                for (String missing : missingLibertyFeatures) {
-                    logger.debug(String.format("Adding missing feature %s to %s.", missing, GENERATED_FEATURES_FILE_PATH));
-                    configDocument.createFeature(missing);
+                Set<String> existingGeneratedFeatures = getGeneratedFeatures(servUtil, newServerXmlSrc);
+                if (!missingLibertyFeatures.equals(existingGeneratedFeatures)) {
+                    // Create specialized server.xml
+                    ServerConfigXmlDocument configDocument = ServerConfigXmlDocument.newInstance();
+                    configDocument.createComment(HEADER);
+                    Element featureManagerElem = configDocument.createFeatureManager();
+                    configDocument.createComment(featureManagerElem, GENERATED_FEATURES_COMMENT);
+                    for (String missing : missingLibertyFeatures) {
+                        logger.debug(String.format("Adding missing feature %s to %s.", missing, GENERATED_FEATURES_FILE_PATH));
+                        configDocument.createFeature(missing);
+                    }
+                    // Generate log message before writing file as the file change event kicks off other dev mode actions
+                    logger.lifecycle("Generated the following features: " + missingLibertyFeatures);
+                    // use logger.lifecycle so that message appears without --info tag on
+                    configDocument.writeXMLDocument(newServerXmlSrc);
+                    logger.debug("Created file " + newServerXmlSrc);
+                    // Add a reference to this new file in existing server.xml.
+                    def serverXml = findConfigFile("server.xml", server.serverXmlFile);
+                    def doc = getServerXmlDocFromConfig(serverXml);
+                    logger.debug("Xml document we'll try to update after generate features doc=" + doc + " file=" + serverXml);
+                    addGenerationCommentToConfig(doc, serverXml);
+                } else {
+                    logger.lifecycle("Regenerated the following features: " + missingLibertyFeatures);
+                    // use logger.lifecycle so that message appears without --info tag on
                 }
-                configDocument.writeXMLDocument(newServerXmlSrc);
-                logger.debug("Created file " + newServerXmlSrc);
-                // Add a reference to this new file in existing server.xml.
-                def serverXml = findConfigFile("server.xml", server.serverXmlFile);
-                def doc = getServerXmlDocFromConfig(serverXml);
-                logger.debug("Xml document we'll try to update after generate features doc=" + doc + " file=" + serverXml);
-                addGenerationCommentToConfig(doc, serverXml);
-
-                logger.lifecycle("Generated the following features: " + missingLibertyFeatures);
-                // use logger.lifecycle so that message appears without --info tag on
             } else {
                 logger.lifecycle("No additional features were generated.");
                 if (newServerXmlSrc.exists()) {
@@ -224,6 +230,17 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         servUtil.setLowerCaseFeatures(true);
         return existingFeatures;
     }
+
+    // returns the features specified in the generated-features.xml file
+    private Set<String> getGeneratedFeatures(ServerFeatureUtil servUtil, File generatedFeaturesFile) {
+        servUtil.setLowerCaseFeatures(false);
+        Set<String> genFeatSet = new HashSet<String>();
+        servUtil.getServerXmlFeatures(genFeatSet, configDirectory,
+                generatedFeaturesFile, null, null);
+        servUtil.setLowerCaseFeatures(true);
+        return genFeatSet;
+    }
+
     /**
      * Gets the binary scanner jar file from the local cache.
      * Downloads it first from connected repositories such as Maven Central if a newer release is available than the cached version.
