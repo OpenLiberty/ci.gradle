@@ -47,7 +47,7 @@ class DevTest extends BaseDevTest {
 
     @Test
     public void configChangeTest() throws Exception {
-         int generateFeaturesCount = countOccurrences(RUNNING_GENERATE_FEATURES, logFile);
+        int generateFeaturesCount = countOccurrences(RUNNING_GENERATE_FEATURES, logFile);
         // configuration file change
         File srcServerXML = new File(buildDir, "src/main/liberty/config/server.xml");
         File targetServerXML = new File(targetDir, "wlp/usr/servers/defaultServer/server.xml");
@@ -57,7 +57,7 @@ class DevTest extends BaseDevTest {
         replaceString("</feature>", "</feature>\n" + "    <feature>mpHealth-2.0</feature>", srcServerXML);
 
         // check that features have been generated
-         assertTrue(verifyLogMessage(10000, RUNNING_GENERATE_FEATURES, ++generateFeaturesCount)); // task ran
+        assertTrue(verifyLogMessage(10000, RUNNING_GENERATE_FEATURES, ++generateFeaturesCount)); // task ran
 
         // check for server configuration was successfully updated message in messages.log
         File messagesLogFile = new File(targetDir, "wlp/usr/servers/defaultServer/logs/messages.log");
@@ -174,7 +174,7 @@ class DevTest extends BaseDevTest {
 
         assertTrue(verifyLogMessage(20000, RESTARTED, ++restartedCount));
         // not supposed to rerun generate features just because of a server restart
-         assertTrue(verifyLogMessage(2000, RUNNING_GENERATE_FEATURES, logFile, runningGenerateCount));
+        assertTrue(verifyLogMessage(2000, RUNNING_GENERATE_FEATURES, logFile, runningGenerateCount));
     }
 
     @Test

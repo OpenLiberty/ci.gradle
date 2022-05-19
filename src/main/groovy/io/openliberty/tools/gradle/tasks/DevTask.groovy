@@ -85,9 +85,7 @@ class DevTask extends AbstractFeatureTask {
     private static final boolean DEFAULT_CONTAINER = false;
     private static final boolean DEFAULT_SKIP_DEFAULT_PORTS = false;
     private static final boolean DEFAULT_KEEP_TEMP_DOCKERFILE = false;
-    // TODO update when feature generation is re-enabled
-    // force to false to disable feature generation
-    private static final boolean DEFAULT_GENERATE_FEATURES = false;
+    private static final boolean DEFAULT_GENERATE_FEATURES = true;
 
     protected final String CONTAINER_PROPERTY_ARG = '-P'+CONTAINER_PROPERTY+'=true';
 
@@ -258,16 +256,15 @@ class DevTask extends AbstractFeatureTask {
         this.keepTempDockerfile = keepTempDockerfile;
     }
 
-    // TODO enable when feature generation is re-enabled
-    // @Optional
-    // @Input
-    private Boolean generateFeatures = null;
+    @Optional
+    @Input
+    Boolean generateFeatures;
 
-    // // Need to use a string value to allow someone to specify --generateFeatures=false, if not explicitly set defaults to true
-    // @Option(option = 'generateFeatures', description = 'If true, scan the application binary files to determine which Liberty features should be used. The default value is true.')
-    // void setGenerateFeatures(String generateFeatures) {
-    //     this.generateFeatures = Boolean.parseBoolean(generateFeatures);
-    // }
+     // Need to use a string value to allow someone to specify --generateFeatures=false, if not explicitly set defaults to true
+     @Option(option = 'generateFeatures', description = 'If true, scan the application binary files to determine which Liberty features should be used. The default value is true.')
+     void setGenerateFeatures(String generateFeatures) {
+         this.generateFeatures = Boolean.parseBoolean(generateFeatures);
+     }
 
     @Optional
     @Input
