@@ -18,7 +18,6 @@ package io.openliberty.tools.gradle
 
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 
 import static org.junit.Assert.assertTrue
@@ -27,8 +26,6 @@ import static org.junit.Assert.assertTrue
  * Test to ensure the binary scanner honours the version of MicroProfile and Java EE
  * specified in the build.gradle.
  */
-// TODO enable when feature generation is re-enabled
-@Ignore
 class GenerateFeaturesRestTest extends BaseGenerateFeaturesTest {
 
     @Before
