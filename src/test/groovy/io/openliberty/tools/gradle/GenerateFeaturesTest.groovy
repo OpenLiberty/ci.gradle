@@ -18,7 +18,6 @@ package io.openliberty.tools.gradle
 import io.openliberty.tools.gradle.tasks.GenerateFeaturesTask
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 
 import java.nio.charset.Charset
@@ -28,8 +27,6 @@ import java.nio.file.Files
 import static org.junit.Assert.*
 import static io.openliberty.tools.common.plugins.util.BinaryScannerUtil.*;
 
-// TODO enable when feature generation is re-enabled
-@Ignore
 class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
     static File targetDir;

@@ -63,8 +63,7 @@ class LibertyTaskFactory {
         project.tasks.create('deploy', DeployTask)
         project.tasks.create('undeploy', UndeployTask)
         project.tasks.create('installFeature', InstallFeatureTask)
-        // TODO enable when feature generation is re-enabled
-        // project.tasks.create('generateFeatures', GenerateFeaturesTask)
+        project.tasks.create('generateFeatures', GenerateFeaturesTask)
         project.tasks.create('prepareFeature', PrepareFeatureTask)
         project.tasks.create('uninstallFeature', UninstallFeatureTask)
         project.tasks.create('cleanDirs', CleanTask)

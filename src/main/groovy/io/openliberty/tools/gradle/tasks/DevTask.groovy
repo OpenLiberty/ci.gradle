@@ -57,6 +57,9 @@ class DevTask extends AbstractFeatureTask {
     private static final String MICROSHED_HTTP_PORT = "microshed_http_port";
     private static final String MICROSHED_HTTPS_PORT = "microshed_https_port";
     private static final String WLP_USER_DIR_PROPERTY_NAME = "wlp.user.dir";
+    private static final String GEN_FEAT_LIBERTY_DEP_WARNING = "Liberty feature dependencies were detected in the build.gradle file and automatic generation of features is [On]. " +
+            "Automatic generation of features does not support Liberty feature dependencies. " +
+            "Remove any Liberty feature dependencies from the build.gradle file or disable automatic generation of features by typing 'g' and press Enter.";
 
     DevTask() {
         configure({
@@ -82,9 +85,7 @@ class DevTask extends AbstractFeatureTask {
     private static final boolean DEFAULT_CONTAINER = false;
     private static final boolean DEFAULT_SKIP_DEFAULT_PORTS = false;
     private static final boolean DEFAULT_KEEP_TEMP_DOCKERFILE = false;
-    // TODO update when feature generation is re-enabled
-    // force to false to disable feature generation
-    private static final boolean DEFAULT_GENERATE_FEATURES = false;
+    private static final boolean DEFAULT_GENERATE_FEATURES = true;
 
     protected final String CONTAINER_PROPERTY_ARG = '-P'+CONTAINER_PROPERTY+'=true';
 
@@ -255,16 +256,15 @@ class DevTask extends AbstractFeatureTask {
         this.keepTempDockerfile = keepTempDockerfile;
     }
 
-    // TODO enable when feature generation is re-enabled
-    // @Optional
-    // @Input
-    private Boolean generateFeatures = null;
+    @Optional
+    @Input
+    Boolean generateFeatures;
 
-    // // Need to use a string value to allow someone to specify --generateFeatures=false, if not explicitly set defaults to true
-    // @Option(option = 'generateFeatures', description = 'If true, scan the application binary files to determine which Liberty features should be used. The default value is true.')
-    // void setGenerateFeatures(String generateFeatures) {
-    //     this.generateFeatures = Boolean.parseBoolean(generateFeatures);
-    // }
+     // Need to use a string value to allow someone to specify --generateFeatures=false, if not explicitly set defaults to true
+     @Option(option = 'generateFeatures', description = 'If true, scan the application binary files to determine which Liberty features should be used. The default value is true.')
+     void setGenerateFeatures(String generateFeatures) {
+         this.generateFeatures = Boolean.parseBoolean(generateFeatures);
+     }
 
     @Optional
     @Input
@@ -595,9 +595,28 @@ class DevTask extends AbstractFeatureTask {
                 util.restartServer();
                 return true;
             } else if (installFeatures) {
-                libertyInstallFeature();
+                try {
+                    libertyInstallFeature();
+                } catch (PluginExecutionException e) {
+                    // display warning if install feature fails, generateFeatures is on, and Liberty features are in buildfile
+                    if (e.getCause() instanceof BuildException && generateFeatures) {
+                        libertyDependencyWarning(e.getCause());
+                    }
+                }
             }
             return true;
+        }
+
+        // Check if BuildException contains InstallFeature feature conflict error message
+        // This method is only meant to be called if generateFeatures == true and Liberty feature dependencies
+        // are detected in the build file
+        private void libertyDependencyWarning(BuildException e) {
+            if (e.getCause() != null && e.getCause().getCause() != null && e.getCause().getCause().getCause() != null) {
+                // PluginExecutionException from installFeature will be 3 layers deep
+                if (e.getCause().getCause().getCause().getMessage().contains(InstallFeatureUtil.CONFLICT_MESSAGE)) {
+                    logger.warn(GEN_FEAT_LIBERTY_DEP_WARNING);
+                }
+            }
         }
 
         private boolean hasServerConfigBootstrapPropertiesChanged(Project newProject, Project oldProject) {
@@ -702,16 +721,9 @@ class DevTask extends AbstractFeatureTask {
                 } catch (BuildException e) {
                     // stdout/stderr from the installFeature task is sent to the terminal
                     // only need to log the actual stacktrace when debugging
-                    logger.error('Failed to install features from configuration file', e);
+                    logger.error('Failed to install features from configuration file' + e.getMessage())
                     if (generateFeatures && !project.configurations.getByName('libertyFeature').dependencies.isEmpty()) {
-                        if (e.getCause() != null && e.getCause().getCause() != null && e.getCause().getCause().getCause() != null) {
-                            // PluginExecutionException from installFeature will be 3 layers deep
-                            if (e.getCause().getCause().getCause().getMessage().contains(InstallFeatureUtil.CONFLICT_MESSAGE)) {
-                                logger.warn("Liberty feature dependencies were detected in the build.gradle file and automatic generation of features is [On]. "
-                                        + "Automatic generation of features does not support Liberty feature dependencies. "
-                                        + "Remove any Liberty feature dependencies from the build.gradle file or disable automatic generation of features by typing 'g' and press Enter.");
-                            }
-                        }
+                        libertyDependencyWarning(e);
                     }
                 } finally {
                     gradleConnection.close();
@@ -860,7 +872,6 @@ class DevTask extends AbstractFeatureTask {
         public void libertyInstallFeature() {
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
-
             try {
                 List<String> options = new ArrayList<String>();
                 if (container) {
