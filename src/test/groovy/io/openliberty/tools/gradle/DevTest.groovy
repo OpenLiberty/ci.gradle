@@ -172,7 +172,9 @@ class DevTest extends BaseDevTest {
         writer.write("r\n"); // command to restart liberty
         writer.flush();
 
-        assertTrue(verifyLogMessage(20000, RESTARTED, ++restartedCount));
+        // TODO reduce wait time once https://github.com/OpenLiberty/ci.gradle/issues/751 is resolved
+        // depending on the order the tests run in, tests may be triggered before this test resulting in a 30s timeout (bug above)
+        assertTrue(getContents(logFile, "Dev mode std output"),verifyLogMessage(40000, RESTARTED, ++restartedCount));
         // not supposed to rerun generate features just because of a server restart
         assertTrue(verifyLogMessage(2000, RUNNING_GENERATE_FEATURES, logFile, runningGenerateCount));
     }
