@@ -112,6 +112,11 @@ When dev mode runs with container support, it builds a container image and runs 
 
 **Limitations:** This task is not supported with Spring Boot applications.
 
+N.B. starting in 3.4, dev mode invokes `generate-features`. Ensure that the `generated-features.xml` configuration file is copied via your Dockerfile.
+```dockerfile
+COPY --chown=1001:0  build/wlp/usr/servers/defaultServer/configDropins/overrides/generated-features.xml /config/configDropins/overrides/
+```
+
 ### Prerequisites
 
 You need to install the Docker runtime locally (Docker Desktop on macOS or Windows, or Docker on Linux) to use this Gradle task. The installed Docker Client and Engine versions must be 18.03.0 or higher.
