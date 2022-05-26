@@ -45,7 +45,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.1.2'
+        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.4'
     }
 }
 ```
@@ -65,13 +65,13 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath ('io.openliberty.tools:liberty-ant-tasks:1.9.7')
-        classpath ('io.openliberty.tools:ci.common:1.8.13')
+        classpath ('io.openliberty.tools:liberty-ant-tasks:1.9.9')
+        classpath ('io.openliberty.tools:ci.common:1.8.20')
     }
 }
 
 plugins {
-    id "io.openliberty.tools.gradle.Liberty" version "3.1.2"
+    id "io.openliberty.tools.gradle.Liberty" version "3.4"
 }
 ```
 
@@ -83,26 +83,27 @@ See the [Liberty extension properties](docs/libertyExtensions.md#liberty-extensi
 
 The Liberty plugin provides the following tasks for your project:
 
-| Task | Description |
-| --------- | ------------ |
-| [cleanDirs](docs/clean.md#clean-task) | Cleans the Liberty server logs, workarea, and applications folders.|
-| [compileJsp](docs/compileJsp.md) | Compiles the JSP files from the src/main/webapp directory into the build/classes directory. |
-| [deploy](docs/deploy.md#deploy-task) | Deploys one or more applications to a Liberty server. |
-| [installFeature](docs/installFeature.md#installfeature-task) | Installs an additional feature to the Liberty runtime. |
-| [installLiberty](docs/installLiberty.md#installliberty-task) | Installs the  Liberty runtime from a repository. |
-| [libertyCreate](docs/libertyCreate.md#libertycreate-task) | Creates a Liberty server. |
-| [libertyDebug](docs/libertyDebug.md) | Runs the Liberty server in the console foreground after a debugger connects to the debug port (default: 7777). |
-| [libertyDev](docs/libertyDev.md) | Start a Liberty server in dev mode. |
-| [libertyDevc](docs/libertyDev.md#libertydevc-task-container-mode) | Start a Liberty server in dev mode in a container. |
-| [libertyDump](docs/libertyDump.md#libertydump-task) | Dumps diagnostic information from the Liberty server into an archive. |
-| [libertyJavaDump](docs/libertyJavaDump.md#libertyjavadump-task) | Dumps diagnostic information from the Liberty server JVM. |
-| [libertyPackage](docs/libertyPackage.md#libertypackage-task) | Packages a Liberty server. |
-| [libertyRun](docs/libertyRun.md#libertyrun-task) | Runs a Liberty server in the Gradle foreground process. |
-| [libertyStart](docs/libertyStart.md#libertystart-task) | Starts the Liberty server in a background process. |
-| [libertyStatus](docs/libertyStatus.md) | Checks to see if the Liberty server is running. |
-| [libertyStop](docs/libertyStop.md#libertystop-task) | Stops the Liberty server. |
-| [prepareFeature](docs/prepareFeature.md#prepareFeature-task) | Prepares a user feature for installation to the Liberty runtime. |
-| [undeploy](docs/undeploy.md#undeploy-task) | Removes applications from the Liberty server. |
+| Task                                                               | Description |
+|--------------------------------------------------------------------| ------------ |
+| [cleanDirs](docs/clean.md#clean-task)                              | Cleans the Liberty server logs, workarea, and applications folders.|
+| [compileJsp](docs/compileJsp.md)                                   | Compiles the JSP files from the src/main/webapp directory into the build/classes directory. |
+| [deploy](docs/deploy.md#deploy-task)                               | Deploys one or more applications to a Liberty server. |
+| [generateFeatures](docs/generateFeatures.md#generateFeatures-task) | Scan the class files of an application and create a Liberty configuration file containing the Liberty features the application requires. |
+| [installFeature](docs/installFeature.md#installfeature-task)       | Installs an additional feature to the Liberty runtime. |
+| [installLiberty](docs/installLiberty.md#installliberty-task)       | Installs the  Liberty runtime from a repository. |
+| [libertyCreate](docs/libertyCreate.md#libertycreate-task)          | Creates a Liberty server. |
+| [libertyDebug](docs/libertyDebug.md)                               | Runs the Liberty server in the console foreground after a debugger connects to the debug port (default: 7777). |
+| [libertyDev](docs/libertyDev.md)                                   | Start a Liberty server in dev mode. |
+| [libertyDevc](docs/libertyDev.md#libertydevc-task-container-mode)  | Start a Liberty server in dev mode in a container. |
+| [libertyDump](docs/libertyDump.md#libertydump-task)                | Dumps diagnostic information from the Liberty server into an archive. |
+| [libertyJavaDump](docs/libertyJavaDump.md#libertyjavadump-task)    | Dumps diagnostic information from the Liberty server JVM. |
+| [libertyPackage](docs/libertyPackage.md#libertypackage-task)       | Packages a Liberty server. |
+| [libertyRun](docs/libertyRun.md#libertyrun-task)                   | Runs a Liberty server in the Gradle foreground process. |
+| [libertyStart](docs/libertyStart.md#libertystart-task)             | Starts the Liberty server in a background process. |
+| [libertyStatus](docs/libertyStatus.md)                             | Checks to see if the Liberty server is running. |
+| [libertyStop](docs/libertyStop.md#libertystop-task)                | Stops the Liberty server. |
+| [prepareFeature](docs/prepareFeature.md#prepareFeature-task)       | Prepares a user feature for installation to the Liberty runtime. |
+| [undeploy](docs/undeploy.md#undeploy-task)                         | Removes applications from the Liberty server. |
 | [uninstallFeature](docs/uninstallFeature.md#uninstallfeature-task) | Remove a feature from the Liberty runtime. |
 
 ### Task ordering

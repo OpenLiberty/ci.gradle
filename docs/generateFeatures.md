@@ -1,58 +1,47 @@
 ## generateFeatures task
 ---
-Scan the class files of your application and create a new Liberty configuration file containing the features your application requires.
+Scan the class files of an application and create a new `generated-features.xml` Liberty configuration file containing the features the application requires.
 
-This task is available as a tech preview in the 3.3.1-SNAPSHOT. Please provide feedback by opening an issue at https://github.com/OpenLiberty/ci.gradle.
+This feature is best accessed through [dev mode](libertyDev.md). When you start `libertyDev` your application will be compiled and the class files will be scanned to verify that all the required Liberty features are included in your server configuration. Then as you work, dev mode will continue to monitor the project to confirm the Liberty features configured are up to date. If you implement a new interface in Java, the scanner will determine if that API is connected to a Liberty feature, then update the configuration and install the feature. If you remove a feature from `server.xml`, dev mode will determine if that feature is actually necessary, and if so, add it to the generated configuration file as described below.
 
-This feature is best accessed through dev mode. When you start up `libertyDev` it will compile your application and scan the files to verify that all the required Liberty features are part of your configuration. Then as you work, dev mode will continue to monitor the project to confirm the Liberty features are up to date. If you implement a new interface in Java, the scanner will determine if that API is connected to a Liberty feature, then update the configuration and install the feature. If you remove a feature from `server.xml`, dev mode will determine if that feature is actually necessary, and if so, add it to the configuration file as described below. For this snapshot you need to add the Sonatype repository to `build.gradle` (shown below), but in the future all the dependencies will be in Maven Central.
-
-If you need to disable feature generation, you can start dev mode with the parameter `--generateFeatures=false`. When running dev mode, you can toggle the generation of features off and on by typing 'g' and pressing Enter. Normally dev mode only scans a class file that has just been updated, but you can tell dev mode to rescan all class files by typing 'o' and pressing Enter. This will optimize the feature list in the generated configuration file.
+Feature generation is enabled through dev mode by default. If you need to disable feature generation, you can start dev mode with the parameter `--generateFeatures=false`. When running dev mode, you can toggle the generation of features off and on by typing 'g' and pressing Enter. Normally dev mode only scans a class file that has just been updated, but you can tell dev mode to rescan all class files by typing 'o' and pressing Enter. This will optimize the feature list in the generated configuration file.
 
 ##### Lifecycle
 
 This task is not part of the lifecycle, so to use it in your build you will need to understand its dependencies. Since it will scan the class files of your application, it must be run after the `compileJava` task. The list of features that it generates will be used by the `libertyCreate` and the `installFeature` tasks, so run this task first.
 
-If this task detects Liberty features used in your project but not present in your Liberty configuration, it will create a new file `configDropins/overrides/generated-features.xml` in the `src/main/liberty/config` directory of your project. The `generated-features.xml` file will contain a list of features required for your project. If the `generated-features.xml` file has been created in the past and no additional features have been detected, this file will be retained and will contain a comment indicating that there are no additional features generated.
+If this task detects Liberty features used in your project but not present in your Liberty configuration, it will create a new file `configDropins/overrides/generated-features.xml` in the `src/main/liberty/config` directory of your project. The `generated-features.xml` file will contain a list of features required for your project. If the `generated-features.xml` file has been created in the past and no additional features have been detected, this file will be retained.
 
-The task examines the `build.gradle` dependencies to determine what version of Java EE and what version of MicroProfile you may be using. It will then generate features which are compatible. For Java EE the task looks for these coordinates:
-* javax:javaee-api:6.0
-* javax:javaee-api:7.0
-* javax:javaee-api:8.0
-* jakarta:jakartaee-api:8.0
+The task examines the `build.gradle` dependencies to determine which version of Jakarta EE, MicroProfile or Java EE API you may be using. Compatible features will then be generated.
 
-For MicroProfile it looks for `org.eclipse.microprofile:microprofile` and generates features according to the version number. The task uses these compile dependencies to determine the best Liberty features to use with your application. 
+For Jakarta EE API, this task looks for `jakarta:jakartaee-api` dependency with version `8.0`.
 
-The task also considers the features you have already specified in `server.xml` or other files that Liberty will use (e.g. `include` elements and `configDropins` files). The task will attempt to find a working set of features that are compatible with each other.
+For MicroProfile API, this task looks for a `org.eclipse.microprofile:microprofile` dependency and generates features according to the version number.
 
-If there are conflicts with features specified in Liberty configuration files or features used in the application code, the task will print an error message. If available, the task will also print a list of suggested features with no conflicts.
+For Java EE API, this task looks for a `javax:javaee-api` dependency with versions `6.0`, `7.0` or `8.0`.
 
-##### Tech Preview Limitations
- 
-* For MicroProfile, this task will generate the latest features available in a given major release. (e.g. even if you specify `org.eclipse.microprofile:microprofile:3.2` and you use mpHealth APIs this task will generate the feature `mpHealth-2.2`, which is the latest version available for MicroProfile 3.x)
-* Jakarta EE version 9 or 9.1 is not supported at this time
-* When using the `serverXmlFile` parameter in build.gradle, if you specify a file not in the directory `src/main/liberty/config` and that file uses relative paths to include other files, any features in those files will not be considered for feature generation
-* Any features accessed using property variables (e.g. `${custom.key}/configFile.xml`) are not considered for feature generation
-
-For the tech preview snapshot you must include the Sonatype repository in `build.gradle`:
-```
-buildscript {
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        maven {
-            url "https://plugins.gradle.org/m2"
-            url "https://oss.sonatype.org/content/repositories/snapshots"
-        }
-    }
-    dependencies {
-        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.3.1-SNAPSHOT'
-    }
+For example, if you have the following Jakarta EE and MicroProfile dependencies in your `build.gradle` file, features compatible with Jakarta EE `8.0` and MicroProfile `4.1` will be generated.
+```groovy
+dependencies {
+    providedCompile 'jakarta.platform:jakarta.jakartaee-api:8.0.0'
+    providedCompile 'org.eclipse.microprofile:microprofile:4.1'
 }
 ```
+
+This task also considers the features you have already specified in `server.xml` or other Liberty server configuration files (e.g. `include` elements and `configDropins` files). This task will attempt to find a working set of features that are compatible with each other.
+
+If there are conflicts with features specified in Liberty configuration files or features used in the application code, this task will print an error message. If available, this task will also print a list of suggested features with no conflicts.
 
 ##### Example (outside of dev mode):
 
 Compile the application code and generate Liberty features.
-
 * `gradle compileJava generateFeatures`
 
+##### Limitations
+
+* MicroProfile 5 is not supported at this time
+* Jakarta EE version 9 or 9.1 is not supported at this time
+* When using the `serverXmlFile` parameter in the `build.gradle` file, if you specify a file not in the directory `src/main/liberty/config` and that file uses relative paths to include other files, any features in those files will not be considered for feature generation
+* Any features accessed using property variables (e.g. `${custom.key}/configFile.xml`) are not considered for feature generation
+
+See issues tagged with [`generateFeatures`](https://github.com/OpenLiberty/ci.gradle/issues?q=is%3Aissue+is%3Aopen+label%3AgenerateFeatures) for further information.
