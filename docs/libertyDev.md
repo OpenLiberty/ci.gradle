@@ -112,7 +112,7 @@ When dev mode runs with container support, it builds a container image and runs 
 
 **Limitations:** This task is not supported with Spring Boot applications.
 
-N.B. starting in 3.4, dev mode invokes `generate-features`. Ensure that the `generated-features.xml` configuration file is copied via your Dockerfile.
+N.B. starting in 3.4, dev mode invokes `generate-features`. Ensure that the `generated-features.xml` configuration file is copied to your Docker image via your Dockerfile.
 ```dockerfile
 COPY --chown=1001:0  build/wlp/usr/servers/defaultServer/configDropins/overrides/generated-features.xml /config/configDropins/overrides/
 ```
