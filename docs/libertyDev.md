@@ -116,6 +116,10 @@ N.B. starting in 3.4, dev mode invokes `generate-features`. Ensure that the `gen
 ```dockerfile
 COPY --chown=1001:0  build/wlp/usr/servers/defaultServer/configDropins/overrides/generated-features.xml /config/configDropins/overrides/
 ```
+If on Linux, it is recommended that you copy the entire `configDropins/overrides` directory to your Docker image via your Dockerfile.
+```dockerfile
+COPY --chown=1001:0  build/wlp/usr/servers/defaultServer/configDropins/overrides /config/configDropins/overrides
+```
 
 ### Prerequisites
 

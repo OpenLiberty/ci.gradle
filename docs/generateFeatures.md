@@ -16,6 +16,10 @@ If you are using [devc](libertyDev.md#libertydevc-task-container-mode), ensure t
 ```dockerfile
 COPY --chown=1001:0  build/wlp/usr/servers/defaultServer/configDropins/overrides/generated-features.xml /config/configDropins/overrides/
 ```
+If on Linux, it is recommended that you copy the entire `configDropins/overrides` directory to your Docker image via your Dockerfile.
+```dockerfile
+COPY --chown=1001:0  build/wlp/usr/servers/defaultServer/configDropins/overrides /config/configDropins/overrides
+```
 
 The task examines the `build.gradle` dependencies to determine which version of Jakarta EE, MicroProfile or Java EE API you may be using. Compatible features will then be generated.
 
