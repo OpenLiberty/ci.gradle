@@ -1,10 +1,9 @@
 ## libertyDev Task
 
-Start a Liberty server in dev mode. This task also invokes the `libertyCreate`, `installFeature`, and `deploy` tasks before starting the server.
-
-N.B. starting in the tech preview 3.3.1-SNAPSHOT, dev mode also invokes `generateFeatures`. See [generateFeatures](generateFeatures.md) for details.
-
+Start a Liberty instance in dev mode. This task also invokes the `generateFeatures`, `libertyCreate`, `installFeature`, and `deploy` tasks before starting the runtime.
 **Note:** This task is designed to be executed directly from the Gradle command line.
+
+N.B. starting in 3.4, dev mode invokes `generateFeatures`. See [generateFeatures](generateFeatures.md) for details.
 
 **Limitations:** This task is not supported with Spring Boot applications.
 
@@ -14,8 +13,11 @@ To start the server in a container, see the [libertyDevc](#libertydevc-task-cont
 
 While dev mode is running, perform the following in the command terminal to run the corresponding actions.
 
+* To toggle the automatic generation of features, type `g` and press Enter.
+* To optimize the list of generated features, type `o` and press Enter.
 * To run tests on demand, press Enter.
 * To restart the server, type `r` and press Enter.
+* * To see the help menu for available actions, type `h` and press Enter.
 * To exit dev mode, press `Control-C`, or type `q` and press Enter.
 
 ### Features
@@ -65,6 +67,7 @@ The following are optional command line parameters supported by this task.
 | compileWait | Time in seconds to wait before processing Java changes. If you encounter compile errors while refactoring, increase this value to allow all files to be saved before compilation occurs. The default value is `0.5` seconds. | No |
 | serverStartTimeout | Maximum time to wait (in seconds) to verify that the server has started. The value must be an integer greater than or equal to 0. The default value is `90` seconds. | No |
 | verifyAppStartTimeout | Maximum time to wait (in seconds) to verify that the application has started or updated before running tests. The value must be an integer greater than or equal to 0. The default value is `30` seconds. | No |
+| generateFeatures | If set to `true`, when a Java file, server configuration file, or build file is changed, generate features required by the application. The default value is `true`. | No |
 
 ### Properties
 
@@ -109,6 +112,15 @@ When dev mode runs with container support, it builds a container image and runs 
 
 **Limitations:** This task is not supported with Spring Boot applications.
 
+N.B. starting in 3.4, dev mode invokes `generate-features`. Ensure that the `generated-features.xml` configuration file is copied to your Docker image via your Dockerfile.
+```dockerfile
+COPY --chown=1001:0  build/wlp/usr/servers/defaultServer/configDropins/overrides/generated-features.xml /config/configDropins/overrides/
+```
+If on Linux, it is recommended that you copy the entire `configDropins/overrides` directory to your Docker image via your Dockerfile.
+```dockerfile
+COPY --chown=1001:0  build/wlp/usr/servers/defaultServer/configDropins/overrides /config/configDropins/overrides
+```
+
 ### Prerequisites
 
 You need to install the Docker runtime locally (Docker Desktop on macOS or Windows, or Docker on Linux) to use this Gradle task. The installed Docker Client and Engine versions must be 18.03.0 or higher.
@@ -131,13 +143,13 @@ Finally, if dev mode detects the Liberty command `RUN configure.sh` it will inse
 
 Dev mode offers different levels of file tracking and deployment depending on the way the file is specified in the Dockerfile. 
 1. When you use the COPY command on an individual file, dev mode can track file changes and hot deploy them to the container subject to the limitations below. **This is the recommended way to deploy files for dev mode,** so that you can make changes to those files at any time without needing to rebuild the image or restart the container.
-   - E.g. `COPY src/main/liberty/config/server.xml /config/` 
+   - E.g. `COPY build/wlp/usr/servers/defaultServer/server.xml /config/`
    - Note that the Dockerfile must copy only one `.war` file for the application. See the section on [Dockerfiles](#Dockerfile) for details.
 2. You can use the COPY command to deploy an entire directory and its sub-directories. In this case, dev mode will detect file changes and automatically rebuild the image and restart the container upon changes.
 3. The ADD command can be used on individual files, including tar files, as well as on directories. Again, dev mode will rebuild the image and restart the container when it detects file changes. 
 4. Certain Dockerfile features are not supported by dev mode. In these cases, the files specified are not tracked. If you change these files, you must rebuild the image and restart the container manually. **Type 'r' and press Enter to rebuild the image and restart the container.**
    - variable substitution used in the COPY or ADD command e.g. `$PROJECT/config`
-   - wildcards used in the COPY or ADD command e.g. `src/main/liberty/config/*`
+   - wildcards used in the COPY or ADD command e.g. `build/wlp/usr/servers/defaultServer/configDropins/*`
    - paths relative to WORKDIR e.g. `WORKDIR /other/project` followed by `COPY test.txt relativeDir/`
    - files copied from a different part of a multistage Docker build e.g. `COPY --from=<name>`
 
@@ -145,8 +157,11 @@ Dev mode offers different levels of file tracking and deployment depending on th
 
 While dev mode is running in container mode, perform the following in the command terminal to run the corresponding actions.
 
+* To toggle the automatic generation of features, type `g` and press Enter.
+* To optimize the list of generated features, type `o` and press Enter.
 * To run tests on demand, press Enter.
 * To rebuild the Docker image and restart the container, type `r` and press Enter.
+* To see the help menu for available actions, type `h` and press Enter.
 * To exit dev mode, press `Control-C`, or type `q` and press Enter.
 
 ### Linux Limitations
