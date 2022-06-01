@@ -129,29 +129,30 @@ class DevTest extends BaseDevTest {
             \n
             }\n
         }"""
+
         Files.write(unitTestSrcFile.toPath(), unitTest.getBytes());
         assertTrue(unitTestSrcFile.exists());
 
         // wait for compilation
         File unitTestTargetFile = new File(targetDir, "classes/java/test/UnitTest.class");
         assertTrue(verifyFileExists(unitTestTargetFile, 6000));
+
         long lastModified = unitTestTargetFile.lastModified();
         // The resolution of File.lastModified() is 1000 ms so wait long enough for lastModified() to register the modification.
-        Thread.sleep(2000);
-
+        Thread.sleep(1001);
         // modify the test file
         String str = "// testing";
         BufferedWriter javaWriter = new BufferedWriter(new FileWriter(unitTestSrcFile, true));
         javaWriter.append(' ');
         javaWriter.append(str);
-
         javaWriter.close();
-
         assertTrue(waitForCompilation(unitTestTargetFile, lastModified, 6000));
 
         // delete the test file
+        // "The java class .../build/classes/java/test/UnitTest.class was deleted."
         assertTrue(unitTestSrcFile.delete());
         assertTrue(verifyFileDoesNotExist(unitTestTargetFile, 6000));
+        assertTrue(verifyLogMessage(10000, "UnitTest.class was deleted"));
     }
 
     @Test
