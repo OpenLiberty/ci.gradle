@@ -743,6 +743,13 @@ class DevTask extends AbstractFeatureTask {
         }
 
         @Override
+        public void updateExistingFeatures() {
+            ServerFeatureUtil servUtil = getServerFeatureUtil(true);
+            Set<String> features = servUtil.getServerFeatures(getServerDir(project), libertyDirPropertyFiles);
+            this.existingFeatures.addAll(features);
+        }
+
+        @Override
         public boolean compile(File dir) {
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
