@@ -41,7 +41,7 @@ class DevTest extends BaseDevTest {
     @Test
     /* simple double check. if failure, check parse in ci.common */
     public void verifyJsonHost() throws Exception {
-        assertTrue(verifyLogMessage(2000, "CWWKT0016I", errFile));   // Verify web app code triggered
+        assertTrue(verifyLogMessage(2000, WEB_APP_AVAILABLE, errFile));   // Verify web app code triggered
         // TODO assertTrue(verifyLogMessage(2000, "http:\\/\\/"));  // Verify escape char seq passes
     }
 
@@ -61,7 +61,7 @@ class DevTest extends BaseDevTest {
 
         // check for server configuration was successfully updated message in messages.log
         File messagesLogFile = new File(targetDir, "wlp/usr/servers/defaultServer/logs/messages.log");
-        assertTrue(verifyLogMessage(60000, "CWWKG0017I", messagesLogFile));
+        assertTrue(verifyLogMessage(60000, SERVER_UPDATED, messagesLogFile));
         boolean foundUpdate = verifyLogMessage(60000, "<feature>mpFaultTolerance-2.0</feature>", targetServerXML);
         assertTrue("Could not find the updated feature in the target server.xml file", foundUpdate);
     }
@@ -84,7 +84,7 @@ class DevTest extends BaseDevTest {
 
         // check for server configuration update
         File messagesLogFile = new File(targetDir, "wlp/usr/servers/defaultServer/logs/messages.log");
-        assertTrue(verifyLogMessage(60000, "CWWKG0016I", messagesLogFile));
+        assertTrue(verifyLogMessage(60000, WEB_APP_AVAILABLE, messagesLogFile));
         assertTrue("Could not find the updated feature in the target extraFeatures.xml file",
                 verifyLogMessage(60000, "<feature>servlet-4.0</feature>", targetServerXMLIncludes));
     }

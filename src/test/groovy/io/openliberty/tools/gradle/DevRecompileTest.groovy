@@ -41,7 +41,7 @@ class DevRecompileTest extends BaseDevTest {
     @Test
     /* simple double check. if failure, check parse in ci.common */
     public void verifyJsonHost() throws Exception {
-        assertTrue(verifyLogMessage(2000, "CWWKT0016I", errFile));   // Verify web app code triggered
+        assertTrue(verifyLogMessage(2000, WEB_APP_AVAILABLE, errFile));   // Verify web app code triggered
         // TODO assertTrue(verifyLogMessage(2000, "http:\\/\\/"));  // Verify escape char seq passes
     }
 
@@ -111,7 +111,7 @@ class DevRecompileTest extends BaseDevTest {
         replaceString(badCode, goodCode, helloBatchSrc);
         assertTrue(verifyLogMessage(10000, COMPILATION_SUCCESSFUL, goodCount+1));
 
-        // Restore these tests once issue 757 is fixed.
+        // TODO Restore these tests once issue 757 is fixed.
         // assertTrue(s, verifyLogMessage(10000, RUNNING_GENERATE_FEATURES, ++runGenerateFeaturesCount));
         // assertTrue(s, verifyLogMessage(10000, REGENERATE_FEATURES, ++regenerateCount));
     }
