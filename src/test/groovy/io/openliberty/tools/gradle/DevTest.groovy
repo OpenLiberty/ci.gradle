@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.openliberty.tools.gradle
+package io.openliberty.tools.gradle;
 
 import static org.junit.Assert.*;
 
@@ -41,12 +41,13 @@ class DevTest extends BaseDevTest {
     @Test
     /* simple double check. if failure, check parse in ci.common */
     public void verifyJsonHost() throws Exception {
-        assertTrue(verifyLogMessage(2000, "CWWKT0016I", errFile));   // Verify web app code triggered
+        assertTrue(verifyLogMessage(2000, WEB_APP_AVAILABLE, errFile));   // Verify web app code triggered
         // TODO assertTrue(verifyLogMessage(2000, "http:\\/\\/"));  // Verify escape char seq passes
     }
 
     @Test
     public void configChangeTest() throws Exception {
+        tagLog("##configChangeTest start");
         int generateFeaturesCount = countOccurrences(RUNNING_GENERATE_FEATURES, logFile);
         // configuration file change
         File srcServerXML = new File(buildDir, "src/main/liberty/config/server.xml");
@@ -54,20 +55,22 @@ class DevTest extends BaseDevTest {
         assertTrue(srcServerXML.exists());
         assertTrue(targetServerXML.exists());
 
-        replaceString("</feature>", "</feature>\n" + "    <feature>mpHealth-2.0</feature>", srcServerXML);
+        replaceString("</feature>", "</feature>\n" + "    <feature>mpFaultTolerance-2.0</feature>", srcServerXML);
 
         // check that features have been generated
         assertTrue(verifyLogMessage(10000, RUNNING_GENERATE_FEATURES, ++generateFeaturesCount)); // task ran
 
         // check for server configuration was successfully updated message in messages.log
         File messagesLogFile = new File(targetDir, "wlp/usr/servers/defaultServer/logs/messages.log");
-        assertTrue(verifyLogMessage(60000, "CWWKG0017I", messagesLogFile));
-        assertTrue("Could not find the updated feature in the target server.xml file",
-            verifyLogMessage(60000, "<feature>mpHealth-2.0</feature>", targetServerXML));
+        assertTrue(verifyLogMessage(60000, SERVER_UPDATED, messagesLogFile));
+        boolean foundUpdate = verifyLogMessage(60000, "<feature>mpFaultTolerance-2.0</feature>", targetServerXML);
+        assertTrue("Could not find the updated feature in the target server.xml file", foundUpdate);
+        tagLog("##configChangeTest end");
     }
 
     @Test
     public void configIncludesChangeTest() throws Exception {
+        tagLog("##configIncludesChangeTest start");
         // add a feature to an <includes> server configuration file, ensure that
         // generate-features is called and the server configuration is updated
         int generateFeaturesCount = countOccurrences(RUNNING_GENERATE_FEATURES, logFile);
@@ -84,13 +87,17 @@ class DevTest extends BaseDevTest {
 
         // check for server configuration update
         File messagesLogFile = new File(targetDir, "wlp/usr/servers/defaultServer/logs/messages.log");
-        assertTrue(verifyLogMessage(60000, "CWWKG0016I", messagesLogFile));
+        boolean appAvailable = verifyLogMessage(60000, WEB_APP_AVAILABLE, messagesLogFile);
+        String logContents = getContents(messagesLogFile, "Server messages.log");
+        assertTrue(logContents, appAvailable);
         assertTrue("Could not find the updated feature in the target extraFeatures.xml file",
                 verifyLogMessage(60000, "<feature>servlet-4.0</feature>", targetServerXMLIncludes));
+        tagLog("##configIncludesChangeTest end");
     }
 
     @Test
     public void modifyJavaFileTest() throws Exception {
+        tagLog("##modifyJavaFileTest start");
         // modify a java file
         File srcHelloWorld = new File(buildDir, "src/main/java/com/demo/HelloWorld.java");
         File targetHelloWorld = new File(targetDir, "classes/java/main/com/demo/HelloWorld.class");
@@ -98,20 +105,20 @@ class DevTest extends BaseDevTest {
         assertTrue(targetHelloWorld.exists());
 
         long lastModified = targetHelloWorld.lastModified();
+        waitLongEnough();
         String str = "// testing";
         BufferedWriter javaWriter = new BufferedWriter(new FileWriter(srcHelloWorld, true));
         javaWriter.append(' ');
         javaWriter.append(str);
-
         javaWriter.close();
 
-        Thread.sleep(5000); // wait for compilation
-        boolean wasModified = targetHelloWorld.lastModified() > lastModified;
-        assertTrue(wasModified);
+        assertTrue(waitForCompilation(targetHelloWorld, lastModified, 6000));
+        tagLog("##modifyJavaFileTest end");
     }
 
     @Test
     public void testDirectoryTest() throws Exception {
+        tagLog("##testDirectoryTest start");
         // create the test directory
         File testDir = new File(buildDir, "src/test/java");
         assertTrue(testDir.mkdirs());
@@ -129,43 +136,45 @@ class DevTest extends BaseDevTest {
             \n
             }\n
         }"""
+
         Files.write(unitTestSrcFile.toPath(), unitTest.getBytes());
         assertTrue(unitTestSrcFile.exists());
 
-        Thread.sleep(6000); // wait for compilation
+        // wait for compilation
         File unitTestTargetFile = new File(targetDir, "classes/java/test/UnitTest.class");
-        assertTrue(unitTestTargetFile.exists());
-        long lastModified = unitTestTargetFile.lastModified();
+        assertTrue(verifyFileExists(unitTestTargetFile, 6000));
 
+        long lastModified = unitTestTargetFile.lastModified();
+        waitLongEnough();
         // modify the test file
         String str = "// testing";
         BufferedWriter javaWriter = new BufferedWriter(new FileWriter(unitTestSrcFile, true));
         javaWriter.append(' ');
         javaWriter.append(str);
-
         javaWriter.close();
-
-        // The resolution of File.lastModified() is 1000 ms so wait long enough for lastModified() to register the modification.
-        Thread.sleep(2000);
-        assertTrue(unitTestTargetFile.lastModified() > lastModified);
+        assertTrue(waitForCompilation(unitTestTargetFile, lastModified, 6000));
 
         // delete the test file
+        // "The java class .../build/classes/java/test/UnitTest.class was deleted."
         assertTrue(unitTestSrcFile.delete());
-        Thread.sleep(2000);
-        assertFalse(unitTestTargetFile.exists());
-
+        assertTrue(verifyFileDoesNotExist(unitTestTargetFile, 6000));
+        assertTrue(verifyLogMessage(10000, "UnitTest.class was deleted"));
+        tagLog("##testDirectoryTest end");
     }
 
     @Test
     public void manualTestsInvocationTest() throws Exception {
+        tagLog("##manualTestsInvocationTest start");
         writer.write("\n");
         writer.flush();
 
         assertTrue(verifyLogMessage(10000,  "Tests finished."));
+        tagLog("##manualTestsInvocationTest end");
     }
 
     @Test
     public void restartServerTest() throws Exception {
+        tagLog("##restartServerTest start");
         int runningGenerateCount = countOccurrences(RUNNING_GENERATE_FEATURES, logFile);
         String RESTARTED = "The server has been restarted.";
         int restartedCount = countOccurrences(RESTARTED, logFile);
@@ -174,21 +183,20 @@ class DevTest extends BaseDevTest {
 
         // TODO reduce wait time once https://github.com/OpenLiberty/ci.gradle/issues/751 is resolved
         // depending on the order the tests run in, tests may be triggered before this test resulting in a 30s timeout (bug above)
-        assertTrue(getContents(logFile, "Dev mode std output"),verifyLogMessage(40000, RESTARTED, ++restartedCount));
+        assertTrue(verifyLogMessage(123000, RESTARTED, ++restartedCount));
         // not supposed to rerun generate features just because of a server restart
         assertTrue(verifyLogMessage(2000, RUNNING_GENERATE_FEATURES, logFile, runningGenerateCount));
+        tagLog("##restartServerTest end");
     }
 
     @Test
     public void generateFeatureTest() throws Exception {
-        final String GENERATED_FEATURES_FILE_NAME = "generated-features.xml";
-        final String SERVER_XML_COMMENT = "Plugin has generated Liberty features"; // the explanation added to server.xml
-        final String NEW_FILE_INFO_MESSAGE = "This file was generated by the Liberty Gradle Plugin and will be overwritten"; // the explanation added to the generated features file
-
+        tagLog("##generateFeatureTest start");
+        assertFalse(verifyLogMessage(10000, "batch-1.0", errFile)); // not present on server yet
         // Verify generate features runs when dev mode first starts
         assertTrue(verifyLogMessage(10000, RUNNING_GENERATE_FEATURES));
-        int generateFeaturesCount = countOccurrences(RUNNING_GENERATE_FEATURES, logFile);
-        assertFalse(verifyLogMessage(10000, "batch-1.0", errFile)); // not present on server yet
+        int runGenerateFeaturesCount = countOccurrences(RUNNING_GENERATE_FEATURES, logFile);
+        int installedFeaturesCount = countOccurrences(SERVER_INSTALLED_FEATURES, errFile);
 
         File newFeatureFile = new File(buildDir, "src/main/liberty/config/configDropins/overrides/"+GENERATED_FEATURES_FILE_NAME);
         File newTargetFeatureFile = new File(targetDir, "wlp/usr/servers/defaultServer/configDropins/overrides/"+GENERATED_FEATURES_FILE_NAME);
@@ -222,32 +230,18 @@ class DevTest extends BaseDevTest {
         File helloBatchObj = new File(targetDir, "classes/com/demo/HelloBatch.class");
         verifyFileExists(helloBatchObj, 15000);
         // ... and run the proper task.
-        assertTrue(verifyLogMessage(10000, RUNNING_GENERATE_FEATURES, ++generateFeaturesCount));
+        assertTrue(verifyLogMessage(10000, RUNNING_GENERATE_FEATURES, ++runGenerateFeaturesCount));
         assertTrue(verifyFileExists(newFeatureFile, 5000)); // task created file
         assertTrue(verifyFileExists(newTargetFeatureFile, 5000)); // dev mode copied file
         assertTrue(verifyLogMessage(10000, "batch-1.0", newFeatureFile));
         assertTrue(verifyLogMessage(10000, NEW_FILE_INFO_MESSAGE, newFeatureFile));
         assertTrue(verifyLogMessage(10000, SERVER_XML_COMMENT, serverXmlFile));
         // should appear as part of the message "CWWKF0012I: The server installed the following features:"
-        assertTrue(verifyLogMessage(10000, "batch-1.0", errFile));
+        assertTrue(verifyLogMessage(123000, SERVER_INSTALLED_FEATURES, errFile, ++installedFeaturesCount));
 
-        // When there is a compilation error the generate features process should not run
-        final String goodCode = "import javax.ws.rs.GET;";
-        final String badCode  = "import javax.ws.rs.GET";
-        final String errMsg = "Source compilation had errors.";
-        int errCount = countOccurrences(errMsg, logFile);
-        replaceString(goodCode, badCode, helloBatchSrc);
+        // Performance of generate features when there is a compilation error is tested in DevRecompileTest
 
-        assertTrue(verifyLogMessage(10000, errMsg, errCount+1)); // wait for compilation
-        int updatedgenFeaturesCount = countOccurrences(RUNNING_GENERATE_FEATURES, logFile);
-        assertEquals(generateFeaturesCount, updatedgenFeaturesCount);
-
-        // Need valid code for testing
-        String goodCompile = "Source compilation was successful.";
-        int goodCount = countOccurrences(goodCompile, logFile);
-        replaceString(badCode, goodCode, helloBatchSrc);
-        assertTrue(verifyLogMessage(10000, goodCompile, goodCount+1));
-
+        int regenerateCount = countOccurrences(REGENERATE_FEATURES, logFile);
         final String autoGenOff = "Setting automatic generation of features to: [ Off ]";
         final String autoGenOn  = "Setting automatic generation of features to: [ On ]";
         // toggle off
@@ -257,9 +251,11 @@ class DevTest extends BaseDevTest {
         // toggle on
         writer.write("g\n");
         writer.flush();
-        assertTrue(autoGenOn, verifyLogMessage(20000, autoGenOn)); // allow time to run scanner
-
+        assertTrue(autoGenOn, verifyLogMessage(21000, autoGenOn)); // allow time to run scanner
+        // After generate features is toggled off and on we end up with the same features as before
+        assertTrue(verifyLogMessage(61000, REGENERATE_FEATURES, ++regenerateCount));
         // Remove a class and use 'optimize' to rebuild the generated features
+        int generateFeaturesCount = countOccurrences(GENERATE_FEATURES, logFile);
         assertTrue(helloBatchSrc.delete());
         assertTrue(verifyFileDoesNotExist(helloBatchSrc, 15000));
         assertTrue(verifyFileDoesNotExist(helloBatchObj, 15000));
@@ -268,9 +264,15 @@ class DevTest extends BaseDevTest {
         // Just removing the class file does not remove the feature because the feature
         // list is built in an incremental way.
         assertTrue(verifyLogMessage(100, "batch-1.0", newFeatureFile, 1));
+
+        int serverUpdateCount = countOccurrences(SERVER_UPDATE_COMPLETE, errFile);
         writer.write("o\n");
         writer.flush();
+        assertTrue(verifyLogMessage(10000, GENERATE_FEATURES, logFile, ++generateFeaturesCount));
         assertTrue(verifyLogMessage(10000, "batch-1.0", newFeatureFile, 0)); // exist 0 times
+        // Check for server response to newly generated feature list.
+        assertTrue(verifyLogMessage(10000, SERVER_UPDATE_COMPLETE, errFile, serverUpdateCount+1));
+        tagLog("##generateFeatureTest end");
     }
 
     @AfterClass
