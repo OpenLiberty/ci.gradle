@@ -296,4 +296,9 @@ class BaseDevTest extends AbstractIntegrationTest {
             Thread.sleep(5000); // wait 5s to ensure java process has stopped
         }
     }
+
+   protected static void tagLog(String line) throws Exception {
+      writer.write(line + "\n");
+      writer.flush();
+   }
 }

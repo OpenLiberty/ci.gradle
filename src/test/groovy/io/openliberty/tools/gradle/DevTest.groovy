@@ -47,6 +47,7 @@ class DevTest extends BaseDevTest {
 
     @Test
     public void configChangeTest() throws Exception {
+        tagLog("##configChangeTest start");
         int generateFeaturesCount = countOccurrences(RUNNING_GENERATE_FEATURES, logFile);
         // configuration file change
         File srcServerXML = new File(buildDir, "src/main/liberty/config/server.xml");
@@ -64,10 +65,12 @@ class DevTest extends BaseDevTest {
         assertTrue(verifyLogMessage(60000, SERVER_UPDATED, messagesLogFile));
         boolean foundUpdate = verifyLogMessage(60000, "<feature>mpFaultTolerance-2.0</feature>", targetServerXML);
         assertTrue("Could not find the updated feature in the target server.xml file", foundUpdate);
+        tagLog("##configChangeTest end");
     }
 
     @Test
     public void configIncludesChangeTest() throws Exception {
+        tagLog("##configIncludesChangeTest start");
         // add a feature to an <includes> server configuration file, ensure that
         // generate-features is called and the server configuration is updated
         int generateFeaturesCount = countOccurrences(RUNNING_GENERATE_FEATURES, logFile);
@@ -84,13 +87,17 @@ class DevTest extends BaseDevTest {
 
         // check for server configuration update
         File messagesLogFile = new File(targetDir, "wlp/usr/servers/defaultServer/logs/messages.log");
-        assertTrue(verifyLogMessage(60000, WEB_APP_AVAILABLE, messagesLogFile));
+        boolean appAvailable = verifyLogMessage(60000, WEB_APP_AVAILABLE, messagesLogFile);
+        String logContents = getContents(messagesLogFile, "Server messages.log");
+        assertTrue(logContents, appAvailable);
         assertTrue("Could not find the updated feature in the target extraFeatures.xml file",
                 verifyLogMessage(60000, "<feature>servlet-4.0</feature>", targetServerXMLIncludes));
+        tagLog("##configIncludesChangeTest end");
     }
 
     @Test
     public void modifyJavaFileTest() throws Exception {
+        tagLog("##modifyJavaFileTest start");
         // modify a java file
         File srcHelloWorld = new File(buildDir, "src/main/java/com/demo/HelloWorld.java");
         File targetHelloWorld = new File(targetDir, "classes/java/main/com/demo/HelloWorld.class");
@@ -106,10 +113,12 @@ class DevTest extends BaseDevTest {
         javaWriter.close();
 
         assertTrue(waitForCompilation(targetHelloWorld, lastModified, 6000));
+        tagLog("##modifyJavaFileTest end");
     }
 
     @Test
     public void testDirectoryTest() throws Exception {
+        tagLog("##testDirectoryTest start");
         // create the test directory
         File testDir = new File(buildDir, "src/test/java");
         assertTrue(testDir.mkdirs());
@@ -150,18 +159,22 @@ class DevTest extends BaseDevTest {
         assertTrue(unitTestSrcFile.delete());
         assertTrue(verifyFileDoesNotExist(unitTestTargetFile, 6000));
         assertTrue(verifyLogMessage(10000, "UnitTest.class was deleted"));
+        tagLog("##testDirectoryTest end");
     }
 
     @Test
     public void manualTestsInvocationTest() throws Exception {
+        tagLog("##manualTestsInvocationTest start");
         writer.write("\n");
         writer.flush();
 
         assertTrue(verifyLogMessage(10000,  "Tests finished."));
+        tagLog("##manualTestsInvocationTest end");
     }
 
     @Test
     public void restartServerTest() throws Exception {
+        tagLog("##restartServerTest start");
         int runningGenerateCount = countOccurrences(RUNNING_GENERATE_FEATURES, logFile);
         String RESTARTED = "The server has been restarted.";
         int restartedCount = countOccurrences(RESTARTED, logFile);
@@ -173,10 +186,12 @@ class DevTest extends BaseDevTest {
         assertTrue(verifyLogMessage(123000, RESTARTED, ++restartedCount));
         // not supposed to rerun generate features just because of a server restart
         assertTrue(verifyLogMessage(2000, RUNNING_GENERATE_FEATURES, logFile, runningGenerateCount));
+        tagLog("##restartServerTest end");
     }
 
     @Test
     public void generateFeatureTest() throws Exception {
+        tagLog("##generateFeatureTest start");
         assertFalse(verifyLogMessage(10000, "batch-1.0", errFile)); // not present on server yet
         // Verify generate features runs when dev mode first starts
         assertTrue(verifyLogMessage(10000, RUNNING_GENERATE_FEATURES));
@@ -257,6 +272,7 @@ class DevTest extends BaseDevTest {
         assertTrue(verifyLogMessage(10000, "batch-1.0", newFeatureFile, 0)); // exist 0 times
         // Check for server response to newly generated feature list.
         assertTrue(verifyLogMessage(10000, SERVER_UPDATE_COMPLETE, errFile, serverUpdateCount+1));
+        tagLog("##generateFeatureTest end");
     }
 
     @AfterClass
