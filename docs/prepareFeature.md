@@ -7,7 +7,8 @@ In Open Liberty and WebSphere Liberty runtime versions 21.0.0.11 and above, this
 
 
 ### Examples
-1. Create a `features-bom` file for the user feature. The `features-bom` artifact in each groupId provides the bill of materials (BOM) for each Maven artifacts. 
+1. Place your user feature ESA file in Maven local repository or Maven Central repository.
+2. Create a `features-bom` file for the user feature in Maven local repository or Maven Central repository. The `features-bom` artifact in each groupId provides the bill of materials (BOM) for each Maven artifacts. 
  ```xml
 <project>
   <modelVersion>4.0.0</modelVersion>
@@ -33,7 +34,7 @@ In Open Liberty and WebSphere Liberty runtime versions 21.0.0.11 and above, this
 
  ```
 
-2. Provide the Maven coordinate of the custom made `features-bom` file:
+3. Provide the Maven coordinate of the custom made `features-bom` file:
  ```xml
 apply plugin: 'liberty'
 
@@ -41,4 +42,4 @@ dependencies {
     featuresBom 'userTest.user.test.features:features-bom:1.0'
 }
  ```
-3. Install the user feature using the `installFeature` task.
+4. Install the user feature using the `installFeature` task.
