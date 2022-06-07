@@ -695,7 +695,6 @@ class DevTask extends AbstractFeatureTask {
                 existingFeaturesCopy.removeAll(featuresCopy);
                 if (!existingFeaturesCopy.isEmpty()) {
                     logger.info("Configuration features have been removed: " + existingFeaturesCopy);
-                    existingFeatures.removeAll(existingFeaturesCopy);
                 }
             }
 
@@ -717,7 +716,6 @@ class DevTask extends AbstractFeatureTask {
                         options.add("--containerName=${super.getContainerName()}");
                     }
                     runInstallFeatureTask(gradleBuildLauncher, options);
-                    existingFeatures.addAll(features);
                 } catch (BuildException e) {
                     // stdout/stderr from the installFeature task is sent to the terminal
                     // only need to log the actual stacktrace when debugging
@@ -740,6 +738,13 @@ class DevTask extends AbstractFeatureTask {
         @Override
         public Set<String> getExistingFeatures() {
             return this.existingFeatures;
+        }
+
+        @Override
+        public void updateExistingFeatures() {
+            ServerFeatureUtil servUtil = getServerFeatureUtil(true);
+            Set<String> features = servUtil.getServerFeatures(getServerDir(project), libertyDirPropertyFiles);
+            existingFeatures = features;
         }
 
         @Override
