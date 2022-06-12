@@ -1,9 +1,9 @@
 ## libertyDev Task
 
-Start a Liberty instance in dev mode. This task also invokes the `generateFeatures`, `libertyCreate`, `installFeature`, and `deploy` tasks before starting the runtime.
+Start a Liberty instance in dev mode. This task also invokes the `libertyCreate`, `installFeature`, and `deploy` tasks before starting the runtime.
 **Note:** This task is designed to be executed directly from the Gradle command line.
 
-N.B. starting in 3.4, dev mode invokes `generateFeatures`. See [generateFeatures](generateFeatures.md) for details.
+N.B. starting in 3.4.1, dev mode invokes `generateFeatures` if the `generateFeatures` configuration parameter is set to true. **This goal will modify the source configuration directory of your application.** See [generateFeatures](generateFeatures.md) for details.
 
 **Limitations:** This task is not supported with Spring Boot applications.
 
@@ -13,12 +13,12 @@ To start the server in a container, see the [libertyDevc](#libertydevc-task-cont
 
 While dev mode is running, perform the following in the command terminal to run the corresponding actions.
 
-* To toggle the automatic generation of features, type `g` and press Enter.
-* To optimize the list of generated features, type `o` and press Enter.
-* To run tests on demand, press Enter.
-* To restart the server, type `r` and press Enter.
-* * To see the help menu for available actions, type `h` and press Enter.
-* To exit dev mode, press `Control-C`, or type `q` and press Enter.
+* `g` - To toggle the automatic generation of features, type `g` and press Enter. A new server configuration file will be generated in the SOURCE configuration directory.
+* `o` - To optimize the list of generated features, type `o` and press Enter. A new server configuration file will be generated in the SOURCE configuration directory.
+* Enter - To run tests on demand, press Enter.
+* `r` - To restart the server, type `r` and press Enter.
+* * `h` - To see the help menu for available actions, type `h` and press Enter.
+* `q` - stop the server and quit dev mode, press `Ctrl-C`, or type `q` and press Enter.
 
 ### Features
 
@@ -67,7 +67,7 @@ The following are optional command line parameters supported by this task.
 | compileWait | Time in seconds to wait before processing Java changes. If you encounter compile errors while refactoring, increase this value to allow all files to be saved before compilation occurs. The default value is `0.5` seconds. | No |
 | serverStartTimeout | Maximum time to wait (in seconds) to verify that the server has started. The value must be an integer greater than or equal to 0. The default value is `90` seconds. | No |
 | verifyAppStartTimeout | Maximum time to wait (in seconds) to verify that the application has started or updated before running tests. The value must be an integer greater than or equal to 0. The default value is `30` seconds. | No |
-| generateFeatures | If set to `true`, when a Java file, server configuration file, or build file is changed, generate features required by the application. The default value is `true`. | No |
+| generateFeatures | If set to `true`, when a Java file, server configuration file, or build file is changed, generate features required by the application in the source configuration directory. The default value is `false`. | No |
 
 ### Properties
 
@@ -112,7 +112,7 @@ When dev mode runs with container support, it builds a container image and runs 
 
 **Limitations:** This task is not supported with Spring Boot applications.
 
-N.B. starting in 3.4, dev mode invokes `generate-features`. Ensure that the `generated-features.xml` configuration file is copied to your Docker image via your Dockerfile.
+N.B. starting in 3.4.1, dev mode invokes `generate-features` if the `generateFeatures` configuration parameter is set to true. Ensure that the `generated-features.xml` configuration file is copied to your Docker image via your Dockerfile.
 ```dockerfile
 COPY --chown=1001:0  build/wlp/usr/servers/defaultServer/configDropins/overrides/generated-features.xml /config/configDropins/overrides/
 ```
@@ -157,12 +157,12 @@ Dev mode offers different levels of file tracking and deployment depending on th
 
 While dev mode is running in container mode, perform the following in the command terminal to run the corresponding actions.
 
-* To toggle the automatic generation of features, type `g` and press Enter.
-* To optimize the list of generated features, type `o` and press Enter.
-* To run tests on demand, press Enter.
-* To rebuild the Docker image and restart the container, type `r` and press Enter.
-* To see the help menu for available actions, type `h` and press Enter.
-* To exit dev mode, press `Control-C`, or type `q` and press Enter.
+* `g` - To toggle the automatic generation of features, type `g` and press Enter. A new server configuration file will be generated in the SOURCE configuration directory.
+* `o` - To optimize the list of generated features, type `o` and press Enter. A new server configuration file will be generated in the SOURCE configuration directory.
+* Enter - To run tests on demand, press Enter.
+* `r` - To rebuild the Docker image and restart the container, type `r` and press Enter.
+* `h` - To see the help menu for available actions, type `h` and press Enter.
+* `q` - stop the server and quit dev mode, press `Ctrl-C`, or type `q` and press Enter.
 
 ### Linux Limitations
 

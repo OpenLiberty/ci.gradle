@@ -45,7 +45,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.4'
+        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.4.1'
     }
 }
 ```
@@ -71,7 +71,7 @@ buildscript {
 }
 
 plugins {
-    id "io.openliberty.tools.gradle.Liberty" version "3.4"
+    id "io.openliberty.tools.gradle.Liberty" version "3.4.1"
 }
 ```
 
@@ -88,7 +88,7 @@ The Liberty plugin provides the following tasks for your project:
 | [cleanDirs](docs/clean.md#clean-task)                              | Cleans the Liberty server logs, workarea, and applications folders.|
 | [compileJsp](docs/compileJsp.md)                                   | Compiles the JSP files from the src/main/webapp directory into the build/classes directory. |
 | [deploy](docs/deploy.md#deploy-task)                               | Deploys one or more applications to a Liberty server. |
-| [generateFeatures](docs/generateFeatures.md#generateFeatures-task) | Scan the class files of an application and create a Liberty configuration file containing the Liberty features the application requires. |
+| [generateFeatures](docs/generateFeatures.md#generateFeatures-task) | Scan the class files of an application and create a Liberty configuration file in the source configuration directory containing the Liberty features the application requires. |
 | [installFeature](docs/installFeature.md#installfeature-task)       | Installs an additional feature to the Liberty runtime. |
 | [installLiberty](docs/installLiberty.md#installliberty-task)       | Installs the  Liberty runtime from a repository. |
 | [libertyCreate](docs/libertyCreate.md#libertycreate-task)          | Creates a Liberty server. |

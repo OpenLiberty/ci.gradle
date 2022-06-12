@@ -15,7 +15,6 @@
  */
 package io.openliberty.tools.gradle.tasks
 
-import io.openliberty.tools.common.plugins.util.BinaryScannerUtil
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.tasks.Input
@@ -43,6 +42,7 @@ import io.openliberty.tools.common.plugins.util.PluginScenarioException
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 import io.openliberty.tools.common.plugins.util.ServerStatusUtil
 import io.openliberty.tools.common.plugins.util.ProjectModule
+import io.openliberty.tools.common.plugins.util.BinaryScannerUtil
 
 import java.util.concurrent.TimeUnit
 import java.util.Map.Entry
@@ -85,7 +85,7 @@ class DevTask extends AbstractFeatureTask {
     private static final boolean DEFAULT_CONTAINER = false;
     private static final boolean DEFAULT_SKIP_DEFAULT_PORTS = false;
     private static final boolean DEFAULT_KEEP_TEMP_DOCKERFILE = false;
-    private static final boolean DEFAULT_GENERATE_FEATURES = true;
+    private static final boolean DEFAULT_GENERATE_FEATURES = false;
 
     protected final String CONTAINER_PROPERTY_ARG = '-P'+CONTAINER_PROPERTY+'=true';
 
@@ -261,7 +261,7 @@ class DevTask extends AbstractFeatureTask {
     Boolean generateFeatures;
 
      // Need to use a string value to allow someone to specify --generateFeatures=false, if not explicitly set defaults to true
-     @Option(option = 'generateFeatures', description = 'If true, scan the application binary files to determine which Liberty features should be used. The default value is true.')
+     @Option(option = 'generateFeatures', description = 'If true, scan the application binary files to determine which Liberty features should be used. The default value is false.')
      void setGenerateFeatures(String generateFeatures) {
          this.generateFeatures = Boolean.parseBoolean(generateFeatures);
      }
@@ -1101,6 +1101,18 @@ class DevTask extends AbstractFeatureTask {
             if (generateFeatures) {
                 // Optimize generate features on startup
                 runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources'); // ensure class files exist
+
+                String generatedFileCanonicalPath;
+                try {
+                    generatedFileCanonicalPath = new File(configDirectory,
+                            BinaryScannerUtil.GENERATED_FEATURES_FILE_PATH).getCanonicalPath();
+                } catch (IOException e) {
+                    generatedFileCanonicalPath = new File(configDirectory,
+                            BinaryScannerUtil.GENERATED_FEATURES_FILE_PATH).toString();
+                }
+                logger.warn(
+                        "The source configuration directory will be modified. Features will automatically be generated in a new file: "
+                                + generatedFileCanonicalPath);
                 try {
                     runGenerateFeaturesTask(gradleBuildLauncher, true);
                 } catch (BuildException e) {

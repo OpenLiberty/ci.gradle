@@ -62,7 +62,7 @@ class BaseDevTest extends AbstractIntegrationTest {
 
     protected static void runDevMode() throws IOException, InterruptedException, FileNotFoundException {
         System.out.println("Starting dev mode...");
-        startProcess(null, true);
+        startProcess("--generateFeatures=true", true);
         System.out.println("Started dev mode");
     }
 
