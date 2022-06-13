@@ -13,7 +13,7 @@ To start the server in a container, see the [libertyDevc](#libertydevc-task-cont
 
 While dev mode is running, perform the following in the command terminal to run the corresponding actions.
 
-* `g` - To toggle the automatic generation of features, type `g` and press Enter. Features will automatically be generated in a new file of your application. A new server configuration file will be generated in the SOURCE configDropins/overrides configuration directory.
+* `g` - To toggle the automatic generation of features, type `g` and press Enter. A new server configuration file will be generated in the SOURCE configDropins/overrides configuration directory.
 * `o` - To optimize the list of generated features, type `o` and press Enter. A new server configuration file will be generated in the SOURCE configDropins/overrides configuration directory.
 * Enter - To run tests on demand, press Enter.
 * `r` - To restart the server, type `r` and press Enter.
@@ -157,7 +157,7 @@ Dev mode offers different levels of file tracking and deployment depending on th
 
 While dev mode is running in container mode, perform the following in the command terminal to run the corresponding actions.
 
-* `g` - To toggle the automatic generation of features, type `g` and press Enter. Features will automatically be generated in a new file of your application. A new server configuration file will be generated in the SOURCE configDropins/overrides configuration directory.
+* `g` - To toggle the automatic generation of features, type `g` and press Enter. A new server configuration file will be generated in the SOURCE configDropins/overrides configuration directory.
 * `o` - To optimize the list of generated features, type `o` and press Enter. A new server configuration file will be generated in the SOURCE configDropins/overrides configuration directory.
 * Enter - To run tests on demand, press Enter.
 * `r` - To rebuild the Docker image and restart the container, type `r` and press Enter.
