@@ -1,7 +1,7 @@
 ## generateFeatures task
 ---
 
-**This goal will modify the source configuration directory of your application.**
+**This task will modify the source configuration directory of your application.**
 
 Scan the class files of an application and create a new `generated-features.xml` Liberty configuration file within the source directory containing the features the application requires.
 
