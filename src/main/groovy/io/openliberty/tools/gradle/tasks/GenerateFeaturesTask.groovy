@@ -334,13 +334,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         String eeVersion = null
         project.configurations.compileClasspath.allDependencies.each {
             dependency ->
-                if (dependency.group.equals("javax") && dependency.name.equals("javaee-api")) {
-                    String newVersion = composeEEVersion(dependency.version)
-                    if (newVersion != null && isLatestVersion(eeVersion, newVersion)) {
-                        eeVersion = newVersion
-                    }
-                } else if (dependency.group.equals("jakarta.platform") &&
-                        dependency.name.equals("jakarta.jakartaee-api")) {
+                if ((dependency.group.equals("javax") && dependency.name.equals("javaee-api")) ||
+                    (dependency.group.equals("jakarta.platform") &&
+                        dependency.name.equals("jakarta.jakartaee-api"))) {
                     String newVersion = composeEEVersion(dependency.version)
                     if (newVersion != null && isLatestVersion(eeVersion, newVersion)) {
                         eeVersion = newVersion
