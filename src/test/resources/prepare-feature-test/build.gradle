@@ -25,14 +25,14 @@ repositories {
 }
 
 dependencies {
-    featuresBom 'test.user.test.features:features-bom:19.0.0.8'
+    featuresBom 'test.user.test.osgi:hello-bom:1.0'
 }
 
 liberty {
     server{
         name = 'LibertyProjectServer'
         features {
-            name = ["testesa1"]
+            name = ["helloWorld1"]
             acceptLicense = true
         }
     }

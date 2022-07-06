@@ -1,5 +1,5 @@
 /**
-* (C) Copyright IBM Corporation 2020, 2021.
+* (C) Copyright IBM Corporation 2020, 2022.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import io.openliberty.tools.common.plugins.util.PrepareFeatureUtil
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.PluginScenarioException
 import io.openliberty.tools.gradle.utils.ArtifactDownloadUtil
+import org.gradle.api.artifacts.Configuration
 
 public class AbstractPrepareTask extends AbstractServerTask {
 
@@ -73,7 +74,7 @@ public class AbstractPrepareTask extends AbstractServerTask {
 
         @Override
         public void error(String msg) {
-            logger.error(msg);
+             logger.error(msg);
         }
 
         @Override
@@ -87,10 +88,14 @@ public class AbstractPrepareTask extends AbstractServerTask {
         }
 		
 		@Override
-		public void provideJsonFileDependency(File file) {
-			project.getConfigurations().create('jsonProvided')
-			DependencyHandler dependencies = project.getDependencies();
-			dependencies.add("jsonProvided", project.files(file))
+		public void provideJsonFileDependency(File file, String groupId, String version) {
+			def configName = "json-" + groupId + version;
+			Configuration provided = project.getConfigurations().findByName(configName);
+			if(provided == null) { // if user features are located under the same groupId and version, then share the same features.json file. 
+				project.getConfigurations().create(configName)
+				DependencyHandler dependencies = project.getDependencies();
+				dependencies.add(configName, project.files(file))
+			}	
 		}
 	
     }
