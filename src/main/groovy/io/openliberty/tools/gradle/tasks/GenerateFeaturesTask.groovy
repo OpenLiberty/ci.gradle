@@ -334,23 +334,17 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         String eeVersion = null
         project.configurations.compileClasspath.allDependencies.each {
             dependency ->
-                if (dependency.group.equals("javax") && dependency.name.equals("javaee-api")) {
-                    if (dependency.version.startsWith("8.")) {
-                        eeVersion = BINARY_SCANNER_EEV8
-                    } else if (dependency.version.startsWith("7.") && (isLatestVersion(eeVersion, BINARY_SCANNER_EEV7))) {
-                        eeVersion = BINARY_SCANNER_EEV7
-                    } else if (dependency.version.startsWith("6.") && (isLatestVersion(eeVersion, BINARY_SCANNER_EEV6))) {
-                        eeVersion = BINARY_SCANNER_EEV6
+                if ((dependency.group.equals("javax") && dependency.name.equals("javaee-api")) ||
+                    (dependency.group.equals("jakarta.platform") &&
+                        dependency.name.equals("jakarta.jakartaee-api"))) {
+                    String newVersion = composeEEVersion(dependency.version)
+                    if (newVersion != null && isLatestVersion(eeVersion, newVersion)) {
+                        eeVersion = newVersion
                     }
-                } else if (dependency.group.equals("jakarta.platform") &&
-                        dependency.name.equals("jakarta.jakartaee-api") &&
-                        dependency.version.startsWith("8.")) {
-                    eeVersion = BINARY_SCANNER_EEV8
                 }
         }
         return eeVersion;
     }
-
     /**
      * Returns the latest MicroProfile major version detected in the project dependencies
      *
@@ -363,20 +357,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             dependency ->
                 if (dependency.group.equals("org.eclipse.microprofile") &&
                         dependency.name.equals("microprofile")) {
-                    String version = null;
-                    if (dependency.version.length() == 3) { // version is 'm.n'
-                        version = BINARY_SCANNER_MP.get(dependency.version);
-                    }
-                    if ((version != null) && (isLatestVersion(mpVersion, version))) {
-                        mpVersion = version;
-                    } else if (dependency.version.startsWith("1") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV1))) {
-                        mpVersion = BINARY_SCANNER_MPV1
-                    } else if (dependency.version.startsWith("2") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV2))) {
-                        mpVersion = BINARY_SCANNER_MPV2
-                    } else if (dependency.version.startsWith("3") && (isLatestVersion(mpVersion, BINARY_SCANNER_MPV3))) {
-                        mpVersion = BINARY_SCANNER_MPV3
-                    } else if (dependency.version.startsWith("4")) {
-                        mpVersion = BINARY_SCANNER_MPV4
+                    String newVersion = composeMPVersion(dependency.version)
+                    if (newVersion != null && isLatestVersion(mpVersion, newVersion)) {
+                        mpVersion = newVersion;
                     }
                 }
         }

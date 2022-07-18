@@ -3,7 +3,7 @@
 Start a Liberty instance in dev mode. This task also invokes the `libertyCreate`, `installFeature`, and `deploy` tasks before starting the runtime.
 **Note:** This task is designed to be executed directly from the Gradle command line.
 
-N.B. starting in 3.4.1, dev mode invokes `generateFeatures` if the `generateFeatures` configuration parameter is set to true. **This task will modify the source configuration directory of your application.** See [generateFeatures](generateFeatures.md) for details.
+N.B. starting in 3.4.1, dev mode invokes `generateFeatures` if the `generateFeatures` configuration parameter is set to `true` (default is `false`). **This task will modify the source configuration directory of your application.** See [generateFeatures](generateFeatures.md) for details.
 
 **Limitations:** This task is not supported with Spring Boot applications.
 
