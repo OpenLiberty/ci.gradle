@@ -19,7 +19,7 @@ jobs:
         # test against latest update of each major Java version, as well as specific updates of LTS versions:
         RUNTIME: [ol, wlp]
         RUNTIME_VERSION: [22.0.0.6, 22.0.0.3]
-        java: [17]
+        java: [17, 8]
         # exclude:
         # - java: 8
         #   RUNTIME_VERSION: 22.0.0.3
@@ -81,13 +81,8 @@ jobs:
       run:
         ./gradlew clean install check -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
     # Copy build reports and upload artifact if build failed
-    - name: Check file existence
-      id: check_files
-      uses: andstor/file-existence-action@v1
-      with:
-        files: "build/reports/tests/test"
     - name: Copy build/report/tests/test for upload
-      if: ${{ failure() }} && steps.check_files.outputs.files_exists == 'true'
+      if: ${{ failure() }}
       run: mkdir -p ${BUILD_REPORTS_PATH} && cp -r build/reports/tests/test ${BUILD_REPORTS_PATH}
       env:
         BUILD_REPORTS_PATH: ~/buildReports/${{runner.os}}/java${{matrix.java}}/${{matrix.RUNTIME}}-${{matrix.RUNTIME_VERSION}}/
