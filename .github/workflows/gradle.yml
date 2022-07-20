@@ -19,12 +19,12 @@ jobs:
         # test against latest update of each major Java version, as well as specific updates of LTS versions:
         RUNTIME: [ol, wlp]
         RUNTIME_VERSION: [22.0.0.6, 22.0.0.3]
-        java: [17, 11, 8]
-        exclude:
-        - java: 8
-          RUNTIME_VERSION: 22.0.0.3
-        - java: 17
-          RUNTIME_VERSION: 22.0.0.3
+        java: [17]
+        # exclude:
+        # - java: 8
+        #   RUNTIME_VERSION: 22.0.0.3
+        # - java: 17
+        #   RUNTIME_VERSION: 22.0.0.3
     name: ${{ matrix.RUNTIME }} ${{ matrix.RUNTIME_VERSION }}, Java ${{ matrix.java }}, Linux
     steps:
     # Checkout repos
@@ -78,8 +78,7 @@ jobs:
         ./gradlew clean install check -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
     - name: Run tests with Gradle on Java17 on Ubuntu
       if: ${{ matrix.java >= 17 }}
-      run: |
-        export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs='-XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:+HeapDumpOnOutOfMemoryError -Xmx2048m'"
+      run:
         ./gradlew clean install check -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
     # Copy build reports and upload artifact if build failed
     - name: Check file existence
@@ -100,83 +99,83 @@ jobs:
         retention-days: 3
 
 # WINDOWS BUILDS
-  build-windows:
-    runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        # test against latest update of each major Java version, as well as specific updates of LTS versions:
-        RUNTIME: [ol, wlp]
-        RUNTIME_VERSION: [22.0.0.6, 22.0.0.3]
-        java: [17, 11, 8]
-        exclude:
-        - java: 8
-          RUNTIME_VERSION: 22.0.0.3
-        - java: 8
-          RUNTIME: wlp
-        - java: 17
-          RUNTIME_VERSION: 22.0.0.3
-    name: ${{ matrix.RUNTIME }} ${{ matrix.RUNTIME_VERSION }}, Java ${{ matrix.java }}, Windows
-    steps:
-    # Checkout repos
-    - name: Checkout ci.gradle
-      uses: actions/checkout@v2
-    - name: Setup Java ${{ matrix.java }}
-      uses: actions/setup-java@v2
-      with:
-        distribution: 'adopt'
-        java-version: ${{ matrix.java }}
-        cache: 'gradle'
-    # Moving and cloning to C: drive for Windows for more disk space
-    - name: Clone ci.ant, ci.common, ci.gradle repos to C drive
-      run: |
-        cp -r D:/a/ci.gradle/ci.gradle C:/ci.gradle
-        git clone https://github.com/OpenLiberty/ci.common.git C:/ci.common
-        git clone https://github.com/OpenLiberty/ci.ant.git C:/ci.ant
-    # Cache mvn/gradle packages
-    - name: Cache Maven packages
-      uses: actions/cache@v2
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
-    - name: Cache Gradle packages
-      uses: actions/cache@v2
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-    # Install dependencies
-    - name: Install ci.ant and ci.common
-      run: |
-        cd C:/ci.ant
-        mvn clean install
-        cd C:/ci.common
-        mvn clean install
-    # Run tests
-    - name: Run tests with Gradle on Windows
-      working-directory: C:/ci.gradle
-      # LibertyTest is excluded because test0_run hangs
-      run: ./gradlew clean install check -P"test.exclude"="**/Polling*,**/TestLoose*,**/LibertyTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" ${GRADLE_OPTS} --stacktrace --info --no-daemon
-      timeout-minutes: 60
-      env:
-        GRADLE_OPTS: "-Dorg.gradle.jvmargs='-XX:MaxMetaspaceSize=512m'"
-    # Copy build reports and upload artifact if build failed
-    - name: Check file existence
-      id: check_files
-      uses: andstor/file-existence-action@v1
-      with:
-        files: "build/reports/tests/test"
-    - name: Copy build/report/tests/test for upload
-      if: ${{ failure() }} && steps.check_files.outputs.files_exists == 'true'
-      working-directory: C:/ci.gradle
-      run: cp -r build/reports/tests/test D:/buildReports/${{runner.os}}/java${{matrix.java}}/${{matrix.RUNTIME}}-${{matrix.RUNTIME_VERSION}}/      
-    - uses: actions/upload-artifact@v2
-      if: ${{ failure() }}
-      with:
-        name: buildReportsArtifact
-        path: D:/buildReports
-        retention-days: 3
+  # build-windows:
+  #   runs-on: windows-latest
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       # test against latest update of each major Java version, as well as specific updates of LTS versions:
+  #       RUNTIME: [ol, wlp]
+  #       RUNTIME_VERSION: [22.0.0.6, 22.0.0.3]
+  #       java: [17, 11, 8]
+  #       exclude:
+  #       - java: 8
+  #         RUNTIME_VERSION: 22.0.0.3
+  #       - java: 8
+  #         RUNTIME: wlp
+  #       - java: 17
+  #         RUNTIME_VERSION: 22.0.0.3
+  #   name: ${{ matrix.RUNTIME }} ${{ matrix.RUNTIME_VERSION }}, Java ${{ matrix.java }}, Windows
+  #   steps:
+  #   # Checkout repos
+  #   - name: Checkout ci.gradle
+  #     uses: actions/checkout@v2
+  #   - name: Setup Java ${{ matrix.java }}
+  #     uses: actions/setup-java@v2
+  #     with:
+  #       distribution: 'adopt'
+  #       java-version: ${{ matrix.java }}
+  #       cache: 'gradle'
+  #   # Moving and cloning to C: drive for Windows for more disk space
+  #   - name: Clone ci.ant, ci.common, ci.gradle repos to C drive
+  #     run: |
+  #       cp -r D:/a/ci.gradle/ci.gradle C:/ci.gradle
+  #       git clone https://github.com/OpenLiberty/ci.common.git C:/ci.common
+  #       git clone https://github.com/OpenLiberty/ci.ant.git C:/ci.ant
+  #   # Cache mvn/gradle packages
+  #   - name: Cache Maven packages
+  #     uses: actions/cache@v2
+  #     with:
+  #       path: ~/.m2
+  #       key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+  #       restore-keys: ${{ runner.os }}-m2
+  #   - name: Cache Gradle packages
+  #     uses: actions/cache@v2
+  #     with:
+  #       path: |
+  #         ~/.gradle/caches
+  #         ~/.gradle/wrapper
+  #       key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+  #       restore-keys: |
+  #         ${{ runner.os }}-gradle-
+  #   # Install dependencies
+  #   - name: Install ci.ant and ci.common
+  #     run: |
+  #       cd C:/ci.ant
+  #       mvn clean install
+  #       cd C:/ci.common
+  #       mvn clean install
+  #   # Run tests
+  #   - name: Run tests with Gradle on Windows
+  #     working-directory: C:/ci.gradle
+  #     # LibertyTest is excluded because test0_run hangs
+  #     run: ./gradlew clean install check -P"test.exclude"="**/Polling*,**/TestLoose*,**/LibertyTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" ${GRADLE_OPTS} --stacktrace --info --no-daemon
+  #     timeout-minutes: 60
+  #     env:
+  #       GRADLE_OPTS: "-Dorg.gradle.jvmargs='-XX:MaxMetaspaceSize=512m'"
+  #   # Copy build reports and upload artifact if build failed
+  #   - name: Check file existence
+  #     id: check_files
+  #     uses: andstor/file-existence-action@v1
+  #     with:
+  #       files: "build/reports/tests/test"
+  #   - name: Copy build/report/tests/test for upload
+  #     if: ${{ failure() }} && steps.check_files.outputs.files_exists == 'true'
+  #     working-directory: C:/ci.gradle
+  #     run: cp -r build/reports/tests/test D:/buildReports/${{runner.os}}/java${{matrix.java}}/${{matrix.RUNTIME}}-${{matrix.RUNTIME_VERSION}}/      
+  #   - uses: actions/upload-artifact@v2
+  #     if: ${{ failure() }}
+  #     with:
+  #       name: buildReportsArtifact
+  #       path: D:/buildReports
+  #       retention-days: 3
