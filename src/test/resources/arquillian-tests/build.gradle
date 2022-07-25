@@ -84,10 +84,6 @@ dependencies {
     libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: runtimeVersion
 
     implementation "javax.annotation:javax.annotation-api:1.3.2"
-
-    // if(JavaVersion.current().isJava11()) {
-    //     implementation "javax.annotation:javax.annotation-api:1.3.2"
-    // }
 }
 
 check.dependsOn 'verifyMainAppManaged'
