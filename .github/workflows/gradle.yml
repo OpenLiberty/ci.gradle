@@ -78,6 +78,7 @@ jobs:
     - name: Copy build/report/tests/test for upload
       if: ${{ failure() }}
       run: mkdir -p ${BUILD_REPORTS_PATH} && cp -r build/reports/tests/test ${BUILD_REPORTS_PATH}
+      working-directory: ~/ci.gradle
       env:
         BUILD_REPORTS_PATH: ~/buildReports/${{runner.os}}/java${{matrix.java}}/${{matrix.RUNTIME}}-${{matrix.RUNTIME_VERSION}}/
     - uses: actions/upload-artifact@v2
@@ -148,7 +149,7 @@ jobs:
     - name: Run tests with Gradle on Windows
       working-directory: C:/ci.gradle
       # LibertyTest is excluded because test0_run hangs
-      run: ./gradlew clean install check -P"test.exclude"="**/Polling*,**/TestLoose*,**/LibertyTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info
+      run: ./gradlew clean install check -P"test.exclude"="**/Polling*,**/TestLoose*,**/LibertyTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
       timeout-minutes: 75
     # Copy build reports and upload artifact if build failed
     - name: Copy build/report/tests/test for upload
