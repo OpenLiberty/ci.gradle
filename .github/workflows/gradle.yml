@@ -77,15 +77,17 @@ jobs:
     # Copy build reports and upload artifact if build failed
     - name: Copy build/report/tests/test for upload
       if: ${{ failure() }}
-      run: mkdir -p ${BUILD_REPORTS_PATH} && cp -r test ${BUILD_REPORTS_PATH}
+      run: |
+        mkdir -p ${BUILD_REPORTS_PATH}
+        cp -r test ${BUILD_REPORTS_PATH}
       working-directory: build/reports/tests
       env:
-        BUILD_REPORTS_PATH: ~/buildReports/${{runner.os}}/java${{matrix.java}}/${{matrix.RUNTIME}}-${{matrix.RUNTIME_VERSION}}/
+        BUILD_REPORTS_PATH: /buildReports/${{runner.os}}/java${{matrix.java}}/${{matrix.RUNTIME}}-${{matrix.RUNTIME_VERSION}}/
     - uses: actions/upload-artifact@v2
       if: ${{ failure() }}
       with:
         name: buildReportsArtifact
-        path: ~/buildReports
+        path: /buildReports
         retention-days: 3
 
 # WINDOWS BUILDS
