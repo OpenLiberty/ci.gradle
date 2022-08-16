@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2021.
+ * (C) Copyright IBM Corporation 2021, 2022.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,21 +27,21 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 class InstallUsrFeature_toExt extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/prepare-feature-test")
     static File buildDir = new File(integTestDir, "/InstallUsrFeature")
-    static File resourceBom = new File(resourceDir, "features-bom-19.0.0.8.pom")
-	static File resourceEsa = new File(resourceDir, "testesa1-19.0.0.8.esa")
+    static File resourceHelloBom = new File(resourceDir, "hello-bom-1.0.pom")
+	static File resourceHelloEsa = new File(resourceDir, "hello-esa-plugin-1.0.esa")
 	static File resourceExtProp = new File(resourceDir, "testExt.properties")
 	static File buildFilename = new File(resourceDir, "build_wlp.gradle")
 	static File mavenLocalRepo = new File(System.getProperty("user.home")+ "/.m2/repository")
-	static File userTestRepo = new File(mavenLocalRepo, "test/user/test/features")
-	static File featuresBom = new File(userTestRepo, "features-bom/19.0.0.8/features-bom-19.0.0.8.pom")
-	static File testEsa = new File(userTestRepo, "testesa1/19.0.0.8/testesa1-19.0.0.8.esa")
+	static File userTestRepo = new File(mavenLocalRepo, "test/user/test/osgi")
+	static File helloBom = new File(userTestRepo, "hello-bom/1.0/hello-bom-1.0.pom")
+	static File helloEsa = new File(userTestRepo, "hello-esa-plugin/1.0/hello-esa-plugin-1.0.esa")
 	static File extensionsDir = new File(buildDir, "build/wlp/etc/extensions/testExt.properties");
+
+	
 	//User feature will be installed to "testExt" extension dir
 	static File extensionsInstallDir = new File(buildDir, "build/wlp/usr/cik/extensions/testExt");
 	
 	private static final String MIN_USER_FEATURE_VERSION = "21.0.0.11";
-	
-
 	
 	public static boolean deleteFolder(final File directory) {
 		if (directory.isDirectory()) {
@@ -81,21 +81,21 @@ class InstallUsrFeature_toExt extends AbstractIntegrationTest{
         createDir(buildDir)
         copyBuildFiles(buildFilename, buildDir)
         copySettingsFile(resourceDir, buildDir)
-		copyFile(resourceBom, featuresBom)
-		copyFile(resourceEsa, testEsa)
+		copyFile(resourceHelloBom, helloBom)
+		copyFile(resourceHelloEsa, helloEsa)
 		copyFile(resourceExtProp, extensionsDir)
     }
 
     @Test
     public void test_usrFeatureExt() {
         try {
-			def file = new File(extensionsInstallDir, "lib/features/testesa1.mf")
+			def file = new File(extensionsInstallDir, "lib/features/com.ibm.ws.install.helloWorld1.mf")
 			
 			//installFeature will call prepareFeature when featuresBom is specified.
             runTasks(buildDir, 'installFeature')
 			
-			assert file.exists() : "testesa1.mf is not installed"
-			assert file.canRead() : "testesa1.mf cannot be read"
+			assert file.exists() : "com.ibm.ws.install.helloWorld1.mf is not installed"
+			assert file.canRead() : "com.ibm.ws.install.helloWorld1.mf cannot be read"
 			
             
         } catch (Exception e) {

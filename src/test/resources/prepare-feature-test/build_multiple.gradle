@@ -15,25 +15,25 @@ buildscript {
 apply plugin: 'liberty'
 
 repositories {
-	mavenLocal()     {
+    mavenCentral()
+	mavenLocal() {
         metadataSources {
             mavenPom()
             artifact()
         }
     }
-    mavenCentral()
 }
 
 dependencies {
     featuresBom 'test.user.test.osgi:hello-bom:1.0'
+	featuresBom 'test.user.test.osgi:SimpleActivator-bom:1.0'
 }
 
 liberty {
     server{
         name = 'LibertyProjectServer'
         features {
-            name = ["helloWorld1"]
-			to = 'testExt'
+            name = ["helloWorld1", "SimpleActivator-1.0"]
             acceptLicense = true
         }
     }

@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2021.
+ * (C) Copyright IBM Corporation 2021, 2022.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,8 +139,9 @@ public class AbstractFeatureTask extends AbstractServerTask {
         public File downloadArtifact(String groupId, String artifactId, String type, String version) throws PluginExecutionException {
  			//check if jsonCoordinate is provided from prepareFeature task
 			def coordinates = groupId + ":" + artifactId + ":" + version
+			def configName = "json-" + groupId + version
  			if(jsonCoordinate != null && !jsonCoordinate.isEmpty() && jsonCoordinate.equals(coordinates)) {
- 				Configuration provided = project.getConfigurations().findByName("jsonProvided");
+ 				Configuration provided = project.getConfigurations().findByName(configName);
  				if (provided != null) {
  					return provided.getFiles().iterator().next()
  				}else {
