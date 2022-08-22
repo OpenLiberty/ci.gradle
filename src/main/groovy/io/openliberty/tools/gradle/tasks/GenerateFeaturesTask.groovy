@@ -111,16 +111,21 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         logger.debug("Non-custom features:" + nonCustomFeatures);
 
         Set<String> scannedFeatureList;
+        String eeVersion = null;
+        String mpVersion = null;
         try {
             Set<String> directories = getClassesDirectories();
             if (directories.isEmpty() && (classFiles == null || classFiles.isEmpty())) {
                 // log as warning and continue to call binary scanner to detect conflicts in user specified features
                 logger.warn(NO_CLASS_FILES_WARNING);
             }
+            eeVersion = getEEVersion(project);
+            mpVersion = getMPVersion(project);
+
             String logLocation = project.getBuildDir().getCanonicalPath();
-            String eeVersion = getEEVersion(project);
-            String mpVersion = getMPVersion(project);
-            scannedFeatureList = binaryScannerHandler.runBinaryScanner(nonCustomFeatures, classFiles, directories, logLocation, eeVersion, mpVersion, optimize);
+            String eeVersionArg = composeEEVersion(eeVersion);
+            String mpVersionArg = composeMPVersion(mpVersion);
+            scannedFeatureList = binaryScannerHandler.runBinaryScanner(nonCustomFeatures, classFiles, directories, logLocation, eeVersionArg, mpVersionArg, optimize);
         } catch (BinaryScannerUtil.NoRecommendationException noRecommendation) {
             throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE3, noRecommendation.getConflicts()));
         } catch (BinaryScannerUtil.FeatureModifiedException featuresModified) {
@@ -148,6 +153,25 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         } catch (BinaryScannerUtil.FeatureUnavailableException featureUnavailable) {
             throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE5, featureUnavailable.getConflicts(), featureUnavailable.getMPLevel(),
                     featureUnavailable.getEELevel(), featureUnavailable.getUnavailableFeatures()));
+        } catch (BinaryScannerUtil.IllegalTargetException illegalTargets) {
+            String messages = null;
+            if (illegalTargets.getEELevel() != null) {
+                messages = String.format(BinaryScannerUtil.BINARY_SCANNER_INVALID_EE_MESSAGE, eeVersion);
+            }
+            if (illegalTargets.getMPLevel() != null) {
+                if (messages != null) {
+                    messages += "\n" ;
+                    messages += String.format(BinaryScannerUtil.BINARY_SCANNER_INVALID_MP_MESSAGE, mpVersion);
+                } else {
+                    messages = String.format(BinaryScannerUtil.BINARY_SCANNER_INVALID_MP_MESSAGE, mpVersion);
+                }
+            }
+            if (messages == null) { // We need to be prepared for this situation from the binary scanner.
+                messages = BinaryScannerUtil.BINARY_SCANNER_INVALID_EEMPARG_MESSAGE;
+            }
+            throw new GradleException(messages);
+        } catch (BinaryScannerUtil.IllegalTargetComboException illegalCombo) {
+            throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_INVALID_COMBO_MESSAGE, eeVersion, mpVersion));
         } catch (PluginExecutionException x) {
             // throw an error when there is a problem not caught in runBinaryScanner()
             Object o = x.getCause();
@@ -337,7 +361,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                 if ((dependency.group.equals("javax") && dependency.name.equals("javaee-api")) ||
                     (dependency.group.equals("jakarta.platform") &&
                         dependency.name.equals("jakarta.jakartaee-api"))) {
-                    String newVersion = composeEEVersion(dependency.version)
+                    String newVersion = dependency.version
                     if (newVersion != null && isLatestVersion(eeVersion, newVersion)) {
                         eeVersion = newVersion
                     }
@@ -357,7 +381,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             dependency ->
                 if (dependency.group.equals("org.eclipse.microprofile") &&
                         dependency.name.equals("microprofile")) {
-                    String newVersion = composeMPVersion(dependency.version)
+                    String newVersion = dependency.version
                     if (newVersion != null && isLatestVersion(mpVersion, newVersion)) {
                         mpVersion = newVersion;
                     }
