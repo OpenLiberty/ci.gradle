@@ -153,25 +153,11 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         } catch (BinaryScannerUtil.FeatureUnavailableException featureUnavailable) {
             throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE5, featureUnavailable.getConflicts(), featureUnavailable.getMPLevel(),
                     featureUnavailable.getEELevel(), featureUnavailable.getUnavailableFeatures()));
-        } catch (BinaryScannerUtil.IllegalTargetException illegalTargets) {
-            String messages = null;
-            if (illegalTargets.getEELevel() != null) {
-                messages = String.format(BinaryScannerUtil.BINARY_SCANNER_INVALID_EE_MESSAGE, eeVersion);
-            }
-            if (illegalTargets.getMPLevel() != null) {
-                if (messages != null) {
-                    messages += "\n" ;
-                    messages += String.format(BinaryScannerUtil.BINARY_SCANNER_INVALID_MP_MESSAGE, mpVersion);
-                } else {
-                    messages = String.format(BinaryScannerUtil.BINARY_SCANNER_INVALID_MP_MESSAGE, mpVersion);
-                }
-            }
-            if (messages == null) { // We need to be prepared for this situation from the binary scanner.
-                messages = BinaryScannerUtil.BINARY_SCANNER_INVALID_EEMPARG_MESSAGE;
-            }
-            throw new GradleException(messages);
         } catch (BinaryScannerUtil.IllegalTargetComboException illegalCombo) {
             throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_INVALID_COMBO_MESSAGE, eeVersion, mpVersion));
+        } catch (BinaryScannerUtil.IllegalTargetException illegalTargets) {
+            String messages = buildInvalidArgExceptionMessage(illegalTargets.getEELevel(), illegalTargets.getMPLevel(), eeVersion, mpVersion);
+            throw new GradleException(messages);
         } catch (PluginExecutionException x) {
             // throw an error when there is a problem not caught in runBinaryScanner()
             Object o = x.getCause();
