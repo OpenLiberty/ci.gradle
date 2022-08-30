@@ -34,7 +34,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     @Before
     public void setUp() throws IOException, InterruptedException, FileNotFoundException {
         setUpBeforeTest("basic-dev-project");
-        targetDir = new File(buildDir, "build");
+        targetDir = new File(buildDir, targetDirName);
     }
 
     @After
@@ -79,6 +79,29 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
         // verify class files not found warning message
         assertTrue(processOutput.contains(GenerateFeaturesTask.NO_CLASS_FILES_WARNING));
+    }
+
+    /**
+     * Verify a scanner log is generated when plugin logging is enabled.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void scannerLogExistenceTest() throws Exception {
+        File scannerLogDir = new File(targetDir, "logs");
+        assertFalse(scannerLogDir.exists());
+
+        runCompileAndGenerateFeaturesDebug();
+        assertTrue(scannerLogDir.exists());
+        File[] logDirListing = scannerLogDir.listFiles();
+        assertNotNull(logDirListing);
+        boolean logExists = false;
+        for (File child : logDirListing) {
+            if (child.exists() && child.length() > 0) {
+                logExists = true;
+            }
+        }
+        assertTrue(logExists);
     }
 
     @Test
@@ -222,6 +245,81 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
     }
 
+    /**
+     * Test calling the scanner with both the EE umbrella dependency and the MP
+     * umbrella dependency.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void bothEEMPUmbrellaTest() throws Exception {
+        runCompileAndGenerateFeaturesDebug();
+        // Check for "  targetJavaEE: null" in the debug output
+        String line = findLogMessage(TARGET_EE_NULL, 5000, logFile);
+        assertNull("Target EE:'" + line+"'", line);
+        // Check for "  targetJavaMP: null" in the debug output
+        line = findLogMessage(TARGET_MP_NULL, 5000, logFile);
+        assertNull("Target MP:" + line, line);
+    }
+
+    /**
+     * Test calling the scanner with just the EE umbrella dependency and no MP
+     * umbrella dependency.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void onlyEEUmbrellaTest() throws Exception {
+        replaceString(UMBRELLA_MP, ESA_MP_DEPENDENCY, buildFile);
+        removeUnusedUmbrellas(buildFile);
+        runCompileAndGenerateFeaturesDebug();
+        // Check for "  targetJavaEE: null" in the debug output
+        String line = findLogMessage(TARGET_EE_NULL, 5000, logFile);
+        assertNull("Target EE:" + line, line);
+        // Check for "  targetJavaMP: null" in the debug output
+        line = findLogMessage(TARGET_MP_NULL, 5000, logFile);
+        assertNotNull("Target MP:" + line, line);
+    }
+
+    /**
+     * Test calling the scanner with just the MP umbrella dependency and no EE
+     * umbrella dependency.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void onlyMPUmbrellaTest() throws Exception {
+        replaceString(UMBRELLA_EE, ESA_EE_DEPENDENCY, buildFile);
+        removeUnusedUmbrellas(buildFile);
+        runCompileAndGenerateFeaturesDebug();
+        // Check for "  targetJavaEE: null" in the debug output
+        String line = findLogMessage(TARGET_EE_NULL, 5000, logFile);
+        assertNotNull("Target EE:" + line, line);
+        // Check for "  targetJavaMP: null" in the debug output
+        line = findLogMessage(TARGET_MP_NULL, 5000, logFile);
+        assertNull("Target MP:" + line, line);
+    }
+
+    /**
+     * Test calling the scanner with no EE umbrella dependency and no MP
+     * umbrella dependency.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void noUmbrellaTest() throws Exception {
+        replaceString(UMBRELLA_EE, ESA_EE_DEPENDENCY, buildFile);
+        replaceString(UMBRELLA_MP, ESA_MP_DEPENDENCY, buildFile);
+        removeUnusedUmbrellas(buildFile);
+        runCompileAndGenerateFeaturesDebug();
+        // Check for "  targetJavaEE: null" in the debug output
+        String line = findLogMessage(TARGET_EE_NULL, 5000, logFile);
+        assertNotNull("Target EE:" + line, line);
+        // Check for "  targetJavaMP: null" in the debug output
+        line = findLogMessage(TARGET_MP_NULL, 5000, logFile);
+        assertNotNull("Target MP:" + line, line);
+    }
+
     protected Set<String> getCdi12ConflictingFeatures() {
         // servlet-4.0 (EE8) conflicts with cdi-1.2 (EE7)
         Set<String> conflictingFeatures = new HashSet<String>();
@@ -230,4 +328,9 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         return conflictingFeatures;
     }
 
+    // The lower level, unused umbrella dependencies interfere with some tests.
+    protected void removeUnusedUmbrellas(File file) {
+        replaceString(UMBRELLA_EE_OLD, "", file);
+        replaceString(UMBRELLA_MP_OLD, "", file);
+    }
 }

@@ -39,6 +39,7 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
 
     static String projectName;
     static final String buildFilename = "build.gradle";
+    static final String targetDirName = "build";
     static File buildFile;
     static File resourceDir;
     static File buildDir;
@@ -53,6 +54,14 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
 
     static final String GENERATED_FEATURES_FILE_NAME = "generated-features.xml";
     static final String GENERATED_FEATURES_FILE_PATH = "/src/main/liberty/config/configDropins/overrides/" + GENERATED_FEATURES_FILE_NAME;
+    static final String UMBRELLA_EE = "providedCompile \"jakarta.platform:jakarta.jakartaee-api:8.0.0\"";
+    static final String UMBRELLA_MP = "providedCompile \"org.eclipse.microprofile:microprofile:3.2\"";
+    static final String ESA_EE_DEPENDENCY = "providedCompile 'io.openliberty.features:servlet-4.0:22.0.0.2'";
+    static final String ESA_MP_DEPENDENCY = "providedCompile 'io.openliberty.features:microProfile-3.2:22.0.0.2'";
+    static final String UMBRELLA_EE_OLD = "providedCompile 'javax:javaee-api:7.0'";
+    static final String UMBRELLA_MP_OLD = "providedCompile 'org.eclipse.microprofile:microprofile:1.2'";
+    static final String TARGET_EE_NULL = "targetJavaEE: null";
+    static final String TARGET_MP_NULL = "targetMicroP: null";
 
     protected static void setUpBeforeTest(String projectName) throws IOException, InterruptedException, FileNotFoundException {
         this.projectName = projectName;
@@ -150,7 +159,7 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
         int waited = 0;
         int sleep = 10;
         while (waited <= timeout) {
-            if (readFile(message, log)) {
+            if (readFile(message, log) != null) {
                 return true;
             }
             Thread.sleep(sleep);
@@ -159,20 +168,35 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
         return false;
     }
 
-    protected static boolean readFile(String str, File file) throws FileNotFoundException, IOException {
+    protected static String findLogMessage(String message, int timeout, File log)
+        throws InterruptedException, FileNotFoundException, IOException {
+        int waited = 0;
+        int sleep = 10;
+        while (waited <= timeout) {
+            String line = readFile(message, log);
+            if (line != null) {
+                return line;
+            }
+            Thread.sleep(sleep);
+            waited += sleep;
+        }
+        return null;
+    }
+
+    protected static String readFile(String str, File file) throws FileNotFoundException, IOException {
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line = br.readLine();
         try {
             while (line != null) {
                 if (line.contains(str)) {
-                    return true;
+                    return line;
                 }
                 line = br.readLine();
             }
         } finally {
             br.close();
         }
-        return false;
+        return null;
     }
 
     /**
@@ -210,6 +234,10 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
 
     protected static void runCompileAndGenerateFeatures() throws IOException, InterruptedException, FileNotFoundException {
         runProcess("compileJava generateFeatures");
+    }
+
+    protected static void runCompileAndGenerateFeaturesDebug() throws IOException, InterruptedException, FileNotFoundException {
+        runProcess("compileJava generateFeatures --debug");
     }
 
     protected static void runGenerateFeatures() throws IOException, InterruptedException, FileNotFoundException {
