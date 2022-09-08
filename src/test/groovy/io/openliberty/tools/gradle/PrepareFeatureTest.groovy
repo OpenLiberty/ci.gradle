@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2021.
+ * (C) Copyright IBM Corporation 2021, 2022.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,22 @@ import org.junit.Test
 import org.junit.runners.MethodSorters
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
-class PrepareFeatureTest extends AbstractIntegrationTest{
+class PrepareFeature extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/prepare-feature-test")
-    static File buildDir = new File(integTestDir, "/PrepareFeature_single")
-    static File resourceBom = new File(resourceDir, "features-bom-19.0.0.8.pom")
-	static File resourceEsa = new File(resourceDir, "testesa1-19.0.0.8.esa")
+    static File buildDirSingle = new File(integTestDir, "/PrepareFeature_single")
+    static File buildDirMultiple = new File(integTestDir, "/PrepareFeature_multiple")
+	static File resourceHelloBom = new File(resourceDir, "hello-bom-1.0.pom")
+	static File resourceSimpleBom = new File(resourceDir, "SimpleActivator-bom-1.0.pom")
+	static File resourceHelloEsa = new File(resourceDir, "hello-esa-plugin-1.0.esa")
+	static File resourceSimpleEsa = new File(resourceDir, "SimpleActivatorESA-1.0.esa")
 	static File buildFilename = new File(resourceDir, "build.gradle")
+	static File buildFilename_multiple = new File(resourceDir, "build_multiple.gradle")
 	static File mavenLocalRepo = new File(System.getProperty("user.home")+ "/.m2/repository")
-	static File userTestRepo = new File(mavenLocalRepo, "test/user/test/features")
-	static File featuresBom = new File(userTestRepo, "features-bom/19.0.0.8/features-bom-19.0.0.8.pom")
-	static File testEsa = new File(userTestRepo, "testesa1/19.0.0.8/testesa1-19.0.0.8.esa")
+	static File userTestRepo = new File(mavenLocalRepo, "test/user/test/osgi")
+	static File helloBom = new File(userTestRepo, "hello-bom/1.0/hello-bom-1.0.pom")
+	static File simpleBom = new File(userTestRepo, "SimpleActivator-bom/1.0/SimpleActivator-bom-1.0.pom")
+	static File helloEsa = new File(userTestRepo, "hello-esa-plugin/1.0/hello-esa-plugin-1.0.esa")
+	static File simpleEsa = new File(userTestRepo, "SimpleActivatorESA/1.0/SimpleActivatorESA-1.0.esa")
 	
 	private static final String MIN_USER_FEATURE_VERSION = "21.0.0.11";
 	
@@ -72,22 +78,29 @@ class PrepareFeatureTest extends AbstractIntegrationTest{
     @Before
     public void setup() {
 		org.junit.Assume.assumeTrue(checkOpenLibertyVersion());
-        createDir(buildDir)
-        copyBuildFiles(buildFilename, buildDir)
-        copySettingsFile(resourceDir, buildDir)
-		copyFile(resourceBom, featuresBom)
-		copyFile(resourceEsa, testEsa)
+        createDir(buildDirSingle)
+        createDir(buildDirMultiple)
+        copyBuildFiles(buildFilename, buildDirSingle)
+        copySettingsFile(resourceDir, buildDirSingle)
+        copyBuildFiles(buildFilename_multiple, buildDirMultiple)
+        copySettingsFile(resourceDir, buildDirMultiple)
+  		copyFile(resourceHelloBom, helloBom)
+		copyFile(resourceHelloEsa, helloEsa)
+        copyFile(resourceSimpleBom, simpleBom)
+		copyFile(resourceSimpleEsa, simpleEsa)	
+		
     }
+
 
     @Test
     public void test_prepareFeature() {
         try {
-			def jsonFile = new File(userTestRepo, "features/19.0.0.8/features-19.0.0.8.json")
+			def jsonFile = new File(userTestRepo, "features/1.0/features-1.0.json")
 			
-            runTasks(buildDir, 'prepareFeature')
+            runTasks(buildDirSingle, 'prepareFeature')
 
             assert jsonFile.exists() : "features.json cannot be generated"	
-            
+            deleteFolder(jsonFile)
         } catch (Exception e) {
             throw new AssertionError ("Fail on task prepareFeature. "+e)
         }
@@ -96,22 +109,54 @@ class PrepareFeatureTest extends AbstractIntegrationTest{
 	@Test
 	public void test_usrFeatureInstall() {
 		try {
-			def jsonFile = new File(userTestRepo, "features/19.0.0.8/features-19.0.0.8.json")
-			def file = new File(buildDir, "build/wlp/usr/extension/lib/features/testesa1.mf")
+			def jsonFile = new File(userTestRepo, "features/1.0/features-1.0.json")
+			def file = new File(buildDirSingle, "build/wlp/usr/extension/lib/features/com.ibm.ws.install.helloWorld1.mf")
 			
 			//installFeature will call prepareFeature when featuresBom is specified.
-            runTasks(buildDir, 'installFeature')
+            runTasks(buildDirSingle, 'installFeature')
 
             assert jsonFile.exists() : "features.json cannot be generated"
 			
-			assert file.exists() : "testesa1.mf is not installed"
-			assert file.canRead() : "testesa1.mf cannot be read"
+			assert file.exists() : "com.ibm.ws.install.helloWorld1.mf is not installed"
+			assert file.canRead() : "com.ibm.ws.install.helloWorld1.mf cannot be read"
 			
 			deleteFolder(file)
+			deleteFolder(jsonFile)
         } catch (Exception e) {
-            throw new AssertionError ("Fail to install user feature. "+e)
+            throw new AssertionError ("Fail to install user feature. " + e)
         }
+	}	
+
+	
+	@Test
+	public void test_multipleUsrFeatureInstall() {
+		try {
+			def jsonFile = new File(userTestRepo, "features/1.0/features-1.0.json")
+			def helloFile = new File(buildDirMultiple, "build/wlp/usr/extension/lib/features/com.ibm.ws.install.helloWorld1.mf")
+			def simpleFile = new File(buildDirMultiple, "build/wlp/usr/extension/lib/features/test.user.test.osgi.SimpleActivator.mf")
+			
+			
+			//installFeature will call prepareFeature when featuresBom is specified.
+			runTasks(buildDirMultiple, 'installFeature')
+
+			assert jsonFile.exists() : "features.json cannot be generated"
+			
+			assert helloFile.exists() : "com.ibm.ws.install.helloWorld1.mf is not installed"
+			assert helloFile.canRead() : "com.ibm.ws.install.helloWorld1.mf cannot be read"
+			assert simpleFile.exists() : "test.user.test.osgi.SimpleActivator.mf is not installed"
+			assert simpleFile.canRead() : "test.user.test.osgi.SimpleActivator.mf cannot be read"
+			
+			deleteFolder(helloFile)
+			deleteFolder(simpleFile)
+			deleteFolder(jsonFile)
+		} catch (Exception e) {
+			throw new AssertionError ("Fail to install multiple user features. " + e)
+		}
 	}
+
+
+	
+
 	
 	
 	@AfterClass
