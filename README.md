@@ -27,6 +27,10 @@ To build the plugin and run the integration tests execute the following commands
 
 ## Usage
 
+### Java Support
+
+The Liberty Gradle Plugin is tested with Long-Term-Support (LTS) releases of Java. The plugin is currently supported on Java 8 and 11.
+
 ### Adding the plugin to the build script
 
 Within your Gradle build script, you need to set up the classpath to include the Liberty Gradle plugin. You also need to define the Maven Central repository to find the plugin and its dependencies.
