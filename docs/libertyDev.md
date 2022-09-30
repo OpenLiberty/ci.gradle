@@ -3,7 +3,7 @@
 Start a Liberty instance in dev mode. This task also invokes the `libertyCreate`, `installFeature`, and `deploy` tasks before starting the runtime.
 **Note:** This task is designed to be executed directly from the Gradle command line.
 
-Starting in version 3.4.1, dev mode invokes the `generateFeatures` task when the `generateFeatures` configuration parameter is set to `true`. **This task modifies the source configuration directory of your application.** See [generateFeatures](generateFeatures.md) for details. The default value for the `generateFeatures` parameter is `false`. When auto-generation of features is turned on, dev mode has a runtime dependency on IBM WebSphere Application Server Migration Toolkit for Application Binaries, which is separately licensed under IBM License Agreement for Non-Warranted Programs. See license [here](https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/license/wamt).
+Starting in version 3.4.1, dev mode invokes the `generateFeatures` task when the `generateFeatures` configuration parameter is set to `true`. **This task modifies the source configuration directory of your application.** See [generateFeatures](generateFeatures.md) for details. The default value for the `generateFeatures` parameter is `false`. When auto-generation of features is turned on, dev mode has a runtime dependency on IBM WebSphere Application Server Migration Toolkit for Application Binaries, which is separately licensed under IBM License Agreement for Non-Warranted Programs. For more information, see the [license](https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/license/wamt).
 
 **Limitations:** This task is not supported with Spring Boot applications.
 
