@@ -94,13 +94,13 @@ The Liberty plugin provides the following tasks for your project:
 | [cleanDirs](docs/clean.md#clean-task)                              | Cleans the Liberty server logs, workarea, and applications folders.|
 | [compileJsp](docs/compileJsp.md)                                   | Compiles the JSP files from the src/main/webapp directory into the build/classes directory. |
 | [deploy](docs/deploy.md#deploy-task)                               | Deploys one or more applications to a Liberty server. |
-| [generateFeatures](docs/generateFeatures.md#generateFeatures-task) | Scan the class files of an application and create a Liberty configuration file in the source configuration directory containing the Liberty features the application requires. |
+| [generateFeatures](docs/generateFeatures.md#generateFeatures-task) | Scan the class files of an application and create a Liberty configuration file in the source configuration directory that contains the Liberty features the application requires.* |
 | [installFeature](docs/installFeature.md#installfeature-task)       | Installs an additional feature to the Liberty runtime. |
 | [installLiberty](docs/installLiberty.md#installliberty-task)       | Installs the  Liberty runtime from a repository. |
 | [libertyCreate](docs/libertyCreate.md#libertycreate-task)          | Creates a Liberty server. |
 | [libertyDebug](docs/libertyDebug.md)                               | Runs the Liberty server in the console foreground after a debugger connects to the debug port (default: 7777). |
-| [libertyDev](docs/libertyDev.md)                                   | Start a Liberty server in dev mode. |
-| [libertyDevc](docs/libertyDev.md#libertydevc-task-container-mode)  | Start a Liberty server in dev mode in a container. |
+| [libertyDev](docs/libertyDev.md)                                   | Start a Liberty server in dev mode.* |
+| [libertyDevc](docs/libertyDev.md#libertydevc-task-container-mode)  | Start a Liberty server in dev mode in a container.* |
 | [libertyDump](docs/libertyDump.md#libertydump-task)                | Dumps diagnostic information from the Liberty server into an archive. |
 | [libertyJavaDump](docs/libertyJavaDump.md#libertyjavadump-task)    | Dumps diagnostic information from the Liberty server JVM. |
 | [libertyPackage](docs/libertyPackage.md#libertypackage-task)       | Packages a Liberty server. |
@@ -111,6 +111,9 @@ The Liberty plugin provides the following tasks for your project:
 | [prepareFeature](docs/prepareFeature.md#prepareFeature-task)       | Prepares a user feature for installation to the Liberty runtime. |
 | [undeploy](docs/undeploy.md#undeploy-task)                         | Removes applications from the Liberty server. |
 | [uninstallFeature](docs/uninstallFeature.md#uninstallfeature-task) | Remove a feature from the Liberty runtime. |
+
+*The `libertyDev`, `libertyDevc`, and `generateFeatures` tasks have a runtime dependency on IBM WebSphere Application Server Migration Toolkit for Application Binaries, which is separately licensed under IBM License Agreement for Non-Warranted Programs. See license [here](https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/license/wamt).
+Note:  The `libertyDev` and `libertyDevc` tasks have this dependency only when auto-generation of features is turned on. By default, auto-generation of features is turned off.
 
 ### Task ordering
 
