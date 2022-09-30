@@ -112,7 +112,7 @@ The Liberty plugin provides the following tasks for your project:
 | [undeploy](docs/undeploy.md#undeploy-task)                         | Removes applications from the Liberty server. |
 | [uninstallFeature](docs/uninstallFeature.md#uninstallfeature-task) | Remove a feature from the Liberty runtime. |
 
-*The `libertyDev`, `libertyDevc`, and `generateFeatures` tasks have a runtime dependency on IBM WebSphere Application Server Migration Toolkit for Application Binaries, which is separately licensed under IBM License Agreement for Non-Warranted Programs. See license [here](https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/license/wamt).
+*The `libertyDev`, `libertyDevc`, and `generateFeatures` tasks have a runtime dependency on IBM WebSphere Application Server Migration Toolkit for Application Binaries, which is separately licensed under IBM License Agreement for Non-Warranted Programs. For more information, see the [license](https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/license/wamt).
 Note:  The `libertyDev` and `libertyDevc` tasks have this dependency only when auto-generation of features is turned on. By default, auto-generation of features is turned off.
 
 ### Task ordering
