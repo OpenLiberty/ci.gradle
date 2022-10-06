@@ -879,10 +879,12 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
             //Skip comments
             if(!line.startsWith("#")) {
                 String[] keyValue = line.split("=", 2);
-                String key = keyValue[0];
-                String value = keyValue[1];
+                if (keyValue.length == 2) {
+                    String key = keyValue[0];
+                    String value = keyValue[1];
 
-                serverEnvProps.put(key,value);
+                    serverEnvProps.put(key,value);
+                }
             }
         }
 
