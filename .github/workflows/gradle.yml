@@ -151,7 +151,7 @@ jobs:
     - name: Run tests with Gradle on Windows
       working-directory: C:/ci.gradle
       # LibertyTest is excluded because test0_run hangs
-      run: ./gradlew clean install check -P"test.exclude"="**/Polling*,**/TestLoose*,**/LibertyTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
+      run: ./gradlew clean install check -P"test.exclude"="**/Polling*,**/TestLoose*,**/LibertyTest*,**/GenerateFeaturesTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
       timeout-minutes: 75
     # Copy build reports and upload artifact if build failed
     - name: Copy build/report/tests/test for upload
