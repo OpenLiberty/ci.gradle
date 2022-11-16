@@ -9,7 +9,7 @@ The `compileJsp` task compiles the JSP files in the src/main/webapp directory so
 
 | Attribute | Type | Since | Description | Required |
 | --------- | ---- | ----- | ----------- | ---------|
-| jspVersion | int | 2.0 | Maximum time to wait (in seconds) for all the JSP files to compile. The server is stopped and the goal ends after this specified time. The default value is 30 seconds. | No |
+| jspVersion | int | 2.0 | Sets the JSP version to use. Valid values are `2.2` or `2.3`. The default value is `2.3`. | No |
 | jspCompileTimeout | int | 2.0 | Maximum time to wait (in seconds) for all the JSP files to compile. The server is stopped and the goal ends after this specified time. The default value is 30 seconds. | No |
 
 The `jspVersion` and `jspCompileTimeout` properties are set in the `liberty.jsp` closure.
