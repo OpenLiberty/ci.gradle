@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017, 2021.
+ * (C) Copyright IBM Corporation 2017, 2022.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -284,7 +284,11 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         // jvmOptions, jvmOptionsFile and jvmProjectProps take precedence over jvm.options from configDirectory
         File optionsFile = new File(serverDirectory, "jvm.options")
         if (optionsFile.exists() && jvmOptionsPath == null) {
-            optionsFile.delete();
+            // if using pre-existing installation, do not delete file
+            if (project.liberty.installDir == null) {
+                logger.warn(optionsFile.getCanonicalPath() + " file deleted before processing plugin configuration.")
+                optionsFile.delete();
+            }
         }
         if((server.jvmOptions != null && !server.jvmOptions.isEmpty()) || !jvmProjectProps.isEmpty()){
             if (jvmOptionsPath != null) {
@@ -304,7 +308,11 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         // bootstrap.properties from configDirectory
         File bootstrapFile = new File(serverDirectory, "bootstrap.properties")
         if (bootstrapFile.exists() && bootStrapPropertiesPath == null) {
-            bootstrapFile.delete();
+            // if using pre-existing installation, do not delete file
+            if (project.liberty.installDir == null) {
+                logger.warn(bootstrapFile.getCanonicalPath() + " file deleted before processing plugin configuration.")
+                bootstrapFile.delete();
+            }
         }
         if((server.bootstrapProperties != null && !server.bootstrapProperties.isEmpty()) || !bootstrapProjectProps.isEmpty()){
             if (bootStrapPropertiesPath != null) {
@@ -326,6 +334,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         // generate a config file on the server with any Liberty configuration variables specified via project properties
         File pluginVariableConfig = new File(serverDirectory, PLUGIN_VARIABLE_CONFIG_OVERRIDES_XML)
         if (pluginVariableConfig.exists()) {
+            logger.warn(pluginVariableConfig.getCanonicalPath() + " file deleted before processing plugin configuration.")
             pluginVariableConfig.delete();
         }
         if ((server.var != null && !server.var.isEmpty()) || !varProjectProps.isEmpty()) {
@@ -336,6 +345,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         // generate a config file on the server with any Liberty configuration default variables specified via project properties
         pluginVariableConfig = new File(serverDirectory, PLUGIN_VARIABLE_CONFIG_DEFAULTS_XML)
         if (pluginVariableConfig.exists()) {
+            logger.warn(pluginVariableConfig.getCanonicalPath() + " file deleted before processing plugin configuration.")
             pluginVariableConfig.delete();
         }
         if ((server.defaultVar != null && !server.defaultVar.isEmpty()) || !defaultVarProjectProps.isEmpty()) {
