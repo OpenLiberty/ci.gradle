@@ -14,7 +14,7 @@ The Liberty Gradle plugin supports install and operational control of Liberty ru
 Clone this repository and then, with a JRE on the path, execute the following command in the root directory.
 
 ```bash
-$ ./gradlew build
+$ ./gradlew assemble
 ```
 
 This will download Gradle, build the plugin, and install it in to the `build\libs` directory. It is also possible to install the plugin in to your local Maven repository using `./gradlew install`.
