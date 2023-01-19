@@ -51,7 +51,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.4.1'
+        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.5.2'
     }
 }
 ```
@@ -77,11 +77,31 @@ buildscript {
 }
 
 plugins {
-    id "io.openliberty.tools.gradle.Liberty" version "3.4.1"
+    id "io.openliberty.tools.gradle.Liberty" version "3.5.2"
 }
 ```
 
 ## Plugin Configuration
+
+### Liberty Installation Configuration
+
+The Liberty Gradle Plugin must first be configured with the Liberty server installation information. The installation information can be specified as:
+
+* A [Maven artifact](docs/installLiberty.md#using-maven-artifact)
+* An [existing installation directory](docs/libertyExtensions.md#general-runtime-properties) - reference the `installDir` property
+* A Liberty server from a [Liberty repository or other location](docs/installLiberty.md#install-block)
+
+Installing from a Maven artifact is the default installation method. The default runtime artifact is the latest version of `io.openliberty:openliberty-kernel`. In order to configure WebSphere Liberty for installation, specify the `libertyRuntime` with the `com.ibm.websphere.appserver.runtime` group and the specific `name` and `version` that is needed. For a full list of artifacts available, see the [installLiberty task](docs/installLiberty.md#using-maven-artifact) documentation. 
+
+Example using the `libertyRuntime` property to install a WebSphere Liberty runtime from a Maven artifact:
+
+```groovy
+dependencies {
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-webProfile8', version: '22.0.0.12'
+}
+```
+
+### Additional Configuration
 
 See the [Liberty extension properties](docs/libertyExtensions.md#liberty-extension-properties) reference for the properties used to configure the Liberty plugin. See each task for additional configuration and examples.
 
