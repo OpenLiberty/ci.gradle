@@ -1,0 +1,41 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+apply plugin: 'war'
+apply plugin: 'liberty'
+
+jar.enabled = false
+description = 'WAR Module'
+dependencies {
+    testImplementation group: 'junit', name: 'junit', version:'4.13.1'
+    implementation group: 'javax', name: 'javaee-api', version:'7.0'
+    implementation project(':ejb-ejb')
+    libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: runtimeVersion
+}
+
+war {
+    archiveName = baseName + '.' + extension
+}
+
+liberty {
+    server {
+        name = "testServer"
+        deploy {
+            apps = [war]
+        }
+        verifyAppStartTimeout = 30
+        looseApplication = true
+    }
+}
+

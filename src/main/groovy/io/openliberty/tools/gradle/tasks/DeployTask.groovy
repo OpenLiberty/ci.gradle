@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2021.
+ * (C) Copyright IBM Corporation 2014, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -347,26 +347,39 @@ class DeployTask extends AbstractServerTask {
 
     private void addWarEmbeddedLib(Element parent, LooseWarApplication looseApp, Task task) throws Exception {
         ArrayList<File> deps = new ArrayList<File>();
-        task.classpath.each {deps.add(it)}
+        task.classpath.each {
+            deps.add(it)
+        }
         //Removes WEB-INF/lib/main directory since it is not rquired in the xml
-        if(deps != null && !deps.isEmpty()) {
+        if (deps != null && !deps.isEmpty()) {
             deps.remove(0)
         }
         File parentProjectDir = new File(task.getProject().getRootProject().rootDir.getAbsolutePath())
         for (File dep: deps) {
-            String dependentProjectName = "project ':"+getProjectPath(parentProjectDir, dep)+"'"
-            Project siblingProject = project.getRootProject().findProject(dependentProjectName)
-            boolean isCurrentProject = ((task.getProject().toString()).equals(dependentProjectName))
-            if (!isCurrentProject && siblingProject != null){
-                Element archive = looseApp.addArchive(parent, "/WEB-INF/lib/"+ dep.getName());
-                looseApp.addOutputDirectory(archive, siblingProject, "/");
-                Task resourceTask = siblingProject.getTasks().findByPath(":"+dependentProjectName+":processResources");
-                if (resourceTask.getDestinationDir() != null){
+            String dependencyProjectName = getProjectPath(parentProjectDir, dep)
+            String projectDependencyString = "project ':" + dependencyProjectName + "'"
+            Project siblingProject = project.getRootProject().findProject(dependencyProjectName)
+            boolean isCurrentProject = ((task.getProject().toString()).equals(projectDependencyString))
+            if (!isCurrentProject && siblingProject != null) {
+                Element archive = looseApp.addArchive(parent, "/WEB-INF/lib/" + dep.getName());
+                //Add sibling project class directories to <archive/> as <dir>
+                siblingProject.sourceSets.main.getOutput().getClassesDirs().each {
+                    looseApp.getConfig().addDir(archive, it, "/");
+                }
+                Task resourceTask = siblingProject.getTasks().findByPath(":" + projectDependencyString + ":processResources");
+                if (resourceTask != null && resourceTask.getDestinationDir() != null) {
                     looseApp.addOutputDir(archive, resourceTask.getDestinationDir(), "/");
                 }
-                File manifestFile = project.sourceSets.main.getOutput().getResourcesDir().getParentFile()
-                looseApp.addManifestFileWithParent(archive, manifestFile);
-            } else if(FilenameUtils.getExtension(dep.getAbsolutePath()).equalsIgnoreCase("jar")){
+                File resourceDir = siblingProject.sourceSets.main.getOutput().getResourcesDir()
+                File manifestFile = null
+                if (resourceDir.exists() && resourceDir.listFiles().length > 0) {
+                    File metaInfDir = new File(resourceDir, "META-INF")
+                    if (metaInfDir.exists() && metaInfDir.listFiles().length > 0) {
+                        manifestFile = new File(metaInfDir, "MANIFEST.MF")
+                    }
+                }
+                looseApp.addManifestFileWithParent(archive, manifestFile, resourceDir.getParentFile().getCanonicalPath());
+            } else if (FilenameUtils.getExtension(dep.getAbsolutePath()).equalsIgnoreCase("jar")) {
                 addLibrary(parent, looseApp, "/WEB-INF/lib/", dep);
             } else {
                 looseApp.addOutputDir(looseApp.getDocumentRoot(), dep , "/WEB-INF/classes/");
