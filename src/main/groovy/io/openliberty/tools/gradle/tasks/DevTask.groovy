@@ -87,6 +87,11 @@ class DevTask extends AbstractFeatureTask {
     private static final boolean DEFAULT_KEEP_TEMP_DOCKERFILE = false;
     private static final boolean DEFAULT_GENERATE_FEATURES = false;
 
+    // Debug port for BuildLauncher tasks launched from DevTask as parent JVM
+    // (parent defaults to '5005')
+    private Integer childDebugPort = null;  // cache
+    private static final int DEFAULT_CHILD_DEBUG_PORT = 6006;
+
     protected final String CONTAINER_PROPERTY_ARG = '-P'+CONTAINER_PROPERTY+'=true';
 
     private Boolean hotTests;
@@ -97,6 +102,7 @@ class DevTask extends AbstractFeatureTask {
     }
 
     private Boolean skipTests;
+
 
     @Option(option = 'skipTests', description = 'If this option is enabled, do not run any tests in dev mode. The default value is false.')
     void setSkipTests(boolean skipTests) {
@@ -1083,6 +1089,20 @@ class DevTask extends AbstractFeatureTask {
         final ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
                 new ArrayBlockingQueue<Runnable>(1, true));
 
+        String localMavenRepoForFeatureUtility = new File(new File(System.getProperty("user.home"), ".m2"), "repository");
+
+        File buildFile = project.getBuildFile();
+
+        // Instantiate util before any child gradle tasks launched so it can help find available port if needed
+        this.util = new DevTaskUtil(project.buildDir, serverInstallDir, getUserDir(project, serverInstallDir),
+                serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
+                resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
+                verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(),
+                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerBuildContext, dockerRunOpts,
+                dockerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempDockerfile.booleanValue(), localMavenRepoForFeatureUtility,
+                getPackagingType(), buildFile, generateFeatures.booleanValue()
+        );
+
         ProjectConnection gradleConnection = initGradleProjectConnection();
         BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
         try {
@@ -1145,18 +1165,6 @@ class DevTask extends AbstractFeatureTask {
             gradleConnection.close();
         }
 
-        String localMavenRepoForFeatureUtility = new File(new File(System.getProperty("user.home"), ".m2"), "repository");
-
-        File buildFile = project.getBuildFile();
-
-        util = new DevTaskUtil(project.buildDir, serverInstallDir, getUserDir(project, serverInstallDir),
-                serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
-                resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
-                verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), 
-                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerBuildContext, dockerRunOpts, 
-                dockerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempDockerfile.booleanValue(), localMavenRepoForFeatureUtility, 
-                getPackagingType(), buildFile, generateFeatures.booleanValue()
-        );
 
         util.addShutdownHook(executor);
 
@@ -1295,6 +1303,14 @@ class DevTask extends AbstractFeatureTask {
                 .forTasks(tasks);
         if (logger.isEnabled(LogLevel.DEBUG)) {
             buildLauncher.addArguments("--debug");
+        }
+
+        if (Boolean.getBoolean("org.gradle.debug")) {
+            if (this.childDebugPort == null) {
+                childDebugPort = this.util.findAvailablePort(DEFAULT_CHILD_DEBUG_PORT, true)
+                logger.warn("Launch JVM with debug port = " + childDebugPort.toString() + ". The child daemon JVM will initially launch in a suspended state and require a debugger to be attached to proceed.")
+            }
+            buildLauncher.addArguments("-Dorg.gradle.debug.port=" + Integer.toString(childDebugPort))
         }
         buildLauncher.run();
     }
