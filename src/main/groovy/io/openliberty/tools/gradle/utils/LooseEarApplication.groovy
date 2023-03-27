@@ -64,7 +64,10 @@ public class LooseEarApplication extends LooseApplication {
                     config.addFile(moduleArchive, f, "/WEB-INF/lib/" + f.getName());
                     break
                 case "MF":
-                    addManifestFileWithParent(moduleArchive, f)
+                    //This checks the manifest file and resource directory of the project's jar source set.
+                    //The location of the resource directory should be the same as proj.getProjectDir()/build/resources.
+                    //If the manifest file exists, it is copied to proj.getProjectDir()/build/resources/tmp/META-INF. If it does not exist, one is created there.
+                    addManifestFileWithParent(moduleArchive, f, proj.sourceSets.main.getOutput().getResourcesDir().getParentFile().getCanonicalPath())
                     break
                 default:
                     break
