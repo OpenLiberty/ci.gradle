@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2020.
+ * (C) Copyright IBM Corporation 2014, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,8 @@ class StartTask extends AbstractServerTask {
         if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
                 Map<String,String> props = combinedBootstrapProperties == null ? convertPropertiesToMap(server.bootstrapProperties) : combinedBootstrapProperties;
-                ServerConfigDocument scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(project), serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, props, server.serverEnvFile, false);
+                ServerConfigDocument scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(project), serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, props, server.serverEnvFile, 
+                                                                            false, getLibertyDirectoryPropertyFiles(null));
                 if (scd != null) {
                     appNames = scd.getNames()
                     appNames += scd.getNamelessLocations().collect { String location ->

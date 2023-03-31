@@ -1,0 +1,5 @@
+<server description="Sample Liberty server">
+    
+    <variable name="appLocation" defaultValue="test-maven-war.war"/>
+    
+</server>
