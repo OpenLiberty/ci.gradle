@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017, 2022.
+ * (C) Copyright IBM Corporation 2017, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -505,10 +505,13 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
                 Map<String,String> props = combinedBootstrapProperties == null ? convertPropertiesToMap(server.bootstrapProperties) : combinedBootstrapProperties;
-                ServerConfigDocument scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(project), serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, props, server.serverEnvFile, false);
-                if (scd != null && scd.getLocations().contains(fileName)) {
+                ServerConfigDocument scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(project), serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, props, server.serverEnvFile, 
+                                                                            false, getLibertyDirectoryPropertyFiles(null));
+                if (scd != null && isLocationFound( scd.getLocations(), fileName)) {
                     logger.debug("Application configuration is found in server.xml : " + fileName)
                     configured = true
+                } else {
+                    logger.debug("Application configuration is not found in server.xml : " + fileName)
                 }
             }
             catch (Exception e) {
@@ -516,6 +519,28 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
             }
         }
         return configured
+    }
+
+    protected boolean isLocationFound(Set<String> locations, String fileName) {
+        if (locations == null) {
+            return false
+        }
+        
+        if (locations.contains(fileName)) {
+            return true
+        }
+
+        for (String nextLocation : locations) {
+            int index = nextLocation.lastIndexOf("/")
+            if (index > -1) {
+                String appName = nextLocation.substring(index+1)
+                if (fileName.equals(appName)) {
+                    return true
+                }
+            }
+        }
+
+        return false
     }
 
     // Gradle passes the properties from the configuration as Strings and Integers and maybe Booleans.

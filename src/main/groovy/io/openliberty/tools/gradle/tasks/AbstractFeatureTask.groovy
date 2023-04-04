@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2021, 2022.
+ * (C) Copyright IBM Corporation 2021, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,20 @@ public class AbstractFeatureTask extends AbstractServerTask {
     private class ServerFeatureTaskUtil extends ServerFeatureUtil {
 
         @Override
+        public void error(String msg) {
+            logger.error(msg);
+        }
+
+        @Override
+        public boolean isDebugEnabled() {
+            return logger.isDebugEnabled();
+        }
+
+        @Override
         void debug(String msg) {
-            logger.debug(msg);
+            if (isDebugEnabled()) {
+                logger.debug(msg);
+            }
         }
 
         @Override
@@ -63,12 +75,16 @@ public class AbstractFeatureTask extends AbstractServerTask {
 
         @Override
         void debug(String msg, Throwable throwable) {
-            logger.debug(msg, (Throwable) e);
+            if (isDebugEnabled()) {
+                logger.debug(msg, (Throwable) e);
+            }
         }
 
         @Override
         void debug(Throwable throwable) {
-            logger.debug("Throwable exception received: " + e.getMessage(), (Throwable) e);
+            if (isDebugEnabled()) {
+                logger.debug("Throwable exception received: " + e.getMessage(), (Throwable) e);
+            }
         }
 
         @Override
@@ -76,7 +92,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
             if (!suppressLogs) {
                 logger.warn(msg);
             } else {
-                logger.debug(msg);
+                debug(msg);
             }
         }
 
@@ -85,7 +101,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
             if (!suppressLogs) {
                 logger.lifecycle(msg);
             } else {
-                logger.debug(msg);
+                debug(msg);
             }
         }
     }
@@ -97,17 +113,23 @@ public class AbstractFeatureTask extends AbstractServerTask {
 
         @Override
         public void debug(String msg) {
-            logger.debug(msg)
+            if (isDebugEnabled()) {
+                logger.debug(msg)
+            }
         }
 
         @Override
         public void debug(String msg, Throwable e) {
-            logger.debug(msg, (Throwable) e)
+            if (isDebugEnabled()) {
+                logger.debug(msg, (Throwable) e)
+            }
         }
 
         @Override
         public void debug(Throwable e) {
-            logger.debug("Throwable exception received: " + e.getMessage(), (Throwable) e)
+            if (isDebugEnabled()) {
+                logger.debug("Throwable exception received: " + e.getMessage(), (Throwable) e)
+            }
         }
 
         @Override
