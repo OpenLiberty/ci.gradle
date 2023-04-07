@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2019, 2021.
+ * (C) Copyright IBM Corporation 2019, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -315,8 +315,8 @@ class DevTask extends AbstractFeatureTask {
                     false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, null /* parent build files */, generateFeatures, null /* compileArtifactPaths */, null /* testArtifactPaths */, new ArrayList<Path>() /* webResources */
                 );
 
-            ServerFeatureUtil servUtil = getServerFeatureUtil(true);
             this.libertyDirPropertyFiles = AbstractServerTask.getLibertyDirectoryPropertyFiles(installDirectory, userDirectory, serverDirectory);
+            ServerFeatureUtil servUtil = getServerFeatureUtil(true, libertyDirPropertyFiles);
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory, libertyDirPropertyFiles);
 
             this.existingLibertyFeatureDependencies = new HashSet<String>();
@@ -686,7 +686,7 @@ class DevTask extends AbstractFeatureTask {
 
         @Override
         public void installFeatures(File configFile, File serverDir, boolean generateFeatures) {
-            ServerFeatureUtil servUtil = getServerFeatureUtil(true);
+            ServerFeatureUtil servUtil = getServerFeatureUtil(true, libertyDirPropertyFiles);
             Set<String> features = servUtil.getServerFeatures(serverDir, libertyDirPropertyFiles);
 
             if (features == null) {
@@ -738,7 +738,7 @@ class DevTask extends AbstractFeatureTask {
         @Override
         public ServerFeatureUtil getServerFeatureUtilObj() {
             // suppress logs from ServerFeatureUtil so that dev console is not flooded
-            return getServerFeatureUtil(true);
+            return getServerFeatureUtil(true, libertyDirPropertyFiles);
         }
 
         @Override
@@ -748,7 +748,7 @@ class DevTask extends AbstractFeatureTask {
 
         @Override
         public void updateExistingFeatures() {
-            ServerFeatureUtil servUtil = getServerFeatureUtil(true);
+            ServerFeatureUtil servUtil = getServerFeatureUtil(true, libertyDirPropertyFiles);
             Set<String> features = servUtil.getServerFeatures(getServerDir(project), libertyDirPropertyFiles);
             existingFeatures = features;
         }

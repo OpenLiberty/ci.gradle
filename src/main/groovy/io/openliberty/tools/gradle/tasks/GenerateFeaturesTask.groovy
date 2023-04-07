@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2021, 2022.
+ * (C) Copyright IBM Corporation 2021, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         } */
 
         // get existing server features from source directory
-        ServerFeatureUtil servUtil = getServerFeatureUtil(true);
+        ServerFeatureUtil servUtil = getServerFeatureUtil(true, null);
         Set<String> generatedFiles = new HashSet<String>();
         generatedFiles.add(GENERATED_FEATURES_FILE_NAME);
 
