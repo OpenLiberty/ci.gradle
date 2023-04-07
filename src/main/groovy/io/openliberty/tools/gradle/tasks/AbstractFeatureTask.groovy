@@ -24,10 +24,13 @@ import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 import io.openliberty.tools.gradle.utils.ArtifactDownloadUtil
 import org.gradle.api.Project
 import org.gradle.api.logging.LogLevel
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.options.Option
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.file.FileCollection
 
 public class AbstractFeatureTask extends AbstractServerTask {
 
@@ -186,8 +189,9 @@ public class AbstractFeatureTask extends AbstractServerTask {
         }
         return result;
     }
+	
 
-    protected Set<String> getSpecifiedFeatures(String containerName) throws PluginExecutionException {
+    public Set<String> getSpecifiedFeatures(String containerName) throws PluginExecutionException {
         InstallFeatureUtil util = getInstallFeatureUtil(null, containerName);
         // if createNewInstallFeatureUtil failed to create a new InstallFeatureUtil instance, then features are installed via ant
         if (installFeaturesFromAnt) {

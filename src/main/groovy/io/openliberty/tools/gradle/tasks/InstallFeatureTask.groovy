@@ -19,8 +19,12 @@ import java.util.Set
 
 import org.gradle.api.artifacts.ResolveException
 import org.gradle.api.logging.LogLevel
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.OutputDirectory
 
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
 import io.openliberty.tools.common.plugins.util.DevUtil
@@ -43,6 +47,16 @@ class InstallFeatureTask extends AbstractFeatureTask {
         this.containerName = containerName;
     }
 
+	@Input
+	public Set<String> getSpecifiedFeatures() throws PluginExecutionException {
+		return super.getSpecifiedFeatures(containerName)
+	}
+	
+	@OutputDirectory
+	public File getLibDirectory() {
+		return new File(getInstallDir(project),"/lib/features")
+	}
+	
     @TaskAction
     void installFeature() {
         // If non-container mode, check for Beta version and skip if needed.  Container mode does not need to check since featureUtility will check when it is called.
