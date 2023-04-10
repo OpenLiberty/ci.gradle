@@ -62,33 +62,33 @@ public class AbstractFeatureTask extends AbstractServerTask {
         }
 
         @Override
-        void debug(String msg) {
+        public void debug(String msg) {
             if (isDebugEnabled()) {
                 logger.debug(msg);
             }
         }
 
         @Override
-        void error(String msg, Throwable throwable) {
+        public void error(String msg, Throwable throwable) {
             logger.error(msg, e);
         }
 
         @Override
-        void debug(String msg, Throwable throwable) {
+        public void debug(String msg, Throwable throwable) {
             if (isDebugEnabled()) {
                 logger.debug(msg, (Throwable) e);
             }
         }
 
         @Override
-        void debug(Throwable throwable) {
+        public void debug(Throwable throwable) {
             if (isDebugEnabled()) {
                 logger.debug("Throwable exception received: " + e.getMessage(), (Throwable) e);
             }
         }
 
         @Override
-        void warn(String msg) {
+        public void warn(String msg) {
             if (!suppressLogs) {
                 logger.warn(msg);
             } else {
@@ -97,7 +97,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
         }
 
         @Override
-        void info(String msg) {
+        public void info(String msg) {
             if (!suppressLogs) {
                 logger.lifecycle(msg);
             } else {
@@ -245,9 +245,10 @@ public class AbstractFeatureTask extends AbstractServerTask {
      * @return instance of ServerFeatureUtil
      */
     @Internal
-    protected ServerFeatureUtil getServerFeatureUtil(boolean suppressLogs) {
+    protected ServerFeatureUtil getServerFeatureUtil(boolean suppressLogs, Map<String, File> libDirPropFiles) {
         if (servUtil == null) {
             servUtil = new ServerFeatureTaskUtil();
+            servUtil.setLibertyDirectoryPropertyFiles(libDirPropFiles);
         }
         if (suppressLogs) {
             servUtil.setSuppressLogs(true);
