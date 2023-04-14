@@ -21,7 +21,8 @@ import io.openliberty.tools.common.plugins.config.ApplicationXmlDocument
 import io.openliberty.tools.common.plugins.config.LooseApplication
 import io.openliberty.tools.common.plugins.config.LooseConfigData
 import io.openliberty.tools.common.plugins.config.ServerConfigDocument
-import io.openliberty.tools.common.plugins.util.DevUtil;
+import io.openliberty.tools.common.plugins.util.DevUtil
+import io.openliberty.tools.common.plugins.util.OSUtil
 
 import org.apache.commons.io.FilenameUtils
 import org.gradle.api.artifacts.UnknownConfigurationException
@@ -42,6 +43,7 @@ import java.lang.NumberFormatException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.text.MessageFormat
+import java.util.HashSet
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import java.io.File
@@ -345,7 +347,7 @@ class DeployTask extends AbstractServerTask {
         return false;
     }
 
-    private void addWarEmbeddedLib(Element parent, LooseWarApplication looseApp, Task task) throws Exception {
+    private void addWarEmbeddedLib(Element parent, LooseApplication looseApp, Task task) throws Exception {
         ArrayList<File> deps = new ArrayList<File>();
         task.classpath.each {
             deps.add(it)
@@ -357,8 +359,12 @@ class DeployTask extends AbstractServerTask {
         File parentProjectDir = new File(task.getProject().getRootProject().rootDir.getAbsolutePath())
         for (File dep: deps) {
             String dependencyProjectName = getProjectPath(parentProjectDir, dep)
-            String projectDependencyString = "project ':" + dependencyProjectName + "'"
-            Project siblingProject = project.getRootProject().findProject(dependencyProjectName)
+            String projectDependencyString
+            Project siblingProject
+            if (dependencyProjectName != null && !dependencyProjectName.isEmpty()) {
+                projectDependencyString = "project ':" + dependencyProjectName + "'"
+                siblingProject = project.getRootProject().findProject(dependencyProjectName)
+            }
             boolean isCurrentProject = ((task.getProject().toString()).equals(projectDependencyString))
             if (!isCurrentProject && siblingProject != null) {
                 Element archive = looseApp.addArchive(parent, "/WEB-INF/lib/" + dep.getName());
@@ -428,7 +434,12 @@ class DeployTask extends AbstractServerTask {
                         break;
                     case "war":
                         Element warElement = looseEar.addWarModule(dependencyProject)
-                        addEmbeddedLib(warElement, dependencyProject, looseEar, "/WEB-INF/lib/")
+                        Task warTask = dependencyProject.getTasks().findByName('war')
+                        if (warTask != null) {
+                            addWarEmbeddedLib(warElement, looseEar, warTask)
+                        } else {                 
+                            addEmbeddedLib(warElement, dependencyProject, looseEar, "/WEB-INF/lib/")
+                        }
                         break;
                     default:
                         logger.warn('Application ' + dependencyProject.getName() + ' is expressed as ' + projectType + ' which is not a supported input type. Define applications using Task or File objects of type war, ear, or jar.')
@@ -522,14 +533,20 @@ class DeployTask extends AbstractServerTask {
 
     private void addEmbeddedLib(Element parent, Project project, LooseApplication looseApp, String dir) throws Exception {
         try {
-            if (project.configurations.getByName('compile') != null) {
-                //Get only the compile dependencies that are included in the war
-                File[] filesAsDeps = project.configurations.compile.minus(project.configurations.providedCompile).getFiles().toArray()
-                for (File f : filesAsDeps){
-                    String extension = FilenameUtils.getExtension(f.getAbsolutePath())
-                    if(extension.equals("jar")){
-                        addLibrary(parent, looseApp, dir, f);
-                    }
+            Set<File> filesAsDeps = new HashSet<File>()
+            //Get the compile and implementation dependencies that are included in the war
+            if (project.configurations.findByName('compile') != null) {
+                Set<File> compileDepFiles = project.configurations.compile.minus(project.configurations.providedCompile).getFiles()
+                filesAsDeps.addAll(compileDepFiles)
+            }
+            if (project.configurations.findByName('impementation') != null) {
+                Set<File> implementationDepFiles = project.configurations.implementation.minus(project.configurations.providedCompile).getFiles()
+                filesAsDeps.addAll(implementationDepFiles)
+            }
+            for (File f : filesAsDeps){
+                String extension = FilenameUtils.getExtension(f.getAbsolutePath())
+                if(extension.equals("jar")){
+                    addLibrary(parent, looseApp, dir, f);
                 }
             }
         } catch (UnknownConfigurationException uce) {
@@ -553,12 +570,23 @@ class DeployTask extends AbstractServerTask {
     }
 
     private String getProjectPath(File parentProjectDir, File dep) {
-        String dependencyPathPortion = dep.getAbsolutePath().replace(parentProjectDir.getAbsolutePath()+"/","")
+        String dependencyPathPortion = dep.getAbsolutePath().replace(parentProjectDir.getAbsolutePath(),"")
         String projectPath = dep.getAbsolutePath().replace(dependencyPathPortion,"")
-        Pattern pattern = Pattern.compile("/build/.*")
+        Pattern pattern
+        if (OSUtil.isWindows()) {
+            pattern = Pattern.compile("\\\\build\\\\.*")
+        } else {
+            pattern = Pattern.compile("/build/.*")
+        }
         Matcher matcher = pattern.matcher(dependencyPathPortion)
         projectPath = matcher.replaceAll("")
-        return projectPath;
+
+        //Remove leading slash character from trimmed path
+        if (projectPath.length() > 1) {
+            projectPath = projectPath.substring(1, projectPath.length())
+        }
+        
+        return projectPath
     }
 
     private boolean isSupportedType(){

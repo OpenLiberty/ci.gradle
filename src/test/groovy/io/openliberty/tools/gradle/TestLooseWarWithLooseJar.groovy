@@ -18,6 +18,8 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
+import io.openliberty.tools.common.plugins.util.OSUtil
+
 public class TestLooseWarWithLooseJar extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/loose-war-with-loose-jar")
     static File buildDir = new File(integTestDir, "/loose-war-with-loose-jar")
@@ -93,8 +95,13 @@ public class TestLooseWarWithLooseJar extends AbstractIntegrationTest{
 
         //Check loose jar classes dir location
         String nodeValue = nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
-        Assert.assertEquals("sibling archive targetInArchive attribute value", buildDir.getCanonicalPath() + "/ejb-ejb/build/classes/java/main",
-            nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()); 
+        if (OSUtil.isWindows()) {
+            Assert.assertEquals("sibling archive targetInArchive attribute value", buildDir.getCanonicalPath() + "\\ejb-ejb\\build\\classes\\java\\main",
+                nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()); 
+        } else {
+            Assert.assertEquals("sibling archive targetInArchive attribute value", buildDir.getCanonicalPath() + "/ejb-ejb/build/classes/java/main",
+                nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()); 
+        }
         
          //Check loose jar contains correct amount of file elements
         expression = "/archive/archive/file";
@@ -103,8 +110,14 @@ public class TestLooseWarWithLooseJar extends AbstractIntegrationTest{
 
         //Check loose jar manifest file location
         nodeValue = nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
-        Assert.assertEquals("sibling archive targetInArchive attribute value", buildDir.getCanonicalPath() + "/ejb-ejb/build/resources/tmp/META-INF/MANIFEST.MF",
-            nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()); 
+        if (OSUtil.isWindows()) {
+            Assert.assertEquals("sibling archive targetInArchive attribute value", buildDir.getCanonicalPath() + "\\ejb-ejb\\build\\resources\\tmp\\META-INF\\MANIFEST.MF",
+                nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue());
+        } else {
+            Assert.assertEquals("sibling archive targetInArchive attribute value", buildDir.getCanonicalPath() + "/ejb-ejb/build/resources/tmp/META-INF/MANIFEST.MF",
+                nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue());
+        }
+ 
 
         //Check correct number of additional file elements are present
         expression = "/archive/file";
@@ -112,24 +125,36 @@ public class TestLooseWarWithLooseJar extends AbstractIntegrationTest{
         Assert.assertEquals("Number of <file/> element ==>", 4, nodes.getLength());
 
         Assert.assertEquals("archive targetInArchive attribute value", "/WEB-INF/lib/javaee-api-7.0.jar",
-            nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue());
+            nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue()); 
 
         // Check that dependencies are not located in the test build dir since copyLibsDirectory not set. They will be located in the gradle cache somewhere.
         nodeValue = nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
-        assert nodeValue.endsWith("/javaee-api-7.0.jar") && !nodeValue.contains("/loose-war-with-loose-jar/") : 'archive sourceOnDisk attribute value not correct'
+        if (OSUtil.isWindows()) {
+            assert nodeValue.endsWith("\\javaee-api-7.0.jar") && !nodeValue.contains("\\loose-war-with-loose-jar\\") : 'archive sourceOnDisk attribute value not correct'
+        } else {
+            assert nodeValue.endsWith("/javaee-api-7.0.jar") && !nodeValue.contains("/loose-war-with-loose-jar/") : 'archive sourceOnDisk attribute value not correct'
+        }
 
         Assert.assertEquals("archive targetInArchive attribute value", "/WEB-INF/lib/javax.mail-1.5.0.jar",
             nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue());
 
         // Check that dependencies are not located in the test build dir since copyLibsDirectory not set. They will be located in the gradle cache somewhere.
         nodeValue = nodes.item(1).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
-        assert nodeValue.endsWith("/javax.mail-1.5.0.jar") && !nodeValue.contains("/loose-war-with-loose-jar/") : 'archive sourceOnDisk attribute value not correct'
+        if (OSUtil.isWindows()) {
+            assert nodeValue.endsWith("\\javax.mail-1.5.0.jar") && !nodeValue.contains("\\loose-war-with-loose-jar/") : 'archive sourceOnDisk attribute value not correct'
+        } else {
+            assert nodeValue.endsWith("/javax.mail-1.5.0.jar") && !nodeValue.contains("/loose-war-with-loose-jar/") : 'archive sourceOnDisk attribute value not correct'
+        }
 
         Assert.assertEquals("archive targetInArchive attribute value", "/WEB-INF/lib/activation-1.1.jar",
             nodes.item(2).getAttributes().getNamedItem("targetInArchive").getNodeValue());
 
         // Check that dependencies are not located in the test build dir since copyLibsDirectory not set. They will be located in the gradle cache somewhere.
         nodeValue = nodes.item(2).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
-        assert nodeValue.endsWith("/activation-1.1.jar") && !nodeValue.contains("/loose-war-with-loose-jar/") : 'archive sourceOnDisk attribute value not correct'
+        if (OSUtil.isWindows()) {
+            assert nodeValue.endsWith("\\activation-1.1.jar") && !nodeValue.contains("\\loose-war-with-loose-jar\\") : 'archive sourceOnDisk attribute value not correct'
+        } else {
+            assert nodeValue.endsWith("/activation-1.1.jar") && !nodeValue.contains("/loose-war-with-loose-jar/") : 'archive sourceOnDisk attribute value not correct'
+        }
     }
 }
