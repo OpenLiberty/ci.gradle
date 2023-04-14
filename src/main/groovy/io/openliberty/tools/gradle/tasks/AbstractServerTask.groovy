@@ -1123,12 +1123,26 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
     }
 
     // Return the loose application configuration xml file
-    public File getLooseAppConfigFile(Boolean container, String appsDir){
+    public File getLooseAppConfigFile(Boolean container, String appsDir) throws GradleException {
         String looseConfigFileName
-        Tuple applications = splitAppList(server.deploy.apps)
-            applications[0].each{ Task task ->
-              looseConfigFileName = getLooseConfigFileName(task)
-            }
+        List<Object> appsList
+
+        if (appsDir.equals("apps")) {
+            appsList = server.deploy.apps
+        } else if (appsDir.equals("dropins")) {
+            appsList = server.deploy.dropins
+        }
+
+        Tuple applications = splitAppList(appsList)
+
+        if (applications[0].isEmpty()) {
+            throw new GradleException("Liberty dev mode requires a loose application file. No war/ear task was configured for 'apps' or 'dropins'. Unable to create a loose application file.")
+        }
+
+        applications[0].each { Task task ->
+            looseConfigFileName = getLooseConfigFileName(task)
+        }
+
         if (container) {
             File devcDestDir = new File(new File(project.buildDir, DevUtil.DEVC_HIDDEN_FOLDER), appsDir)
             return (new File(devcDestDir, looseConfigFileName));
