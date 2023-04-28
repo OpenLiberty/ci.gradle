@@ -18,6 +18,8 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
+import io.openliberty.tools.common.plugins.util.OSUtil
+
 public class TestLooseApplication extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/sample.servlet")
     static File buildDir = new File(integTestDir, "/test-loose-application")
@@ -87,16 +89,24 @@ public class TestLooseApplication extends AbstractIntegrationTest{
 
       // Check that dependencies are located in the test build dir specified by copyLibsDirectory. Otherwise they would be located in the gradle cache somewhere.
       String nodeValue = nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
-      assert nodeValue.endsWith("/commons-text-1.1.jar") && nodeValue.contains("/test-loose-application/build/libs/") : 'archive sourceOnDisk attribute value not correct'
 
+      if (OSUtil.isWindows()) {
+          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-text-1.1.jar") && nodeValue.contains("\\test-loose-application\\build\\libs\\"))
+      } else {
+          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("/commons-text-1.1.jar") && nodeValue.contains("/test-loose-application/build/libs/")) 
+      }
 
       Assert.assertEquals("archive targetInArchive attribute value", "/WEB-INF/lib/commons-lang3-3.5.jar",
               nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue());
 
       // Check that dependencies are located in the test build dir specified by copyLibsDirectory. Otherwise they would be located in the gradle cache somewhere.
       nodeValue = nodes.item(1).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
-      assert nodeValue.endsWith("/commons-lang3-3.5.jar") && nodeValue.contains("/test-loose-application/build/libs/") : 'archive sourceOnDisk attribute value not correct'
 
+      if (OSUtil.isWindows()) {
+          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-lang3-3.5.jar") && nodeValue.contains("\\test-loose-application\\build\\libs\\"))
+      } else {
+          Assert.assertTrue('archive sourceOnDisk attribute value not correct', ("/commons-lang3-3.5.jar") && nodeValue.contains("/test-loose-application/build/libs/"))
+      }
     }
 
     @Test
@@ -114,6 +124,4 @@ public class TestLooseApplication extends AbstractIntegrationTest{
         assert value != null : "keystore_password property not found"
 
     }
-
-
 }

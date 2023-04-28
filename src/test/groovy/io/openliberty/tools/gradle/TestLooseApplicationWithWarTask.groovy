@@ -18,6 +18,8 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
+import io.openliberty.tools.common.plugins.util.OSUtil
+
 public class TestLooseApplicationWithWarTask extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/sample.servlet")
     static File buildDir = new File(integTestDir, "/test-loose-application-with-war-tasks")
@@ -86,15 +88,23 @@ public class TestLooseApplicationWithWarTask extends AbstractIntegrationTest{
 
       // Check that dependencies are not located in the test build dir since copyLibsDirectory not set. They will be located in the gradle cache somewhere.
       String nodeValue = nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
-      assert nodeValue.endsWith("/commons-text-1.1.jar") && !nodeValue.contains("/test-loose-application-with-war-tasks/") : 'archive sourceOnDisk attribute value not correct'
 
+      if (OSUtil.isWindows()) {
+          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-text-1.1.jar") && !nodeValue.contains("\\test-loose-application-with-war-tasks\\"))
+      } else {
+          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("/commons-text-1.1.jar") && !nodeValue.contains("/test-loose-application-with-war-tasks/"))
+      }
       Assert.assertEquals("archive targetInArchive attribute value", "/WEB-INF/lib/commons-lang3-3.5.jar",
               nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue());
 
       // Check that dependencies are not located in the test build dir since copyLibsDirectory not set. They will be located in the gradle cache somewhere.
       nodeValue = nodes.item(1).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
-      assert nodeValue.endsWith("/commons-lang3-3.5.jar") && !nodeValue.contains("/test-loose-application-with-war-tasks/") : 'archive sourceOnDisk attribute value not correct'
 
+      if (OSUtil.isWindows()) {
+          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-lang3-3.5.jar") && !nodeValue.contains("\\test-loose-application-with-war-tasks\\"))
+      } else {
+          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("/commons-lang3-3.5.jar") && !nodeValue.contains("/test-loose-application-with-war-tasks/"))
+      }
     }
 
     @Test
