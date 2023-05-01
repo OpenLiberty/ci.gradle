@@ -24,7 +24,7 @@ repositories {
 }
 
 task war2 (type: War) {
-    baseName = 'sample.servlet2'
+    archiveBaseName = 'sample.servlet2'
 }
 
 dependencies {

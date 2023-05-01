@@ -55,7 +55,7 @@ dependencies {
 }
 
 war {
-    baseName = 'sample.servlet1'
+    archiveBaseName = 'sample.servlet1'
 }
 
 liberty {

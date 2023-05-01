@@ -76,12 +76,12 @@ dependencies {
 sourceSets.main.compileClasspath += configurations.provided
 
 task sourcesJar(type: Jar) {
-    classifier = 'sources'
+    archiveClassifier = 'sources'
     from sourceSets.main.allSource
 }
 
 task groovydocJar(type: Jar) {
-    classifier = 'groovydoc'
+    archiveClassifier = 'groovydoc'
     from groovydoc
 }
 

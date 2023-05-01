@@ -59,7 +59,7 @@ class StartTask extends AbstractServerTask {
             if (server.deploy.dropins != null && !server.deploy.dropins.isEmpty()) {
                 server.deploy.dropins.each { Object dropinObj ->
                     if (dropinObj instanceof Task) {
-                        appsToVerify += dropinObj.baseName
+                        appsToVerify += dropinObj.getArchiveBaseName().get()
                     } else if (dropinObj instanceof File) {
                         appsToVerify += getBaseName(dropinObj.name)
                     }
@@ -111,8 +111,8 @@ class StartTask extends AbstractServerTask {
 
         server.deploy.apps.each { app ->
             if (app instanceof Task) {
-                if (getArchiveName(app.archiveName).equals(fileName)) {
-                    appName = app.baseName
+                if (getArchiveName(app.getArchiveFileName().get()).equals(fileName)) {
+                    appName = app.getArchiveFileName().get()
                     foundName = true
                 }
             } else if (app instanceof File) {

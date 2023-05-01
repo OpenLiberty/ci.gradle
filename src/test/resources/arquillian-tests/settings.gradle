@@ -1,1 +1,7 @@
 include 'verifyMainAppManaged', 'skipWithXmlManaged', 'skipWithoutXmlManaged', 'skipWithXmlRemote', 'skipWithoutXmlRemote'
+
+startParameter.excludedTaskNames += ':verifyMainAppManaged:build'
+startParameter.excludedTaskNames += ':skipWithXmlManaged:build'
+startParameter.excludedTaskNames += ':skipWithoutXmlManaged:build'
+startParameter.excludedTaskNames += ':skipWithXmlRemote:build'
+startParameter.excludedTaskNames += ':skipWithoutXmlRemote:build'

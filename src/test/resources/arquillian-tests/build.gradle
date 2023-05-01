@@ -44,7 +44,7 @@ allprojects {
 }
 
 war {
-    archiveName = 'arquillianTestWar.' + extension
+    archiveFileName = 'arquillianTestWar.' + getArchiveExtension().get()
 }
 
 liberty {
@@ -93,7 +93,7 @@ test.enabled = false
 tasks.withType(Test) {
     group 'Verification'
     testLogging.showStandardStreams = true
-    dependsOn 'deploy', 'testClasses'
+    dependsOn 'deploy', 'testClasses', 'war'
 }
 
 task verifyMainAppManaged (type:Test) {
@@ -140,6 +140,7 @@ task skipWithoutXmlManaged (type:Test) {
     reports.junitXml.destination = file("$buildDir/test-results/skip-without-xml-managed")
     include '**/SkipWithoutXmlIT*'
     classpath += configurations.arqManaged
+    dependsOn 'compileJava'
     dependsOn ':skipWithoutXmlManaged:configArq'
     finalizedBy 'skipWithoutXmlManagedRestEndpointIT'
 }

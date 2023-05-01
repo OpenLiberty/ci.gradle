@@ -33,7 +33,7 @@ dependencies {
 }
 
 bootJar {
-	classifier = 'test'
+	archiveClassifier = 'test'
 }
 
 liberty {
