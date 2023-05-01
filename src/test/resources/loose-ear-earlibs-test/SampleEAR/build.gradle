@@ -32,7 +32,7 @@ dependencies {
 }
 
 ear {
-    archiveName = baseName + '.' + extension
+    archiveFileName = getArchiveBaseName().get() + '.' + getArchiveExtension().get()
     deploymentDescriptor {
         module ('SampleEJB.jar', 'ejb')
         webModule ('SampleWAR.war', '/SampleWAR')

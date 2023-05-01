@@ -39,18 +39,18 @@ ext {
 
 }
 task war2(type:War){
-    baseName = 'test.servlet'
-    println 'war2 archiveName = ' + archiveName
+    archiveBaseName = 'test.servlet'
+    println 'war2 archiveFileName = ' + archiveFileName
 }
 
 task war3(type:War){
-    baseName = 'servlet.test'
-    println 'war3 archiveName = ' + archiveName
+    archiveBaseName = 'servlet.test'
+    println 'war3 archiveFileName = ' + archiveFileName
 }
 
 task war4(type:War){
-    baseName = 'sample.test'
-    println 'war4 archiveName = ' + archiveName
+    archiveBaseName = 'sample.test'
+    println 'war4 archiveFileName = ' + archiveFileName
 }
 
 liberty {

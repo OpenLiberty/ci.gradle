@@ -568,9 +568,9 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
             task = project.jar
         }
         if (server.stripVersion){
-            return task.baseName + "." + task.extension
+            return task.getArchiveBaseName().get() + "." + task.getArchiveExtension().get()
         }
-        return task.archiveName;
+        return task.getArchiveFileName().get();
     }
 
     protected void configureApps(Project project) {
@@ -653,9 +653,9 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
                 }
                 application.appendNode('appsDirectory', appDir)
                 if (server.looseApplication) {
-                    application.appendNode('applicationFilename', appObj.archiveName + '.xml')
+                    application.appendNode('applicationFilename', appObj.getArchiveFileName().get() + '.xml')
                 } else {
-                    application.appendNode('applicationFilename', appObj.archiveName)
+                    application.appendNode('applicationFilename', appObj.getArchiveFileName().get())
                 }
                 if (appObj instanceof War) {
                     application.appendNode('warSourceDirectory', project.webAppDirName)

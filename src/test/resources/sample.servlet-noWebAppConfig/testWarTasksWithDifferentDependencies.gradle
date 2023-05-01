@@ -57,20 +57,20 @@ dependencies {
 }
 
 task war2(type:War){
-    baseName = 'sample.servlet2'
+    archiveBaseName = 'sample.servlet2'
     classpath = configurations.war2
-    println 'war2 archiveName = ' + archiveName
+    println 'war2 archiveFileName = ' + archiveFileName
 }
 
 task war3(type:War){
-    baseName = 'sample.servlet3'
-    println 'war3 archiveName = ' + archiveName
+    archiveBaseName = 'sample.servlet3'
+    println 'war3 archiveFileName = ' + archiveFileName
 }
 
 task war4(type:War){
-    baseName = 'sample.servlet4'
+    archiveBaseName = 'sample.servlet4'
     classpath = configurations.war4
-    println 'war4 archiveName = ' + archiveName
+    println 'war4 archiveFileName = ' + archiveFileName
 }
 
 liberty {

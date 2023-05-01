@@ -40,7 +40,7 @@ ext {
 }
 
 task testWar(type:War){
-    baseName = 'testWar'
+    archiveBaseName = 'testWar'
 }
 
 liberty {

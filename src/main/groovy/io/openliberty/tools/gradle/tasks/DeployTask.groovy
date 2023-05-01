@@ -124,13 +124,13 @@ class DeployTask extends AbstractServerTask {
         String archiveBaseName
         String fileName
         if("springboot".equals(getPackagingType())) {
-            archiveBaseName = springBootTask.baseName
+            archiveBaseName = springBootTask.getArchiveBaseName().get()
             installSpringBootFeatureIfNeeded()
             String targetThinAppPath = invokeThinOperation(appsDir)
             fileName = targetThinAppPath.substring(targetThinAppPath.lastIndexOf("/") + 1)
             validateAppConfig(targetThinAppPath.substring(targetThinAppPath.lastIndexOf("/") + 1), archiveBaseName, appsDir)
         } else {
-            archiveBaseName = task.baseName
+            archiveBaseName = task.getArchiveBaseName().get()
             fileName = getArchiveName(task)
             Files.copy(task.archivePath.toPath(), new File(getServerDir(project), "/" + appsDir + "/" + getArchiveName(task)).toPath(), StandardCopyOption.REPLACE_EXISTING)
             validateAppConfig(getArchiveName(task), archiveBaseName, appsDir)
@@ -157,7 +157,7 @@ class DeployTask extends AbstractServerTask {
                 installProjectArchive(task, appsDir)
             }
         } else {
-            throw new GradleException(MessageFormat.format("Application {0} is not supported", task.archiveName))
+            throw new GradleException(MessageFormat.format("Application {0} is not supported", task.getArchiveFileName().get()))
         }
     }
 
@@ -171,7 +171,7 @@ class DeployTask extends AbstractServerTask {
         else if(springBootVersion.startsWith('1.')) {
             archiveOutputPath = springBootTask.archivePath.getAbsolutePath()
             if (project.bootRepackage.classifier != null && !project.bootRepackage.classifier.isEmpty()) {
-                archiveOutputPath = archiveOutputPath.substring(0, archiveOutputPath.lastIndexOf(".")) + "-" + project.bootRepackage.classifier + "." + springBootTask.extension
+                archiveOutputPath = archiveOutputPath.substring(0, archiveOutputPath.lastIndexOf(".")) + "-" + project.bootRepackage.classifier + "." + springBootTask.getArchiveExtension().get()
             }
         }
 
@@ -248,7 +248,7 @@ class DeployTask extends AbstractServerTask {
 
         switch(getPackagingType()){
             case "war":
-                validateAppConfig(application, task.baseName, appsDir)
+                validateAppConfig(application, task.getArchiveBaseName().get(), appsDir)
                 logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFile.getAbsolutePath()))
                 installLooseConfigWar(config, task, false)
                 installAndVerify(config, looseConfigFile, application, appsDir)
@@ -263,7 +263,7 @@ class DeployTask extends AbstractServerTask {
                 if ((String.valueOf(project.getGradle().getGradleVersion().charAt(0)) as int) < 4) {
                     throw new Exception(MessageFormat.format(("Loose Ear is only supported by Gradle 4.0 or higher")))
                 }
-                validateAppConfig(application, task.baseName, appsDir)
+                validateAppConfig(application, task.getArchiveBaseName().get(), appsDir)
                 logger.info(MessageFormat.format(("Installing application into the {0} folder."), looseConfigFile.getAbsolutePath()))
                 installLooseConfigEar(config, task)
                 installAndVerify(config, looseConfigFile, application, appsDir)

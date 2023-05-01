@@ -33,7 +33,7 @@ dependencies {
 }
 
 bootWar {
-	classifier = 'test'
+	archiveClassifier = 'test'
 }
 
 liberty {

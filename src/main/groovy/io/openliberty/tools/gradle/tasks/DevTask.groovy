@@ -17,6 +17,7 @@ package io.openliberty.tools.gradle.tasks
 
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.internal.file.DefaultFilePropertyFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Optional
@@ -1053,8 +1054,8 @@ class DevTask extends AbstractFeatureTask {
 
         sourceDirectory = mainSourceSet.java.srcDirs.iterator().next()
         testSourceDirectory = testSourceSet.java.srcDirs.iterator().next()
-        File outputDirectory = mainSourceSet.java.outputDir;
-        File testOutputDirectory = testSourceSet.java.outputDir;
+        DefaultFilePropertyFactory.DefaultDirectoryVar outputDirectory = mainSourceSet.java.classesDirectory;
+        DefaultFilePropertyFactory.DefaultDirectoryVar testOutputDirectory = testSourceSet.java.classesDirectory;
         List<File> resourceDirs = mainSourceSet.resources.srcDirs.toList();
 
         File serverDirectory = getServerDir(project);
@@ -1191,7 +1192,7 @@ class DevTask extends AbstractFeatureTask {
         // which is where the server.xml is located if a specific serverXmlFile
         // configuration parameter is not specified.
         try {
-            util.watchFiles(outputDirectory, testOutputDirectory, executor, serverXMLFile,
+            util.watchFiles(outputDirectory.get().asFile, testOutputDirectory.get().asFile, executor, serverXMLFile,
                             project.liberty.server.bootstrapPropertiesFile, project.liberty.server.jvmOptionsFile);
         } catch (PluginScenarioException e) {
             if (e.getMessage() != null) {

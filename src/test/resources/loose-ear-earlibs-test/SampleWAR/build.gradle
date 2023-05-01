@@ -11,6 +11,6 @@ dependencies {
 }
 
 war {
-    archiveName = baseName + '.' + extension
+    archiveFileName = getArchiveBaseName().get() + '.' + getArchiveExtension().get()
 }
 

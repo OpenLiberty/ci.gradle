@@ -35,20 +35,20 @@ public class LooseEarApplication extends LooseApplication {
             config.addFile(applicationXmlFile, "/META-INF/application.xml");
         }
         else {
-            applicationXmlFile = new File(task.destinationDir.getParentFile().getAbsolutePath() + "/tmp/ear" + applicationName);
+            applicationXmlFile = new File(task.getDestinationDirectory().get().getAsFile().getParentFile().getAbsolutePath() + "/tmp/ear" + applicationName);
             config.addFile(applicationXmlFile, "/META-INF/application.xml");
         }
     }
     
     public Element addWarModule(Project proj) throws Exception {
-        Element warArchive = config.addArchive("/" + proj.war.archiveName);
+        Element warArchive = config.addArchive("/" + proj.war.getArchiveFileName().get());
         proj.sourceSets.main.getOutput().getClassesDirs().each{config.addDir(warArchive, it, "/WEB-INF/classes");}
         addModules(warArchive,proj)
         return warArchive;
     }
     
     public Element addJarModule(Project proj) throws Exception {
-        Element moduleArchive = config.addArchive("/" + proj.jar.archiveName);
+        Element moduleArchive = config.addArchive("/" + proj.jar.getArchiveFileName().get());
         proj.sourceSets.main.getOutput().getClassesDirs().each{config.addDir(moduleArchive, it, "/");}
         addModules(moduleArchive, proj)
         return moduleArchive;

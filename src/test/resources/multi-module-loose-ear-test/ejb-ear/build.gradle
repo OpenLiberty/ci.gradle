@@ -31,7 +31,7 @@ dependencies {
 }
 
 ear {
-    archiveName = baseName + '.' + extension
+    archiveFileName = getArchiveBaseName().get() + '.' + getArchiveExtension().get()
     deploymentDescriptor {
         module ('ejb-ejb.jar', 'ejb')
         webModule ('ejb-war.war', '/ejb-war')
