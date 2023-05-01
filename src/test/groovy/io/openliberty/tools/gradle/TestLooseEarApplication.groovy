@@ -22,6 +22,8 @@ import org.w3c.dom.Node;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import io.openliberty.tools.common.plugins.util.OSUtil
+
 public class TestLooseEarApplication extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/loose-ear-test")
     static File buildDir = new File(integTestDir, "/test-loose-ear-application")
@@ -109,10 +111,13 @@ public class TestLooseEarApplication extends AbstractIntegrationTest{
           if (node.getAttributes().getNamedItem("targetInArchive").getNodeValue().equals("/WEB-INF/lib/commons-text-1.1.jar")) {
               // Check that dependencies are located in the test build dir specified by copyLibsDirectory. Otherwise they would be located in the gradle cache somewhere.
               String nodeValue = node.getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
-              Assert.assertTrue(nodeValue.endsWith("/commons-text-1.1.jar") && nodeValue.contains("/test-loose-ear-application/ejb-ear/build/libs/"))
+              if (OSUtil.isWindows()) {
+                  Assert.assertTrue(nodeValue.endsWith("\\commons-text-1.1.jar") && nodeValue.contains("\\test-loose-ear-application\\ejb-ear\\build\\libs\\"))
+              } else {
+                  Assert.assertTrue(nodeValue.endsWith("/commons-text-1.1.jar") && nodeValue.contains("/test-loose-ear-application/ejb-ear/build/libs/"))
+              }
           }
       }
-
     }
 
     @Test
@@ -129,5 +134,4 @@ public class TestLooseEarApplication extends AbstractIntegrationTest{
             throw new AssertionError ("Fail on task libertyStart. "+ e)
         }
     }
-
 }
