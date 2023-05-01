@@ -56,7 +56,11 @@ abstract class AbstractIntegrationTest {
     }
 
     protected static File copyBuildFiles(File buildFile, File buildDir, boolean appendGradleProperties) {
-        copyFile(buildFile, new File(buildDir, 'build.gradle'))
+        if (buildFile.getPath().endsWith(".kts")) {
+            copyFile(buildFile, new File(buildDir, 'build.gradle.kts'))
+        } else {
+            copyFile(buildFile, new File(buildDir, 'build.gradle'))
+        }
 
         File destProps = new File(buildDir, 'gradle.properties')
         if (appendGradleProperties && destProps.exists()) {
@@ -71,6 +75,10 @@ abstract class AbstractIntegrationTest {
         copyFile(new File(resourceDir, "settings.gradle"), new File(destDir, "settings.gradle"))
     }
 
+    protected static File copySettingsKtsFile(File resourceDir, File destDir) {
+        copyFile(new File(resourceDir, "settings.gradle.kts"), new File(destDir, "settings.gradle.kts"))
+    }
+
     protected static File createTestProject(File parent, File sourceDir, String buildFilename) {
         createTestProject(parent, sourceDir, buildFilename, false)
     }
@@ -81,12 +89,15 @@ abstract class AbstractIntegrationTest {
         }
         try {
             // Copy all resources except the individual test .gradle files
-            // Do copy settings.gradle.
+            // Do copy settings.gradle or settings.gradle.kts.
+            boolean isKts = buildFilename.endsWith(".kts")
             FileUtils.copyDirectory(sourceDir, parent, new FileFilter() {
                public boolean accept (File pathname) {
-                   return (!pathname.getPath().endsWith(".gradle") ||
-                    pathname.getPath().endsWith("settings.gradle") ||
-                        pathname.getPath().endsWith("build.gradle"))
+                   return ((!pathname.getPath().endsWith(".gradle") && 
+                            !pathname.getPath().endsWith(".gradle.kts")) ||
+                            (pathname.getPath().endsWith("settings.gradle") && !isKts) ||
+                            (pathname.getPath().endsWith("settings.gradle.kts") && isKts) ||
+                            pathname.getPath().endsWith("build.gradle"))
                }
             });
 

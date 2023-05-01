@@ -8,7 +8,7 @@ import org.junit.Test
 public class TestCreateWithConfigDir extends AbstractIntegrationTest{
     static File sourceDir = new File("build/resources/test/server-config")
     static File testBuildDir = new File(integTestDir, "/test-create-with-config-dir")
-    static String buildFilename = "testCreateLibertyConfigDir.gradle"
+    static String buildFilename = "testCreateLibertyConfigDir.gradle.kts"
 
     @BeforeClass
     public static void setup() {
@@ -25,11 +25,13 @@ public class TestCreateWithConfigDir extends AbstractIntegrationTest{
         def jvmOptionsFile = new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/jvm.options")
         def configFile = new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/server.xml")
         def serverEnvFile = new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/servers/LibertyProjectServer/server.env")
+        def copiedJdbcFile = new File("build/testBuilds/test-create-with-config-dir/build/wlp/usr/shared/resources/postgresql-42.3.8.jar")
 
         assert serverEnvFile.exists() : "file not found"
         assert configFile.exists() : "file not found"
         assert bootstrapFile.exists() : "file not found"
         assert jvmOptionsFile.exists() : "file not found"
+        assert copiedJdbcFile.exists() : "file not found"
 
         assert bootstrapFile.text.equals(new File("build/testBuilds/test-create-with-config-dir/src/test/resources/bootstrap.properties").text) : "bootstrap.properties file did not copy properly"
         assert jvmOptionsFile.text.equals(new File("build/testBuilds/test-create-with-config-dir/src/test/resources/jvm.options").text) : "jvm.options file did not copy properly"
