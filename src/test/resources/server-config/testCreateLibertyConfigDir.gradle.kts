@@ -32,6 +32,11 @@ dependencies {
     libertyRuntime("${runtimeGroup}:${kernelArtifactId}:${runtimeVersion}")
 }
 
+liberty {
+    server.name = serverName
+    server.configDirectory = file("${project.projectDir}/src/test/resources")
+}
+
 tasks {
     val integrationTest by registering(Test::class) {
         group = "Verification"
@@ -53,8 +58,6 @@ tasks {
     }
 
     libertyCreate {
-        liberty.server.name = serverName
-        liberty.server.configDirectory = file("${project.projectDir}/src/test/resources") 
         dependsOn(copyJdbcLib)
         outputs.upToDateWhen { false }
     }
