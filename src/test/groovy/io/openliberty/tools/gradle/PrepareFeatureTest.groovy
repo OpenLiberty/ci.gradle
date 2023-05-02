@@ -24,7 +24,7 @@ import org.junit.Test
 import org.junit.runners.MethodSorters
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
-class PrepareFeature extends AbstractIntegrationTest{
+class PrepareFeatureTest extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/prepare-feature-test")
     static File buildDirSingle = new File(integTestDir, "/PrepareFeature_single")
     static File buildDirMultiple = new File(integTestDir, "/PrepareFeature_multiple")
@@ -42,28 +42,6 @@ class PrepareFeature extends AbstractIntegrationTest{
 	static File simpleEsa = new File(userTestRepo, "SimpleActivatorESA/1.0/SimpleActivatorESA-1.0.esa")
 	
 	private static final String MIN_USER_FEATURE_VERSION = "21.0.0.11";
-	
-	public static boolean deleteFolder(final File directory) {
-		if (directory.isDirectory()) {
-			File[] files = directory.listFiles();
-			if (null != files) {
-				for (File file : files) {
-					if (file.isDirectory()) {
-							deleteFolder(file);
-					} else {
-						if (!file.delete()) {
-								file.deleteOnExit();
-						}
-					}
-				}
-			}
-		}
-		if(!directory.delete()){
-			directory.deleteOnExit();
-			return false;
-		}
-		return true;
-	}
 	
 	public static boolean checkOpenLibertyVersion() {
 		DefaultArtifactVersion minVersion = new DefaultArtifactVersion(MIN_USER_FEATURE_VERSION);
@@ -100,7 +78,7 @@ class PrepareFeature extends AbstractIntegrationTest{
             runTasks(buildDirSingle, 'prepareFeature')
 
             assert jsonFile.exists() : "features.json cannot be generated"	
-            deleteFolder(jsonFile)
+            deleteDir(jsonFile.getParentFile())
         } catch (Exception e) {
             throw new AssertionError ("Fail on task prepareFeature. "+e)
         }
@@ -120,8 +98,8 @@ class PrepareFeature extends AbstractIntegrationTest{
 			assert file.exists() : "com.ibm.ws.install.helloWorld1.mf is not installed"
 			assert file.canRead() : "com.ibm.ws.install.helloWorld1.mf cannot be read"
 			
-			deleteFolder(file)
-			deleteFolder(jsonFile)
+			deleteDir(file.getParentFile())
+			deleteDir(jsonFile.getParentFile())
         } catch (Exception e) {
             throw new AssertionError ("Fail to install user feature. " + e)
         }
@@ -146,22 +124,11 @@ class PrepareFeature extends AbstractIntegrationTest{
 			assert simpleFile.exists() : "test.user.test.osgi.SimpleActivator.mf is not installed"
 			assert simpleFile.canRead() : "test.user.test.osgi.SimpleActivator.mf cannot be read"
 			
-			deleteFolder(helloFile)
-			deleteFolder(simpleFile)
-			deleteFolder(jsonFile)
+			deleteDir(helloFile.getParentFile())
+			deleteDir(jsonFile.getParentFile())
 		} catch (Exception e) {
 			throw new AssertionError ("Fail to install multiple user features. " + e)
 		}
-	}
-
-
-	
-
-	
-	
-	@AfterClass
-	public static void cleanUp() {
-		deleteFolder(userTestRepo)
 	}
 	
 }

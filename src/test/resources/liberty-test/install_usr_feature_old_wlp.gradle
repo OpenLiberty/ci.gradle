@@ -1,0 +1,42 @@
+apply plugin: 'liberty'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+
+repositories {
+	mavenLocal()     {
+        metadataSources {
+            mavenPom()
+            artifact()
+        }
+    }
+    mavenCentral()
+}
+
+
+dependencies {
+	libertyRuntime group: 'io.openliberty', name: 'openliberty-kernel', version: '21.0.0.10'
+}
+
+def usrFeatureName = System.properties['user.home'] + '/.m2/repository/test/user/test/osgi/SimpleActivatorESA/1.0/SimpleActivatorESA-1.0.esa'
+
+liberty {
+	server {
+		features {
+			name = [usrFeatureName]
+			acceptLicense = true
+		}
+	}
+}

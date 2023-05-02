@@ -43,28 +43,6 @@ class InstallUsrFeature_toExt extends AbstractIntegrationTest{
 	
 	private static final String MIN_USER_FEATURE_VERSION = "21.0.0.11";
 	
-	public static boolean deleteFolder(final File directory) {
-		if (directory.isDirectory()) {
-			File[] files = directory.listFiles();
-			if (null != files) {
-				for (File file : files) {
-					if (file.isDirectory()) {
-							deleteFolder(file);
-					} else {
-						if (!file.delete()) {
-								file.deleteOnExit();
-						}
-					}
-				}
-			}
-		}
-		if(!directory.delete()){
-			directory.deleteOnExit();
-			return false;
-		}
-		return true;
-	}
-	
 	public static boolean checkOpenLibertyVersion() {
 		DefaultArtifactVersion minVersion = new DefaultArtifactVersion(MIN_USER_FEATURE_VERSION);
 		DefaultArtifactVersion version = new DefaultArtifactVersion(System.getProperty("runtimeVersion"))
@@ -106,7 +84,7 @@ class InstallUsrFeature_toExt extends AbstractIntegrationTest{
 	
 	@AfterClass
 	public static void cleanUp() {
-		deleteFolder(userTestRepo)
+		deleteDir(userTestRepo)
 	}
 	
 }
