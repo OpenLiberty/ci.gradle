@@ -269,7 +269,8 @@ class BaseDevTest extends AbstractIntegrationTest {
     protected static void cleanUpAfterClass(boolean isDevMode) throws Exception {
         stopProcess(isDevMode);
         if (buildDir != null && buildDir.exists()) {
-            FileUtils.deleteDirectory(buildDir);
+            // FileUtils.deleteDirectory(buildDir);
+            FileUtils.deleteQuietly(buildDir); // try this method that does not throw an exception
         }
         if (logFile != null && logFile.exists()) {
             assertTrue(logFile.delete());

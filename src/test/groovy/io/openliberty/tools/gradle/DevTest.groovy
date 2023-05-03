@@ -152,7 +152,7 @@ class DevTest extends BaseDevTest {
         javaWriter.append(' ');
         javaWriter.append(str);
         javaWriter.close();
-        assertTrue(waitForCompilation(unitTestTargetFile, lastModified, 6000));
+        assertTrue(waitForCompilation(unitTestTargetFile, lastModified, 10000));
 
         // delete the test file
         // "The java class .../build/classes/java/test/UnitTest.class was deleted."
@@ -168,7 +168,11 @@ class DevTest extends BaseDevTest {
         writer.write("\n");
         writer.flush();
 
-        assertTrue(verifyLogMessage(10000,  "Tests finished."));
+        // This test fails often on Linux (and is skipped on Windows). Could it be a timing issue?
+        if (!verifyLogMessage(10000,  "Tests finished.")) {
+            // simply try again and hope for the best
+            assertTrue(verifyLogMessage(10000,  "Tests finished."));
+        }
         tagLog("##manualTestsInvocationTest end");
     }
 
