@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2022.
+ * (C) Copyright IBM Corporation 2014, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,9 +48,11 @@ class InstallFeatureTask extends AbstractFeatureTask {
         // If non-container mode, check for Beta version and skip if needed.  Container mode does not need to check since featureUtility will check when it is called.
         def propertiesList = null;
         def openLibertyVersion = null;
+		boolean isClosedLiberty = false;
         if (containerName == null) {
             propertiesList = InstallFeatureUtil.loadProperties(getInstallDir(project))
             openLibertyVersion = InstallFeatureUtil.getOpenLibertyVersion(propertiesList)
+			isClosedLiberty = InstallFeatureUtil.isClosedLiberty(propertiesList)
 
             boolean skipBetaInstallFeatureWarning = Boolean.parseBoolean(System.getProperty(DevUtil.SKIP_BETA_INSTALL_WARNING))
             if (InstallFeatureUtil.isOpenLibertyBetaVersion(openLibertyVersion)) {
@@ -64,6 +66,10 @@ class InstallFeatureTask extends AbstractFeatureTask {
         def pluginListedEsas = getPluginListedFeatures(true)
 		def additionalJsons = getAdditionalJsonList();
         InstallFeatureUtil util = getInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVersion, containerName, additionalJsons)
+
+		if(!pluginListedEsas.isEmpty() && isClosedLiberty) {
+			installFeaturesFromAnt = true;
+		}
 
         // if getInstallFeatureUtil failed to retrieve an InstallFeatureUtil instance for util, then features are installed via ant
         if(installFeaturesFromAnt) {
