@@ -70,6 +70,7 @@ The following are optional command line parameters supported by this task.
 | serverStartTimeout | Maximum time to wait (in seconds) to verify that the server has started. The value must be an integer greater than or equal to 0. The default value is `90` seconds. | No |
 | verifyAppStartTimeout | Maximum time to wait (in seconds) to verify that the application has started or updated before running tests. The value must be an integer greater than or equal to 0. The default value is `30` seconds. | No |
 | generateFeatures | If set to `true`, when a Java file, server configuration file, or build file is changed, generate features required by the application in the source configuration directory. The default value is `false`. | No |
+| skipInstallFeature | If set to `true`, the `installFeature` task will be skipped when `dev` mode is started on an already existing Liberty runtime installation. It will also be skipped when `dev` mode is running and a restart of the server is triggered either directly by the user or by application changes. The `installFeature` task will be invoked though when `dev` mode is running and a change to the configured features is detected. The default value is `false`. | No |
 
 ### Properties
 

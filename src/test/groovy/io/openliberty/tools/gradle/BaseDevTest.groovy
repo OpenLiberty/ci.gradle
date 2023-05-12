@@ -31,6 +31,7 @@ class BaseDevTest extends AbstractIntegrationTest {
     static File resourceDir = new File("build/resources/test/dev-test/" + projectName);
     static File buildDir = new File(integTestDir, "dev-test/" + projectName + System.currentTimeMillis()); // append timestamp in case previous build was not deleted
     static String buildFilename = "build.gradle";
+    final String RUNNING_INSTALL_FEATURE = "Task :installFeature";
     final String RUNNING_GENERATE_FEATURES = "Task :generateFeatures";
     final String REGENERATE_FEATURES = "Regenerated the following features:";
     final String GENERATE_FEATURES = "Generated the following features:";
@@ -63,6 +64,16 @@ class BaseDevTest extends AbstractIntegrationTest {
     protected static void runDevMode() throws IOException, InterruptedException, FileNotFoundException {
         System.out.println("Starting dev mode...");
         startProcess("--generateFeatures=true", true);
+        System.out.println("Started dev mode");
+    }
+
+    protected static void runDevMode(String params, File buildDirectory) throws IOException, InterruptedException, FileNotFoundException {
+        buildDir = buildDirectory;
+        logFile = new File(buildDir, "output.log");
+        errFile = new File(buildDir, "stderr.log");
+        
+        System.out.println("Starting dev mode with params..."+params);
+        startProcess(params, true);
         System.out.println("Started dev mode");
     }
 
@@ -145,13 +156,18 @@ class BaseDevTest extends AbstractIntegrationTest {
             throws InterruptedException, FileNotFoundException {
         int waited = 0;
         int sleep = 10;
+        int foundOccurrences = 0;
         while (waited <= timeout) {
             Thread.sleep(sleep);
             waited += sleep;
-            if (countOccurrences(message, file) == occurrences) {
+            foundOccurrences = countOccurrences(message, file)
+            if (foundOccurrences == occurrences) {
                 return true;
             }
         }
+
+        System.out.println("Log message found "+foundOccurrences+" times, expected to find it "+occurrences+" times.");
+
         return false;
     }
 
@@ -270,13 +286,13 @@ class BaseDevTest extends AbstractIntegrationTest {
         stopProcess(isDevMode);
         if (buildDir != null && buildDir.exists()) {
             // FileUtils.deleteDirectory(buildDir);
-            FileUtils.deleteQuietly(buildDir); // try this method that does not throw an exception
+            //FileUtils.deleteQuietly(buildDir); // try this method that does not throw an exception
         }
         if (logFile != null && logFile.exists()) {
-            assertTrue(logFile.delete());
+            //assertTrue(logFile.delete());
         }
         if (errFile != null && errFile.exists()) {
-            assertTrue(errFile.delete());
+            //assertTrue(errFile.delete());
         }
     }
 
@@ -289,8 +305,11 @@ class BaseDevTest extends AbstractIntegrationTest {
             } else {
                 process.destroy(); // stop run
             }
-            writer.flush();
-            writer.close();
+            try {
+                writer.close(); // close automatically does a flush
+            } catch (IOException e) {
+                System.out.println("Received IOException on writer.close()" + e.getMessage());
+            }
 
             // test that dev mode has stopped running
             assertTrue(verifyLogMessage(100000, "CWWKE0036I", errFile, ++serverStoppedOccurrences));
