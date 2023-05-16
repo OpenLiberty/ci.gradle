@@ -29,7 +29,7 @@ To build the plugin and run the integration tests execute the following commands
 
 ### Gradle Support
 
-The Liberty Gradle Plugin supports running with Gradle 7.3+ and Gradle 8.x. The 7.3 version of Gradle is when full support for Java 17 was introduced. When using a Gradle wrapper, ensure the wrapper version matches the version of Gradle being used.
+The Liberty Gradle Plugin supports running with Gradle 7.3+ and Gradle 8.x as of release 3.6. The 7.3 version of Gradle is when full support for Java 17 was introduced. When using a Gradle wrapper, ensure the wrapper version matches the version of Gradle being used.
 
 ### Java Support
 
