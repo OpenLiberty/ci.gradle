@@ -50,6 +50,5 @@ liberty {
     }
 }
 
-clean.dependsOn 'libertyStop'
 deploy.dependsOn 'ear'
 ear.dependsOn ':ejb-war:jar', ':ejb-war:war'
