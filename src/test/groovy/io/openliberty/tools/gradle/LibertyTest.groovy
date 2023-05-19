@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2015, 2017.
+ * (C) Copyright IBM Corporation 2015, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,9 +147,44 @@ class LibertyTest extends AbstractIntegrationTest{
         try{
            runTasks(buildDir, 'cleanDirs')
         } catch (Exception e) {
-           throw new AssertionError ("Fail on task Clean. "+e)
+           throw new AssertionError ("Fail on task cleanDirs. "+e)
+        }
+
+        try{
+           runTasks(buildDir, 'libertyStart')
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task libertyStart after cleanDirs. "+e)
+        }
+
+        try{
+           runTasks(buildDir, 'clean')
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task clean while Liberty server is running "+e)
+        }
+
+        try{
+           runTasks(buildDir, 'clean')
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task clean after clean. "+e)
+        }
+
+        try{
+           runTasks(buildDir, 'cleanDirs')
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task cleanDirs after clean. "+e)
+        }
+
+        try{
+           runTasks(buildDir, 'libertyStart')
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task libertyStart after second clean. "+e)
+        }
+
+        try{
+           runTasks(buildDir, 'libertyStop')
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task libertyStop after libertyStart. "+e)
         }
     }
-
 
 }

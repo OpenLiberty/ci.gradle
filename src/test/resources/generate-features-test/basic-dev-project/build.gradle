@@ -43,5 +43,3 @@ dependencies {
     testImplementation "org.glassfish:javax.json:1.0.4"
     testImplementation "javax.xml.bind:jaxb-api:2.3.1"
 }
-
-clean.dependsOn "libertyStop"

@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2015, 2019.
+ * (C) Copyright IBM Corporation 2015, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,15 +29,26 @@ class CleanTask extends AbstractServerTask {
 
     @TaskAction
     void cleanDirectories() {
-        def params = buildLibertyMap(project);
-        params.put('logs', server.cleanDir.logs)
-        params.put('workarea', server.cleanDir.workarea)
-        params.put('dropins', server.cleanDir.dropins)
-        params.put('apps', server.cleanDir.apps)
-        params.remove('timeout')
-        project.ant.taskdef(name: 'cleanDir',
-                            classname: 'io.openliberty.tools.ant.CleanTask',
-                            classpath: project.buildscript.configurations.classpath.asPath)
-        project.ant.cleanDir(params)
+        // first make sure there is a Liberty installation that needs cleaning as a previous clean may have occurred
+        File installDir = getInstallDir(project)
+        if (isLibertyInstalled(installDir)) {
+            def params = buildLibertyMap(project);
+            params.put('logs', server.cleanDir.logs)
+            params.put('workarea', server.cleanDir.workarea)
+            params.put('dropins', server.cleanDir.dropins)
+            params.put('apps', server.cleanDir.apps)
+            params.remove('timeout')
+            project.ant.taskdef(name: 'cleanDir',
+                                classname: 'io.openliberty.tools.ant.CleanTask',
+                                classpath: project.buildscript.configurations.classpath.asPath)
+            project.ant.cleanDir(params)
+        } else {
+            logger.info("There is no Liberty server to clean. The runtime has not been installed.")
+        }
+    }
+
+    private boolean isLibertyInstalled(File installDir) {
+        boolean installationExists = installDir.exists() && new File(installDir,"lib/ws-launch.jar").exists()
+        return installationExists
     }
 }
