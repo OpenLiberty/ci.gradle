@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2018, 2021.
+ * (C) Copyright IBM Corporation 2018, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,13 @@ public class LibertyTasks {
 
         project.cleanDirs {
             dependsOn 'libertyStop'
+        }
+
+        // The war, ear and java plugins all apply the base plugin which defines the clean task.
+        // This code ensures the libertyStop task is invoked before clean so that a Liberty server is not orphaned.
+        if (project.plugins.hasPlugin('base')) {
+            def tasks = project.tasks
+            tasks.getByName('clean').dependsOn 'libertyStop'
         }
 		
 		project.prepareFeature {

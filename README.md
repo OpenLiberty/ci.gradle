@@ -27,11 +27,13 @@ To build the plugin and run the integration tests execute the following commands
 
 ## Usage
 
+### Gradle Support
+
+The Liberty Gradle Plugin supports running with Gradle 7.3+ and Gradle 8.x as of release 3.6. The 7.3 version of Gradle is when full support for Java 17 was introduced. When using a Gradle wrapper, ensure the wrapper version matches the version of Gradle being used.
+
 ### Java Support
 
 The Liberty Gradle Plugin is tested with Long-Term-Support (LTS) releases of Java. The plugin, as of release 3.5, supports Java 8, 11 and 17. Prior to this version, the plugin is supported on Java 8 and 11.
-
-Note: When running the Liberty Gradle Plugin with Java 17, the minimum supported version of Gradle is 7.3. That is when Gradle introduced full support for Java 17. Also, the Gradle wrapper should match the version of Gradle being used.
 
 ### Adding the plugin to the build script
 
@@ -51,7 +53,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.5.2'
+        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.6'
     }
 }
 ```
@@ -71,13 +73,13 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath ('io.openliberty.tools:liberty-ant-tasks:1.9.9')
-        classpath ('io.openliberty.tools:ci.common:1.8.20')
+        classpath ('io.openliberty.tools:liberty-ant-tasks:1.9.12')
+        classpath ('io.openliberty.tools:ci.common:1.8.24')
     }
 }
 
 plugins {
-    id "io.openliberty.tools.gradle.Liberty" version "3.5.2"
+    id "io.openliberty.tools.gradle.Liberty" version "3.6"
 }
 ```
 
@@ -105,7 +107,7 @@ Example using `libertyRuntime` property to install a specific Open Liberty runti
 
 ```groovy
 dependencies {
-    libertyRuntime group: 'io.openliberty', name: 'openliberty-kernel', version: '23.0.0.2'
+    libertyRuntime group: 'io.openliberty', name: 'openliberty-kernel', version: '23.0.0.3'
 }
 ```
 
