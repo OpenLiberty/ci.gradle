@@ -854,6 +854,7 @@ class DevTask extends AbstractFeatureTask {
                     gradleBuildLauncher.addArguments(CONTAINER_PROPERTY_ARG);
                 }
                 if (skipInstallFeature) {
+                    gradleBuildLauncher.addArguments("--exclude-task", "libertyCreate");
                     gradleBuildLauncher.addArguments("--exclude-task", "installFeature");
                 }
                 runGradleTask(gradleBuildLauncher, 'deploy');
@@ -925,6 +926,7 @@ class DevTask extends AbstractFeatureTask {
                     // Container mode should call installFeature separately with the containerName parameter where needed.
                     gradleBuildLauncher.addArguments("--exclude-task", "installFeature");
                 } else if (skipInstallFeature) {
+                    gradleBuildLauncher.addArguments("--exclude-task", "libertyCreate");
                     gradleBuildLauncher.addArguments("--exclude-task", "installFeature");
                 }
                 runGradleTask(gradleBuildLauncher, 'deploy');
@@ -948,6 +950,9 @@ class DevTask extends AbstractFeatureTask {
                 gradleBuildLauncher.addArguments('--rerun-tasks');
                 addLibertyRuntimeProperties(gradleBuildLauncher);
                 gradleBuildLauncher.addArguments("--exclude-task", "installLiberty");
+                if (skipInstallFeature) {
+                    gradleBuildLauncher.addArguments("--exclude-task", "installFeature");
+                }
                 try {
                     runGradleTask(gradleBuildLauncher, 'libertyCreate');
                 } catch (BuildException e) {
@@ -1188,25 +1193,27 @@ class DevTask extends AbstractFeatureTask {
                     } catch (IOException e) {
                     }
                 }
-                
-                addLibertyRuntimeProperties(gradleBuildLauncher);
-                runGradleTask(gradleBuildLauncher, 'libertyCreate');
 
                 // if skipInstallFeature is set to true, skip installFeature task unless it is a new installation
                 if (skipInstallFeature) {
-                    logger.info("Dev mode skipInstallFeature flag is set to true");
-                } else {
-                    logger.info("Dev mode skipInstallFeature flag is set to false");
+                    logger.debug("skipInstallFeature flag is set to true");
                 }
+                
+                if (!isNewInstallation) {
+                    logger.info("Skipping installLiberty task.")
+                    gradleBuildLauncher.addArguments("--exclude-task", "installLiberty"); // skip installing Liberty at startup since it was already installed
+                    if (skipInstallFeature) {
+                        logger.info("Skipping installFeature task.")
+                        gradleBuildLauncher.addArguments("--exclude-task", "installFeature"); // skip installing features at startup since flag was set
+                    }
+                }
+                addLibertyRuntimeProperties(gradleBuildLauncher);
+                runGradleTask(gradleBuildLauncher, 'libertyCreate');
 
                 if (!skipInstallFeature || isNewInstallation) {
-                    logger.info("Calling installFeature task.");
                     // suppress extra install feature warnings (one would have shown up already from the libertyCreate task on the line above)
                     gradleBuildLauncher.addArguments("-D" + DevUtil.SKIP_BETA_INSTALL_WARNING + "=" + Boolean.TRUE.toString());
                     runInstallFeatureTask(gradleBuildLauncher, null);
-                } else {
-                    logger.info("Skipping installFeature task.")
-                    gradleBuildLauncher.addArguments("--exclude-task", "installFeature"); // skip installing features at startup since flag was set
                 }
             } else {
                 // skip creating the server and installing features and just propagate the option to 'deploy'

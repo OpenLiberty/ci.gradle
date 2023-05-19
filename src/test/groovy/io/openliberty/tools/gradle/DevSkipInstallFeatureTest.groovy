@@ -33,15 +33,15 @@ class DevSkipInstallFeatureTest extends BaseDevTest {
 
     static final String projectName = "dev-skip-feature-install";
     static File resourceDir = new File("build/resources/test/dev-test/" + projectName);
-
     static File testBuildDir = new File(integTestDir, "/test-dev-skip-install-feature")
+    final String RUNNING_INSTALL_LIBERTY = "Task :installLiberty";
 
     @BeforeClass
     public static void setup() throws IOException, InterruptedException, FileNotFoundException {
         createDir(testBuildDir)
         createTestProject(testBuildDir, resourceDir, "buildInstallLiberty.gradle", true)
 
-        runTasks(testBuildDir, 'libertyCreate', 'libertyStop')
+        runTasks(testBuildDir, 'libertyCreate')
 
         // now copy the build.gradle for dev mode invocation
         File buildFile = new File(resourceDir, buildFilename)
@@ -53,7 +53,9 @@ class DevSkipInstallFeatureTest extends BaseDevTest {
     @Test
     public void restartServerTest() throws Exception {
         tagLog("##restartServerTest start");
+        int runningInstallLibertyCount = countOccurrences(RUNNING_INSTALL_LIBERTY, logFile);
         int runningInstallFeatureCount = countOccurrences(RUNNING_INSTALL_FEATURE, logFile);
+
         String RESTARTED = "The server has been restarted.";
         int restartedCount = countOccurrences(RESTARTED, logFile);
         writer.write("r\n"); // command to restart liberty
@@ -62,7 +64,9 @@ class DevSkipInstallFeatureTest extends BaseDevTest {
         // TODO reduce wait time once https://github.com/OpenLiberty/ci.gradle/issues/751 is resolved
         // depending on the order the tests run in, tests may be triggered before this test resulting in a 30s timeout (bug above)
         assertTrue(verifyLogMessage(123000, RESTARTED, ++restartedCount));
-        // not supposed to rerun installFeature task just because of a server restart
+
+        // not supposed to rerun installFeature or installLiberty task just because of a server restart
+        assertTrue("Did not find expected log messages for running installLiberty task: "+runningInstallLibertyCount, verifyLogMessage(2000, RUNNING_INSTALL_LIBERTY, logFile, runningInstallLibertyCount));
         assertTrue("Did not find expected log messages for running installFeature task: "+runningInstallFeatureCount, verifyLogMessage(2000, RUNNING_INSTALL_FEATURE, logFile, runningInstallFeatureCount));
         tagLog("##restartServerTest end");
     }
