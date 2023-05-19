@@ -121,10 +121,15 @@ class DevTest extends BaseDevTest {
         tagLog("##testDirectoryTest start");
         // create the test directory
         File testDir = new File(buildDir, "src/test/java");
-        assertTrue(testDir.mkdirs());
+        File unitTestSrcFile = new File(testDir, "UnitTest.java");
+
+        if (!testDir.exists()) {
+            assertTrue("Failed creating directory: "+testDir.getCanonicalPath(), testDir.mkdirs());
+        } else {
+            assertTrue("Failed deleting file: "+unitTestSrcFile.getCanonicalPath(), unitTestSrcFile.delete());
+        }
 
         // creates a java test file
-        File unitTestSrcFile = new File(testDir, "UnitTest.java");
         String unitTest = """import org.junit.Test;\n
         import static org.junit.Assert.*;\n
         \n
