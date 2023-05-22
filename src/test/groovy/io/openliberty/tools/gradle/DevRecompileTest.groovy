@@ -30,12 +30,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 class DevRecompileTest extends BaseDevTest {
+    static final String projectName = "basic-dev-project";
+
+    static File resourceDir = new File("build/resources/test/dev-test/" + projectName);
+    static File buildDir = new File(integTestDir, "dev-test/" + projectName + System.currentTimeMillis()); // append timestamp in case previous build was not deleted
 
     @BeforeClass
     public static void setup() throws IOException, InterruptedException, FileNotFoundException {
         createDir(buildDir);
         createTestProject(buildDir, resourceDir, buildFilename);
-        runDevMode();
+        runDevMode(buildDir);
     }
 
     @Test

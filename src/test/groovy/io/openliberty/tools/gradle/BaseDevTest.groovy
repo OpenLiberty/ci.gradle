@@ -26,10 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 class BaseDevTest extends AbstractIntegrationTest {
-    static final String projectName = "basic-dev-project";
-
-    static File resourceDir = new File("build/resources/test/dev-test/" + projectName);
-    static File buildDir = new File(integTestDir, "dev-test/" + projectName + System.currentTimeMillis()); // append timestamp in case previous build was not deleted
+    static File buildDir;
     static String buildFilename = "build.gradle";
     final String RUNNING_INSTALL_FEATURE = "Task :installFeature";
     final String RUNNING_GENERATE_FEATURES = "Task :generateFeatures";
@@ -57,14 +54,13 @@ class BaseDevTest extends AbstractIntegrationTest {
     // the correct file. Use logFile for "compilation was successful"
     // and errFile for "compilation had errors" or Liberty messages like 
     // "CWWKF0011I" or "The server installed the following features".
-    static File logFile = new File(buildDir, "output.log");
-    static File errFile = new File(buildDir, "stderr.log");
+    static File logFile;
+    static File errFile;
+    
     static Process process;
 
-    protected static void runDevMode() throws IOException, InterruptedException, FileNotFoundException {
-        System.out.println("Starting dev mode...");
-        startProcess("--generateFeatures=true", true);
-        System.out.println("Started dev mode");
+    protected static void runDevMode(File buildDirectory) throws IOException, InterruptedException, FileNotFoundException {
+        runDevMode("--generateFeatures=true", buildDirectory)
     }
 
     protected static void runDevMode(String params, File buildDirectory) throws IOException, InterruptedException, FileNotFoundException {
@@ -286,12 +282,6 @@ class BaseDevTest extends AbstractIntegrationTest {
         stopProcess(isDevMode);
         if (buildDir != null && buildDir.exists()) {
             FileUtils.deleteQuietly(buildDir); // try this method that does not throw an exception
-        }
-        if (logFile != null && logFile.exists()) {
-            assertTrue(logFile.delete());
-        }
-        if (errFile != null && errFile.exists()) {
-            assertTrue(errFile.delete());
         }
     }
 

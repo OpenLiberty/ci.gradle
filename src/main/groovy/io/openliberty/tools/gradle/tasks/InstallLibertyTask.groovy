@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2021.
+ * (C) Copyright IBM Corporation 2014, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ class InstallLibertyTask extends AbstractLibertyTask {
     protected String detachedCoords
     protected String detachedConfigFilePath
     // default to install the latest Open Liberty kernel from Maven Central repository
-    protected String defaultRuntime = "io.openliberty:openliberty-kernel:[19.0.0.9,)"
+    protected String defaultRuntime = "io.openliberty:openliberty-kernel:[23.0.0.3,)"
 
     InstallLibertyTask() {
         configure({

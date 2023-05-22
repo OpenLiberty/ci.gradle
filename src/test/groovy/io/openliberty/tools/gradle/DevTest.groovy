@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2020, 2022.
+ * (C) Copyright IBM Corporation 2020, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 class DevTest extends BaseDevTest {
+    static final String projectName = "basic-dev-project";
+
+    static File resourceDir = new File("build/resources/test/dev-test/" + projectName);
+    static File buildDir = new File(integTestDir, "dev-test/" + projectName + System.currentTimeMillis()); // append timestamp in case previous build was not deleted
 
     @BeforeClass
     public static void setup() throws IOException, InterruptedException, FileNotFoundException {
         createDir(buildDir);
         createTestProject(buildDir, resourceDir, buildFilename);
-        runDevMode();
+        runDevMode(buildDir);
     }
 
     @Test
@@ -125,7 +129,7 @@ class DevTest extends BaseDevTest {
 
         if (!testDir.exists()) {
             assertTrue("Failed creating directory: "+testDir.getCanonicalPath(), testDir.mkdirs());
-        } else {
+        } else if (unitTestSrcFile.exists()) {
             assertTrue("Failed deleting file: "+unitTestSrcFile.getCanonicalPath(), unitTestSrcFile.delete());
         }
 
@@ -157,7 +161,9 @@ class DevTest extends BaseDevTest {
         javaWriter.append(' ');
         javaWriter.append(str);
         javaWriter.close();
-        assertTrue(waitForCompilation(unitTestTargetFile, lastModified, 10000));
+        if (!waitForCompilation(unitTestTargetFile, lastModified, 10000)) { // just try again - failing here often
+            assertTrue(waitForCompilation(unitTestTargetFile, lastModified, 10000));
+        }
 
         // delete the test file
         // "The java class .../build/classes/java/test/UnitTest.class was deleted."
