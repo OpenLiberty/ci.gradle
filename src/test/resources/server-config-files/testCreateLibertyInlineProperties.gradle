@@ -61,8 +61,8 @@ dependencies {
 task integrationTest(type: Test) {
     group 'Verification'
     description 'Runs the integration tests.'
-    reports.html.destination = file("$buildDir/reports/it")
-    reports.junitXml.destination = file("$buildDir/test-results/it")
+    reports.html.outputLocation = file("$buildDir/reports/it")
+    reports.junitXml.outputLocation = file("$buildDir/test-results/it")
     include '**/it/**'
     exclude '**/unit/**'
 }

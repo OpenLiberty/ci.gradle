@@ -46,8 +46,8 @@ arquillianConfiguration {
 }
 
 test {
-    reports.html.destination = file("$buildDir/reports/it")
-    reports.junitXml.destination = file("$buildDir/test-results/it")
+    reports.html.outputLocation = file("$buildDir/reports/it")
+    reports.junitXml.outputLocation = file("$buildDir/test-results/it")
     include '**/*IT*'
     exclude '**/unit/**'
     testLogging.showStandardStreams = true
