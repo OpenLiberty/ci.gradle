@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2021.
+ * (C) Copyright IBM Corporation 2014, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,9 @@ class InstallLibertyTask extends AbstractLibertyTask {
             group 'Liberty'
         })
         outputs.upToDateWhen {
-            getInstallDir(project).exists() && project.buildDir.exists() && new File(project.buildDir, 'liberty-plugin-config.xml').exists()
+            // ensure a Liberty installation exists at the install directory
+            getInstallDir(project).exists() && new File(getInstallDir(project), 'lib/ws-launch.jar').exists() && 
+            project.buildDir.exists() && new File(project.buildDir, 'liberty-plugin-config.xml').exists()
         }
     }
 
