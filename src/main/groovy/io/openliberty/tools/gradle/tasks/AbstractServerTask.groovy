@@ -890,6 +890,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
             if (serverEnvPath == null && server.serverEnvFile == null) {
                 // Do a special case merge but ONLY if there is no server.env file present in configDirectory or specified with serverEnvFile
                 envPropsToWrite = mergeSpecialPropsFromInstallServerEnvIfAbsent(envFile, configuredProps)
+                logger.warn("The default " + envFile.getCanonicalPath() + " file is overwritten by inlined configuration.")
             } else if (serverEnvPath != null) {
                 logger.warn("The " + serverEnvPath + " file is overwritten by inlined configuration.")
             }
@@ -911,8 +912,6 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      */
     private Properties mergeSpecialPropsFromInstallServerEnvIfAbsent(File envFile, Properties envProps) throws IOException {
 
-        String[] specialProps = { "keystore_password" }
-
         // Make a copy to avoid side effects 
         Properties mergedProps = new Properties()
         mergedProps.putAll(envProps)
@@ -920,10 +919,9 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         // From install (target) dir
         Properties serverEnvProps = convertServerEnvToProperties(envFile)
 
-        for (String propertyName : specialProps) {
-            if (serverEnvProps.containsKey(propertyName)) {
-                mergedProps.putIfAbsent(propertyName,serverEnvProps.get(propertyName))
-            }
+        String propertyName = "keystore_password"
+        if (serverEnvProps.containsKey(propertyName)) {
+            mergedProps.putIfAbsent(propertyName,serverEnvProps.get(propertyName))
         }
 
         return mergedProps
