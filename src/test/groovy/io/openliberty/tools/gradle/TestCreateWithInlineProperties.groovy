@@ -72,11 +72,15 @@ public class TestCreateWithInlineProperties extends AbstractIntegrationTest{
 
         prop = new Properties();
         prop.load( input2 );
-        assert prop.size() == 2 : "expected 2 properties in server.env file but found "+prop.size()
+        assert prop.size() == 3 : "expected 3 properties in server.env file but found "+prop.size()
         String value2 = prop.getProperty("some.env.var");
-        assert value2 != null && value2.equals("someValue") : "property not found in server.env file"
+        assert value2 != null && value2.equals("someValue") : "some.env.var property not found in server.env file"
         value2 = prop.getProperty("another.env.var");
-        assert value2 != null && value2.equals("anotherValue") : "property not found in server.env file"
+        assert value2 != null && value2.equals("anotherValue") : "another.env.var property not found in server.env file"
+        // if no server.env file is specified in configuration and mergeServerEnv is not set to true, 
+        // the keystore_password is still preserved when present in the default server.env file and not specified in a property
+        value2 = prop.getProperty("keystore_password");
+        assert value2 != null : "keystore_password property not found in server.env file"
 
         assert libertyConfigVarOverridesFile.text.contains("name=\"someVar\"") : "configDropins/overrides/liberty-plugin-variable-config.xml does not contain expected variable: "+libertyConfigVarOverridesFile.text
         assert libertyConfigVarOverridesFile.text.contains("value=\"someValue\"") : "configDropins/overrides/liberty-plugin-variable-config.xml does not contain expected variable: "+libertyConfigVarOverridesFile.text
