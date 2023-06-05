@@ -234,7 +234,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
             serverFeatures = util.getServerFeatures(getServerDir(project), getLibertyDirectoryPropertyFiles(null))
         }
 
-        Set<String> featuresToInstall = InstallFeatureUtil.combineToSet(pluginListedFeatures, dependencyFeatures, serverFeatures)
+        Set<String> featuresToInstall = util.combineToSet(pluginListedFeatures, dependencyFeatures, serverFeatures)
         return featuresToInstall
     }
 
