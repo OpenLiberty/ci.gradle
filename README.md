@@ -53,7 +53,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.6'
+        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.6.1'
     }
 }
 ```
@@ -74,12 +74,12 @@ buildscript {
     }
     dependencies {
         classpath ('io.openliberty.tools:liberty-ant-tasks:1.9.12')
-        classpath ('io.openliberty.tools:ci.common:1.8.24')
+        classpath ('io.openliberty.tools:ci.common:1.8.25')
     }
 }
 
 plugins {
-    id "io.openliberty.tools.gradle.Liberty" version "3.6"
+    id "io.openliberty.tools.gradle.Liberty" version "3.6.1"
 }
 ```
 
