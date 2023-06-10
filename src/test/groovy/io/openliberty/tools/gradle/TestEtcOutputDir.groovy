@@ -25,7 +25,7 @@ public class TestEtcOutputDir extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'libertyStart')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task libertyStart. "+ e)
+            throw new AssertionError ("Fail on task libertyStart.", e)
         }
 
         assert new File('build/testBuilds/test-etc-output-dir/build/testEtcOutputDir').exists() : 'Could not find the outputDir specified in the build file.'

@@ -42,7 +42,7 @@ class LibertyPackage_archiveJar_Test extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'installLiberty', 'libertyStart', 'libertyStop')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task installLiberty. "+ e)
+            throw new AssertionError ("Fail on task installLiberty.", e)
         }
     }
 
@@ -72,10 +72,10 @@ class LibertyPackage_archiveJar_Test extends AbstractIntegrationTest{
               assert value != null : "Manifest.mf does not contain Main-Class attribute."
               assert value.equals("wlp.lib.extract.SelfExtractRun") : "Expected Main-Class manifest value for runnable jar not found."
            } catch (Exception e) {
-                 throw new AssertionError ("Unexpected exception when checking the Jar Manifest for Main-Class attribute. "+e)
+                 throw new AssertionError ("Unexpected exception when checking the Jar Manifest for Main-Class attribute.", e)
            }
         } catch (Exception e) {
-           throw new AssertionError ("Fail on task libertyPackage. "+e)
+           throw new AssertionError ("Fail on task libertyPackage.", e)
         }
     }
 }

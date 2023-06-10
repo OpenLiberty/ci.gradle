@@ -38,7 +38,7 @@ abstract class AbstractIntegrationTest {
     protected static void deleteDir(File dir) {
         if (dir.exists()) {
             if (!dir.deleteDir()) {
-                throw new AssertionError("Unable to delete directory '$dir.canonicalPath'.")
+                throw new AssertionError("Unable to delete directory '$dir.canonicalPath'.", null)
             }
         }
     }
@@ -46,7 +46,7 @@ abstract class AbstractIntegrationTest {
     protected static void createDir(File dir) {
         if (!dir.exists()) {
             if (!dir.mkdirs()) {
-                throw new AssertionError("Unable to create directory '$dir.canonicalPath'.")
+                throw new AssertionError("Unable to create directory '$dir.canonicalPath'.", null)
             }
         }
     }
@@ -85,7 +85,7 @@ abstract class AbstractIntegrationTest {
 
     protected static File createTestProject(File parent, File sourceDir, String buildFilename, boolean appendGradleProperties) {
         if (!sourceDir.exists()){
-            throw new AssertionError("The source file '${sourceDir.canonicalPath}' doesn't exist.")
+            throw new AssertionError("The source file '${sourceDir.canonicalPath}' doesn't exist.", null)
         }
         try {
             // Copy all resources except the individual test .gradle files
@@ -106,7 +106,7 @@ abstract class AbstractIntegrationTest {
             copyBuildFiles(buildFile, parent, appendGradleProperties)
 
         } catch (IOException e) {
-            throw new AssertionError("Unable to copy directory '${parent.canonicalPath}'.")
+            throw new AssertionError("Unable to copy directory '${parent.canonicalPath}'.", e)
         }
     }
 
@@ -167,12 +167,12 @@ abstract class AbstractIntegrationTest {
 
     protected static File copyFile(File sourceFile, File destFile) {
         if (!sourceFile.exists()){
-            throw new AssertionError("The source file '${sourceFile.canonicalPath}' doesn't exist.")
+            throw new AssertionError("The source file '${sourceFile.canonicalPath}' doesn't exist.", null)
         }
         try {
             FileUtils.copyFile(sourceFile, destFile)
         } catch (Exception e) {
-            throw new AssertionError("Unable to create file '${destFile.canonicalPath}'.")
+            throw new AssertionError("Unable to create file '${destFile.canonicalPath}'.", e)
         }
     }
 
@@ -193,7 +193,7 @@ abstract class AbstractIntegrationTest {
                 }
 
             } catch (Exception e) {
-                throw new AssertionError("Unable to merge file '${sourceFile.canonicalPath}' to '${destFile.canonicalPath}'.")
+                throw new AssertionError("Unable to merge file '${sourceFile.canonicalPath}' to '${destFile.canonicalPath}'.", e)
             }
         }
     }

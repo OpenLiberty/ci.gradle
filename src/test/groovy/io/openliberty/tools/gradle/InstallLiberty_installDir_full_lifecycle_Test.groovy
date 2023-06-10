@@ -55,7 +55,7 @@ class InstallLiberty_installDir_full_lifecycle_Test extends AbstractIntegrationT
             runTasks(buildDir, 'libertyStart')
             runTasks(buildDir, 'libertyStop')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task libertyStart. "+e)
+            throw new AssertionError ("Fail on task libertyStart.", e)
         }
     }
 
@@ -64,7 +64,7 @@ class InstallLiberty_installDir_full_lifecycle_Test extends AbstractIntegrationT
         try{
            runTasks(buildDir, 'UninstallFeature')
         } catch (Exception e) {
-           throw new AssertionError ("Fail on task UninstallFeature. "+e)
+           throw new AssertionError ("Fail on task UninstallFeature.", e)
         }
     }
 }

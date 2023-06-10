@@ -47,7 +47,7 @@ class InstallFeature_multiple extends AbstractIntegrationTest{
             assert file_2.exists() : "com.ibm.websphere.appserver.adminCenter-1.0.mf is not installed"
             assert file_2.canRead() : "com.ibm.websphere.appserver.adminCenter-1.0.mf cannot be read"
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task installFeature. "+e)
+            throw new AssertionError ("Fail on task installFeature.", e)
         }
     }
 
@@ -61,7 +61,7 @@ class InstallFeature_multiple extends AbstractIntegrationTest{
             assert !file.exists() : "com.ibm.websphere.appserver.mongodb-2.0.mf is not uninstalled"
             assert !file2.exists() : "com.ibm.websphere.appserver.adminCenter-1.0.mf is not installed"
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task uninstallFeature. "+e)
+            throw new AssertionError ("Fail on task uninstallFeature.", e)
         }
     }
 }

@@ -25,7 +25,7 @@ public class VerifyTimeoutSuccessAppsTest extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'libertyStart')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task libertyStart. "+ e)
+            throw new AssertionError ("Fail on task libertyStart.", e)
         }
         assert new File('build/testBuilds/verify-timeout-success-apps-test/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet-1.war').exists() : 'application not installed on server'
     }

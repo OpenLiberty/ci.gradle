@@ -35,7 +35,7 @@ class InstallFeature_acceptLicense extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'libertyCreate')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task libertyCreate. " + e)
+            throw new AssertionError ("Fail on task libertyCreate.", e)
         }
     }
 
@@ -51,7 +51,7 @@ class InstallFeature_acceptLicense extends AbstractIntegrationTest{
             assert file_2.exists() : "com.ibm.websphere.appserver.adminCenter-1.0.mf is not installed"
             assert file_2.canRead() : "com.ibm.websphere.appserver.adminCenter-1.0.mf cannot be read"
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task installFeature. "+e)
+            throw new AssertionError ("Fail on task installFeature.", e)
         }
     }
 }

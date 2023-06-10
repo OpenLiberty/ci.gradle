@@ -36,7 +36,7 @@ class InstallLiberty_runtimeDep_upToDate_Test extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'installLiberty')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task installLiberty. "+ e)
+            throw new AssertionError ("Fail on task installLiberty ", e)
         }
     }
 

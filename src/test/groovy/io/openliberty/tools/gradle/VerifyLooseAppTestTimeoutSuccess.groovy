@@ -41,7 +41,7 @@ public class VerifyLooseAppTestTimeoutSuccess extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'deploy')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task deploy. " + e)
+            throw new AssertionError ("Fail on task deploy.", e)
         }
         assert new File('build/testBuilds/verify-loose-app-test-timeout-success/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war.xml').exists() : 'looseApplication config file was not copied over to the liberty runtime'
     }
@@ -96,7 +96,7 @@ public class VerifyLooseAppTestTimeoutSuccess extends AbstractIntegrationTest{
       try {
           runTasks(buildDir, 'libertyStart')
       } catch (Exception e) {
-          throw new AssertionError ("Fail on task libertyStart. "+ e)
+          throw new AssertionError ("Fail on task libertyStart.", e)
       }
     }
 }

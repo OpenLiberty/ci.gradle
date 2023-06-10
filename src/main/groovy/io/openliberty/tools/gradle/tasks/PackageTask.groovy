@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2022.
+ * (C) Copyright IBM Corporation 2014, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package io.openliberty.tools.gradle.tasks
 
+import org.gradle.api.GradleException
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.logging.LogLevel
@@ -100,7 +101,7 @@ class PackageTask extends AbstractServerTask {
     private static void createDir(File dir) {
         if (!dir.exists()) {
             if (!dir.mkdirs()) {
-                throw new AssertionError("Unable to create directory '$dir.canonicalPath'.")
+                throw new GradleException("Unable to create directory '$dir.canonicalPath'.")
             }
         }
     }

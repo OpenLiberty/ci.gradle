@@ -65,7 +65,7 @@ class PrepareFeatureTest extends AbstractIntegrationTest{
             assert jsonFile.exists() : "features.json cannot be generated"	
             deleteDir(jsonFile.getParentFile())
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task prepareFeature. "+e)
+            throw new AssertionError ("Fail on task prepareFeature.", e)
         }
     }
 	
@@ -86,7 +86,7 @@ class PrepareFeatureTest extends AbstractIntegrationTest{
 			deleteDir(file.getParentFile())
 			deleteDir(jsonFile.getParentFile())
         } catch (Exception e) {
-            throw new AssertionError ("Fail to install user feature. " + e)
+            throw new AssertionError ("Fail to install user feature.", e)
         }
 	}	
 
@@ -112,7 +112,7 @@ class PrepareFeatureTest extends AbstractIntegrationTest{
 			deleteDir(helloFile.getParentFile())
 			deleteDir(jsonFile.getParentFile())
 		} catch (Exception e) {
-			throw new AssertionError ("Fail to install multiple user features. " + e)
+			throw new AssertionError ("Fail to install multiple user features.", e)
 		}
 	}
 	
