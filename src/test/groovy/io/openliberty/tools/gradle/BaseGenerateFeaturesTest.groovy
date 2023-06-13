@@ -15,7 +15,7 @@
  */
 package io.openliberty.tools.gradle
 
-import org.codehaus.plexus.util.FileUtils
+import org.apache.commons.io.FileUtils
 import org.w3c.dom.Document
 
 import javax.xml.parsers.DocumentBuilder
