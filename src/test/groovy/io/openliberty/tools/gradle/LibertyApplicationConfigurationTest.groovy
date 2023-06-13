@@ -32,7 +32,7 @@ class LibertyApplicationConfigurationTest extends AbstractIntegrationTest {
         try {
             runTasks(buildDir, 'deploy')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task deploy. "+ e)
+            throw new AssertionError ("Fail on task deploy.", e)
         }
     }
 

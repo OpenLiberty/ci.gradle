@@ -45,7 +45,7 @@ public class TestLooseEarApplication extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'deploy')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task deploy. " + e)
+            throw new AssertionError ("Fail on task deploy.", e)
         }
         assert new File('build/testBuilds/test-loose-ear-application/ejb-ear/build/wlp/usr/servers/ejbServer/apps/ejb-ear.ear.xml').exists() : 'looseApplication config file was not copied over to the liberty runtime'
     }
@@ -131,7 +131,7 @@ public class TestLooseEarApplication extends AbstractIntegrationTest{
             int code = connection.getResponseCode();
             Assert.assertTrue(code == 200);
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task libertyStart. "+ e)
+            throw new AssertionError ("Fail on task libertyStart.", e)
         }
     }
 }

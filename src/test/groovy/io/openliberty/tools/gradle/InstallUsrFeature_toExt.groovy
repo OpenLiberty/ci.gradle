@@ -62,7 +62,7 @@ class InstallUsrFeature_toExt extends AbstractIntegrationTest{
 			
             
         } catch (Exception e) {
-            throw new AssertionError ("Fail to install user feature. "+e)
+            throw new AssertionError ("Fail to install user feature.", e)
         }
     }
 	

@@ -34,7 +34,7 @@ public class TestEclipseFacetsEar extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, ':ejb-ear:eclipseWtpFacet')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task eclipseWtpFacet. " + e)
+            throw new AssertionError ("Fail on task eclipseWtpFacet.", e)
         }
     }
 

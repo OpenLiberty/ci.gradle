@@ -20,7 +20,7 @@ public class NoServerNameTest extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'libertyCreate')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task libertyCreate. "+ e)
+            throw new AssertionError ("Fail on task libertyCreate.", e)
         }
         assert new File(buildDir, 'build/wlp/usr/servers/defaultServer').exists() : 'defaultServer was not created'
     }

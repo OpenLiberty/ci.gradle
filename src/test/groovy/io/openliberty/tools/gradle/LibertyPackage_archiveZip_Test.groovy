@@ -40,7 +40,7 @@ class LibertyPackage_archiveZip_Test extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'installLiberty', 'libertyStart', 'libertyStop')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task installLiberty. "+ e)
+            throw new AssertionError ("Fail on task installLiberty.", e)
         }
     }
 
@@ -69,11 +69,11 @@ class LibertyPackage_archiveZip_Test extends AbstractIntegrationTest{
                    }
                }
            } catch (Exception e) {
-               throw new AssertionError ("Unexpected exception when checking the zip server root folder. "+e)
+               throw new AssertionError ("Unexpected exception when checking the zip server root folder.", e)
            }
 
         } catch (Exception e) {
-           throw new AssertionError ("Fail on task libertyPackage. "+e)
+           throw new AssertionError ("Fail on task libertyPackage.", e)
         }
     }
 }

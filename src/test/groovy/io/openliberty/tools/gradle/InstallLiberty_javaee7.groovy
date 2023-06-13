@@ -35,7 +35,7 @@ class InstallLiberty_javaee7 extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'installLiberty')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task installLiberty. "+ e)
+            throw new AssertionError ("Fail on task installLiberty.", e)
         }
     }
 
@@ -46,7 +46,7 @@ class InstallLiberty_javaee7 extends AbstractIntegrationTest{
             assert file.exists() : "file not found"
             assert file.canRead() : "file cannot be read"
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task installLiberty. "+e)
+            throw new AssertionError ("Fail on task installLiberty.", e)
         }
     }
 }

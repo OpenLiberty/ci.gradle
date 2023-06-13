@@ -34,7 +34,7 @@ public class TestEclipseFacetsWar extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'eclipseWtpFacet')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task eclipseWtpFacet. " + e)
+            throw new AssertionError ("Fail on task eclipseWtpFacet.", e)
         }
     }
 

@@ -45,7 +45,7 @@ public class TestMultiModuleLooseEar extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'deploy')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task deploy. " + e)
+            throw new AssertionError ("Fail on task deploy.", e)
         }
         assert new File('build/testBuilds/multi-module-loose-ear-test/ejb-ear/build/wlp/usr/servers/ejbServer/apps/ejb-ear.ear.xml').exists() : 'looseApplication config file was not copied over to the liberty runtime'
     }

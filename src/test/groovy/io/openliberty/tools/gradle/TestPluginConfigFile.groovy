@@ -39,7 +39,7 @@ public class TestPluginConfigFile extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'libertyCreate')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task libertyCreate. " + e)
+            throw new AssertionError ("Fail on task libertyCreate.", e)
         }
         assert new File('build/testBuilds/test-plugin-config-file/build/liberty-plugin-config.xml').exists() : 'liberty plugin config file was not created in the build directory'
 
