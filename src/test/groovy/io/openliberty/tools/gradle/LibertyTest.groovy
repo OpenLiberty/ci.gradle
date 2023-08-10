@@ -36,7 +36,7 @@ class LibertyTest extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'installLiberty')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task installLiberty. "+ e)
+            throw new AssertionError ("Fail on task installLiberty.", e)
         }
     }
         
@@ -58,15 +58,15 @@ class LibertyTest extends AbstractIntegrationTest{
                     if (verify) {
                         runTasks(buildDir, 'libertyStop')
                     } else {
-                        throw new AssertionError ("Fail to start server for libertyRun.")
+                        throw new AssertionError ("Fail to start server for libertyRun.", null)
                     }
                 } catch (Exception e) {
-                    throw new AssertionError ("Fail on task libertyStop for libertyRun. "+e)
+                    throw new AssertionError ("Fail on task libertyStop for libertyRun.", e)
                 }
             }
             runTasks(buildDir, 'libertyRun')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task libertyRun. "+e)
+            throw new AssertionError ("Fail on task libertyRun.", e)
         }
     }
 
@@ -75,7 +75,7 @@ class LibertyTest extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'libertyStart')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task libertyStart. "+e)
+            throw new AssertionError ("Fail on task libertyStart.", e)
         }
     }
 
@@ -84,7 +84,7 @@ class LibertyTest extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'deploy')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task deploy. "+e)
+            throw new AssertionError ("Fail on task deploy.", e)
         }
     }
 
@@ -93,7 +93,7 @@ class LibertyTest extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'undeploy')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task undeploy. "+e)
+            throw new AssertionError ("Fail on task undeploy.", e)
         }
     }
 
@@ -102,7 +102,7 @@ class LibertyTest extends AbstractIntegrationTest{
         try{
             runTasks(buildDir, 'libertyStop')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task libertyStop. "+e)
+            throw new AssertionError ("Fail on task libertyStop.", e)
         }
     }
 
@@ -111,7 +111,7 @@ class LibertyTest extends AbstractIntegrationTest{
         try{
           runTasks(buildDir, 'libertyStatus')
         } catch (Exception e) {
-          throw new AssertionError ("Fail on task libertyStatus. "+e)
+          throw new AssertionError ("Fail on task libertyStatus.", e)
         }
     }
 
@@ -120,7 +120,7 @@ class LibertyTest extends AbstractIntegrationTest{
         try{
            runTasks(buildDir, 'libertyPackage')
         } catch (Exception e) {
-           throw new AssertionError ("Fail on task libertyPackage. "+e)
+           throw new AssertionError ("Fail on task libertyPackage.", e)
         }
     }
 
@@ -129,7 +129,7 @@ class LibertyTest extends AbstractIntegrationTest{
         try{
            runTasks(buildDir, 'InstallFeature')
         } catch (Exception e) {
-           throw new AssertionError ("Fail on task InstallFeature. "+e)
+           throw new AssertionError ("Fail on task InstallFeature.", e)
         }
     }
 
@@ -138,7 +138,7 @@ class LibertyTest extends AbstractIntegrationTest{
         try{
            runTasks(buildDir, 'UninstallFeature')
         } catch (Exception e) {
-           throw new AssertionError ("Fail on task UninstallFeature. "+e)
+           throw new AssertionError ("Fail on task UninstallFeature.", e)
         }
     }
 
@@ -147,43 +147,43 @@ class LibertyTest extends AbstractIntegrationTest{
         try{
            runTasks(buildDir, 'cleanDirs')
         } catch (Exception e) {
-           throw new AssertionError ("Fail on task cleanDirs. "+e)
+           throw new AssertionError ("Fail on task cleanDirs.", e)
         }
 
         try{
            runTasks(buildDir, 'libertyStart')
         } catch (Exception e) {
-           throw new AssertionError ("Fail on task libertyStart after cleanDirs. "+e)
+           throw new AssertionError ("Fail on task libertyStart after cleanDirs.", e)
         }
 
         try{
            runTasks(buildDir, 'clean')
         } catch (Exception e) {
-           throw new AssertionError ("Fail on task clean while Liberty server is running "+e)
+           throw new AssertionError ("Fail on task clean while Liberty server is running.", e)
         }
 
         try{
            runTasks(buildDir, 'clean')
         } catch (Exception e) {
-           throw new AssertionError ("Fail on task clean after clean. "+e)
+           throw new AssertionError ("Fail on task clean after clean.", e)
         }
 
         try{
            runTasks(buildDir, 'cleanDirs')
         } catch (Exception e) {
-           throw new AssertionError ("Fail on task cleanDirs after clean. "+e)
+           throw new AssertionError ("Fail on task cleanDirs after clean.", e)
         }
 
         try{
            runTasks(buildDir, 'libertyStart')
         } catch (Exception e) {
-           throw new AssertionError ("Fail on task libertyStart after second clean. "+e)
+           throw new AssertionError ("Fail on task libertyStart after second clean.", e)
         }
 
         try{
            runTasks(buildDir, 'libertyStop')
         } catch (Exception e) {
-           throw new AssertionError ("Fail on task libertyStop after libertyStart. "+e)
+           throw new AssertionError ("Fail on task libertyStop after libertyStart.", e)
         }
     }
 

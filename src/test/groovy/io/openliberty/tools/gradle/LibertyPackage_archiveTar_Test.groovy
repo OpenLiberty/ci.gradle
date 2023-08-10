@@ -36,7 +36,7 @@ class LibertyPackage_archiveTar_Test extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'installLiberty', 'libertyStart', 'libertyStop')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task installLiberty. "+ e)
+            throw new AssertionError ("Fail on task installLiberty.", e)
         }
     }
 
@@ -51,7 +51,7 @@ class LibertyPackage_archiveTar_Test extends AbstractIntegrationTest{
            assert file.canRead() : "file cannot be read"
 
         } catch (Exception e) {
-           throw new AssertionError ("Fail on task libertyPackage. "+e)
+           throw new AssertionError ("Fail on task libertyPackage.", e)
         }
     }
 }

@@ -886,10 +886,15 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
 
     private String setServerEnvHelper(File envFile, String serverEnvPath, Properties configuredProps) {
         if ((server.env != null && !server.env.isEmpty()) || !envProjectProps.isEmpty()) {
-            if (serverEnvPath != null) {
+            Properties envPropsToWrite = configuredProps
+            if (serverEnvPath == null && server.serverEnvFile == null) {
+                // Do a special case merge but ONLY if there is no server.env file present in configDirectory or specified with serverEnvFile
+                envPropsToWrite = mergeSpecialPropsFromInstallServerEnvIfAbsent(envFile, configuredProps)
+                logger.warn("The default " + envFile.getCanonicalPath() + " file is overwritten by inlined configuration.")
+            } else if (serverEnvPath != null) {
                 logger.warn("The " + serverEnvPath + " file is overwritten by inlined configuration.")
             }
-            writeServerEnvProperties(envFile, configuredProps)
+            writeServerEnvProperties(envFile, envPropsToWrite)
             return "inlined configuration"
         } else if (server.serverEnvFile != null && server.serverEnvFile.exists()) {
             if (serverEnvPath != null) {
@@ -899,6 +904,29 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
             return server.serverEnvFile.getCanonicalPath()
         }
     }
+
+    /**
+     * Merges envProps with special properties found in envFile, the install (target) server.env.  We return a clone/copy of
+     * envProps, to which any of a list of special properties found in envFile have been added.  We give precedence
+     * to properties already in envProps.
+     */
+    private Properties mergeSpecialPropsFromInstallServerEnvIfAbsent(File envFile, Properties envProps) throws IOException {
+
+        // Make a copy to avoid side effects 
+        Properties mergedProps = new Properties()
+        mergedProps.putAll(envProps)
+
+        // From install (target) dir
+        Properties serverEnvProps = convertServerEnvToProperties(envFile)
+
+        String propertyName = "keystore_password"
+        if (serverEnvProps.containsKey(propertyName)) {
+            mergedProps.putIfAbsent(propertyName,serverEnvProps.get(propertyName))
+        }
+
+        return mergedProps
+    }
+
 
     private Properties convertServerEnvToProperties(File serverEnv) {
         Properties serverEnvProps = new Properties();

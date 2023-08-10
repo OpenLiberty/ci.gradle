@@ -39,7 +39,7 @@ class LibertyApplicationConfigurationM2DefaultTest extends AbstractIntegrationTe
             //Then installing that war from m2 to the apps directory through the libertyApp configuration
             runTasks(buildDir, 'deploy')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task deploy. "+ e)
+            throw new AssertionError ("Fail on task deploy.", e)
         }
     }
 

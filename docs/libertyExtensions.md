@@ -52,3 +52,8 @@ The following properties are supported for server configuration.
 | timeout | String | 1.0 | Waiting time before the server starts. The default value is 30 seconds. The unit is seconds. Only used with `libertyStart` and `deploy` tasks. | No |
 | var | Properties | 3.0 | Inline server variables that are written to the `configDropins/overrides/liberty-plugin-variable-config.xml` file in the server directory. The property name is used for the variable `name`, and the property value is used for the variable `value`.| No|
 | verifyAppStartTimeout | int | 2.0 | Wait time for checking message logs for start of all applications installed with the `deploy` task. Only used with the `libertyStart` task. Default value is 0 seconds with no verification. | No |
+
+If Liberty configuration is specified with Gradle properties for the server extension properties of type `Properties`, the above indicated files are created in the target Liberty server. By default there is no merging behavior for the Gradle properties with files located in the `configDirectory` or the specific configuration file parameters such as `bootstrapPropertiesFile`, `jvmOptionsFile` and `serverEnvFile`. However, the `liberty.server.env."var"` Gradle properties can be merged with other configured `server.env` files by setting the `mergeServerEnv` parameter to `true`.   
+
+As a special case when `mergeServerEnv` is `false`,  an existing `keystore_password` property in the default generated `server.env` file in the target server will be merged in if there is no `serverEnvFile` configured nor `server.env` file located in the `configDirectory`, and the `keystore_password` env var is not defined as a Gradle property.
+

@@ -44,7 +44,7 @@ public class YourAwesomeTest extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'yourAwesomeTask')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task yourAwesomeTask. "+ e)
+            throw new AssertionError ("Fail on task yourAwesomeTask.", e)
         }
     }
 }

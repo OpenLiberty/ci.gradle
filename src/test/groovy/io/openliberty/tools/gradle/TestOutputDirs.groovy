@@ -25,7 +25,7 @@ public class TestOutputDirs extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'libertyStart')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task libertyStart. "+ e)
+            throw new AssertionError ("Fail on task libertyStart.", e)
         }
         assert new File('build/testBuilds/test-output-dirs/build/testOutputDir').exists() : 'Could not find the outputDir specified in the build file.'
         assert new File('build/testBuilds/test-output-dirs/build/testOutputDir/LibertyProjectServer').exists() : 'Could not find the outputDir specified in the build file.'

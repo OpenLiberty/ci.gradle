@@ -32,7 +32,7 @@ class InstallFeature_single extends AbstractIntegrationTest{
             assert file.exists() : "com.ibm.websphere.appserver.mongodb-2.0.mf is not installed"
             assert file.canRead() : "com.ibm.websphere.appserver.mongodb-2.0.mf cannot be read"
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task installFeature. "+e)
+            throw new AssertionError ("Fail on task installFeature.", e)
         }
     }
 
@@ -45,7 +45,7 @@ class InstallFeature_single extends AbstractIntegrationTest{
 
             assert !file.exists() : "com.ibm.websphere.appserver.mongodb-2.0.mf is not uninstalled"
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task uninstallFeature. "+e)
+            throw new AssertionError ("Fail on task uninstallFeature.", e)
         }
     }
 	

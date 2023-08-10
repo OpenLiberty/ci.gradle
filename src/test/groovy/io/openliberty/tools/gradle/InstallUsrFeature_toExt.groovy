@@ -7,7 +7,7 @@ import org.junit.AfterClass
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runners.MethodSorters
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import io.openliberty.tools.common.plugins.util.VersionUtility
 
 class InstallUsrFeature_toExt extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/prepare-feature-test")
@@ -29,9 +29,10 @@ class InstallUsrFeature_toExt extends AbstractIntegrationTest{
 	private static final String MIN_USER_FEATURE_VERSION = "21.0.0.11";
 	
 	public static boolean checkOpenLibertyVersion() {
-		DefaultArtifactVersion minVersion = new DefaultArtifactVersion(MIN_USER_FEATURE_VERSION);
-		DefaultArtifactVersion version = new DefaultArtifactVersion(System.getProperty("runtimeVersion"))
-		if (version.compareTo(minVersion) >= 0) {
+
+		String runtimeVersion = System.getProperty("runtimeVersion");
+
+		if (VersionUtility.compareArtifactVersion(runtimeVersion, MIN_USER_FEATURE_VERSION, true) >= 0) {
 			return true
 		}
 		return false
@@ -62,7 +63,7 @@ class InstallUsrFeature_toExt extends AbstractIntegrationTest{
 			
             
         } catch (Exception e) {
-            throw new AssertionError ("Fail to install user feature. "+e)
+            throw new AssertionError ("Fail to install user feature.", e)
         }
     }
 	

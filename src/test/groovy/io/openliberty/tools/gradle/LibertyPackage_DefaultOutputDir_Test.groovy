@@ -36,7 +36,7 @@ class LibertyPackage_DefaultOutputDir_Test extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'installLiberty', 'libertyStart')
         } catch (Exception e) {
-            throw new AssertionError ("Error during server start lifecycle. "+ e)
+            throw new AssertionError ("Error during server start lifecycle.", e)
         }
     }
 
@@ -45,7 +45,7 @@ class LibertyPackage_DefaultOutputDir_Test extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'libertyStop')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task libertyStop. "+ e)
+            throw new AssertionError ("Fail on task libertyStop.", e)
         }
     }
 
@@ -59,7 +59,7 @@ class LibertyPackage_DefaultOutputDir_Test extends AbstractIntegrationTest{
            assert new File(buildDir, 'build/liberty-alt-output-dir').exists()
            assert new File(buildDir, 'build/liberty-alt-output-dir/defaultServer').exists()
         } catch (Exception e) {
-           throw new AssertionError ("Fail on task libertyPackage. "+ e)
+           throw new AssertionError ("Fail on task libertyPackage.", e)
         }
     }
 }

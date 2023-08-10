@@ -41,7 +41,7 @@ public class TestLooseApplication extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'deploy')
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task deploy. " + e)
+            throw new AssertionError ("Fail on task deploy.", e)
         }
         assert new File('build/testBuilds/test-loose-application/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war.xml').exists() : 'looseApplication config file was not copied over to the liberty runtime'
     }

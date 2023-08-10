@@ -53,7 +53,7 @@ public class TestSpringBootApplication20 extends AbstractIntegrationTest{
             Assert.assertTrue('no app in apps folder',
                     new File(buildDir, "build/wlp/usr/servers/defaultServer/apps/thin-${testName.getMethodName()}-1.0-SNAPSHOT.jar").exists() )
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task deploy. " + e)
+            throw new AssertionError ("Fail on task deploy.", e)
         }
     }
 
@@ -69,7 +69,7 @@ public class TestSpringBootApplication20 extends AbstractIntegrationTest{
             Assert.assertTrue('no app in apps folder',
                     new File(buildDir, "build/wlp/usr/servers/defaultServer/apps/thin-${testName.getMethodName()}-1.0-SNAPSHOT-test.jar").exists() )
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task deploy. " + e)
+            throw new AssertionError ("Fail on task deploy.", e)
         }
     }
 
@@ -85,7 +85,7 @@ public class TestSpringBootApplication20 extends AbstractIntegrationTest{
             Assert.assertTrue('no app in apps folder',
                     new File(buildDir, "build/wlp/usr/servers/defaultServer/apps/thin-${testName.getMethodName()}-1.0-SNAPSHOT.war").exists() )
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task deploy. " + e)
+            throw new AssertionError ("Fail on task deploy.", e)
         }
     }
 
@@ -101,7 +101,7 @@ public class TestSpringBootApplication20 extends AbstractIntegrationTest{
             Assert.assertTrue('no app in apps folder',
                     new File(buildDir, "build/wlp/usr/servers/defaultServer/apps/thin-${testName.getMethodName()}-1.0-SNAPSHOT-test.war").exists() )
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task deploy. " + e)
+            throw new AssertionError ("Fail on task deploy.", e)
         }
     }
 
@@ -116,7 +116,7 @@ public class TestSpringBootApplication20 extends AbstractIntegrationTest{
             Assert.assertTrue('apps folder should be empty',
                     new File(buildDir, "build/wlp/usr/servers/defaultServer/apps").list().size() == 0 )
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task deploy. " + e)
+            throw new AssertionError ("Fail on task deploy.", e)
         }
     }
 }
