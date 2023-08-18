@@ -268,21 +268,21 @@ class DevTask extends AbstractFeatureTask {
     @Input
     Boolean generateFeatures;
 
-     // Need to use a string value to allow someone to specify --generateFeatures=false, if not explicitly set defaults to true
-     @Option(option = 'generateFeatures', description = 'If true, scan the application binary files to determine which Liberty features should be used. The default value is false.')
-     void setGenerateFeatures(String generateFeatures) {
-         this.generateFeatures = Boolean.parseBoolean(generateFeatures);
-     }
+    // Need to use a string value to allow someone to specify --generateFeatures=false, if not explicitly set defaults to true
+    @Option(option = 'generateFeatures', description = 'If true, scan the application binary files to determine which Liberty features should be used. The default value is false.')
+    void setGenerateFeatures(String generateFeatures) {
+        this.generateFeatures = Boolean.parseBoolean(generateFeatures);
+    }
 
     @Optional
     @Input
     Boolean skipInstallFeature;
 
-     // Need to use a string value to allow someone to specify --skipInstallFeature=true, if not explicitly set defaults to false
-     @Option(option = 'skipInstallFeature', description = 'If set to true, the installFeature task will be skipped when dev mode is started on an already existing Liberty runtime installation. It will also be skipped when dev mode is running and a restart of the server is triggered either directly by the user or by application changes. The installFeature task will be invoked though when dev mode is running and a change to the configured features is detected. The default value is false.')
-     void setSkipInstallFeature(String skipInstallFeature) {
-         this.skipInstallFeature = Boolean.parseBoolean(skipInstallFeature);
-     }
+    // Need to use a string value to allow someone to specify --skipInstallFeature=true, if not explicitly set defaults to false
+    @Option(option = 'skipInstallFeature', description = 'If set to true, the installFeature task will be skipped when dev mode is started on an already existing Liberty runtime installation. It will also be skipped when dev mode is running and a restart of the server is triggered either directly by the user or by application changes. The installFeature task will be invoked though when dev mode is running and a change to the configured features is detected. The default value is false.')
+    void setSkipInstallFeature(String skipInstallFeature) {
+        this.skipInstallFeature = Boolean.parseBoolean(skipInstallFeature);
+    }
 
     @Optional
     @Input
@@ -854,7 +854,7 @@ class DevTask extends AbstractFeatureTask {
                     gradleBuildLauncher.addArguments(CONTAINER_PROPERTY_ARG);
                 }
                 if (skipInstallFeature) {
-                    gradleBuildLauncher.addArguments("--exclude-task", "libertyCreate");
+                    gradleBuildLauncher.addArguments("--exclude-task", "libertyCreate"); // TODO: revisit
                     gradleBuildLauncher.addArguments("--exclude-task", "installFeature");
                 }
                 runGradleTask(gradleBuildLauncher, 'deploy');
@@ -897,9 +897,6 @@ class DevTask extends AbstractFeatureTask {
 
         @Override
         public void libertyInstallFeature() {
-            if (skipInstallFeature) {
-                return
-            }
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
             try {
@@ -1200,10 +1197,10 @@ class DevTask extends AbstractFeatureTask {
                 }
                 
                 if (!isNewInstallation) {
-                    logger.info("Skipping installLiberty task.")
+                    logger.info("Skipping installLiberty task for existing installation.")
                     gradleBuildLauncher.addArguments("--exclude-task", "installLiberty"); // skip installing Liberty at startup since it was already installed
                     if (skipInstallFeature) {
-                        logger.info("Skipping installFeature task.")
+                        logger.info("Skipping installFeature task due to skipInstallFeature configuration.")
                         gradleBuildLauncher.addArguments("--exclude-task", "installFeature"); // skip installing features at startup since flag was set
                     }
                 }
