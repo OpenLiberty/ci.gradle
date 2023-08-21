@@ -854,7 +854,7 @@ class DevTask extends AbstractFeatureTask {
                     gradleBuildLauncher.addArguments(CONTAINER_PROPERTY_ARG);
                 }
                 if (skipInstallFeature) {
-                    gradleBuildLauncher.addArguments("--exclude-task", "libertyCreate"); // TODO: revisit
+                    gradleBuildLauncher.addArguments("--exclude-task", "libertyCreate"); // deploy dependsOn libertyCreate which is finalizedBy installFeature
                     gradleBuildLauncher.addArguments("--exclude-task", "installFeature");
                 }
                 runGradleTask(gradleBuildLauncher, 'deploy');
@@ -912,18 +912,22 @@ class DevTask extends AbstractFeatureTask {
             }
         }
 
+        /**
+        * This method is only called from DevUtil.restartServer() which explicitly calls libertyCreate() before calling this method. We need to explicitly
+        * exclude the libertyCreate task.
+        **/
         @Override
         public void libertyDeploy() {
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
             try {
+                gradleBuildLauncher.addArguments("--exclude-task", "libertyCreate"); // deploy dependsOn libertyCreate which is finalizedBy installFeature
                 if (container) {
                     gradleBuildLauncher.addArguments(CONTAINER_PROPERTY_ARG)
                     // Skip installFeature since it is not needed here in container mode.
                     // Container mode should call installFeature separately with the containerName parameter where needed.
                     gradleBuildLauncher.addArguments("--exclude-task", "installFeature");
                 } else if (skipInstallFeature) {
-                    gradleBuildLauncher.addArguments("--exclude-task", "libertyCreate");
                     gradleBuildLauncher.addArguments("--exclude-task", "installFeature");
                 }
                 runGradleTask(gradleBuildLauncher, 'deploy');
@@ -934,6 +938,10 @@ class DevTask extends AbstractFeatureTask {
             }
         }
 
+        /*
+        * This method is only called from common DevUtil.restartServer() method. The installLiberty task should not need to be called, and must be
+        * explicitly excluded since libertyCreate dependsOn installLiberty.
+        */      
         @Override
         public void libertyCreate() {
             if (container) {
@@ -1198,6 +1206,7 @@ class DevTask extends AbstractFeatureTask {
                 
                 if (!isNewInstallation) {
                     logger.info("Skipping installLiberty task for existing installation.")
+                    // will this cause an issue when changing the runtime? Customer would be forced to cleanup first?
                     gradleBuildLauncher.addArguments("--exclude-task", "installLiberty"); // skip installing Liberty at startup since it was already installed
                     if (skipInstallFeature) {
                         logger.info("Skipping installFeature task due to skipInstallFeature configuration.")
