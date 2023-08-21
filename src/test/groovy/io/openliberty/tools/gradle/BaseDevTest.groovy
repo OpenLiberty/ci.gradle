@@ -212,7 +212,7 @@ class BaseDevTest extends AbstractIntegrationTest {
     // a file has been changed between two instants of time. The problem is that the 
     // method has a resolution of just 2000ms on Windows FAT and 1000ms on MacOS HFS+.
     protected static void waitLongEnough() throws InterruptedException {
-       Thread.sleep(2001);
+       Thread.sleep(3001); // make sure we wait long enough
     }
 
     private static boolean readFile(String str, File file) throws FileNotFoundException {
