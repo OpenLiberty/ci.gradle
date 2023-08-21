@@ -26,11 +26,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 class BaseDevTest extends AbstractIntegrationTest {
-    static final String projectName = "basic-dev-project";
-
-    static File resourceDir = new File("build/resources/test/dev-test/" + projectName);
-    static File buildDir = new File(integTestDir, "dev-test/" + projectName + System.currentTimeMillis()); // append timestamp in case previous build was not deleted
+    static File buildDir;
     static String buildFilename = "build.gradle";
+    final String RUNNING_INSTALL_FEATURE = "Task :installFeature";
     final String RUNNING_GENERATE_FEATURES = "Task :generateFeatures";
     final String REGENERATE_FEATURES = "Regenerated the following features:";
     final String GENERATE_FEATURES = "Generated the following features:";
@@ -56,13 +54,22 @@ class BaseDevTest extends AbstractIntegrationTest {
     // the correct file. Use logFile for "compilation was successful"
     // and errFile for "compilation had errors" or Liberty messages like 
     // "CWWKF0011I" or "The server installed the following features".
-    static File logFile = new File(buildDir, "output.log");
-    static File errFile = new File(buildDir, "stderr.log");
+    static File logFile;
+    static File errFile;
+    
     static Process process;
 
-    protected static void runDevMode() throws IOException, InterruptedException, FileNotFoundException {
-        System.out.println("Starting dev mode...");
-        startProcess("--generateFeatures=true", true);
+    protected static void runDevMode(File buildDirectory) throws IOException, InterruptedException, FileNotFoundException {
+        runDevMode("--generateFeatures=true", buildDirectory)
+    }
+
+    protected static void runDevMode(String params, File buildDirectory) throws IOException, InterruptedException, FileNotFoundException {
+        buildDir = buildDirectory;
+        logFile = new File(buildDir, "output.log");
+        errFile = new File(buildDir, "stderr.log");
+        
+        System.out.println("Starting dev mode with params..."+params);
+        startProcess(params, true);
         System.out.println("Started dev mode");
     }
 
@@ -145,13 +152,18 @@ class BaseDevTest extends AbstractIntegrationTest {
             throws InterruptedException, FileNotFoundException {
         int waited = 0;
         int sleep = 10;
+        int foundOccurrences = 0;
         while (waited <= timeout) {
             Thread.sleep(sleep);
             waited += sleep;
-            if (countOccurrences(message, file) == occurrences) {
+            foundOccurrences = countOccurrences(message, file)
+            if (foundOccurrences == occurrences) {
                 return true;
             }
         }
+
+        System.out.println("Log message found "+foundOccurrences+" times, expected to find it "+occurrences+" times.");
+
         return false;
     }
 
@@ -200,7 +212,7 @@ class BaseDevTest extends AbstractIntegrationTest {
     // a file has been changed between two instants of time. The problem is that the 
     // method has a resolution of just 2000ms on Windows FAT and 1000ms on MacOS HFS+.
     protected static void waitLongEnough() throws InterruptedException {
-       Thread.sleep(2001);
+       Thread.sleep(3001); // make sure we wait long enough
     }
 
     private static boolean readFile(String str, File file) throws FileNotFoundException {
@@ -269,14 +281,7 @@ class BaseDevTest extends AbstractIntegrationTest {
     protected static void cleanUpAfterClass(boolean isDevMode) throws Exception {
         stopProcess(isDevMode);
         if (buildDir != null && buildDir.exists()) {
-            // FileUtils.deleteDirectory(buildDir);
             FileUtils.deleteQuietly(buildDir); // try this method that does not throw an exception
-        }
-        if (logFile != null && logFile.exists()) {
-            assertTrue(logFile.delete());
-        }
-        if (errFile != null && errFile.exists()) {
-            assertTrue(errFile.delete());
         }
     }
 
@@ -289,8 +294,11 @@ class BaseDevTest extends AbstractIntegrationTest {
             } else {
                 process.destroy(); // stop run
             }
-            writer.flush();
-            writer.close();
+            try {
+                writer.close(); // close automatically does a flush
+            } catch (IOException e) {
+                System.out.println("Received IOException on writer.close()" + e.getMessage());
+            }
 
             // test that dev mode has stopped running
             assertTrue(verifyLogMessage(100000, "CWWKE0036I", errFile, ++serverStoppedOccurrences));

@@ -35,13 +35,7 @@ class PollingDevTest extends DevTest {
     public static void setup() throws IOException, InterruptedException, FileNotFoundException {
         createDir(buildDir);
         createTestProject(buildDir, resourceDir, buildFilename);
-        runDevModePolling();
+        runDevMode("--pollingTest --generateFeatures=true", buildDir)
     }
-    
-    private static void runDevModePolling() throws IOException, InterruptedException, FileNotFoundException {
-        System.out.println("Starting dev mode with polling...");
-        startProcess("--pollingTest --generateFeatures=true", true);
-        System.out.println("Started dev mode with polling");
-    }
-    
+        
 }

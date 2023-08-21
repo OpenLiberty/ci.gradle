@@ -87,6 +87,7 @@ class DevTask extends AbstractFeatureTask {
     private static final boolean DEFAULT_SKIP_DEFAULT_PORTS = false;
     private static final boolean DEFAULT_KEEP_TEMP_DOCKERFILE = false;
     private static final boolean DEFAULT_GENERATE_FEATURES = false;
+    private static final boolean DEFAULT_SKIP_INSTALL_FEATURE = false;
 
     // Debug port for BuildLauncher tasks launched from DevTask as parent JVM
     // (parent defaults to '5005')
@@ -267,11 +268,21 @@ class DevTask extends AbstractFeatureTask {
     @Input
     Boolean generateFeatures;
 
-     // Need to use a string value to allow someone to specify --generateFeatures=false, if not explicitly set defaults to true
-     @Option(option = 'generateFeatures', description = 'If true, scan the application binary files to determine which Liberty features should be used. The default value is false.')
-     void setGenerateFeatures(String generateFeatures) {
-         this.generateFeatures = Boolean.parseBoolean(generateFeatures);
-     }
+    // Need to use a string value to allow someone to specify --generateFeatures=false, if not explicitly set defaults to true
+    @Option(option = 'generateFeatures', description = 'If true, scan the application binary files to determine which Liberty features should be used. The default value is false.')
+    void setGenerateFeatures(String generateFeatures) {
+        this.generateFeatures = Boolean.parseBoolean(generateFeatures);
+    }
+
+    @Optional
+    @Input
+    Boolean skipInstallFeature;
+
+    // Need to use a string value to allow someone to specify --skipInstallFeature=true, if not explicitly set defaults to false
+    @Option(option = 'skipInstallFeature', description = 'If set to true, the installFeature task will be skipped when dev mode is started on an already existing Liberty runtime installation. It will also be skipped when dev mode is running and a restart of the server is triggered either directly by the user or by application changes. The installFeature task will be invoked though when dev mode is running and a change to the configured features is detected. The default value is false.')
+    void setSkipInstallFeature(String skipInstallFeature) {
+        this.skipInstallFeature = Boolean.parseBoolean(skipInstallFeature);
+    }
 
     @Optional
     @Input
@@ -302,14 +313,14 @@ class DevTask extends AbstractFeatureTask {
 
         DevTaskUtil(File buildDir, File installDirectory, File userDirectory, File serverDirectory, File sourceDirectory, File testSourceDirectory,
                     File configDirectory, File projectDirectory, List<File> resourceDirs,
-                    boolean  hotTests, boolean  skipTests, String artifactId, int serverStartTimeout,
+                    boolean  hotTests, boolean  skipTests, boolean skipInstallFeature, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
                     boolean libertyDebug, boolean pollingTest, boolean container, File dockerfile, File dockerBuildContext,
                     String dockerRunOpts, int dockerBuildTimeout, boolean skipDefaultPorts, boolean keepTempDockerfile, 
                     String mavenCacheLocation, String packagingType, File buildFile, boolean generateFeatures
         ) throws IOException {
             super(buildDir, serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory, /* multi module project directory */ projectDirectory,
-                    resourceDirs, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, artifactId,  serverStartTimeout,
+                    resourceDirs, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, skipInstallFeature, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, dockerfile, dockerBuildContext, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts,
                     null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation, null /* multi module upstream projects */,
@@ -842,6 +853,10 @@ class DevTask extends AbstractFeatureTask {
                 if (container) {
                     gradleBuildLauncher.addArguments(CONTAINER_PROPERTY_ARG);
                 }
+                if (skipInstallFeature) {
+                    gradleBuildLauncher.addArguments("--exclude-task", "libertyCreate"); // deploy dependsOn libertyCreate which is finalizedBy installFeature
+                    gradleBuildLauncher.addArguments("--exclude-task", "installFeature");
+                }
                 runGradleTask(gradleBuildLauncher, 'deploy');
             } catch (BuildException e) {
                 throw new PluginExecutionException(e);
@@ -897,6 +912,10 @@ class DevTask extends AbstractFeatureTask {
             }
         }
 
+        /**
+        * This method is only called from DevUtil.restartServer() which explicitly calls libertyCreate() before calling this method. We need to explicitly
+        * exclude the libertyCreate task.
+        **/
         @Override
         public void libertyDeploy() {
             ProjectConnection gradleConnection = initGradleProjectConnection();
@@ -907,6 +926,9 @@ class DevTask extends AbstractFeatureTask {
                     // Skip installFeature since it is not needed here in container mode.
                     // Container mode should call installFeature separately with the containerName parameter where needed.
                     gradleBuildLauncher.addArguments("--exclude-task", "installFeature");
+                } else if (skipInstallFeature) {
+                    gradleBuildLauncher.addArguments("--exclude-task", "libertyCreate"); // deploy dependsOn libertyCreate which is finalizedBy installFeature
+                    gradleBuildLauncher.addArguments("--exclude-task", "installFeature");
                 }
                 runGradleTask(gradleBuildLauncher, 'deploy');
             } catch (BuildException e) {
@@ -916,6 +938,10 @@ class DevTask extends AbstractFeatureTask {
             }
         }
 
+        /*
+        * This method is only called from common DevUtil.restartServer() method. The installLiberty task should not need to be called, and must be
+        * explicitly excluded since libertyCreate dependsOn installLiberty.
+        */      
         @Override
         public void libertyCreate() {
             if (container) {
@@ -928,6 +954,10 @@ class DevTask extends AbstractFeatureTask {
 
                 gradleBuildLauncher.addArguments('--rerun-tasks');
                 addLibertyRuntimeProperties(gradleBuildLauncher);
+                gradleBuildLauncher.addArguments("--exclude-task", "installLiberty");
+                if (skipInstallFeature) {
+                    gradleBuildLauncher.addArguments("--exclude-task", "installFeature");
+                }
                 try {
                     runGradleTask(gradleBuildLauncher, 'libertyCreate');
                 } catch (BuildException e) {
@@ -1042,6 +1072,10 @@ class DevTask extends AbstractFeatureTask {
             generateFeatures = DEFAULT_GENERATE_FEATURES;
         }
 
+        if (skipInstallFeature == null) {
+            skipInstallFeature = DEFAULT_SKIP_INSTALL_FEATURE;
+        }
+
         processContainerParams();
     }
 
@@ -1097,7 +1131,7 @@ class DevTask extends AbstractFeatureTask {
         // Instantiate util before any child gradle tasks launched so it can help find available port if needed
         this.util = new DevTaskUtil(project.buildDir, serverInstallDir, getUserDir(project, serverInstallDir),
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
-                resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
+                resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), skipInstallFeature.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(),
                 libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerBuildContext, dockerRunOpts,
                 dockerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempDockerfile.booleanValue(), localMavenRepoForFeatureUtility,
@@ -1150,11 +1184,43 @@ class DevTask extends AbstractFeatureTask {
                 }
             }
             if (!container) {
+                boolean isNewInstallation = true;
+                // Check to see if Liberty was already installed and set flag accordingly.
+                if (serverInstallDir != null) {
+                    try {
+                        File installDirectoryCanonicalFile = serverInstallDir.getCanonicalFile();
+                        // Quick check to see if a Liberty installation exists at the installDirectory
+                        File file = new File(installDirectoryCanonicalFile, "lib/ws-launch.jar");
+                        if (file.exists()) {
+                            isNewInstallation = false;
+                            logger.info("Dev mode is using an existing installation.");
+                        }
+                    } catch (IOException e) {
+                    }
+                }
+
+                // if skipInstallFeature is set to true, skip installFeature task unless it is a new installation
+                if (skipInstallFeature) {
+                    logger.debug("skipInstallFeature flag is set to true");
+                }
+                
+                if (!isNewInstallation) {
+                    logger.info("Skipping installLiberty task for existing installation.")
+                    // will this cause an issue when changing the runtime? Customer would be forced to cleanup first?
+                    gradleBuildLauncher.addArguments("--exclude-task", "installLiberty"); // skip installing Liberty at startup since it was already installed
+                    if (skipInstallFeature) {
+                        logger.info("Skipping installFeature task due to skipInstallFeature configuration.")
+                        gradleBuildLauncher.addArguments("--exclude-task", "installFeature"); // skip installing features at startup since flag was set
+                    }
+                }
                 addLibertyRuntimeProperties(gradleBuildLauncher);
                 runGradleTask(gradleBuildLauncher, 'libertyCreate');
-                // suppress extra install feature warnings (one would have shown up already from the libertyCreate task on the line above)
-                gradleBuildLauncher.addArguments("-D" + DevUtil.SKIP_BETA_INSTALL_WARNING + "=" + Boolean.TRUE.toString());
-                runInstallFeatureTask(gradleBuildLauncher, null);
+
+                if (!skipInstallFeature || isNewInstallation) {
+                    // suppress extra install feature warnings (one would have shown up already from the libertyCreate task on the line above)
+                    gradleBuildLauncher.addArguments("-D" + DevUtil.SKIP_BETA_INSTALL_WARNING + "=" + Boolean.TRUE.toString());
+                    runInstallFeatureTask(gradleBuildLauncher, null);
+                }
             } else {
                 // skip creating the server and installing features and just propagate the option to 'deploy'
                 createServerDirectories();
