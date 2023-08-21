@@ -921,13 +921,13 @@ class DevTask extends AbstractFeatureTask {
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
             try {
-                gradleBuildLauncher.addArguments("--exclude-task", "libertyCreate"); // deploy dependsOn libertyCreate which is finalizedBy installFeature
                 if (container) {
                     gradleBuildLauncher.addArguments(CONTAINER_PROPERTY_ARG)
                     // Skip installFeature since it is not needed here in container mode.
                     // Container mode should call installFeature separately with the containerName parameter where needed.
                     gradleBuildLauncher.addArguments("--exclude-task", "installFeature");
                 } else if (skipInstallFeature) {
+                    gradleBuildLauncher.addArguments("--exclude-task", "libertyCreate"); // deploy dependsOn libertyCreate which is finalizedBy installFeature
                     gradleBuildLauncher.addArguments("--exclude-task", "installFeature");
                 }
                 runGradleTask(gradleBuildLauncher, 'deploy');
