@@ -279,13 +279,20 @@ class BaseDevTest extends AbstractIntegrationTest {
     }
 
     protected static void cleanUpAfterClass(boolean isDevMode) throws Exception {
-        stopProcess(isDevMode);
+        stopProcess(isDevMode, errFile);
         if (buildDir != null && buildDir.exists()) {
             FileUtils.deleteQuietly(buildDir); // try this method that does not throw an exception
         }
     }
 
-    private static void stopProcess(boolean isDevMode) throws IOException, InterruptedException, FileNotFoundException {
+    protected static void cleanUpAfterClassCheckLogFile(boolean isDevMode) throws Exception {
+        stopProcess(isDevMode, logFile);
+        if (buildDir != null && buildDir.exists()) {
+            FileUtils.deleteQuietly(buildDir); // try this method that does not throw an exception
+        }
+    }
+
+    private static void stopProcess(boolean isDevMode, File testLogFile) throws IOException, InterruptedException, FileNotFoundException {
         // shut down dev mode
         if (writer != null) {
             int serverStoppedOccurrences = countOccurrences("CWWKE0036I", logFile);
@@ -301,7 +308,7 @@ class BaseDevTest extends AbstractIntegrationTest {
             }
 
             // test that dev mode has stopped running
-            assertTrue(verifyLogMessage(100000, "CWWKE0036I", errFile, ++serverStoppedOccurrences));
+            assertTrue(verifyLogMessage(100000, "CWWKE0036I", testLogFile, ++serverStoppedOccurrences));
             Thread.sleep(5000); // wait 5s to ensure java process has stopped
         }
     }

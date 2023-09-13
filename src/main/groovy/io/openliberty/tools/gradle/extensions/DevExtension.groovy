@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2020.
+ * (C) Copyright IBM Corporation 2020, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,17 @@ package io.openliberty.tools.gradle.extensions
 
 class DevExtension {
     boolean container = false
+    File containerfile
+    File containerBuildContext
+    String containerRunOpts
+    int containerBuildTimeout
+    boolean skipDefaultPorts = false
+    boolean keepTempContainerfile = false
+
+    //Docker aliases to maintain backwards compatability
     File dockerfile
     File dockerBuildContext
     String dockerRunOpts
     int dockerBuildTimeout
-    boolean skipDefaultPorts = false
     boolean keepTempDockerfile = false
 }
