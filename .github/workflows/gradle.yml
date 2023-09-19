@@ -27,21 +27,6 @@ jobs:
           RUNTIME_VERSION: 23.0.0.3
     name: ${{ matrix.RUNTIME }} ${{ matrix.RUNTIME_VERSION }}, Java ${{ matrix.java }}, Linux
     steps:
-    - name: Install Podman
-      uses: gacts/install-podman@v1
-      with:
-        qemu: true
-    - name: Setup qemu
-      run: |
-        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-        sudo udevadm control --reload-rules
-        sudo udevadm trigger --name-match=kvm
-          sudo apt install qemu-system-x86
-    - name: Setup Podman
-      run: |
-        podman version
-        podman machine init --rootful=true
-        podman machine start
     # Checkout repos
     - name: Checkout ci.gradle
       uses: actions/checkout@v3
@@ -85,7 +70,7 @@ jobs:
     # Run tests
     - name: Run tests with Gradle on Ubuntu
       run:
-        ./gradlew clean install check -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info
+        ./gradlew clean install check -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" -P"test.exclude"="**/DevContainerTest*" --stacktrace --info
     # Copy build reports and upload artifact if build failed
     - name: Copy build/report/tests/test for upload
       if: ${{ failure() }}
