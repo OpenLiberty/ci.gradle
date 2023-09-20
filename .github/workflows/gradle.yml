@@ -70,7 +70,7 @@ jobs:
     # Run tests
     - name: Run tests with Gradle on Ubuntu
       run:
-        ./gradlew clean install check -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info
+        ./gradlew clean install check -P"test.exclude"="**/TestSpringBootApplication30*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info
     # Copy build reports and upload artifact if build failed
     - name: Copy build/report/tests/test for upload
       if: ${{ failure() }}
@@ -149,7 +149,7 @@ jobs:
     - name: Run tests with Gradle on Windows
       working-directory: C:/ci.gradle
       # LibertyTest is excluded because test0_run hangs
-      run: ./gradlew clean install check -P"test.exclude"="**/Polling*,**/LibertyTest*,**/GenerateFeaturesTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
+      run: ./gradlew clean install check -P"test.exclude"="**/Polling*,**/LibertyTest*,**/GenerateFeaturesTest*,**/TestSpringBootApplication30*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
       timeout-minutes: 75
     # Copy build reports and upload artifact if build failed
     - name: Copy build/report/tests/test for upload

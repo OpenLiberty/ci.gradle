@@ -138,10 +138,9 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
     }
 
     protected determineSpringBootBuildTask() {
-        if (springBootVersion ?. startsWith('2')    ) {
+        if (isSpringBoot2plus(springBootVersion)) {
             return project.bootJar
-        }
-        else if ( springBootVersion ?. startsWith('1') ) {
+        } else if (isSpringBoot1(springBootVersion)) {
             return project.bootRepackage
         }
     }
@@ -564,7 +563,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
     }
     
     protected String getArchiveName(Task task){
-        if (springBootVersion?.startsWith('1')) {
+        if (isSpringBoot1(springBootVersion)) {
             task = project.jar
         }
         if (server.stripVersion){
@@ -648,7 +647,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         appList.each { Object appObj ->
             Node application = new Node(null, 'application')
             if (appObj instanceof Task) {
-                if (springBootVersion?.startsWith('1')) {
+                if (isSpringBoot1(springBootVersion)) {
                     appObj = project.jar
                 }
                 application.appendNode('appsDirectory', appDir)

@@ -165,10 +165,10 @@ class DeployTask extends AbstractServerTask {
     private String getArchiveOutputPath() {
         String archiveOutputPath;
 
-        if (springBootVersion.startsWith('2.')) {
+        if (isSpringBoot2plus(springBootVersion)) {
             archiveOutputPath = springBootTask.archivePath.getAbsolutePath()
         }
-        else if(springBootVersion.startsWith('1.')) {
+        else if(isSpringBoot1(springBootVersion)) {
             archiveOutputPath = springBootTask.archivePath.getAbsolutePath()
             if (project.bootRepackage.classifier != null && !project.bootRepackage.classifier.isEmpty()) {
                 archiveOutputPath = archiveOutputPath.substring(0, archiveOutputPath.lastIndexOf(".")) + "-" + project.bootRepackage.classifier + "." + springBootTask.getArchiveExtension().get()
@@ -223,14 +223,18 @@ class DeployTask extends AbstractServerTask {
             String fileSuffix = isWindows ? ".bat" : ""
             File installUtil = new File(getInstallDir(project), "bin/installUtility"+fileSuffix)
 
-            def installCommand = installUtil.toString() + " install springBoot-1.5 springBoot-2.0 --acceptLicense"
-            def sbuff = new StringBuffer()
-            def proc = installCommand.execute()
-            proc.consumeProcessOutput(sbuff, sbuff)
-            proc.waitFor()
-            logger.info(sbuff.toString())
-            if (proc.exitValue()!=0) {
-                throw new GradleException("Error installing required spring boot support features.")
+            // only install springBoot feature that matches required version
+            String sbFeature = getLibertySpringBootFeature(springBootVersion) 
+            if (sbFeature != null) {
+                def installCommand = installUtil.toString() + " install " + sbFeature + " --acceptLicense"
+                def sbuff = new StringBuffer()
+                def proc = installCommand.execute()
+                proc.consumeProcessOutput(sbuff, sbuff)
+                proc.waitFor()
+                logger.info(sbuff.toString())
+                if (proc.exitValue()!=0) {
+                    throw new GradleException("Error installing required spring boot support feature: "+sbFeature)
+                }
             }
         }
     }
