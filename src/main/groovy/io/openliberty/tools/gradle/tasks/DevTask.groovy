@@ -259,7 +259,7 @@ class DevTask extends AbstractFeatureTask {
     private String dockerRunOpts;
     @Option(option = 'dockerRunOpts', description = 'Alias for containerRunOpts')
     void setDockerRunOpts(String dockerRunOpts) {
-        if (containerRunOpts == null) {
+        if (dockerRunOpts != null && containerRunOpts == null) {
             setContainerRunOpts(dockerRunOpts)
         }
     }
@@ -279,7 +279,9 @@ class DevTask extends AbstractFeatureTask {
     private int dockerBuildTimeout;
     @Option(option = 'dockerBuildTimeout', description = 'Alias for containerBuildTimeout')
     void setDockerBuildTimeout(String inputValue) {
-        setContainerBuildTimeout(inputValue)
+        if (inputValue != null && containerBuildTimeout == null) {
+            setContainerBuildTimeout(inputValue)
+        }
     }
 
     private Boolean skipDefaultPorts;
@@ -299,7 +301,9 @@ class DevTask extends AbstractFeatureTask {
     private Boolean keepTempDockerfile;
     @Option(option = 'keepTempDockerfile', description = 'Alias for keepTempContainerfile')
     void setKeepTempDockerfile(boolean keepTempDockerfile) {
-        setKeepTempContainerfile(keepTempDockerfile)
+        if (keepTempDockerfile != null && keepTempContainerfile == null) {
+            setKeepTempContainerfile(keepTempDockerfile)
+        }
     }
 
     @Optional
@@ -1340,28 +1344,28 @@ class DevTask extends AbstractFeatureTask {
             }
         }
 
-        if (containerfile == null) {
+        if (containerfile == null && dockerfile == null) {
             File buildcontainerfileSetting = project.liberty.dev.containerfile; // get from build.gradle
             if (buildcontainerfileSetting != null) {
                 setContainerfile(buildcontainerfileSetting.getAbsolutePath()); // setContainerfile will convert it to canonical path
             }
         }
 
-        if (containerBuildContext == null) {
+        if (containerBuildContext == null && dockerBuildContext == null) {
             File buildContainerBuildContextSetting = project.liberty.dev.containerBuildContext; // get from build.gradle
             if (buildContainerBuildContextSetting != null) {
                 setContainerBuildContext(buildContainerBuildContextSetting.getAbsolutePath()); // setContainerBuildContext will convert it to canonical path
             }
         }
 
-        if (containerRunOpts == null) {
+        if (containerRunOpts == null && dockerRunOpts == null) {
             String buildContainerRunOptsSetting = project.liberty.dev.containerRunOpts; // get from build.gradle
             if (buildContainerRunOptsSetting != null) {
                 setContainerRunOpts(buildContainerRunOptsSetting);
             }
         }
 
-        if (containerBuildTimeout == 0) {
+        if (containerBuildTimeout == 0 && dockerBuildTimeout == 0) {
             String buildContainerBuildTimeoutSetting = project.liberty.dev.containerBuildTimeout; // get from build.gradle
             if (buildContainerBuildTimeoutSetting != null) {
                 setContainerBuildTimeout(buildContainerBuildTimeoutSetting);
@@ -1377,7 +1381,7 @@ class DevTask extends AbstractFeatureTask {
             }
         }
 
-        if (keepTempContainerfile == null) {
+        if (keepTempContainerfile == null && keepTempDockerfile == null) {
             boolean buildKeepTempContainerfileSetting = project.liberty.dev.keepTempContainerfile; // get from build.gradle
             if (buildKeepTempContainerfileSetting == null) {
                 setKeepTempContainerfile(DEFAULT_KEEP_TEMP_CONTAINERFILE);
