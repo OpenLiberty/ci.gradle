@@ -85,7 +85,7 @@ class DevTask extends AbstractFeatureTask {
     private static final boolean DEFAULT_POLLING_TEST = false;
     private static final boolean DEFAULT_CONTAINER = false;
     private static final boolean DEFAULT_SKIP_DEFAULT_PORTS = false;
-    private static final boolean DEFAULT_KEEP_TEMP_DOCKERFILE = false;
+    private static final boolean DEFAULT_KEEP_TEMP_CONTAINERFILE = false;
     private static final boolean DEFAULT_GENERATE_FEATURES = false;
     private static final boolean DEFAULT_SKIP_INSTALL_FEATURE = false;
 
@@ -184,7 +184,7 @@ class DevTask extends AbstractFeatureTask {
     @Input
     private Boolean container = null;
 
-    @Option(option = 'container', description = 'Run the server in a Docker container instead of locally. The default value is false for the libertyDev task, and true for the libertyDevc task.')
+    @Option(option = 'container', description = 'Run the server in a container instead of locally. The default value is false for the libertyDev task, and true for the libertyDevc task.')
     void setContainer(boolean container) {
         this.container = container;
         project.liberty.dev.container = container; // Needed in DeployTask and AbstractServerTask
@@ -194,23 +194,41 @@ class DevTask extends AbstractFeatureTask {
         return container;
     }
 
+    private File containerfile;
+
+    @Option(option = 'containerfile', description = 'Dev mode will build a container image from the provided Containerfile/Dockerfile and start a container from the new image.')
+    void setContainerfile(String containerfile) {
+        if (containerfile != null) {
+            // ensures the containerfile is defined with the full path - matches how maven behaves
+            this.containerfile = convertParameterToCanonicalFile(containerfile, "containerfile");      
+        }
+    }
+
     private File dockerfile;
 
-    @Option(option = 'dockerfile', description = 'Dev mode will build a docker image from the provided Dockerfile and start a container from the new image.')
+    @Option(option = 'dockerfile', description = 'Alias for containerfile')
     void setDockerfile(String dockerfile) {
-        if (dockerfile != null) {
-            // ensures the dockerfile is defined with the full path - matches how maven behaves
-            this.dockerfile = convertParameterToCanonicalFile(dockerfile, "dockerfile");      
+        if (dockerfile != null && containerfile == null) {
+            setContainerFile(dockerfile)
+        }
+    }
+
+    private File containerBuildContext;
+
+    @Option(option = 'containerBuildContext', description = 'The container build context used when building the container in dev mode. Defaults to the directory of the Containerfile/Dockerfile if not specified.')
+    void setContainerBuildContext(String containerBuildContext) {
+        if (containerBuildContext != null) {
+            // ensures the containerBuildContext is defined with the full path - matches how maven behaves
+            this.containerBuildContext = convertParameterToCanonicalFile(containerBuildContext, "containerBuildContext");      
         }
     }
 
     private File dockerBuildContext;
 
-    @Option(option = 'dockerBuildContext', description = 'The Docker build context used when building the container in dev mode. Defaults to the directory of the Dockerfile if not specified.')
+    @Option(option = 'dockerBuildContext', description = 'Alias for containerBuildContext') 
     void setDockerBuildContext(String dockerBuildContext) {
-        if (dockerBuildContext != null) {
-            // ensures the dockerBuildContext is defined with the full path - matches how maven behaves
-            this.dockerBuildContext = convertParameterToCanonicalFile(dockerBuildContext, "dockerBuildContext");      
+        if (dockerBuildContext != null && containerBuildContext == null) {
+            setContainerBuildContext(dockerBuildContext)
         }
     }
 
@@ -231,37 +249,61 @@ class DevTask extends AbstractFeatureTask {
         return result;
     }
 
-    private String dockerRunOpts;
+    private String containerRunOpts;
 
-    @Option(option = 'dockerRunOpts', description = 'Additional options for the docker run command when dev mode starts a container.')
+    @Option(option = 'containerRunOpts', description = 'Additional options for the container run command when dev mode starts a container.')
+    void setContainerRunOpts(String containerRunOpts) {
+        this.containerRunOpts = containerRunOpts;
+    }
+
+    private String dockerRunOpts;
+    @Option(option = 'dockerRunOpts', description = 'Alias for containerRunOpts')
     void setDockerRunOpts(String dockerRunOpts) {
-        this.dockerRunOpts = dockerRunOpts;
+        if (dockerRunOpts != null && containerRunOpts == null) {
+            setContainerRunOpts(dockerRunOpts)
+        }
+    }
+
+    private int containerBuildTimeout;
+
+    @Option(option = 'containerBuildTimeout', description = 'Specifies the amount of time to wait (in seconds) for the completion of the container operation to build the image.')
+    void setContainerBuildTimeout(String inputValue) {
+        try {
+            this.containerBuildTimeout = Integer.valueOf(inputValue);
+        } catch (NumberFormatException e) {
+            logger.error(String.format("Unexpected value: %s for dev mode option containerBuildTimeout. containerBuildTimeout should be a valid integer.", inputValue));
+            throw e;
+        }
     }
 
     private int dockerBuildTimeout;
-
-    @Option(option = 'dockerBuildTimeout', description = 'Specifies the amount of time to wait (in seconds) for the completion of the Docker operation to build the image.')
+    @Option(option = 'dockerBuildTimeout', description = 'Alias for containerBuildTimeout')
     void setDockerBuildTimeout(String inputValue) {
-        try {
-            this.dockerBuildTimeout = Integer.valueOf(inputValue);
-        } catch (NumberFormatException e) {
-            logger.error(String.format("Unexpected value: %s for dev mode option dockerBuildTimeout. dockerBuildTimeout should be a valid integer.", inputValue));
-            throw e;
+        if (inputValue != null && containerBuildTimeout == null) {
+            setContainerBuildTimeout(inputValue)
         }
     }
 
     private Boolean skipDefaultPorts;
 
-    @Option(option = 'skipDefaultPorts', description = 'If true, the default Docker port mappings are skipped in the docker run command.')
+    @Option(option = 'skipDefaultPorts', description = 'If true, the default container port mappings are skipped in the container run command.')
     void setSkipDefaultPorts(boolean skipDefaultPorts) {
         this.skipDefaultPorts = skipDefaultPorts;
     }
 
-    private Boolean keepTempDockerfile;
+    private Boolean keepTempContainerfile;
 
-    @Option(option = 'keepTempDockerfile', description = 'If true, preserve the temporary Dockerfile used to build the container.')
+    @Option(option = 'keepTempContainerfile', description = 'If true, preserve the temporary Containerfile/Dockerfile used to build the container.')
+    void setKeepTempContainerfile(boolean keepTempContainerfile) {
+        this.keepTempContainerfile = keepTempContainerfile;
+    }
+
+    private Boolean keepTempDockerfile;
+    @Option(option = 'keepTempDockerfile', description = 'Alias for keepTempContainerfile')
     void setKeepTempDockerfile(boolean keepTempDockerfile) {
-        this.keepTempDockerfile = keepTempDockerfile;
+        if (keepTempDockerfile != null && keepTempContainerfile == null) {
+            setKeepTempContainerfile(keepTempDockerfile)
+        }
     }
 
     @Optional
@@ -315,15 +357,15 @@ class DevTask extends AbstractFeatureTask {
                     File configDirectory, File projectDirectory, List<File> resourceDirs,
                     boolean  hotTests, boolean  skipTests, boolean skipInstallFeature, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
-                    boolean libertyDebug, boolean pollingTest, boolean container, File dockerfile, File dockerBuildContext,
-                    String dockerRunOpts, int dockerBuildTimeout, boolean skipDefaultPorts, boolean keepTempDockerfile, 
+                    boolean libertyDebug, boolean pollingTest, boolean container, File containerfile, File containerBuildContext,
+                    String containerRunOpts, int containerBuildTimeout, boolean skipDefaultPorts, boolean keepTempContainerfile, 
                     String mavenCacheLocation, String packagingType, File buildFile, boolean generateFeatures
         ) throws IOException {
             super(buildDir, serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory, /* multi module project directory */ projectDirectory,
                     resourceDirs, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, skipInstallFeature, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
-                    true /* useBuildRecompile */, true /* gradle */, pollingTest, container, dockerfile, dockerBuildContext, dockerRunOpts, dockerBuildTimeout, skipDefaultPorts,
-                    null /* compileOptions not needed since useBuildRecompile is true */, keepTempDockerfile, mavenCacheLocation, null /* multi module upstream projects */,
+                    true /* useBuildRecompile */, true /* gradle */, pollingTest, container, containerfile, containerBuildContext, containerRunOpts, containerBuildTimeout, skipDefaultPorts,
+                    null /* compileOptions not needed since useBuildRecompile is true */, keepTempContainerfile, mavenCacheLocation, null /* multi module upstream projects */,
                     false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, null /* parent build files */, generateFeatures, null /* compileArtifactPaths */, null /* testArtifactPaths */, new ArrayList<Path>() /* webResources */
                 );
 
@@ -1133,8 +1175,8 @@ class DevTask extends AbstractFeatureTask {
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), skipInstallFeature.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(),
-                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), dockerfile, dockerBuildContext, dockerRunOpts,
-                dockerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempDockerfile.booleanValue(), localMavenRepoForFeatureUtility,
+                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), containerfile, containerBuildContext, containerRunOpts,
+                containerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempContainerfile.booleanValue(), localMavenRepoForFeatureUtility,
                 getPackagingType(), buildFile, generateFeatures.booleanValue()
         );
 
@@ -1224,7 +1266,7 @@ class DevTask extends AbstractFeatureTask {
             } else {
                 // skip creating the server and installing features and just propagate the option to 'deploy'
                 createServerDirectories();
-                gradleBuildLauncher.addArguments("--exclude-task", "installFeature"); // skip installing features at startup since Dockerfile should have RUN features.sh
+                gradleBuildLauncher.addArguments("--exclude-task", "installFeature"); // skip installing features at startup since Containerfile/Dockerfile should have RUN features.sh
                 gradleBuildLauncher.addArguments(CONTAINER_PROPERTY_ARG);
             }
             runGradleTask(gradleBuildLauncher, 'deploy');
@@ -1302,32 +1344,26 @@ class DevTask extends AbstractFeatureTask {
             }
         }
 
-        if (dockerfile == null) {
-            File buildDockerfileSetting = project.liberty.dev.dockerfile; // get from build.gradle
-            if (buildDockerfileSetting != null) {
-                setDockerfile(buildDockerfileSetting.getAbsolutePath()); // setDockerfile will convert it to canonical path
-            }
+        File buildContainerfileSetting = project.liberty.dev.containerfile == null ? project.liberty.dev.dockerfile : project.liberty.dev.containerfile; // get from build.gradle
+        if (buildContainerfileSetting != null) {
+            setContainerfile(buildContainerfileSetting.getAbsolutePath()); // setContainerfile will convert it to canonical path
         }
 
-        if (dockerBuildContext == null) {
-            File buildDockerBuildContextSetting = project.liberty.dev.dockerBuildContext; // get from build.gradle
-            if (buildDockerBuildContextSetting != null) {
-                setDockerBuildContext(buildDockerBuildContextSetting.getAbsolutePath()); // setDockerBuildContext will convert it to canonical path
-            }
+        File buildContainerBuildContextSetting = project.liberty.dev.containerBuildContext == null ? project.liberty.dev.dockerBuildContext : project.liberty.dev.containerBuildContext; // get from build.gradle
+        if (buildContainerBuildContextSetting != null) {
+            setContainerBuildContext(buildContainerBuildContextSetting.getAbsolutePath()); // setContainerBuildContext will convert it to canonical path
         }
 
-        if (dockerRunOpts == null) {
-            String buildDockerRunOptsSetting = project.liberty.dev.dockerRunOpts; // get from build.gradle
-            if (buildDockerRunOptsSetting != null) {
-                setDockerRunOpts(buildDockerRunOptsSetting);
-            }
+
+        String buildContainerRunOptsSetting = project.liberty.dev.containerRunOpts == null ? project.liberty.dev.dockerRunOpts : project.liberty.dev.containerRunOpts; // get from build.gradle
+        if (buildContainerRunOptsSetting != null) {
+            setContainerRunOpts(buildContainerRunOptsSetting);
         }
 
-        if (dockerBuildTimeout == 0) {
-            String buildDockerBuildTimeoutSetting = project.liberty.dev.dockerBuildTimeout; // get from build.gradle
-            if (buildDockerBuildTimeoutSetting != null) {
-                setDockerBuildTimeout(buildDockerBuildTimeoutSetting);
-            }
+
+        String buildContainerBuildTimeoutSetting = project.liberty.dev.containerBuildTimeout == null ? project.liberty.dev.dockerBuildTimeout : project.liberty.dev.containerBuildTimeout; // get from build.gradle
+        if (buildContainerBuildTimeoutSetting != null) {
+            setContainerBuildTimeout(buildContainerBuildTimeoutSetting);
         }
 
         if (skipDefaultPorts == null) {
@@ -1339,12 +1375,15 @@ class DevTask extends AbstractFeatureTask {
             }
         }
 
-        if (keepTempDockerfile == null) {
-            boolean buildKeepTempDockerfileSetting = project.liberty.dev.keepTempDockerfile; // get from build.gradle
-            if (buildKeepTempDockerfileSetting == null) {
-                setKeepTempDockerfile(DEFAULT_KEEP_TEMP_DOCKERFILE);
+        if (keepTempContainerfile == null && keepTempDockerfile == null) {
+            boolean buildKeepTempContainerfileSetting = project.liberty.dev.keepTempContainerfile; // get from build.gradle
+            boolean buildKeepTempDockerfileSetting = project.liberty.dev.keepTempDockerfile;
+            if (buildKeepTempContainerfileSetting != null) {
+                setKeepTempContainerfile(buildKeepTempContainerfileSetting);
+            } else if (buildKeepTempDockerfileSetting != null) {
+                setKeepTempContainerfile(buildKeepTempDockerfileSetting);
             } else {
-                setKeepTempDockerfile(buildKeepTempDockerfileSetting);
+                setKeepTempContainerfile(DEFAULT_KEEP_TEMP_CONTAINERFILE);
             }
         }
     }
