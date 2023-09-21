@@ -29,20 +29,20 @@ repositories {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
-	libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
+	libertyRuntime group: 'io.openliberty', name: 'openliberty-runtime', version: '23.0.0.9'
 }
 
 
 liberty {
     server {
 	serverXmlFile = file("src/main/liberty/config/server30.xml")
-        install.useOpenLiberty = false
+        //install.useOpenLiberty = false
         looseApplication = false
 		deploy {
 			dropins = [bootJar]
 		}
-        features {
-            acceptLicense = true
-        }
+        // features {
+        //    acceptLicense = true
+        // }
     }
 }
