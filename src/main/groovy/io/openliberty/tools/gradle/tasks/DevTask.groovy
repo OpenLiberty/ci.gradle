@@ -1345,30 +1345,42 @@ class DevTask extends AbstractFeatureTask {
         }
 
         if (containerfile == null && dockerfile == null) {
-            File buildcontainerfileSetting = project.liberty.dev.containerfile; // get from build.gradle
-            if (buildcontainerfileSetting != null) {
-                setContainerfile(buildcontainerfileSetting.getAbsolutePath()); // setContainerfile will convert it to canonical path
+            File buildContainerfileSetting = project.liberty.dev.containerfile;
+            File buildDockerfileSetting = project.liberty.dev.dockerfile; // get from build.gradle
+            if (buildContainerfileSetting != null) {
+                setContainerfile(buildContainerfileSetting.getAbsolutePath()); // setContainerfile will convert it to canonical path
+            } else if (buildDockerfileSetting != null) {
+                setContainerfile(buildDockerfileSetting.getAbsolutePath());
             }
         }
 
         if (containerBuildContext == null && dockerBuildContext == null) {
             File buildContainerBuildContextSetting = project.liberty.dev.containerBuildContext; // get from build.gradle
+            File buildDockerBuildContextSetting = project.liberty.dev.dockerBuildContext;
             if (buildContainerBuildContextSetting != null) {
                 setContainerBuildContext(buildContainerBuildContextSetting.getAbsolutePath()); // setContainerBuildContext will convert it to canonical path
+            } else if (buildDockerBuildContextSetting != null) {
+                setContainerBuildContext(buildDockerBuildContextSetting.getAbsolutePath());
             }
         }
 
         if (containerRunOpts == null && dockerRunOpts == null) {
-            String buildContainerRunOptsSetting = project.liberty.dev.containerRunOpts; // get from build.gradle
+            String buildContainerRunOptsSetting = project.liberty.dev.containerRunOpts;
+            String buildDockerRunOptsSetting = project.liberty.dev.dockerRunOpts; // get from build.gradle
             if (buildContainerRunOptsSetting != null) {
                 setContainerRunOpts(buildContainerRunOptsSetting);
+            } else if (buildDockerRunOptsSetting != null) {
+                setContainerRunOpts(buildDockerRunOptsSetting);
             }
         }
 
         if (containerBuildTimeout == 0 && dockerBuildTimeout == 0) {
-            String buildContainerBuildTimeoutSetting = project.liberty.dev.containerBuildTimeout; // get from build.gradle
+            String buildContainerBuildTimeoutSetting = project.liberty.dev.containerBuildTimeout;
+            String buildDockerBuildTimeoutSetting = project.liberty.dev.dockerBuildTimeout; // get from build.gradle
             if (buildContainerBuildTimeoutSetting != null) {
                 setContainerBuildTimeout(buildContainerBuildTimeoutSetting);
+            } else if (buildDockerBuildTimeoutSetting != null) {
+                setContainerBuildTimeout(buildDockerBuildTimeoutSetting);
             }
         }
 
@@ -1383,10 +1395,13 @@ class DevTask extends AbstractFeatureTask {
 
         if (keepTempContainerfile == null && keepTempDockerfile == null) {
             boolean buildKeepTempContainerfileSetting = project.liberty.dev.keepTempContainerfile; // get from build.gradle
-            if (buildKeepTempContainerfileSetting == null) {
-                setKeepTempContainerfile(DEFAULT_KEEP_TEMP_CONTAINERFILE);
-            } else {
+            boolean buildKeepTempDockerfileSetting = project.liberty.dev.keepTempDockerfile;
+            if (buildKeepTempContainerfileSetting != null) {
                 setKeepTempContainerfile(buildKeepTempContainerfileSetting);
+            } else if (buildKeepTempDockerfileSetting != null) {
+                setKeepTempContainerfile(buildKeepTempDockerfileSetting);
+            } else {
+                setKeepTempContainerfile(DEFAULT_KEEP_TEMP_CONTAINERFILE);
             }
         }
     }
