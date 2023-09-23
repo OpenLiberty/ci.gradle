@@ -53,7 +53,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.6.1'
+        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.7'
     }
 }
 ```
@@ -73,13 +73,13 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath ('io.openliberty.tools:liberty-ant-tasks:1.9.12')
-        classpath ('io.openliberty.tools:ci.common:1.8.25')
+        classpath ('io.openliberty.tools:liberty-ant-tasks:1.9.13')
+        classpath ('io.openliberty.tools:ci.common:1.8.27')
     }
 }
 
 plugins {
-    id "io.openliberty.tools.gradle.Liberty" version "3.6.1"
+    id "io.openliberty.tools.gradle.Liberty" version "3.7"
 }
 ```
 
