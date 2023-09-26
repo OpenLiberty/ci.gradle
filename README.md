@@ -74,7 +74,7 @@ buildscript {
     }
     dependencies {
         classpath ('io.openliberty.tools:liberty-ant-tasks:1.9.13')
-        classpath ('io.openliberty.tools:ci.common:1.8.27')
+        classpath ('io.openliberty.tools:ci.common:1.8.28')
     }
 }
 
