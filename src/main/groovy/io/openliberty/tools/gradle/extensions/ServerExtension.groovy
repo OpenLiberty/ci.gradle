@@ -41,6 +41,7 @@ class ServerExtension {
     Properties env = new Properties()
     Properties var = new Properties()
     Properties defaultVar = new Properties()
+    Properties keys = new Properties()
 
     boolean clean = false
     String timeout

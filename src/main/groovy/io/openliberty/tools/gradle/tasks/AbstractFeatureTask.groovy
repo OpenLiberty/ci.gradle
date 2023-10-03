@@ -22,6 +22,7 @@ import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.PluginScenarioException
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 import io.openliberty.tools.gradle.utils.ArtifactDownloadUtil
+import java.util.Map.Entry
 import org.gradle.api.Project
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.Internal
@@ -40,6 +41,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
     private InstallFeatureUtil util;
 
     private ServerFeatureUtil servUtil;
+	
 	
 	@Internal
  	String jsonCoordinate;
@@ -107,8 +109,8 @@ public class AbstractFeatureTask extends AbstractServerTask {
     }
 
     private class InstallFeatureTaskUtil extends InstallFeatureUtil {
-        public InstallFeatureTaskUtil(File installDir, File buildDir, String from, String to, Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons)  throws PluginScenarioException, PluginExecutionException {
-            super(installDir, buildDir, from, to, pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons)
+        public InstallFeatureTaskUtil(File installDir, File buildDir, String from, String to, Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons, String verify, Collection<Map<String,String>> keyMap)  throws PluginScenarioException, PluginExecutionException {
+            super(installDir, buildDir, from, to, pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons, verify, keyMap)
         }
 
         @Override
@@ -172,6 +174,11 @@ public class AbstractFeatureTask extends AbstractServerTask {
  			}
  			return ArtifactDownloadUtil.downloadArtifact(project, groupId, artifactId, type, version);
  		}
+		 
+		 @Override
+		 public File downloadSignature(File esa, String groupId, String artifactId, String type, String version) throws PluginExecutionException {
+			 return ArtifactDownloadUtil.downloadSignature(project, groupId, artifactId, type, version, esa);
+		 }
     }
 
     protected Set<String> getPluginListedFeatures(boolean findEsaFiles) {
@@ -237,6 +244,33 @@ public class AbstractFeatureTask extends AbstractServerTask {
         Set<String> featuresToInstall = util.combineToSet(pluginListedFeatures, dependencyFeatures, serverFeatures)
         return featuresToInstall
     }
+	
+	/*
+	 * 
+	 */
+	@Internal
+	protected Collection<Map<String, String>> getKeyMap(){
+		Collection<Map<String,String>> keyMapList = new ArrayList<>();
+		if(server.keys == null) {
+			logger.debug("liberty.keys property map is empty")
+			return keyMapList;
+			
+		}
+		
+		Set<Entry<Object, Object>> entries = server.keys.entrySet()
+		for (Entry<Object, Object> entry : entries) {
+			Map<String, String> keyMap = new HashMap<>();
+			String key = (String) entry.getKey()
+			Object value = entry.getValue()
+			if (value != null) {
+				logger.info("keyID : " + key + "\tkeyURL : " + value.toString())
+				keyMap.put("keyid", key)
+				keyMap.put("keyurl", value.toString())
+			}
+			keyMapList.add(keyMap)
+		}
+		return keyMapList;
+	}
 
     /**
      * Get a new instance of ServerFeatureUtil
@@ -258,9 +292,10 @@ public class AbstractFeatureTask extends AbstractServerTask {
         return servUtil;
     }
 
-    private void createNewInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons) throws PluginExecutionException {
+    private void createNewInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons, Collection<Map<String,String>> keyMap) throws PluginExecutionException {
         try {
-            util = new InstallFeatureTaskUtil(getInstallDir(project), project.getBuildDir(), server.features.from, server.features.to, pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons)
+			logger.info("Verify option: " + server.features.verify)
+            util = new InstallFeatureTaskUtil(getInstallDir(project), project.getBuildDir(), server.features.from, server.features.to, pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons, server.features.verify, keyMap)
         } catch (PluginScenarioException e) {
             logger.debug("Exception received: " + e.getMessage(), (Throwable) e)
             logger.debug("Installing features from installUtility.")
@@ -281,13 +316,14 @@ public class AbstractFeatureTask extends AbstractServerTask {
                 openLibertyVersion = InstallFeatureUtil.getOpenLibertyVersion(propertiesList)
             }
             def additionalJsons = getAdditionalJsonList()
-            createNewInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVersion, containerName, additionalJsons)
+			Collection<Map<String,String>> keyMap = getKeyMap();
+            createNewInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVersion, containerName, additionalJsons, keyMap)
         }
         return util;
     }
 
-    protected InstallFeatureUtil getInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons) throws PluginExecutionException {
-        createNewInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons)
+    protected InstallFeatureUtil getInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons, Collection<Map<String,String>> keyMap) throws PluginExecutionException {
+        createNewInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons, keyMap)
         return util
     }
 

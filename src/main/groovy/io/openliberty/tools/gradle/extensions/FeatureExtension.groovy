@@ -16,9 +16,9 @@
 package io.openliberty.tools.gradle.extensions
 
 class FeatureExtension {
-
     List<String> name
     boolean acceptLicense = false
     String to
     String from
+    String verify = "enforce"
 }

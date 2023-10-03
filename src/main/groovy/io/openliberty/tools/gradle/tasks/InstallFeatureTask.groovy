@@ -17,6 +17,7 @@ package io.openliberty.tools.gradle.tasks
 
 import java.util.Set
 
+
 import org.gradle.api.artifacts.ResolveException
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.TaskAction
@@ -44,7 +45,7 @@ class InstallFeatureTask extends AbstractFeatureTask {
     }
 
     @TaskAction
-    void installFeature() {
+    void installFeature() throws PluginExecutionException {
         // If non-container mode, check for Beta version and skip if needed.  Container mode does not need to check since featureUtility will check when it is called.
         def propertiesList = null;
         def openLibertyVersion = null;
@@ -64,8 +65,9 @@ class InstallFeatureTask extends AbstractFeatureTask {
         }
     
         def pluginListedEsas = getPluginListedFeatures(true)
-		def additionalJsons = getAdditionalJsonList();
-        InstallFeatureUtil util = getInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVersion, containerName, additionalJsons)
+        def additionalJsons = getAdditionalJsonList();
+        def keyMap = getKeyMap();
+        InstallFeatureUtil util = getInstallFeatureUtil(pluginListedEsas, propertiesList, openLibertyVersion, containerName, additionalJsons, keyMap)
 
 		if(!pluginListedEsas.isEmpty() && isClosedLiberty) {
 			installFeaturesFromAnt = true;
