@@ -35,6 +35,7 @@ class VerifyFeatureTest extends AbstractIntegrationTest{
 		copySettingsFile(resourceDir, buildDir)
         copyFile(resourceSimpleBom, simpleBom)
 		copyFile(resourceSimpleEsa, simpleEsa)	
+        copyFile(resourceSimpleAsc, simpleAsc)
 		
     }
 	
