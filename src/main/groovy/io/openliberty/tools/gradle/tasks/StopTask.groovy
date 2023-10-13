@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2020.
+ * (C) Copyright IBM Corporation 2014, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,26 @@ class StopTask extends AbstractServerTask {
     @TaskAction
     void stop() {
         if (isLibertyInstalledAndValid(project)) {
-            if (getServerDir(project).exists()) {
-                ServerTask serverTaskStop = createServerTask(project, "stop");
-                serverTaskStop.setUseEmbeddedServer(server.embedded)
-                serverTaskStop.execute()
+            File serverDir = getServerDir(project)
+            if (serverDir.exists()) {
+                File serverXmlFile = new File(serverDir,"server.xml")
+                boolean defaultServerTemplateUsed = copyDefaultServerTemplate(getInstallDir(project),serverDir)
+                if (serverXmlFile.exists()) {
+                    ServerTask serverTaskStop = createServerTask(project, "stop");
+                    serverTaskStop.setUseEmbeddedServer(server.embedded)
+                    serverTaskStop.execute()
+                } else {
+        	        logger.error ('The server cannot be stopped. There is no server.xml file in the server.')
+                }
+
+                if (defaultServerTemplateUsed) {
+        	        logger.warn ('The server.xml file was missing in the server during the stop task. Copied the defaultServer template server.xml file into the server temporarily so the stop task could be completed.')
+                    if (!serverXmlFile.delete()) {
+                        logger.error('Could not delete the server.xml file copied from the defaultServer template after stopping the server.')
+                    }
+                }
             } else {
-        	logger.error ('There is no server to stop. The server has not been created.')
+        	    logger.error ('There is no server to stop. The server has not been created.')
             }
         } else {
             logger.error ('There is no server to stop. The runtime has not been installed.')
