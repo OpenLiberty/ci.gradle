@@ -29,10 +29,11 @@ dependencies {
 }
 
 def keyid = System.properties['keyid']
-def keyurl = project.projectDir.absolutePath + File.separator + 'SimpleActivatorValidKey.asc' 
+def keyurl = file("src/test/resources/SimpleActivatorValidKey.asc")
 liberty {
     server{
         name = 'LibertyProjectServer'
+        serverXmlFile = file("src/test/resources/server.xml")
 		keys."$keyid" = "$keyurl"
         features {
             name = ["SimpleActivator-1.0"]

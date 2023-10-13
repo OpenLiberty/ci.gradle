@@ -2,6 +2,7 @@ package io.openliberty.tools.gradle
 
 import static org.junit.Assert.*
 
+import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -20,6 +21,11 @@ class InstallFeature_single extends AbstractIntegrationTest{
     public static void setup() {
         createDir(buildDir)
         copySettingsFile(resourceDir, buildDir)
+    }
+    
+    @AfterClass
+    public static void cleanup() {
+        deleteDir(new File(mavenLocalRepo, "test/user/test/osgi"));
     }
 
     @Test
@@ -57,4 +63,6 @@ class InstallFeature_single extends AbstractIntegrationTest{
 		runTasks(buildDir, 'installFeature')
 		assert simpleFile.exists() : "test.user.test.osgi.SimpleActivator.mf is not installed"
 	}
+    
+    
 }

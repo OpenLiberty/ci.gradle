@@ -1,0 +1,9 @@
+<server description="Sample Liberty server">
+
+  <featureManager>
+     <feature>json-1.0</feature> 
+  </featureManager>
+
+  <httpEndpoint host="*" httpPort="${default.http.port}"
+    httpsPort="${default.https.port}" id="defaultHttpEndpoint"/>
+</server>
