@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2022.
+ * (C) Copyright IBM Corporation 2014, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ class CreateTask extends AbstractServerTask {
             group 'Liberty'
         })
         outputs.upToDateWhen {
-            getServerDir(project).exists() && new File(getServerDir(project), 'server.xml')
+            getServerDir(project).exists() && (new File(getServerDir(project), 'server.xml')).exists()
         }
     }
 
@@ -76,7 +76,9 @@ class CreateTask extends AbstractServerTask {
     void create() {
         //Checking etc/server.env for outputDirs
         Liberty.checkEtcServerEnvProperties(project)
-        if(!getServerDir(project).exists()){
+        File serverDir = getServerDir(project)
+        File serverXmlFile = new File(serverDir, "server.xml")
+        if(!serverDir.exists()){
             def params = buildLibertyMap(project);
             if (server.template != null && server.template.length() != 0) {
                 params.put('template', server.template)
@@ -85,6 +87,10 @@ class CreateTask extends AbstractServerTask {
                 params.put('noPassword', server.noPassword)
             }
             executeServerCommand(project, 'create', params)
+        } else if (copyDefaultServerTemplate(getInstallDir(project), serverDir)) {
+            // copied defaultServer template server.xml over for rare case that the server.xml disappears from an existing Liberty server (issue 850)
+            // if the project contains its own server.xml file, it will get copied over in copyConfigFiles() next
+            logger.warn("The " + serverXmlFile.getAbsolutePath() + " does not exist. Copying over the defaultServer template server.xml file.")
         }
         copyConfigFiles()
         writeServerPropertiesToXml(project)
