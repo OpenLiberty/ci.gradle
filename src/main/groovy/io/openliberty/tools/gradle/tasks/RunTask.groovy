@@ -32,49 +32,41 @@ class RunTask extends AbstractServerTask {
     void run() {
         addShutdownHook {
             if (isLibertyInstalledAndValid(project)) {
-                if (getServerDir(project).exists()) {
+                File serverDir = getServerDir(project)
+                if (serverDir.exists()) {
+                    // copy default server template server.xml file over if the server.xml file does not exist so that the server can be stopped
+                    boolean defaultServerTemplateUsed = copyDefaultServerTemplate(getInstallDir(project), serverDir)                    
                     File serverXmlFile = new File(getServerDir(project),"server.xml")
                     if (serverXmlFile.exists()) {
                         ServerTask serverTaskStop = createServerTask(project, "stop");
                         serverTaskStop.setUseEmbeddedServer(server.embedded)
                         serverTaskStop.execute()
                     }
-                }
-            }
-        }
-
-        if (isLibertyInstalledAndValid(project)) {
-            File serverDir = getServerDir(project)
-            if (serverDir.exists()) {
-                File serverXmlFile = new File(serverDir,"server.xml")
-                if (serverXmlFile.exists()) {
-                    if (server.embedded) {
-                        ServerTask serverTaskRun = createServerTask(project, "run");
-                        serverTaskRun.setUseEmbeddedServer(server.embedded)
-                        serverTaskRun.setClean(server.clean)
-                        serverTaskRun.execute();
-                    } else {
-                        List<String> command = buildCommand("run")
-                        if (server.clean) {
-                            command.add("--clean")
-                        }
-                        def pb = new ProcessBuilder(command)
-                        pb.environment().put('WLP_USER_DIR', getUserDir(project).getCanonicalPath())
-
-                        def run_process = pb.redirectErrorStream(true).start()
-
-                        run_process.inputStream.eachLine {
-                            println it
-                        }
+                    if (defaultServerTemplateUsed) {
+                        serverXmlFile.delete() // delete the temporary copy of the server.xml file
                     }                
-                } else {
-        	        logger.error ('There is no server.xml file in the server. The server cannot be run.')
                 }
-            } else {
-        	    logger.error ('There is no server to run. The server has not been created.')
             }
-        } else {
-            logger.error ('There is no server to run. The runtime has not been installed.')
         }
+
+        if (server.embedded) {
+            ServerTask serverTaskRun = createServerTask(project, "run");
+            serverTaskRun.setUseEmbeddedServer(server.embedded)
+            serverTaskRun.setClean(server.clean)
+            serverTaskRun.execute();
+        } else {
+            List<String> command = buildCommand("run")
+            if (server.clean) {
+                command.add("--clean")
+            }
+            def pb = new ProcessBuilder(command)
+            pb.environment().put('WLP_USER_DIR', getUserDir(project).getCanonicalPath())
+
+            def run_process = pb.redirectErrorStream(true).start()
+
+            run_process.inputStream.eachLine {
+                println it
+            }
+        }                
     }
 }
