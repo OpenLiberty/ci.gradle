@@ -214,25 +214,29 @@ class DeployTask extends AbstractServerTask {
         return targetThinAppPath;
     }
 
-    private isSpringBootUtilAvailable() {
-        new FileNameFinder().getFileNames(new File(getInstallDir(project), "bin").getAbsolutePath(), "springBootUtility*")
+    private boolean isUtilityAvailable(File installDirectory, String utilityName) {
+            String utilFileName = isWindows ? utilityName+".bat" : utilityName;
+            File installUtil = new File(installDirectory, "bin/"+utilFileName);
+            return installUtil.exists();
     }
 
     private installSpringBootFeatureIfNeeded() {
-        if (isClosedLiberty() && !isSpringBootUtilAvailable()) {
+        File installDir = getInstallDir(project)
+        if (!isUtilityAvailable(installDir, "springBootUtility") && isUtilityAvailable(installDir, "featureUtility")) {
             String fileSuffix = isWindows ? ".bat" : ""
-            File installUtil = new File(getInstallDir(project), "bin/installUtility"+fileSuffix)
+            File installUtil = new File(installDir, "bin/featureUtility"+fileSuffix)
 
             // only install springBoot feature that matches required version
             String sbFeature = getLibertySpringBootFeature(springBootVersion) 
             if (sbFeature != null) {
-                def installCommand = installUtil.toString() + " install " + sbFeature + " --acceptLicense"
+                logger.info("Required springBootUtility not found in Liberty installation. Installing feature "+sbFeature+" to enable it.");
+                def installCommand = installUtil.toString() + " installFeature " + sbFeature + " --acceptLicense"
                 def sbuff = new StringBuffer()
                 def proc = installCommand.execute()
                 proc.consumeProcessOutput(sbuff, sbuff)
                 proc.waitFor()
-                logger.info(sbuff.toString())
                 if (proc.exitValue()!=0) {
+                    logger.error(sbuff.toString())
                     throw new GradleException("Error installing required spring boot support feature: "+sbFeature)
                 }
             }

@@ -74,6 +74,20 @@ public class TestSpringBootApplication30 extends AbstractIntegrationTest{
     }
 
     @Test
+    public void test_spring_boot_classifier_apps_30_no_feature() {
+        try {
+            runTasks(buildDir, 'deploy')
+
+            Assert.assertTrue('defaultServer/dropins has app deployed',
+                    new File(buildDir, 'build/wlp/usr/servers/defaultServer/dropins').list().size() == 0)
+            Assert.assertTrue('no app in apps folder',
+                    new File(buildDir, "build/wlp/usr/servers/defaultServer/apps/thin-${testName.getMethodName()}-1.0-SNAPSHOT-test.jar").exists() )
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task deploy.", e)
+        }
+    }
+
+    @Test
     public void test_spring_boot_war_apps_30() {
         try {
             runTasks(buildDir, 'deploy', 'libertyStart')
