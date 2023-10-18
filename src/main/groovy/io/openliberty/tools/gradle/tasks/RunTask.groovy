@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2019.
+ * (C) Copyright IBM Corporation 2014, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,19 @@ class RunTask extends AbstractServerTask {
     void run() {
         addShutdownHook {
             if (isLibertyInstalledAndValid(project)) {
-                if (getServerDir(project).exists()) {
-                    ServerTask serverTaskStop = createServerTask(project, "stop");
-                    serverTaskStop.setUseEmbeddedServer(server.embedded)
-                    serverTaskStop.execute()
+                File serverDir = getServerDir(project)
+                if (serverDir.exists()) {
+                    // copy default server template server.xml file over if the server.xml file does not exist so that the server can be stopped
+                    boolean defaultServerTemplateUsed = copyDefaultServerTemplate(getInstallDir(project), serverDir)                    
+                    File serverXmlFile = new File(getServerDir(project),"server.xml")
+                    if (serverXmlFile.exists()) {
+                        ServerTask serverTaskStop = createServerTask(project, "stop");
+                        serverTaskStop.setUseEmbeddedServer(server.embedded)
+                        serverTaskStop.execute()
+                    }
+                    if (defaultServerTemplateUsed) {
+                        serverXmlFile.delete() // delete the temporary copy of the server.xml file
+                    }                
                 }
             }
         }
@@ -58,6 +67,6 @@ class RunTask extends AbstractServerTask {
             run_process.inputStream.eachLine {
                 println it
             }
-        }
+        }                
     }
 }

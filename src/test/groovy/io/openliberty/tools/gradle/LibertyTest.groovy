@@ -28,6 +28,7 @@ class LibertyTest extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/liberty-test")
     static File buildDir = new File(integTestDir, "/liberty-test")
     static String buildFilename = "build.gradle"
+    static File serverXmlFile = new File(buildDir, "/build/wlp/usr/servers/LibertyProjectServer/server.xml")
 
     @BeforeClass
     public static void setup() {
@@ -180,10 +181,30 @@ class LibertyTest extends AbstractIntegrationTest{
            throw new AssertionError ("Fail on task libertyStart after second clean.", e)
         }
 
+        // try deleting the server.xml and see if we can recover
+        assert serverXmlFile.exists() : 'server.xml file does not exist in LibertyProjectServer'
+        assert serverXmlFile.delete() : 'server.xml could not be deleted in LibertyProjectServer'
+
         try{
            runTasks(buildDir, 'libertyStop')
         } catch (Exception e) {
-           throw new AssertionError ("Fail on task libertyStop after libertyStart.", e)
+           throw new AssertionError ("Fail on task libertyStop after deleting server.xml.", e)
+        }
+
+        assert !serverXmlFile.exists() : 'server.xml file unexpectedly exists in LibertyProjectServer after libertyStop'
+
+        try{
+            runTasks(buildDir, 'libertyStatus')
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task libertyStatus after deleting server.xml.", e)
+        }
+
+        assert serverXmlFile.exists() : 'server.xml file does not exist in LibertyProjectServer after libertyStatus'
+
+        try{
+            runTasks(buildDir, 'clean')
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task clean after deleting server.xml.", e)
         }
     }
 

@@ -207,6 +207,20 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         }
     }
 
+    // Use this method to copy over the server.xml file from the defaultServer template.
+    // Returns true if the server.xml file does not exist and the defaultServer template server.xml file is copied over, false otherwise.
+    protected boolean copyDefaultServerTemplate(File installDir, File serverDir) {
+        File serverXmlFile = new File(serverDir, "server.xml")
+        if (!serverXmlFile.exists()) {
+            File defaultServerTemplate = new File(installDir, "templates/servers/defaultServer/server.xml")
+            if (defaultServerTemplate.exists()) {
+                Files.copy(defaultServerTemplate.toPath(), serverXmlFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+                return true;
+            }
+        }
+        return false;
+    }
+    
     protected void copyConfigDirectory() {
         //merge default server.env with one in config directory
         File configDirServerEnv = new File(server.configDirectory, "server.env")

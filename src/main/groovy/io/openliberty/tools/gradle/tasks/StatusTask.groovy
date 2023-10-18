@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2019.
+ * (C) Copyright IBM Corporation 2014, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,23 @@ class StatusTask extends AbstractServerTask {
 
     @TaskAction
     void status() {
-        def status_process = new ProcessBuilder(buildCommand("status")).redirectErrorStream(true).start()
-        status_process.inputStream.eachLine {
-            println it
+        if (isLibertyInstalledAndValid(project)) {
+            File serverDir = getServerDir(project)
+            if (serverDir.exists()) {
+                File serverXmlFile = new File(serverDir,"server.xml")
+                if (serverXmlFile.exists()) {
+                    def status_process = new ProcessBuilder(buildCommand("status")).redirectErrorStream(true).start()
+                    status_process.inputStream.eachLine {
+                        println it
+                    }
+                } else {
+        	        logger.error ('The server status cannot be checked. There is no server.xml file in the server.')
+                }
+            } else {
+        	    logger.error ('The server status cannot be checked. The server has not been created.')
+            }
+        } else {
+            logger.error ('The server status cannot be checked. The runtime has not been installed.')
         }
     }
 
