@@ -15,6 +15,7 @@
  */
 package io.openliberty.tools.gradle.tasks
 
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.internal.file.DefaultFilePropertyFactory
@@ -51,6 +52,7 @@ import java.nio.file.Path;
 
 class DevTask extends AbstractFeatureTask {
 
+    private static final String LIBERTY_DEV_PODMAN = "liberty.dev.podman";
     private static final String LIBERTY_HOSTNAME = "liberty.hostname";
     private static final String LIBERTY_HTTP_PORT = "liberty.http.port";
     private static final String LIBERTY_HTTPS_PORT = "liberty.https.port";
@@ -360,7 +362,7 @@ class DevTask extends AbstractFeatureTask {
                     boolean libertyDebug, boolean pollingTest, boolean container, File containerfile, File containerBuildContext,
                     String containerRunOpts, int containerBuildTimeout, boolean skipDefaultPorts, boolean keepTempContainerfile, 
                     String mavenCacheLocation, String packagingType, File buildFile, boolean generateFeatures
-        ) throws IOException {
+        ) throws IOException, PluginExecutionException {
             super(buildDir, serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory, /* multi module project directory */ projectDirectory,
                     resourceDirs, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, skipInstallFeature, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
@@ -378,6 +380,8 @@ class DevTask extends AbstractFeatureTask {
             project.configurations.getByName('libertyFeature').dependencies.each {
                 dep -> this.existingLibertyFeatureDependencies.add(dep.name)
             }
+
+            setContainerEngine(this)
         }
 
         @Override
@@ -1171,14 +1175,18 @@ class DevTask extends AbstractFeatureTask {
         File buildFile = project.getBuildFile();
 
         // Instantiate util before any child gradle tasks launched so it can help find available port if needed
-        this.util = new DevTaskUtil(project.buildDir, serverInstallDir, getUserDir(project, serverInstallDir),
+        try {
+            this.util = new DevTaskUtil(project.buildDir, serverInstallDir, getUserDir(project, serverInstallDir),
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), skipInstallFeature.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(),
                 libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), containerfile, containerBuildContext, containerRunOpts,
                 containerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempContainerfile.booleanValue(), localMavenRepoForFeatureUtility,
                 getPackagingType(), buildFile, generateFeatures.booleanValue()
-        );
+            );
+        } catch (IOException | PluginExecutionException e) {
+            throw new GradleException("Error initializing dev mode.", e)
+        }
 
         ProjectConnection gradleConnection = initGradleProjectConnection();
         BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
