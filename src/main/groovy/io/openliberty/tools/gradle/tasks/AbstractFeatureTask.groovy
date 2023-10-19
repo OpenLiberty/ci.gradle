@@ -296,9 +296,8 @@ public class AbstractFeatureTask extends AbstractServerTask {
     protected void setContainerEngine(AbstractContainerSupportUtil util) throws PluginExecutionException {
         String LIBERTY_DEV_PODMAN = "liberty.dev.podman";
         Map<String, Object> projectProperties = project.getProperties();
-        if (!projectProperties.isEmpty()) {
+        if (!projectProperties.isEmpty() && projectProperties.containsKey(LIBERTY_DEV_PODMAN)) {
             Object isPodman = projectProperties.get(LIBERTY_DEV_PODMAN);
-            isPodman = projectProperties.get(LIBERTY_DEV_PODMAN);
             if (isPodman != null) {
                 util.setIsDocker(!(Boolean.parseBoolean(isPodman.toString())));
                 logger.debug("liberty.dev.podman was set to: " + (Boolean.parseBoolean(isPodman.toString())));
