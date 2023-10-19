@@ -52,7 +52,6 @@ import java.nio.file.Path;
 
 class DevTask extends AbstractFeatureTask {
 
-    private static final String LIBERTY_DEV_PODMAN = "liberty.dev.podman";
     private static final String LIBERTY_HOSTNAME = "liberty.hostname";
     private static final String LIBERTY_HTTP_PORT = "liberty.http.port";
     private static final String LIBERTY_HTTPS_PORT = "liberty.https.port";
