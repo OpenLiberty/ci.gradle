@@ -83,7 +83,7 @@ class BaseDevTest extends AbstractIntegrationTest {
             gradlew = new File("gradlew")
         }
 
-        StringBuilder command = new StringBuilder(gradlew.getAbsolutePath() + " libertyDev");
+        StringBuilder command = new StringBuilder(gradlew.getAbsolutePath() + " --warning-mode none libertyDev");
         if (params != null) {
             command.append(" " + params);
         }
