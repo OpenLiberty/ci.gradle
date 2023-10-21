@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017, 2021.
+ * (C) Copyright IBM Corporation 2017, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,19 +78,51 @@ abstract class AbstractLibertyTask extends DefaultTask {
         return version
     }
 
+    protected static boolean isSpringBoot1(String springBootVersion) {
+        if (springBootVersion == null) {
+            return false
+        }
+        return springBootVersion.startsWith('1.')
+    }
+
+    protected static boolean isSpringBoot2plus(String springBootVersion) {
+        if (springBootVersion == null) {
+            return false
+        }
+        if (springBootVersion.contains('.')) {
+            String majorVersion = springBootVersion.substring(0,springBootVersion.indexOf('.'))
+            try {
+                int majorVersionNumber = Integer.parseInt(majorVersion)
+                return majorVersionNumber > 1
+            } catch (NumberFormatException e) {
+            }
+        }
+        return false
+    }
+
+    protected static String getLibertySpringBootFeature(String springBootVersion) {
+        if (isSpringBoot1(springBootVersion)) {
+            return "springBoot-1.5"
+        } else if (isSpringBoot2plus(springBootVersion)) {
+            String majorVersion = springBootVersion.substring(0,springBootVersion.indexOf('.'))
+            return "springBoot-"+majorVersion+".0"
+        }
+        return null
+    }
+
     protected static Task findSpringBootTask(Project project, String springBootVersion) {
         if (springBootVersion == null) {
             return null
         }
         Task task
         //Do not change the order of war and java
-        if (springBootVersion.startsWith('2.')) {
+        if (isSpringBoot2plus(springBootVersion)) {
             if (project.plugins.hasPlugin('war')) {
                 task = project.bootWar
             } else if (project.plugins.hasPlugin('java')) {
                 task = project.bootJar
             }
-        } else if (springBootVersion.startsWith('1.')) {
+        } else if (isSpringBoot1(springBootVersion)) {
             if (project.plugins.hasPlugin('war')) {
                 task = project.war
             } else if (project.plugins.hasPlugin('java')) {

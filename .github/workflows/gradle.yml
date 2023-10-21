@@ -67,10 +67,15 @@ jobs:
       run: |
         mvn -V clean install -f ci.ant --batch-mode --no-transfer-progress --errors -DtrimStackTrace=false -DskipTests
         mvn -V clean install -f ci.common --batch-mode --no-transfer-progress --errors -DtrimStackTrace=false -DskipTests
+    # Run tests that require a minimum of Java 17 or later
+    - name: Run tests that require a minimum of Java 17 or later
+      if: ${{ matrix.java == '17' || matrix.java == '21' }}
+      run:
+        ./gradlew clean install check -P"test.include"="**/TestSpringBootApplication30*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info
     # Run tests
     - name: Run tests with Gradle on Ubuntu
       run:
-        ./gradlew clean install check -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" -P"test.exclude"="**/DevContainerTest*" --stacktrace --info
+        ./gradlew clean install check -P"test.exclude"="**/TestSpringBootApplication30*,**/DevContainerTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info
     # Copy build reports and upload artifact if build failed
     - name: Copy build/report/tests/test for upload
       if: ${{ failure() }}
@@ -143,11 +148,16 @@ jobs:
     - name: Install ci.common
       working-directory: C:/ci.common
       run: mvn -V clean install --batch-mode --no-transfer-progress --errors -DtrimStackTrace=false -DskipTests
+    # Run tests that require a minimum of Java 17 or later
+    - name: Run tests that require a minimum of Java 17 or later
+      if: ${{ matrix.java == '17'  || matrix.java == '21' }}
+      run:
+        ./gradlew clean install check -P"test.include"="**/TestSpringBootApplication30*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
     # Run tests
     - name: Run tests with Gradle on Windows
       working-directory: C:/ci.gradle
       # LibertyTest is excluded because test0_run hangs
-      run: ./gradlew clean install check -P"test.exclude"="**/Polling*,**/LibertyTest*,**/GenerateFeaturesTest*,**/DevContainerTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
+      run: ./gradlew clean install check -P"test.exclude"="**/Polling*,**/LibertyTest*,**/GenerateFeaturesTest*,**/TestSpringBootApplication30*,**/DevContainerTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
       timeout-minutes: 75
     # Copy build reports and upload artifact if build failed
     - name: Copy build/report/tests/test for upload

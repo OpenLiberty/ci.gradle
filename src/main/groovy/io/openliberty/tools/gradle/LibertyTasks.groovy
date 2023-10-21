@@ -17,6 +17,7 @@ package io.openliberty.tools.gradle
 
 import io.openliberty.tools.gradle.extensions.ServerExtension
 import io.openliberty.tools.gradle.tasks.AbstractServerTask
+import io.openliberty.tools.gradle.tasks.AbstractLibertyTask
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskDependency
@@ -92,8 +93,9 @@ public class LibertyTasks {
 		}
 
         project.deploy {
-            if (AbstractServerTask.findSpringBootVersion(project) != null) {
-                if (springBootVersion?.startsWith('2')) {
+            String springBootVersion = AbstractServerTask.findSpringBootVersion(project)
+            if (springBootVersion != null) {
+                if (AbstractLibertyTask.isSpringBoot2plus(springBootVersion)) {
                     dependsOn 'bootJar'
                 } else { //version 1.5.x
                     dependsOn 'bootRepackage'
