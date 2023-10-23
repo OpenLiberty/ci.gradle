@@ -39,8 +39,7 @@ jobs:
     - name: Checkout ci.common
       uses: actions/checkout@v3
       with:
-        repository: jjiwooLim/ci.common
-        ref: verifySig
+        repository: OpenLiberty/ci.common
         path: ci.common
     - name: Checkout ci.ant
       uses: actions/checkout@v3
@@ -123,7 +122,7 @@ jobs:
     - name: Clone ci.ant, ci.common, ci.gradle repos to C drive
       run: |
         cp -r D:/a/ci.gradle/ci.gradle C:/ci.gradle
-         git clone https://github.com/jjiwooLim/ci.common.git --branch verifySig --single-branch C:/ci.common
+        git clone https://github.com/OpenLiberty/ci.common.git C:/ci.common
         git clone https://github.com/OpenLiberty/ci.ant.git C:/ci.ant
     # Cache mvn/gradle packages
     - name: Cache Maven packages
@@ -164,7 +163,7 @@ jobs:
     - name: Copy build/report/tests/test for upload
       if: ${{ failure() }}
       working-directory: C:/ci.gradle
-      run: cp -r build/reports/tests/test D:/buildReports/${{runner.os}}/java${{matrix.java}}/${{matrix.RUNTIME}}-${{matrix.RUNTIME_VERSION}}/      
+      run: cp -r build/reports/tests/test D:/buildReports/${{runner.os}}/java${{matrix.java}}/${{matrix.RUNTIME}}-${{matrix.RUNTIME_VERSION}}/
     - uses: actions/upload-artifact@v3
       if: ${{ failure() }}
       with:
