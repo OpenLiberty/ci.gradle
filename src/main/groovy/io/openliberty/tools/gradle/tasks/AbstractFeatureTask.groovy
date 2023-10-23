@@ -16,6 +16,7 @@
 package io.openliberty.tools.gradle.tasks
 
 
+import io.openliberty.tools.common.plugins.util.AbstractContainerSupportUtil
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil.ProductProperties
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
@@ -111,6 +112,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
     private class InstallFeatureTaskUtil extends InstallFeatureUtil {
         public InstallFeatureTaskUtil(File installDir, File buildDir, String from, String to, Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons, String verify, Collection<Map<String,String>> keyMap)  throws PluginScenarioException, PluginExecutionException {
             super(installDir, buildDir, from, to, pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons, verify, keyMap)
+            setContainerEngine(this);
         }
 
         @Override
@@ -327,5 +329,16 @@ public class AbstractFeatureTask extends AbstractServerTask {
         return util
     }
 
+    protected void setContainerEngine(AbstractContainerSupportUtil util) throws PluginExecutionException {
+        String LIBERTY_DEV_PODMAN = "liberty.dev.podman";
+        Map<String, Object> projectProperties = project.getProperties();
+        if (!projectProperties.isEmpty() && projectProperties.containsKey(LIBERTY_DEV_PODMAN)) {
+            Object isPodman = projectProperties.get(LIBERTY_DEV_PODMAN);
+            if (isPodman != null) {
+                util.setIsDocker(!(Boolean.parseBoolean(isPodman.toString())));
+                logger.debug("liberty.dev.podman was set to: " + (Boolean.parseBoolean(isPodman.toString())));
+            }
+        }
+    }
 
 }

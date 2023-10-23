@@ -57,7 +57,7 @@ public class TestEclipseFacetsWar extends AbstractIntegrationTest{
             if (attributes.getAt('facet').equals('jst.web') && attributes.getAt('version').equals('3.0')) {
                 hasJstWebFacet = true
             }
-            if (attributes.getAt('facet').equals('jst.java') && attributes.getAt('version').equals('1.7')) {
+            if (attributes.getAt('facet').equals('jst.java') && attributes.getAt('version').equals('1.8')) {
                 hasJavaFacet = true
             }
         }

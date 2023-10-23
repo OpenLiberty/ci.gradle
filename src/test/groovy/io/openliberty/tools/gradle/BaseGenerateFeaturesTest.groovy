@@ -125,7 +125,7 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
             gradlew = new File("gradlew");
         }
 
-        StringBuilder command = new StringBuilder(gradlew.getAbsolutePath() + " " + processCommand);
+        StringBuilder command = new StringBuilder(gradlew.getAbsolutePath() + " --warning-mode none " + processCommand);
 
         System.out.println("Running command: " + command.toString());
         ProcessBuilder builder = buildProcess(command.toString());
