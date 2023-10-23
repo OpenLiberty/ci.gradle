@@ -265,7 +265,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
 			String key = (String) entry.getKey()
 			Object value = entry.getValue()
 			if (value != null) {
-				logger.info("keyID : " + key + "\tkeyURL : " + value.toString())
+				logger.debug("keyID : " + key + "\tkeyURL : " + value.toString())
 				keyMap.put("keyid", key)
 				keyMap.put("keyurl", value.toString())
 			}
@@ -296,7 +296,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
 
     private void createNewInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons, Collection<Map<String,String>> keyMap) throws PluginExecutionException {
         try {
-			logger.info("Verify option: " + server.features.verify)
+			logger.info("Feature signature verify option: " + server.features.verify)
             util = new InstallFeatureTaskUtil(getInstallDir(project), project.getBuildDir(), server.features.from, server.features.to, pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons, server.features.verify, keyMap)
         } catch (PluginScenarioException e) {
             logger.debug("Exception received: " + e.getMessage(), (Throwable) e)
