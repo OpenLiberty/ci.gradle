@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017, 2020.
+ * (C) Copyright IBM Corporation 2017, 2023.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ class ServerExtension {
     Properties env = new Properties()
     Properties var = new Properties()
     Properties defaultVar = new Properties()
+    Properties keys = new Properties()
 
     boolean clean = false
     String timeout

@@ -1,0 +1,44 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+apply plugin: 'liberty'
+
+repositories {
+    mavenCentral()
+	mavenLocal() {
+        metadataSources {
+            mavenPom()
+            artifact()
+        }
+    }
+}
+
+dependencies {
+    featuresBom 'test.user.test.osgi:SimpleActivator-bom:1.0'
+}
+
+def keyid = System.properties['keyid']
+def keyurl = file("src/test/resources/SimpleActivatorValidKey.asc")
+liberty {
+    server{
+        name = 'LibertyProjectServer'
+        serverXmlFile = file("src/test/resources/server.xml")
+		keys."$keyid" = "$keyurl"
+        features {
+            name = ["SimpleActivator-1.0"]
+            acceptLicense = true
+			verify = System.properties['verify']
+        }
+    }
+}

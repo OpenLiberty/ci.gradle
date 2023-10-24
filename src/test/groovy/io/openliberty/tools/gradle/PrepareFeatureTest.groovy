@@ -2,7 +2,7 @@ package io.openliberty.tools.gradle
 
 import static org.junit.Assert.*
 
-import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.AfterClass
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -38,8 +38,8 @@ class PrepareFeatureTest extends AbstractIntegrationTest{
 	}
 	
 
-    @Before
-    public void setup() {
+    @BeforeClass
+    public static void setup() {
 		org.junit.Assume.assumeTrue(checkOpenLibertyVersion());
         createDir(buildDirSingle)
         createDir(buildDirMultiple)
@@ -51,7 +51,6 @@ class PrepareFeatureTest extends AbstractIntegrationTest{
 		copyFile(resourceHelloEsa, helloEsa)
         copyFile(resourceSimpleBom, simpleBom)
 		copyFile(resourceSimpleEsa, simpleEsa)	
-		
     }
 
 
@@ -115,5 +114,6 @@ class PrepareFeatureTest extends AbstractIntegrationTest{
 			throw new AssertionError ("Fail to install multiple user features.", e)
 		}
 	}
+    
 	
 }
