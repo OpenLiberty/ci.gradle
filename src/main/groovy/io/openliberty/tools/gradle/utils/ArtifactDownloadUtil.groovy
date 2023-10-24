@@ -45,7 +45,7 @@ public class ArtifactDownloadUtil {
 		def sig = downloadFile(project, config, coordinates);
 		//if signature and esa file are not in same directory, copy signature file to esa parent directory.
 		if (!sig.getParent().equals(esa.getParent())) {
-            project.getLogger().debug("Copying " + sig + " to esa.getAbsolutePath()" + ".asc")
+            project.getLogger().debug("Copying " + sig + " to " + esa.getAbsolutePath() + ".asc")
 			FileUtils.copyFile(sig, new File(esa.getAbsolutePath() + ".asc"))
 		}
 		return sig
