@@ -1,9 +1,13 @@
 ## prepareFeature task
----
+
 The `prepareFeature` task  generates `features.json` file for user features. The `features.json` file is JSON file that contains the information found within a feature's ESA manifest file. JSONs are a key requirement for the installation of any Liberty features(s) from a Maven repository. 
 
 
 In Open Liberty and WebSphere Liberty runtime versions 21.0.0.11 and above, this task can prepare the user feature to generate the JSON file.
+
+### Dependencies
+
+The `featuresBom` dependency configuration is used to locate the user feature esa file and to generate `features.json`. The `features.json` is generated in the following maven coordinate: ${userfeature.group}:features:{$userfeature.version}.
 
 
 ### Examples
