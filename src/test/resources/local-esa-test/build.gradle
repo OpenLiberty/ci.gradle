@@ -1,0 +1,30 @@
+apply plugin: 'liberty'
+
+buildscript {
+    repositories{
+      mavenLocal()
+      mavenCentral()
+      maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+      }
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+repositories {
+      mavenLocal()
+      mavenCentral()
+}
+
+def featureName = new File(project.projectDir, '/json-1.0-23.0.0.10.esa').toString()
+liberty {
+    runtime = ['group': 'io.openliberty','name':'openliberty-kernel','version':runtimeVersion]
+    server {
+        features {
+            name = [featureName, 'jsp-2.3']
+        }
+    }
+}
