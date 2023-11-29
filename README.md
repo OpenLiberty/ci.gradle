@@ -33,7 +33,9 @@ The Liberty Gradle Plugin supports running with Gradle 7.6+ and Gradle 8.x as of
 
 ### Java Support
 
-The Liberty Gradle Plugin is tested with Long-Term-Support (LTS) releases of Java. The plugin, as of release 3.5, supports Java 8, 11 and 17. Prior to this version, the plugin is supported on Java 8 and 11.
+The Liberty Gradle Plugin is tested with Long-Term-Support (LTS) releases of Java. The plugin, as of release 3.8, supports Java 8, 11, 17 and 21. Versions 3.5 to 3.7.x support Java 8, 11 and 17. Prior to version 3.5, the plugin is supported on Java 8 and 11.
+
+Note: To use the Liberty Gradle Plugin with Java 21, a minimum of Gradle 8.4 is required. Since Gradle does not officially support Java 21 yet, there may be unknown issues. All of our automated tests are passing with Gradle 8.4 though.
 
 ### Adding the plugin to the build script
 
