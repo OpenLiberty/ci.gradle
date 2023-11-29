@@ -10,7 +10,7 @@ apply plugin: "com.gradle.plugin-publish"
 
 archivesBaseName = 'liberty-gradle-plugin'
 group = 'io.openliberty.tools'
-version = '3.7.1-SNAPSHOT'
+version = '3.8-SNAPSHOT'
 
 repositories {
     mavenLocal()
@@ -59,8 +59,8 @@ compileTestGroovy {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-def libertyAntVersion = "1.9.14-SNAPSHOT"
-def libertyCommonVersion = "1.8.30-SNAPSHOT"
+def libertyAntVersion = "1.9.14"
+def libertyCommonVersion = "1.8.30"
 
 dependencies {
     implementation gradleApi()
