@@ -201,7 +201,8 @@ class DevTask extends AbstractFeatureTask {
     void setContainerfile(String containerfile) {
         if (containerfile != null) {
             // ensures the containerfile is defined with the full path - matches how maven behaves
-            this.containerfile = convertParameterToCanonicalFile(containerfile, "containerfile");      
+            this.containerfile = convertParameterToCanonicalFile(containerfile, "containerfile");
+            project.liberty.dev.containerfile = this.containerfile;
         }
     }
 
@@ -220,7 +221,8 @@ class DevTask extends AbstractFeatureTask {
     void setContainerBuildContext(String containerBuildContext) {
         if (containerBuildContext != null) {
             // ensures the containerBuildContext is defined with the full path - matches how maven behaves
-            this.containerBuildContext = convertParameterToCanonicalFile(containerBuildContext, "containerBuildContext");      
+            this.containerBuildContext = convertParameterToCanonicalFile(containerBuildContext, "containerBuildContext");
+            project.liberty.dev.containerBuildContext = this.containerBuildContext;
         }
     }
 
@@ -255,6 +257,7 @@ class DevTask extends AbstractFeatureTask {
     @Option(option = 'containerRunOpts', description = 'Additional options for the container run command when dev mode starts a container.')
     void setContainerRunOpts(String containerRunOpts) {
         this.containerRunOpts = containerRunOpts;
+        project.liberty.dev.containerRunOpts = this.containerRunOpts;
     }
 
     private String dockerRunOpts;
@@ -271,6 +274,7 @@ class DevTask extends AbstractFeatureTask {
     void setContainerBuildTimeout(String inputValue) {
         try {
             this.containerBuildTimeout = Integer.valueOf(inputValue);
+            project.liberty.dev.containerBuildTimeout = this.containerBuildTimeout;
         } catch (NumberFormatException e) {
             logger.error(String.format("Unexpected value: %s for dev mode option containerBuildTimeout. containerBuildTimeout should be a valid integer.", inputValue));
             throw e;
@@ -290,6 +294,7 @@ class DevTask extends AbstractFeatureTask {
     @Option(option = 'skipDefaultPorts', description = 'If true, the default container port mappings are skipped in the container run command.')
     void setSkipDefaultPorts(boolean skipDefaultPorts) {
         this.skipDefaultPorts = skipDefaultPorts;
+        project.liberty.dev.skipDefaultPorts = this.skipDefaultPorts;
     }
 
     private Boolean keepTempContainerfile;
@@ -297,6 +302,7 @@ class DevTask extends AbstractFeatureTask {
     @Option(option = 'keepTempContainerfile', description = 'If true, preserve the temporary Containerfile/Dockerfile used to build the container.')
     void setKeepTempContainerfile(boolean keepTempContainerfile) {
         this.keepTempContainerfile = keepTempContainerfile;
+        project.liberty.dev.keepTempContainerfile = this.keepTempContainerfile;
     }
 
     private Boolean keepTempDockerfile;
