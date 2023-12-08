@@ -444,7 +444,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
                                           break
             case PropertyType.BOOTSTRAP:  bootstrapProjectProps.setProperty(propName, propValue)
                                           break
-            case PropertyType.JVM:        jvmProjectProps.add(propName)
+            case PropertyType.JVM:        if (!jvmProjectProps.contains(propName)) { jvmProjectProps.add(propName) } // avoid exact duplicates
                                           break
             case PropertyType.VAR:        varProjectProps.setProperty(propName, propValue)
                                           break
@@ -795,6 +795,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
                 combinedJvmOptions = new ArrayList<String> ()
                 // add the project properties (which come from the command line) last so that they take precedence over the options specified in build.gradle
                 combinedJvmOptions.addAll(options)
+                combinedJvmOptions.removeAll(projectProperties); // remove any exact duplicates before adding all the project properties
                 combinedJvmOptions.addAll(projectProperties)
             }
         } else {
