@@ -444,7 +444,8 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
                                           break
             case PropertyType.BOOTSTRAP:  bootstrapProjectProps.setProperty(propName, propValue)
                                           break
-            case PropertyType.JVM:        if (!jvmProjectProps.contains(propName)) { jvmProjectProps.add(propName) } // avoid exact duplicates
+            case PropertyType.JVM:        jvmProjectProps.remove(propName)  // avoid exact duplicates
+                                          jvmProjectProps.add(propName)
                                           break
             case PropertyType.VAR:        varProjectProps.setProperty(propName, propValue)
                                           break
@@ -787,19 +788,40 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         }
     }
 
+    // Remove any duplicate entries in the passed in List
+    protected List<String> getUniqueValues(List<String> values) {
+        List<String> uniqueValues = new ArrayList<String> ();
+        if (values == null) {
+            return uniqueValues
+        }
+
+        for (String nextValue : values) {
+            // by removing a matching existing value, it ensures there will not be a duplicate and that this current one will appear later in the List
+            if (uniqueValues.contains(nextValue)) {
+                getLog().debug("Remove duplicate value: "+nextValue+" at position: "+uniqueValues.indexOf(nextValue))
+            }
+            uniqueValues.remove(nextValue) // has no effect if the value is not present
+            uniqueValues.add(nextValue)
+        }
+        return uniqueValues
+    }
+
     private void writeJvmOptions(File file, List<String> options, List<String> projectProperties) throws IOException {
-        if (! projectProperties.isEmpty()) {
-            if (options == null) {
-                combinedJvmOptions = projectProperties;
+        List<String> uniqueOptions = getUniqueValues(options)
+        List<String> uniqueProps = getUniqueValues(projectProperties)
+
+        if (! uniqueProps.isEmpty()) {
+            if (uniqueOptions.isEmpty()) {
+                combinedJvmOptions = uniqueProps;
             } else {
                 combinedJvmOptions = new ArrayList<String> ()
                 // add the project properties (which come from the command line) last so that they take precedence over the options specified in build.gradle
-                combinedJvmOptions.addAll(options)
-                combinedJvmOptions.removeAll(projectProperties); // remove any exact duplicates before adding all the project properties
-                combinedJvmOptions.addAll(projectProperties)
+                combinedJvmOptions.addAll(uniqueOptions)
+                combinedJvmOptions.removeAll(uniqueProps) // remove any exact duplicates before adding all the project properties
+                combinedJvmOptions.addAll(uniqueProps)
             }
         } else {
-            combinedJvmOptions = options
+            combinedJvmOptions = uniqueOptions
         }
 
         makeParentDirectory(file)
