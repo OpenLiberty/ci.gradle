@@ -33,7 +33,7 @@ liberty {
         name = wlpServerName
 
         bootstrapProperties = ['default.http.port':'9084','default.https.port':'9474']
-        jvmOptions = ['-Xmx512m']
+        jvmOptions = ['-Xmx512m','-Dmy.dup.jvmoption=This is the value']
     }
 }
 
