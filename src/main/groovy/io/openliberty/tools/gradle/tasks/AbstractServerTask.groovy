@@ -299,19 +299,19 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         if (optionsFile.exists() && jvmOptionsPath == null) {
             // if using pre-existing installation, do not delete file
             if (project.liberty.installDir == null) {
-                logger.warn(optionsFile.getCanonicalPath() + " file deleted before processing plugin configuration.")
+                logger.info(optionsFile.getCanonicalPath() + " file deleted before processing plugin configuration.")
                 optionsFile.delete();
             }
         }
         if((server.jvmOptions != null && !server.jvmOptions.isEmpty()) || !jvmProjectProps.isEmpty()){
             if (jvmOptionsPath != null) {
-                logger.warn("The " + jvmOptionsPath + " file is overwritten by inlined configuration.")
+                logger.info("The " + jvmOptionsPath + " file is overwritten by inlined configuration.")
             }
             writeJvmOptions(optionsFile, server.jvmOptions, jvmProjectProps)
             jvmOptionsPath = "inlined configuration"
         } else if (server.jvmOptionsFile != null && server.jvmOptionsFile.exists()) {
             if (jvmOptionsPath != null) {
-                logger.warn("The " + jvmOptionsPath + " file is overwritten by the " + server.jvmOptionsFile.getCanonicalPath() + " file.");
+                logger.info("The " + jvmOptionsPath + " file is overwritten by the " + server.jvmOptionsFile.getCanonicalPath() + " file.");
             }
             Files.copy(server.jvmOptionsFile.toPath(), optionsFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
             jvmOptionsPath = server.jvmOptionsFile.getCanonicalPath()
@@ -323,19 +323,19 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         if (bootstrapFile.exists() && bootStrapPropertiesPath == null) {
             // if using pre-existing installation, do not delete file
             if (project.liberty.installDir == null) {
-                logger.warn(bootstrapFile.getCanonicalPath() + " file deleted before processing plugin configuration.")
+                logger.info(bootstrapFile.getCanonicalPath() + " file deleted before processing plugin configuration.")
                 bootstrapFile.delete();
             }
         }
         if((server.bootstrapProperties != null && !server.bootstrapProperties.isEmpty()) || !bootstrapProjectProps.isEmpty()){
             if (bootStrapPropertiesPath != null) {
-                logger.warn("The " + bootStrapPropertiesPath + " file is overwritten by inlined configuration.")
+                logger.info("The " + bootStrapPropertiesPath + " file is overwritten by inlined configuration.")
             }
             writeBootstrapProperties(bootstrapFile, server.bootstrapProperties, bootstrapProjectProps)
             bootStrapPropertiesPath = "inlined configuration"
         } else if (server.bootstrapPropertiesFile != null && server.bootstrapPropertiesFile.exists()) {
             if (bootStrapPropertiesPath != null) {
-                logger.warn("The " + bootStrapPropertiesPath + " file is overwritten by the " + server.bootstrapPropertiesFile.getCanonicalPath() + " file.")
+                logger.info("The " + bootStrapPropertiesPath + " file is overwritten by the " + server.bootstrapPropertiesFile.getCanonicalPath() + " file.")
             }
             Files.copy(server.bootstrapPropertiesFile.toPath(), bootstrapFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
             bootStrapPropertiesPath = server.bootstrapPropertiesFile.getCanonicalPath()
@@ -347,7 +347,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         // generate a config file on the server with any Liberty configuration variables specified via project properties
         File pluginVariableConfig = new File(serverDirectory, PLUGIN_VARIABLE_CONFIG_OVERRIDES_XML)
         if (pluginVariableConfig.exists()) {
-            logger.warn(pluginVariableConfig.getCanonicalPath() + " file deleted before processing plugin configuration.")
+            logger.debug(pluginVariableConfig.getCanonicalPath() + " file deleted before processing plugin configuration.")
             pluginVariableConfig.delete();
         }
         if ((server.var != null && !server.var.isEmpty()) || !varProjectProps.isEmpty()) {
@@ -358,7 +358,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         // generate a config file on the server with any Liberty configuration default variables specified via project properties
         pluginVariableConfig = new File(serverDirectory, PLUGIN_VARIABLE_CONFIG_DEFAULTS_XML)
         if (pluginVariableConfig.exists()) {
-            logger.warn(pluginVariableConfig.getCanonicalPath() + " file deleted before processing plugin configuration.")
+            logger.debug(pluginVariableConfig.getCanonicalPath() + " file deleted before processing plugin configuration.")
             pluginVariableConfig.delete();
         }
         if ((server.defaultVar != null && !server.defaultVar.isEmpty()) || !defaultVarProjectProps.isEmpty()) {
