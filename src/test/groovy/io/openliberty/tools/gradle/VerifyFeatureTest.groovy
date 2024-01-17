@@ -57,23 +57,21 @@ class VerifyFeatureTest extends AbstractIntegrationTest{
     }
 
 
+    @Test
+    public void test_verifyALL() {
+        try {
+			System.properties['verify'] = 'all'
+			System.properties['keyid'] = '0x05534365803788CE'
+			assert simpleValidKey.exists() : "no valid key"
+			
+            runTasks(buildDir, 'installFeature')
 
-    //TODO: Disable for now. 
-//    @Test
-//    public void test_verifyALL() {
-//        try {
-//			System.properties['verify'] = 'all'
-//			System.properties['keyid'] = '0x05534365803788CE'
-//			assert simpleValidKey.exists() : "no valid key"
-//			
-//            runTasks(buildDir, 'installFeature')
-//
-//            assert featureFile.exists() : "SimpleActivator.mf cannot be generated"	
-//            
-//        } catch (Exception e) {
-//            throw new AssertionError ("Fail to verify user feature.", e)
-//        }
-//    }
+            assert featureFile.exists() : "SimpleActivator.mf cannot be generated"	
+            
+        } catch (Exception e) {
+            throw new AssertionError ("Fail to verify user feature.", e)
+        }
+    }
 	
 	@Test
 	public void test_verifyALLWrongKeyId() {
