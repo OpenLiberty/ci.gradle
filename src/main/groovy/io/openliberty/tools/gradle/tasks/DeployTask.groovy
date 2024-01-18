@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2023.
+ * (C) Copyright IBM Corporation 2014, 2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,8 @@ class DeployTask extends AbstractServerTask {
         } else {
             if (libertyConfigDropinsAppXml.exists()){
                 libertyConfigDropinsAppXml.delete()
-                ServerConfigDocument.markInstanceStale()
+                // force reinitialization of ServerConfigDocument
+                scd = null
             }
         }
     }
@@ -681,7 +682,7 @@ class DeployTask extends AbstractServerTask {
                 File serverXML = new File(getServerDir(project).getCanonicalPath(), "server.xml")
 
                 try {
-                    scd = ServerConfigDocument.getInstance(CommonLogger.getInstance(project), serverXML, server.configDirectory,
+                    scd = getServerConfigDocument(new CommonLogger(project), serverXML, server.configDirectory,
                             server.bootstrapPropertiesFile, combinedBootstrapProperties, server.serverEnvFile, false, getLibertyDirectoryPropertyFiles(null))
 
                     //appName will be set to a name derived from appFile if no name can be found.
