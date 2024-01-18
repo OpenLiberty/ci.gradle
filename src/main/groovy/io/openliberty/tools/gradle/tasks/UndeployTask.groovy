@@ -23,6 +23,8 @@ import org.gradle.api.logging.LogLevel
 import io.openliberty.tools.ant.ServerTask
 import io.openliberty.tools.common.plugins.config.ServerConfigDocument
 
+import io.openliberty.tools.gradle.utils.CommonLogger
+
 class UndeployTask extends AbstractServerTask {
 
     private static final String STOP_APP_MESSAGE_CODE_REG = "CWWKZ0009I.*"
@@ -77,7 +79,7 @@ class UndeployTask extends AbstractServerTask {
             File serverXML = new File(getServerDir(project).getCanonicalPath(), "server.xml")
 
             try {
-                getServerConfigDocument(CommonLogger.getInstance(project), serverXML, server.configDirectory,
+                getServerConfigDocument(new CommonLogger(project), serverXML, server.configDirectory,
                         server.bootstrapPropertiesFile, combinedBootstrapProperties, server.serverEnvFile, false, getLibertyDirectoryPropertyFiles(null))
 
                 //appName will be set to a name derived from appFile if no name can be found.

@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2019, 2020.
+ * (C) Copyright IBM Corporation 2019, 2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,22 +21,10 @@ import org.gradle.api.Project
 
 public class CommonLogger implements CommonLoggerI {
 
-    private static CommonLogger logger = null
-    private static Project project
+    private Project project
 
-    CommonLogger(Project project) {
+    public CommonLogger(Project project) {
         this.project = project
-    }
-
-    public static init(Project project) {
-        logger = new CommonLogger(project)
-    }
-
-    public static CommonLogger getInstance(Project project) {
-        if (logger == null) {
-            CommonLogger.init(project)
-        }
-        return logger
     }
 
     @Override
