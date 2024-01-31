@@ -4,12 +4,6 @@ import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
-
 import org.junit.BeforeClass
 import org.junit.FixMethodOrder
 import org.junit.Test

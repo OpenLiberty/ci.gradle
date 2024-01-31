@@ -80,6 +80,8 @@ public class TestLooseEarApplicationEarlibs extends AbstractIntegrationTest{
         inputBuilderFactory.setCoalescing(true);
         inputBuilderFactory.setIgnoringElementContentWhitespace(true);
         inputBuilderFactory.setValidating(false);
+        inputBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false)
+        inputBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)  
         DocumentBuilder inputBuilder = inputBuilderFactory.newDocumentBuilder();
         Document inputDoc=inputBuilder.parse(input);
 
