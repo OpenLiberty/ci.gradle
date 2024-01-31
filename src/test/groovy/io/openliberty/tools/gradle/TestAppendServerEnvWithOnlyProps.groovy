@@ -4,12 +4,6 @@ import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 
