@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2023.
+ * (C) Copyright IBM Corporation 2014, 2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.logging.LogLevel
+import org.gradle.api.Project
 
 class CreateTask extends AbstractServerTask {
 
@@ -33,7 +34,7 @@ class CreateTask extends AbstractServerTask {
             group 'Liberty'
         })
         outputs.upToDateWhen {
-            getServerDir(project).exists() && (new File(getServerDir(project), 'server.xml')).exists()
+            getServerDir(project).exists() && (new File(getServerDir(project), 'server.xml')).exists() && !isServerDirChanged(project)
         }
     }
 
@@ -93,7 +94,25 @@ class CreateTask extends AbstractServerTask {
             logger.warn("The " + serverXmlFile.getAbsolutePath() + " does not exist. Copying over the defaultServer template server.xml file.")
         }
         copyConfigFiles()
-        writeServerPropertiesToXml(project)
+    }
+
+    protected boolean isServerDirChanged(Project project) {
+        if (!project.buildDir.exists() || !(new File(project.buildDir, 'liberty-plugin-config.xml')).exists()) {
+            return false
+        }
+
+        XmlParser pluginXmlParser = new XmlParser()
+        Node libertyPluginConfig = pluginXmlParser.parse(new File(project.buildDir, 'liberty-plugin-config.xml'))
+        if (!libertyPluginConfig.getAt('serverDirectory').isEmpty()) {
+            File currentDir = getServerDir(project)
+            File previousDir = new File(libertyPluginConfig.getAt('serverDirectory')[0].value)
+            if (previousDir.exists() && previousDir.equals(currentDir)) {
+                return false
+            }
+            return true
+        }
+        // if serverDirectory did not exist in the xml file, do not consider this as a change 
+        return false
     }
 
     File getLibertyPropertyFile(File libertyPropertyFile, String fileName) {

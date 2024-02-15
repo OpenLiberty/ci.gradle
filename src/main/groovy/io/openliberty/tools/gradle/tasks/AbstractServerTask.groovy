@@ -380,6 +380,8 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         if (serverEnvPath != null && !serverEnvPath.isEmpty()) {
             logger.info("Update server configuration file server.env from " + serverEnvPath)
         }
+
+        writeServerPropertiesToXml(project)
     }
 
     private void loadLibertyConfigFromProperties() {

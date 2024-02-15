@@ -1260,9 +1260,12 @@ class DevTask extends AbstractFeatureTask {
                 }
                 
                 if (!isNewInstallation) {
-                    logger.info("Skipping installLiberty task for existing installation.")
-                    // will this cause an issue when changing the runtime? Customer would be forced to cleanup first?
-                    gradleBuildLauncher.addArguments("--exclude-task", "installLiberty"); // skip installing Liberty at startup since it was already installed
+                    // if the install dir changed or this is the first dev mode run on this project, need to give installLiberty task 
+                    // a chance to check validity of installation and update info in liberty plugin config xml file.
+                    if (!isInstallDirChanged(project, serverInstallDir)) {
+                        logger.info("Skipping installLiberty task for existing installation.")
+                        gradleBuildLauncher.addArguments("--exclude-task", "installLiberty"); // skip installing Liberty at startup since it is the same installation as previous dev mode run
+                    }
                     if (skipInstallFeature) {
                         logger.info("Skipping installFeature task due to skipInstallFeature configuration.")
                         gradleBuildLauncher.addArguments("--exclude-task", "installFeature"); // skip installing features at startup since flag was set
@@ -1323,6 +1326,26 @@ class DevTask extends AbstractFeatureTask {
             return; // enter shutdown hook
         }
     }
+
+    private boolean isInstallDirChanged(Project project, File currentInstallDir) {
+        if (project.buildDir.exists() && new File(project.buildDir, 'liberty-plugin-config.xml').exists()) {
+            XmlParser pluginXmlParser = new XmlParser()
+            Node libertyPluginConfig = pluginXmlParser.parse(new File(project.buildDir, 'liberty-plugin-config.xml'))
+            if (!libertyPluginConfig.getAt('installDirectory').isEmpty()) {
+                Node installDirNode = libertyPluginConfig.getAt('installDirectory').get(0)
+                String installDirValue = installDirNode.text()
+                File previousInstallDir = new File(installDirValue)
+                if (previousInstallDir.exists() && previousInstallDir.equals(currentInstallDir)) {
+                    return false
+                } else {
+                    logger.info("Detected change in installDir location from "+installDirValue+" to "+currentInstallDir.getAbsolutePath())
+                    return true
+                }
+            }
+        }
+        return true
+    }
+
 
     private void addLibertyRuntimeProperties(BuildLauncher gradleBuildLauncher) {
         Set<Entry<Object, Object>> entries = project.getProperties().entrySet()
