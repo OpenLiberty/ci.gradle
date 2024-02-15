@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2023.
+ * (C) Copyright IBM Corporation 2014, 2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package io.openliberty.tools.gradle.tasks
 
 import javax.xml.parsers.*
+import groovy.xml.StreamingMarkupBuilder
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
@@ -52,7 +53,8 @@ class InstallLibertyTask extends AbstractLibertyTask {
         outputs.upToDateWhen {
             // ensure a Liberty installation exists at the install directory
             getInstallDir(project).exists() && new File(getInstallDir(project), 'lib/ws-launch.jar').exists() && 
-            project.buildDir.exists() && new File(project.buildDir, 'liberty-plugin-config.xml').exists()
+            project.buildDir.exists() && new File(project.buildDir, 'liberty-plugin-config.xml').exists() &&
+            !isInstallDirChanged(project)
         }
     }
 
@@ -109,7 +111,9 @@ class InstallLibertyTask extends AbstractLibertyTask {
     @TaskAction
     void install() {
         // If installDir is set, then use the configured wlp or throw error if it is invalid
-        if(project.liberty.installDir != null && isLibertyInstalledAndValid(project)) {
+        boolean isExisting = false
+        if((project.liberty.installDir != null || project.hasProperty('liberty.installDir')) && isLibertyInstalledAndValid(project)) {
+            isExisting = true
             logger.info ("Liberty is already installed at: " + getInstallDir(project))
         } else {
             def params = buildInstallLibertyMap(project)
@@ -125,25 +129,94 @@ class InstallLibertyTask extends AbstractLibertyTask {
                 process.waitFor()
             }
         }
-
-        createPluginXmlFile()
+        createPluginXmlFile(isExisting)
     }
 
-    protected void createPluginXmlFile() {
+    protected void updatePluginXmlFile() {
+        XmlParser pluginXmlParser = new XmlParser()
+        Node libertyPluginConfig = pluginXmlParser.parse(new File(project.buildDir, 'liberty-plugin-config.xml'))
+
+        Node installDirNode = libertyPluginConfig.getAt('installDirectory').isEmpty() ? libertyPluginConfig.appendNode('installDirectory') : libertyPluginConfig.getAt('installDirectory').get(0)
+        installDirNode.setValue(getInstallDir(project).toString())
+        //logger.info ("Updating liberty-plugin-config.xml installDirectory: " + getInstallDir(project).toString())
+
+        if (project.liberty.installDir != null || project.hasProperty('liberty.installDir')) {
+            // remove stale nodes
+            if (!libertyPluginConfig.getAt('assemblyArchive').isEmpty()) {
+                //logger.info ("Updating liberty-plugin-config.xml to remove assemblyArchive")
+                libertyPluginConfig.remove(libertyPluginConfig.getAt('assemblyArchive').get(0))
+            }
+            if (!libertyPluginConfig.getAt('assemblyArtifact').isEmpty()) {
+                //logger.info ("Updating liberty-plugin-config.xml to remove assemblyArtifact")
+                libertyPluginConfig.remove(libertyPluginConfig.getAt('assemblyArtifact').get(0))
+            }
+        } else if (detachedCoords != null) {
+            //logger.info ("Updating liberty-plugin-config.xml to update assemblyArtifact and assemblyArchive")
+            Node assemblyArchive = libertyPluginConfig.getAt('assemblyArchive').isEmpty() ? libertyPluginConfig.appendNode('assemblyArchive') : libertyPluginConfig.getAt('assemblyArchive').get(0)
+            Node assemblyArtifact = libertyPluginConfig.getAt('assemblyArtifact').isEmpty() ? libertyPluginConfig.appendNode('assemblyArtifact') : libertyPluginConfig.getAt('assemblyArtifact').get(0)
+ 
+            //removes the child nodes from the assemblyArtifact element
+            assemblyArtifact.value = ""
+
+            String[] coords = detachedCoords.split(":")
+
+            assemblyArtifact.appendNode('groupId', coords[0])
+            assemblyArtifact.appendNode('artifactId', coords[1])
+            assemblyArtifact.appendNode('version', coords[2])
+            assemblyArtifact.appendNode('type', 'zip')
+
+            assemblyArchive.setValue(detachedConfigFilePath)
+
+        } else if (project.configurations.libertyRuntime != null) {
+            //logger.info ("Updating liberty-plugin-config.xml to update assemblyArtifact and assemblyArchive")
+            Node assemblyArchive = libertyPluginConfig.getAt('assemblyArchive').isEmpty() ? libertyPluginConfig.appendNode('assemblyArchive') : libertyPluginConfig.getAt('assemblyArchive').get(0)
+            Node assemblyArtifact = libertyPluginConfig.getAt('assemblyArtifact').isEmpty() ? libertyPluginConfig.appendNode('assemblyArtifact') : libertyPluginConfig.getAt('assemblyArtifact').get(0)
+            
+            //removes the child nodes from the assemblyArtifact element
+            assemblyArtifact.value = ""
+
+            project.configurations.libertyRuntime.dependencies.each { libertyArtifact ->
+
+                assemblyArtifact.appendNode('groupId', libertyArtifact.group)
+                assemblyArtifact.appendNode('artifactId',libertyArtifact.name )
+                assemblyArtifact.appendNode('version', libertyArtifact.version)
+                assemblyArtifact.appendNode('type', 'zip')
+
+                assemblyArchive.setValue(project.configurations.libertyRuntime.resolvedConfiguration.resolvedArtifacts.getAt(0).file.toString())
+            }
+        }
+
+        new File( project.buildDir, 'liberty-plugin-config.xml' ).withWriter('UTF-8') { output ->
+            output << new StreamingMarkupBuilder().bind { mkp.xmlDeclaration(encoding: 'UTF-8', version: '1.0' ) }
+            XmlNodePrinter printer = new XmlNodePrinter( new PrintWriter(output) )
+            printer.preserveWhitespace = true
+            printer.print( libertyPluginConfig )
+        }
+
+        logger.info ("Updating Liberty plugin config info at ${project.buildDir}/liberty-plugin-config.xml.")
+
+    }
+
+    protected void createPluginXmlFile(boolean isExisting) {
         if(!this.state.upToDate) {
             if (!project.buildDir.exists()) {
                 logger.info ("Creating missing project buildDir at ${project.buildDir}.")
                 project.buildDir.mkdirs()
             }
 
-            new File(project.buildDir, 'liberty-plugin-config.xml').withWriter { writer ->
-                def xmlDoc = new MarkupBuilder(writer)
-                xmlDoc.mkp.xmlDeclaration(version: "1.0", encoding: "UTF-8")
-                xmlDoc.'liberty-plugin-config'('version':'2.0') {
-                    outputLibertyPropertiesToXml(xmlDoc)
+            // if the file already exists, update it instead of replacing it
+            if (new File(project.buildDir, 'liberty-plugin-config.xml').exists()) {
+                updatePluginXmlFile()
+            } else {
+                new File(project.buildDir, 'liberty-plugin-config.xml').withWriter { writer ->
+                    def xmlDoc = new MarkupBuilder(writer)
+                    xmlDoc.mkp.xmlDeclaration(version: "1.0", encoding: "UTF-8")
+                    xmlDoc.'liberty-plugin-config'('version':'2.0') {
+                        outputLibertyPropertiesToXml(xmlDoc, isExisting)
+                    }
                 }
+                logger.info ("Creating Liberty plugin config info to ${project.buildDir}/liberty-plugin-config.xml.")
             }
-            logger.info ("Adding Liberty plugin config info to ${project.buildDir}/liberty-plugin-config.xml.")
         }
     }
 
@@ -269,8 +342,13 @@ class InstallLibertyTask extends AbstractLibertyTask {
         return result
     }
 
-    protected void outputLibertyPropertiesToXml(MarkupBuilder xmlDoc) {
+    protected void outputLibertyPropertiesToXml(MarkupBuilder xmlDoc, boolean isExisting) {
         xmlDoc.installDirectory (getInstallDir(project).toString())
+
+        // should only include assemblyArtifact and assemblyArchive if using an installation that was installed by our plugin
+        if (isExisting && ((project.liberty.installDir != null) || project.hasProperty('liberty.installDir'))) {
+            return
+        }
 
         if (detachedCoords != null) {
             String[] coords = detachedCoords.split(":")

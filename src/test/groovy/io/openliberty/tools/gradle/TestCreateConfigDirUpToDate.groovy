@@ -55,10 +55,10 @@ public class TestCreateConfigDirUpToDate extends AbstractIntegrationTest {
             testFileMessageString = "\\build\\testBuilds\\test-create-config-dir-up-to-date\\src\\main\\liberty\\config\\test.txt has changed."
         } 
 
-        assert result.getOutput().contains(configDirMessageString)
-        assert result.getOutput().contains(testFileMessageString)
+        assert result.getOutput().contains(configDirMessageString) : "configDirMessageString not found in output: "+result.getOutput()
+        assert result.getOutput().contains(testFileMessageString) : "testFileMessageString not found in output: "+result.getOutput()
 
         //Check updated file was copied to server directory
-        assert serverTestTextFile.text.contains('Test Comment 2')
+        assert serverTestTextFile.text.contains('Test Comment 2') : "Test Comment 2 not found in "+serverTestTextFile.text
     }
 }
