@@ -538,6 +538,15 @@ class DevTask extends AbstractFeatureTask {
                 return false;
             }
 
+            // Detect change in installation configuration that requires restart of dev mode. Throw error.
+            if (hasInstallationConfigChanged(newProject, project)) {
+                // Note that a change in some config values requires a 'clean' because the install location is the same, but the
+                // artifact that gets installed would be different. This can happen when using 'libertyRuntime' for example and
+                // only changing the 'version'. The 'installLiberty' task cannot detect that difference today and would report the task as upToDate.
+                // It only detects changes in install location currently. It would not be trivial to detect the other types of changes.
+                throw new PluginExecutionException("A change in Liberty runtime installation configuration requires a 'clean'. After running the 'clean' task, please run the 'libertyDev' task again for the change to take effect.");
+            }
+
             if(hasServerConfigBootstrapPropertiesChanged(newProject, project)) {
                 logger.debug('Bootstrap properties changed');
                 restartServer = true;
@@ -686,6 +695,59 @@ class DevTask extends AbstractFeatureTask {
                     logger.warn(GEN_FEAT_LIBERTY_DEP_WARNING);
                 }
             }
+        }
+
+        private boolean hasInstallationConfigChanged(Project newProject, Project oldProject) {
+            // The following project configuration is used for the Liberty installation
+            // liberty extension: installDir, baseDir, cacheDir, outputDir, userDir, runtime
+            // libertyRuntime dependency
+            // liberty->install block: type, runtimeUrl, version, useOpenLiberty
+            boolean foundChange = false
+            if (newProject.liberty.installDir != oldProject.liberty.installDir) {
+                logger.debug('liberty.installDir changed')
+                foundChange = true
+            }
+            if (newProject.liberty.baseDir != oldProject.liberty.baseDir) {
+                logger.debug('liberty.baseDir changed')
+                foundChange = true
+            }
+            if (newProject.liberty.cacheDir != oldProject.liberty.cacheDir) {
+                logger.debug('liberty.cacheDir changed')
+                foundChange = true
+            }
+            if (newProject.liberty.outputDir != oldProject.liberty.outputDir) {
+                logger.debug('liberty.outputDir changed')
+                foundChange = true
+            }
+            if (newProject.liberty.userDir != oldProject.liberty.userDir) {
+                logger.debug('liberty.userDir changed')
+                foundChange = true
+            }
+            if (newProject.liberty.install.type != oldProject.liberty.install.type) {
+                logger.debug('liberty.install.type changed')
+                foundChange = true
+            }
+            if (newProject.liberty.install.runtimeUrl != oldProject.liberty.install.runtimeUrl) {
+                logger.debug('liberty.install.runtimeUrl changed')
+                foundChange = true
+            }
+            if (newProject.liberty.install.version != oldProject.liberty.install.version) {
+                logger.debug('liberty.install.version changed')
+                foundChange = true
+            }
+            if (newProject.liberty.install.useOpenLiberty != oldProject.liberty.install.useOpenLiberty) {
+                logger.debug('liberty.install.useOpenLiberty changed')
+                foundChange = true
+            }
+            if (newProject.liberty.runtime != oldProject.liberty.runtime) {
+                logger.debug('liberty.runtime changed')
+                foundChange = true
+            }
+            if (newProject.configurations.libertyRuntime != oldProject.configurations.libertyRuntime) {
+                logger.debug('libertyRuntime changed')
+                foundChange = true
+            }
+            return foundChange
         }
 
         private boolean hasServerConfigBootstrapPropertiesChanged(Project newProject, Project oldProject) {
