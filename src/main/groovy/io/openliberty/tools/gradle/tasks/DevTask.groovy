@@ -544,6 +544,8 @@ class DevTask extends AbstractFeatureTask {
                 // artifact that gets installed would be different. This can happen when using 'libertyRuntime' for example and
                 // only changing the 'version'. The 'installLiberty' task cannot detect that difference today and would report the task as upToDate.
                 // It only detects changes in install location currently. It would not be trivial to detect the other types of changes.
+                logger.error("A change in Liberty runtime installation configuration requires a 'clean'. Stopping dev mode.");
+                util.stopServer();
                 throw new PluginExecutionException("A change in Liberty runtime installation configuration requires a 'clean'. After running the 'clean' task, please run the 'libertyDev' task again for the change to take effect.");
             }
 
