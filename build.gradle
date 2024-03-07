@@ -60,7 +60,7 @@ compileTestGroovy {
 }
 
 def libertyAntVersion = "1.9.14"
-def libertyCommonVersion = "1.8.31"
+def libertyCommonVersion = "1.8.32-SNAPSHOT"
 
 dependencies {
     implementation gradleApi()
