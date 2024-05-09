@@ -21,10 +21,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class TestCompileJSP extends AbstractIntegrationTest{
+public class TestCompileJSPSource17 extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/sampleJSP.servlet")
-    static File buildDir = new File(integTestDir, "/test-compile-jsp")
-    static String buildFilename = "testCompileJSP.gradle"
+    static File buildDir = new File(integTestDir, "/test-compile-jsp-source-17")
+    static String buildFilename = "testCompileJSP17.gradle"
 
     @BeforeClass
     public static void setup() {
@@ -36,28 +36,28 @@ public class TestCompileJSP extends AbstractIntegrationTest{
 
     @Test
     public void check_for_jsp() {
-        assert new File('build/testBuilds/test-compile-jsp/src/main/webapp/index.jsp').exists() : 'index.jsp not found!'
+        assert new File('build/testBuilds/test-compile-jsp-source-17/src/main/webapp/index.jsp').exists() : 'index.jsp not found!'
     }
 
     @Test
     public void test_1() {
         
-        assert new File('build/testBuilds/test-compile-jsp/build/compileJsp').exists() : 'compileJsp Directory not found!'
+        assert new File('build/testBuilds/test-compile-jsp-source-17/build/compileJsp').exists() : 'compileJsp Directory not found!'
     }
 
     @Test
     public void test_2() {
-        assert new File('build/testBuilds/test-compile-jsp/build/classes/java/_index.class').exists() : '_index.class not found!'
+        assert new File('build/testBuilds/test-compile-jsp-source-17/build/classes/java/_index.class').exists() : '_index.class not found!'
     }
 
     @Test
     public void check_jsp_server_xml_exists() {
-        assert new File('build/testBuilds/test-compile-jsp/build/compileJsp/servers/defaultServer/server.xml').exists() : 'server.xml not found!'
+        assert new File('build/testBuilds/test-compile-jsp-source-17/build/compileJsp/servers/defaultServer/server.xml').exists() : 'server.xml not found!'
     }
 
     @Test
     public void check_jsp_server_xml_contains_features() {
-        File serverXml = new File("build/testBuilds/test-compile-jsp/build/compileJsp/servers/defaultServer/server.xml")
+        File serverXml = new File("build/testBuilds/test-compile-jsp-source-17/build/compileJsp/servers/defaultServer/server.xml")
         FileInputStream input = new FileInputStream(serverXml)
         
         // get input XML Document 
@@ -94,8 +94,9 @@ public class TestCompileJSP extends AbstractIntegrationTest{
         if (nodes.item(0) instanceof Element) {
             Element child = (Element) nodes.item(0)
             String nodeValue = child.getAttribute("javaSourceLevel")
-            Assert.assertTrue("Unexpected javaSourceLevel ==>"+nodeValue, nodeValue.equals("8"))
+            Assert.assertTrue("Unexpected javaSourceLevel ==>"+nodeValue, nodeValue.equals("17"))
         }
     }
 
+    
 }
