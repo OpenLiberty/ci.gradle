@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017, 2020.
+ * (C) Copyright IBM Corporation 2017, 2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,6 +85,9 @@ class CompileJSPTask extends AbstractFeatureTask {
         logger.debug("Classpath: " + classpathStr)
         compileJsp.setClasspath(classpathStr)
 
+        // Java version for compiling jsps
+        setCompileJavaSourceVersion(compileJsp, task)
+
         //Feature list
         Set<String> installedFeatures = getSpecifiedFeatures(null);
 
@@ -103,23 +106,41 @@ class CompileJSPTask extends AbstractFeatureTask {
         compileJsp.execute()
     }
 
-        private void setJspVersion(CompileJSPs compile, Set<String> installedFeatures) {
-            //If no conditions are met, defaults to 2.3 from the ant task
-            if (project.liberty.jsp.jspVersion != null) {
-                compile.setJspVersion(project.liberty.jsp.jspVersion);
-            }
-            else {
-                Iterator it = installedFeatures.iterator();
-                String currentFeature;
-                while (it.hasNext()) {
-                    currentFeature = (String) it.next();
-                    if(currentFeature.startsWith("jsp-")) {
-                        String version = currentFeature.replace("jsp-", "");
-                        compile.setJspVersion(version);
-                        break;
-                    }
+    private void setCompileJavaSourceVersion(CompileJSPs compile, Task task) {
+        Task compileTask = project.tasks.getByName('compileJava')
+        
+        if (compileTask != null) {
+            String release = (String) compileTask.getOptions().getRelease().getOrNull()
+            if (release != null) {
+                logger.info("Found release from compileJava options: "+release)
+                compile.setSource(release)
+                return
+            } 
+        }
+        
+        if (project.hasProperty('sourceCompatibility')) {
+            logger.info("Found sourceCompatibility")
+            compile.setSource((String) project.getProperties().get('sourceCompatibility'))
+        }
+    }
+
+    private void setJspVersion(CompileJSPs compile, Set<String> installedFeatures) {
+        //If no conditions are met, defaults to 2.3 from the ant task
+        if (project.liberty.jsp.jspVersion != null) {
+            compile.setJspVersion(project.liberty.jsp.jspVersion);
+        }
+        else {
+            Iterator it = installedFeatures.iterator();
+            String currentFeature;
+            while (it.hasNext()) {
+                currentFeature = (String) it.next();
+                if(currentFeature.startsWith("jsp-")) {
+                    String version = currentFeature.replace("jsp-", "");
+                    compile.setJspVersion(version);
+                    break;
                 }
             }
+        }
     }
 
     protected void setCompileDependencies(Task task, Set<String> classpaths) {
