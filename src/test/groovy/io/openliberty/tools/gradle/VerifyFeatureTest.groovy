@@ -61,7 +61,7 @@ class VerifyFeatureTest extends AbstractIntegrationTest{
     public void test_verifyALL() {
         try {
 			System.properties['verify'] = 'all'
-			System.properties['keyid'] = '0x05534365803788CE'
+			System.properties['keyid'] = '0x400885CB88B656BB'
 			assert simpleValidKey.exists() : "no valid key"
 			
             runTasks(buildDir, 'installFeature')
