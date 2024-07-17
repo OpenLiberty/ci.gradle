@@ -63,7 +63,7 @@ The following are optional command line parameters supported by this task.
 | Parameter | Description | Required |
 | --------  | ----------- | -------  |
 | hotTests | If this option is enabled, run tests automatically after every change. The default value is `false`. | No |
-| skipTests | If this option is enabled, do not run any tests in dev mode. The default value is `false`. | No |
+| skipTests | If this option is enabled, do not run any tests in dev mode, even when the `Enter` key is pressed or when `hotTests` is set to `true`. The default value is `false`. | No |
 | libertyDebug | Whether to allow attaching a debugger to the running server. The default value is `true`. | No |
 | libertyDebugPort | The debug port that you can attach a debugger to. The default value is `7777`. | No |
 | compileWait | Time in seconds to wait before processing Java changes. If you encounter compile errors while refactoring, increase this value to allow all files to be saved before compilation occurs. The default value is `0.5` seconds. | No |
