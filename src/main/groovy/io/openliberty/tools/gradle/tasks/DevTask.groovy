@@ -89,6 +89,7 @@ class DevTask extends AbstractFeatureTask {
     private static final boolean DEFAULT_KEEP_TEMP_CONTAINERFILE = false;
     private static final boolean DEFAULT_GENERATE_FEATURES = false;
     private static final boolean DEFAULT_SKIP_INSTALL_FEATURE = false;
+    private static final boolean DEFAULT_CHANGE_ON_DEMAND_TESTS_ACTION = false;
 
     // Debug port for BuildLauncher tasks launched from DevTask as parent JVM
     // (parent defaults to '5005')
@@ -96,6 +97,13 @@ class DevTask extends AbstractFeatureTask {
     private static final int DEFAULT_CHILD_DEBUG_PORT = 6006;
 
     protected final String CONTAINER_PROPERTY_ARG = '-P'+CONTAINER_PROPERTY+'=true';
+
+    private Boolean changeOnDemandTestsAction;
+
+    @Option(option = 'changeOnDemandTestsAction', description = 'If this option is enabled, change the action for running on demand tests from Enter to type t and press Enter. The default value is false.')
+    void setChangeOnDemandTestsAction(boolean changeOnDemandTestsAction) {
+        this.changeOnDemandTestsAction = changeOnDemandTestsAction;
+    }
 
     private Boolean hotTests;
 
@@ -361,7 +369,7 @@ class DevTask extends AbstractFeatureTask {
         private ServerTask serverTask = null;
 
         DevTaskUtil(File buildDir, File installDirectory, File userDirectory, File serverDirectory, File sourceDirectory, File testSourceDirectory,
-                    File configDirectory, File projectDirectory, List<File> resourceDirs,
+                    File configDirectory, File projectDirectory, List<File> resourceDirs, boolean changeOnDemandTestsAction,
                     boolean  hotTests, boolean  skipTests, boolean skipInstallFeature, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
                     boolean libertyDebug, boolean pollingTest, boolean container, File containerfile, File containerBuildContext,
@@ -369,7 +377,7 @@ class DevTask extends AbstractFeatureTask {
                     String mavenCacheLocation, String packagingType, File buildFile, boolean generateFeatures
         ) throws IOException, PluginExecutionException {
             super(buildDir, serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory, /* multi module project directory */ projectDirectory,
-                    resourceDirs, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, skipInstallFeature, artifactId,  serverStartTimeout,
+                    resourceDirs, changeOnDemandTestsAction, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, skipInstallFeature, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, containerfile, containerBuildContext, containerRunOpts, containerBuildTimeout, skipDefaultPorts,
                     null /* compileOptions not needed since useBuildRecompile is true */, keepTempContainerfile, mavenCacheLocation, null /* multi module upstream projects */,
@@ -1166,6 +1174,10 @@ class DevTask extends AbstractFeatureTask {
             libertyDebugPort = DEFAULT_DEBUG_PORT;
         }
 
+        if (changeOnDemandTestsAction == null) {
+            changeOnDemandTestsAction = DEFAULT_CHANGE_ON_DEMAND_TESTS_ACTION;
+        }
+
         if (hotTests == null) {
             hotTests = DEFAULT_HOT_TESTS;
         }
@@ -1246,7 +1258,7 @@ class DevTask extends AbstractFeatureTask {
         try {
             this.util = new DevTaskUtil(project.buildDir, serverInstallDir, getUserDir(project, serverInstallDir),
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
-                resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), skipInstallFeature.booleanValue(), artifactId, serverStartTimeout.intValue(),
+                resourceDirs, changeOnDemandTestsAction.booleanValue(), hotTests.booleanValue(), skipTests.booleanValue(), skipInstallFeature.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(),
                 libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), containerfile, containerBuildContext, containerRunOpts,
                 containerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempContainerfile.booleanValue(), localMavenRepoForFeatureUtility,
