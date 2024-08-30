@@ -103,6 +103,7 @@ class DevTask extends AbstractFeatureTask {
     @Option(option = 'changeOnDemandTestsAction', description = 'If this option is enabled, change the action for running on demand tests from Enter to type t and press Enter. The default value is false.')
     void setChangeOnDemandTestsAction(boolean changeOnDemandTestsAction) {
         this.changeOnDemandTestsAction = changeOnDemandTestsAction;
+        project.liberty.dev.changeOnDemandTestsAction = this.changeOnDemandTestsAction;
     }
 
     private Boolean hotTests;
@@ -1174,10 +1175,6 @@ class DevTask extends AbstractFeatureTask {
             libertyDebugPort = DEFAULT_DEBUG_PORT;
         }
 
-        if (changeOnDemandTestsAction == null) {
-            changeOnDemandTestsAction = DEFAULT_CHANGE_ON_DEMAND_TESTS_ACTION;
-        }
-
         if (hotTests == null) {
             hotTests = DEFAULT_HOT_TESTS;
         }
@@ -1202,7 +1199,7 @@ class DevTask extends AbstractFeatureTask {
             skipInstallFeature = DEFAULT_SKIP_INSTALL_FEATURE;
         }
 
-        processContainerParams();
+        processDevExtensionParams();
     }
 
     @TaskAction
@@ -1443,8 +1440,8 @@ class DevTask extends AbstractFeatureTask {
         }
     }
 
-    // Get container option values from build.gradle if not specified on the command line
-    private void processContainerParams() throws Exception {
+    // Get dev extension parameter values from build.gradle if not specified on the command line
+    private void processDevExtensionParams() throws Exception {
         // process parameters from dev extension
         if (container == null) {
             boolean buildContainerSetting = project.liberty.dev.container; // get from build.gradle or from -Pdev_mode_container=true
@@ -1495,6 +1492,15 @@ class DevTask extends AbstractFeatureTask {
                 setKeepTempContainerfile(buildKeepTempDockerfileSetting);
             } else {
                 setKeepTempContainerfile(DEFAULT_KEEP_TEMP_CONTAINERFILE);
+            }
+        }
+
+        if (changeOnDemandTestsAction == null) {
+            boolean buildChangeOnDemandTestsActionSetting = project.liberty.dev.changeOnDemandTestsAction; // get from build.gradle
+            if (buildChangeOnDemandTestsActionSetting == null) {
+                setChangeOnDemandTestsAction(DEFAULT_CHANGE_ON_DEMAND_TESTS_ACTION);
+            } else {
+                setChangeOnDemandTestsAction(buildChangeOnDemandTestsActionSetting);
             }
         }
     }

@@ -62,7 +62,6 @@ The following are optional command line parameters supported by this task.
 
 | Parameter | Description | Required |
 | --------  | ----------- | -------  |
-| changeOnDemandTestsAction | If this option is enabled, change the action for running on demand tests from `Enter` to type `t` and press `Enter`. The default value is `false`. This parameter is introduced in version 3.8.4. | No |
 | compileWait | Time in seconds to wait before processing Java changes. If you encounter compile errors while refactoring, increase this value to allow all files to be saved before compilation occurs. The default value is `0.5` seconds. | No |
 | generateFeatures | If set to `true`, when a Java file, server configuration file, or build file is changed, generate features required by the application in the source configuration directory. The default value is `false`. | No |
 | hotTests | If this option is enabled, run tests automatically after every change. The default value is `false`. | No |
@@ -75,7 +74,39 @@ The following are optional command line parameters supported by this task.
 
 ### Properties
 
+The `dev` extension allows you to configure properties for the `libertyDev` task.
+
+These can also be specified as command line parameters in addition to the ones in the section above.
+
+| Attribute | Type  | Since | Description | Required |
+| --------- | ----- | ----- | ----------- | -------- |
+| changeOnDemandTestsAction | boolean | 3.8.4 | If set to `true`, change the action for running on demand tests from `Enter` to type `t` and press `Enter`. The default value is `false`. | No |
+
 See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.
+
+### Examples
+
+Start dev mode and change the on demand tests action from `Enter` to type `t` and press `Enter`.
+```
+$ gradle libertyDev --changeOnDemandTestsAction
+```
+
+Customizing the configuration using `dev` extension properties in `build.gradle`.  Note that changing these while dev mode is running is not supported.
+```
+liberty {
+    dev {
+        changeOnDemandTestsAction = true
+    }
+}
+```
+
+or
+
+```
+ext {
+    liberty.dev.changeOnDemandTestsAction = true
+}
+```
 
 ### System Properties for Tests
 
