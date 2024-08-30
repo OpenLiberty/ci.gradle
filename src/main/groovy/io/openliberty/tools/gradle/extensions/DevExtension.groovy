@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2020, 2023.
+ * (C) Copyright IBM Corporation 2020, 2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ class DevExtension {
     int containerBuildTimeout
     boolean skipDefaultPorts = false
     boolean keepTempContainerfile = false
+    boolean changeOnDemandTestsAction = false
 
     //Docker aliases to maintain backwards compatability
     File dockerfile
