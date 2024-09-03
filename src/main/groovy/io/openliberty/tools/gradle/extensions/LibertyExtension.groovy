@@ -33,11 +33,11 @@ class LibertyExtension {
     // Default is group 'io.openliberty', name 'openliberty-kernel' and version '[19.0.0.9,)' which gets the latest version.
     Properties runtime = new Properties();
 
-    CompileJSPExtension jsp;
+    CompileJSPExtension jsp
 
-    InstallExtension install;
-    SpringBootExtension thin;
-    ServerExtension server;
+    InstallExtension install
+    SpringBootExtension thin
+    ServerExtension server
 
     DevExtension dev;
 
@@ -51,23 +51,23 @@ class LibertyExtension {
     }
 
     def jsp(Action action) {
-       action.execute(jsp);
+       action.execute(jsp)
     }
 
     def thin(Action action) {
-        action.execute(thin);
+        action.execute(thin)
     }
 
     def install(Action action) {
-        action.execute(install);
+        action.execute(install)
     }
 
     def server(Action action) {
-        action.execute(server);
+        action.execute(server)
     }
 
     def dev(Action action) {
-        action.execute(dev);
+        action.execute(dev)
     }
 
 }

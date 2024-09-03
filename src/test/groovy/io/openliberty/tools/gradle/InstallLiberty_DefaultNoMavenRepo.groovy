@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2019
+ * (C) Copyright IBM Corporation 2019,2024
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,13 @@
  */
 package io.openliberty.tools.gradle
 
-import static org.junit.Assert.*
+
 
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 
 import org.junit.BeforeClass
 import org.junit.Test
-import org.gradle.api.GradleException
-import org.gradle.api.artifacts.ResolveException
 
 class InstallLiberty_DefaultNoMavenRepo extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/liberty-test")
@@ -45,7 +43,6 @@ class InstallLiberty_DefaultNoMavenRepo extends AbstractIntegrationTest{
             .buildAndFail()
 
         String output = result.getOutput()
-        //gradle 8.10 is throwing TypedResolveException instead of ResolveException
-        assert output.contains("org.gradle.api.internal.artifacts.ivyservice.TypedResolveException") : "Expected installLiberty to fail with TypedResolveException"
+        assert output.contains("org.gradle.internal.resolve.ModuleVersionNotFoundException") : "Expected installLiberty to fail with TypedResolveException"
     }
 }

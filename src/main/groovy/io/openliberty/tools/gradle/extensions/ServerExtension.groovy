@@ -52,16 +52,16 @@ class ServerExtension {
 
     int verifyAppStartTimeout = 0
 
-    FeatureExtension features;
-    UninstallFeatureExtension uninstallfeatures;
-    CleanExtension cleanDir;
+    FeatureExtension features
+    UninstallFeatureExtension uninstallfeatures
+    CleanExtension cleanDir
 
-    DeployExtension deploy;
-    UndeployExtension undeploy;
+    DeployExtension deploy
+    UndeployExtension undeploy
 
-    PackageExtension packageLiberty;
-    DumpExtension dumpLiberty;
-    DumpExtension javaDumpLiberty;
+    PackageExtension packageLiberty
+    DumpExtension dumpLiberty
+    DumpExtension javaDumpLiberty
 
     @Inject
     ServerExtension(ObjectFactory objectFactory) {
