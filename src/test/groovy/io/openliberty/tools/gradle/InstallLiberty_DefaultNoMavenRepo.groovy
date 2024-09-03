@@ -45,6 +45,7 @@ class InstallLiberty_DefaultNoMavenRepo extends AbstractIntegrationTest{
             .buildAndFail()
 
         String output = result.getOutput()
-        assert output.contains("org.gradle.api.artifacts.ResolveException") : "Expected installLiberty to fail with ResolveException"
+        //gradle 8.10 is throwing TypedResolveException instead of ResolveException
+        assert output.contains("org.gradle.api.internal.artifacts.ivyservice.TypedResolveException") : "Expected installLiberty to fail with TypedResolveException"
     }
 }
