@@ -44,6 +44,12 @@ liberty {
         deploy {
             apps = [war]
         }
+        undeploy {
+            apps = [war]
+        }
+        features {
+            acceptLicense = true
+        }
         looseApplication = false
         stripVersion = true
     }

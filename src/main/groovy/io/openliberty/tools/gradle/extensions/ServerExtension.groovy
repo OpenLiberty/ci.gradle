@@ -16,9 +16,10 @@
 
 package io.openliberty.tools.gradle.extensions
 
-import org.gradle.util.ConfigureUtil
-import org.gradle.api.Task
-import java.util.Properties
+import org.gradle.api.Action
+import org.gradle.api.model.ObjectFactory
+
+import javax.inject.Inject
 
 class ServerExtension {
     //Server properties
@@ -51,47 +52,59 @@ class ServerExtension {
 
     int verifyAppStartTimeout = 0
 
-    FeatureExtension features = new FeatureExtension()
-    UninstallFeatureExtension uninstallfeatures = new UninstallFeatureExtension()
-    CleanExtension cleanDir = new CleanExtension()
+    FeatureExtension features;
+    UninstallFeatureExtension uninstallfeatures;
+    CleanExtension cleanDir;
 
-    DeployExtension deploy = new DeployExtension()
-    UndeployExtension undeploy = new UndeployExtension()
+    DeployExtension deploy;
+    UndeployExtension undeploy;
 
-    PackageExtension packageLiberty = new PackageExtension()
-    DumpExtension dumpLiberty = new DumpExtension()
-    DumpExtension javaDumpLiberty = new DumpExtension()
+    PackageExtension packageLiberty;
+    DumpExtension dumpLiberty;
+    DumpExtension javaDumpLiberty;
 
-    def uninstallfeatures(Closure closure) {
-        ConfigureUtil.configure(closure, uninstallfeatures)
+    @Inject
+    ServerExtension(ObjectFactory objectFactory) {
+        this.features = objectFactory.newInstance(FeatureExtension.class)
+        this.uninstallfeatures = objectFactory.newInstance(UninstallFeatureExtension.class)
+        this.cleanDir = objectFactory.newInstance(CleanExtension.class)
+        this.deploy = objectFactory.newInstance(DeployExtension.class)
+        this.undeploy = objectFactory.newInstance(UndeployExtension.class)
+        this.packageLiberty = objectFactory.newInstance(PackageExtension.class)
+        this.dumpLiberty = objectFactory.newInstance(DumpExtension.class)
+        this.javaDumpLiberty = objectFactory.newInstance(DumpExtension.class)
     }
 
-    def features(Closure closure) {
-        ConfigureUtil.configure(closure, features)
+    def uninstallfeatures(Action action) {
+        action.execute(uninstallfeatures)
     }
 
-    def cleanDir(Closure closure) {
-        ConfigureUtil.configure(closure, cleanDir)
+    def features(Action action) {
+        action.execute(features)
     }
 
-    def deploy(Closure closure) {
-        ConfigureUtil.configure(closure, deploy)
+    def cleanDir(Action action) {
+        action.execute(cleanDir)
     }
 
-    def undeploy(Closure closure) {
-        ConfigureUtil.configure(closure, undeploy)
+    def deploy(Action action) {
+        action.execute(deploy)
     }
 
-    def packageLiberty(Closure closure) {
-        ConfigureUtil.configure(closure, packageLiberty)
+    def undeploy(Action action) {
+        action.execute(undeploy)
     }
 
-    def dumpLiberty(Closure closure) {
-        ConfigureUtil.configure(closure, dumpLiberty)
+    def packageLiberty(Action action) {
+        action.execute(packageLiberty)
     }
 
-    def javaDumpLiberty(Closure closure) {
-        ConfigureUtil.configure(closure, javaDumpLiberty)
+    def dumpLiberty(Action action) {
+        action.execute(dumpLiberty)
+    }
+
+    def javaDumpLiberty(Action action) {
+        action.execute(javaDumpLiberty)
     }
 
 }
