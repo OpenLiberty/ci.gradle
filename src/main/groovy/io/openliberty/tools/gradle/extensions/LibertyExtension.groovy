@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2020.
+ * (C) Copyright IBM Corporation 2014, 2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ class LibertyExtension {
 
     // For overriding the group, name or version of the libertyRuntime installed from Maven Central repository.
     // Default is group 'io.openliberty', name 'openliberty-kernel' and version '[19.0.0.9,)' which gets the latest version.
-    Properties runtime =new Properties();
+    Properties runtime = new Properties();
 
     CompileJSPExtension jsp;
 
