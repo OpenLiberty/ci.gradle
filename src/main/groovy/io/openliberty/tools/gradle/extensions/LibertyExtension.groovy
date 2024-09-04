@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2020.
+ * (C) Copyright IBM Corporation 2014, 2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,10 @@
  */
 package io.openliberty.tools.gradle.extensions
 
-import org.gradle.util.ConfigureUtil
-import org.gradle.api.NamedDomainObjectContainer
+import org.gradle.api.Action
+import org.gradle.api.model.ObjectFactory
+
+import javax.inject.Inject
 
 class LibertyExtension {
 
@@ -29,35 +31,43 @@ class LibertyExtension {
 
     // For overriding the group, name or version of the libertyRuntime installed from Maven Central repository.
     // Default is group 'io.openliberty', name 'openliberty-kernel' and version '[19.0.0.9,)' which gets the latest version.
-    Properties runtime = new Properties()
+    Properties runtime = new Properties();
 
-    CompileJSPExtension jsp = new CompileJSPExtension()
+    CompileJSPExtension jsp
 
-    InstallExtension install = new InstallExtension()
-    SpringBootExtension thin = new SpringBootExtension()
+    InstallExtension install
+    SpringBootExtension thin
+    ServerExtension server
 
-    ServerExtension server = server = new ServerExtension()
+    DevExtension dev;
 
-    DevExtension dev = new DevExtension();
-
-    def jsp(Closure closure) {
-        ConfigureUtil.configure(closure, jsp)
+    @Inject
+    LibertyExtension(ObjectFactory objectFactory) {
+        this.jsp = objectFactory.newInstance(CompileJSPExtension.class)
+        this.install = objectFactory.newInstance(InstallExtension.class)
+        this.thin = objectFactory.newInstance(SpringBootExtension.class)
+        this.server = objectFactory.newInstance(ServerExtension.class)
+        this.dev = objectFactory.newInstance(DevExtension.class)
     }
 
-    def thin(Closure closure) {
-       ConfigureUtil.configure(closure, thin)
+    def jsp(Action action) {
+       action.execute(jsp)
     }
 
-    def install(Closure closure) {
-        ConfigureUtil.configure(closure, install)
+    def thin(Action action) {
+        action.execute(thin)
     }
 
-    def server(Closure closure){
-        ConfigureUtil.configure(closure, server)
+    def install(Action action) {
+        action.execute(install)
     }
 
-    def dev(Closure closure) {
-        ConfigureUtil.configure(closure, dev)
+    def server(Action action) {
+        action.execute(server)
+    }
+
+    def dev(Action action) {
+        action.execute(dev)
     }
 
 }
