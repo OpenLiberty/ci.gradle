@@ -48,7 +48,7 @@ class InstallLibertyTask extends AbstractLibertyTask {
         outputs.upToDateWhen {
             // ensure a Liberty installation exists at the install directory
             getInstallDir(project).exists() && new File(getInstallDir(project), 'lib/ws-launch.jar').exists() && 
-            project.layout.buildDirectory.asFile.get().exists() && new File(project.layout.buildDirectory.asFile.get(), 'liberty-plugin-config.xml').exists() &&
+            project.getLayout().getBuildDirectory().getAsFile().get().exists() && new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml').exists() &&
             !isInstallDirChanged(project)
         }
     }
@@ -119,7 +119,7 @@ class InstallLibertyTask extends AbstractLibertyTask {
 
             String licenseFilePath = project.configurations.getByName('libertyLicense').getAsPath()
             if (licenseFilePath) {
-                def command = "java -jar " + licenseFilePath + " --acceptLicense " + project.layout.buildDirectory.asFile.get()
+                def command = "java -jar " + licenseFilePath + " --acceptLicense " + project.getLayout().getBuildDirectory().getAsFile().get()
                 def process = command.execute()
                 process.waitFor()
             }
@@ -129,7 +129,7 @@ class InstallLibertyTask extends AbstractLibertyTask {
 
     protected void updatePluginXmlFile() {
         XmlParser pluginXmlParser = new XmlParser()
-        Node libertyPluginConfig = pluginXmlParser.parse(new File(project.layout.buildDirectory.asFile.get(), 'liberty-plugin-config.xml'))
+        Node libertyPluginConfig = pluginXmlParser.parse(new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml'))
 
         Node installDirNode = libertyPluginConfig.getAt('installDirectory').isEmpty() ? libertyPluginConfig.appendNode('installDirectory') : libertyPluginConfig.getAt('installDirectory').get(0)
         installDirNode.setValue(getInstallDir(project).toString())
@@ -181,36 +181,36 @@ class InstallLibertyTask extends AbstractLibertyTask {
             }
         }
 
-        new File( project.layout.buildDirectory.asFile.get(), 'liberty-plugin-config.xml' ).withWriter('UTF-8') { output ->
+        new File( project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml' ).withWriter('UTF-8') { output ->
             output << new StreamingMarkupBuilder().bind { mkp.xmlDeclaration(encoding: 'UTF-8', version: '1.0' ) }
             XmlNodePrinter printer = new XmlNodePrinter( new PrintWriter(output) )
             printer.preserveWhitespace = true
             printer.print( libertyPluginConfig )
         }
 
-        logger.info ("Updating Liberty plugin config info at ${project.layout.buildDirectory.asFile.get()}/liberty-plugin-config.xml.")
+        logger.info ("Updating Liberty plugin config info at ${project.getLayout().getBuildDirectory().getAsFile().get()}/liberty-plugin-config.xml.")
 
     }
 
     protected void createPluginXmlFile(boolean isExisting) {
         if(!this.state.upToDate) {
-            if (!project.layout.buildDirectory.asFile.get().exists()) {
-                logger.info ("Creating missing project buildDir at ${project.layout.buildDirectory.asFile.get()}.")
-                project.layout.buildDirectory.asFile.get().mkdirs()
+            if (!project.getLayout().getBuildDirectory().getAsFile().get().exists()) {
+                logger.info ("Creating missing project buildDir at ${project.getLayout().getBuildDirectory().getAsFile().get()}.")
+                project.getLayout().getBuildDirectory().getAsFile().get().mkdirs()
             }
 
             // if the file already exists, update it instead of replacing it
-            if (new File(project.layout.buildDirectory.asFile.get(), 'liberty-plugin-config.xml').exists()) {
+            if (new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml').exists()) {
                 updatePluginXmlFile()
             } else {
-                new File(project.layout.buildDirectory.asFile.get(), 'liberty-plugin-config.xml').withWriter { writer ->
+                new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml').withWriter { writer ->
                     def xmlDoc = new MarkupBuilder(writer)
                     xmlDoc.mkp.xmlDeclaration(version: "1.0", encoding: "UTF-8")
                     xmlDoc.'liberty-plugin-config'('version':'2.0') {
                         outputLibertyPropertiesToXml(xmlDoc, isExisting)
                     }
                 }
-                logger.info ("Creating Liberty plugin config info to ${project.layout.buildDirectory.asFile.get()}/liberty-plugin-config.xml.")
+                logger.info ("Creating Liberty plugin config info to ${project.getLayout().getBuildDirectory().getAsFile().get()}/liberty-plugin-config.xml.")
             }
         }
     }
@@ -322,7 +322,7 @@ class InstallLibertyTask extends AbstractLibertyTask {
         }
 
         if (project.liberty.baseDir == null) {
-           result.put('baseDir', project.layout.buildDirectory.asFile.get())
+           result.put('baseDir', project.getLayout().getBuildDirectory().getAsFile().get())
         } else {
            result.put('baseDir', project.liberty.baseDir)
         }

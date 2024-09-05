@@ -35,7 +35,7 @@ abstract class AbstractLibertyTask extends DefaultTask {
     protected boolean isInstallDirChanged(Project project) {
 
         XmlParser pluginXmlParser = new XmlParser()
-        Node libertyPluginConfig = pluginXmlParser.parse(new File(project.layout.buildDirectory.asFile.get(), 'liberty-plugin-config.xml'))
+        Node libertyPluginConfig = pluginXmlParser.parse(new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml'))
         if (!libertyPluginConfig.getAt('installDirectory').isEmpty()) {
             Node installDirNode = libertyPluginConfig.getAt('installDirectory').get(0)
             File previousInstallDir = new File(installDirNode.text())

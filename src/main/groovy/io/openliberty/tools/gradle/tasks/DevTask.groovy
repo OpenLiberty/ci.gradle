@@ -1254,7 +1254,7 @@ class DevTask extends AbstractFeatureTask {
 
         // Instantiate util before any child gradle tasks launched so it can help find available port if needed
         try {
-            this.util = new DevTaskUtil(project.layout.buildDirectory.asFile.get(), serverInstallDir, getUserDir(project, serverInstallDir),
+            this.util = new DevTaskUtil(project.getLayout().getBuildDirectory().getAsFile().get(), serverInstallDir, getUserDir(project, serverInstallDir),
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
                 resourceDirs, changeOnDemandTestsAction.booleanValue(), hotTests.booleanValue(), skipTests.booleanValue(), skipInstallFeature.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(),
@@ -1401,9 +1401,9 @@ class DevTask extends AbstractFeatureTask {
     }
 
     private boolean isInstallDirChanged(Project project, File currentInstallDir) {
-        if (project.layout.buildDirectory.asFile.get().exists() && new File(project.layout.buildDirectory.asFile.get(), 'liberty-plugin-config.xml').exists()) {
+        if (project.getLayout().getBuildDirectory().getAsFile().get().exists() && new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml').exists()) {
             XmlParser pluginXmlParser = new XmlParser()
-            Node libertyPluginConfig = pluginXmlParser.parse(new File(project.layout.buildDirectory.asFile.get(), 'liberty-plugin-config.xml'))
+            Node libertyPluginConfig = pluginXmlParser.parse(new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml'))
             if (!libertyPluginConfig.getAt('installDirectory').isEmpty()) {
                 Node installDirNode = libertyPluginConfig.getAt('installDirectory').get(0)
                 String installDirValue = installDirNode.text()

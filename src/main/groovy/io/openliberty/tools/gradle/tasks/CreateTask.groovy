@@ -69,7 +69,7 @@ class CreateTask extends AbstractServerTask {
 
     @InputFile
     File getPluginConfigXml() {
-        return new File(project.layout.buildDirectory.asFile.get(), 'liberty-plugin-config.xml')
+        return new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml')
     }
 
     @TaskAction
@@ -96,12 +96,12 @@ class CreateTask extends AbstractServerTask {
     }
 
     protected boolean isServerDirChanged(Project project) {
-        if (!project.layout.buildDirectory.asFile.get().exists() || !(new File(project.layout.buildDirectory.asFile.get(), 'liberty-plugin-config.xml')).exists()) {
+        if (!project.getLayout().getBuildDirectory().getAsFile().get().exists() || !(new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml')).exists()) {
             return false
         }
 
         XmlParser pluginXmlParser = new XmlParser()
-        Node libertyPluginConfig = pluginXmlParser.parse(new File(project.layout.buildDirectory.asFile.get(), 'liberty-plugin-config.xml'))
+        Node libertyPluginConfig = pluginXmlParser.parse(new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml'))
         if (!libertyPluginConfig.getAt('serverDirectory').isEmpty()) {
             File currentDir = getServerDir(project)
             File previousDir = new File(libertyPluginConfig.getAt('serverDirectory')[0].value)

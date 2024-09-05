@@ -175,7 +175,7 @@ class Liberty implements Plugin<Project> {
             return installDir
         } else if (project.liberty.installDir == null) {
             if (project.liberty.baseDir == null) {
-                return new File(project.layout.buildDirectory.asFile.get(), 'wlp')
+                return new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'wlp')
             } else {
                 return new File(project.liberty.baseDir, 'wlp')
             }

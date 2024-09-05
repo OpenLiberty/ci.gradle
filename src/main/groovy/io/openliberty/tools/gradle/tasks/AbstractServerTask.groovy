@@ -731,7 +731,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
 
     protected void writeServerPropertiesToXml(Project project) {
         XmlParser pluginXmlParser = new XmlParser()
-        Node libertyPluginConfig = pluginXmlParser.parse(new File(project.layout.buildDirectory.asFile.get(), 'liberty-plugin-config.xml'))
+        Node libertyPluginConfig = pluginXmlParser.parse(new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml'))
         if (libertyPluginConfig.getAt('servers').isEmpty()) {
             libertyPluginConfig.appendNode('servers')
         } else {
@@ -747,14 +747,14 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
 
         libertyPluginConfig.getAt('servers')[0].append(serverNode)
 
-        new File( project.layout.buildDirectory.asFile.get(), 'liberty-plugin-config.xml' ).withWriter('UTF-8') { output ->
+        new File( project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml' ).withWriter('UTF-8') { output ->
             output << new StreamingMarkupBuilder().bind { mkp.xmlDeclaration(encoding: 'UTF-8', version: '1.0' ) }
             XmlNodePrinter printer = new XmlNodePrinter( new PrintWriter(output) )
             printer.preserveWhitespace = true
             printer.print( libertyPluginConfig )
         }
 
-        logger.info ("Adding Liberty plugin config info to ${project.layout.buildDirectory.asFile.get()}/liberty-plugin-config.xml.")
+        logger.info ("Adding Liberty plugin config info to ${project.getLayout().getBuildDirectory().getAsFile().get()}/liberty-plugin-config.xml.")
     }
 
     private void writeBootstrapProperties(File file, Properties properties, Map<String, String> projectProperties) throws IOException {
@@ -1209,7 +1209,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         }
 
         if (container) {
-            File devcDestDir = new File(new File(project.layout.buildDirectory.asFile.get(), DevUtil.DEVC_HIDDEN_FOLDER), appsDir)
+            File devcDestDir = new File(new File(project.getLayout().getBuildDirectory().getAsFile().get(), DevUtil.DEVC_HIDDEN_FOLDER), appsDir)
             return (new File(devcDestDir, looseConfigFileName));
         } else {
             File destDir = new File(getServerDir(project), appsDir)
