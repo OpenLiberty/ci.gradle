@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2018.
+ * (C) Copyright IBM Corporation 2018, 2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,9 @@
  */
 package io.openliberty.tools.gradle;
 
-import org.junit.AfterClass
 import org.junit.BeforeClass
 import org.junit.Test
-import groovy.util.XmlParser
-import java.util.HashMap
+import groovy.xml.XmlParser
 
 public class TestEclipseFacetsWar extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/sample.servlet")

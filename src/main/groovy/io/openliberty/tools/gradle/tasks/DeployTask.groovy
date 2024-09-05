@@ -250,7 +250,7 @@ class DeployTask extends AbstractServerTask {
         File destDir = new File(getServerDir(project), appsDir)
         File looseConfigFile = new File(destDir, looseConfigFileName)
         
-        File devcDestDir = new File(new File(project.buildDir, DevUtil.DEVC_HIDDEN_FOLDER), appsDir)
+        File devcDestDir = new File(new File(project.getLayout().getBuildDirectory().getAsFile().get(), DevUtil.DEVC_HIDDEN_FOLDER), appsDir)
         File devcLooseConfigFile = new File(devcDestDir, looseConfigFileName)
 
         LooseConfigData config = new LooseConfigData()
@@ -312,8 +312,8 @@ class DeployTask extends AbstractServerTask {
 
                 if (server.deploy.copyLibsDirectory == null) { // in container mode, copy dependencies from .m2 dir to the build dir to mount in container
                     // if buildDir is subdirectory of projectDir, use buildDir/libs.  Otherwise use projectDir/build/libs since it must be under the project root in order to make use of DEVMODE_PROJECT_ROOT
-                    if (project.getBuildDir().getCanonicalFile().toPath().startsWith(project.getProjectDir().getCanonicalFile().toPath())) {
-                        server.deploy.copyLibsDirectory = new File(project.getBuildDir(), LIBS);
+                    if (project.getLayout().getBuildDirectory().getAsFile().get().getCanonicalFile().toPath().startsWith(project.getProjectDir().getCanonicalFile().toPath())) {
+                        server.deploy.copyLibsDirectory = new File(project.getLayout().getBuildDirectory().getAsFile().get(), LIBS);
                         logger.debug("Setting copyLibsDirectory to " + server.deploy.copyLibsDirectory);
                     } else {
                         server.deploy.copyLibsDirectory = new File(project.getProjectDir(), BUILD_LIBS);
@@ -343,7 +343,7 @@ class DeployTask extends AbstractServerTask {
         addWarEmbeddedLib(looseWar.getDocumentRoot(), looseWar, task);
 
         //add Manifest file
-        File manifestFile = new File(project.buildDir.getAbsolutePath() + "/tmp/war/MANIFEST.MF")
+        File manifestFile = new File(project.getLayout().getBuildDirectory().getAsFile().get().getAbsolutePath() + "/tmp/war/MANIFEST.MF")
         looseWar.addManifestFile(manifestFile)
     }
 
@@ -406,12 +406,12 @@ class DeployTask extends AbstractServerTask {
         LooseEarApplication looseEar = new LooseEarApplication(task, config);
         looseEar.addSourceDir();
         looseEar.addApplicationXmlFile();
-        
+
         //Checking ear plugin dependency configurations to determine loose-ear content
         processDeployDependencies(looseEar, task)
         processEarlibDependencies(looseEar, task)
 
-        File manifestFile = new File(project.buildDir.getAbsolutePath() + "/tmp/ear/MANIFEST.MF")
+        File manifestFile = new File(project.getLayout().getBuildDirectory().getAsFile().get().getAbsolutePath() + "/tmp/ear/MANIFEST.MF")
         looseEar.addManifestFile(manifestFile)
     }
 

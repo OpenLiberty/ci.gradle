@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017, 2023.
+ * (C) Copyright IBM Corporation 2017, 2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 package io.openliberty.tools.gradle.tasks
 
 import io.openliberty.tools.gradle.Liberty
-
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Dependency
 import org.gradle.api.Task
+import org.gradle.api.artifacts.Dependency
 import org.gradle.api.tasks.Internal
+import groovy.xml.XmlParser
 
 abstract class AbstractLibertyTask extends DefaultTask {
 
@@ -35,7 +35,7 @@ abstract class AbstractLibertyTask extends DefaultTask {
     protected boolean isInstallDirChanged(Project project) {
 
         XmlParser pluginXmlParser = new XmlParser()
-        Node libertyPluginConfig = pluginXmlParser.parse(new File(project.buildDir, 'liberty-plugin-config.xml'))
+        Node libertyPluginConfig = pluginXmlParser.parse(new File(project.layout.buildDirectory.asFile.get(), 'liberty-plugin-config.xml'))
         if (!libertyPluginConfig.getAt('installDirectory').isEmpty()) {
             Node installDirNode = libertyPluginConfig.getAt('installDirectory').get(0)
             File previousInstallDir = new File(installDirNode.text())
