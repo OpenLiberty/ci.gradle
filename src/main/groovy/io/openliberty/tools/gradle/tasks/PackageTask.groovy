@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2023.
+ * (C) Copyright IBM Corporation 2014, 2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ class PackageTask extends AbstractServerTask {
     void packageServer() {
         // Set default server.outputDir to liberty-alt-output-dir for libertyPackage task.
         if (getOutputDir(project).equals(getUserDir(project).toString() + "/servers")) {
-            server.outputDir = new File(project.getBuildDir(), "liberty-alt-output-dir");
+            server.outputDir = new File(project.layout.buildDirectory.asFile.get(), "liberty-alt-output-dir");
         }
 
         def params = buildLibertyMap(project)
@@ -125,7 +125,7 @@ class PackageTask extends AbstractServerTask {
      * @throws IOException
      */
     private String getPackageDirectory() throws IOException {
-        def buildDirLibFolder = new File(project.getBuildDir(),'libs')
+        def buildDirLibFolder = new File(project.layout.buildDirectory.asFile.get(),'libs')
         if (server.packageLiberty.packageDirectory != null && !server.packageLiberty.packageDirectory.isEmpty()) {
             // check if path is relative or absolute, convert to canonical
             def dir = new File(server.packageLiberty.packageDirectory)
