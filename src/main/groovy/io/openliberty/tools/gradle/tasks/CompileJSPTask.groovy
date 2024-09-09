@@ -15,21 +15,11 @@
  */
 package io.openliberty.tools.gradle.tasks
 
-import java.io.File;
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.HashSet;
-
-import org.gradle.api.tasks.TaskAction
+import io.openliberty.tools.ant.jsp.CompileJSPs
+import org.apache.tools.ant.Project
 import org.gradle.api.Task
-import org.gradle.api.GradleException
+import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.War
-import org.gradle.api.logging.LogLevel
-
-import org.apache.tools.ant.Project;
-import io.openliberty.tools.ant.jsp.CompileJSPs;
 
 class CompileJSPTask extends AbstractFeatureTask {
     protected Project ant = new Project();
@@ -69,8 +59,8 @@ class CompileJSPTask extends AbstractFeatureTask {
         War war;
         if(project.plugins.hasPlugin("war")){
             war = (War)project.war
-            if ( war.webAppDirectory.asFile.get() != null) {
-                compileJsp.setSrcdir( war.webAppDirectory.asFile.get())
+            if ( war.getWebAppDirectory().getAsFile().get() != null) {
+                compileJsp.setSrcdir( war.getWebAppDirectory().getAsFile().get())
             }
         }else {
             compileJsp.setSrcdir(new File("src/main/webapp"))
