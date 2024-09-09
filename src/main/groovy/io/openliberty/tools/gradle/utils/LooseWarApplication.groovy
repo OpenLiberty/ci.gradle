@@ -20,8 +20,8 @@ public class LooseWarApplication extends LooseApplication {
         File sourceDir = new File("src/main/webapp")
         if (task.getProject().getPlugins().hasPlugin("war")) {
             war = (War) task.getProject().war
-            if (war.webAppDirectory.asFile.get() != null) {
-                sourceDir = new File(war.webAppDirectory.asFile.get().getAbsolutePath())
+            if (war.getWebAppDirectory().getAsFile().get() != null) {
+                sourceDir = new File(war.getWebAppDirectory().getAsFile().get().getAbsolutePath())
             }
         }
         config.addDir(sourceDir, "/")
