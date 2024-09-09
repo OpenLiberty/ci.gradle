@@ -16,45 +16,34 @@
 package io.openliberty.tools.gradle.tasks
 
 import groovy.xml.StreamingMarkupBuilder
+import groovy.xml.XmlParser
+import groovy.xml.XmlNodePrinter
+import io.openliberty.tools.ant.ServerTask
 import io.openliberty.tools.common.plugins.config.ApplicationXmlDocument
 import io.openliberty.tools.common.plugins.config.ServerConfigDocument
+import io.openliberty.tools.common.plugins.config.ServerConfigXmlDocument
+import io.openliberty.tools.common.plugins.util.DevUtil
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 import io.openliberty.tools.gradle.utils.CommonLogger
-
 import org.apache.commons.io.FileUtils
+import org.apache.commons.io.FilenameUtils
+import org.apache.commons.io.filefilter.FileFilterUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ModuleDependency
-import org.gradle.api.tasks.bundling.War
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.bundling.War
 import org.gradle.plugins.ear.Ear
 
+import javax.xml.parsers.ParserConfigurationException
+import javax.xml.transform.TransformerException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
-
-import org.apache.commons.io.FilenameUtils
-import org.apache.commons.io.filefilter.FileFilterUtils
-
-import io.openliberty.tools.ant.ServerTask
-import io.openliberty.tools.common.plugins.config.ServerConfigXmlDocument;
-
-import java.util.ArrayList
-import java.util.List
-import java.util.HashMap
-import java.util.Map
 import java.util.Map.Entry
-import java.util.Properties
-import java.util.HashSet
-import java.util.Set
-import java.util.EnumSet
-import java.util.regex.Pattern
 import java.util.regex.Matcher
-
-import javax.xml.transform.TransformerException
-import javax.xml.parsers.ParserConfigurationException
-import io.openliberty.tools.common.plugins.util.DevUtil;
+import java.util.regex.Pattern
 
 abstract class AbstractServerTask extends AbstractLibertyTask {
 
@@ -742,7 +731,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
 
     protected void writeServerPropertiesToXml(Project project) {
         XmlParser pluginXmlParser = new XmlParser()
-        Node libertyPluginConfig = pluginXmlParser.parse(new File(project.buildDir, 'liberty-plugin-config.xml'))
+        Node libertyPluginConfig = pluginXmlParser.parse(new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml'))
         if (libertyPluginConfig.getAt('servers').isEmpty()) {
             libertyPluginConfig.appendNode('servers')
         } else {
@@ -758,14 +747,14 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
 
         libertyPluginConfig.getAt('servers')[0].append(serverNode)
 
-        new File( project.buildDir, 'liberty-plugin-config.xml' ).withWriter('UTF-8') { output ->
+        new File( project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml' ).withWriter('UTF-8') { output ->
             output << new StreamingMarkupBuilder().bind { mkp.xmlDeclaration(encoding: 'UTF-8', version: '1.0' ) }
             XmlNodePrinter printer = new XmlNodePrinter( new PrintWriter(output) )
             printer.preserveWhitespace = true
             printer.print( libertyPluginConfig )
         }
 
-        logger.info ("Adding Liberty plugin config info to ${project.buildDir}/liberty-plugin-config.xml.")
+        logger.info ("Adding Liberty plugin config info to ${project.getLayout().getBuildDirectory().getAsFile().get()}/liberty-plugin-config.xml.")
     }
 
     private void writeBootstrapProperties(File file, Properties properties, Map<String, String> projectProperties) throws IOException {
@@ -1109,7 +1098,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
                 File appFile = depArtifact
                 if (dep instanceof ModuleDependency && server.stripVersion && depArtifact.getName().contains(dep.getVersion())) {
                     String noVersionName = depArtifact.getName().minus("-" + dep.getVersion()) //Assuming default Gradle naming scheme
-                    File noVersionDependencyFile = new File(project.getBuildDir(), 'libs/' + noVersionName) //Copying the file to build/libs with no version
+                    File noVersionDependencyFile = new File(project.getLayout().getBuildDirectory().asFile.get(), 'libs/' + noVersionName) //Copying the file to build/libs with no version
                     FileUtils.copyFile(depArtifact, noVersionDependencyFile)
                     appFile = noVersionDependencyFile
                 }
@@ -1220,7 +1209,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         }
 
         if (container) {
-            File devcDestDir = new File(new File(project.buildDir, DevUtil.DEVC_HIDDEN_FOLDER), appsDir)
+            File devcDestDir = new File(new File(project.getLayout().getBuildDirectory().getAsFile().get(), DevUtil.DEVC_HIDDEN_FOLDER), appsDir)
             return (new File(devcDestDir, looseConfigFileName));
         } else {
             File destDir = new File(getServerDir(project), appsDir)

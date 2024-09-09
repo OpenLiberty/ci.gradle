@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2021.
+ * (C) Copyright IBM Corporation 2014, 2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,7 +175,7 @@ class Liberty implements Plugin<Project> {
             return installDir
         } else if (project.liberty.installDir == null) {
             if (project.liberty.baseDir == null) {
-                return new File(project.buildDir, 'wlp')
+                return new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'wlp')
             } else {
                 return new File(project.liberty.baseDir, 'wlp')
             }

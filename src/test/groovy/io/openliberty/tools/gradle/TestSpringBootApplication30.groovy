@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2023.
+ * (C) Copyright IBM Corporation 2023, 2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package io.openliberty.tools.gradle
 
-import groovy.xml.QName
 import org.junit.*
 import org.junit.rules.TestName
 
