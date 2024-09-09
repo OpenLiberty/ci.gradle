@@ -59,17 +59,20 @@ class CompileJSPTask extends AbstractFeatureTask {
     protected void perTaskCompileJSP(Task task) throws Exception {
         CompileJSPs compileJsp = new CompileJSPs()
         compileJsp.setInstallDir(getInstallDir(project))
-        compileJsp.setTempdir(project.buildDir)
-        compileJsp.setDestdir(new File(project.buildDir.getAbsolutePath()+"/classes/java"))
+        compileJsp.setTempdir(project.getLayout().getBuildDirectory().getAsFile().get())
+        compileJsp.setDestdir(new File(project.getLayout().getBuildDirectory().getAsFile().get().getAbsolutePath()+"/classes/java"))
         compileJsp.setTimeout(project.liberty.jsp.jspCompileTimeout)
         // don't delete temporary server dir
         compileJsp.setCleanup(false)
         compileJsp.setProject(ant)
         compileJsp.setTaskName('antlib:net/wasdev/wlp/ant:compileJSPs')
-
-        if (project.convention.plugins.war.webAppDirName != null) {
-            compileJsp.setSrcdir(project.convention.plugins.war.webAppDir)
-        } else {
+        War war;
+        if(project.plugins.hasPlugin("war")){
+            war = (War)project.war
+            if ( war.webAppDirectory.asFile.get() != null) {
+                compileJsp.setSrcdir( war.webAppDirectory.asFile.get())
+            }
+        }else {
             compileJsp.setSrcdir(new File("src/main/webapp"))
         }
         Set<String> classpath = new HashSet<String>();

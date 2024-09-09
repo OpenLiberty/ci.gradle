@@ -1,27 +1,29 @@
 package io.openliberty.tools.gradle.utils;
 
-import java.io.File;
-import org.gradle.api.Project;
-import org.gradle.api.plugins.WarPluginConvention
+import io.openliberty.tools.common.plugins.config.LooseApplication
+import io.openliberty.tools.common.plugins.config.LooseConfigData
 import org.gradle.api.Task
 import org.gradle.api.tasks.bundling.War
-
-import io.openliberty.tools.common.plugins.config.LooseConfigData
-import io.openliberty.tools.common.plugins.util.PluginExecutionException
-import io.openliberty.tools.common.plugins.config.LooseApplication
 
 public class LooseWarApplication extends LooseApplication {
     
     protected Task task;
 
     public LooseWarApplication(Task task, LooseConfigData config) {
-        super(task.getProject().getBuildDir().getAbsolutePath(), config)
+        super(task.getProject().getLayout().getBuildDirectory().getAsFile().get().getAbsolutePath(), config)
         this.task = task
     }
 
     public void addSourceDir() throws Exception {
-        WarPluginConvention wpc = task.getProject().getConvention().findPlugin(WarPluginConvention)
-        File sourceDir = new File(wpc.getWebAppDir().getAbsolutePath())
+
+        War war;
+        File sourceDir = new File("src/main/webapp")
+        if (task.getProject().getPlugins().hasPlugin("war")) {
+            war = (War) task.getProject().war
+            if (war.webAppDirectory.asFile.get() != null) {
+                sourceDir = new File(war.webAppDirectory.asFile.get().getAbsolutePath())
+            }
+        }
         config.addDir(sourceDir, "/")
     }
 
