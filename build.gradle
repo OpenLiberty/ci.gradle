@@ -178,7 +178,7 @@ pluginBundle {
 publishing {
     publications {
         libertyGradle (MavenPublication) {
-            artifactId = base.archivesName
+            artifactId = 'liberty-maven-plugin'
 
             from components.java
             artifact groovydocJar
