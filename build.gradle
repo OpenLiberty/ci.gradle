@@ -1,17 +1,14 @@
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.OutputStream
-import java.util.Properties
 
 apply plugin: 'groovy'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply plugin: "com.gradle.plugin-publish"
 
-archivesBaseName = 'liberty-gradle-plugin'
 group = 'io.openliberty.tools'
 version = '3.8.4-SNAPSHOT'
-
+base {
+    archivesName='liberty-gradle-plugin'
+}
 repositories {
     mavenLocal()
     mavenCentral()
@@ -116,29 +113,29 @@ test {
 
         try {
 
-        output = new FileOutputStream("${buildDir}/gradle.properties");
+            output = new FileOutputStream("${buildDir}/gradle.properties");
 
-        if (libertyRuntime == "ol") {
-            runtimeGroup = "io.openliberty"
-            runtimeArtifactId = "openliberty-runtime"
-            kernelArtifactId = "openliberty-kernel"
-        } else {
-            runtimeGroup = "com.ibm.websphere.appserver.runtime"
-            runtimeArtifactId = "wlp-javaee7"
-            kernelArtifactId = "wlp-kernel"
-        }
+            if (libertyRuntime == "ol") {
+                runtimeGroup = "io.openliberty"
+                runtimeArtifactId = "openliberty-runtime"
+                kernelArtifactId = "openliberty-kernel"
+            } else {
+                runtimeGroup = "com.ibm.websphere.appserver.runtime"
+                runtimeArtifactId = "wlp-javaee7"
+                kernelArtifactId = "wlp-kernel"
+            }
 
-        // set the properties value
-        prop.setProperty("lgpVersion", version)
-        prop.setProperty("runtimeGroup", runtimeGroup)
-        prop.setProperty("runtimeArtifactId", runtimeArtifactId)
-        prop.setProperty("kernelArtifactId", kernelArtifactId)
-        prop.setProperty("runtimeVersion", runtimeVersion)
-        prop.setProperty("antVersion", libertyAntVersion)
-        prop.setProperty("commonVersion", libertyCommonVersion)
+            // set the properties value
+            prop.setProperty("lgpVersion", version)
+            prop.setProperty("runtimeGroup", runtimeGroup)
+            prop.setProperty("runtimeArtifactId", runtimeArtifactId)
+            prop.setProperty("kernelArtifactId", kernelArtifactId)
+            prop.setProperty("runtimeVersion", runtimeVersion)
+            prop.setProperty("antVersion", libertyAntVersion)
+            prop.setProperty("commonVersion", libertyCommonVersion)
 
-        // save properties to project root folder
-        prop.store(output, null)
+            // save properties to project root folder
+            prop.store(output, null)
 
         } catch (IOException io) {
             io.printStackTrace()
@@ -181,11 +178,11 @@ pluginBundle {
 publishing {
     publications {
         libertyGradle (MavenPublication) {
-            artifactId = archivesBaseName
+            artifactId = base.archivesName
 
             from components.java
             artifact groovydocJar
-            artifact sourcesJar 
+            artifact sourcesJar
 
             pom {
                 name = 'liberty-gradle-plugin'
@@ -218,7 +215,7 @@ publishing {
 }
 
 if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
-    
+
     if (!version.endsWith("SNAPSHOT")) {
         signing {
             sign publishing.publications.libertyGradle
