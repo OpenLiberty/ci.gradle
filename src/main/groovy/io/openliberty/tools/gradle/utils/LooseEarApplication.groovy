@@ -5,16 +5,19 @@ import io.openliberty.tools.common.plugins.config.LooseConfigData
 import org.apache.commons.io.FilenameUtils
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.logging.Logger
 import org.gradle.plugins.ear.Ear
 import org.w3c.dom.Element
 
 public class LooseEarApplication extends LooseApplication {
     
     protected Task task;
+    protected Logger logger;
 
-    public LooseEarApplication(Task task, LooseConfigData config) {
+    public LooseEarApplication(Task task, LooseConfigData config, Logger logger) {
         super(task.getProject().getLayout().getBuildDirectory().getAsFile().get().getAbsolutePath(), config)
         this.task = task
+        this.logger = logger
     }
 
     public void addSourceDir() throws Exception {
@@ -39,6 +42,9 @@ public class LooseEarApplication extends LooseApplication {
                 applicationXmlFile = new File(task.getDestinationDirectory().get().getAsFile().getParentFile().getAbsolutePath() + "/tmp/ear" + applicationName);
                 config.addFile(applicationXmlFile, "/META-INF/application.xml");
             }
+        }
+        else {
+            logger.warn("Project is expected to have EAR plugin. Application xml file may not be added correctly")
         }
     }
     
