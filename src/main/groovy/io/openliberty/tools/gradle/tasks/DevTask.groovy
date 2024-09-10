@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2019, 2023, 2024.
+ * (C) Copyright IBM Corporation 2019, 2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,11 @@ import java.util.concurrent.ThreadPoolExecutor
 import io.openliberty.tools.ant.ServerTask
 
 import io.openliberty.tools.common.plugins.util.DevUtil
-import io.openliberty.tools.common.plugins.util.InstallFeatureUtil;
+import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.PluginScenarioException
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
+import io.openliberty.tools.common.plugins.util.ServerFeatureUtil.FeaturesPlatforms
 import io.openliberty.tools.common.plugins.util.ServerStatusUtil
 import io.openliberty.tools.common.plugins.util.ProjectModule
 import io.openliberty.tools.common.plugins.util.BinaryScannerUtil
@@ -363,6 +364,7 @@ class DevTask extends AbstractFeatureTask {
     private class DevTaskUtil extends DevUtil {
 
         Set<String> existingFeatures;
+        Set<String> existingPlatforms;
 
         Set<String> existingLibertyFeatureDependencies;
 
@@ -388,7 +390,12 @@ class DevTask extends AbstractFeatureTask {
 
             this.libertyDirPropertyFiles = AbstractServerTask.getLibertyDirectoryPropertyFiles(installDirectory, userDirectory, serverDirectory);
             ServerFeatureUtil servUtil = getServerFeatureUtil(true, libertyDirPropertyFiles);
-            this.existingFeatures = servUtil.getServerFeatures(serverDirectory, libertyDirPropertyFiles);
+            FeaturesPlatforms fp = servUtil.getServerFeatures(serverDirectory, libertyDirPropertyFiles);
+
+            if (fp != null) {
+                this.existingFeatures = fp.getFeatures()
+                this.existingPlatforms = fp.getPlatforms()
+            }
 
             this.existingLibertyFeatureDependencies = new HashSet<String>();
 
@@ -823,7 +830,8 @@ class DevTask extends AbstractFeatureTask {
         @Override
         public void installFeatures(File configFile, File serverDir, boolean generateFeatures) {
             ServerFeatureUtil servUtil = getServerFeatureUtil(true, libertyDirPropertyFiles);
-            Set<String> features = servUtil.getServerFeatures(serverDir, libertyDirPropertyFiles);
+            FeaturesPlatforms fp = servUtil.getServerFeatures(serverDir, libertyDirPropertyFiles);
+            Set<String> features = fp == null ? null : fp.getFeatures();
 
             if (features == null) {
                 return;
@@ -885,8 +893,10 @@ class DevTask extends AbstractFeatureTask {
         @Override
         public void updateExistingFeatures() {
             ServerFeatureUtil servUtil = getServerFeatureUtil(true, libertyDirPropertyFiles);
-            Set<String> features = servUtil.getServerFeatures(getServerDir(project), libertyDirPropertyFiles);
-            existingFeatures = features;
+            FeaturesPlatforms fp = servUtil.getServerFeatures(getServerDir(project), libertyDirPropertyFiles);
+
+            this.existingFeatures = fp == null ? new HashSet<String>() : fp.getFeatures();
+            this.existingPlatforms = fp == null ? new HashSet<String>() : fp.getPlatforms();
         }
 
         @Override
