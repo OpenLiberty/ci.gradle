@@ -23,28 +23,28 @@ public class LooseEarApplication extends LooseApplication {
     public void addSourceDir() throws Exception {
         if (task.getProject().getPlugins().hasPlugin("ear")) {
             Ear ear = (Ear) task.getProject().ear
-            File sourceDir = new File(task.getProject().path.replace(":","") + "/" + ear.getAppDirectory().getAsFile().get().getAbsolutePath())
+            File sourceDir = new File(task.getProject().path.replace(":","") + "/" + ear.getAppDirectory().getAsFile().get().getPath())
             config.addDir(sourceDir, "/")
         }
     }
 
     public void addApplicationXmlFile() throws Exception {
+        String applicationName = "/application.xml"
+        File applicationXmlFile;
         if (task.getProject().getPlugins().hasPlugin("ear")) {
             Ear ear = (Ear) task.getProject().ear
-            String applicationName = "/application.xml"
-            if (ear.getDeploymentDescriptor() != null){
+            if (ear.getDeploymentDescriptor() != null) {
                 applicationName = "/" + ear.getDeploymentDescriptor().getFileName()
             }
-            File applicationXmlFile = new File(task.getProject().path.replace(":", "") + "/" + ear.getAppDirectory().getAsFile().get().getAbsolutePath() + "/META-INF/" + applicationName)
+            applicationXmlFile = new File(task.getProject().path.replace(":", "") + "/" + ear.getAppDirectory().getAsFile().get().getAbsolutePath() + "/META-INF/" + applicationName)
             if (applicationXmlFile.exists()) {
-                config.addFile(applicationXmlFile, "/META-INF/application.xml");
-            } else {
-                applicationXmlFile = new File(task.getDestinationDirectory().get().getAsFile().getParentFile().getAbsolutePath() + "/tmp/ear" + applicationName);
                 config.addFile(applicationXmlFile, "/META-INF/application.xml");
             }
         }
-        else {
-            logger.warn("Project is expected to have EAR plugin. Application xml file may not be added correctly")
+        if (applicationXmlFile == null || !applicationXmlFile.exists()) {
+            applicationXmlFile = new File(task.getDestinationDirectory().get().getAsFile().getParentFile().getAbsolutePath() + "/tmp/ear" + applicationName);
+            config.addFile(applicationXmlFile, "/META-INF/application.xml");
+            logger.warn("Could not get the application.xml file location from the EAR plugin because it is not configured. The file may not be added correctly to the application archive.")
         }
     }
     

@@ -27,7 +27,7 @@ public class LooseWarApplication extends LooseApplication {
                 sourceDir = new File(war.getWebAppDirectory().getAsFile().get().getAbsolutePath())
             }
         }else {
-            logger.warn("Default sourcedir path to src/main/webapp as WAR plugin does not exist. Application may not work expectedly")
+            logger.warn("Could not get the webAppDirectory location from the WAR plugin because it is not configured. Using the default location src/main/webapp instead. Application may not work as expected.")
         }
         config.addDir(sourceDir, "/")
     }
