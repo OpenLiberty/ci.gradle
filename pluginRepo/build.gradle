@@ -13,7 +13,7 @@ publishing {
     repositories {
         maven {
             name = "test"
-            url = uri("${rootProject.buildDir}/plugin-test-repository")
+            url = uri("${rootProject.getLayout().getBuildDirectory().getAsFile().get()}/plugin-test-repository")
         }
     }
 }

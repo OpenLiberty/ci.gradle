@@ -13,7 +13,7 @@ buildscript {
     }
 }
 
-project.buildDir = '../build'
+project.getLayout().setBuildDirectory('../build');
 
 dependencies {
     implementation 'io.openliberty.arquillian:arquillian-liberty-managed:1.0.8'

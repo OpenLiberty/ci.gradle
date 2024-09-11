@@ -30,7 +30,7 @@ compileJava.options.encoding = 'UTF-8'
 ext {
     // Liberty server properties
     wlpServerName = 'LibertyProjectServer'
-    serverDirectory = "${project.buildDir}/wlp/usr/servers/${wlpServerName}"
+    serverDirectory = "${project.getLayout().getBuildDirectory().getAsFile().get()}/wlp/usr/servers/${wlpServerName}"
     testServerHttpPort = 9080
     testServerHttpsPort = 9443
 
@@ -45,7 +45,7 @@ liberty {
         name = wlpServerName
         deploy {
             apps = [war]
-            copyLibsDirectory = file("${project.buildDir}/libs")
+            copyLibsDirectory = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/libs")
         }
         mergeServerEnv = true
         env = ['TEST_PROP_2':'white', 'CONFIG_SERVER_ENV_PROPS':'TEST']
@@ -65,16 +65,16 @@ dependencies {
 
 test {
     println 'inside the test block'
-    reports.html.outputLocation = file("$buildDir/reports/unit")
-    reports.junitXml.outputLocation = file("$buildDir/test-results/unit")
+    reports.html.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/reports/unit")
+    reports.junitXml.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/test-results/unit")
     exclude '**/it/**'
 }
 
 task integrationTest(type: Test) {
     group 'Verification'
     description 'Runs the integration tests.'
-    reports.html.outputLocation = file("$buildDir/reports/it")
-    reports.junitXml.outputLocation = file("$buildDir/test-results/it")
+    reports.html.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/reports/it")
+    reports.junitXml.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/test-results/it")
     include '**/it/**'
     exclude '**/unit/**'
 
