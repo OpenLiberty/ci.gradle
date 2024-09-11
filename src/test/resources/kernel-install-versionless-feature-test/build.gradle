@@ -1,0 +1,24 @@
+apply plugin: 'liberty'
+
+buildscript {
+    repositories{
+      mavenLocal()
+      mavenCentral()
+      maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+      }
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+repositories {
+      mavenLocal()
+      mavenCentral()
+}
+
+liberty {
+    runtime = ['group': runtimeGroup,'name':kernelArtifactId,'version':runtimeVersion]
+}
