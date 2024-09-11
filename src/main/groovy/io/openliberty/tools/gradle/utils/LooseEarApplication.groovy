@@ -38,13 +38,12 @@ public class LooseEarApplication extends LooseApplication {
             }
             applicationXmlFile = new File(task.getProject().path.replace(":", "") + "/" + ear.getAppDirectory().getAsFile().get().getAbsolutePath() + "/META-INF/" + applicationName)
             if (applicationXmlFile.exists()) {
-                config.addFile(applicationXmlFile, "/META-INF/application.xml");
+                config.addFile(applicationXmlFile, "/META-INF/application.xml")
             }
         }
         if (applicationXmlFile == null || !applicationXmlFile.exists()) {
             applicationXmlFile = new File(task.getDestinationDirectory().get().getAsFile().getParentFile().getAbsolutePath() + "/tmp/ear" + applicationName);
-            config.addFile(applicationXmlFile, "/META-INF/application.xml");
-            logger.warn("Could not get the application.xml file location from the EAR plugin because it is not configured. The file may not be added correctly to the application archive.")
+            config.addFile(applicationXmlFile, "/META-INF/application.xml")
         }
     }
     
