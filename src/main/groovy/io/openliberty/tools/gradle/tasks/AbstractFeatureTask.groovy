@@ -223,14 +223,10 @@ public class AbstractFeatureTask extends AbstractServerTask {
         FeaturesPlatforms getServerFeaturesResult = new FeaturesPlatforms()
         // if createNewInstallFeatureUtil failed to create a new InstallFeatureUtil instance, then features are installed via ant
         if (installFeaturesFromAnt) {
-            Set<String> featuresInstalledFromAnt
             if (server.features.name != null) {
-                featuresInstalledFromAnt = new HashSet<String>(server.features.name)
-                return new FeaturesPlatforms(featuresInstalledFromAnt, new HashSet<String>())
-            } else {
-                featuresInstalledFromAnt = new HashSet<String>()
-                return getServerFeaturesResult
+                getServerFeaturesResult.getFeatures().addAll(server.features.name)
             }
+            return getServerFeaturesResult
         }
 
         def pluginListedFeatures = getPluginListedFeatures(false)

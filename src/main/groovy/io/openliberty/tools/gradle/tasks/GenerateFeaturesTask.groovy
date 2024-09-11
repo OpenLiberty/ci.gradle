@@ -175,8 +175,13 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
             servUtil.setLowerCaseFeatures(false);
             // get set of user defined features so they can be omitted from the generated file that will be written
-            FeaturesPlatforms fp = optimize ? existingFeatures : servUtil.getServerFeatures(server.configDirectory, server.serverXmlFile, new HashMap<String, File>(), generatedFiles);
-            Set<String> userDefinedFeatures = fp == null ? new HashSet<String>() : fp.getFeatures();
+            Set<String> userDefinedFeatures = optimize ? existingFeatures : new HashSet<String>();
+            if (!optimize) {
+                FeaturesPlatforms fp = servUtil.getServerFeatures(server.configDirectory, server.serverXmlFile, new HashMap<String, File>(), generatedFiles);
+                if (fp != null) {
+                    userDefinedFeatures = fp.getFeatures();
+                }
+            }
             logger.debug("User defined features:" + userDefinedFeatures);
             servUtil.setLowerCaseFeatures(true);
             if (!userDefinedFeatures.isEmpty()) {
@@ -245,9 +250,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     // returns the features specified in the generated-features.xml file
     private Set<String> getGeneratedFeatures(ServerFeatureUtil servUtil, File generatedFeaturesFile) {
         servUtil.setLowerCaseFeatures(false);
-        Set<String> genFeatSet = new HashSet<String>();
-        servUtil.getServerXmlFeatures(genFeatSet, server.configDirectory,
+        FeaturesPlatforms fp = servUtil.getServerXmlFeatures(new FeaturesPlatforms(), server.configDirectory,
                 generatedFeaturesFile, null, null);
+        Set<String> genFeatSet = fp == null ? new HashSet<String>() : fp.getFeatures();
         servUtil.setLowerCaseFeatures(true);
         return genFeatSet;
     }
