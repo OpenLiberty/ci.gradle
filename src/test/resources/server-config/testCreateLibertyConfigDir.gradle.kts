@@ -41,15 +41,15 @@ tasks {
     val integrationTest by registering(Test::class) {
         group = "Verification"
         description = "Runs the integration tests."
-        reports.html.outputLocation.set(file("$buildDir/reports/it"))
-        reports.junitXml.outputLocation.set(file("$buildDir/test-results/it"))
+        reports.html.outputLocation.set(file("${project.getLayout().getBuildDirectory().getAsFile().get()}/reports/it"))
+        reports.junitXml.outputLocation.set(file("${project.getLayout().getBuildDirectory().getAsFile().get()}/test-results/it"))
         include("**/it/**")
         exclude("**/unit/**")
     }
 
     val copyJdbcLib by registering(Copy::class) {
         from(jdbcLib)
-        into("$buildDir/wlp/usr/shared/resources")
+        into("${project.getLayout().getBuildDirectory().getAsFile().get()}/wlp/usr/shared/resources")
         include("*.jar")
     }
 

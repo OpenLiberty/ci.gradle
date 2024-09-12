@@ -40,7 +40,7 @@ dependencies {
 }
 
 liberty {
-    installDir = file("${project.buildDir}/wlp")
+    installDir = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/wlp")
 }
 
 clean.dependsOn "libertyStop"
