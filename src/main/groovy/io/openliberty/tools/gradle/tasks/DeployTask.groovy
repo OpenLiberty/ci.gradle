@@ -335,7 +335,7 @@ class DeployTask extends AbstractServerTask {
             }
         }
 
-        LooseWarApplication looseWar = new LooseWarApplication(task, config)
+        LooseWarApplication looseWar = new LooseWarApplication(task, config,logger)
         looseWar.addSourceDir()
         looseWar.addOutputDir(looseWar.getDocumentRoot() , task.classpath.getFiles().toArray()[0], "/WEB-INF/classes/");
 
@@ -403,7 +403,7 @@ class DeployTask extends AbstractServerTask {
     }
 
     protected void installLooseConfigEar(LooseConfigData config, Task task) throws Exception{
-        LooseEarApplication looseEar = new LooseEarApplication(task, config);
+        LooseEarApplication looseEar = new LooseEarApplication(task, config, logger);
         looseEar.addSourceDir();
         looseEar.addApplicationXmlFile();
 

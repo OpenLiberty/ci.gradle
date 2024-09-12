@@ -15,23 +15,14 @@
  */
 package io.openliberty.tools.gradle.tasks
 
-import java.io.File;
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.HashSet;
-
-import org.gradle.api.tasks.TaskAction
+import io.openliberty.tools.ant.jsp.CompileJSPs
+import org.apache.tools.ant.Project
 import org.gradle.api.Task
-import org.gradle.api.GradleException
+import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.War
 import org.gradle.api.logging.LogLevel
 
-import org.apache.tools.ant.Project
-import io.openliberty.tools.ant.jsp.CompileJSPs
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil.FeaturesPlatforms
-
 
 class CompileJSPTask extends AbstractFeatureTask {
     protected Project ant = new Project();
@@ -61,17 +52,20 @@ class CompileJSPTask extends AbstractFeatureTask {
     protected void perTaskCompileJSP(Task task) throws Exception {
         CompileJSPs compileJsp = new CompileJSPs()
         compileJsp.setInstallDir(getInstallDir(project))
-        compileJsp.setTempdir(project.buildDir)
-        compileJsp.setDestdir(new File(project.buildDir.getAbsolutePath()+"/classes/java"))
+        compileJsp.setTempdir(project.getLayout().getBuildDirectory().getAsFile().get())
+        compileJsp.setDestdir(new File(project.getLayout().getBuildDirectory().getAsFile().get().getAbsolutePath()+"/classes/java"))
         compileJsp.setTimeout(project.liberty.jsp.jspCompileTimeout)
         // don't delete temporary server dir
         compileJsp.setCleanup(false)
         compileJsp.setProject(ant)
         compileJsp.setTaskName('antlib:net/wasdev/wlp/ant:compileJSPs')
-
-        if (project.convention.plugins.war.webAppDirName != null) {
-            compileJsp.setSrcdir(project.convention.plugins.war.webAppDir)
-        } else {
+        War war;
+        if(project.plugins.hasPlugin("war")){
+            war = (War)project.war
+            if ( war.getWebAppDirectory().getAsFile().get() != null) {
+                compileJsp.setSrcdir( war.getWebAppDirectory().getAsFile().get())
+            }
+        }else {
             compileJsp.setSrcdir(new File("src/main/webapp"))
         }
         Set<String> classpath = new HashSet<String>();
