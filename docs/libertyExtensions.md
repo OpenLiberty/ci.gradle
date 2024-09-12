@@ -12,7 +12,7 @@ The [deploy](deploy.md), [undeploy](undeploy.md), [libertyPackage](libertyPackag
 
 | Attribute | Type | Since | Description | Required |
 | --------- | ---- | ----- | ----------- | ---------|
-| baseDir | String | 3.0 | The base installation directory. The actual installation directory of WebSphere Liberty server will be `${baseDir}/wlp`. The default value is `${project.buildDir}`. This was moved from the properties in the `install` block in version 3.0.| No |
+| baseDir | String | 3.0 | The base installation directory. The actual installation directory of WebSphere Liberty server will be `${baseDir}/wlp`. The default value is `${project.getLayout().getBuildDirectory().getAsFile().get()}`. This was moved from the properties in the `install` block in version 3.0.| No |
 | cacheDir | String | 3.0 | The directory used for caching downloaded files such as the license or `.jar` files. The default value is `${java.io.tmpdir}/wlp-cache`. This was moved from the properties in the `install` block in version 3.0.| No |
 | installDir | String | 1.0 | Path to the WebSphere Liberty server installation `wlp` directory. To use a pre-installed version of Liberty, set this property to the path of the Liberty `wlp` directory, including `wlp` in the path. Additionally, `installDir` can be specified in the `gradle.properties` file or from the [command line](installLiberty.md#override-installDir). | No |
 | outputDir | String | 1.0 | Deprecated. Value of the `${wlp_output_dir}` variable. The default value is `${installDir}/usr/servers/${serverName}`. This parameter has moved to the `server` block. | No |

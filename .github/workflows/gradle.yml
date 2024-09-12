@@ -71,11 +71,11 @@ jobs:
     - name: Run tests that require a minimum of Java 17 or later
       if: ${{ matrix.java == '17' || matrix.java == '21' }}
       run:
-        ./gradlew clean install check -P"test.include"="**/TestSpringBootApplication30*,**/TestCompileJSPSource17*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info
+        ./gradlew clean install check -P"test.include"="**/TestSpringBootApplication30*,**/TestCompileJSPSource17*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --warning-mode=all
     # Run tests
     - name: Run tests with Gradle on Ubuntu
       run:
-        ./gradlew clean install check -P"test.exclude"="**/TestSpringBootApplication30*,**/TestCompileJSPSource17*,**/DevContainerTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info
+        ./gradlew clean install check -P"test.exclude"="**/TestSpringBootApplication30*,**/TestCompileJSPSource17*,**/DevContainerTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --warning-mode=all
     # Copy build reports and upload artifact if build failed
     - name: Copy build/report/tests/test for upload
       if: ${{ failure() }}

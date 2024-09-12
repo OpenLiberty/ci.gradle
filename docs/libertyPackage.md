@@ -19,7 +19,7 @@ The `libertyPackage` task uses a `packageLiberty` block to define task specific 
 | --------- | ----- | ----- | ----------- | -------- |
 | include | String | 1.0 | Controls the package contents. Can be used with values `all`, `usr`, `minify`, `wlp`, `runnable`, `all,runnable` and `minify,runnable`. The default value is `all`. The `runnable`, `all,runnable` and `minify,runnable` values are supported beginning with 8.5.5.9 and works with `jar` type packages only. | Yes, only when the `os` option is set. |
 | os| String | 1.0 | A comma-delimited list of operating systems that you want the packaged server to support. To specify that an operating system is not to be supported, prefix it with a minus sign ("-"). The 'include' attribute __must__ be set to `minify`. | No |
-| packageDirectory |  String | 3.0 | Directory of the packaged file. The default value is `${project.buildDir}/libs`. If the directory is not absolute, it is created in `${project.buildDir}/libs`.| No |
+| packageDirectory |  String | 3.0 | Directory of the packaged file. The default value is `${project.getLayout().getBuildDirectory().getAsFile().get()}/libs`. If the directory is not absolute, it is created in `${project.getLayout().getBuildDirectory().getAsFile().get()}/libs`.| No |
 | packageName |  String | 3.0 | Name of the packaged file. The default value is `${project.name}`. | No |
 | packageType | String | 3.0 | Type of package. Can be used with values `zip`, `jar`, `tar`, or `tar.gz`. Defaults to `jar` if `runnable` is specified for the `include` property. Otherwise the default value is `zip`. | No |
 | serverRoot |  String | 3.0 | Specifies the root server folder name in the packaged file. | No |

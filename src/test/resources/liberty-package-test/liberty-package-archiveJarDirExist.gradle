@@ -28,7 +28,7 @@ liberty {
     server{
         name = 'LibertyProjectServer'
         packageLiberty {
-            packageDirectory = "${project.buildDir}"
+            packageDirectory = "${project.getLayout().getBuildDirectory().getAsFile().get()}"
             packageType = 'jar'
         }
     }

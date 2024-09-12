@@ -43,7 +43,7 @@ liberty {
         name = "ejbServer"
         deploy {
             apps = [ear]
-            copyLibsDirectory = file("${project.buildDir}/libs")
+            copyLibsDirectory = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/libs")
         }
         verifyAppStartTimeout = 30
         looseApplication = true
