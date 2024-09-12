@@ -39,8 +39,7 @@ jobs:
     - name: Checkout ci.common
       uses: actions/checkout@v3
       with:
-        repository: cbridgha/ci.common
-        ref: VersionlessFeatureSupport
+        repository: OpenLiberty/ci.common
         path: ci.common
     - name: Checkout ci.ant
       uses: actions/checkout@v3
@@ -125,7 +124,7 @@ jobs:
     - name: Clone ci.ant, ci.common, ci.gradle repos to C drive
       run: |
         cp -r D:/a/ci.gradle/ci.gradle C:/ci.gradle
-        git clone https://github.com/cbridgha/ci.common.git --branch VersionlessFeatureSupport --single-branch C:/ci.common
+        git clone https://github.com/OpenLiberty/ci.common.git C:/ci.common
         git clone https://github.com/OpenLiberty/ci.ant.git C:/ci.ant
     # Cache mvn/gradle packages
     - name: Cache Maven packages
