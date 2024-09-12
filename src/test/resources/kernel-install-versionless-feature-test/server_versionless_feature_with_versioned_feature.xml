@@ -1,9 +1,8 @@
 <server description="default server">
     <featureManager>    
         <feature>beanValidation</feature>
-        <feature>servlet</feature>
+        <feature>servlet-4.0</feature>
         <feature>jpa</feature>
         <feature>ejb</feature>
-        <platform>javaee-8.0</platform>
     </featureManager>     
 </server>

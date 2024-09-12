@@ -149,6 +149,25 @@ abstract class AbstractIntegrationTest {
         return result
     }
 
+    // Use this method when the task is supposed to fail. Then the returned BuildResult can be
+    // checked for any expected output.
+    protected static BuildResult runTasksFailResult(File projectDir, String... tasks) {
+        List<String> args = new ArrayList<String>();
+        for (String task: tasks) {
+            args.add(task);
+        }
+        args.add("-i");
+        args.add("-s");
+
+        BuildResult result = GradleRunner.create()
+            .withProjectDir(projectDir)
+            .forwardOutput()
+            .withArguments(args)
+            .buildAndFail();
+
+        return result;
+    }
+
     protected static boolean runTaskCheckForUpToDate(File projectDir, String task, String argument) {
         List<String> args = new ArrayList<String>()
         args.add(task)

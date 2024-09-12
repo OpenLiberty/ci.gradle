@@ -1,0 +1,6 @@
+<server description="default server">
+    <featureManager>    
+        <feature>servlet</feature>
+        <feature>mpHealth-4.0</feature>
+    </featureManager>     
+</server>
