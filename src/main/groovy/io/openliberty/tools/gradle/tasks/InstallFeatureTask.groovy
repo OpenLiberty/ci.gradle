@@ -27,6 +27,7 @@ import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
 import io.openliberty.tools.common.plugins.util.DevUtil
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.PluginScenarioException
+import io.openliberty.tools.common.plugins.util.ServerFeatureUtil.FeaturesPlatforms
 
 class InstallFeatureTask extends AbstractFeatureTask {
 
@@ -78,8 +79,11 @@ class InstallFeatureTask extends AbstractFeatureTask {
             installFeatureFromAnt();
         }
         else {
-            Set<String> featuresToInstall = getSpecifiedFeatures(containerName);
-            util.installFeatures(server.features.acceptLicense, new ArrayList<String>(featuresToInstall))
+            FeaturesPlatforms fp = getSpecifiedFeatures(containerName);
+            Set<String> featuresToInstall = fp == null ? new HashSet<String>() : fp.getFeatures();
+            Set<String> platformsToInstall = fp == null ? new HashSet<String>() : fp.getPlatforms();
+
+            util.installFeatures(server.features.acceptLicense, new ArrayList<String>(featuresToInstall), new ArrayList<String>(platformsToInstall))
         }
     }
 

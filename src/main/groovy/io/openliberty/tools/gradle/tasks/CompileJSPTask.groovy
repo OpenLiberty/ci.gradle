@@ -20,6 +20,9 @@ import org.apache.tools.ant.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.War
+import org.gradle.api.logging.LogLevel
+
+import io.openliberty.tools.common.plugins.util.ServerFeatureUtil.FeaturesPlatforms
 
 class CompileJSPTask extends AbstractFeatureTask {
     protected Project ant = new Project();
@@ -82,7 +85,11 @@ class CompileJSPTask extends AbstractFeatureTask {
         setCompileJavaSourceVersion(compileJsp, task)
 
         //Feature list
-        Set<String> installedFeatures = getSpecifiedFeatures(null);
+        Set<String> installedFeatures = new HashSet<String>();
+        FeaturesPlatforms fp = getSpecifiedFeatures(null);
+        if (fp != null) {
+            installedFeatures = fp.getFeatures();
+        }
 
         //Set JSP Feature Version
         setJspVersion(compileJsp, installedFeatures);

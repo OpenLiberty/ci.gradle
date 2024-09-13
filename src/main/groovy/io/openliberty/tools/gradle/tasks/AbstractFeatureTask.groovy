@@ -15,13 +15,14 @@
  */
 package io.openliberty.tools.gradle.tasks
 
-
 import io.openliberty.tools.common.plugins.util.AbstractContainerSupportUtil
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil.ProductProperties
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.PluginScenarioException
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
+import io.openliberty.tools.common.plugins.util.ServerFeatureUtil.FeaturesPlatforms
+
 import io.openliberty.tools.gradle.utils.ArtifactDownloadUtil
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.logging.LogLevel
@@ -217,33 +218,32 @@ public class AbstractFeatureTask extends AbstractServerTask {
         return result;
     }
 
-    protected Set<String> getSpecifiedFeatures(String containerName) throws PluginExecutionException {
-        InstallFeatureUtil util = getInstallFeatureUtil(null, containerName);
+    protected FeaturesPlatforms getSpecifiedFeatures(String containerName) throws PluginExecutionException {
+        InstallFeatureUtil util = getInstallFeatureUtil(null, containerName)
+        FeaturesPlatforms getServerFeaturesResult = new FeaturesPlatforms()
         // if createNewInstallFeatureUtil failed to create a new InstallFeatureUtil instance, then features are installed via ant
         if (installFeaturesFromAnt) {
-            Set<String> featuresInstalledFromAnt;
             if (server.features.name != null) {
-                featuresInstalledFromAnt = new HashSet<String>(server.features.name);
-                return featuresInstalledFromAnt;
-            } else {
-                featuresInstalledFromAnt = new HashSet<String>();
-                return featuresInstalledFromAnt;
+                getServerFeaturesResult.getFeatures().addAll(server.features.name)
             }
+            return getServerFeaturesResult
         }
 
         def pluginListedFeatures = getPluginListedFeatures(false)
         def dependencyFeatures = getDependencyFeatures()
-        def serverFeatures = null;
 
         // if DevMode provides a server directory parameter use that for finding the server features
         if (serverDirectoryParam != null) {
-            serverFeatures = util.getServerFeatures(new File(serverDirectoryParam), getLibertyDirectoryPropertyFiles(serverDirectoryParam))
+            getServerFeaturesResult = util.getServerFeatures(new File(serverDirectoryParam), getLibertyDirectoryPropertyFiles(serverDirectoryParam))
         } else if (getServerDir(project).exists()) {
-            serverFeatures = util.getServerFeatures(getServerDir(project), getLibertyDirectoryPropertyFiles(null))
+            getServerFeaturesResult = util.getServerFeatures(getServerDir(project), getLibertyDirectoryPropertyFiles(null))
         }
 
+        Set<String> serverFeatures = getServerFeaturesResult != null ? getServerFeaturesResult.getFeatures() : new HashSet<String>()
+        Set<String> serverPlatforms = getServerFeaturesResult != null ? getServerFeaturesResult.getPlatforms() : new HashSet<String>()
+
         Set<String> featuresToInstall = util.combineToSet(pluginListedFeatures, dependencyFeatures, serverFeatures)
-        return featuresToInstall
+        return new FeaturesPlatforms(featuresToInstall, serverPlatforms)
     }
 	
 	/*
