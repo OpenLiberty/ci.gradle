@@ -124,7 +124,10 @@ class KernelInstallVersionlessFeatureTest extends AbstractIntegrationTest{
         BuildResult result = runTasksFailResult(buildDir, "installFeature")
 	    String output = result.getOutput()
         assertTrue(output.contains("Detected possible versionless feature(s) for installation. The minimum required Liberty version for versionless feature support is 24.0.0.8"))
-        assertTrue(output.contains("PluginExecutionException: CWWKF1299E: The following features could not be obtained: ejb. Ensure that the features are valid for Open Liberty."))
+        
+        String messageWL = "PluginExecutionException: CWWKF1203E: Unable to obtain the following features: ejb. Ensure that the features are valid."
+        String messageOL = "PluginExecutionException: CWWKF1299E: The following features could not be obtained: ejb. Ensure that the features are valid for Open Liberty."
+        assertTrue(output.contains(messageOL) || output.contains(messageWL))
     }
 
     //@Test
