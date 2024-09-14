@@ -98,9 +98,42 @@ class KernelInstallVersionlessFeatureTest extends AbstractIntegrationTest{
         assertTrue(output.contains("CWWKF1516E: The platform could not be determined. The following versionless features cannot be installed: [ejb]."))
     }
 
+    @Test
+    /**
+     * Install with only server.xml features
+     */
+    public void testInstallVersionedFeatureWithPlatformServerOldRelease() {
+        copyBuildFiles(new File(resourceDir, "install_features_server_old_release.gradle"), buildDir)
+        runTasks(buildDir, "libertyCreate")
+        copyServer("server_versioned_feature_with_platform.xml")
+        // expect failure - check for error message
+        BuildResult result = runTasksFailResult(buildDir, "installFeature")
+	    String output = result.getOutput()
+        assertTrue(output.contains("PluginExecutionException: Detected versionless feature(s) for installation. The minimum required Liberty version for versionless feature support is 24.0.0.8"))
+    }
+
+    @Test
+    /**
+     * Install with only server.xml features
+     */
+    public void testInstallVersionlessFeaturesNoPlatformServerOldRelease() {
+        copyBuildFiles(new File(resourceDir, "install_features_server_old_release.gradle"), buildDir)
+        runTasks(buildDir, "libertyCreate")
+        copyServer("server_versionless_feature_no_platform.xml")
+        // expect failure - check for error message
+        BuildResult result = runTasksFailResult(buildDir, "installFeature")
+	    String output = result.getOutput()
+        assertTrue(output.contains("Detected possible versionless feature(s) for installation. The minimum required Liberty version for versionless feature support is 24.0.0.8"))
+        
+        String messageWL = "PluginExecutionException: CWWKF1203E: Unable to obtain the following features: ejb. Ensure that the features are valid."
+        String messageOL = "PluginExecutionException: CWWKF1299E: The following features could not be obtained: ejb. Ensure that the features are valid for Open Liberty."
+        assertTrue(output.contains(messageOL) || output.contains(messageWL))
+    }
+
     //@Test
     // Commented out because current failure returns 
     // "Cannot invoke "com.ibm.ws.kernel.feature.provisioning.ProvisioningFeatureDefinition.getSymbolicName()" because the return value of "java.util.HashMap.get(Object)" is null"
+    // Opened issue https://github.com/OpenLiberty/ci.common/issues/452 to follow up.
     /**
      * Install with only server.xml features
      */
