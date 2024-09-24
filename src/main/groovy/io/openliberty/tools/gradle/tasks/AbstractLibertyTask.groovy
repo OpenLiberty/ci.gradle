@@ -80,7 +80,9 @@ abstract class AbstractLibertyTask extends DefaultTask {
         if (project.plugins.hasPlugin("org.springframework.boot")) {
             try {
                 for (Dependency dep : project.buildscript.configurations.classpath.getAllDependencies().toArray()) {
-                    if ("org.springframework.boot".equals(dep.getGroup()) && "spring-boot-gradle-plugin".equals(dep.getName())) {
+                    if ("org.springframework.boot".equals(dep.getGroup()) &&
+                            ("spring-boot-gradle-plugin".equals(dep.getName()) ||
+                                "org.springframework.boot.gradle.plugin".equals(dep.getName()))) {
                         version = dep.getVersion()
                         break
                     }

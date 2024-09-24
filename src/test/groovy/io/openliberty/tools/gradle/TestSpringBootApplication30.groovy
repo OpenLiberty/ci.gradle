@@ -132,4 +132,20 @@ public class TestSpringBootApplication30 extends AbstractIntegrationTest{
             throw new AssertionError ("Fail on task deploy.", e)
         }
     }
+
+    @Test
+    public void test_spring_boot_plugins_dsl_apps_30() {
+        try {
+            runTasks(buildDir, 'deploy', 'libertyStart')
+
+            String webPage = new URL("http://localhost:9080").getText()
+            Assert.assertEquals("Did not get expected http response.","Hello!", webPage)
+            Assert.assertTrue('defaultServer/dropins has app deployed',
+                    new File(buildDir, 'build/wlp/usr/servers/defaultServer/dropins').list().size() == 0)
+            Assert.assertTrue('no app in apps folder',
+                    new File(buildDir, "build/wlp/usr/servers/defaultServer/apps/thin-${testName.getMethodName()}-1.0-SNAPSHOT.jar").exists() )
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task deploy.", e)
+        }
+    }
 }
