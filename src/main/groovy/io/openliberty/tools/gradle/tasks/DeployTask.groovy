@@ -297,7 +297,7 @@ class DeployTask extends AbstractServerTask {
 
         File outputDir;
         if(compileJava != null){
-            outputDir = compileJava.destinationDir
+            outputDir = compileJava.getDestinationDirectory().get().getAsFile()
         }
 
         if (outputDir != null && !outputDir.exists() && hasJavaSourceFiles(task.classpath, outputDir)) {
