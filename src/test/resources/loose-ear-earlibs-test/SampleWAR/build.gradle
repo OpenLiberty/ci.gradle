@@ -4,7 +4,7 @@ apply plugin: 'war'
 jar.enabled = false
 description = 'WAR Module'
 dependencies {
-    implementation group: 'commons-io', name: 'commons-io', version: '2.8.0', transitive:true
+    implementation group: 'commons-io', name: 'commons-io', version: '2.14.0', transitive:true
     testImplementation group: 'junit', name: 'junit', version:'4.13.1'
     providedCompile group: 'javax', name: 'javaee-api', version:'7.0'
     providedCompile project(':SampleEJB')
