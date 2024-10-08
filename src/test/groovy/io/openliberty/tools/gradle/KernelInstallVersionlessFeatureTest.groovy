@@ -130,10 +130,9 @@ class KernelInstallVersionlessFeatureTest extends AbstractIntegrationTest{
         assertTrue(output.contains(messageOL) || output.contains(messageWL))
     }
 
-    //@Test
-    // Commented out because current failure returns 
-    // "Cannot invoke "com.ibm.ws.kernel.feature.provisioning.ProvisioningFeatureDefinition.getSymbolicName()" because the return value of "java.util.HashMap.get(Object)" is null"
-    // Opened issue https://github.com/OpenLiberty/ci.common/issues/452 to follow up.
+    @Test
+    // This test required a fix that is in 24.0.0.10. 
+    // Opened issue https://github.com/OpenLiberty/ci.common/issues/452 for it.
     /**
      * Install with only server.xml features
      */
