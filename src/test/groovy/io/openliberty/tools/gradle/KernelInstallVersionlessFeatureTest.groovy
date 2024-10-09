@@ -109,7 +109,7 @@ class KernelInstallVersionlessFeatureTest extends AbstractIntegrationTest{
         // expect failure - check for error message
         BuildResult result = runTasksFailResult(buildDir, "installFeature")
 	    String output = result.getOutput()
-        assertTrue(output.contains("PluginExecutionException: Detected versionless feature(s) for installation. The minimum required Liberty version for versionless feature support is 24.0.0.9"))
+        assertTrue(output.contains("PluginExecutionException: Detected versionless feature(s) for installation. The minimum required Liberty version for versionless feature support is 24.0.0.10"))
     }
 
     @Test
@@ -123,17 +123,16 @@ class KernelInstallVersionlessFeatureTest extends AbstractIntegrationTest{
         // expect failure - check for error message
         BuildResult result = runTasksFailResult(buildDir, "installFeature")
 	    String output = result.getOutput()
-        assertTrue(output.contains("Detected possible versionless feature(s) for installation. The minimum required Liberty version for versionless feature support is 24.0.0.9"))
+        assertTrue(output.contains("Detected possible versionless feature(s) for installation. The minimum required Liberty version for versionless feature support is 24.0.0.10"))
         
         String messageWL = "PluginExecutionException: CWWKF1203E: Unable to obtain the following features: ejb. Ensure that the features are valid."
         String messageOL = "PluginExecutionException: CWWKF1299E: The following features could not be obtained: ejb. Ensure that the features are valid for Open Liberty."
         assertTrue(output.contains(messageOL) || output.contains(messageWL))
     }
 
-    //@Test
-    // Commented out because current failure returns 
-    // "Cannot invoke "com.ibm.ws.kernel.feature.provisioning.ProvisioningFeatureDefinition.getSymbolicName()" because the return value of "java.util.HashMap.get(Object)" is null"
-    // Opened issue https://github.com/OpenLiberty/ci.common/issues/452 to follow up.
+    @Test
+    // This test required a fix that is in 24.0.0.10. 
+    // Opened issue https://github.com/OpenLiberty/ci.common/issues/452 for it.
     /**
      * Install with only server.xml features
      */
