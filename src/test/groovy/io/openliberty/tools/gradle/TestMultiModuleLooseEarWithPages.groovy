@@ -94,6 +94,10 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
             warWebappsFolder = "\\multi-module-loose-ear-pages-test\\war\\src\\main\\webapp"
             ejbJar = "\\WEB-INF\\lib\\ejb-jar-1.0-SNAPSHOT.jar"
         }
+        System.out.println("targetInArchive value#1 is " +nodes.item(0).getAttributes()
+                .getNamedItem("targetInArchive").getNodeValue());
+        System.out.println("targetInArchive value#2 is " +nodes.item(0).getAttributes()
+                .getNamedItem("targetInArchive").getNodeValue());
         Assert.assertTrue(nodes.item(0).getAttributes()
                 .getNamedItem("targetInArchive").getNodeValue().equals(ejbWar)||
                 nodes.item(1).getAttributes()
@@ -102,6 +106,10 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
         expression = "/archive/archive/dir";
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
         Assert.assertEquals("Number of <archive/> element ==>", 3, nodes.getLength());
+
+        System.out.println("sourceOnDisk value#1 is " +nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue());
+        System.out.println("sourceOnDisk value#2 is " +nodes.item(1).getAttributes().getNamedItem("sourceOnDisk").getNodeValue());
+        System.out.println("sourceOnDisk value#3 is " +nodes.item(2).getAttributes().getNamedItem("sourceOnDisk").getNodeValue());
 
         Assert.assertTrue(nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue().contains(warWebappsFolder)
         ||nodes.item(1).getAttributes().getNamedItem("sourceOnDisk").getNodeValue().contains(warWebappsFolder)
