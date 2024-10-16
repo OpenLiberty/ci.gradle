@@ -15,15 +15,18 @@
  */
 package io.openliberty.tools.gradle.utils
 
-
+import org.apache.commons.io.FilenameUtils
 import org.apache.tools.ant.taskdefs.Jar
 import org.gradle.api.GradleException
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.tasks.bundling.War
 import org.gradle.plugins.ear.Ear
+
+import java.nio.file.Path
 
 public class DevTaskHelper {
 
@@ -58,8 +61,8 @@ public class DevTaskHelper {
      * @param project project
      * @return
      */
-    public static HashMap<File, Dependency> getDeployDependencies(Project project) {
-        HashMap<File, Dependency> completeDeployDeps = new HashMap<File, Dependency>();
+    public static Map<File, Dependency> getDeployDependencies(Project project) {
+        Map<File, Dependency> completeDeployDeps = new HashMap<File, Dependency>();
         File[] filesAsDeps = project.configurations.deploy.getFiles().toArray()
         Dependency[] deployDeps = project.configurations.deploy.getAllDependencies().toArray()
 
@@ -93,5 +96,58 @@ public class DevTaskHelper {
             }
         }
         return allDependentProjects;
+    }
+
+    /**
+     * get web app source directories
+     * @param project
+     * @return
+     */
+    public static List<Path> getWebSourceDirectoriesToMonitor(Project project) {
+        List<Path> retVal = new ArrayList<Path>();
+        Task warTask = project.getTasks().findByName('war')
+        if (warTask != null) {
+            setWarSourceDir(warTask, retVal)
+        } else if (project.configurations.deploy != null) {
+            setWarSourceDirForDeployDependencies(project, retVal)
+        } else {
+            retVal.add("src/main/webapp")
+        }
+        return retVal;
+    }
+    /**
+     * find war deploy dependencies and add source dir
+     * @param project
+     * @param retVal
+     */
+    private static void setWarSourceDirForDeployDependencies(Project project, ArrayList<Path> retVal) {
+        Task warTask
+        HashMap<File, Dependency> completeDeployDeps = DevTaskHelper.getDeployDependencies(project)
+        for (Map.Entry<File, Dependency> entry : completeDeployDeps) {
+            Dependency dependency = entry.getValue();
+            File dependencyFile = entry.getKey();
+
+            if (dependency instanceof ProjectDependency) {
+                Project dependencyProject = dependency.getDependencyProject()
+                String projectType = FilenameUtils.getExtension(dependencyFile.toString())
+                switch (projectType) {
+                    case "war":
+                        warTask = dependencyProject.getTasks().findByName('war')
+                        if (warTask != null) {
+                            setWarSourceDir(warTask, retVal)
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
+    private static void setWarSourceDir(Task warTask, ArrayList<Path> retVal) {
+        War war = (War) warTask.getProject().war
+        if (war.getWebAppDirectory().getAsFile().get() != null) {
+            retVal.add(war.getWebAppDirectory().get().asFile.toPath())
+        }
     }
 }

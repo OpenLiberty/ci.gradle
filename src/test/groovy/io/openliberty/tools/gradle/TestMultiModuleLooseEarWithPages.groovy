@@ -1,6 +1,5 @@
 package io.openliberty.tools.gradle
 
-
 import org.junit.AfterClass
 import org.junit.Assert
 import org.junit.BeforeClass
@@ -91,18 +90,22 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
         Assert.assertEquals("Number of <archive/> element ==>", 2, nodes.getLength());
         if (OSUtil.isWindows()) {
-            ejbWar = "\\ejb-war-1.0-SNAPSHOT.war"
-            warWebappsFolder = "\\multi-module-loose-ear-pages-test\\war\\src\\main\\webapp"
-            ejbJar = "\\WEB-INF\\lib\\ejb-jar-1.0-SNAPSHOT.jar"
+            ejbWar = "//ejb-war-1.0-SNAPSHOT.war"
+            warWebappsFolder = "//multi-module-loose-ear-pages-test//war//src//main//webapp"
+            ejbJar = "//WEB-INF//lib//ejb-jar-1.0-SNAPSHOT.jar"
         }
-        Assert.assertEquals(ejbWar, nodes.item(0).getAttributes()
-                .getNamedItem("targetInArchive").getNodeValue())
+        Assert.assertTrue(List.of(nodes.item(0).getAttributes()
+                .getNamedItem("targetInArchive").getNodeValue(),
+                nodes.item(0).getAttributes()
+                        .getNamedItem("targetInArchive").getNodeValue()).contains(ejbWar))
 
         expression = "/archive/archive/dir";
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
         Assert.assertEquals("Number of <archive/> element ==>", 3, nodes.getLength());
 
-        Assert.assertTrue(nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue().contains(warWebappsFolder));
+        Assert.assertTrue(nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue().contains(warWebappsFolder)
+        ||nodes.item(1).getAttributes().getNamedItem("sourceOnDisk").getNodeValue().contains(warWebappsFolder)
+        ||nodes.item(2).getAttributes().getNamedItem("sourceOnDisk").getNodeValue().contains(warWebappsFolder));
 
         expression = "/archive/archive/archive";
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);

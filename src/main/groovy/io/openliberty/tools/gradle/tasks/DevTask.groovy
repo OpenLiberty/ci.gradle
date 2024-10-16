@@ -1216,7 +1216,10 @@ class DevTask extends AbstractFeatureTask {
 
     @TaskAction
     void action() {
-        HashSet<Project> allProjects = new HashSet<>()
+        //all projects contain list of all gradle projects.
+        // this list of projects is passed to DevTaskUtil constructor
+        // to be used for recompileBuildFile, updateArtifcatPaths etc
+        Set<Project> allProjects = new HashSet<Project>()
         initializeDefaultValues();
 
         SourceSet mainSourceSet = project.sourceSets.main;
@@ -1264,8 +1267,10 @@ class DevTask extends AbstractFeatureTask {
 
         File buildFile = project.getBuildFile();
 
-        List<Path> webResourceDirs = LooseWarApplication.getWebSourceDirectoriesToMonitor(project);
+        List<Path> webResourceDirs = DevTaskHelper.getWebSourceDirectoriesToMonitor(project);
         // Instantiate util before any child gradle tasks launched so it can help find available port if needed
+        // Project modules contain all child modules. This project modules will be present only for multi-module
+        // used to watch sub project src and test source files
         List<ProjectModule> projectModules = getProjectModules()
         allProjects.add(project)
         allProjects.addAll(DevTaskHelper.getAllUpstreamProjects(project))
@@ -1418,10 +1423,7 @@ class DevTask extends AbstractFeatureTask {
 
     private List<ProjectModule> getProjectModules() {
         List<ProjectModule> upstreamProjects = new ArrayList<ProjectModule>();
-
-        HashSet<Project> allProjects = new HashSet<>()
-        allProjects.addAll(DevTaskHelper.getAllUpstreamProjects(project))
-        for (Project dependencyProject : allProjects) {
+        for (Project dependencyProject : DevTaskHelper.getAllUpstreamProjects(project)) {
             // TODO get compiler options for upstream project
             // JavaCompilerOptions upstreamCompilerOptions = getMavenCompilerOptions(p);
             JavaCompilerOptions upstreamCompilerOptions = new JavaCompilerOptions();
