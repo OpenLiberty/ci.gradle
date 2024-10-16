@@ -103,9 +103,9 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
         expression = "/archive/archive/dir";
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
         Assert.assertEquals("Number of <archive/> element ==>", 3, nodes.getLength());
-        String sourceOnDisk1=nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
-        String sourceOnDisk2=nodes.item(1).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
-        String sourceOnDisk3=nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
+        String sourceOnDisk1 = nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
+        String sourceOnDisk2 = nodes.item(1).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
+        String sourceOnDisk3 = nodes.item(2).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
 
         Assert.assertTrue("actual targetInArchive paths [" + sourceOnDisk1 + ","+ sourceOnDisk2 + ","
                 + sourceOnDisk3 + "] is not containing with actual result : " + warWebappsFolder,
