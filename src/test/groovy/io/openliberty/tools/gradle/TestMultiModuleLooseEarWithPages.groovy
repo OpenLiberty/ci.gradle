@@ -90,14 +90,14 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
         Assert.assertEquals("Number of <archive/> element ==>", 2, nodes.getLength());
         if (OSUtil.isWindows()) {
-            ejbWar = "//ejb-war-1.0-SNAPSHOT.war"
-            warWebappsFolder = "//multi-module-loose-ear-pages-test//war//src//main//webapp"
-            ejbJar = "//WEB-INF//lib//ejb-jar-1.0-SNAPSHOT.jar"
+            ejbWar = "\\ejb-war-1.0-SNAPSHOT.war"
+            warWebappsFolder = "\\multi-module-loose-ear-pages-test\\war\\src\\main\\webapp"
+            ejbJar = "\\WEB-INF\\lib\\ejb-jar-1.0-SNAPSHOT.jar"
         }
-        Assert.assertTrue(List.of(nodes.item(0).getAttributes()
-                .getNamedItem("targetInArchive").getNodeValue(),
-                nodes.item(0).getAttributes()
-                        .getNamedItem("targetInArchive").getNodeValue()).contains(ejbWar))
+        Assert.assertTrue(nodes.item(0).getAttributes()
+                .getNamedItem("targetInArchive").getNodeValue().equals(ejbWar)||
+                nodes.item(1).getAttributes()
+                        .getNamedItem("targetInArchive").getNodeValue().equals(ejbWar))
 
         expression = "/archive/archive/dir";
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
