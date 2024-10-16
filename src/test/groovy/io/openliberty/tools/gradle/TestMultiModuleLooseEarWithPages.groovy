@@ -13,6 +13,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.xpath.XPath
 import javax.xml.xpath.XPathConstants
 import javax.xml.xpath.XPathFactory
+import io.openliberty.tools.common.plugins.util.OSUtil
 
 public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/multi-module-loose-ear-pages-test")
@@ -64,6 +65,10 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
     public void test_loose_config_file_contents_are_correct(){
         File on = new File("build/testBuilds/multi-module-loose-ear-pages-test/ear/build/wlp/usr/servers/ejbServer/apps/ejb-ear-1.0-SNAPSHOT.ear.xml");
         FileInputStream input = new FileInputStream(on);
+        String ejbWar = "/ejb-war-1.0-SNAPSHOT.war"
+        String warWebappsFolder = "/multi-module-loose-ear-pages-test/war/src/main/webapp"
+        String ejbJar = "/WEB-INF/lib/ejb-jar-1.0-SNAPSHOT.jar"
+
 
         // get input XML Document
         DocumentBuilderFactory inputBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -85,24 +90,25 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
         expression = "/archive/archive";
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
         Assert.assertEquals("Number of <archive/> element ==>", 2, nodes.getLength());
-
-        String ejbWar = "/ejb-war-1.0-SNAPSHOT.war"
-
-        Assert.assertTrue(ejbWar.equals(nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue()))
+        if (OSUtil.isWindows()) {
+            ejbWar = "\\ejb-war-1.0-SNAPSHOT.war"
+            warWebappsFolder = "\\multi-module-loose-ear-pages-test\\war\\src\\main\\webapp"
+            ejbJar = "\\WEB-INF\\lib\\ejb-jar-1.0-SNAPSHOT.jar"
+        }
+        Assert.assertEquals(ejbWar, nodes.item(0).getAttributes()
+                .getNamedItem("targetInArchive").getNodeValue())
 
         expression = "/archive/archive/dir";
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
         Assert.assertEquals("Number of <archive/> element ==>", 3, nodes.getLength());
 
-        String warWebappsFolder = "/multi-module-loose-ear-pages-test/war/src/main/webapp"
         Assert.assertTrue(nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue().contains(warWebappsFolder));
 
         expression = "/archive/archive/archive";
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
         Assert.assertEquals("Number of <archive/> element ==>", 1, nodes.getLength());
 
-        String ejbJar = "/WEB-INF/lib/ejb-jar-1.0-SNAPSHOT.jar"
-        Assert.assertTrue(ejbJar.equals(nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue()))
+        Assert.assertEquals(ejbJar, nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue())
 
         expression = "/archive/file";
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);

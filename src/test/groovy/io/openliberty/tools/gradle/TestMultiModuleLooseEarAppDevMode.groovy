@@ -55,7 +55,11 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
     }
 
     @AfterClass
-    public static void tearDown() throws Exception {
-        runTasks(buildDir, 'libertyStop')
+    public static void cleanUpAfterClass() throws Exception {
+        String stdout = getContents(logFile, "Dev mode std output");
+        System.out.println(stdout);
+        String stderr = getContents(errFile, "Dev mode std error");
+        System.out.println(stderr);
+        cleanUpAfterClass(true);
     }
 }
