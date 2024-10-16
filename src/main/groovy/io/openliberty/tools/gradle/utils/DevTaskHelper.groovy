@@ -147,7 +147,7 @@ public class DevTaskHelper {
     private static void setWarSourceDir(Task warTask, ArrayList<Path> retVal) {
         War war = (War) warTask.getProject().war
         if (war.getWebAppDirectory().getAsFile().get() != null) {
-            retVal.add(war.getWebAppDirectory().get().asFile.toPath())
+            retVal.add(war.getWebAppDirectory().get().asFile.toPath().toAbsolutePath())
         }
     }
 }
