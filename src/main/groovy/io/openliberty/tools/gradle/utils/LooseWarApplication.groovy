@@ -1,4 +1,4 @@
-package io.openliberty.tools.gradle.utils;
+package io.openliberty.tools.gradle.utils
 
 import io.openliberty.tools.common.plugins.config.LooseApplication
 import io.openliberty.tools.common.plugins.config.LooseConfigData
@@ -31,5 +31,4 @@ public class LooseWarApplication extends LooseApplication {
         }
         config.addDir(sourceDir, "/")
     }
-
 }

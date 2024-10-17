@@ -1,0 +1,53 @@
+apply plugin: 'ear'
+apply plugin: 'liberty'
+
+description = 'EAR Module'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    deploy project(path:':war', configuration:'archives')
+    deploy project(path:':jar', configuration:'archives')
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.0'
+    libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: runtimeVersion
+}
+
+ear {
+    archiveFileName = rootProject.name+"-"+getArchiveBaseName().get() +"-"+rootProject.version+ '.' + getArchiveExtension().get()
+    deploymentDescriptor {
+        module ('ejb-jar-1.0-SNAPSHOT.jar', 'java')
+        webModule ('ejb-war-1.0-SNAPSHOT.war', '/converter')
+    }
+}
+
+liberty {
+    server {
+        name = "ejbServer"
+        deploy {
+            apps = [ear]
+            copyLibsDirectory = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/libs")
+        }
+        verifyAppStartTimeout = 30
+        looseApplication = true
+    }
+}
+
+deploy.dependsOn 'ear'
+ear.dependsOn ':jar:jar', ':war:war'
