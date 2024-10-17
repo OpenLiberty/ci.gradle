@@ -107,7 +107,7 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
         String sourceOnDisk2 = nodes.item(1).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
         String sourceOnDisk3 = nodes.item(2).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
 
-        Assert.assertTrue("actual targetInArchive paths [" + sourceOnDisk1 + ","+ sourceOnDisk2 + ","
+        Assert.assertTrue("actual sourceOnDisk paths [" + sourceOnDisk1 + ","+ sourceOnDisk2 + ","
                 + sourceOnDisk3 + "] is not containing with actual result : " + warWebappsFolder,
                 sourceOnDisk1.contains(warWebappsFolder) || sourceOnDisk2.contains(warWebappsFolder) || sourceOnDisk3.contains(warWebappsFolder));
 

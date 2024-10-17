@@ -1,16 +1,10 @@
-package io.openliberty.tools.gradle.utils;
+package io.openliberty.tools.gradle.utils
 
 import io.openliberty.tools.common.plugins.config.LooseApplication
 import io.openliberty.tools.common.plugins.config.LooseConfigData
-import org.apache.commons.io.FilenameUtils
-import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.artifacts.Dependency
-import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.logging.Logger
 import org.gradle.api.tasks.bundling.War
-
-import java.nio.file.Path
 
 public class LooseWarApplication extends LooseApplication {
     
