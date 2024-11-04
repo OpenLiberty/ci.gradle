@@ -16,7 +16,7 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
         createDir(buildDir);
         createTestProject(buildDir, resourceDir, buildFilename);
         new File(buildDir, "build").createNewFile();
-        runDevMode(buildDir)
+        runDevMode("--skipTests",buildDir)
     }
 
     @Test
@@ -37,6 +37,23 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
         javaWriter.close();
 
         assertTrue(waitForCompilation(targetHelloWorld, lastModified, 6000));
+    }
+
+    @Test
+    public void manualTestsInvocationTest() throws Exception {
+
+        writer.write("\n");
+        writer.flush();
+        if (!verifyLogMessage(2000,  "Tests will not run on demand for ear because skipTests is set to true")) {
+            assertTrue(verifyLogMessage(2000,  "Tests will not run on demand for ear because skipTests is set to true"));
+        }
+        if (!verifyLogMessage(2000,  "Tests will not run on demand for jar because skipTests is set to true")) {
+            assertTrue(verifyLogMessage(2000,  "Tests will not run on demand for jar because skipTests is set to true"));
+        }
+        if (!verifyLogMessage(2000,  "Tests will not run on demand for war because skipTests is set to true")) {
+            assertTrue(verifyLogMessage(2000,  "Tests will not run on demand for war because skipTests is set to true"));
+        }
+
     }
 
     @AfterClass

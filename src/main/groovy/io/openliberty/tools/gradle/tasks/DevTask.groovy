@@ -28,7 +28,6 @@ import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil.FeaturesPlatforms
 import io.openliberty.tools.common.plugins.util.ServerStatusUtil
 import io.openliberty.tools.gradle.utils.DevTaskHelper
-import io.openliberty.tools.gradle.utils.LooseWarApplication
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -1416,8 +1415,10 @@ class DevTask extends AbstractFeatureTask {
     private List<ProjectModule> getProjectModules() {
         List<ProjectModule> upstreamProjects = new ArrayList<ProjectModule>();
         for (Project dependencyProject : DevTaskHelper.getAllUpstreamProjects(project)) {
-            // TODO get compiler options for upstream project
-            // JavaCompilerOptions upstreamCompilerOptions = getMavenCompilerOptions(p);
+            // In Maven , there is a step to set compiler options for upstream project
+            // Gradle does not need to manually inject compiler options because
+            // we are directly calling compileJava task, which internally takes the compiler options
+            // from task definition or command line arguments
             JavaCompilerOptions upstreamCompilerOptions = new JavaCompilerOptions();
             SourceSet mainSourceSet = dependencyProject.sourceSets.main;
             SourceSet testSourceSet = dependencyProject.sourceSets.test;
@@ -1431,40 +1432,15 @@ class DevTask extends AbstractFeatureTask {
             File upstreamTestOutputDir = testOutputDirectory.asFile.get();
             // resource directories
             List<File> upstreamResourceDirs = mainSourceSet.resources.srcDirs.toList();
-            /* TODO all gradle items
-            // properties that are set in the pom file
-            Properties props = dependencyProject.getProperties();
-
-            // properties that are set by user via CLI parameters
-            Properties userProps = session.getUserProperties();
-
-            Plugin libertyPlugin = getLibertyPluginForProject(p);
-            // use "dev" goal, although we don't expect the skip tests flags to be bound to any goal
-            Xpp3Dom config = ExecuteMojoUtil.getPluginGoalConfig(libertyPlugin, "dev", getLog());
-
-            boolean upstreamSkipTests = DevHelper.getBooleanFlag(config, userProps, props, "skipTests");
-            boolean upstreamSkipITs = DevHelper.getBooleanFlag(config, userProps, props, "skipITs");
-            boolean upstreamSkipUTs = DevHelper.getBooleanFlag(config, userProps, props, "skipUTs");
-
-            // only force skipping unit test for ear modules otherwise honour existing skip
-            // test params
-
-
-            // build list of dependent modules
-            List<MavenProject> dependentProjects = graph.getDownstreamProjects(p, true);
-            List<File> dependentModules = new ArrayList<File>();
-            for (MavenProject depProj : dependentProjects) {
-                dependentModules.add(depProj.getFile());
-            }
-            */
-            boolean upstreamSkipTests = false
-            boolean upstreamSkipITs = false
-            boolean upstreamSkipUTs = false
+            //get gradle project properties. It is observed that project properties contain all gradle properties
+            // properties are overridden automatically with the highest precedence
+            // in gradle, we are only using skopTests
+            boolean upstreamSkipTests = dependencyProject.hasProperty("skipTests") ? DevTaskHelper.parseBooleanIfDefined(dependencyProject.properties.get("skipTests")) : skipTests
 
             if (DevTaskHelper.getPackagingType(dependencyProject).equals("ear")) {
                 upstreamSkipUTs = true;
             }
-            // build list of dependent modules
+            // build list of dependent modules -> can be kept as empty list in ci.gradle as gradle itself is evaluating other project module dependencies
             List<File> dependentModules = new ArrayList<File>();
             ProjectModule upstreamProject = new ProjectModule(dependencyProject.getBuildFile(),
                     dependencyProject.getName(),
@@ -1477,8 +1453,8 @@ class DevTask extends AbstractFeatureTask {
                     upstreamTestOutputDir,
                     upstreamResourceDirs,
                     upstreamSkipTests,
-                    upstreamSkipUTs,
-                    upstreamSkipITs,
+                    false,
+                    false,
                     upstreamCompilerOptions,
                     dependentModules);
 

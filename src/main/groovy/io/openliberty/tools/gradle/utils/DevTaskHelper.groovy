@@ -150,4 +150,16 @@ public class DevTaskHelper {
             retVal.add(war.getWebAppDirectory().get().asFile.toPath().toAbsolutePath())
         }
     }
+
+    /**
+     * Parses a Boolean from a Object if the Object is not null.  Otherwise returns null.
+     * @param value the Object to parse
+     * @return a Boolean, or null if value is null
+     */
+    public static Boolean parseBooleanIfDefined(Object value) {
+        if (value != null) {
+            return Boolean.parseBoolean(value as String);
+        }
+        return null;
+    }
 }
