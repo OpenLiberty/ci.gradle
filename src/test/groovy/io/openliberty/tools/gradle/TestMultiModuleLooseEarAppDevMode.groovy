@@ -56,6 +56,24 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
 
     }
 
+    @Test
+    public void modifyUpdateGradleTest() throws Exception {
+
+        // modify a java file
+        File srcHelloWorld = new File(buildDir, "build.gradle");
+        assertTrue(srcHelloWorld.exists());
+
+        waitLongEnough();
+        String str = "// testing";
+        BufferedWriter javaWriter = new BufferedWriter(new FileWriter(srcHelloWorld, true));
+        javaWriter.append(' ');
+        javaWriter.append(str);
+        javaWriter.close();
+        if (!verifyLogMessage(2000,  "We detected a change in build.gradle, but we cannot identify whether it’s a runtime or dependency change")) {
+            assertTrue(verifyLogMessage(2000,  "We detected a change in build.gradle, but we cannot identify whether it’s a runtime or dependency change"));
+        }
+    }
+
     @AfterClass
     public static void cleanUpAfterClass() throws Exception {
         String stdout = getContents(logFile, "Dev mode std output");
@@ -64,4 +82,5 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
         System.out.println(stderr);
         cleanUpAfterClass(true);
     }
+
 }

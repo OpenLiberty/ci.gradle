@@ -499,13 +499,23 @@ class DevTask extends AbstractFeatureTask {
         @Override
         public boolean updateArtifactPaths(ProjectModule projectModule, boolean redeployCheck, boolean generateFeatures, ThreadPoolExecutor executor)
                 throws PluginExecutionException {
-            // not supported for Gradle, only used for multi module Maven projects
+            // unable to identify the changes made, showing option for user. always return false because action is invoked manually
+            if (isMultiModuleProject()) {
+                info("We detected a change in build.gradle, but we cannot identify whether it’s a runtime or dependency change");
+                info("r - to restart server, type 'r' and press Enter.");
+                info("Press Enter to recompile the project and run tests manually");
+            }
             return false;
         }
 
         @Override
         public boolean updateArtifactPaths(File parentBuildFile) {
-            // not supported for Gradle, only used for multi module Maven projects
+            // unable to identify the changes made, showing option for user. always return false because action is invoked manually
+            if (isMultiModuleProject()) {
+                info("We detected a change in build.gradle, but we cannot identify whether it’s a runtime or dependency change");
+                info("r - to restart server, type 'r' and press Enter.");
+                info("Press Enter to recompile the project and run tests manually");
+            }
             return false;
         }
         
@@ -534,6 +544,13 @@ class DevTask extends AbstractFeatureTask {
             boolean restartServer = false;
             boolean installFeatures = false;
             boolean optimizeGenerateFeatures = false;
+
+            if (isMultiModuleProject()) {
+                info("We detected a change in build.gradle, but we cannot identify whether it’s a runtime or dependency change");
+                info("r - to restart server, type 'r' and press Enter.");
+                info("Press Enter to recompile the project and run tests manually");
+                return false;
+            }
 
             ProjectBuilder builder = ProjectBuilder.builder();
             Project newProject;
