@@ -377,14 +377,14 @@ class DevTask extends AbstractFeatureTask {
                     boolean libertyDebug, boolean pollingTest, boolean container, File containerfile, File containerBuildContext,
                     String containerRunOpts, int containerBuildTimeout, boolean skipDefaultPorts, boolean keepTempContainerfile, 
                     String mavenCacheLocation, String packagingType, File buildFile, boolean generateFeatures, List<Path> webResourceDirs,
-                    List<ProjectModule> projectModuleList
+                    List<ProjectModule> projectModuleList, Map<String, List<String>> parentBuildGradle
         ) throws IOException, PluginExecutionException {
             super(buildDir, serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory, /* multi module project directory */ projectDirectory,
                     resourceDirs, changeOnDemandTestsAction, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, skipInstallFeature, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, containerfile, containerBuildContext, containerRunOpts, containerBuildTimeout, skipDefaultPorts,
                     null /* compileOptions not needed since useBuildRecompile is true */, keepTempContainerfile, mavenCacheLocation, projectModuleList /* multi module upstream projects */,
-                    false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, null /* parent build files */, generateFeatures, null /* compileArtifactPaths */, null /* testArtifactPaths */, webResourceDirs /* webResources */
+                    false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, parentBuildGradle /* parent build files */, generateFeatures, null /* compileArtifactPaths */, null /* testArtifactPaths */, webResourceDirs /* webResources */
                 );
             this.libertyDirPropertyFiles = AbstractServerTask.getLibertyDirectoryPropertyFiles(installDirectory, userDirectory, serverDirectory);
             ServerFeatureUtil servUtil = getServerFeatureUtil(true, libertyDirPropertyFiles);
@@ -1265,6 +1265,11 @@ class DevTask extends AbstractFeatureTask {
         // Project modules contain all child modules. This project modules will be present only for multi-module
         // used to watch sub project src and test source files
         List<ProjectModule> projectModules = getProjectModules()
+        // get parent build.gradle to register
+        Map<String, List<String>> parentBuildGradle = new HashMap<String, List<String>>();
+        if(projectModules.size()>0) {
+            DevTaskHelper.updateParentBuildFiles(parentBuildGradle, project)
+        }
         try {
             this.util = new DevTaskUtil(project.getLayout().getBuildDirectory().getAsFile().get(), serverInstallDir, getUserDir(project, serverInstallDir),
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
@@ -1272,7 +1277,7 @@ class DevTask extends AbstractFeatureTask {
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(),
                 libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), containerfile, containerBuildContext, containerRunOpts,
                 containerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempContainerfile.booleanValue(), localMavenRepoForFeatureUtility,
-                DevTaskHelper.getPackagingType(project), buildFile, generateFeatures.booleanValue(), webResourceDirs, projectModules
+                DevTaskHelper.getPackagingType(project), buildFile, generateFeatures.booleanValue(), webResourceDirs, projectModules, parentBuildGradle
             );
         } catch (IOException | PluginExecutionException e) {
             throw new GradleException("Error initializing dev mode.", e)

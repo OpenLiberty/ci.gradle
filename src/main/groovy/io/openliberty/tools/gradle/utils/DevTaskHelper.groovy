@@ -162,4 +162,20 @@ public class DevTaskHelper {
         }
         return null;
     }
+
+    /**
+     * Update map with list of parent build files and their subsequent child build files
+     *
+     * @param parentBuildFiles Map of parent build files and subsequent child build files
+     * @param proj GradleProject
+     */
+    public static void updateParentBuildFiles(Map<String, List<String>> parentBuildFiles, Project proj) {
+        String parentBuildGradle = proj.getRootProject().getBuildFile().getAbsolutePath().toString()
+        List<String> childBuildFiles = new ArrayList<>();
+        childBuildFiles.add(proj.getBuildFile().getAbsolutePath())
+        for (Project dependencyProject : getAllUpstreamProjects(proj)) {
+            childBuildFiles.add(dependencyProject.getBuildFile().getAbsolutePath().toString())
+        }
+        parentBuildFiles.put(parentBuildGradle, childBuildFiles)
+    }
 }
