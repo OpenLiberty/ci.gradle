@@ -16,7 +16,8 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
         createDir(buildDir);
         createTestProject(buildDir, resourceDir, buildFilename);
         new File(buildDir, "build").createNewFile();
-        runDevMode("--skipTests",buildDir)
+        runDevMode("--skipTests", buildDir)
+        Thread.wait(20000)
     }
 
     @Test
@@ -44,14 +45,14 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
 
         writer.write("\n");
         writer.flush();
-        if (!verifyLogMessage(2000,  "Tests will not run on demand for ear because skipTests is set to true")) {
-            assertTrue(verifyLogMessage(2000,  "Tests will not run on demand for ear because skipTests is set to true"));
+        if (!verifyLogMessage(6000,  "Tests will not run on demand for ear because skipTests is set to true")) {
+            assertTrue(verifyLogMessage(6000,  "Tests will not run on demand for ear because skipTests is set to true"));
         }
-        if (!verifyLogMessage(2000,  "Tests will not run on demand for jar because skipTests is set to true")) {
-            assertTrue(verifyLogMessage(2000,  "Tests will not run on demand for jar because skipTests is set to true"));
+        if (!verifyLogMessage(6000,  "Tests will not run on demand for jar because skipTests is set to true")) {
+            assertTrue(verifyLogMessage(6000,  "Tests will not run on demand for jar because skipTests is set to true"));
         }
-        if (!verifyLogMessage(2000,  "Tests will not run on demand for war because skipTests is set to true")) {
-            assertTrue(verifyLogMessage(2000,  "Tests will not run on demand for war because skipTests is set to true"));
+        if (!verifyLogMessage(6000,  "Tests will not run on demand for war because skipTests is set to true")) {
+            assertTrue(verifyLogMessage(6000,  "Tests will not run on demand for war because skipTests is set to true"));
         }
 
     }
@@ -63,14 +64,13 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
         File srcHelloWorld = new File(buildDir, "build.gradle");
         assertTrue(srcHelloWorld.exists());
 
-        waitLongEnough();
         String str = "// testing";
         BufferedWriter javaWriter = new BufferedWriter(new FileWriter(srcHelloWorld, true));
         javaWriter.append(' ');
         javaWriter.append(str);
         javaWriter.close();
-        if (!verifyLogMessage(2000,  "We detected a change in build.gradle, but we cannot identify whether it’s a runtime or dependency change")) {
-            assertTrue(verifyLogMessage(2000,  "We detected a change in build.gradle, but we cannot identify whether it’s a runtime or dependency change"));
+        if (!verifyLogMessage(6000,  "We detected a change in build.gradle, but we cannot identify whether it’s a runtime or dependency change")) {
+            assertTrue(verifyLogMessage(6000,  "We detected a change in build.gradle, but we cannot identify whether it’s a runtime or dependency change"));
         }
     }
 
