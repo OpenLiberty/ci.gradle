@@ -17,7 +17,6 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
         createTestProject(buildDir, resourceDir, buildFilename);
         new File(buildDir, "build").createNewFile();
         runDevMode("--skipTests", buildDir)
-        Thread.wait(20000)
     }
 
     @Test
@@ -42,7 +41,7 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
 
     @Test
     public void manualTestsInvocationTest() throws Exception {
-
+        waitLongEnough();
         writer.write("\n");
         writer.flush();
         if (!verifyLogMessage(6000,  "Tests will not run on demand for ear because skipTests is set to true")) {
@@ -59,7 +58,7 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
 
     @Test
     public void modifyUpdateGradleTest() throws Exception {
-
+        waitLongEnough();
         // modify a java file
         File srcHelloWorld = new File(buildDir, "build.gradle");
         assertTrue(srcHelloWorld.exists());
@@ -69,6 +68,7 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
         javaWriter.append(' ');
         javaWriter.append(str);
         javaWriter.close();
+
         if (!verifyLogMessage(6000,  "We detected a change in build.gradle, but we cannot identify whether it’s a runtime or dependency change")) {
             assertTrue(verifyLogMessage(6000,  "We detected a change in build.gradle, but we cannot identify whether it’s a runtime or dependency change"));
         }
