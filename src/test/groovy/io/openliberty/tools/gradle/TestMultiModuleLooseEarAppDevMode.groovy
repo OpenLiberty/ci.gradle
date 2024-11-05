@@ -69,8 +69,8 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
         javaWriter.append(str);
         javaWriter.close();
 
-        if (!verifyLogMessage(123000,  "We detected a change in build.gradle, but we cannot identify whether it’s a runtime or dependency change")) {
-            assertTrue(verifyLogMessage(123000,  "We detected a change in build.gradle, but we cannot identify whether it’s a runtime or dependency change"));
+        if (!verifyLogMessage(123000,  "We detected a change in build.gradle, but we cannot identify whether it's a runtime or dependency change")) {
+            assertTrue(verifyLogMessage(123000,  "We detected a change in build.gradle, but we cannot identify whether it's a runtime or dependency change"));
         }
     }
 
