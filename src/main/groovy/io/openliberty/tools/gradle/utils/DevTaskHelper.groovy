@@ -170,11 +170,11 @@ public class DevTaskHelper {
      * @param proj GradleProject
      */
     public static void updateParentBuildFiles(Map<String, List<String>> parentBuildFiles, Project proj) {
-        String parentBuildGradle = proj.getRootProject().getBuildFile().getAbsolutePath().toString()
+        String parentBuildGradle = proj.getRootProject().getBuildFile().getCanonicalPath()
         List<String> childBuildFiles = new ArrayList<>();
-        childBuildFiles.add(proj.getBuildFile().getAbsolutePath())
+        childBuildFiles.add(proj.getBuildFile().getCanonicalPath())
         for (Project dependencyProject : getAllUpstreamProjects(proj)) {
-            childBuildFiles.add(dependencyProject.getBuildFile().getAbsolutePath().toString())
+            childBuildFiles.add(dependencyProject.getBuildFile().getCanonicalPath())
         }
         parentBuildFiles.put(parentBuildGradle, childBuildFiles)
     }
