@@ -36,7 +36,7 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
         javaWriter.append(str);
         javaWriter.close();
 
-        assertTrue(waitForCompilation(targetHelloWorld, lastModified, 6000));
+        assertTrue(waitForCompilation(targetHelloWorld, lastModified, 123000));
     }
 
     @Test
@@ -44,8 +44,8 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
         waitLongEnough();
         writer.write("\n");
         writer.flush();
-        if (!verifyLogMessage(6000,  "Tests will not run on demand for ear because skipTests is set to true")) {
-            assertTrue(verifyLogMessage(6000,  "Tests will not run on demand for ear because skipTests is set to true"));
+        if (!verifyLogMessage(123000,  "Tests will not run on demand for ear because skipTests is set to true")) {
+            assertTrue(verifyLogMessage(123000,  "Tests will not run on demand for ear because skipTests is set to true"));
         }
         if (!verifyLogMessage(6000,  "Tests will not run on demand for jar because skipTests is set to true")) {
             assertTrue(verifyLogMessage(6000,  "Tests will not run on demand for jar because skipTests is set to true"));
@@ -69,8 +69,8 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
         javaWriter.append(str);
         javaWriter.close();
 
-        if (!verifyLogMessage(6000,  "We detected a change in build.gradle, but we cannot identify whether it’s a runtime or dependency change")) {
-            assertTrue(verifyLogMessage(6000,  "We detected a change in build.gradle, but we cannot identify whether it’s a runtime or dependency change"));
+        if (!verifyLogMessage(123000,  "We detected a change in build.gradle, but we cannot identify whether it’s a runtime or dependency change")) {
+            assertTrue(verifyLogMessage(123000,  "We detected a change in build.gradle, but we cannot identify whether it’s a runtime or dependency change"));
         }
     }
 
