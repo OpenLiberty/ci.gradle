@@ -69,8 +69,8 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
         javaWriter.append(str);
         javaWriter.close();
 
-        if (!verifyLogMessage(123000,  "We detected a change in build.gradle, but we cannot identify whether it's a runtime or dependency change")) {
-            assertTrue(verifyLogMessage(123000,  "We detected a change in build.gradle, but we cannot identify whether it's a runtime or dependency change"));
+        if (!verifyLogMessage(123000,  "A change was detected in a build file. The libertyDev task could not determine if a server restart is required.")) {
+            assertTrue(verifyLogMessage(123000,  "A change was detected in a build file. The libertyDev task could not determine if a server restart is required."));
         }
     }
 

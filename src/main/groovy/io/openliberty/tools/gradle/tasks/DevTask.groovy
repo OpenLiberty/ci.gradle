@@ -501,9 +501,8 @@ class DevTask extends AbstractFeatureTask {
                 throws PluginExecutionException {
             // unable to identify the changes made, showing option for user. always return false because action is invoked manually
             if (isMultiModuleProject()) {
-                info("We detected a change in build.gradle, but we cannot identify whether it's a runtime or dependency change");
-                info("r - to restart server, type 'r' and press Enter.");
-                info("Press Enter to recompile the project and run tests manually");
+                info("A change was detected in a build file. The libertyDev task could not determine if a server restart is required.");
+                info("To restart the server, type 'r' and press Enter.");
             }
             return false;
         }
@@ -512,9 +511,8 @@ class DevTask extends AbstractFeatureTask {
         public boolean updateArtifactPaths(File parentBuildFile) {
             // unable to identify the changes made, showing option for user. always return false because action is invoked manually
             if (isMultiModuleProject()) {
-                info("We detected a change in build.gradle, but we cannot identify whether it's a runtime or dependency change");
-                info("r - to restart server, type 'r' and press Enter.");
-                info("Press Enter to recompile the project and run tests manually");
+                info("A change was detected in a build file. The libertyDev task could not determine if a server restart is required.");
+                info("To restart the server, type 'r' and press Enter.");
             }
             return false;
         }
@@ -546,9 +544,8 @@ class DevTask extends AbstractFeatureTask {
             boolean optimizeGenerateFeatures = false;
 
             if (isMultiModuleProject()) {
-                info("We detected a change in build.gradle, but we cannot identify whether it's a runtime or dependency change");
-                info("r - to restart server, type 'r' and press Enter.");
-                info("Press Enter to recompile the project and run tests manually");
+                info("A change was detected in a build file. The libertyDev task could not determine if a server restart is required.");
+                info("To restart the server, type 'r' and press Enter.");
                 return false;
             }
 
@@ -1456,13 +1453,16 @@ class DevTask extends AbstractFeatureTask {
             List<File> upstreamResourceDirs = mainSourceSet.resources.srcDirs.toList();
             //get gradle project properties. It is observed that project properties contain all gradle properties
             // properties are overridden automatically with the highest precedence
-            // in gradle, we are only using skopTests
+            // in gradle, we are only using skipTests
             boolean upstreamSkipTests = dependencyProject.hasProperty("skipTests") ? DevTaskHelper.parseBooleanIfDefined(dependencyProject.properties.get("skipTests")) : skipTests
 
             if (DevTaskHelper.getPackagingType(dependencyProject).equals("ear")) {
                 upstreamSkipUTs = true;
             }
-            // build list of dependent modules -> can be kept as empty list in ci.gradle as gradle itself is evaluating other project module dependencies
+            // build list of dependent modules -> can be kept as empty list for gradle
+            // In gradle multi module project, we are calling compileJava for ear
+            // Then gradle internally identifies other transitive project dependencies and calls compileJava for each of them
+            // gradle checks whether the task is UP TO DATE, if its already UP TO DATE, it wont be triggered again
             List<File> dependentModules = new ArrayList<File>();
             ProjectModule upstreamProject = new ProjectModule(dependencyProject.getBuildFile(),
                     dependencyProject.getName(),
