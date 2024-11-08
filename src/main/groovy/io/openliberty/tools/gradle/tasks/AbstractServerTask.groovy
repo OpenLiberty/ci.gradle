@@ -505,10 +505,9 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         configureMultipleAppsConfigDropins(serverNode)
     }
 
-    protected ServerConfigDocument getServerConfigDocument(CommonLogger log, File serverXML, File configDir, File bootstrapFile,
-            Map<String, String> bootstrapProp, File serverEnvFile, boolean giveConfigDirPrecedence, Map<String, File> libertyDirPropertyFiles) throws IOException {
-        if (scd == null || !scd.getServerXML().getCanonicalPath().equals(serverXML.getCanonicalPath())) {
-            scd = new ServerConfigDocument(log, serverXML, configDir, bootstrapFile, bootstrapProp, serverEnvFile, giveConfigDirPrecedence, libertyDirPropertyFiles)
+    protected ServerConfigDocument getServerConfigDocument(CommonLogger log, Map<String, File> libertyDirPropertyFiles) throws IOException {
+        if (scd == null) {
+            scd = new ServerConfigDocument(log, libertyDirPropertyFiles)
         }
 
         return scd
@@ -520,8 +519,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
                 Map<String,String> props = combinedBootstrapProperties == null ? convertPropertiesToMap(server.bootstrapProperties) : combinedBootstrapProperties;
-                getServerConfigDocument(new CommonLogger(project), serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, props, server.serverEnvFile, 
-                                                                            false, getLibertyDirectoryPropertyFiles(null));
+                scd = getServerConfigDocument(new CommonLogger(project), getLibertyDirectoryPropertyFiles(null));
                 if (scd != null && isLocationFound( scd.getLocations(), fileName)) {
                     logger.debug("Application configuration is found in server.xml : " + fileName)
                     configured = true
