@@ -86,8 +86,7 @@ class StartTask extends AbstractServerTask {
         if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
                 Map<String,String> props = combinedBootstrapProperties == null ? convertPropertiesToMap(server.bootstrapProperties) : combinedBootstrapProperties;
-                getServerConfigDocument(new CommonLogger(project), serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, props, server.serverEnvFile, 
-                                                                            false, getLibertyDirectoryPropertyFiles(null));
+                scd = getServerConfigDocument(new CommonLogger(project), getLibertyDirectoryPropertyFiles(null));
                 if (scd != null) {
                     appNames = scd.getNames()
                     appNames += scd.getNamelessLocations().collect { String location ->
