@@ -384,7 +384,7 @@ class DevTask extends AbstractFeatureTask {
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, containerfile, containerBuildContext, containerRunOpts, containerBuildTimeout, skipDefaultPorts,
                     null /* compileOptions not needed since useBuildRecompile is true */, keepTempContainerfile, mavenCacheLocation, projectModuleList /* multi module upstream projects */,
-                    false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, parentBuildGradle /* parent build files */, generateFeatures, null /* compileArtifactPaths */, null /* testArtifactPaths */, webResourceDirs /* webResources */
+                    projectModuleList.size() > 0 /* recompileDependencies as true for multi module */, packagingType, buildFile, parentBuildGradle /* parent build files */, generateFeatures, null /* compileArtifactPaths */, null /* testArtifactPaths */, webResourceDirs /* webResources */
                 );
             this.libertyDirPropertyFiles = AbstractServerTask.getLibertyDirectoryPropertyFiles(installDirectory, userDirectory, serverDirectory);
             ServerFeatureUtil servUtil = getServerFeatureUtil(true, libertyDirPropertyFiles);
@@ -499,20 +499,20 @@ class DevTask extends AbstractFeatureTask {
         @Override
         public boolean updateArtifactPaths(ProjectModule projectModule, boolean redeployCheck, boolean generateFeatures, ThreadPoolExecutor executor)
                 throws PluginExecutionException {
-            // unable to identify the changes made, showing option for user. always return false because action is invoked manually
+            // for multi module, unable to identify the changes made, showing option for user. return true to trigger recompile
             if (isMultiModuleProject()) {
-                info("A change was detected in a build file. The libertyDev task could not determine if a server restart is required.");
-                info("To restart the server, type 'r' and press Enter.");
+                warn("A change was detected in a build file. The libertyDev task could not determine if a server restart is required.");
+                return true;
             }
             return false;
         }
 
         @Override
         public boolean updateArtifactPaths(File parentBuildFile) {
-            // unable to identify the changes made, showing option for user. always return false because action is invoked manually
+            // for multi module, unable to identify the changes made, showing option for user. return true to trigger recompile
             if (isMultiModuleProject()) {
-                info("A change was detected in a build file. The libertyDev task could not determine if a server restart is required.");
-                info("To restart the server, type 'r' and press Enter.");
+                warn("A change was detected in a build file. The libertyDev task could not determine if a server restart is required.");
+                return true;
             }
             return false;
         }
@@ -542,11 +542,10 @@ class DevTask extends AbstractFeatureTask {
             boolean restartServer = false;
             boolean installFeatures = false;
             boolean optimizeGenerateFeatures = false;
-
+            // for multi module, unable to identify the changes made, showing option for user. return true to trigger recompile
             if (isMultiModuleProject()) {
-                info("A change was detected in a build file. The libertyDev task could not determine if a server restart is required.");
-                info("To restart the server, type 'r' and press Enter.");
-                return false;
+                warn("A change was detected in a build file. The libertyDev task could not determine if a server restart is required.");
+                return true;
             }
 
             ProjectBuilder builder = ProjectBuilder.builder();
