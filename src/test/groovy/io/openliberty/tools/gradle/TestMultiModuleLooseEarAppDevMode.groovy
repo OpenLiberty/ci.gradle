@@ -69,8 +69,8 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
         javaWriter.append(str);
         javaWriter.close();
 
-        if (!verifyLogMessage(123000,  "A change was detected in a build file. The libertyDev task could not determine if a server restart is required.")) {
-            assertTrue(verifyLogMessage(123000,  "A change was detected in a build file. The libertyDev task could not determine if a server restart is required."));
+        if (!verifyLogMessage(123000,  "A change was detected in a build file. The libertyDev task could not determine if a server restart is required. To restart server, type 'r' and press Enter.")) {
+            assertTrue(verifyLogMessage(123000,  "A change was detected in a build file. The libertyDev task could not determine if a server restart is required. To restart server, type 'r' and press Enter."));
         }
     }
 

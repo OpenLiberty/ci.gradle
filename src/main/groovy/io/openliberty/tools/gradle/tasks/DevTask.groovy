@@ -501,7 +501,7 @@ class DevTask extends AbstractFeatureTask {
                 throws PluginExecutionException {
             // for multi module, unable to identify the changes made, showing option for user. return true to trigger recompile
             if (isMultiModuleProject()) {
-                warn("A change was detected in a build file. The libertyDev task could not determine if a server restart is required.");
+                warn("A change was detected in a build file. The libertyDev task could not determine if a server restart is required. To restart server, type 'r' and press Enter.");
                 return true;
             }
             return false;
@@ -511,7 +511,7 @@ class DevTask extends AbstractFeatureTask {
         public boolean updateArtifactPaths(File parentBuildFile) {
             // for multi module, unable to identify the changes made, showing option for user. return true to trigger recompile
             if (isMultiModuleProject()) {
-                warn("A change was detected in a build file. The libertyDev task could not determine if a server restart is required.");
+                warn("A change was detected in a build file. The libertyDev task could not determine if a server restart is required. To restart server, type 'r' and press Enter.");
                 return true;
             }
             return false;
@@ -544,7 +544,7 @@ class DevTask extends AbstractFeatureTask {
             boolean optimizeGenerateFeatures = false;
             // for multi module, unable to identify the changes made, showing option for user. return true to trigger recompile
             if (isMultiModuleProject()) {
-                warn("A change was detected in a build file. The libertyDev task could not determine if a server restart is required.");
+                warn("A change was detected in a build file. The libertyDev task could not determine if a server restart is required. To restart server, type 'r' and press Enter.");
                 return true;
             }
 
