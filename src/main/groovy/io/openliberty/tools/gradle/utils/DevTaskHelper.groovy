@@ -150,4 +150,32 @@ public class DevTaskHelper {
             retVal.add(war.getWebAppDirectory().get().asFile.toPath().toAbsolutePath())
         }
     }
+
+    /**
+     * Parses a Boolean from a Object if the Object is not null.  Otherwise returns null.
+     * @param value the Object to parse
+     * @return a Boolean, or null if value is null
+     */
+    public static Boolean parseBooleanIfDefined(Object value) {
+        if (value != null) {
+            return Boolean.parseBoolean(value as String);
+        }
+        return null;
+    }
+
+    /**
+     * Update map with list of parent build files and their subsequent child build files
+     *
+     * @param parentBuildFiles Map of parent build files and subsequent child build files
+     * @param proj GradleProject
+     */
+    public static void updateParentBuildFiles(Map<String, List<String>> parentBuildFiles, Project proj) {
+        String parentBuildGradle = proj.getRootProject().getBuildFile().getCanonicalPath()
+        List<String> childBuildFiles = new ArrayList<>();
+        childBuildFiles.add(proj.getBuildFile().getCanonicalPath())
+        for (Project dependencyProject : getAllUpstreamProjects(proj)) {
+            childBuildFiles.add(dependencyProject.getBuildFile().getCanonicalPath())
+        }
+        parentBuildFiles.put(parentBuildGradle, childBuildFiles)
+    }
 }

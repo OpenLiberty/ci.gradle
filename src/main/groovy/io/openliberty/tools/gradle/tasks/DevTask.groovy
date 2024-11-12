@@ -28,7 +28,6 @@ import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil.FeaturesPlatforms
 import io.openliberty.tools.common.plugins.util.ServerStatusUtil
 import io.openliberty.tools.gradle.utils.DevTaskHelper
-import io.openliberty.tools.gradle.utils.LooseWarApplication
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -378,14 +377,14 @@ class DevTask extends AbstractFeatureTask {
                     boolean libertyDebug, boolean pollingTest, boolean container, File containerfile, File containerBuildContext,
                     String containerRunOpts, int containerBuildTimeout, boolean skipDefaultPorts, boolean keepTempContainerfile, 
                     String mavenCacheLocation, String packagingType, File buildFile, boolean generateFeatures, List<Path> webResourceDirs,
-                    List<ProjectModule> projectModuleList
+                    List<ProjectModule> projectModuleList, Map<String, List<String>> parentBuildGradle
         ) throws IOException, PluginExecutionException {
             super(buildDir, serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory, /* multi module project directory */ projectDirectory,
                     resourceDirs, changeOnDemandTestsAction, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, skipInstallFeature, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, containerfile, containerBuildContext, containerRunOpts, containerBuildTimeout, skipDefaultPorts,
                     null /* compileOptions not needed since useBuildRecompile is true */, keepTempContainerfile, mavenCacheLocation, projectModuleList /* multi module upstream projects */,
-                    false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, null /* parent build files */, generateFeatures, null /* compileArtifactPaths */, null /* testArtifactPaths */, webResourceDirs /* webResources */
+                    projectModuleList.size() > 0 /* recompileDependencies as true for multi module */, packagingType, buildFile, parentBuildGradle /* parent build files */, generateFeatures, null /* compileArtifactPaths */, null /* testArtifactPaths */, webResourceDirs /* webResources */
                 );
             this.libertyDirPropertyFiles = AbstractServerTask.getLibertyDirectoryPropertyFiles(installDirectory, userDirectory, serverDirectory);
             ServerFeatureUtil servUtil = getServerFeatureUtil(true, libertyDirPropertyFiles);
@@ -500,13 +499,21 @@ class DevTask extends AbstractFeatureTask {
         @Override
         public boolean updateArtifactPaths(ProjectModule projectModule, boolean redeployCheck, boolean generateFeatures, ThreadPoolExecutor executor)
                 throws PluginExecutionException {
-            // not supported for Gradle, only used for multi module Maven projects
+            // for multi module, unable to identify the changes made, showing option for user. return true to trigger recompile
+            if (isMultiModuleProject()) {
+                warn("A change was detected in a build file. The libertyDev task could not determine if a server restart is required. To restart server, type 'r' and press Enter.");
+                return true;
+            }
             return false;
         }
 
         @Override
         public boolean updateArtifactPaths(File parentBuildFile) {
-            // not supported for Gradle, only used for multi module Maven projects
+            // for multi module, unable to identify the changes made, showing option for user. return true to trigger recompile
+            if (isMultiModuleProject()) {
+                warn("A change was detected in a build file. The libertyDev task could not determine if a server restart is required. To restart server, type 'r' and press Enter.");
+                return true;
+            }
             return false;
         }
         
@@ -535,6 +542,11 @@ class DevTask extends AbstractFeatureTask {
             boolean restartServer = false;
             boolean installFeatures = false;
             boolean optimizeGenerateFeatures = false;
+            // for multi module, unable to identify the changes made, showing option for user. return true to trigger recompile
+            if (isMultiModuleProject()) {
+                warn("A change was detected in a build file. The libertyDev task could not determine if a server restart is required. To restart server, type 'r' and press Enter.");
+                return true;
+            }
 
             ProjectBuilder builder = ProjectBuilder.builder();
             Project newProject;
@@ -1266,6 +1278,11 @@ class DevTask extends AbstractFeatureTask {
         // Project modules contain all child modules. This project modules will be present only for multi-module
         // used to watch sub project src and test source files
         List<ProjectModule> projectModules = getProjectModules()
+        // get parent build.gradle to register
+        Map<String, List<String>> parentBuildGradle = new HashMap<String, List<String>>();
+        if(projectModules.size()>0) {
+            DevTaskHelper.updateParentBuildFiles(parentBuildGradle, project)
+        }
         try {
             this.util = new DevTaskUtil(project.getLayout().getBuildDirectory().getAsFile().get(), serverInstallDir, getUserDir(project, serverInstallDir),
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
@@ -1273,7 +1290,7 @@ class DevTask extends AbstractFeatureTask {
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(),
                 libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), containerfile, containerBuildContext, containerRunOpts,
                 containerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempContainerfile.booleanValue(), localMavenRepoForFeatureUtility,
-                DevTaskHelper.getPackagingType(project), buildFile, generateFeatures.booleanValue(), webResourceDirs, projectModules
+                DevTaskHelper.getPackagingType(project), buildFile, generateFeatures.booleanValue(), webResourceDirs, projectModules, parentBuildGradle
             );
         } catch (IOException | PluginExecutionException e) {
             throw new GradleException("Error initializing dev mode.", e)
@@ -1416,8 +1433,10 @@ class DevTask extends AbstractFeatureTask {
     private List<ProjectModule> getProjectModules() {
         List<ProjectModule> upstreamProjects = new ArrayList<ProjectModule>();
         for (Project dependencyProject : DevTaskHelper.getAllUpstreamProjects(project)) {
-            // TODO get compiler options for upstream project
-            // JavaCompilerOptions upstreamCompilerOptions = getMavenCompilerOptions(p);
+            // In Maven , there is a step to set compiler options for upstream project
+            // Gradle does not need to manually inject compiler options because
+            // we are directly calling compileJava task, which internally takes the compiler options
+            // from task definition or command line arguments
             JavaCompilerOptions upstreamCompilerOptions = new JavaCompilerOptions();
             SourceSet mainSourceSet = dependencyProject.sourceSets.main;
             SourceSet testSourceSet = dependencyProject.sourceSets.test;
@@ -1431,40 +1450,18 @@ class DevTask extends AbstractFeatureTask {
             File upstreamTestOutputDir = testOutputDirectory.asFile.get();
             // resource directories
             List<File> upstreamResourceDirs = mainSourceSet.resources.srcDirs.toList();
-            /* TODO all gradle items
-            // properties that are set in the pom file
-            Properties props = dependencyProject.getProperties();
-
-            // properties that are set by user via CLI parameters
-            Properties userProps = session.getUserProperties();
-
-            Plugin libertyPlugin = getLibertyPluginForProject(p);
-            // use "dev" goal, although we don't expect the skip tests flags to be bound to any goal
-            Xpp3Dom config = ExecuteMojoUtil.getPluginGoalConfig(libertyPlugin, "dev", getLog());
-
-            boolean upstreamSkipTests = DevHelper.getBooleanFlag(config, userProps, props, "skipTests");
-            boolean upstreamSkipITs = DevHelper.getBooleanFlag(config, userProps, props, "skipITs");
-            boolean upstreamSkipUTs = DevHelper.getBooleanFlag(config, userProps, props, "skipUTs");
-
-            // only force skipping unit test for ear modules otherwise honour existing skip
-            // test params
-
-
-            // build list of dependent modules
-            List<MavenProject> dependentProjects = graph.getDownstreamProjects(p, true);
-            List<File> dependentModules = new ArrayList<File>();
-            for (MavenProject depProj : dependentProjects) {
-                dependentModules.add(depProj.getFile());
-            }
-            */
-            boolean upstreamSkipTests = false
-            boolean upstreamSkipITs = false
-            boolean upstreamSkipUTs = false
+            //get gradle project properties. It is observed that project properties contain all gradle properties
+            // properties are overridden automatically with the highest precedence
+            // in gradle, we are only using skipTests
+            boolean upstreamSkipTests = dependencyProject.hasProperty("skipTests") ? DevTaskHelper.parseBooleanIfDefined(dependencyProject.properties.get("skipTests")) : skipTests
 
             if (DevTaskHelper.getPackagingType(dependencyProject).equals("ear")) {
                 upstreamSkipUTs = true;
             }
-            // build list of dependent modules
+            // build list of dependent modules -> can be kept as empty list for gradle
+            // In gradle multi module project, we are calling compileJava for ear
+            // Then gradle internally identifies other transitive project dependencies and calls compileJava for each of them
+            // gradle checks whether the task is UP TO DATE, if its already UP TO DATE, it wont be triggered again
             List<File> dependentModules = new ArrayList<File>();
             ProjectModule upstreamProject = new ProjectModule(dependencyProject.getBuildFile(),
                     dependencyProject.getName(),
@@ -1477,8 +1474,8 @@ class DevTask extends AbstractFeatureTask {
                     upstreamTestOutputDir,
                     upstreamResourceDirs,
                     upstreamSkipTests,
-                    upstreamSkipUTs,
-                    upstreamSkipITs,
+                    false,
+                    false,
                     upstreamCompilerOptions,
                     dependentModules);
 

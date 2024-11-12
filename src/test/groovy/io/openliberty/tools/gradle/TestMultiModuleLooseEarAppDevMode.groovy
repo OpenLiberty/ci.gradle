@@ -16,7 +16,7 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
         createDir(buildDir);
         createTestProject(buildDir, resourceDir, buildFilename);
         new File(buildDir, "build").createNewFile();
-        runDevMode(buildDir)
+        runDevMode("--skipTests", buildDir)
     }
 
     @Test
@@ -36,7 +36,42 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
         javaWriter.append(str);
         javaWriter.close();
 
-        assertTrue(waitForCompilation(targetHelloWorld, lastModified, 6000));
+        assertTrue(waitForCompilation(targetHelloWorld, lastModified, 123000));
+    }
+
+    @Test
+    public void manualTestsInvocationTest() throws Exception {
+        waitLongEnough();
+        writer.write("\n");
+        writer.flush();
+        if (!verifyLogMessage(123000,  "Tests will not run on demand for ear because skipTests is set to true")) {
+            assertTrue(verifyLogMessage(123000,  "Tests will not run on demand for ear because skipTests is set to true"));
+        }
+        if (!verifyLogMessage(6000,  "Tests will not run on demand for jar because skipTests is set to true")) {
+            assertTrue(verifyLogMessage(6000,  "Tests will not run on demand for jar because skipTests is set to true"));
+        }
+        if (!verifyLogMessage(6000,  "Tests will not run on demand for war because skipTests is set to true")) {
+            assertTrue(verifyLogMessage(6000,  "Tests will not run on demand for war because skipTests is set to true"));
+        }
+
+    }
+
+    @Test
+    public void modifyUpdateGradleTest() throws Exception {
+        waitLongEnough();
+        // modify a java file
+        File srcHelloWorld = new File(buildDir, "build.gradle");
+        assertTrue(srcHelloWorld.exists());
+
+        String str = "// testing";
+        BufferedWriter javaWriter = new BufferedWriter(new FileWriter(srcHelloWorld, true));
+        javaWriter.append(' ');
+        javaWriter.append(str);
+        javaWriter.close();
+
+        if (!verifyLogMessage(123000,  "A change was detected in a build file. The libertyDev task could not determine if a server restart is required. To restart server, type 'r' and press Enter.")) {
+            assertTrue(verifyLogMessage(123000,  "A change was detected in a build file. The libertyDev task could not determine if a server restart is required. To restart server, type 'r' and press Enter."));
+        }
     }
 
     @AfterClass
@@ -47,4 +82,5 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
         System.out.println(stderr);
         cleanUpAfterClass(true);
     }
+
 }
