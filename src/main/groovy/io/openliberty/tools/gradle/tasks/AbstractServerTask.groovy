@@ -506,8 +506,8 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
     }
 
     protected ServerConfigDocument getServerConfigDocument(CommonLogger log, File severXml, Map<String, File> libertyDirPropertyFiles) throws IOException {
-        if (scd == null || !scd.getServerXML().getCanonicalPath().equals(severXml.getCanonicalPath())) {
-            scd = new ServerConfigDocument(log, libertyDirPropertyFiles)
+        if (scd == null || !scd.getOriginalServerXMLFile().getCanonicalPath().equals(severXml.getCanonicalPath())) {
+            scd = new ServerConfigDocument(log, serverxml,libertyDirPropertyFiles)
         }
         return scd
     }
