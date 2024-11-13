@@ -15,16 +15,11 @@
  */
 package io.openliberty.tools.gradle.tasks
 
-import org.gradle.api.GradleException
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.Task
-import org.gradle.api.logging.LogLevel
 import io.openliberty.tools.ant.ServerTask
-import io.openliberty.tools.gradle.utils.*
-import io.openliberty.tools.common.plugins.config.ServerConfigDocument
 import io.openliberty.tools.gradle.utils.CommonLogger
-
-import java.io.File
+import org.gradle.api.GradleException
+import org.gradle.api.Task
+import org.gradle.api.tasks.TaskAction
 
 class StartTask extends AbstractServerTask {
 
@@ -85,9 +80,7 @@ class StartTask extends AbstractServerTask {
         File serverConfigFile = new File(getServerDir(project), 'server.xml')
         if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
-                Map<String,String> props = combinedBootstrapProperties == null ? convertPropertiesToMap(server.bootstrapProperties) : combinedBootstrapProperties;
-                getServerConfigDocument(new CommonLogger(project), serverConfigFile, server.configDirectory, server.bootstrapPropertiesFile, props, server.serverEnvFile, 
-                                                                            false, getLibertyDirectoryPropertyFiles(null));
+                getServerConfigDocument(new CommonLogger(project), serverConfigFile, getLibertyDirectoryPropertyFiles(null));
                 if (scd != null) {
                     appNames = scd.getNames()
                     appNames += scd.getNamelessLocations().collect { String location ->
