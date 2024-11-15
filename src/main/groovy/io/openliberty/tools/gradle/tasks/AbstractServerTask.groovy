@@ -23,6 +23,7 @@ import io.openliberty.tools.common.plugins.config.ApplicationXmlDocument
 import io.openliberty.tools.common.plugins.config.ServerConfigDocument
 import io.openliberty.tools.common.plugins.config.ServerConfigXmlDocument
 import io.openliberty.tools.common.plugins.util.DevUtil
+import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 import io.openliberty.tools.gradle.utils.CommonLogger
 import org.apache.commons.io.FileUtils
@@ -506,8 +507,13 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
     }
 
     protected ServerConfigDocument getServerConfigDocument(CommonLogger log, File serverXML, Map<String, File> libertyDirPropertyFiles) throws IOException {
+
         if (scd == null || !scd.getOriginalServerXMLFile().getCanonicalPath().equals(serverXML.getCanonicalPath())) {
-            scd = new ServerConfigDocument(log, serverXML, libertyDirPropertyFiles)
+            try {
+                scd = new ServerConfigDocument(log, serverXML, libertyDirPropertyFiles);
+            } catch (PluginExecutionException e) {
+                throw new GradleException(e.getMessage());
+            }
         }
 
         return scd
