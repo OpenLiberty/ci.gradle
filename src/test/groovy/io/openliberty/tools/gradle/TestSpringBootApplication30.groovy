@@ -15,8 +15,11 @@
  */
 package io.openliberty.tools.gradle
 
+import org.gradle.testkit.runner.BuildResult
 import org.junit.*
 import org.junit.rules.TestName
+
+import static org.junit.Assert.assertTrue
 
 public class TestSpringBootApplication30 extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/sample.springboot3")
@@ -49,6 +52,8 @@ public class TestSpringBootApplication30 extends AbstractIntegrationTest{
             Assert.assertEquals("Did not get expected http response.","Hello!", webPage)
             Assert.assertTrue('defaultServer/dropins has app deployed',
                     new File(buildDir, 'build/wlp/usr/servers/defaultServer/dropins').list().size() == 0)
+            Assert.assertTrue('defaultServer/configDropins/defaults has no config',
+                    new File(buildDir, 'build/wlp/usr/servers/defaultServer/configDropins/defaults').list().size() == 1)
             Assert.assertTrue('no app in apps folder',
                     new File(buildDir, "build/wlp/usr/servers/defaultServer/apps/thin-${testName.getMethodName()}-1.0-SNAPSHOT.jar").exists() )
         } catch (Exception e) {
@@ -164,4 +169,17 @@ public class TestSpringBootApplication30 extends AbstractIntegrationTest{
             throw new AssertionError ("Fail on task deploy.", e)
         }
     }
+
+    @Test
+    public void test_spring_boot_with_springbootapplication_nodes_apps_30() {
+        try {
+            BuildResult result = runTasksFailResult(buildDir, 'deploy', 'libertyStart')
+            String output = result.getOutput()
+            assertTrue(output.contains("Found multiple springBootApplication elements specified in the server configuration. Only one springBootApplication can be configured per Liberty server."))
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task deploy.", e)
+        }
+    }
+
+
 }
