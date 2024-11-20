@@ -216,5 +216,23 @@ abstract class AbstractIntegrationTest {
             }
         }
     }
-
+/**
+ * Count number of lines that contain the given string
+ */
+    protected static int countOccurrences(String str, File file) throws FileNotFoundException, IOException {
+        int occurrences = 0;
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String line = br.readLine();
+        try {
+            while (line != null) {
+                if (line.contains(str)) {
+                    occurrences++;
+                }
+                line = br.readLine();
+            }
+        } finally {
+            br.close();
+        }
+        return occurrences;
+    }
 }

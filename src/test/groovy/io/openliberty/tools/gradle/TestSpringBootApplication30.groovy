@@ -54,6 +54,9 @@ public class TestSpringBootApplication30 extends AbstractIntegrationTest{
                     new File(buildDir, 'build/wlp/usr/servers/defaultServer/dropins').list().size() == 0)
             Assert.assertTrue('defaultServer/configDropins/defaults has no config',
                     new File(buildDir, 'build/wlp/usr/servers/defaultServer/configDropins/defaults').list().size() == 1)
+            File configDropinsDir=new File(buildDir, 'build/wlp/usr/servers/defaultServer/configDropins/defaults')
+            File configDropinsFile=new File(configDropinsDir,configDropinsDir.list().getAt(0))
+            Assert.assertTrue("defaultServer/configDropins/defaults config file does not contain thin spring boot location",countOccurrences("thin-${testName.getMethodName()}-1.0-SNAPSHOT.jar".toString(), configDropinsFile)>0);
             Assert.assertTrue('no app in apps folder',
                     new File(buildDir, "build/wlp/usr/servers/defaultServer/apps/thin-${testName.getMethodName()}-1.0-SNAPSHOT.jar").exists() )
         } catch (Exception e) {
