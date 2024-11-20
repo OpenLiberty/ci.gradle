@@ -201,7 +201,7 @@ class DeployTask extends AbstractServerTask {
 
     private String invokeThinOperation(String appsDir) {
         Map<String, String> params = buildLibertyMap(project);
-
+        String targetThinAppPath
         project.ant.taskdef(name: 'invokeUtil',
                 classname: 'io.openliberty.tools.ant.SpringBootUtilTask',
                 classpath: project.buildscript.configurations.classpath.asPath)
@@ -209,7 +209,15 @@ class DeployTask extends AbstractServerTask {
         String sourceAppPath = getArchiveOutputPath()
         params.put('sourceAppPath', sourceAppPath)
         params.put('targetLibCachePath', getTargetLibCachePath())
-        String targetThinAppPath = getTargetThinAppPath(appsDir, "thin-" + sourceAppPath.substring(sourceAppPath.lastIndexOf(File.separator) + 1))
+
+        File serverXML = new File(getServerDir(project).getCanonicalPath(), "server.xml")
+        ServerConfigDocument scd = getServerConfigDocument(new CommonLogger(project), serverXML, getLibertyDirectoryPropertyFiles(null))
+        if (scd != null && scd.getSpringBootAppNodeLocation().isPresent()) {
+            targetThinAppPath = getTargetThinAppPath(appsDir, scd.getSpringBootAppNodeLocation().get())
+        } else {
+            targetThinAppPath = getTargetThinAppPath(appsDir, "thin-" + sourceAppPath.substring(sourceAppPath.lastIndexOf(File.separator) + 1))
+        }
+
         params.put('targetThinAppPath', targetThinAppPath)
         project.ant.invokeUtil(params)
         return targetThinAppPath;

@@ -34,9 +34,6 @@ dependencies {
 
 liberty {
 	server {
-		serverXmlFile = file("src/main/liberty/config/server30.xml")
-		deploy {
-			apps = [bootJar]
-		}
+		serverXmlFile = file("src/main/liberty/alternateConfig/server.xml")
 	}
 }

@@ -216,5 +216,4 @@ abstract class AbstractIntegrationTest {
             }
         }
     }
-
 }
