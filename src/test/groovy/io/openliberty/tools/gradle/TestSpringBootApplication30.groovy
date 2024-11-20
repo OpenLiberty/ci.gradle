@@ -21,6 +21,17 @@ import org.junit.rules.TestName
 
 import static org.junit.Assert.assertTrue
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
+import org.w3c.dom.Element;
+
 public class TestSpringBootApplication30 extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/sample.springboot3")
     static String buildFilename = "springboot_3_archive.gradle"
@@ -56,7 +67,28 @@ public class TestSpringBootApplication30 extends AbstractIntegrationTest{
                     new File(buildDir, 'build/wlp/usr/servers/defaultServer/configDropins/defaults').list().size() == 1)
             File configDropinsDir=new File(buildDir, 'build/wlp/usr/servers/defaultServer/configDropins/defaults')
             File configDropinsFile=new File(configDropinsDir,configDropinsDir.list().getAt(0))
-            Assert.assertTrue("defaultServer/configDropins/defaults config file does not contain thin spring boot location",countOccurrences("thin-${testName.getMethodName()}-1.0-SNAPSHOT.jar".toString(), configDropinsFile)>0);
+            try (FileInputStream input = new FileInputStream(configDropinsFile)) {
+                // get configDropins XML Document
+                DocumentBuilderFactory inputBuilderFactory = DocumentBuilderFactory.newInstance();
+                inputBuilderFactory.setIgnoringComments(true);
+                inputBuilderFactory.setCoalescing(true);
+                inputBuilderFactory.setIgnoringElementContentWhitespace(true);
+                inputBuilderFactory.setValidating(false);
+                inputBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
+                inputBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+                DocumentBuilder inputBuilder = inputBuilderFactory.newDocumentBuilder();
+                Document inputDoc=inputBuilder.parse(input);
+
+                // parse configDropins XML Document
+                XPath xPath = XPathFactory.newInstance().newXPath();
+                String expression = "/server/springBootApplication";
+                NodeList nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
+                Assert.assertTrue("Number of <springBootApplication/> element ==>", nodes.getLength()>0);
+
+                Node node = nodes.item(0);
+                Element element = (Element)node;
+                Assert.assertEquals("Value of the 1st <springBootApplication/> ==>"+element.getAttribute("location"), "thin-${testName.getMethodName()}-1.0-SNAPSHOT.jar".toString(), element.getAttribute("location"));
+            }
             Assert.assertTrue('no app in apps folder',
                     new File(buildDir, "build/wlp/usr/servers/defaultServer/apps/thin-${testName.getMethodName()}-1.0-SNAPSHOT.jar").exists() )
         } catch (Exception e) {
