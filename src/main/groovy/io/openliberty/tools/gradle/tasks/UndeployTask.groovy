@@ -18,10 +18,8 @@ package io.openliberty.tools.gradle.tasks
 import org.gradle.api.GradleException
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.logging.LogLevel
 
 import io.openliberty.tools.ant.ServerTask
-import io.openliberty.tools.common.plugins.config.ServerConfigDocument
 
 import io.openliberty.tools.gradle.utils.CommonLogger
 
@@ -79,7 +77,7 @@ class UndeployTask extends AbstractServerTask {
             File serverXML = new File(getServerDir(project).getCanonicalPath(), "server.xml")
 
             try {
-                getServerConfigDocument(new CommonLogger(project), serverXML, getLibertyDirectoryPropertyFiles(null))
+                getServerConfigDocument(new CommonLogger(project), serverXML)
 
                 //appName will be set to a name derived from appFile if no name can be found.
                 appName = scd.findNameForLocation(file)

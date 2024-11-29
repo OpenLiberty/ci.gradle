@@ -23,8 +23,8 @@ import io.openliberty.tools.common.plugins.config.ApplicationXmlDocument
 import io.openliberty.tools.common.plugins.config.ServerConfigDocument
 import io.openliberty.tools.common.plugins.config.ServerConfigXmlDocument
 import io.openliberty.tools.common.plugins.util.DevUtil
+import io.openliberty.tools.common.plugins.util.LibertyPropFilesUtility
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
-import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 import io.openliberty.tools.gradle.utils.CommonLogger
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
@@ -506,11 +506,11 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         configureMultipleAppsConfigDropins(serverNode)
     }
 
-    protected ServerConfigDocument getServerConfigDocument(CommonLogger log, File serverXML, Map<String, File> libertyDirPropertyFiles) throws IOException {
+    protected ServerConfigDocument getServerConfigDocument(CommonLogger log, File serverXML) throws IOException {
 
         if (scd == null || !scd.getOriginalServerXMLFile().getCanonicalPath().equals(serverXML.getCanonicalPath())) {
             try {
-                scd = new ServerConfigDocument(log, serverXML, libertyDirPropertyFiles);
+                scd = new ServerConfigDocument(log, serverXML, getInstallDir(project), getUserDir(project), getServerDir(project));
             } catch (PluginExecutionException e) {
                 throw new GradleException(e.getMessage());
             }
@@ -525,7 +525,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
                 Map<String,String> props = combinedBootstrapProperties == null ? convertPropertiesToMap(server.bootstrapProperties) : combinedBootstrapProperties;
-                getServerConfigDocument(new CommonLogger(project), serverConfigFile, getLibertyDirectoryPropertyFiles(null));
+                getServerConfigDocument(new CommonLogger(project), serverConfigFile);
                 if (scd != null && isLocationFound( scd.getLocations(), fileName)) {
                     logger.debug("Application configuration is found in server.xml : " + fileName)
                     configured = true
@@ -1138,57 +1138,18 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         return serverTask
     }
 
-    static public Map<String,File> getLibertyDirectoryPropertyFiles(File installDir, File userDir, File serverDir) throws Exception {
-        Map<String, File> libertyDirectoryPropertyToFile = new HashMap<String,File>()
+    protected Map<String, File> getLibertyDirectoryPropertyFiles(String serverDirectoryParam) {
 
-        if (serverDir.exists()) {
-            libertyDirectoryPropertyToFile.put(ServerFeatureUtil.SERVER_CONFIG_DIR, serverDir.getCanonicalFile())
-
-            libertyDirectoryPropertyToFile.put(ServerFeatureUtil.WLP_INSTALL_DIR, installDir.getCanonicalFile())
- 
-            libertyDirectoryPropertyToFile.put(ServerFeatureUtil.WLP_USER_DIR, userDir.getCanonicalFile())
-
-            File userExtDir = new File(userDir, "extension")
-            libertyDirectoryPropertyToFile.put(ServerFeatureUtil.USR_EXTENSION_DIR, userExtDir.getCanonicalFile())
-
-            File userSharedDir = new File(userDir, "shared")
-            File userSharedAppDir = new File(userSharedDir, "app")
-            File userSharedConfigDir = new File(userSharedDir, "config")
-            File userSharedResourcesDir = new File(userSharedDir, "resources")
-            File userSharedStackGroupsDir = new File(userSharedDir, "stackGroups")
-
-            libertyDirectoryPropertyToFile.put(ServerFeatureUtil.SHARED_APP_DIR, userSharedAppDir.getCanonicalFile())
-            libertyDirectoryPropertyToFile.put(ServerFeatureUtil.SHARED_CONFIG_DIR, userSharedConfigDir.getCanonicalFile())
-            libertyDirectoryPropertyToFile.put(ServerFeatureUtil.SHARED_RESOURCES_DIR, userSharedResourcesDir.getCanonicalFile())
-            libertyDirectoryPropertyToFile.put(ServerFeatureUtil.SHARED_STACKGROUP_DIR, userSharedStackGroupsDir.getCanonicalFile())
-        }
-        return libertyDirectoryPropertyToFile
-    }
-
-    protected Map<String,File> getLibertyDirectoryPropertyFiles(String serverDirectoryParam) {
-        
         File serverConfigDir = getServerDir(project)
 
         // if DevMode provides a server directory parameter use that for finding the server config dir
         if (serverDirectoryParam != null) {
             serverConfigDir = new File(serverDirectoryParam)
         }
+        File wlpInstallDir = getInstallDir(project)
+        File wlpUserDir = getUserDir(project, wlpInstallDir)
 
-        if (serverConfigDir.exists()) {
-            try {
-                File wlpInstallDir = getInstallDir(project)
-                File wlpUserDir = getUserDir(project, wlpInstallDir)
-
-                return getLibertyDirectoryPropertyFiles(wlpInstallDir, wlpUserDir, serverConfigDir)
-            } catch (Exception e) {
-                logger.warn("The properties for directories could not be initialized because an error occurred when accessing the directories.")
-                logger.debug("Exception received: "+e.getMessage(), (Throwable) e)
-            }
-        } else {
-            logger.warn("The " + serverConfigDir + " directory cannot be accessed. The properties for directories could not be initialized.")
-        }
-
-        return new HashMap<String,File> ()
+        return LibertyPropFilesUtility.getLibertyDirectoryPropertyFiles(new CommonLogger(project), wlpInstallDir, wlpUserDir, serverConfigDir)
     }
 
     // Return the loose application configuration xml file
