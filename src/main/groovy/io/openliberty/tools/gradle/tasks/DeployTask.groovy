@@ -211,7 +211,7 @@ class DeployTask extends AbstractServerTask {
         params.put('targetLibCachePath', getTargetLibCachePath())
 
         File serverXML = new File(getServerDir(project).getCanonicalPath(), "server.xml")
-        ServerConfigDocument scd = getServerConfigDocument(new CommonLogger(project), serverXML, getLibertyDirectoryPropertyFiles(null))
+        ServerConfigDocument scd = getServerConfigDocument(new CommonLogger(project), serverXML)
         if (scd != null && scd.getSpringBootAppNodeLocation().isPresent()) {
             targetThinAppPath = getTargetThinAppPath(appsDir, scd.getSpringBootAppNodeLocation().get())
         } else {
@@ -690,7 +690,7 @@ class DeployTask extends AbstractServerTask {
                 File serverXML = new File(getServerDir(project).getCanonicalPath(), "server.xml")
 
                 try {
-                    scd = getServerConfigDocument(new CommonLogger(project), serverXML, getLibertyDirectoryPropertyFiles(null))
+                    scd = getServerConfigDocument(new CommonLogger(project), serverXML)
 
                     //appName will be set to a name derived from appFile if no name can be found.
                     appName = scd.findNameForLocation(appFile)

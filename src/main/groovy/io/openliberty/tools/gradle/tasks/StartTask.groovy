@@ -80,7 +80,7 @@ class StartTask extends AbstractServerTask {
         File serverConfigFile = new File(getServerDir(project), 'server.xml')
         if (serverConfigFile != null && serverConfigFile.exists()) {
             try {
-                getServerConfigDocument(new CommonLogger(project), serverConfigFile, getLibertyDirectoryPropertyFiles(null));
+                getServerConfigDocument(new CommonLogger(project), serverConfigFile);
                 if (scd != null) {
                     appNames = scd.getNames()
                     appNames += scd.getNamelessLocations().collect { String location ->
