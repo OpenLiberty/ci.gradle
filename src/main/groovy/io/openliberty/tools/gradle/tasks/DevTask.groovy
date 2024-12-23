@@ -387,6 +387,7 @@ class DevTask extends AbstractFeatureTask {
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, containerfile, containerBuildContext, containerRunOpts, containerBuildTimeout, skipDefaultPorts,
                     null /* compileOptions not needed since useBuildRecompile is true */, keepTempContainerfile, mavenCacheLocation, projectModuleList /* multi module upstream projects */,
                     projectModuleList.size() > 0 /* recompileDependencies as true for multi module */, packagingType, buildFile, parentBuildGradle /* parent build files */, generateFeatures, null /* compileArtifactPaths */, null /* testArtifactPaths */, webResourceDirs /* webResources */
+                    ,true /*ignored for gradle*/
                 );
             this.libertyDirPropertyFiles = LibertyPropFilesUtility.getLibertyDirectoryPropertyFiles(new CommonLogger(project), installDirectory, userDirectory, serverDirectory);
             ServerFeatureUtil servUtil = getServerFeatureUtil(true, libertyDirPropertyFiles);
