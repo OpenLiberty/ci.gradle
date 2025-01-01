@@ -216,5 +216,16 @@ public class TestSpringBootApplication30 extends AbstractIntegrationTest{
         }
     }
 
+    @Test
+    public void test_spring_boot_with_springbootapplication_nodes_apps_include_30() {
+        try {
+            BuildResult result = runTasksFailResult(buildDir, 'deploy', 'libertyStart')
+            String output = result.getOutput()
+            assertTrue(output.contains("Found multiple springBootApplication elements specified in the server configuration. Only one springBootApplication can be configured per Liberty server."))
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task deploy.", e)
+        }
+    }
+
 
 }
