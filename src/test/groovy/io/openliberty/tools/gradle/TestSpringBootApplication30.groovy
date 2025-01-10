@@ -221,7 +221,7 @@ public class TestSpringBootApplication30 extends AbstractIntegrationTest{
         try {
             BuildResult result = runTasksFailResult(buildDir, 'deploy', 'libertyStart')
             String output = result.getOutput()
-            assertTrue(output.contains("SpringBootApplication elements are specified in multiple server configuration files"))
+            assertTrue(output.contains("Found multiple springBootApplication elements are specified in multiple server configuration files"))
         } catch (Exception e) {
             throw new AssertionError ("Fail on task deploy.", e)
         }
