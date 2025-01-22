@@ -19,8 +19,10 @@ allprojects {
     apply plugin: 'java'
     apply plugin: 'liberty'
 
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    java {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
     }
