@@ -115,6 +115,7 @@ abstract class AbstractIntegrationTest {
         tasks.each {
             args.add(it)
         }
+        args.add("--warning-mode=all")
         args.add("-i")
         args.add("-s")
 
@@ -137,6 +138,7 @@ abstract class AbstractIntegrationTest {
         tasks.each {
             args.add(it)
         }
+        args.add("--warning-mode=all")
         args.add("-i")
         args.add("-s")
 
@@ -156,6 +158,7 @@ abstract class AbstractIntegrationTest {
         for (String task: tasks) {
             args.add(task);
         }
+        args.add("--warning-mode=all")
         args.add("-i");
         args.add("-s");
 
@@ -172,6 +175,7 @@ abstract class AbstractIntegrationTest {
         List<String> args = new ArrayList<String>()
         args.add(task)
         args.add(argument)
+        args.add("--warning-mode=all")
         args.add("-i")
         args.add("-s")
 

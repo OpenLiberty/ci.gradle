@@ -18,8 +18,10 @@ buildscript {
 apply plugin: 'war'
 apply plugin: 'liberty'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+java {
+  sourceCompatibility = 1.8
+  targetCompatibility = 1.8
+}
 
 compileJava.options.encoding = 'UTF-8'
 
@@ -90,8 +92,8 @@ test {
 
 
 task integrationTest(type: Test) {
-    group 'Verification'
-    description 'Runs the integration tests.'
+    group = 'Verification'
+    description = 'Runs the integration tests.'
     reports.html.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/reports/it")
     reports.junitXml.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/test-results/it")
     include '**/it/**'

@@ -7,7 +7,9 @@ plugins {
 
 group = 'liberty.gradle'
 version = '1.0-SNAPSHOT'
-sourceCompatibility = 17
+java {
+	sourceCompatibility = 17
+}
 
 repositories {
 	mavenCentral()

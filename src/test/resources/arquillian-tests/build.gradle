@@ -91,13 +91,13 @@ check.dependsOn 'verifyMainAppManaged'
 test.enabled = false
 
 tasks.withType(Test) {
-    group 'Verification'
+    group = 'Verification'
     testLogging.showStandardStreams = true
     dependsOn 'deploy', 'testClasses', 'war'
 }
 
 task verifyMainAppManaged (type:Test) {
-    description 'Tests that the main app is ready before the test app when verifyApps is set properly'
+    description = 'Tests that the main app is ready before the test app when verifyApps is set properly'
     reports.html.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/reports/verify-main-app-managed")
     reports.junitXml.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/test-results/verify-main-app-managed")
     include '**/GreeterIT*'
@@ -116,7 +116,7 @@ task verifyMainAppManagedValidation (type:Test) {
 }
 
 task skipWithXmlManaged (type:Test) {
-    description 'For the managed container, tests the task is skipped when the skipIfArquillianXmlExists flag is set to true and arquillian.xml exists in src/test/resources.'
+    description = 'For the managed container, tests the task is skipped when the skipIfArquillianXmlExists flag is set to true and arquillian.xml exists in src/test/resources.'
     reports.html.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/reports/skip-with-xml-managed")
     reports.junitXml.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/test-results/skip-with-xml-managed")
     include '**/SkipWithXmlIT*'
@@ -135,7 +135,7 @@ task skipWithXmlManagedRestEndpointIT (type:Test) {
 }
 
 task skipWithoutXmlManaged (type:Test) {
-    description 'For the managed container, tests the task is run when the skipIfArquillianXmlExists flag is set to true and arquillian.xml does not exist in src/test/resources'
+    description = 'For the managed container, tests the task is run when the skipIfArquillianXmlExists flag is set to true and arquillian.xml does not exist in src/test/resources'
     reports.html.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/reports/skip-without-xml-managed")
     reports.junitXml.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/test-results/skip-without-xml-managed")
     include '**/SkipWithoutXmlIT*'
@@ -155,7 +155,7 @@ task skipWithoutXmlManagedRestEndpointIT (type:Test) {
 }
 
 task skipWithXmlRemote (type:Test) {
-    description 'For the remote container, tests the task is run when the skipIfArquillianXmlExists flag is set to true and arquillian.xml does not exist in src/test/resources'
+    description = 'For the remote container, tests the task is run when the skipIfArquillianXmlExists flag is set to true and arquillian.xml does not exist in src/test/resources'
     reports.html.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/reports/skip-with-xml-remote")
     reports.junitXml.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/test-results/skip-with-xml-remote")
     include '**/SkipWithXmlIT*'
@@ -165,7 +165,7 @@ task skipWithXmlRemote (type:Test) {
 }
 
 task skipWithoutXmlRemote (type:Test) {
-    description 'For the remote container, tests the task is run when the skipIfArquillianXmlExists flag is set to true and arquillian.xml does not exist in src/test/resources'
+    description = 'For the remote container, tests the task is run when the skipIfArquillianXmlExists flag is set to true and arquillian.xml does not exist in src/test/resources'
     reports.html.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/reports/skip-without-xml-remote")
     reports.junitXml.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/test-results/skip-without-xml-remote")
     include '**/SkipWithoutXmlIT*'

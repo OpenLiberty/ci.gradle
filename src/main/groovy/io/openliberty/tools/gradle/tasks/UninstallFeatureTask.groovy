@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2015, 2020.
+ * (C) Copyright IBM Corporation 2015, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ class UninstallFeatureTask extends AbstractServerTask {
 
     UninstallFeatureTask() {
         configure({
-            description 'Uninstall a feature from the Liberty server'
-            group 'Liberty'
+            description = 'Uninstall a feature from the Liberty server'
+            group = 'Liberty'
         })
     }
 

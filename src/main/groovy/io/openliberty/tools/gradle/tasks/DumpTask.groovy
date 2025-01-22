@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2015, 2019.
+ * (C) Copyright IBM Corporation 2015, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ class DumpTask extends AbstractServerTask {
 
     DumpTask() {
         configure({
-            description 'Dumps diagnostic information from the Liberty server into an archive.'
-            group 'Liberty'
+            description = 'Dumps diagnostic information from the Liberty server into an archive.'
+            group = 'Liberty'
         })
     }
 

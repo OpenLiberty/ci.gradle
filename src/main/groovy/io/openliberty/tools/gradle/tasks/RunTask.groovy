@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2023.
+ * (C) Copyright IBM Corporation 2014, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ class RunTask extends AbstractServerTask {
 
     RunTask() {
         configure({
-            description "Runs a Liberty server under the Gradle process."
-            group 'Liberty'
+            description = "Runs a Liberty server under the Gradle process."
+            group = 'Liberty'
         })
     }
 
