@@ -118,10 +118,10 @@ class CompileJSPTask extends AbstractFeatureTask {
             } 
         }
         
-        if (project.getExtensions().getByName('java').hasProperty("sourceCompatibility")) {
+        if (project.hasProperty('sourceCompatibility')) {
             logger.info("Found sourceCompatibility")
-            compile.setSource((String) project.getExtensions().getByName('java').getProperties().get('sourceCompatibility'))
-       }
+            compile.setSource((String) project.getProperties().get('sourceCompatibility'))
+        }
     }
 
     private void setJspVersion(CompileJSPs compile, Set<String> installedFeatures) {
