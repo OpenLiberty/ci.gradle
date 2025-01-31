@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017, 2024.
+ * (C) Copyright IBM Corporation 2017, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -677,7 +677,8 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
                     application.appendNode('applicationFilename', appObj.getArchiveFileName().get())
                 }
                 if (appObj instanceof War) {
-                    application.appendNode('warSourceDirectory', project.webAppDirName)
+                    War war=appObj
+                    application.appendNode('warSourceDirectory', war.webAppDirectory.getAsFile().get())
                 }
             } else if (appObj instanceof File) {
                 application.appendNode('appsDirectory', appDir)

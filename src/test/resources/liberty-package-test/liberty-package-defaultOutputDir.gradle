@@ -20,8 +20,8 @@ apply plugin: 'liberty'
 repositories {
     mavenCentral()
     maven {
-        name 'liberty-starter-maven-repo'
-        url 'https://liberty-starter.wasdev.developer.ibm.com/start/api/v1/repo'
+        name = 'liberty-starter-maven-repo'
+        url = 'https://liberty-starter.wasdev.developer.ibm.com/start/api/v1/repo'
     }
 }
 

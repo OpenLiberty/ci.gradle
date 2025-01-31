@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2024.
+ * (C) Copyright IBM Corporation 2014, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,8 @@ class InstallLibertyTask extends AbstractLibertyTask {
 
     InstallLibertyTask() {
         configure({
-            description 'Installs Liberty from a repository'
-            group 'Liberty'
+            description = 'Installs Liberty from a repository'
+            group  = 'Liberty'
         })
         outputs.upToDateWhen {
             // ensure a Liberty installation exists at the install directory

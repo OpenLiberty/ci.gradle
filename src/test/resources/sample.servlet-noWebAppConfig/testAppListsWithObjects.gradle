@@ -65,8 +65,8 @@ liberty {
         }
         looseApplication = false
         deploy {
-            apps = [war2, file(war3.archivePath)]
-            dropins = [war, file(war4.archivePath)]
+            apps = [war2, file(war3.archiveFile.get())]
+            dropins = [war, file(war4.archiveFile.get())]
         }
 
         verifyAppStartTimeout = 30
@@ -94,8 +94,8 @@ test {
 
 
 task integrationTest(type: Test) {
-    group 'Verification'
-    description 'Runs the integration tests.'
+    group = 'Verification'
+    description = 'Runs the integration tests.'
     reports.html.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/reports/it")
     reports.junitXml.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/test-results/it")
     include '**/it/**'

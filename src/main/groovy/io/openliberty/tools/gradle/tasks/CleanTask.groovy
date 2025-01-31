@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2015, 2023.
+ * (C) Copyright IBM Corporation 2015, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import org.gradle.api.logging.LogLevel
 class CleanTask extends AbstractServerTask {
     CleanTask() {
         configure({
-            description 'Deletes files from some directories from the Liberty server'
-            group 'Liberty'
+            description = 'Deletes files from some directories from the Liberty server'
+            group = 'Liberty'
         })
     }
 

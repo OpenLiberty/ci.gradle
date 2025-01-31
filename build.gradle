@@ -13,10 +13,10 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven {
-        url 'https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/maven/repository/'
+        url = 'https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/maven/repository/'
     }
     maven {
-        url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        url = 'https://oss.sonatype.org/content/repositories/snapshots/'
     }
 }
 
@@ -24,7 +24,7 @@ buildscript {
     repositories {
         mavenLocal()
         maven {
-            url "https://plugins.gradle.org/m2/"
+            url = "https://plugins.gradle.org/m2/"
         }
     }
     dependencies {

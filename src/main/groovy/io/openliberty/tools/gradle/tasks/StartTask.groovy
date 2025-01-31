@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2024.
+ * (C) Copyright IBM Corporation 2014, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ class StartTask extends AbstractServerTask {
 
     StartTask() {
         configure({
-            description 'Starts the Liberty server.'
-            group 'Liberty'
+            description = 'Starts the Liberty server.'
+            group = 'Liberty'
         })
     }
 
