@@ -510,7 +510,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
 
         if (scd == null || !scd.getOriginalServerXMLFile().getCanonicalPath().equals(serverXML.getCanonicalPath())) {
             try {
-                scd = new ServerConfigDocument(log, serverXML, getInstallDir(project), getUserDir(project), getServerDir(project));
+                scd = new ServerConfigDocument(log, serverXML, getInstallDir(project), getUserDir(project), getServerDir(project), new File(getOutputDir(project), server.name));
             } catch (PluginExecutionException e) {
                 throw new GradleException(e.getMessage());
             }
@@ -1149,8 +1149,9 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         }
         File wlpInstallDir = getInstallDir(project)
         File wlpUserDir = getUserDir(project, wlpInstallDir)
+        File serverOutputDir= new File(getOutputDir(project), server.name)
 
-        return LibertyPropFilesUtility.getLibertyDirectoryPropertyFiles(new CommonLogger(project), wlpInstallDir, wlpUserDir, serverConfigDir)
+        return LibertyPropFilesUtility.getLibertyDirectoryPropertyFiles(new CommonLogger(project), wlpInstallDir, wlpUserDir, serverConfigDir, serverOutputDir)
     }
 
     // Return the loose application configuration xml file
