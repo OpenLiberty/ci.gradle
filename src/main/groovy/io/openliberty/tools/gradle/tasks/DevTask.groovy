@@ -1247,7 +1247,6 @@ class DevTask extends AbstractFeatureTask {
         File configDirectory = server.configDirectory;
         // getOutputDir returns a string
         File serverOutputDir = new File(getOutputDir(project));
-        File serverOutputDirectory= new File(serverOutputDir, serverName)
 
         if (!container) {
             if (serverDirectory.exists()) {
@@ -1293,7 +1292,7 @@ class DevTask extends AbstractFeatureTask {
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(),
                 libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), containerfile, containerBuildContext, containerRunOpts,
                 containerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempContainerfile.booleanValue(), localMavenRepoForFeatureUtility,
-                DevTaskHelper.getPackagingType(project), buildFile, generateFeatures.booleanValue(), webResourceDirs, projectModules, parentBuildGradle, serverOutputDirectory
+                DevTaskHelper.getPackagingType(project), buildFile, generateFeatures.booleanValue(), webResourceDirs, projectModules, parentBuildGradle, new File(serverOutputDir, serverName)
             );
         } catch (IOException | PluginExecutionException e) {
             throw new GradleException("Error initializing dev mode.", e)
