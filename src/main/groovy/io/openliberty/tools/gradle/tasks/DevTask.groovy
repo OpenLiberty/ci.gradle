@@ -379,7 +379,7 @@ class DevTask extends AbstractFeatureTask {
                     boolean libertyDebug, boolean pollingTest, boolean container, File containerfile, File containerBuildContext,
                     String containerRunOpts, int containerBuildTimeout, boolean skipDefaultPorts, boolean keepTempContainerfile, 
                     String mavenCacheLocation, String packagingType, File buildFile, boolean generateFeatures, List<Path> webResourceDirs,
-                    List<ProjectModule> projectModuleList, Map<String, List<String>> parentBuildGradle
+                    List<ProjectModule> projectModuleList, Map<String, List<String>> parentBuildGradle, File serverOutputDir
         ) throws IOException, PluginExecutionException {
             super(buildDir, serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory, /* multi module project directory */ projectDirectory,
                     resourceDirs, changeOnDemandTestsAction, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, skipInstallFeature, artifactId,  serverStartTimeout,
@@ -388,7 +388,7 @@ class DevTask extends AbstractFeatureTask {
                     null /* compileOptions not needed since useBuildRecompile is true */, keepTempContainerfile, mavenCacheLocation, projectModuleList /* multi module upstream projects */,
                     projectModuleList.size() > 0 /* recompileDependencies as true for multi module */, packagingType, buildFile, parentBuildGradle /* parent build files */, generateFeatures, null /* compileArtifactPaths */, null /* testArtifactPaths */, webResourceDirs /* webResources */
                 );
-            this.libertyDirPropertyFiles = LibertyPropFilesUtility.getLibertyDirectoryPropertyFiles(new CommonLogger(project), installDirectory, userDirectory, serverDirectory);
+            this.libertyDirPropertyFiles = LibertyPropFilesUtility.getLibertyDirectoryPropertyFiles(new CommonLogger(project), installDirectory, userDirectory, serverDirectory, serverOutputDir);
             ServerFeatureUtil servUtil = getServerFeatureUtil(true, libertyDirPropertyFiles);
             FeaturesPlatforms fp = servUtil.getServerFeatures(serverDirectory, libertyDirPropertyFiles);
 
@@ -1246,11 +1246,11 @@ class DevTask extends AbstractFeatureTask {
         initializeConfigDirectory();
         File configDirectory = server.configDirectory;
         // getOutputDir returns a string
-        File serverOutputDir = new File(getOutputDir(project));
+        File outputDir = new File(getOutputDir(project));
 
         if (!container) {
             if (serverDirectory.exists()) {
-                if (ServerStatusUtil.isServerRunning(serverInstallDir, serverOutputDir, serverName)) {
+                if (ServerStatusUtil.isServerRunning(serverInstallDir, outputDir, serverName)) {
                     throw new Exception("The server " + serverName
                             + " is already running. Terminate all instances of the server before starting dev mode."
                             + " You can stop a server instance with the command 'gradle libertyStop'.");
@@ -1292,7 +1292,7 @@ class DevTask extends AbstractFeatureTask {
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(),
                 libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), containerfile, containerBuildContext, containerRunOpts,
                 containerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempContainerfile.booleanValue(), localMavenRepoForFeatureUtility,
-                DevTaskHelper.getPackagingType(project), buildFile, generateFeatures.booleanValue(), webResourceDirs, projectModules, parentBuildGradle
+                DevTaskHelper.getPackagingType(project), buildFile, generateFeatures.booleanValue(), webResourceDirs, projectModules, parentBuildGradle, new File(outputDir, serverName)
             );
         } catch (IOException | PluginExecutionException e) {
             throw new GradleException("Error initializing dev mode.", e)
