@@ -1246,11 +1246,11 @@ class DevTask extends AbstractFeatureTask {
         initializeConfigDirectory();
         File configDirectory = server.configDirectory;
         // getOutputDir returns a string
-        File serverOutputDir = new File(getOutputDir(project));
+        File outputDir = new File(getOutputDir(project));
 
         if (!container) {
             if (serverDirectory.exists()) {
-                if (ServerStatusUtil.isServerRunning(serverInstallDir, serverOutputDir, serverName)) {
+                if (ServerStatusUtil.isServerRunning(serverInstallDir, outputDir, serverName)) {
                     throw new Exception("The server " + serverName
                             + " is already running. Terminate all instances of the server before starting dev mode."
                             + " You can stop a server instance with the command 'gradle libertyStop'.");
@@ -1292,7 +1292,7 @@ class DevTask extends AbstractFeatureTask {
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(),
                 libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), containerfile, containerBuildContext, containerRunOpts,
                 containerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempContainerfile.booleanValue(), localMavenRepoForFeatureUtility,
-                DevTaskHelper.getPackagingType(project), buildFile, generateFeatures.booleanValue(), webResourceDirs, projectModules, parentBuildGradle, new File(serverOutputDir, serverName)
+                DevTaskHelper.getPackagingType(project), buildFile, generateFeatures.booleanValue(), webResourceDirs, projectModules, parentBuildGradle, new File(outputDir, serverName)
             );
         } catch (IOException | PluginExecutionException e) {
             throw new GradleException("Error initializing dev mode.", e)
