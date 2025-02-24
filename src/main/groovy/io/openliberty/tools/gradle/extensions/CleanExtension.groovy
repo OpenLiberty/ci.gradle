@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2015, 2019.
+ * (C) Copyright IBM Corporation 2015, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,16 @@ package io.openliberty.tools.gradle.extensions
 
 class CleanExtension {
  
+    // Delete all the files in the `${wlp_output_dir}/<server name>/logs` directory. The default value is `true`. 
     boolean logs = true
+
+    // Delete all the files in the `${wlp_output_dir}/<server name>/workarea` directory. The default value is `true`. 
     boolean workarea = true
+
+    // Delete all the files in the `${wlp_user_dir}/servers/<server name>/dropins` directory. The default value is `false`.
     boolean dropins = false
+
+    // Delete all the files in the `${wlp_user_dir}/servers/<server name>/apps` directory. The default value is `false`.
     boolean apps = false
 }
 
