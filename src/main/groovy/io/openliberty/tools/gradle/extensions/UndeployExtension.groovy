@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2015, 2019.
+ * (C) Copyright IBM Corporation 2015, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@ package io.openliberty.tools.gradle.extensions
 
 class UndeployExtension {
 
+    // Specifies which tasks/files should be undeployed from the `apps` directory. Applications can be passed in as the task that generates the file or as an application file.
     List<Object> apps
+
+    // Specifies which tasks/files should be undeployed from the `dropins` directory. Applications can be passed in as the task that generates the file or as an application file.
     List<Object> dropins
 }
