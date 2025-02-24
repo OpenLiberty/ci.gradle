@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2024.
+ * (C) Copyright IBM Corporation 2014, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,16 @@ import javax.inject.Inject
 
 class LibertyExtension {
 
+    // Path to the WebSphere Liberty server installation `wlp` directory. To use a pre-installed version of Liberty, set this property to the path of the Liberty `wlp` directory, including `wlp` in the path. Additionally, `installDir` can be specified in the `gradle.properties` file or from the [command line](installLiberty.md#override-installDir). 
     String installDir
+    // Deprecated. Value of the `${wlp_output_dir}` variable. The default value is `${installDir}/usr/servers/${serverName}`. This parameter has moved to the `server` block.
     String outputDir
+    // Value of the `${wlp_user_dir}` variable. The default value is `${installDir}/usr/`.
     String userDir
 
+    // The base installation directory. The actual installation directory of WebSphere Liberty server will be `${baseDir}/wlp`. The default value is `${project.getLayout().getBuildDirectory().getAsFile().get()}`. This was moved from the properties in the `install` block in version 3.0.
     String baseDir
+    // The directory used for caching downloaded files such as the license or `.jar` files. The default value is `${java.io.tmpdir}/wlp-cache`. This was moved from the properties in the `install` block in version 3.0.
     String cacheDir
 
     // For overriding the group, name or version of the libertyRuntime installed from Maven Central repository.
