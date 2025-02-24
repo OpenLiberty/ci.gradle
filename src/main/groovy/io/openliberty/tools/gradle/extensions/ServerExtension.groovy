@@ -101,7 +101,7 @@ class ServerExtension {
     // This option was added in 18.0.0.3. The default value is `false`. Only used with the `libertyCreate` task. 
     boolean noPassword = false
 
-    // Whether the server is [embedded](https://www.ibm.com/support/knowledgecenter/SSD28V_9.0.0/com.ibm.websphere.wlp.core.doc/ae/twlp_extend_embed.html) in the Maven JVM. 
+    // Whether the server is [embedded](https://www.ibm.com/support/knowledgecenter/SSD28V_9.0.0/com.ibm.websphere.wlp.core.doc/ae/twlp_extend_embed.html) in the Gradle JVM. 
     // If not, the server will run as a separate process. The default value is `false`. Only used with the `libertyStart`, `libertyRun` and `libertyStop` tasks.
     boolean embedded = false
 
