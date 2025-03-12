@@ -55,6 +55,35 @@ Start dev mode without allowing to attach a debugger.
 ```
 $ gradle libertyDev --libertyDebug=false
 ```
+### Multiple Modules
+
+Dev mode can be run on a single Gradle module or on a multi module Gradle project (a project consisting of multiple modules specified as `include :<module_name>` section of its `settings.gradle`).  When run on a single Gradle module, only changes within that module are detected and hot deployed.  When run on a multi module Gradle project, changes in all modules are detected and hot deployed according to the Gradle build order.  Note that any modules that other modules rely on as a compile dependency must have a non-empty Java source folder with Java file(s) before starting dev mode, otherwise the other modules may fail to compile.
+
+To start dev mode on a multi module project, run the following from the directory containing the multi module `build.gradle`:
+```
+$ gradle libertyDev
+```
+To start dev mode on a multi module project by using the short-form `libertyDev` task for the Liberty Gradle plugin:
+1. Do one of the following:
+* Define the Liberty Gradle plugin in the parent `build.gradle` of every module,
+* or define the Liberty Gradle plugin in `build.gradle` of every module.
+
+2. If the Liberty Gradle plugin is defined in your `build.gradle` file(s), ensure it is at version `3.9.2` or later.
+3. From the directory containing the multi module `build.gradle`, run:
+```
+$ gradle libertyDev
+```
+
+Liberty server configuration files (such as `server.xml`) will be used from the module that does not have any other modules depending on it.  If there is more than one module without other modules depending on it, specify which module with Liberty configuration that you want to use by including the module while running libertyDev `ear:libertyDev`.  
+For example, to use Liberty configuration from a module with artifact id `ear`, run:
+```
+$ gradle ear:libertyDev
+```
+For example, to use Liberty configuration from a module with artifact id `ear2`, run:
+```
+$ gradle ear2:libertyDev
+```
+
 
 ### Command Line Parameters
 
