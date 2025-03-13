@@ -33,8 +33,32 @@ The following are dev mode supported code changes. Changes to your server such a
 * Resource file changes are detected and copied into your `target` directory. 
 * Configuration directory and configuration file changes are detected and copied into your `target` directory.  Added features to your `server.xml` will be installed and picked up by your running server.  Adding a configuration directory or configuration file that did not previously exist while dev mode is running will require restarting dev mode to be detected.
 
+### Multi-Project Builds
+
+Dev mode can be run on a single Gradle project or on a multi-project build (a project consisting of multiple projects specified as include(<module_name_one>,<module_name_two>,....) section of its settings.gradle). When run on a single Gradle project, only changes within that project are detected and hot deployed. When run on a multi-project build, changes in all projects are detected and hot deployed according to the Gradle build order. Note that any projects that other projects rely on as a compile dependency must have a non-empty Java source folder with Java file(s) before starting dev mode, otherwise the other projects may fail to compile.
+
+To start dev mode on a multi-project build by using the short-form `libertyDev` task for the Liberty Gradle plugin:
+1. Do one of the following:
+* Define the Liberty Gradle plugin in the multi-project build.gradle,
+* or define the Liberty Gradle plugin in the build.gradle of every subproject.
+
+2. If the Liberty Gradle plugin is defined in your `build.gradle` file(s), ensure it is at version `3.9.2` or later.
+3. From the directory containing the multi-project `build.gradle`, run:
+```
+$ gradle libertyDev
+```
+
+Liberty server configuration files (such as `server.xml`) will be used from the project that does not have any other projects depending on it.  If there is more than one project without other project depending on it, specify which project with Liberty configuration that you want to use by including the project while running libertyDev `ear:libertyDev`.  
+For example, to use Liberty configuration from a project with artifact id `ear`, run:
+```
+$ gradle ear:libertyDev
+```
+
+More details on Gradle multi-project builds can be found at https://docs.gradle.org/current/userguide/intro_multi_project_builds.html
 
 ### Examples
+
+The examples below apply regardless of whether you are using a single project or multi-project build.
 
 Start dev mode.
 ```
@@ -55,35 +79,6 @@ Start dev mode without allowing to attach a debugger.
 ```
 $ gradle libertyDev --libertyDebug=false
 ```
-### Multiple Modules
-
-Dev mode can be run on a single Gradle module or on a multi module Gradle project (a project consisting of multiple modules specified as `include :<module_name>` section of its `settings.gradle`).  When run on a single Gradle module, only changes within that module are detected and hot deployed.  When run on a multi module Gradle project, changes in all modules are detected and hot deployed according to the Gradle build order.  Note that any modules that other modules rely on as a compile dependency must have a non-empty Java source folder with Java file(s) before starting dev mode, otherwise the other modules may fail to compile.
-
-To start dev mode on a multi module project, run the following from the directory containing the multi module `build.gradle`:
-```
-$ gradle libertyDev
-```
-To start dev mode on a multi module project by using the short-form `libertyDev` task for the Liberty Gradle plugin:
-1. Do one of the following:
-* Define the Liberty Gradle plugin in the parent `build.gradle` of every module,
-* or define the Liberty Gradle plugin in `build.gradle` of every module.
-
-2. If the Liberty Gradle plugin is defined in your `build.gradle` file(s), ensure it is at version `3.9.2` or later.
-3. From the directory containing the multi module `build.gradle`, run:
-```
-$ gradle libertyDev
-```
-
-Liberty server configuration files (such as `server.xml`) will be used from the module that does not have any other modules depending on it.  If there is more than one module without other modules depending on it, specify which module with Liberty configuration that you want to use by including the module while running libertyDev `ear:libertyDev`.  
-For example, to use Liberty configuration from a module with artifact id `ear`, run:
-```
-$ gradle ear:libertyDev
-```
-For example, to use Liberty configuration from a module with artifact id `ear2`, run:
-```
-$ gradle ear2:libertyDev
-```
-
 
 ### Command Line Parameters
 
