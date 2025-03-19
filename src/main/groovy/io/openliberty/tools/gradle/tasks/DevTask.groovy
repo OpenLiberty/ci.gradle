@@ -334,6 +334,8 @@ class DevTask extends AbstractFeatureTask {
     void setGenerateFeatures(String generateFeatures) {
         this.generateFeatures = Boolean.parseBoolean(generateFeatures);
     }
+    
+    //private Boolean skipInstallFeature;
 
     @Optional
     @Input
@@ -343,6 +345,7 @@ class DevTask extends AbstractFeatureTask {
     @Option(option = 'skipInstallFeature', description = 'If set to true, the installFeature task will be skipped when dev mode is started on an already existing Liberty runtime installation. It will also be skipped when dev mode is running and a restart of the server is triggered either directly by the user or by application changes. The installFeature task will be invoked though when dev mode is running and a change to the configured features is detected. The default value is false.')
     void setSkipInstallFeature(String skipInstallFeature) {
         this.skipInstallFeature = Boolean.parseBoolean(skipInstallFeature);
+        project.liberty.dev.skipInstallFeature = this.skipInstallFeature;
     }
 
     @Optional
@@ -1219,10 +1222,6 @@ class DevTask extends AbstractFeatureTask {
             generateFeatures = DEFAULT_GENERATE_FEATURES;
         }
 
-        if (skipInstallFeature == null) {
-            skipInstallFeature = DEFAULT_SKIP_INSTALL_FEATURE;
-        }
-
         processDevExtensionParams();
     }
 
@@ -1589,6 +1588,15 @@ class DevTask extends AbstractFeatureTask {
                 setChangeOnDemandTestsAction(DEFAULT_CHANGE_ON_DEMAND_TESTS_ACTION);
             } else {
                 setChangeOnDemandTestsAction(buildChangeOnDemandTestsActionSetting);
+            }
+        }
+
+        if (skipInstallFeature == null) {
+            boolean buildSkipInstallFeatureSetting = project.liberty.dev.skipInstallFeature; // get from build.gradle
+            if (buildSkipInstallFeatureSetting == null) {
+                setSkipInstallFeature(String.valueOf(DEFAULT_SKIP_INSTALL_FEATURE));
+            } else {
+                setSkipInstallFeature(String.valueOf(buildSkipInstallFeatureSetting));
             }
         }
     }

@@ -53,6 +53,11 @@ class DevExtension {
     // If set to `true`, change the action for running on demand tests from `Enter` to type `t` and press `Enter`. The default value is `false`.
     boolean changeOnDemandTestsAction = false
 
+    // If set to `true`, the `installFeature` task will be skipped when `dev` mode is started on an already existing Liberty runtime installation. 
+    // It will also be skipped when `dev` mode is running and a restart of the server is triggered either directly by the user or by application changes. 
+    // The `installFeature` task will be invoked though when `dev` mode is running and a change to the configured features is detected. The default value is `false`.
+    boolean skipInstallFeature = false
+
     //Docker aliases to maintain backwards compatability
     File dockerfile
     File dockerBuildContext
