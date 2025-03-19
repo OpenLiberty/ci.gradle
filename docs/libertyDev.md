@@ -105,7 +105,7 @@ These can also be specified as command line parameters in addition to the ones i
 | Attribute | Type  | Since | Description | Required |
 | --------- | ----- | ----- | ----------- | -------- |
 | changeOnDemandTestsAction | boolean | 3.9.0 | If set to `true`, change the action for running on demand tests from `Enter` to type `t` and press `Enter`. The default value is `false`. | No |
-| skipInstallFeature | String | 3.11.4-SNAPSHOT | If set to `true`, the `installFeature` task will be skipped when `dev` mode is started on an already existing Liberty runtime installation. It will also be skipped when `dev` mode is running and a restart of the server is triggered either directly by the user or by application changes. The `installFeature` task will be invoked though when `dev` mode is running and a change to the configured features is detected. The default value is `false`. | No |
+| skipInstallFeature | String | 3.9.4-SNAPSHOT | If set to `true`, the `installFeature` task will be skipped when `dev` mode is started on an already existing Liberty runtime installation. It will also be skipped when `dev` mode is running and a restart of the server is triggered either directly by the user or by application changes. The `installFeature` task will be invoked though when `dev` mode is running and a change to the configured features is detected. The default value is `false`. | No |
 
 See the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration) properties for common server configuration.
 
