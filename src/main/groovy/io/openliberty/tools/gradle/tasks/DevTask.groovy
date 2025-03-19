@@ -335,8 +335,6 @@ class DevTask extends AbstractFeatureTask {
         this.generateFeatures = Boolean.parseBoolean(generateFeatures);
     }
     
-    //private Boolean skipInstallFeature;
-
     @Optional
     @Input
     Boolean skipInstallFeature;
