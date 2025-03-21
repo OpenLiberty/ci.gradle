@@ -39,12 +39,12 @@ dependencies {
     testImplementation "javax.xml.bind:jaxb-api:2.3.1"
 }
 
-ext {
-    liberty.dev.skipInstallFeature=false
-}
-
 liberty {
     installDir = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/wlp")
+
+    dev {
+        skipInstallFeature=true
+    }
 }
 
 clean.dependsOn "libertyStop"
