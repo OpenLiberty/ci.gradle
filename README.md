@@ -101,7 +101,7 @@ Example using `libertyRuntime` property to install an Open Liberty beta runtime:
 
 ```groovy
 dependencies {
-    libertyRuntime group: 'io.openliberty.beta', name: 'openliberty-runtime', version: '23.0.0.2-beta'
+    libertyRuntime group: 'io.openliberty.beta', name: 'openliberty-runtime', version: '25.0.0.2-beta'
 }
 ```
 
@@ -109,7 +109,7 @@ Example using `libertyRuntime` property to install a specific Open Liberty runti
 
 ```groovy
 dependencies {
-    libertyRuntime group: 'io.openliberty', name: 'openliberty-kernel', version: '23.0.0.3'
+    libertyRuntime group: 'io.openliberty', name: 'openliberty-kernel', version: '25.0.0.3'
 }
 ```
 
@@ -119,7 +119,7 @@ Example using the `libertyRuntime` property to install a WebSphere Liberty runti
 
 ```groovy
 dependencies {
-    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-webProfile8', version: '22.0.0.12'
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-webProfile8', version: '24.0.0.12'
 }
 ```
 
