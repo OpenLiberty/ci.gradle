@@ -100,10 +100,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
         // get existing server features from source directory
         ServerFeatureUtil servUtil = getServerFeatureUtil(true, null);
-        Set<String> generatedFiles = new HashSet<String>();
-        generatedFiles.add(GENERATED_FEATURES_FILE_NAME);
 
-        Set<String> existingFeatures = getServerFeatures(servUtil, generatedFiles, optimize);
+        Set<String> existingFeatures = getServerFeatures(servUtil);
         logger.debug("Existing features:" + existingFeatures);
         Set<String> nonCustomFeatures = new HashSet<String>(); // binary scanner only handles actual Liberty features
         for (String feature : existingFeatures) { // custom features are "usr:feature-1.0" or "myExt:feature-2.0"
@@ -130,8 +128,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         } catch (BinaryScannerUtil.NoRecommendationException noRecommendation) {
             throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE3, noRecommendation.getConflicts()));
         } catch (BinaryScannerUtil.FeatureModifiedException featuresModified) {
-            Set<String> userFeatures = (optimize) ? existingFeatures : 
-                getServerFeatures(servUtil, generatedFiles, true); // user features excludes generatedFiles
+            Set<String> userFeatures = (optimize) ? existingFeatures : getServerFeatures(servUtil);
             Set<String> modifiedSet = featuresModified.getFeatures(); // a set that works after being modified by the scanner
 
             if (modifiedSet.containsAll(userFeatures)) {
@@ -177,7 +174,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             // get set of user defined features so they can be omitted from the generated file that will be written
             Set<String> userDefinedFeatures = optimize ? existingFeatures : new HashSet<String>();
             if (!optimize) {
-                FeaturesPlatforms fp = servUtil.getServerFeatures(server.configDirectory, server.serverXmlFile, new HashMap<String, File>(), generatedFiles);
+                FeaturesPlatforms fp = servUtil.getServerFeatures(server.configDirectory, server.serverXmlFile, new HashMap<String, File>(), null);
                 if (fp != null) {
                     userDefinedFeatures = fp.getFeatures();
                 }
@@ -190,10 +187,10 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         }
         logger.debug("Features detected by binary scanner which are not in server.xml : " + missingLibertyFeatures);
 
-        def newServerXmlSrc = new File(server.configDirectory, GENERATED_FEATURES_FILE_PATH);
+        def generatedXmlSrc = new File(getServerDir(project), GENERATED_FEATURES_FILE_PATH);
         try {
             if (missingLibertyFeatures.size() > 0) {
-                Set<String> existingGeneratedFeatures = getGeneratedFeatures(servUtil, newServerXmlSrc);
+                Set<String> existingGeneratedFeatures = getGeneratedFeatures(servUtil, generatedXmlSrc);
                 if (!missingLibertyFeatures.equals(existingGeneratedFeatures)) {
                     // Create specialized server.xml
                     ServerConfigXmlDocument configDocument = ServerConfigXmlDocument.newInstance();
@@ -207,8 +204,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                     // Generate log message before writing file as the file change event kicks off other dev mode actions
                     logger.lifecycle("Generated the following features: " + missingLibertyFeatures);
                     // use logger.lifecycle so that message appears without --info tag on
-                    configDocument.writeXMLDocument(newServerXmlSrc);
-                    logger.debug("Created file " + newServerXmlSrc);
+                    configDocument.writeXMLDocument(generatedXmlSrc);
+                    logger.debug("Created file " + generatedXmlSrc);
                     // Add a reference to this new file in existing server.xml.
                     def serverXml = findConfigFile("server.xml", server.serverXmlFile);
                     def doc = getServerXmlDocFromConfig(serverXml);
@@ -220,14 +217,14 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                 }
             } else {
                 logger.lifecycle("No additional features were generated.");
-                if (newServerXmlSrc.exists()) {
+                if (generatedXmlSrc.exists()) {
                     // generated-features.xml exists but no additional features were generated
                     // create empty features list with comment
                     ServerConfigXmlDocument configDocument = ServerConfigXmlDocument.newInstance();
                     configDocument.createComment(HEADER);
                     Element featureManagerElem = configDocument.createFeatureManager();
                     configDocument.createComment(featureManagerElem, NO_NEW_FEATURES_COMMENT);
-                    configDocument.writeXMLDocument(newServerXmlSrc);
+                    configDocument.writeXMLDocument(generatedXmlSrc);
                 }
             }
         } catch (ParserConfigurationException | TransformerException | IOException e) {
@@ -236,11 +233,10 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         }
     }
 
-    // Get the features from the server config and optionally exclude the specified config files from the search.
-    private Set<String> getServerFeatures(ServerFeatureUtil servUtil, Set<String> generatedFiles, boolean excludeGenerated) {
+    // Get the features from the server config
+    private Set<String> getServerFeatures(ServerFeatureUtil servUtil) {
         servUtil.setLowerCaseFeatures(false);
-        // if optimizing, ignore generated files when passing in existing features to binary scanner
-        FeaturesPlatforms fp = servUtil.getServerFeatures(server.configDirectory, server.serverXmlFile, new HashMap<String, File>(), excludeGenerated ? generatedFiles : null); // pass generatedFiles to exclude them
+        FeaturesPlatforms fp = servUtil.getServerFeatures(server.configDirectory, server.serverXmlFile, new HashMap<String, File>(), null);
         Set<String> existingFeatures = fp == null ? new HashSet<String>() : fp.getFeatures();
 
         servUtil.setLowerCaseFeatures(true);
@@ -250,7 +246,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     // returns the features specified in the generated-features.xml file
     private Set<String> getGeneratedFeatures(ServerFeatureUtil servUtil, File generatedFeaturesFile) {
         servUtil.setLowerCaseFeatures(false);
-        FeaturesPlatforms fp = servUtil.getServerXmlFeatures(new FeaturesPlatforms(), server.configDirectory,
+        FeaturesPlatforms fp = servUtil.getServerXmlFeatures(new FeaturesPlatforms(), getServerDir(project),
                 generatedFeaturesFile, null, null);
         Set<String> genFeatSet = fp == null ? new HashSet<String>() : fp.getFeatures();
         servUtil.setLowerCaseFeatures(true);
