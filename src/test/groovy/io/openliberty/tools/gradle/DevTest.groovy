@@ -213,7 +213,7 @@ class DevTest extends BaseDevTest {
         int runGenerateFeaturesCount = countOccurrences(RUNNING_GENERATE_FEATURES, logFile);
         int installedFeaturesCount = countOccurrences(SERVER_INSTALLED_FEATURES, errFile);
 
-        File newFeatureFile = new File(buildDir, "src/main/liberty/config/configDropins/overrides/"+GENERATED_FEATURES_FILE_NAME);
+        File newFeatureFile = new File(targetDir, "wlp/usr/servers/defaultServer/configDropins/overrides/"+GENERATED_FEATURES_FILE_NAME);
         File newTargetFeatureFile = new File(targetDir, "wlp/usr/servers/defaultServer/configDropins/overrides/"+GENERATED_FEATURES_FILE_NAME);
         File serverXmlFile = new File(buildDir, "src/main/liberty/config/server.xml");
         assertTrue(serverXmlFile.exists());
