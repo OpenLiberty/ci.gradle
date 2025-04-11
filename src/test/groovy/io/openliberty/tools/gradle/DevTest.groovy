@@ -214,7 +214,6 @@ class DevTest extends BaseDevTest {
         int installedFeaturesCount = countOccurrences(SERVER_INSTALLED_FEATURES, errFile);
 
         File newFeatureFile = new File(targetDir, "wlp/usr/servers/defaultServer/configDropins/overrides/"+GENERATED_FEATURES_FILE_NAME);
-        File newTargetFeatureFile = new File(targetDir, "wlp/usr/servers/defaultServer/configDropins/overrides/"+GENERATED_FEATURES_FILE_NAME);
         File serverXmlFile = new File(buildDir, "src/main/liberty/config/server.xml");
         assertTrue(serverXmlFile.exists());
 
@@ -247,7 +246,6 @@ class DevTest extends BaseDevTest {
         // ... and run the proper task.
         assertTrue(verifyLogMessage(10000, RUNNING_GENERATE_FEATURES, ++runGenerateFeaturesCount));
         assertTrue(verifyFileExists(newFeatureFile, 5000)); // task created file
-        assertTrue(verifyFileExists(newTargetFeatureFile, 5000)); // dev mode copied file
         assertTrue(verifyLogMessage(10000, "batch-1.0", newFeatureFile));
         assertTrue(verifyLogMessage(10000, NEW_FILE_INFO_MESSAGE, newFeatureFile));
         assertTrue(verifyLogMessage(10000, SERVER_XML_COMMENT, serverXmlFile));
