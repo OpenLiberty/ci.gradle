@@ -70,6 +70,18 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     }
 
     @Test
+    public void generateToSrcTest() throws Exception {
+        newFeatureFile.delete(); // clean up other tests but file may not be present so don't assert
+        assertFalse(newFeatureFileSrc.exists());
+        runCompileAndGenerateFeaturesToSrc();
+
+        // verify that the generated features file was created
+        // Assume the contents are correct based on prior testing
+        assertTrue(formatOutput(getProcessOutput()), newFeatureFileSrc.exists());
+        assertTrue(newFeatureFileSrc.delete());
+    }
+
+    @Test
     public void noClassFiles() throws Exception {
         // do not compile before running generateFeatures
         runGenerateFeatures();
