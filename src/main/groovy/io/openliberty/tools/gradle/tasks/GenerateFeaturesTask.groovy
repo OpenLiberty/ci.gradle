@@ -68,6 +68,14 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         this.optimize = Boolean.parseBoolean(optimize);
     }
 
+    private Boolean generateToSrc = null;
+
+    // Need to use a string value to allow the ability to specify a value for the parameter (ie. --generateToSrc=false)
+    @Option(option = 'generateToSrc', description = 'Generate features to a file in the project\'s src directory')
+    void setGenerateToSrc(String generateToSrc) {
+        this.generateToSrc = Boolean.parseBoolean(generateToSrc);
+    }
+
     @TaskAction
     void generateFeatures() {
         binaryScanner = getBinaryScannerJarFromRepository();
@@ -189,7 +197,12 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         }
         logger.debug("Features detected by binary scanner which are not in server.xml : " + missingLibertyFeatures);
 
-        def generatedXmlFile = new File(getServerDir(project), GENERATED_FEATURES_FILE_PATH);
+        def generatedXmlFile;
+        if (generateToSrc) {
+            generatedXmlFile = new File(server.configDirectory, GENERATED_FEATURES_FILE_PATH);
+        } else {
+            generatedXmlFile = new File(getServerDir(project), GENERATED_FEATURES_FILE_PATH);
+        }
         try {
             if (missingLibertyFeatures.size() > 0) {
                 Set<String> existingGeneratedFeatures = getGeneratedFeatures(servUtil, generatedXmlFile);
