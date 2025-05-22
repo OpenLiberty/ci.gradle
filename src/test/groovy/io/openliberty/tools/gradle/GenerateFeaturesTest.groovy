@@ -45,14 +45,18 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     @Test
     public void basicTest() throws Exception {
         runCompileAndGenerateFeatures();
+        executeBasicTests(newFeatureFile, "");
+    }
+
+    private void executeBasicTests(File featureFile, String options) {
         // verify that the target directory was created
         assertTrue(targetDir.exists());
 
         // verify that the generated features file was created
-        assertTrue(formatOutput(getProcessOutput()), newFeatureFile.exists());
+        assertTrue(formatOutput(getProcessOutput()), featureFile.exists());
 
         // verify that the correct features are in the generated-features.xml
-        Set<String> features = readFeatures(newFeatureFile);
+        Set<String> features = readFeatures(featureFile);
         assertEquals(1, features.size());
         Set<String> expectedFeatures = new HashSet<String>(Arrays.asList("servlet-4.0"));
         assertEquals(expectedFeatures, features);
@@ -62,29 +66,27 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
             "<featureManager>\n" +
             "  <feature>servlet-4.0</feature>\n" +
             "</featureManager>\n", serverXmlFile);
-        runGenerateFeatures();
+        runGenerateFeatures(options);
         // no additional features should be generated
-        assertTrue(newFeatureFile.exists());
-        features = readFeatures(newFeatureFile);
+        assertTrue(featureFile.exists());
+        features = readFeatures(featureFile);
         assertEquals(0, features.size());
     }
 
     @Test
     public void generateToSrcTest() throws Exception {
-        newFeatureFile.delete(); // clean up other tests but file may not be present so don't assert
-        assertFalse(newFeatureFileSrc.exists());
+        newFeatureFile.delete(); // clean up from other tests but file may not be present so don't assert
+        assertFalse(newFeatureFileSrc.exists()); // assuming no other test creates this file
         runCompileAndGenerateFeaturesToSrc();
 
-        // verify that the generated features file was created
-        // Assume the contents are correct based on prior testing
-        assertTrue(formatOutput(getProcessOutput()), newFeatureFileSrc.exists());
-        assertTrue(newFeatureFileSrc.delete());
+        executeBasicTests(newFeatureFileSrc, "--generateToSrc=true");
+        assertTrue(newFeatureFileSrc.delete()); // clean up the generated file
     }
 
     @Test
     public void noClassFiles() throws Exception {
         // do not compile before running generateFeatures
-        runGenerateFeatures();
+        runGenerateFeatures("");
 
         // verify that generated features file was not created
         assertFalse(newFeatureFile.exists());

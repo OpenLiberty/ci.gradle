@@ -249,8 +249,12 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
         runProcess("compileJava generateFeatures --debug");
     }
 
-    protected static void runGenerateFeatures() throws IOException, InterruptedException, FileNotFoundException {
-        runProcess("generateFeatures");
+    protected static void runGenerateFeatures(String options) throws IOException, InterruptedException, FileNotFoundException {
+        String parameters = "generateFeatures ";
+        if (options != null) {
+            parameters += options;
+        }
+        runProcess(parameters);
     }
 
     // Format the output to help debug test failures.
