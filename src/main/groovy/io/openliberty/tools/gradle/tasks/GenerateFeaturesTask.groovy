@@ -44,6 +44,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
     // Default value of the optimize task option
     private static final boolean DEFAULT_OPTIMIZE = true;
+    // Default value of the generateToSrc option
+    private static final boolean DEFAULT_GENERATETOSRC = true;
 
     // The executable file used to scan binaries for the Liberty features they use.
     private File binaryScanner;
@@ -96,9 +98,12 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         if (optimize == null) {
             optimize = DEFAULT_OPTIMIZE;
         }
+        if (generateToSrc == null) {
+            generateToSrc = DEFAULT_GENERATETOSRC;
+        }
 
         initializeConfigDirectory();
-        // The config dir is in the src directory. Otherwise generate for the build dir.
+        // The server.configDirectory is in the src directory. Otherwise generate for the build dir.
         generationContextDir = generateToSrc ? server.configDirectory : getServerDir(project);
 
         logger.debug("--- Generate Features values ---");
