@@ -77,6 +77,12 @@ public class LibertyTasks {
 			}
         }
 
+        project.generateFeatures {
+            dependsOn 'libertyCreate'
+            // specify installFeature here so that it will not run after libertyCreate and before generateFeatures
+            finalizedBy 'installFeature'
+        }
+
         project.cleanDirs {
             dependsOn 'libertyStop'
         }

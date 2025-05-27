@@ -71,10 +71,6 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
     @TaskAction
     void generateFeatures() {
-        if (!getServerDir(project).exists()) {
-            throw new GradleException("GenerateFeatures task requires the Liberty server but unable to find server path " + getServerDir(project) + ". Please execute the task libertyCreate.");
-        }
-
         binaryScanner = getBinaryScannerJarFromRepository();
         BinaryScannerHandler binaryScannerHandler = new BinaryScannerHandler(binaryScanner);
 
