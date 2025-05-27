@@ -92,7 +92,12 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
     private String internalDirName = null;
 
-    // Need to use a string value to allow the ability to specify a value for the parameter (ie. --generateToSrc=false)
+    /**
+     * The internalDirName option is for internal use only. It is not for users. 
+     * The parameter specifies a directory to use for generate features. It contains the configuration
+     * files necessary to identify the configured features and it is the place to store the 
+     * generated features file. The task will ignore the configDir and the serverDir normally used.
+     */
     @Option(option = 'internalDirName', description = 'Internal only option indicating a configuration directory')
     void setInternalDirName(String internalDirName) {
         this.internalDirName = internalDirName;
