@@ -58,7 +58,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
      * config specified in the src directory src/main/liberty/config.
      * We will select one server config as the context of this operation.
      */
-    private File generationContextDir;
+    private File generationContextDir = null;
 
     GenerateFeaturesTask() {
         configure({
@@ -90,6 +90,14 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         this.generateToSrc = Boolean.parseBoolean(generateToSrc);
     }
 
+    private String internalDirName = null;
+
+    // Need to use a string value to allow the ability to specify a value for the parameter (ie. --generateToSrc=false)
+    @Option(option = 'internalDirName', description = 'Internal only option indicating a configuration directory')
+    void setInternalDirName(String internalDirName) {
+        this.internalDirName = internalDirName;
+    }
+
     @TaskAction
     void generateFeatures() {
         binaryScanner = getBinaryScannerJarFromRepository();
@@ -103,8 +111,17 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         }
 
         initializeConfigDirectory();
-        // The server.configDirectory is in the src directory. Otherwise generate for the build dir.
-        generationContextDir = generateToSrc ? server.configDirectory : getServerDir(project);
+
+        if (internalDirName != null && !internalDirName.isEmpty()) {
+            File internalDir = new File(internalDirName);
+            if (internalDir.exists()) {
+                generationContextDir = internalDir;
+            }
+        }
+        if (generationContextDir == null) {
+            // The server.configDirectory is in the src directory. Otherwise generate for the build dir.
+            generationContextDir = generateToSrc ? server.configDirectory : getServerDir(project);
+        }
 
         logger.debug("--- Generate Features values ---");
         logger.debug("optimize generate features: " + optimize);
