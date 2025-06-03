@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2024.
+ * (C) Copyright IBM Corporation 2014, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,7 +170,13 @@ class Liberty implements Plugin<Project> {
 
     private static File getInstallDir(Project project) {
         if (project.hasProperty('liberty.installDir')) {
-            File installDir = checkAndAppendWlp(project, new File(project.projectDir, project.getProperties().get('liberty.installDir')))
+            // installDir should be an absolute path, not a relative one
+            File installDir = checkAndAppendWlp(project, new File(project.getProperties().get('liberty.installDir')))
+            if (!installDir.exists()) {
+                // if that path does not exist, try a relative path to project for backwards compatibility
+                project.getLogger().info(MessageFormat.format("The installDir project property {0} does not reference a valid absolute path. Checking with a relative path to the project instead.", project.getProperties().get('liberty.installDir')))
+                installDir = checkAndAppendWlp(project, new File(project.projectDir, project.getProperties().get('liberty.installDir')))
+            }
             project.getLogger().info("installDir project property detected. Using ${installDir.getCanonicalPath()}.")
             return installDir
         } else if (project.liberty.installDir == null) {
