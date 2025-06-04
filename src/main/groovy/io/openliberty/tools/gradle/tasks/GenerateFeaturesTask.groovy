@@ -45,7 +45,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     // Default value of the optimize task option
     private static final boolean DEFAULT_OPTIMIZE = true;
     // Default value of the generateToSrc option
-    private static final boolean DEFAULT_GENERATETOSRC = true;
+    private static final boolean DEFAULT_GENERATETOSRC = false;
 
     // The executable file used to scan binaries for the Liberty features they use.
     private File binaryScanner;
@@ -53,7 +53,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     /**
      * Generating features is performed relative to a certain server. We only generate features
      * that are missing from a server config. By default we generate features that are missing
-     * from the server directory in target/liberty/wlp/usr/servers/<server name>.
+     * from the server directory in build/wlp/usr/servers/<server name>.
      * If generateToSrc is specified then we generate features which are missing from the Liberty
      * config specified in the src directory src/main/liberty/config.
      * We will select one server config as the context of this operation.
