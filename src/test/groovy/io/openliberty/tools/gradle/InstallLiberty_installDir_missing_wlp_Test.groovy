@@ -58,6 +58,7 @@ class InstallLiberty_installDir_missing_wlp_Test extends AbstractIntegrationTest
 
         String output = result.getOutput()
         assert output.contains("installDir project property detected. Using $expectedPropertyDir")
+        assert output.contains(" does not reference a valid absolute path.") : "Expected warning about installDir path not an absolute path"
     }
 
     @Test
@@ -71,5 +72,19 @@ class InstallLiberty_installDir_missing_wlp_Test extends AbstractIntegrationTest
         String output = result.getOutput()
         assert output.contains("installDir project property detected. Using $expectedPropertyDir".drop(4))
         assert output.contains("Using path $expectedPropertyDir instead.")
+    }
+
+    @Test
+    void test_installLiberty_installDir_cli_property_wlp_absolute_path() {
+        BuildResult result = GradleRunner.create()
+            .withProjectDir(buildDir)
+            .forwardOutput()
+            .withArguments("installLiberty", "-Pliberty.installDir=$expectedPropertyDir", "-i", "-s")
+            .build()
+
+        String output = result.getOutput()
+        assert output.contains("installDir project property detected. Using $expectedPropertyDir".drop(4))
+        assert !output.contains("Using path $expectedPropertyDir instead.") : "Unexpected warning about path not containing wlp"
+        assert !output.contains(" does not reference a valid absolute path.") : "Unexpected warning about installDir path not an absolute path"
     }
 }
