@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2022.
+ * (C) Copyright IBM Corporation 2022, 2025
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
     static File newFeatureFile;
 
     static final String GENERATED_FEATURES_FILE_NAME = "generated-features.xml";
-    static final String GENERATED_FEATURES_FILE_PATH = "/src/main/liberty/config/configDropins/overrides/" + GENERATED_FEATURES_FILE_NAME;
+    static final String GENERATED_FEATURES_FILE_PATH = "/build/wlp/usr/servers/defaultServer/configDropins/overrides/" + GENERATED_FEATURES_FILE_NAME;
     static final String UMBRELLA_EE = "providedCompile \"jakarta.platform:jakarta.jakartaee-api:8.0.0\"";
     static final String UMBRELLA_MP = "providedCompile \"org.eclipse.microprofile:microprofile:3.2\"";
     static final String ESA_EE_DEPENDENCY = "providedCompile 'io.openliberty.features:servlet-4.0:22.0.0.2'";
