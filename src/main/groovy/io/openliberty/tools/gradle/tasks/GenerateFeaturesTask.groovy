@@ -42,9 +42,23 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     public static final String NO_NEW_FEATURES_COMMENT = "No additional features generated";
     public static final String NO_CLASS_FILES_WARNING = "Could not find class files to generate features against. Liberty features will not be generated. Ensure your project has first been compiled.";
 
+    // Default value of the optimize task option
     private static final boolean DEFAULT_OPTIMIZE = true;
+    // Default value of the generateToSrc option
+    private static final boolean DEFAULT_GENERATETOSRC = false;
 
+    // The executable file used to scan binaries for the Liberty features they use.
     private File binaryScanner;
+
+    /**
+     * Generating features is performed relative to a certain server. We only generate features
+     * that are missing from a server config. By default we generate features that are missing
+     * from the server directory in build/wlp/usr/servers/<server name>.
+     * If generateToSrc is specified then we generate features which are missing from the Liberty
+     * config specified in the src directory src/main/liberty/config.
+     * We will select one server config as the context of this operation.
+     */
+    private File generationContextDir;
 
     GenerateFeaturesTask() {
         configure({
@@ -68,6 +82,14 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         this.optimize = Boolean.parseBoolean(optimize);
     }
 
+    private Boolean generateToSrc = null;
+
+    // Need to use a string value to allow the ability to specify a value for the parameter (ie. --generateToSrc=false)
+    @Option(option = 'generateToSrc', description = 'Generate features to a file in the project\'s src directory')
+    void setGenerateToSrc(String generateToSrc) {
+        this.generateToSrc = Boolean.parseBoolean(generateToSrc);
+    }
+
     @TaskAction
     void generateFeatures() {
         binaryScanner = getBinaryScannerJarFromRepository();
@@ -76,14 +98,20 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         if (optimize == null) {
             optimize = DEFAULT_OPTIMIZE;
         }
-
-        logger.debug("--- Generate Features values ---");
-        logger.debug("optimize generate features: " + optimize);
-        if (classFiles != null && !classFiles.isEmpty()) {
-            logger.debug("Generate features for the following class files: " + classFiles);
+        if (generateToSrc == null) {
+            generateToSrc = DEFAULT_GENERATETOSRC;
         }
 
         initializeConfigDirectory();
+        // The server.configDirectory is in the src directory. Otherwise generate for the build dir.
+        generationContextDir = generateToSrc ? server.configDirectory : getServerDir(project);
+
+        logger.debug("--- Generate Features values ---");
+        logger.debug("optimize generate features: " + optimize);
+        logger.debug("generate to src or build: " + generationContextDir);
+        if (classFiles != null && !classFiles.isEmpty()) {
+            logger.debug("Generate features for the following class files: " + classFiles);
+        }
 
         // TODO add support for env variables
         // commented out for now as the current logic depends on the server dir existing and specifying features with env variables is an edge case
@@ -176,7 +204,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             // get set of user defined features so they can be omitted from the generated file that will be written
             Set<String> userDefinedFeatures = optimize ? existingFeatures : new HashSet<String>();
             if (!optimize) {
-                FeaturesPlatforms fp = servUtil.getServerFeatures(server.configDirectory, server.serverXmlFile, new HashMap<String, File>(), generatedFiles);
+                FeaturesPlatforms fp = servUtil.getServerFeatures(generationContextDir, server.serverXmlFile, new HashMap<String, File>(), generatedFiles);
                 if (fp != null) {
                     userDefinedFeatures = fp.getFeatures();
                 }
@@ -189,7 +217,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         }
         logger.debug("Features detected by binary scanner which are not in server.xml : " + missingLibertyFeatures);
 
-        def generatedXmlFile = new File(getServerDir(project), GENERATED_FEATURES_FILE_PATH);
+        // generate the new features into an xml file in the correct context directory
+        def generatedXmlFile = new File(generationContextDir, GENERATED_FEATURES_FILE_PATH);
         try {
             if (missingLibertyFeatures.size() > 0) {
                 Set<String> existingGeneratedFeatures = getGeneratedFeatures(servUtil, generatedXmlFile);
@@ -234,7 +263,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     private Set<String> getServerFeatures(ServerFeatureUtil servUtil, Set<String> generatedFiles, boolean excludeGenerated) {
         servUtil.setLowerCaseFeatures(false);
         // if optimizing, ignore generated files when passing in existing features to binary scanner
-        FeaturesPlatforms fp = servUtil.getServerFeatures(getServerDir(project), server.serverXmlFile, new HashMap<String, File>(), excludeGenerated ? generatedFiles : null); // pass generatedFiles to exclude them
+        FeaturesPlatforms fp = servUtil.getServerFeatures(generationContextDir, server.serverXmlFile, new HashMap<String, File>(), excludeGenerated ? generatedFiles : null); // pass generatedFiles to exclude them
         Set<String> existingFeatures = fp == null ? new HashSet<String>() : fp.getFeatures();
 
         servUtil.setLowerCaseFeatures(true);
@@ -244,7 +273,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     // returns the features specified in the generated-features.xml file
     private Set<String> getGeneratedFeatures(ServerFeatureUtil servUtil, File generatedFeaturesFile) {
         servUtil.setLowerCaseFeatures(false);
-        FeaturesPlatforms fp = servUtil.getServerXmlFeatures(new FeaturesPlatforms(), getServerDir(project),
+        FeaturesPlatforms fp = servUtil.getServerXmlFeatures(new FeaturesPlatforms(), generationContextDir,
                 generatedFeaturesFile, null, null);
         Set<String> genFeatSet = fp == null ? new HashSet<String>() : fp.getFeatures();
         servUtil.setLowerCaseFeatures(true);
