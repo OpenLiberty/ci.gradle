@@ -46,6 +46,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     private static final boolean DEFAULT_OPTIMIZE = true;
     // Default value of the generateToSrc option
     private static final boolean DEFAULT_GENERATETOSRC = false;
+    // Default value of the internalDevMode option
+    private static final boolean DEFAULT_DEVMODE = false;
 
     // The executable file used to scan binaries for the Liberty features they use.
     private File binaryScanner;
@@ -90,6 +92,19 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         this.generateToSrc = Boolean.parseBoolean(generateToSrc);
     }
 
+    private Boolean internalDevMode = null;
+
+    /**
+     * The internalDevMode parameter is for internal use only. It is not for users.
+     * The parameter is only used when generateToSrc is false meaning we generate to serverDir.
+     * When the parameter is true we will write the generated features file to the temp directory.
+     * This is required because the features must all be installed before writing to server Dir in devmode.
+     */
+    @Option(option = 'internalDevMode', description = 'Internal only option indicating dev mode is active')
+    void setInternalDevMode(String internalDevMode) {
+        this.internalDevMode = Boolean.parseBoolean(internalDevMode);
+    }
+
     @TaskAction
     void generateFeatures() {
         binaryScanner = getBinaryScannerJarFromRepository();
@@ -100,6 +115,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         }
         if (generateToSrc == null) {
             generateToSrc = DEFAULT_GENERATETOSRC;
+        }
+        if (internalDevMode == null) {
+            internalDevMode = DEFAULT_DEVMODE;
         }
 
         initializeConfigDirectory();
@@ -218,7 +236,14 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         logger.debug("Features detected by binary scanner which are not in server.xml : " + missingLibertyFeatures);
 
         // generate the new features into an xml file in the correct context directory
-        def generatedXmlFile = new File(generationContextDir, GENERATED_FEATURES_FILE_PATH);
+        def generatedXmlFile;
+        if (internalDevMode) {
+            // create a temp dir in the build directory for the generated-features.xml in dev mode
+            // The ServerConfigXmlDocument will create the directories if needed.
+            generatedXmlFile = new File(project.getLayout().getBuildDirectory().getAsFile().get(), GENERATED_FEATURES_TEMP_PATH);
+        } else {
+            generatedXmlFile = new File(generationContextDir, GENERATED_FEATURES_FILE_PATH);
+        }
         try {
             if (missingLibertyFeatures.size() > 0) {
                 Set<String> existingGeneratedFeatures = getGeneratedFeatures(servUtil, generatedXmlFile);
