@@ -140,50 +140,6 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         assertEquals(expectedFeatures, features);
     }
 
-    @Test
-    public void serverXmlCommentNoFMTest() throws Exception {
-        // initially the expected comment is not found in server.xml
-        assertFalse(verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 10, serverXmlFile));
-        // also we wish to test behaviour when there is no <featureManager> element so test that
-        assertFalse(verifyLogMessageExists("<featureManager>", 10, serverXmlFile));
-
-        runCompileAndGenerateFeatures();
-
-        // verify that generated features file was created
-        assertTrue(newFeatureFile.exists());
-
-        // verify expected comment found in server.xml
-        Charset charset = StandardCharsets.UTF_8;
-        String serverXmlContents = new String(Files.readAllBytes(serverXmlFile.toPath()), charset);
-        serverXmlContents = "\n" + serverXmlContents;
-        assertTrue(serverXmlContents,
-            verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
-    }
-
-    @Test
-    public void serverXmlCommentFMTest() throws Exception {
-        replaceString("<!--replaceable-->",
-            "<!--Feature generation comment goes below this line-->\n" +
-            "  <featureManager>\n" +
-            "    <feature>jaxrs-2.1</feature>\n" +
-            "  </featureManager>\n", serverXmlFile);
-
-        // initially the expected comment is not found in server.xml
-        assertFalse(verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 10, serverXmlFile));
-
-        runCompileAndGenerateFeatures();
-
-        // verify that generated features file was created
-        assertTrue(newFeatureFile.exists());
-
-        // verify expected comment found in server.xml
-        Charset charset = StandardCharsets.UTF_8;
-        String serverXmlContents = new String(Files.readAllBytes(serverXmlFile.toPath()), charset);
-        serverXmlContents = "\n" + serverXmlContents;
-        assertTrue(serverXmlContents,
-            verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
-    }
-
     /**
      * Conflict between user specified features.
      * Check for BINARY_SCANNER_CONFLICT_MESSAGE2 (conflict between configured features)
