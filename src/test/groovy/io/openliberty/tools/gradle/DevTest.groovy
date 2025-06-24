@@ -249,7 +249,7 @@ class DevTest extends BaseDevTest {
         //assertTrue(verifyFileExists(newTargetFeatureFile, 5000)); // dev mode copied file
         assertTrue(verifyLogMessage(10000, "batch-1.0", newFeatureFile));
         assertTrue(verifyLogMessage(10000, NEW_FILE_INFO_MESSAGE, newFeatureFile));
-        assertTrue(verifyLogMessage(10000, SERVER_XML_COMMENT, serverXmlFile));
+        // assertTrue(verifyLogMessage(10000, SERVER_XML_COMMENT, serverXmlFile)); no comment added to server.xml
         // should appear as part of the message "CWWKF0012I: The server installed the following features:"
         assertTrue(verifyLogMessage(123000, SERVER_INSTALLED_FEATURES, errFile, ++installedFeaturesCount));
 
