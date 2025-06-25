@@ -84,13 +84,13 @@ class DevTask extends AbstractFeatureTask {
     private static final double DEFAULT_COMPILE_WAIT = 0.5;
     private static final int DEFAULT_DEBUG_PORT = 7777;
     private static final boolean DEFAULT_HOT_TESTS = false;
-    private static final boolean  DEFAULT_SKIP_TESTS = false;
+    private static final boolean DEFAULT_SKIP_TESTS = false;
     private static final boolean DEFAULT_LIBERTY_DEBUG = true;
     private static final boolean DEFAULT_POLLING_TEST = false;
     private static final boolean DEFAULT_CONTAINER = false;
     private static final boolean DEFAULT_SKIP_DEFAULT_PORTS = false;
     private static final boolean DEFAULT_KEEP_TEMP_CONTAINERFILE = false;
-    private static final boolean DEFAULT_GENERATE_FEATURES = false;
+    private static final boolean DEFAULT_GENERATE_FEATURES = true;
     private static final boolean DEFAULT_GENERATE_TO_SRC = false;
     private static final boolean DEFAULT_SKIP_INSTALL_FEATURE = false;
     private static final boolean DEFAULT_CHANGE_ON_DEMAND_TESTS_ACTION = false;
