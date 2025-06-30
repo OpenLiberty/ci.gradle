@@ -134,6 +134,12 @@ class DeployTask extends AbstractServerTask {
             archiveBaseName = task.getArchiveBaseName().get()
             fileName = getArchiveName(task)
             Files.copy(task.archiveFile.get().getAsFile().toPath(), new File(getServerDir(project), "/" + appsDir + "/" + getArchiveName(task)).toPath(), StandardCopyOption.REPLACE_EXISTING)
+            if (project.liberty.dev.container) {
+                File devcDestDir = new File(new File(project.getLayout().getBuildDirectory().getAsFile().get(), DevUtil.DEVC_HIDDEN_FOLDER), appsDir + "/" + getArchiveName(task))
+                devcDestDir.mkdirs();
+                Files.copy(task.archiveFile.get().getAsFile().toPath(),devcDestDir.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            }
+
             validateAppConfig(getArchiveName(task), archiveBaseName, appsDir)
         }
         validateAppConfig(fileName, archiveBaseName, appsDir)

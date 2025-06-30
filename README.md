@@ -25,6 +25,12 @@ To build the plugin and run the integration tests execute the following commands
  $ ./gradlew install check -Druntime=<wlp|ol> -DruntimeVersion=<runtime_version> -DwlpLicense=<liberty_license_code>
  ```
 
+If you are writing any code affecting [libertyDevc](docs/libertyDev.md#libertydevc-task-container-mode) task, please make sure to run DevContainerTests in local using below command.
+
+ ```bash
+ $ ./gradlew install check -P"test.include"="**/DevContainerTest*" -Druntime=<wlp|ol> -DruntimeVersion=<runtime_version> -DwlpLicense=<liberty_license_code>
+ ```
+
 ## Usage
 
 ### Gradle Support
