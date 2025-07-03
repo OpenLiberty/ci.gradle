@@ -1,19 +1,27 @@
 ## generateFeatures task
 ---
 
-**This task modifies the source configuration directory of your application.** This task has a runtime dependency on IBM WebSphere Application Server Migration Toolkit for Application Binaries, which is separately licensed under  IBM License Agreement for Non-Warranted Programs. For more information, see the [license](https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/license/wamt).
+**Note:** This task has a runtime dependency on IBM WebSphere Application Server Migration Toolkit for Application Binaries, which is separately licensed under  IBM License Agreement for Non-Warranted Programs. For more information, see the [license](https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/license/wamt).
 
-Scan the class files of an application and create a new `generated-features.xml` Liberty configuration file in the source configuration directory that contains the Liberty features the application requires.
+Scan the class files of an application and create a new `generated-features.xml` Liberty configuration file in the server configuration directory that contains the Liberty features the application requires. You can alternatively save the file in the source configuration directory of your application using the `generateToSrc` parameter. 
 
 This feature is best accessed through [dev mode](libertyDev.md). When you start `libertyDev` your application will be compiled and the class files will be scanned to verify that all the required Liberty features are included in your server configuration. Then as you work, dev mode will continue to monitor the project to confirm the Liberty features configured are up to date. If you implement a new interface in Java, the scanner will determine if that API is connected to a Liberty feature, then update the configuration and install the feature. If you remove a feature from `server.xml`, dev mode will determine if that feature is actually necessary, and if so, add it to the generated configuration file as described below.
 
-Feature generation is disabled through dev mode by default. If you need to enable feature generation, you can start dev mode with the parameter `--generateFeatures=true`. When running dev mode, you can toggle the generation of features off and on by typing 'g' and pressing Enter. Normally dev mode only scans a class file that has just been updated, but you can tell dev mode to rescan all class files by typing 'o' and pressing Enter. This will optimize the feature list in the generated configuration file.
+Feature generation is enabled through dev mode by default. If you need to disable feature generation, you can start dev mode with the parameter `--generateFeatures=false`. The generated features file will be saved in the server configuration directory. If you wish to save the file in the source configuration directory, you can start dev mode with the parameter `--generateToSrc=true`. When running dev mode, you can toggle the generation of features off and on by typing 'g' and pressing Enter. You can toggle the location of the generated file by typing 's' and pressing Enter.
+
+Normally dev mode only scans a class file that has just been updated, but you can tell dev mode to rescan all class files by typing 'o' and pressing Enter. This will optimize the feature list in the generated configuration file.
+
+###### Command Line Parameter
+
+| Parameter | Description | Required |
+| --------  | ----------- | -------  |
+| generateToSrc  | If set to `true`, place the new file `generated-features.xml` in the `src/main/liberty` directory tree rather than in the server definition directory. The default value is `false`.| No |
 
 ##### Lifecycle
 
-This task is not part of the lifecycle, so to use it in your build you will need to understand its dependencies. Since it will scan the class files of your application, it must be run after the `compileJava` task. The list of features that it generates will be used by the `libertyCreate` and the `installFeature` tasks, so run this task first.
+This task is not part of the lifecycle, so to use it in your build you will need to understand its dependencies. Since it will scan the class files of your application, it must be run after the `compileJava` task. This task uses the server configuration directory so it has a dependency on the `libertyCreate` task which will run if there is no Liberty server detected. Finally the `installFeature` task will run after this task.
 
-If this task detects Liberty features used in your project but not present in your Liberty configuration, it will create a new file `configDropins/overrides/generated-features.xml` in the `src/main/liberty/config` directory of your project. The `generated-features.xml` file will contain a list of features required for your project. If the `generated-features.xml` file has been created in the past and no additional features have been detected, this file will be retained.
+If this task detects Liberty features used in your project but not present in your Liberty configuration, it will create a new file `configDropins/overrides/generated-features.xml` in the `build/wlp/usr/servers/defaultServer` directory or optionally in the `src/main/liberty/config` directory of your project. The `generated-features.xml` file will contain a list of features required for your project. If the `generated-features.xml` file has been created in the past and no additional features have been detected, this file will be retained.
 
 If you are using [devc](libertyDev.md#libertydevc-task-container-mode), ensure that the `generated-features.xml` configuration file is copied to your Docker image via your Dockerfile.
 ```dockerfile
