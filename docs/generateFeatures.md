@@ -15,7 +15,7 @@ Normally dev mode only scans a class file that has just been updated, but you ca
 
 | Parameter | Description | Required |
 | --------  | ----------- | -------  |
-| generateToSrc  | If set to `true`, place the new file `generated-features.xml` in the `src/main/liberty` directory tree rather than in the server definition directory. The default value is `false`.| No |
+| generateToSrc  | If set to `true`, place the new file `generated-features.xml` in the `src/main/liberty` directory tree rather than in the server configuration directory. The default value is `false`.| No |
 
 ##### Lifecycle
 
