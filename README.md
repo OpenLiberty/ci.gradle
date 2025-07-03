@@ -63,7 +63,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.7'
+        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.9.4'
     }
 }
 ```
@@ -83,13 +83,13 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath ('io.openliberty.tools:liberty-ant-tasks:1.9.13')
-        classpath ('io.openliberty.tools:ci.common:1.8.28')
+        classpath ('io.openliberty.tools:liberty-ant-tasks:1.9.16')
+        classpath ('io.openliberty.tools:ci.common:1.8.38')
     }
 }
 
 plugins {
-    id "io.openliberty.tools.gradle.Liberty" version "3.7"
+    id "io.openliberty.tools.gradle.Liberty" version "3.9.4"
 }
 ```
 
@@ -109,7 +109,7 @@ Example using `libertyRuntime` property to install an Open Liberty beta runtime:
 
 ```groovy
 dependencies {
-    libertyRuntime group: 'io.openliberty.beta', name: 'openliberty-runtime', version: '25.0.0.2-beta'
+    libertyRuntime group: 'io.openliberty.beta', name: 'openliberty-runtime', version: '25.0.0.7-beta'
 }
 ```
 
@@ -117,7 +117,7 @@ Example using `libertyRuntime` property to install a specific Open Liberty runti
 
 ```groovy
 dependencies {
-    libertyRuntime group: 'io.openliberty', name: 'openliberty-kernel', version: '25.0.0.3'
+    libertyRuntime group: 'io.openliberty', name: 'openliberty-kernel', version: '25.0.0.6'
 }
 ```
 
@@ -127,7 +127,7 @@ Example using the `libertyRuntime` property to install a WebSphere Liberty runti
 
 ```groovy
 dependencies {
-    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-webProfile8', version: '24.0.0.12'
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-webProfile8', version: '25.0.0.6'
 }
 ```
 
