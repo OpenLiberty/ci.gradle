@@ -25,7 +25,13 @@ repositories {
 dependencies {
     deploy project(':ejb-ejb')
     deploy project(path:':ejb-war', configuration:'archives')
-    deploy 'org.apache.commons:commons-text:1.1'
+    deploy 'org.apache.commons:commons-text:1.13.1'
+    constraints {
+        // Override the transitive dependency to address CVE-2025-48924
+        implementation('org.apache.commons:commons-lang3:3.18.0') {
+            because 'CVE in lower versions'
+        }
+    }    
     testImplementation group: 'commons-httpclient', name: 'commons-httpclient', version:'3.1'
     testImplementation group: 'junit', name: 'junit', version:'4.13.1'
     libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: runtimeVersion

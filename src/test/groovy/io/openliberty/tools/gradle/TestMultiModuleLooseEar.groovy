@@ -54,7 +54,7 @@ public class TestMultiModuleLooseEar extends AbstractIntegrationTest{
         <?xml version="1.0" encoding="UTF-8"?>
         <archive>
             <file sourceOnDisk="/Users/../../ci.gradle/build/testBuilds/multi-module-loose-ear-test/ejb-ear/build/tmp/ear/application.xml" targetInArchive="/META-INF/application.xml"/>
-            <file sourceOnDisk="/Users/../../ci.gradle/build/testBuilds/multi-module-loose-ear-test/ejb-ear/build/libs/1557427330063525/commons-text-1.1.jar" targetInArchive="/WEB-INF/lib/commons-text-1.1.jar"/>
+            <file sourceOnDisk="/Users/../../ci.gradle/build/testBuilds/multi-module-loose-ear-test/ejb-ear/build/libs/1557427330063525/commons-text-1.13.1.jar" targetInArchive="/WEB-INF/lib/commons-text-1.13.1.jar"/>
             <archive targetInArchive="/ejb-war.war">
                 <dir sourceOnDisk="/Users/../../ci.gradle/build/testBuilds/multi-module-loose-ear-test/ejb-war/build/classes/java/main" targetInArchive="/WEB-INF/classes"/>
                 <file sourceOnDisk="/Users/../../ci.gradle/build/testBuilds/multi-module-loose-ear-test/ejb-war/build/resources/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
@@ -110,14 +110,14 @@ public class TestMultiModuleLooseEar extends AbstractIntegrationTest{
 
         // check that lib dependency is referenced in copyLibsDirectory location
         for (Node node : nodes) {
-            if (node.getAttributes().getNamedItem("targetInArchive").getNodeValue().equals("/WEB-INF/lib/commons-text-1.1.jar")) {
+            if (node.getAttributes().getNamedItem("targetInArchive").getNodeValue().equals("/WEB-INF/lib/commons-text-1.13.1.jar")) {
                 // Check that dependencies are located in the test build dir specified by copyLibsDirectory. Otherwise they would be located in the gradle cache somewhere.
                 String nodeValue = node.getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
 
                 if (OSUtil.isWindows()) {
-                    Assert.assertTrue(nodeValue.endsWith("\\commons-text-1.1.jar") && nodeValue.contains("\\multi-module-loose-ear-test\\ejb-ear\\build\\libs\\"))
+                    Assert.assertTrue(nodeValue.endsWith("\\commons-text-1.13.1.jar") && nodeValue.contains("\\multi-module-loose-ear-test\\ejb-ear\\build\\libs\\"))
                 } else {
-                    Assert.assertTrue(nodeValue.endsWith("/commons-text-1.1.jar") && nodeValue.contains("/multi-module-loose-ear-test/ejb-ear/build/libs/"))
+                    Assert.assertTrue(nodeValue.endsWith("/commons-text-1.13.1.jar") && nodeValue.contains("/multi-module-loose-ear-test/ejb-ear/build/libs/"))
                 }
             }
         }
