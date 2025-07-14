@@ -51,7 +51,7 @@ public class TestLooseApplicationWithWarTask extends AbstractIntegrationTest{
   <archive>
       <dir sourceOnDisk="/Users/../../ci.gradle/build/testBuilds/test-loose-application-with-war-tasks/src/main/webapp" targetInArchive="/"/>
       <dir sourceOnDisk="/Users/../../ci.gradle/build/testBuilds/test-loose-application-with-war-tasks/build/classes" targetInArchive="/WEB-INF/classes"/>
-      <file sourceOnDisk="/Users/../.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-text/1.14.0/.../commons-text-1.14.0.jar" targetInArchive="/WEB-INF/lib/commons-text-1.14.0.jar"/>
+      <file sourceOnDisk="/Users/../.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-text/1.13.1/.../commons-text-1.13.1.jar" targetInArchive="/WEB-INF/lib/commons-text-1.13.1.jar"/>
       <file sourceOnDisk="/Users/../.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-lang3/3.18.0/.../commons-lang3-3.18.0.jar" targetInArchive="/WEB-INF/lib/commons-lang3-3.18.0.jar"/>
   </archive>
 */
@@ -85,16 +85,16 @@ public class TestLooseApplicationWithWarTask extends AbstractIntegrationTest{
       nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
       Assert.assertEquals("Number of <file/> element ==>", 3, nodes.getLength());
 
-      Assert.assertEquals("archive targetInArchive attribute value", "/WEB-INF/lib/commons-text-1.14.0.jar",
+      Assert.assertEquals("archive targetInArchive attribute value", "/WEB-INF/lib/commons-text-1.13.1.jar",
               nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue());
 
       // Check that dependencies are not located in the test build dir since copyLibsDirectory not set. They will be located in the gradle cache somewhere.
       String nodeValue = nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
 
       if (OSUtil.isWindows()) {
-          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-text-1.14.0.jar") && !nodeValue.contains("\\test-loose-application-with-war-tasks\\"))
+          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-text-1.13.1.jar") && !nodeValue.contains("\\test-loose-application-with-war-tasks\\"))
       } else {
-          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("/commons-text-1.14.0.jar") && !nodeValue.contains("/test-loose-application-with-war-tasks/"))
+          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("/commons-text-1.13.1.jar") && !nodeValue.contains("/test-loose-application-with-war-tasks/"))
       }
       Assert.assertEquals("archive targetInArchive attribute value", "/WEB-INF/lib/commons-lang3-3.18.0.jar",
               nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue());
