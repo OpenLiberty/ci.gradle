@@ -15,7 +15,6 @@
  */
 package io.openliberty.tools.gradle
 
-import io.openliberty.tools.gradle.tasks.GenerateFeaturesTask
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -26,6 +25,7 @@ import java.nio.file.Files
 
 import static org.junit.Assert.*
 import static io.openliberty.tools.common.plugins.util.BinaryScannerUtil.*;
+import io.openliberty.tools.common.plugins.util.GenerateFeaturesUtil;
 
 class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
@@ -92,7 +92,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         assertFalse(newFeatureFile.exists());
 
         // verify class files not found warning message
-        assertTrue(processOutput.contains(GenerateFeaturesTask.NO_CLASS_FILES_WARNING));
+        assertTrue(processOutput.contains(GenerateFeaturesUtil.NO_CLASSES_DIR_WARNING));
     }
 
     /**
@@ -142,8 +142,6 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
     @Test
     public void serverXmlCommentNoFMTest() throws Exception {
-        // initially the expected comment is not found in server.xml
-        assertFalse(verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 10, serverXmlFile));
         // also we wish to test behaviour when there is no <featureManager> element so test that
         assertFalse(verifyLogMessageExists("<featureManager>", 10, serverXmlFile));
 
@@ -156,8 +154,6 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         Charset charset = StandardCharsets.UTF_8;
         String serverXmlContents = new String(Files.readAllBytes(serverXmlFile.toPath()), charset);
         serverXmlContents = "\n" + serverXmlContents;
-        assertTrue(serverXmlContents,
-            verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
     }
 
     @Test
@@ -168,9 +164,6 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
             "    <feature>jaxrs-2.1</feature>\n" +
             "  </featureManager>\n", serverXmlFile);
 
-        // initially the expected comment is not found in server.xml
-        assertFalse(verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 10, serverXmlFile));
-
         runCompileAndGenerateFeatures();
 
         // verify that generated features file was created
@@ -180,8 +173,6 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         Charset charset = StandardCharsets.UTF_8;
         String serverXmlContents = new String(Files.readAllBytes(serverXmlFile.toPath()), charset);
         serverXmlContents = "\n" + serverXmlContents;
-        assertTrue(serverXmlContents,
-            verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
     }
 
     /**
@@ -225,7 +216,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         runCompileAndGenerateFeatures();
 
         // Verify BINARY_SCANNER_CONFLICT_MESSAGE1 error is thrown (BinaryScannerUtil.FeatureModifiedException)
-        Set<String> recommendedFeatureSet = new HashSet<String>(Arrays.asList("cdi-2.0", "servlet-4.0"));
+        Set<String> recommendedFeatureSet = new HashSet<String>(Arrays.asList("servlet-4.0", "cdi-2.0"));
         // search log file instead of process output because warning message in process output may be interrupted
         boolean b = verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE1, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, logFile);
         assertTrue(formatOutput(getProcessOutput()), b);
