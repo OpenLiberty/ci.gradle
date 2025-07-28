@@ -29,7 +29,6 @@ class ServerUtils {
 
     /**
      * Verifies that the server is fully stopped and all resources are released.
-     * This method will wait until the server is confirmed to be fully stopped or until a timeout is reached.
      * 
      * @param serverDir The server directory
      * @param logger The logger to use for output
@@ -235,7 +234,6 @@ class ServerUtils {
     
     /**
      * Force cleanup of server resources when normal stop verification fails.
-     * This is a more aggressive approach to ensure resources are released.
      * 
      * @param serverDir The server directory
      * @param logger The logger to use for output
