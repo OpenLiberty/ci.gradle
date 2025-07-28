@@ -157,6 +157,16 @@ class LibertyTest extends AbstractIntegrationTest{
            throw new AssertionError ("Fail on task libertyStart after cleanDirs.", e)
         }
 
+        // First test: Try to run clean while the server is running
+        // This tests the original scenario
+        try{
+           runTasks(buildDir, 'clean')
+        } catch (Exception e) {
+           throw new AssertionError ("Fail on task clean while Liberty server is running.", e)
+        }
+
+        // Second test: Stop the server and then run clean
+        // This tests the more reliable approach with explicit server stop
         try{
            // Stop the server before cleaning to ensure all resources are released
            runTasks(buildDir, 'libertyStop')
@@ -175,12 +185,6 @@ class LibertyTest extends AbstractIntegrationTest{
            runTasks(buildDir, 'clean')
         } catch (Exception e) {
            throw new AssertionError ("Fail on task clean after server stop.", e)
-        }
-
-        try{
-           runTasks(buildDir, 'clean')
-        } catch (Exception e) {
-           throw new AssertionError ("Fail on task clean after clean.", e)
         }
 
         try{
@@ -221,5 +225,4 @@ class LibertyTest extends AbstractIntegrationTest{
             throw new AssertionError ("Fail on task clean after deleting server.xml.", e)
         }
     }
-
 }
