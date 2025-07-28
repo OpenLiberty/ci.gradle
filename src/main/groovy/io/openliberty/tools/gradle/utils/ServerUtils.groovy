@@ -36,7 +36,7 @@ class ServerUtils {
      * @return true if the server is fully stopped, false otherwise
      */
     static boolean verifyServerFullyStopped(File serverDir, Logger logger) {
-        logger.lifecycle('Verifying Liberty server is fully stopped and resources are released...')
+        logger.debug('Verifying Liberty server is fully stopped and resources are released...')
         
         // Define verification parameters
         int maxAttempts = 5
@@ -53,14 +53,14 @@ class ServerUtils {
             boolean resourcesLocked = areResourcesLocked(workarea, logger)
             
             if (!serverRunning && !resourcesLocked) {
-                logger.lifecycle("Server verified as fully stopped after ${totalWaitTime}ms")
+                logger.debug("Server verified as fully stopped after ${totalWaitTime}ms")
                 return true
             }
             
             if (serverRunning) {
-                logger.lifecycle("Server process still running (attempt ${attempt}/${maxAttempts}), waiting ${waitMs}ms...")
+                logger.debug("Server process still running (attempt ${attempt}/${maxAttempts}), waiting ${waitMs}ms...")
             } else if (resourcesLocked) {
-                logger.lifecycle("Server resources still locked (attempt ${attempt}/${maxAttempts}), waiting ${waitMs}ms...")
+                logger.debug("Server resources still locked (attempt ${attempt}/${maxAttempts}), waiting ${waitMs}ms...")
             }
             
             try {
@@ -194,7 +194,7 @@ class ServerUtils {
             return
         }
         
-        logger.lifecycle("Attempting to identify locked resources:")
+        logger.debug("Attempting to identify locked resources:")
         
         // Check common problematic directories
         List<String> problematicPaths = [
@@ -225,7 +225,7 @@ class ServerUtils {
         
         File[] files = dir.listFiles()
         if (files == null) {
-            logger.lifecycle("  - Cannot list files in: ${dir.getAbsolutePath()} (likely locked)")
+            logger.debug("  - Cannot list files in: ${dir.getAbsolutePath()} (likely locked)")
             return
         }
         
@@ -234,7 +234,7 @@ class ServerUtils {
                 checkDirectoryAccess(file, depth + 1, logger)
             } else {
                 if (!file.canWrite()) {
-                    logger.lifecycle("  - Locked file detected: ${file.getAbsolutePath()}")
+                    logger.debug("  - Locked file detected: ${file.getAbsolutePath()}")
                 }
             }
         }
@@ -253,7 +253,7 @@ class ServerUtils {
         forceKillServerProcesses(serverDir.getName(), logger)
         
         // 2. Force release of file locks by using JVM's System.gc()
-        logger.lifecycle("Requesting garbage collection to help release file locks...")
+        logger.debug("Requesting garbage collection to help release file locks...")
         System.gc()
         System.runFinalization()
         
@@ -307,7 +307,7 @@ class ServerUtils {
                 
                 // Kill each process
                 for (String pid : pidsToKill) {
-                    logger.lifecycle("Killing process with PID: ${pid}")
+                    logger.debug("Killing process with PID: ${pid}")
                     Process killProcess = null
                     try {
                         killProcess = Runtime.getRuntime().exec("taskkill /F /PID " + pid)
@@ -336,7 +336,7 @@ class ServerUtils {
                 
                 // Kill each process
                 for (String pid : pidsToKill) {
-                    logger.lifecycle("Killing process with PID: ${pid}")
+                    logger.debug("Killing process with PID: ${pid}")
                     Process killProcess = null
                     try {
                         killProcess = Runtime.getRuntime().exec(new String[]{"sh", "-c", "kill -9 " + pid})
