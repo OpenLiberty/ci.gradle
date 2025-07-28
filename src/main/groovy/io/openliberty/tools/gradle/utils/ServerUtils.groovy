@@ -147,7 +147,7 @@ class ServerUtils {
         // Try to access potentially locked files
         try {
             // Check if we can delete and recreate a test file in the workarea
-            File testFile = new File(workarea, ".lock_test")
+            File testFile = new File(workarea, ".liberty_lock_test")
             if (testFile.exists()) {
                 if (!testFile.delete()) {
                     return true // Can't delete, likely locked
