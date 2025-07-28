@@ -38,9 +38,9 @@ class ServerUtils {
         logger.lifecycle('Verifying Liberty server is fully stopped and resources are released...')
         
         // Define verification parameters
-        int maxAttempts = 10
+        int maxAttempts = 5
         long initialWaitMs = 500
-        long maxWaitMs = 5000
+        long maxWaitMs = 4000
         long waitMs = initialWaitMs
         long totalWaitTime = 0
         
