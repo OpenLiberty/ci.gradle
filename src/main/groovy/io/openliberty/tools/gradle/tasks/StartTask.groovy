@@ -34,6 +34,14 @@ class StartTask extends AbstractServerTask {
 
     @TaskAction
     void start() {
+        // Clean up force-stopped marker file if it exists
+        File serverDir = getServerDir(project)
+        File forceStoppedMarker = new File(serverDir, ".force_stopped")
+        if (forceStoppedMarker.exists()) {
+            logger.debug("Removing force-stopped marker file from previous server session")
+            forceStoppedMarker.delete()
+        }
+
         ServerTask serverTaskStart = createServerTask(project, "start");
         serverTaskStart.setUseEmbeddedServer(server.embedded)
         serverTaskStart.setClean(server.clean)

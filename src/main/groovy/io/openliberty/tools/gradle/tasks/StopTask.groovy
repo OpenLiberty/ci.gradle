@@ -31,8 +31,15 @@ class StopTask extends AbstractServerTask {
 
     @TaskAction
     void stop() {
+        // Clean up force-stopped marker file if it exists (since this is a normal stop)
+        File serverDir = getServerDir(project)
+        File forceStoppedMarker = new File(serverDir, ".force_stopped")
+        if (forceStoppedMarker.exists()) {
+            logger.debug("Removing force-stopped marker file during normal stop")
+            forceStoppedMarker.delete()
+        }
+
         if (isLibertyInstalledAndValid(project)) {
-            File serverDir = getServerDir(project)
             if (serverDir.exists()) {
                 File serverXmlFile = new File(serverDir,"server.xml")
                 boolean defaultServerTemplateUsed = copyDefaultServerTemplate(getInstallDir(project),serverDir)
