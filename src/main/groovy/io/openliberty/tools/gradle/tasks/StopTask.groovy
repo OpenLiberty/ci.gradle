@@ -31,13 +31,10 @@ class StopTask extends AbstractServerTask {
 
     @TaskAction
     void stop() {
-        // Clean up force-stopped marker file if it exists (since this is a normal stop)
         File serverDir = getServerDir(project)
-        File forceStoppedMarker = new File(serverDir, ".force_stopped")
-        if (forceStoppedMarker.exists()) {
-            logger.debug("Removing force-stopped marker file during normal stop")
-            forceStoppedMarker.delete()
-        }
+
+        // Clean up force-stopped marker file if it exists (since this is a normal stop)
+        ServerUtils.cleanupForceStoppedMarker(getServerDir(project), logger)
 
         if (isLibertyInstalledAndValid(project)) {
             if (serverDir.exists()) {

@@ -15,6 +15,7 @@
  */
 package io.openliberty.tools.gradle.utils
 
+import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import java.nio.file.Files
 import java.nio.file.Path
@@ -359,6 +360,19 @@ class ServerUtils {
             if (findProcess != null) {
                 ProcessUtils.drainAndCloseProcessStream(findProcess, true, logger)
             }
+        }
+    }
+
+    static void cleanupForceStoppedMarker(File serverDir, Logger logger) {
+        File forceStoppedMarker = new File(serverDir, ".liberty_plugin_force_stopped")
+        if (forceStoppedMarker.exists()) {
+            logger.debug("Removing liberty_plugin_force_stopped marker file from previous server session")
+            boolean deleted = forceStoppedMarker.delete()
+            if (!deleted) {
+                logger.debug("Unable to remove liberty_plugin_force_stopped marker file from previous server session")
+            }
+        } else {
+            logger.debug("liberty_plugin_force_stopped marker file does not exist")
         }
     }
 }
