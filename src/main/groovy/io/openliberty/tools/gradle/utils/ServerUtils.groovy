@@ -371,13 +371,11 @@ class ServerUtils {
     static void cleanupForceStoppedMarker(File serverDir, Logger logger) {
         File forceStoppedMarker = new File(serverDir, ".liberty_plugin_force_stopped")
         if (forceStoppedMarker.exists()) {
-            logger.debug("Removing liberty_plugin_force_stopped marker file from previous server session")
+            logger.debug("Removing liberty_plugin_force_stopped marker file from created by a previous server stop task")
             boolean deleted = forceStoppedMarker.delete()
             if (!deleted) {
-                logger.debug("Unable to remove liberty_plugin_force_stopped marker file from previous server session")
+                logger.debug("Unable to remove liberty_plugin_force_stopped marker file from created by a previous server stop task")
             }
-        } else {
-            logger.debug("liberty_plugin_force_stopped marker file does not exist")
         }
     }
 }
