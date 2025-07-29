@@ -63,7 +63,11 @@ class ServerUtils {
             } else if (resourcesLocked) {
                 logger.debug("Server resources still locked (attempt ${attempt}/${maxAttempts}), waiting ${waitMs}ms...")
             }
-            
+
+            // The maximum number of attempts is 5
+            // The maximum wait time per attempt is 4000ms
+            // Attempt 1: 500ms, Attempt 2: 1000ms, Attempt 3: 2000ms, Attempt 4: 4000ms, Attempt 5: 4000ms
+            // The total maximum wait time is 11,500ms (11.5 seconds)
             try {
                 Thread.sleep(waitMs)
                 totalWaitTime += waitMs
@@ -284,14 +288,14 @@ class ServerUtils {
         logger.lifecycle("Force killing any lingering Liberty server processes...")
         
         Process findProcess = null
-        
+
         try {
             if (OSUtil.isWindows()) {
                 // Windows - use taskkill with /F (force) flag
                 String findCmd = "tasklist /FI \"IMAGENAME eq java.exe\" /FO CSV"
                 findProcess = Runtime.getRuntime().exec(findCmd)
                 List<String> pidsToKill = new ArrayList<>()
-                
+
                 try (BufferedReader reader = ProcessUtils.createProcessReader(findProcess)) {
                     String line
                     while ((line = reader.readLine()) != null) {
@@ -306,7 +310,7 @@ class ServerUtils {
                     }
                 }
                 findProcess.waitFor(5, TimeUnit.SECONDS)
-                
+
                 // Kill each process
                 for (String pid : pidsToKill) {
                     logger.debug("Killing process with PID: ${pid}")
@@ -320,13 +324,13 @@ class ServerUtils {
                         ProcessUtils.drainAndCloseProcessStream(killProcess, true, logger)
                     }
                 }
-                
+
             } else {
                 // Unix-based systems (Linux, macOS)
                 String findCmd = "ps -ef | grep " + serverName + " | grep -v grep"
                 findProcess = Runtime.getRuntime().exec(new String[]{"sh", "-c", findCmd})
                 List<String> pidsToKill = new ArrayList<>()
-                
+
                 try (BufferedReader reader = ProcessUtils.createProcessReader(findProcess)) {
                     String line
                     while ((line = reader.readLine()) != null) {
@@ -336,7 +340,7 @@ class ServerUtils {
                         }
                     }
                 }
-                
+
                 // Kill each process
                 for (String pid : pidsToKill) {
                     logger.debug("Killing process with PID: ${pid}")
@@ -351,10 +355,10 @@ class ServerUtils {
                     }
                 }
             }
-            
+
             // Wait a bit for processes to be killed
             Thread.sleep(1000)
-            
+
         } catch (Exception e) {
             logger.warn("Error during force kill: " + e.getMessage())
         } finally {
