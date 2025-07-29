@@ -373,7 +373,7 @@ class ServerUtils {
         if (forceStoppedMarker.exists()) {
             logger.debug("Removing liberty_plugin_force_stopped marker file from created by a previous server stop task")
             if (!forceStoppedMarker.delete()) {
-                logger.debug("Unable to remove liberty_plugin_force_stopped marker file from created by a previous server stop task")
+                logger.debug("Unable to remove liberty_plugin_force_stopped marker file created by a previous server stop task")
             }
         }
     }
