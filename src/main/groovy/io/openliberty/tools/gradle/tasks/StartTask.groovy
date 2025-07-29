@@ -36,10 +36,15 @@ class StartTask extends AbstractServerTask {
     void start() {
         // Clean up force-stopped marker file if it exists
         File serverDir = getServerDir(project)
-        File forceStoppedMarker = new File(serverDir, ".force_stopped")
+        File forceStoppedMarker = new File(serverDir, ".liberty_plugin_force_stopped")
         if (forceStoppedMarker.exists()) {
-            logger.debug("Removing force-stopped marker file from previous server session")
-            forceStoppedMarker.delete()
+            logger.debug("Removing liberty_plugin_force_stopped marker file from previous server session")
+            boolean deleted = forceStoppedMarker.delete()
+            if (!deleted) {
+                logger.debug("Unable to remove liberty_plugin_force_stopped marker file from previous server session")
+            }
+        } else {
+            logger.debug("liberty_plugin_force_stopped marker file does not exist")
         }
 
         ServerTask serverTaskStart = createServerTask(project, "start");
