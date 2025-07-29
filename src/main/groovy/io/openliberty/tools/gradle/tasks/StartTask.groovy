@@ -17,6 +17,7 @@ package io.openliberty.tools.gradle.tasks
 
 import io.openliberty.tools.ant.ServerTask
 import io.openliberty.tools.gradle.utils.CommonLogger
+import io.openliberty.tools.gradle.utils.ServerUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskAction
@@ -34,6 +35,9 @@ class StartTask extends AbstractServerTask {
 
     @TaskAction
     void start() {
+        // Clean up force-stopped marker file if it exists
+        ServerUtils.cleanupForceStoppedMarker(getServerDir(project), logger);
+
         ServerTask serverTaskStart = createServerTask(project, "start");
         serverTaskStart.setUseEmbeddedServer(server.embedded)
         serverTaskStart.setClean(server.clean)

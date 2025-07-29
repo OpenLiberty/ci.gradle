@@ -18,6 +18,7 @@ import org.gradle.api.logging.LogLevel
 
 import org.gradle.api.tasks.TaskAction
 import io.openliberty.tools.ant.ServerTask
+import io.openliberty.tools.gradle.utils.ServerUtils
 
 class StopTask extends AbstractServerTask {
 
@@ -30,8 +31,12 @@ class StopTask extends AbstractServerTask {
 
     @TaskAction
     void stop() {
+        File serverDir = getServerDir(project)
+
+        // Clean up force-stopped marker file if it exists (since this is a normal stop)
+        ServerUtils.cleanupForceStoppedMarker(getServerDir(project), logger)
+
         if (isLibertyInstalledAndValid(project)) {
-            File serverDir = getServerDir(project)
             if (serverDir.exists()) {
                 File serverXmlFile = new File(serverDir,"server.xml")
                 boolean defaultServerTemplateUsed = copyDefaultServerTemplate(getInstallDir(project),serverDir)
@@ -39,6 +44,12 @@ class StopTask extends AbstractServerTask {
                     ServerTask serverTaskStop = createServerTask(project, "stop");
                     serverTaskStop.setUseEmbeddedServer(server.embedded)
                     serverTaskStop.execute()
+                    
+                    // Verify server is fully stopped and resources are released
+                    if (!ServerUtils.verifyServerFullyStopped(serverDir, logger)) {
+                        // If normal stop verification fails, try forced cleanup
+                        ServerUtils.forceCleanupServerResources(serverDir, logger)
+                    }
                 } else {
         	        logger.error ('The server cannot be stopped. There is no server.xml file in the server.')
                 }

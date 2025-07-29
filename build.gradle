@@ -87,6 +87,7 @@ artifacts {
 }
 
 test {
+    failOnNoDiscoveredTests = false
     minHeapSize = "1G"
     maxHeapSize = "3G"
     jvmArgs '-Xmx3G'
