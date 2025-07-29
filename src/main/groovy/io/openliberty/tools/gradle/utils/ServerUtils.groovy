@@ -98,18 +98,18 @@ class ServerUtils {
         String serverName = serverDir.getName()
         boolean isRunning = false
         Process process = null
-        BufferedReader reader = null
         
         try {
             if (OSUtil.isWindows()) {
                 String command = "tasklist /FI \"IMAGENAME eq java.exe\" /FO CSV"
                 process = Runtime.getRuntime().exec(command)
-                reader = ProcessUtils.createProcessReader(process)
-                String line
-                while ((line = reader.readLine()) != null) {
-                    if (line.toLowerCase().contains(serverName.toLowerCase())) {
-                        isRunning = true
-                        break
+                try (BufferedReader reader = ProcessUtils.createProcessReader(process)) {
+                    String line
+                    while ((line = reader.readLine()) != null) {
+                        if (line.toLowerCase().contains(serverName.toLowerCase())) {
+                            isRunning = true
+                            break
+                        }
                     }
                 }
                 process.waitFor(5, TimeUnit.SECONDS)
@@ -117,14 +117,14 @@ class ServerUtils {
                 // Unix-based systems (Linux, macOS)
                 String command = "ps -ef | grep " + serverName + " | grep -v grep"
                 process = Runtime.getRuntime().exec(new String[]{"sh", "-c", command})
-                reader = ProcessUtils.createProcessReader(process)
-                isRunning = reader.readLine() != null
+                try (BufferedReader reader = ProcessUtils.createProcessReader(process)) {
+                    isRunning = reader.readLine() != null
+                }
                 process.waitFor(5, TimeUnit.SECONDS)
             }
         } catch (Exception e) {
             logger.debug("Error checking if server is running: " + e.getMessage())
         } finally {
-            ProcessUtils.closeQuietly(reader, logger, "reader")
             if (process != null) {
                 ProcessUtils.drainAndCloseProcessStream(process, true, logger)
             }
@@ -284,27 +284,28 @@ class ServerUtils {
         logger.lifecycle("Force killing any lingering Liberty server processes...")
         
         Process findProcess = null
-        BufferedReader reader = null
         
         try {
             if (OSUtil.isWindows()) {
                 // Windows - use taskkill with /F (force) flag
                 String findCmd = "tasklist /FI \"IMAGENAME eq java.exe\" /FO CSV"
                 findProcess = Runtime.getRuntime().exec(findCmd)
-                reader = ProcessUtils.createProcessReader(findProcess)
-                String line
                 List<String> pidsToKill = new ArrayList<>()
                 
-                while ((line = reader.readLine()) != null) {
-                    if (line.toLowerCase().contains(serverName.toLowerCase())) {
-                        // Extract PID from CSV format
-                        String[] parts = line.split(",")
-                        if (parts.length >= 2) {
-                            String pid = parts[1].replaceAll("\"", "").trim()
-                            pidsToKill.add(pid)
+                try (BufferedReader reader = ProcessUtils.createProcessReader(findProcess)) {
+                    String line
+                    while ((line = reader.readLine()) != null) {
+                        if (line.toLowerCase().contains(serverName.toLowerCase())) {
+                            // Extract PID from CSV format
+                            String[] parts = line.split(",")
+                            if (parts.length >= 2) {
+                                String pid = parts[1].replaceAll("\"", "").trim()
+                                pidsToKill.add(pid)
+                            }
                         }
                     }
                 }
+                findProcess.waitFor(5, TimeUnit.SECONDS)
                 
                 // Kill each process
                 for (String pid : pidsToKill) {
@@ -324,14 +325,15 @@ class ServerUtils {
                 // Unix-based systems (Linux, macOS)
                 String findCmd = "ps -ef | grep " + serverName + " | grep -v grep"
                 findProcess = Runtime.getRuntime().exec(new String[]{"sh", "-c", findCmd})
-                reader = ProcessUtils.createProcessReader(findProcess)
-                String line
                 List<String> pidsToKill = new ArrayList<>()
                 
-                while ((line = reader.readLine()) != null) {
-                    String[] parts = line.trim().split("\\s+")
-                    if (parts.length >= 2) {
-                        pidsToKill.add(parts[1])
+                try (BufferedReader reader = ProcessUtils.createProcessReader(findProcess)) {
+                    String line
+                    while ((line = reader.readLine()) != null) {
+                        String[] parts = line.trim().split("\\s+")
+                        if (parts.length >= 2) {
+                            pidsToKill.add(parts[1])
+                        }
                     }
                 }
                 
@@ -356,7 +358,6 @@ class ServerUtils {
         } catch (Exception e) {
             logger.warn("Error during force kill: " + e.getMessage())
         } finally {
-            ProcessUtils.closeQuietly(reader, logger, "reader")
             if (findProcess != null) {
                 ProcessUtils.drainAndCloseProcessStream(findProcess, true, logger)
             }

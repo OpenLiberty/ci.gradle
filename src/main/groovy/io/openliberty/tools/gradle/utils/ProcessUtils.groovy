@@ -28,16 +28,6 @@ import java.io.InputStreamReader
  */
 class ProcessUtils {
 
-    static void closeQuietly(Closeable resource, Logger logger, String resourceName) {
-        if (resource != null) {
-            try {
-                resource.close()
-            } catch (IOException e) {
-                logger.debug("Error closing " + resourceName + ": " + e.getMessage())
-            }
-        }
-    }
-
     static BufferedReader createProcessReader(Process process) {
         return new BufferedReader(new InputStreamReader(process.getInputStream()))
     }
@@ -49,15 +39,11 @@ class ProcessUtils {
     static void drainAndCloseProcessStream(Process process, boolean isErrorStream, Logger logger) {
         if (process == null) return
         
-        BufferedReader reader = null
-        try {
-            reader = isErrorStream ? createProcessErrorReader(process) : createProcessReader(process)
+        try (BufferedReader reader = isErrorStream ? createProcessErrorReader(process) : createProcessReader(process)) {
             // Drain the stream
             while (reader.readLine() != null) {}
         } catch (IOException e) {
             logger.debug("Error draining process stream: " + e.getMessage())
-        } finally {
-            closeQuietly(reader, logger, "process reader")
         }
     }
 }
