@@ -36,6 +36,7 @@ import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.ResolvedDependency
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.LogLevel
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.w3c.dom.Element
 
@@ -115,7 +116,7 @@ class DeployTask extends AbstractServerTask {
         }
     }
 
-    private void installMultipleApps(List<Task> applications, String appsDir) {
+    protected void installMultipleApps(List<Task> applications, String appsDir) {
         applications.each{ Task task ->
             installProject(task, appsDir)
         }
@@ -258,7 +259,7 @@ class DeployTask extends AbstractServerTask {
         }
     }
 
-    private void installLooseApplication(Task task, String appsDir) throws Exception {
+    protected void installLooseApplication(Task task, String appsDir) throws Exception {
         String looseConfigFileName = getLooseConfigFileName(task)
         String application = looseConfigFileName.substring(0, looseConfigFileName.length()-4)
         File destDir = new File(getServerDir(project), appsDir)
@@ -299,7 +300,7 @@ class DeployTask extends AbstractServerTask {
         }
     }
 
-    private void installAndVerify(LooseConfigData config, File looseConfigFile, String applicationName, String appsDir) {
+    protected void installAndVerify(LooseConfigData config, File looseConfigFile, String applicationName, String appsDir) {
         deleteApplication(new File(getServerDir(project), "apps"), looseConfigFile)
         deleteApplication(new File(getServerDir(project), "dropins"), looseConfigFile)
         config.toXmlFile(looseConfigFile)
@@ -370,7 +371,7 @@ class DeployTask extends AbstractServerTask {
         return false;
     }
 
-    private void addWarEmbeddedLib(Element parent, LooseApplication looseApp, Task task) throws Exception {
+    protected void addWarEmbeddedLib(Element parent, LooseApplication looseApp, Task task) throws Exception {
         ArrayList<File> deps = new ArrayList<File>();
         task.classpath.each {
             deps.add(it)
@@ -592,7 +593,7 @@ class DeployTask extends AbstractServerTask {
         }
     }
 
-    private String getProjectPath(File parentProjectDir, File dep) {
+    protected String getProjectPath(File parentProjectDir, File dep) {
         String dependencyPathPortion = dep.getAbsolutePath().replace(parentProjectDir.getAbsolutePath(),"")
         String projectPath = dep.getAbsolutePath().replace(dependencyPathPortion,"")
         Pattern pattern
@@ -612,7 +613,8 @@ class DeployTask extends AbstractServerTask {
         return projectPath
     }
 
-    private boolean isSupportedType(){
+    @Internal
+    protected boolean isSupportedType(){
         switch (getPackagingType()) {
             case "ear":
             case "war":
@@ -679,7 +681,7 @@ class DeployTask extends AbstractServerTask {
         return applicationDirectory
     }
 
-    private boolean shouldValidateAppStart() throws GradleException {
+    protected boolean shouldValidateAppStart() throws GradleException {
         try {
             return new File(getServerDir(project).getCanonicalPath()  + "/workarea/.sRunning").exists()
         } catch (IOException ioe) {
