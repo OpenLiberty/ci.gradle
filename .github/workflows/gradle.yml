@@ -28,12 +28,24 @@ jobs:
     # Checkout repos
     - name: Checkout ci.gradle
       uses: actions/checkout@v3
+    # Set up Java 17 for Gradle (regardless of matrix Java version)
+    - name: Setup Java 17 for Gradle
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'adopt'
+        java-version: '17'
+        cache: 'gradle'
+        java-package: jdk
+    # Store Java 17 home for Gradle
+    - name: Set Gradle Java Home
+      id: gradle-java-home
+      run: echo "GRADLE_JAVA_HOME=$JAVA_HOME" >> $GITHUB_ENV
+    # Set up matrix Java version for testing
     - name: Setup Java ${{ matrix.java }}
       uses: actions/setup-java@v3
       with:
         distribution: 'adopt'
         java-version: ${{ matrix.java }}
-        cache: 'gradle'
         java-package: jdk
     - name: Checkout ci.common
       uses: actions/checkout@v3
@@ -78,7 +90,7 @@ jobs:
         ./gradlew clean install check -P"test.include"="**/AbstractIntegrationTest*,**/LibertyTest*,**/BaseDevTest*,**/DevTest*,**/DevRecompileTest*,**/PollingDevTest*" \
         -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" \
         -Dfile.encoding=UTF-8 -Dorg.gradle.jvmargs="-Dfile.encoding=UTF-8" \
-        -Dorg.gradle.java.home="${{ env.JAVA_HOME }}" \
+        -Dorg.gradle.java.home="${{ env.GRADLE_JAVA_HOME }}" \
         --stacktrace --info --warning-mode=all
     # Copy build reports and upload artifact if build failed
     - name: Copy build/report/tests/test for upload
@@ -116,12 +128,24 @@ jobs:
     # Checkout repos
     - name: Checkout ci.gradle
       uses: actions/checkout@v3
+    # Set up Java 17 for Gradle (regardless of matrix Java version)
+    - name: Setup Java 17 for Gradle
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'adopt'
+        java-version: '17'
+        cache: 'gradle'
+        java-package: jdk
+    # Store Java 17 home for Gradle
+    - name: Set Gradle Java Home
+      id: gradle-java-home
+      run: echo "GRADLE_JAVA_HOME=$JAVA_HOME" >> $GITHUB_ENV
+    # Set up matrix Java version for testing
     - name: Setup Java ${{ matrix.java }}
       uses: actions/setup-java@v3
       with:
         distribution: 'adopt'
         java-version: ${{ matrix.java }}
-        cache: 'gradle'
         java-package: jdk
     # Moving and cloning to C: drive for Windows for more disk space
     - name: Clone ci.ant, ci.common, ci.gradle repos to C drive
@@ -169,7 +193,7 @@ jobs:
         ./gradlew "clean" "install" "check" "-P'test.include'='**/AbstractIntegrationTest*,**/LibertyTest*,**/BaseDevTest*,**/DevTest*,**/DevRecompileTest*,**/PollingDevTest*'" `
         "-Druntime=${{ matrix.RUNTIME }}" "-DruntimeVersion=${{ matrix.RUNTIME_VERSION }}" `
         "-Dfile.encoding=UTF-8" "-Dorg.gradle.jvmargs=-Dfile.encoding=UTF-8" `
-        "-Dorg.gradle.java.home=${{ env.JAVA_HOME }}" `
+        "-Dorg.gradle.java.home=${{ env.GRADLE_JAVA_HOME }}" `
         "--stacktrace" "--info" "--warning-mode=all"
       timeout-minutes: 75
     # Copy build reports and upload artifact if build failed
