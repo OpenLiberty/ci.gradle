@@ -40,6 +40,11 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = "UTF-8"
 }
 
+// Ensure test tasks use UTF-8 encoding via JVM args, not via options.encoding
+tasks.withType(Test).configureEach {
+    jvmArgs '-Dfile.encoding=UTF-8'
+}
+
 compileJava {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
