@@ -176,7 +176,6 @@ tasks.withType(Test) {
     javaLauncher = javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(8)
     }
-    options.encoding = 'UTF-8'
     systemProperty 'file.encoding', 'UTF-8'
     systemProperty 'org.gradle.java.home', System.getProperty('org.gradle.java.home')
 }
