@@ -78,6 +78,7 @@ jobs:
         ./gradlew clean install check -P"test.include"="**/AbstractIntegrationTest*,**/LibertyTest*,**/BaseDevTest*,**/DevTest*,**/DevRecompileTest*,**/PollingDevTest*" \
         -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" \
         -Dfile.encoding=UTF-8 -Dorg.gradle.jvmargs="-Dfile.encoding=UTF-8" \
+        -Dorg.gradle.java.home="${{ env.JAVA_HOME }}" \
         --stacktrace --info --warning-mode=all
     # Copy build reports and upload artifact if build failed
     - name: Copy build/report/tests/test for upload
@@ -165,10 +166,11 @@ jobs:
       # LibertyTest is excluded because test0_run hangs
       # For Java 8, TestCreateWithConfigDir is excluded because test_micro_clean_liberty_plugin_variable_config runs out of memory
       run: |
-        ./gradlew clean install check -P"test.include"="**/AbstractIntegrationTest*,**/LibertyTest*,**/BaseDevTest*,**/DevTest*,**/DevRecompileTest*,**/PollingDevTest*" \
-        -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" \
-        -Dfile.encoding=UTF-8 -Dorg.gradle.jvmargs="-Dfile.encoding=UTF-8" \
-        --stacktrace --info --warning-mode=all
+        ./gradlew "clean" "install" "check" "-P'test.include'='**/AbstractIntegrationTest*,**/LibertyTest*,**/BaseDevTest*,**/DevTest*,**/DevRecompileTest*,**/PollingDevTest*'" `
+        "-Druntime=${{ matrix.RUNTIME }}" "-DruntimeVersion=${{ matrix.RUNTIME_VERSION }}" `
+        "-Dfile.encoding=UTF-8" "-Dorg.gradle.jvmargs=-Dfile.encoding=UTF-8" `
+        "-Dorg.gradle.java.home=${{ env.JAVA_HOME }}" `
+        "--stacktrace" "--info" "--warning-mode=all"
       timeout-minutes: 75
     # Copy build reports and upload artifact if build failed
     - name: Copy build/report/tests/test for upload
