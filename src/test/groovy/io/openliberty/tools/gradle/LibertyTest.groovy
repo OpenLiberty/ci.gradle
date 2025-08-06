@@ -162,6 +162,7 @@ class LibertyTest extends AbstractIntegrationTest{
         try{
            runTasks(buildDir, 'clean')
         } catch (Exception e) {
+            e.printStackTrace()
            throw new AssertionError ("Fail on task clean while Liberty server is running.", e)
         }
 
