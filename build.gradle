@@ -65,9 +65,11 @@ compileTestGroovy {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
+// In-order to support Java 21, we need to set the toolchain to Java 21
+// Reference: https://docs.gradle.org/current/userguide/toolchains.html
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
