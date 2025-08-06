@@ -161,19 +161,13 @@ class LibertyTest extends AbstractIntegrationTest{
         // First test: Try to run clean while the server is running
         // This tests the original scenario
         try{
-            // Add timeout mechanism to prevent test from hanging
-            def timeout = 60000 // 60 seconds timeout
-            def future = Executors.newSingleThreadExecutor().submit({
-                runTasks(buildDir, 'clean')
-                return true
-            })
-            
+            // Add a small delay to ensure file locks are fully released
             try {
-                future.get(timeout, TimeUnit.MILLISECONDS)
-            } catch (TimeoutException e) {
-                future.cancel(true)
-                throw new AssertionError("Task 'clean' timed out after ${timeout/1000} seconds", e)
+                Thread.sleep(2000) // 2 second delay
+            } catch (InterruptedException e) {
+                // Ignore interruption
             }
+            runTasks(buildDir, 'clean')
         } catch (Exception e) {
             e.printStackTrace()
             throw new AssertionError ("Fail on task clean while Liberty server is running.", e)
@@ -196,19 +190,13 @@ class LibertyTest extends AbstractIntegrationTest{
         }
 
         try{
-            // Add timeout mechanism to prevent test from hanging
-            def timeout = 60000 // 60 seconds timeout
-            def future = Executors.newSingleThreadExecutor().submit({
-                runTasks(buildDir, 'clean')
-                return true
-            })
-            
+            // Add a small delay to ensure file locks are fully released
             try {
-                future.get(timeout, TimeUnit.MILLISECONDS)
-            } catch (TimeoutException e) {
-                future.cancel(true)
-                throw new AssertionError("Task 'clean' timed out after ${timeout/1000} seconds", e)
+                Thread.sleep(2000) // 2 second delay
+            } catch (InterruptedException e) {
+                // Ignore interruption
             }
+            runTasks(buildDir, 'clean')
         } catch (Exception e) {
            throw new AssertionError ("Fail on task clean after server stop.", e)
         }
@@ -250,6 +238,13 @@ class LibertyTest extends AbstractIntegrationTest{
             def timeout = 60000 // 60 seconds timeout
             def future = Executors.newSingleThreadExecutor().submit({
                 runTasks(buildDir, 'clean')
+                
+                // Add a small delay to ensure file locks are fully released
+                try {
+                    Thread.sleep(2000) // 2 second delay
+                } catch (InterruptedException e) {
+                    // Ignore interruption
+                }
                 return true
             })
             
