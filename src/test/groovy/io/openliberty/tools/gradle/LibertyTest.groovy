@@ -101,6 +101,7 @@ class LibertyTest extends AbstractIntegrationTest{
     @Test
     public void test4_stop() {
         try{
+            println("SAJEER:::: Stopping server")
             runTasks(buildDir, 'libertyStop')
         } catch (Exception e) {
             throw new AssertionError ("Fail on task libertyStop.", e)
