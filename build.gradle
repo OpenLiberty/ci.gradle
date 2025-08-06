@@ -65,11 +65,18 @@ compileTestGroovy {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-// In-order to support Java 21, we need to set the toolchain to Java 21
+// In-order to support both Java 17 and Java 21, we configure the toolchain
 // Reference: https://docs.gradle.org/current/userguide/toolchains.html
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        // Default to Java 17 for backward compatibility
+        languageVersion = JavaLanguageVersion.of(17)
+        
+        // Allow Java 21 as a compatible alternative
+        // This enables the project to work with either Java 17 or Java 21
+        if (System.getProperty('java.version').startsWith('21')) {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
     }
 }
 
