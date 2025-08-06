@@ -22,6 +22,7 @@ import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runners.MethodSorters
 import io.openliberty.tools.ant.ServerTask
+import java.util.concurrent.*
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class LibertyTest extends AbstractIntegrationTest{
@@ -160,10 +161,22 @@ class LibertyTest extends AbstractIntegrationTest{
         // First test: Try to run clean while the server is running
         // This tests the original scenario
         try{
-           runTasks(buildDir, 'clean')
+            // Add timeout mechanism to prevent test from hanging
+            def timeout = 60000 // 60 seconds timeout
+            def future = Executors.newSingleThreadExecutor().submit({
+                runTasks(buildDir, 'clean')
+                return true
+            })
+            
+            try {
+                future.get(timeout, TimeUnit.MILLISECONDS)
+            } catch (TimeoutException e) {
+                future.cancel(true)
+                throw new AssertionError("Task 'clean' timed out after ${timeout/1000} seconds", e)
+            }
         } catch (Exception e) {
             e.printStackTrace()
-           throw new AssertionError ("Fail on task clean while Liberty server is running.", e)
+            throw new AssertionError ("Fail on task clean while Liberty server is running.", e)
         }
 
         // Second test: Stop the server and then run clean
@@ -183,7 +196,19 @@ class LibertyTest extends AbstractIntegrationTest{
         }
 
         try{
-           runTasks(buildDir, 'clean')
+            // Add timeout mechanism to prevent test from hanging
+            def timeout = 60000 // 60 seconds timeout
+            def future = Executors.newSingleThreadExecutor().submit({
+                runTasks(buildDir, 'clean')
+                return true
+            })
+            
+            try {
+                future.get(timeout, TimeUnit.MILLISECONDS)
+            } catch (TimeoutException e) {
+                future.cancel(true)
+                throw new AssertionError("Task 'clean' timed out after ${timeout/1000} seconds", e)
+            }
         } catch (Exception e) {
            throw new AssertionError ("Fail on task clean after server stop.", e)
         }
@@ -221,7 +246,19 @@ class LibertyTest extends AbstractIntegrationTest{
         assert serverXmlFile.exists() : 'server.xml file does not exist in LibertyProjectServer after libertyStatus'
 
         try{
-            runTasks(buildDir, 'clean')
+            // Add timeout mechanism to prevent test from hanging
+            def timeout = 60000 // 60 seconds timeout
+            def future = Executors.newSingleThreadExecutor().submit({
+                runTasks(buildDir, 'clean')
+                return true
+            })
+            
+            try {
+                future.get(timeout, TimeUnit.MILLISECONDS)
+            } catch (TimeoutException e) {
+                future.cancel(true)
+                throw new AssertionError("Task 'clean' timed out after ${timeout/1000} seconds", e)
+            }
         } catch (Exception e) {
             throw new AssertionError ("Fail on task clean after deleting server.xml.", e)
         }
