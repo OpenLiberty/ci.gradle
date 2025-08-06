@@ -161,39 +161,6 @@ class LibertyTest extends AbstractIntegrationTest{
         // First test: Try to run clean while the server is running
         // This tests the original scenario
         try{
-            // Add a small delay to ensure file locks are fully released
-            try {
-                println(new Date().format("HH:mm:ss.SSS") + " - Waiting 1 minute to ensure file locks are fully released")
-                Thread.sleep(60000) // 1 minute delay
-                println(new Date().format("HH:mm:ss.SSS") + " - Done waiting")
-            } catch (InterruptedException e) {
-                // Ignore interruption
-            }
-            
-            // Check if buildDir + "/build/wlp/lib" exists and is not empty, delete contents if needed
-            println(new Date().format("HH:mm:ss.SSS") + " - Checking wlp/lib directory")
-            File wlpLibDir = new File(buildDir, "/build/wlp")
-            if (wlpLibDir.exists() && wlpLibDir.isDirectory()) {
-                println(new Date().format("HH:mm:ss.SSS") + " - Checking wlp/lib directory")
-                File[] files = wlpLibDir.listFiles()
-                if (files != null && files.length > 0) {
-                    println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory is not empty, deleting contents")
-                    files.each { file ->
-                        if (file.isDirectory()) {
-                            file.deleteDir()
-                        } else {
-                            file.delete()
-                        }
-                    }
-                    println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory contents deleted")
-                } else {
-                    println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory is empty")
-                }
-            } else {
-                println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory does not exist")
-            }
-            
-            println(new Date().format("HH:mm:ss.SSS") + " - Starting clean")
             runTasks(buildDir, 'clean')
         } catch (Exception e) {
             e.printStackTrace()
@@ -205,6 +172,29 @@ class LibertyTest extends AbstractIntegrationTest{
         try{
            // Stop the server before cleaning to ensure all resources are released
            runTasks(buildDir, 'libertyStop')
+           
+           // Add Windows-specific handling to ensure processes are fully terminated
+           String os = System.getProperty("os.name")
+           if (os != null && os.toLowerCase().startsWith("windows")) {
+               println(new Date().format("HH:mm:ss.SSS") + " - Windows detected, ensuring all Liberty processes are terminated")
+               
+               // Give some time for processes to shut down
+               try {
+                   Thread.sleep(5000) // 5 seconds
+               } catch (InterruptedException e) {
+                   // Ignore interruption
+               }
+               
+               // Force garbage collection to release any file handles held by Java
+               System.gc()
+               
+               // Additional delay after GC
+               try {
+                   Thread.sleep(2000) // 2 seconds
+               } catch (InterruptedException e) {
+                   // Ignore interruption
+               }
+           }
         } catch (Exception e) {
            throw new AssertionError ("Fail on task libertyStop before clean.", e)
         }
@@ -217,39 +207,6 @@ class LibertyTest extends AbstractIntegrationTest{
         }
 
         try{
-            // Add a small delay to ensure file locks are fully released
-            try {
-                println(new Date().format("HH:mm:ss.SSS") + " - Waiting 1 minute to ensure file locks are fully released")
-                Thread.sleep(60000) // 1 minute delay
-                println(new Date().format("HH:mm:ss.SSS") + " - Done waiting")
-            } catch (InterruptedException e) {
-                // Ignore interruption
-            }
-            
-            // Check if buildDir + "/build/wlp/lib" exists and is not empty, delete contents if needed
-            println(new Date().format("HH:mm:ss.SSS") + " - Checking wlp/lib directory")
-            File wlpLibDir = new File(buildDir.getAbsolutePath(), "/build/wlp")
-            if (wlpLibDir.exists() && wlpLibDir.isDirectory()) {
-                println(new Date().format("HH:mm:ss.SSS") + " - Checking wlp/lib directory")
-                File[] files = wlpLibDir.listFiles()
-                if (files != null && files.length > 0) {
-                    println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory is not empty, deleting contents")
-                    files.each { file ->
-                        if (file.isDirectory()) {
-                            file.deleteDir()
-                        } else {
-                            file.delete()
-                        }
-                    }
-                    println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory contents deleted")
-                } else {
-                    println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory is empty")
-                }
-            } else {
-                println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory does not exist")
-            }
-            
-            println(new Date().format("HH:mm:ss.SSS") + " - Starting clean")
             runTasks(buildDir, 'clean')
         } catch (Exception e) {
            throw new AssertionError ("Fail on task clean after server stop.", e)
@@ -288,47 +245,21 @@ class LibertyTest extends AbstractIntegrationTest{
         assert serverXmlFile.exists() : 'server.xml file does not exist in LibertyProjectServer after libertyStatus'
 
         try{
-            // Add timeout mechanism to prevent test from hanging
-            def timeout = 60000 // 60 seconds timeout
-            def future = Executors.newSingleThreadExecutor().submit({
-                // Check if buildDir + "/build/wlp/lib" exists and is not empty, delete contents if needed
-                File wlpLibDir = new File(buildDir.getAbsolutePath(), "/build/wlp")
-                if (wlpLibDir.exists() && wlpLibDir.isDirectory()) {
-                    println(new Date().format("HH:mm:ss.SSS") + " - Checking wlp/lib directory")
-                    File[] files = wlpLibDir.listFiles()
-                    if (files != null && files.length > 0) {
-                        println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory is not empty, deleting contents")
-                        files.each { file ->
-                            if (file.isDirectory()) {
-                                file.deleteDir()
-                            } else {
-                                file.delete()
-                            }
-                        }
-                        println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory contents deleted")
-                    } else {
-                        println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory is empty")
-                    }
-                } else {
-                    println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory does not exist")
-                }
-                
-                runTasks(buildDir, 'clean')
-                
-                // Add a small delay to ensure file locks are fully released
+            runTasks(buildDir, 'clean')
+            // Add Windows-specific handling to ensure processes are fully terminated
+            String os = System.getProperty("os.name")
+            if (os != null && os.toLowerCase().startsWith("windows")) {
+                println(new Date().format("HH:mm:ss.SSS") + " - Windows detected, ensuring all Liberty processes are terminated")
+
+                // Force garbage collection to release any file handles held by Java
+                System.gc()
+
+                // Additional delay after GC
                 try {
-                    Thread.sleep(2000) // 2 second delay
+                    Thread.sleep(2000) // 2 seconds
                 } catch (InterruptedException e) {
                     // Ignore interruption
                 }
-                return true
-            })
-            
-            try {
-                future.get(timeout, TimeUnit.MILLISECONDS)
-            } catch (TimeoutException e) {
-                future.cancel(true)
-                throw new AssertionError("Task 'clean' timed out after ${timeout/1000} seconds", e)
             }
         } catch (Exception e) {
             throw new AssertionError ("Fail on task clean after deleting server.xml.", e)
