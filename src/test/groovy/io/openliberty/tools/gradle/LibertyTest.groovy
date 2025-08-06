@@ -163,10 +163,13 @@ class LibertyTest extends AbstractIntegrationTest{
         try{
             // Add a small delay to ensure file locks are fully released
             try {
-                Thread.sleep(2000) // 2 second delay
+                println(new Date().format("HH:mm:ss.SSS") + " - Waiting 1 minute to ensure file locks are fully released")
+                Thread.sleep(60000) // 1 minute delay
+                println(new Date().format("HH:mm:ss.SSS") + " - Done waiting")
             } catch (InterruptedException e) {
                 // Ignore interruption
             }
+            println(new Date().format("HH:mm:ss.SSS") + " - Starting clean")
             runTasks(buildDir, 'clean')
         } catch (Exception e) {
             e.printStackTrace()
@@ -192,10 +195,13 @@ class LibertyTest extends AbstractIntegrationTest{
         try{
             // Add a small delay to ensure file locks are fully released
             try {
-                Thread.sleep(2000) // 2 second delay
+                println(new Date().format("HH:mm:ss.SSS") + " - Waiting 1 minute to ensure file locks are fully released")
+                Thread.sleep(60000) // 1 minute delay
+                println(new Date().format("HH:mm:ss.SSS") + " - Done waiting")
             } catch (InterruptedException e) {
                 // Ignore interruption
             }
+            println(new Date().format("HH:mm:ss.SSS") + " - Starting clean")
             runTasks(buildDir, 'clean')
         } catch (Exception e) {
            throw new AssertionError ("Fail on task clean after server stop.", e)
