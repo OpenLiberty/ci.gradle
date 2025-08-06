@@ -172,7 +172,7 @@ class LibertyTest extends AbstractIntegrationTest{
             
             // Check if buildDir + "/build/wlp/lib" exists and is not empty, delete contents if needed
             println(new Date().format("HH:mm:ss.SSS") + " - Checking wlp/lib directory")
-            File wlpLibDir = new File(buildDir, "/build/wlp/lib")
+            File wlpLibDir = new File(buildDir, "/build/wlp")
             if (wlpLibDir.exists() && wlpLibDir.isDirectory()) {
                 println(new Date().format("HH:mm:ss.SSS") + " - Checking wlp/lib directory")
                 File[] files = wlpLibDir.listFiles()
@@ -228,7 +228,7 @@ class LibertyTest extends AbstractIntegrationTest{
             
             // Check if buildDir + "/build/wlp/lib" exists and is not empty, delete contents if needed
             println(new Date().format("HH:mm:ss.SSS") + " - Checking wlp/lib directory")
-            File wlpLibDir = new File(buildDir, "/build/wlp/lib")
+            File wlpLibDir = new File(buildDir.getAbsolutePath(), "/build/wlp")
             if (wlpLibDir.exists() && wlpLibDir.isDirectory()) {
                 println(new Date().format("HH:mm:ss.SSS") + " - Checking wlp/lib directory")
                 File[] files = wlpLibDir.listFiles()
@@ -292,7 +292,7 @@ class LibertyTest extends AbstractIntegrationTest{
             def timeout = 60000 // 60 seconds timeout
             def future = Executors.newSingleThreadExecutor().submit({
                 // Check if buildDir + "/build/wlp/lib" exists and is not empty, delete contents if needed
-                File wlpLibDir = new File(buildDir, "/build/wlp/lib")
+                File wlpLibDir = new File(buildDir.getAbsolutePath(), "/build/wlp")
                 if (wlpLibDir.exists() && wlpLibDir.isDirectory()) {
                     println(new Date().format("HH:mm:ss.SSS") + " - Checking wlp/lib directory")
                     File[] files = wlpLibDir.listFiles()
