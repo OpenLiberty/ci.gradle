@@ -169,6 +169,30 @@ class LibertyTest extends AbstractIntegrationTest{
             } catch (InterruptedException e) {
                 // Ignore interruption
             }
+            
+            // Check if buildDir + "/build/wlp/lib" exists and is not empty, delete contents if needed
+            println(new Date().format("HH:mm:ss.SSS") + " - Checking wlp/lib directory")
+            File wlpLibDir = new File(buildDir, "/build/wlp/lib")
+            if (wlpLibDir.exists() && wlpLibDir.isDirectory()) {
+                println(new Date().format("HH:mm:ss.SSS") + " - Checking wlp/lib directory")
+                File[] files = wlpLibDir.listFiles()
+                if (files != null && files.length > 0) {
+                    println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory is not empty, deleting contents")
+                    files.each { file ->
+                        if (file.isDirectory()) {
+                            file.deleteDir()
+                        } else {
+                            file.delete()
+                        }
+                    }
+                    println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory contents deleted")
+                } else {
+                    println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory is empty")
+                }
+            } else {
+                println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory does not exist")
+            }
+            
             println(new Date().format("HH:mm:ss.SSS") + " - Starting clean")
             runTasks(buildDir, 'clean')
         } catch (Exception e) {
@@ -201,6 +225,30 @@ class LibertyTest extends AbstractIntegrationTest{
             } catch (InterruptedException e) {
                 // Ignore interruption
             }
+            
+            // Check if buildDir + "/build/wlp/lib" exists and is not empty, delete contents if needed
+            println(new Date().format("HH:mm:ss.SSS") + " - Checking wlp/lib directory")
+            File wlpLibDir = new File(buildDir, "/build/wlp/lib")
+            if (wlpLibDir.exists() && wlpLibDir.isDirectory()) {
+                println(new Date().format("HH:mm:ss.SSS") + " - Checking wlp/lib directory")
+                File[] files = wlpLibDir.listFiles()
+                if (files != null && files.length > 0) {
+                    println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory is not empty, deleting contents")
+                    files.each { file ->
+                        if (file.isDirectory()) {
+                            file.deleteDir()
+                        } else {
+                            file.delete()
+                        }
+                    }
+                    println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory contents deleted")
+                } else {
+                    println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory is empty")
+                }
+            } else {
+                println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory does not exist")
+            }
+            
             println(new Date().format("HH:mm:ss.SSS") + " - Starting clean")
             runTasks(buildDir, 'clean')
         } catch (Exception e) {
@@ -243,6 +291,28 @@ class LibertyTest extends AbstractIntegrationTest{
             // Add timeout mechanism to prevent test from hanging
             def timeout = 60000 // 60 seconds timeout
             def future = Executors.newSingleThreadExecutor().submit({
+                // Check if buildDir + "/build/wlp/lib" exists and is not empty, delete contents if needed
+                File wlpLibDir = new File(buildDir, "/build/wlp/lib")
+                if (wlpLibDir.exists() && wlpLibDir.isDirectory()) {
+                    println(new Date().format("HH:mm:ss.SSS") + " - Checking wlp/lib directory")
+                    File[] files = wlpLibDir.listFiles()
+                    if (files != null && files.length > 0) {
+                        println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory is not empty, deleting contents")
+                        files.each { file ->
+                            if (file.isDirectory()) {
+                                file.deleteDir()
+                            } else {
+                                file.delete()
+                            }
+                        }
+                        println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory contents deleted")
+                    } else {
+                        println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory is empty")
+                    }
+                } else {
+                    println(new Date().format("HH:mm:ss.SSS") + " - wlp/lib directory does not exist")
+                }
+                
                 runTasks(buildDir, 'clean')
                 
                 // Add a small delay to ensure file locks are fully released
