@@ -22,7 +22,6 @@ import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runners.MethodSorters
 import io.openliberty.tools.ant.ServerTask
-import java.util.concurrent.*
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class LibertyTest extends AbstractIntegrationTest{
@@ -161,10 +160,9 @@ class LibertyTest extends AbstractIntegrationTest{
         // First test: Try to run clean while the server is running
         // This tests the original scenario
         try{
-            runTasks(buildDir, 'clean')
+           runTasks(buildDir, 'clean')
         } catch (Exception e) {
-            e.printStackTrace()
-            throw new AssertionError ("Fail on task clean while Liberty server is running.", e)
+           throw new AssertionError ("Fail on task clean while Liberty server is running.", e)
         }
 
         // Second test: Stop the server and then run clean
@@ -172,29 +170,6 @@ class LibertyTest extends AbstractIntegrationTest{
         try{
            // Stop the server before cleaning to ensure all resources are released
            runTasks(buildDir, 'libertyStop')
-           
-           // Add Windows-specific handling to ensure processes are fully terminated
-           String os = System.getProperty("os.name")
-           if (os != null && os.toLowerCase().startsWith("windows")) {
-               println(new Date().format("HH:mm:ss.SSS") + " - Windows detected, ensuring all Liberty processes are terminated")
-               
-               // Give some time for processes to shut down
-               try {
-                   Thread.sleep(5000) // 5 seconds
-               } catch (InterruptedException e) {
-                   // Ignore interruption
-               }
-               
-               // Force garbage collection to release any file handles held by Java
-               System.gc()
-               
-               // Additional delay after GC
-               try {
-                   Thread.sleep(2000) // 2 seconds
-               } catch (InterruptedException e) {
-                   // Ignore interruption
-               }
-           }
         } catch (Exception e) {
            throw new AssertionError ("Fail on task libertyStop before clean.", e)
         }
@@ -207,7 +182,7 @@ class LibertyTest extends AbstractIntegrationTest{
         }
 
         try{
-            runTasks(buildDir, 'clean')
+           runTasks(buildDir, 'clean')
         } catch (Exception e) {
            throw new AssertionError ("Fail on task clean after server stop.", e)
         }
@@ -246,21 +221,6 @@ class LibertyTest extends AbstractIntegrationTest{
 
         try{
             runTasks(buildDir, 'clean')
-            // Add Windows-specific handling to ensure processes are fully terminated
-            String os = System.getProperty("os.name")
-            if (os != null && os.toLowerCase().startsWith("windows")) {
-                println(new Date().format("HH:mm:ss.SSS") + " - Windows detected, ensuring all Liberty processes are terminated")
-
-                // Force garbage collection to release any file handles held by Java
-                System.gc()
-
-                // Additional delay after GC
-                try {
-                    Thread.sleep(2000) // 2 seconds
-                } catch (InterruptedException e) {
-                    // Ignore interruption
-                }
-            }
         } catch (Exception e) {
             throw new AssertionError ("Fail on task clean after deleting server.xml.", e)
         }
