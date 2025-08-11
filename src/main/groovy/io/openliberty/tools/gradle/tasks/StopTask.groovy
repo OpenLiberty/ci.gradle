@@ -41,16 +41,12 @@ class StopTask extends AbstractServerTask {
                 File serverXmlFile = new File(serverDir,"server.xml")
                 boolean defaultServerTemplateUsed = copyDefaultServerTemplate(getInstallDir(project),serverDir)
                 if (serverXmlFile.exists()) {
-                    println("SAJEER:::: Stopping server - found server.xml file")
                     ServerTask serverTaskStop = createServerTask(project, "stop");
                     serverTaskStop.setUseEmbeddedServer(server.embedded)
                     serverTaskStop.execute()
-                    println("SAJEER:::: Stopping server - executed stop task")
 
-                    println("SAJEER:::: Verifying server is stopped - found server.xml file")
                     // Verify server is fully stopped and resources are released
                     if (!ServerUtils.verifyServerFullyStopped(serverDir, logger)) {
-                        println("SAJEER:::: Force stopping server")
                         // If normal stop verification fails, try forced cleanup
                         ServerUtils.forceCleanupServerResources(serverDir, logger)
                     }
