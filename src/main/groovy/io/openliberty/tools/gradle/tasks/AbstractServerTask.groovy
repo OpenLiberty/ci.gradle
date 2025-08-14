@@ -32,6 +32,7 @@ import org.apache.commons.io.filefilter.FileFilterUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.tasks.Internal
@@ -1098,7 +1099,11 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
                 dep.setTransitive(false) //Only want main artifacts, one for Maven and one or more for Gradle/Ivy dependencies
             }
 
-            Set<File> depArtifacts = project.configurations.libertyApp.files(dep) //Resolve the artifacts
+            // In Gradle 9.0.0, the files(dep) method on configurations is no longer supported for dependency objects.
+            // Using detachedConfiguration(dep) creates an isolated configuration just for this dependency,
+            // and resolve() returns the set of files that make up the artifacts.
+            Configuration detachedConfig = project.configurations.detachedConfiguration(dep)
+            Set<File> depArtifacts = detachedConfig.resolve() //Resolve the artifacts
             for (File depArtifact : depArtifacts) {
                 File appFile = depArtifact
                 if (dep instanceof ModuleDependency && server.stripVersion && depArtifact.getName().contains(dep.getVersion())) {
