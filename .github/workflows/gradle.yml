@@ -27,7 +27,7 @@ jobs:
     #            RUNTIME: ol
     name: ${{ matrix.RUNTIME }} ${{ matrix.RUNTIME_VERSION }}, Java ${{ matrix.java }}, Linux
     env:
-      TEST_INCLUDE: '**/AbstractIntegrationTest*,**/LibertyTest*,**/BaseDevTest*,**/DevTest*,**/DevRecompileTest*,**/PollingDevTest*,**/InstallFeature_acceptLicense*,**/InstallFeature_localEsa_Test*,**/InstallFeature_multiple*,**/InstallFeature_single*,**/DevSkipInstallFeatureTest*,**/DevSkipInstallFeatureConfigTest*,**/KernelInstallFeatureTest*,**/KernelInstallVersionlessFeatureTest*,**/WLPKernelInstallFeatureTest*,**/InstallUsrFeature_toExt*'
+      TEST_INCLUDE: ${{ '**/AbstractIntegrationTest*,**/LibertyTest*,**/BaseDevTest*,**/DevTest*,**/DevRecompileTest*,**/PollingDevTest*,**/InstallFeature_acceptLicense*,**/InstallFeature_localEsa_Test*,**/InstallFeature_multiple*,**/InstallFeature_single*,**/DevSkipInstallFeatureTest*,**/DevSkipInstallFeatureConfigTest*,**/KernelInstallFeatureTest*,**/KernelInstallVersionlessFeatureTest*,**/WLPKernelInstallFeatureTest*,**/InstallUsrFeature_toExt*' }}
     steps:
       # Checkout repos
       - name: Checkout ci.gradle
@@ -115,7 +115,7 @@ jobs:
     #            RUNTIME: wlp
     name: ${{ matrix.RUNTIME }} ${{ matrix.RUNTIME_VERSION }}, Java ${{ matrix.java }}, Windows
     env:
-      TEST_INCLUDE: '**/AbstractIntegrationTest*,**/BaseDevTest*,**/DevTest*,**/DevRecompileTest*,**/InstallFeature_acceptLicense*,**/InstallFeature_localEsa_Test*,**/InstallFeature_multiple*,**/InstallFeature_single*,**/DevSkipInstallFeatureTest*,**/DevSkipInstallFeatureConfigTest*,**/KernelInstallFeatureTest*,**/KernelInstallVersionlessFeatureTest*,**/WLPKernelInstallFeatureTest*,**/InstallUsrFeature_toExt*'
+      TEST_INCLUDE: ${{ '**/AbstractIntegrationTest*,**/BaseDevTest*,**/DevTest*,**/DevRecompileTest*,**/InstallFeature_acceptLicense*,**/InstallFeature_localEsa_Test*,**/InstallFeature_multiple*,**/InstallFeature_single*,**/DevSkipInstallFeatureTest*,**/DevSkipInstallFeatureConfigTest*,**/KernelInstallFeatureTest*,**/KernelInstallVersionlessFeatureTest*,**/WLPKernelInstallFeatureTest*,**/InstallUsrFeature_toExt*' }}
 #      TEST_EXCLUDE: ${{ ((matrix.java == '8') && '**/TestCreateWithConfigDir*,**/Polling*,**/LibertyTest*,**/GenerateFeaturesTest*,**/TestSpringBootApplication30*,**/TestCompileJSPSource17*,**/DevContainerTest*') || '**/Polling*,**/LibertyTest*,**/GenerateFeaturesTest*,**/TestSpringBootApplication30*,**/TestCompileJSPSource17*,**/DevContainerTest*' }}
     steps:
       # Checkout repos
