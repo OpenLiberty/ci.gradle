@@ -36,6 +36,15 @@ configurations {
     provided
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+}
+
+// Ensure test tasks use UTF-8 encoding via JVM args, not via options.encoding
+tasks.withType(Test).configureEach {
+    jvmArgs '-Dfile.encoding=UTF-8'
+}
+
 compileJava {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
@@ -54,6 +63,21 @@ compileGroovy {
 compileTestGroovy {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+// In-order to support both Java 17 and Java 21, we configure the toolchain
+// Reference: https://docs.gradle.org/current/userguide/toolchains.html
+java {
+    toolchain {
+        // Default to Java 17 for backward compatibility
+        languageVersion = JavaLanguageVersion.of(17)
+        
+        // Allow Java 21 as a compatible alternative
+        // This enables the project to work with either Java 17 or Java 21
+        if (System.getProperty('java.version').startsWith('21')) {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
 }
 
 def libertyAntVersion = "1.9.16"

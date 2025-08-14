@@ -44,7 +44,7 @@ class StopTask extends AbstractServerTask {
                     ServerTask serverTaskStop = createServerTask(project, "stop");
                     serverTaskStop.setUseEmbeddedServer(server.embedded)
                     serverTaskStop.execute()
-                    
+
                     // Verify server is fully stopped and resources are released
                     if (!ServerUtils.verifyServerFullyStopped(serverDir, logger)) {
                         // If normal stop verification fails, try forced cleanup
