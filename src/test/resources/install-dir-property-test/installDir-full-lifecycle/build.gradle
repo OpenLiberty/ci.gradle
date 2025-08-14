@@ -19,7 +19,7 @@ liberty {
     installDir = file("${project(':prebuild').getLayout().getBuildDirectory().getAsFile().get()}/wlp")
 
     server{
-        name = 'test'
+        name = 'InstallLiberty_full_lifecycle_Test'
         timeout = '60'
         features {
             name= ['mongodb-2.0']
