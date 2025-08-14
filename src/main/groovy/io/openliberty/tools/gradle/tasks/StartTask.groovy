@@ -78,7 +78,7 @@ class StartTask extends AbstractServerTask {
         }
     }
 
-    private Set<String> getAppNamesFromServerXml() {
+    protected Set<String> getAppNamesFromServerXml() {
         Set<String> appNames
 
         File serverConfigFile = new File(getServerDir(project), 'server.xml')
