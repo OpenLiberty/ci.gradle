@@ -79,7 +79,7 @@ jobs:
       - name: Run tests with Gradle on Ubuntu
         run:
           # ./gradlew clean install check -P"test.exclude"="**/TestSpringBootApplication30*,**/TestCompileJSPSource17*,**/DevContainerTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --warning-mode=all
-          ./gradlew clean install check -P"test.include"="'**/AbstractIntegrationTest*,**/LibertyTest*,**/BaseDevTest*,**/DevTest*,**/DevRecompileTest*,**/PollingDevTest*,**/InstallFeature_acceptLicense*,**/InstallFeature_localEsa_Test*,**/InstallFeature_multiple*,**/InstallFeature_single*,**/DevSkipInstallFeatureTest*,**/DevSkipInstallFeatureConfigTest*,**/KernelInstallFeatureTest*,**/KernelInstallVersionlessFeatureTest*,**/WLPKernelInstallFeatureTest*,**/InstallUsrFeature_toExt*'" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --warning-mode=all
+          ./gradlew clean install check -P"test.include"="**/AbstractIntegrationTest*,**/LibertyTest*,**/BaseDevTest*,**/DevTest*,**/DevRecompileTest*,**/PollingDevTest*,**/InstallFeature_acceptLicense*,**/InstallFeature_localEsa_Test*,**/InstallFeature_multiple*,**/InstallFeature_single*,**/DevSkipInstallFeatureTest*,**/DevSkipInstallFeatureConfigTest*,**/KernelInstallFeatureTest*,**/KernelInstallVersionlessFeatureTest*,**/WLPKernelInstallFeatureTest*,**/InstallUsrFeature_toExt*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --warning-mode=all
       # Copy build reports and upload artifact if build failed
       - name: Copy build/report/tests/test for upload
         if: ${{ failure() }}
@@ -112,7 +112,7 @@ jobs:
     #          - java: 11
     #            RUNTIME: wlp
     name: ${{ matrix.RUNTIME }} ${{ matrix.RUNTIME_VERSION }}, Java ${{ matrix.java }}, Windows
-    env:
+#    env:
 #      TEST_EXCLUDE: ${{ ((matrix.java == '8') && '**/TestCreateWithConfigDir*,**/Polling*,**/LibertyTest*,**/GenerateFeaturesTest*,**/TestSpringBootApplication30*,**/TestCompileJSPSource17*,**/DevContainerTest*') || '**/Polling*,**/LibertyTest*,**/GenerateFeaturesTest*,**/TestSpringBootApplication30*,**/TestCompileJSPSource17*,**/DevContainerTest*' }}
     steps:
       # Checkout repos
