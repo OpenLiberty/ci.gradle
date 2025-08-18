@@ -374,7 +374,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         writeServerPropertiesToXml(project)
     }
 
-    private void loadLibertyConfigFromProperties() {
+    protected void loadLibertyConfigFromProperties() {
         Set<Entry<Object, Object>> entries = project.getProperties().entrySet()
         for (Entry<Object, Object> entry : entries) {
             String key = (String) entry.getKey()
@@ -426,7 +426,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         }
     }
 
-    private void addProjectProperty(String propName, String propValue, PropertyType propType) {
+    protected void addProjectProperty(String propName, String propValue, PropertyType propType) {
         if (propValue != null) {
             logger.debug("Processing Liberty configuration from property with type "+ propType +" and name "+ propName +" and value "+ propValue)
         } else {
@@ -631,8 +631,9 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
 
         return new Tuple(appTasks, appFiles)
     }
-    
-    private boolean isSupportedType(){
+
+    @Internal
+    protected boolean isSupportedType(){
       switch (getPackagingType()) {
         case "ear":
         case "war":
@@ -762,7 +763,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         logger.info ("Adding Liberty plugin config info to ${project.getLayout().getBuildDirectory().getAsFile().get()}/liberty-plugin-config.xml.")
     }
 
-    private void writeBootstrapProperties(File file, Properties properties, Map<String, String> projectProperties) throws IOException {
+    protected void writeBootstrapProperties(File file, Properties properties, Map<String, String> projectProperties) throws IOException {
         Map<String,String> convertedProps = convertPropertiesToMap(properties)
         if (! projectProperties.isEmpty()) {
             if (properties == null) {
@@ -812,7 +813,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         return uniqueValues
     }
 
-    private void writeJvmOptions(File file, List<String> options, List<String> projectProperties) throws IOException {
+    protected void writeJvmOptions(File file, List<String> options, List<String> projectProperties) throws IOException {
         List<String> uniqueOptions = getUniqueValues(options)
         List<String> uniqueProps = getUniqueValues(projectProperties)
 
@@ -845,7 +846,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         }
     }
 
-    private String handleServerEnvFileAndProperties(String serverEnvPath, String serverDirectory) {
+    protected String handleServerEnvFileAndProperties(String serverEnvPath, String serverDirectory) {
         File envFile = new File(serverDirectory, "server.env")
         Properties configuredProps = combineServerEnvProperties(server.env, envProjectProps);
 
@@ -857,7 +858,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         }
     }
 
-    private String setServerEnvWithAppendServerEnvHelper(File envFile, String serverEnvPath, Properties configuredProps) {
+    protected String setServerEnvWithAppendServerEnvHelper(File envFile, String serverEnvPath, Properties configuredProps) {
         Properties serverEnvProps = convertServerEnvToProperties(envFile);
         Properties mergedProperties = new Properties();
 
@@ -896,7 +897,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         return serverEnvPath;
     }
 
-    private String setServerEnvPathHelperForAppendServerEnv(File envFile, Properties configuredProps, String serverEnvPath) {
+    protected String setServerEnvPathHelperForAppendServerEnv(File envFile, Properties configuredProps, String serverEnvPath) {
         boolean configDirEnvMerged = serverEnvPath != null;
         boolean serverEnvFileMerged = server.serverEnvFile != null && server.serverEnvFile.exists()
         boolean inlineEnvPropsMerged = !configuredProps.isEmpty()
@@ -926,7 +927,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         return updatedServerEnvPath.toString();
     }
 
-    private String setServerEnvHelper(File envFile, String serverEnvPath, Properties configuredProps) {
+    protected String setServerEnvHelper(File envFile, String serverEnvPath, Properties configuredProps) {
         if ((server.env != null && !server.env.isEmpty()) || !envProjectProps.isEmpty()) {
             Properties envPropsToWrite = configuredProps
             if (serverEnvPath == null && server.serverEnvFile == null) {
@@ -952,7 +953,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      * envProps, to which any of a list of special properties found in envFile have been added.  We give precedence
      * to properties already in envProps.
      */
-    private Properties mergeSpecialPropsFromInstallServerEnvIfAbsent(File envFile, Properties envProps) throws IOException {
+    protected Properties mergeSpecialPropsFromInstallServerEnvIfAbsent(File envFile, Properties envProps) throws IOException {
 
         // Make a copy to avoid side effects 
         Properties mergedProps = new Properties()
@@ -970,7 +971,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
     }
 
 
-    private Properties convertServerEnvToProperties(File serverEnv) {
+    protected Properties convertServerEnvToProperties(File serverEnv) {
         Properties serverEnvProps = new Properties();
 
         if ((serverEnv == null) || !serverEnv.exists()) {
@@ -996,7 +997,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         return serverEnvProps;
     }
 
-    private Properties combineServerEnvProperties(Properties properties, Properties projectProperties) {
+    protected Properties combineServerEnvProperties(Properties properties, Properties projectProperties) {
         Properties combinedEnvProperties = new Properties()
         if (! projectProperties.isEmpty()) {
             if (properties.isEmpty()) {
@@ -1013,7 +1014,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         return combinedEnvProperties;
     }
     
-    private void writeServerEnvProperties(File file, Properties combinedEnvProperties) throws IOException {
+    protected void writeServerEnvProperties(File file, Properties combinedEnvProperties) throws IOException {
         makeParentDirectory(file)
         PrintWriter writer = null
         try {
@@ -1032,7 +1033,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
     }
 
 
-    private void writeConfigDropinsServerVariables(File file, Properties varProps, Properties varProjectProps, boolean isDefaultVar) throws IOException, TransformerException, ParserConfigurationException {
+    protected void writeConfigDropinsServerVariables(File file, Properties varProps, Properties varProjectProps, boolean isDefaultVar) throws IOException, TransformerException, ParserConfigurationException {
 
         ServerConfigXmlDocument configDocument = ServerConfigXmlDocument.newInstance()
 
@@ -1052,7 +1053,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
 
     }
 
-    private void makeParentDirectory(File file) {
+    protected void makeParentDirectory(File file) {
         File parentDir = file.getParentFile()
         if (parentDir != null) {
             parentDir.mkdirs()
