@@ -79,7 +79,7 @@ jobs:
       - name: Run tests with Gradle on Ubuntu
         run:
           # ./gradlew clean install check -P"test.exclude"="**/TestSpringBootApplication30*,**/TestCompileJSPSource17*,**/DevContainerTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --warning-mode=all
-          ./gradlew clean install check -P"test.include"="**/AbstractIntegrationTest*,**/LibertyTest*,**/BaseDevTest*,**/DevTest*,**/DevRecompileTest*,**/PollingDevTest*,**/*Install*Feature*,**/InstallLiberty*,**/InstallDir*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --warning-mode=all
+          ./gradlew clean install check -P"test.include"="**/AbstractIntegrationTest*,**/LibertyTest*,**/BaseDevTest*,**/DevTest*,**/DevRecompileTest*,**/PollingDevTest*,**/*Install*Feature*,**/InstallLiberty*,**/InstallDir*,**/LibertyPackage_*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --warning-mode=all
       # Copy build reports and upload artifact if build failed
       - name: Copy build/report/tests/test for upload
         if: ${{ failure() }}
