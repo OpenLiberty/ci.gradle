@@ -88,7 +88,7 @@ public class DevTaskHelper {
                 Dependency[] deployDeps = element.getAllDependencies().toArray()
                 for (Dependency dependency1: deployDeps) {
                     if (dependency1 instanceof ProjectDependency) {
-                        Project dependencyProject = dependency1.getDependencyProject()
+                        Project dependencyProject = project.getRootProject().findProject(((ProjectDependency) dependency1).getPath())
                         allDependentProjects.add(dependencyProject)
                         allDependentProjects.addAll(getAllUpstreamProjects(dependencyProject))
                     }
@@ -128,7 +128,7 @@ public class DevTaskHelper {
             File dependencyFile = entry.getKey();
 
             if (dependency instanceof ProjectDependency) {
-                Project dependencyProject = dependency.getDependencyProject()
+                Project dependencyProject = project.getRootProject().findProject(((ProjectDependency) dependency).getPath())
                 String projectType = FilenameUtils.getExtension(dependencyFile.toString())
                 switch (projectType) {
                     case "war":
