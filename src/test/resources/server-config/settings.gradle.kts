@@ -3,7 +3,7 @@ pluginManagement {
         mavenCentral()
         mavenLocal()
         maven {
-            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+            url = uri("https://central.sonatype.com/repository/maven-snapshots/")
         }
         maven {
             url = uri(file("$rootDir/../../plugin-test-repository/"))
