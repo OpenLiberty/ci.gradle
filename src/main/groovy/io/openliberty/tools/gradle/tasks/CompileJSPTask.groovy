@@ -94,9 +94,14 @@ class CompileJSPTask extends AbstractFeatureTask {
         //Set JSP Feature Version
         setJspVersion(compileJsp, installedFeatures);
 
-        //Removing jsp features at it is already set at this point 
-        installedFeatures.remove("jsp-2.3");
-        installedFeatures.remove("jsp-2.2");
+        //Removing jsp and pages features as the jspVersion is already set at this point 
+        Iterator<String> it = installedFeatures.iterator();
+        while (it.hasNext()) {
+            String nextItem = it.next();
+            if (nextItem.startsWith("jsp-") || nextItem.startsWith("pages-")) {
+                it.remove();
+            }
+        }
         
         if(installedFeatures != null && !installedFeatures.isEmpty()) {
             compileJsp.setFeatures(installedFeatures.toString().replace("[", "").replace("]", ""));
@@ -128,14 +133,13 @@ class CompileJSPTask extends AbstractFeatureTask {
         //If no conditions are met, defaults to 2.3 from the ant task
         if (project.liberty.jsp.jspVersion != null) {
             compile.setJspVersion(project.liberty.jsp.jspVersion);
-        }
-        else {
+        } else {
             Iterator it = installedFeatures.iterator();
             String currentFeature;
             while (it.hasNext()) {
                 currentFeature = (String) it.next();
-                if(currentFeature.startsWith("jsp-")) {
-                    String version = currentFeature.replace("jsp-", "");
+                if(currentFeature.startsWith("jsp-") || currentFeature.startsWith("pages-")) {
+                    String version = currentFeature.substring(currentFeature.indexOf("-")+1);
                     compile.setJspVersion(version);
                     break;
                 }

@@ -58,8 +58,8 @@ buildscript {
     repositories {
         mavenCentral()
         maven {
-            name = 'Sonatype Nexus Snapshots'
-            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+            name = 'Central Portal Snapshots'
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
         }
     }
     dependencies {
