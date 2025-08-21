@@ -94,7 +94,7 @@ public class TestCompileJSP extends AbstractIntegrationTest{
         if (nodes.item(0) instanceof Element) {
             Element child = (Element) nodes.item(0)
             String nodeValue = child.getAttribute("javaSourceLevel")
-            Assert.assertTrue("Unexpected javaSourceLevel ==>"+nodeValue, nodeValue.equals("8"))
+            Assert.assertTrue("Unexpected javaSourceLevel ==>"+nodeValue, nodeValue.equals("17"))
         }
     }
 
