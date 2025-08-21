@@ -1,7 +1,12 @@
-
 apply plugin: 'war'
 
-jar.enabled = false
+// Disable JAR task using the Gradle 9 compatible approach
+tasks.withType(Jar).configureEach {
+    if (it.name == 'jar') {
+        it.enabled = false
+    }
+}
+
 description = 'WAR Module'
 dependencies {
     testImplementation group: 'junit', name: 'junit', version:'4.13.1'
@@ -12,4 +17,3 @@ dependencies {
 war {
     archiveFileName = getArchiveBaseName().get() + '.' + getArchiveExtension().get()
 }
-

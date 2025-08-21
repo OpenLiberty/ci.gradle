@@ -437,6 +437,17 @@ class DeployTask extends AbstractServerTask {
 
         File[] filesAsDeps = task.getProject().configurations.deploy.getFiles().toArray()
         Dependency[] deployDeps = task.getProject().configurations.deploy.getAllDependencies().toArray()
+        
+        println("GRAD9::::: Deploy Files Count = " + filesAsDeps.size())
+        println("GRAD9::::: Deploy Dependencies Count = " + deployDeps.size())
+        
+        for(int i = 0; i < filesAsDeps.size(); i++) {
+            println("GRAD9::::: File " + i + " = " + filesAsDeps[i].toString())
+        }
+        
+        for(int i = 0; i < deployDeps.size(); i++) {
+            println("GRAD9::::: Dependency " + i + " = " + deployDeps[i].toString())
+        }
 
         if(filesAsDeps.size() == deployDeps.size()){
             for(int i = 0; i<filesAsDeps.size(); i++) {
@@ -448,10 +459,17 @@ class DeployTask extends AbstractServerTask {
         for (Map.Entry<File, Dependency> entry : completeDeployDeps){
             Dependency dependency = entry.getValue();
             File dependencyFile = entry.getKey();
+            
+            println("GRAD9::::: Processing dependency: " + dependency.toString())
+            println("GRAD9::::: Dependency file: " + dependencyFile.toString())
 
             if (dependency instanceof ProjectDependency) {
+                println("GRAD9::::: Dependency Project = " + ((ProjectDependency) dependency).getProject().getName())
+                println("GRAD9::::: Dependency File Path = " + dependencyFile.getAbsolutePath())
+                println("GRAD9::::: Dependency File Name = " + dependencyFile.getName())
                 Project dependencyProject = project.getRootProject().findProject(((ProjectDependency) dependency).getPath())
                 String projectType = FilenameUtils.getExtension(dependencyFile.toString())
+                println("GRAD9::::: Project Type = " + projectType)
                 switch (projectType) {
                     case "jar":
                     case "ejb":
@@ -725,4 +743,3 @@ class DeployTask extends AbstractServerTask {
         }
     }
 }
-
