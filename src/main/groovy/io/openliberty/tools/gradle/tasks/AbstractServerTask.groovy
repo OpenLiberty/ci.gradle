@@ -32,6 +32,7 @@ import org.apache.commons.io.filefilter.FileFilterUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.tasks.Internal
@@ -1095,15 +1096,30 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
 
         //This loops thorugh all the Dependency objects that get created by the configuration
         for (Dependency dep : project.configurations.libertyApp.getDependencies()) {
+            Dependency depCopy = dep;
+            
+            // In Gradle 9.0.0, we cannot modify dependencies after a configuration has been resolved
+            // Create a detached configuration with a copy of the dependency
+            Configuration detachedConfig;
             if (dep instanceof ModuleDependency) { //Check that dep isn't a File dependency
-                dep.setTransitive(false) //Only want main artifacts, one for Maven and one or more for Gradle/Ivy dependencies
+                // Create a copy of the dependency that we can modify
+                ModuleDependency moduleDep = (ModuleDependency) dep;
+                ModuleDependency depClone = moduleDep.copy();
+                depClone.setTransitive(false); //Only want main artifacts, one for Maven and one or more for Gradle/Ivy dependencies
+                detachedConfig = project.configurations.detachedConfiguration(depClone);
+                depCopy = depClone;
+            } else {
+                detachedConfig = project.configurations.detachedConfiguration(dep);
             }
 
-            Set<File> depArtifacts = project.configurations.libertyApp.files(dep) //Resolve the artifacts
+            // In Gradle 9.0.0, the files(dep) method on configurations is no longer supported for dependency objects.
+            // Using detachedConfiguration(dep) creates an isolated configuration just for this dependency,
+            // and resolve() returns the set of files that make up the artifacts.
+            Set<File> depArtifacts = detachedConfig.resolve() //Resolve the artifacts
             for (File depArtifact : depArtifacts) {
                 File appFile = depArtifact
-                if (dep instanceof ModuleDependency && server.stripVersion && depArtifact.getName().contains(dep.getVersion())) {
-                    String noVersionName = depArtifact.getName().minus("-" + dep.getVersion()) //Assuming default Gradle naming scheme
+                if (depCopy instanceof ModuleDependency && server.stripVersion && depArtifact.getName().contains(((ModuleDependency)depCopy).getVersion())) {
+                    String noVersionName = depArtifact.getName().minus("-" + ((ModuleDependency)depCopy).getVersion()) //Assuming default Gradle naming scheme
                     File noVersionDependencyFile = new File(project.getLayout().getBuildDirectory().asFile.get(), 'libs/' + noVersionName) //Copying the file to build/libs with no version
                     FileUtils.copyFile(depArtifact, noVersionDependencyFile)
                     appFile = noVersionDependencyFile
