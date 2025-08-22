@@ -194,7 +194,7 @@ publishing {
                 name = 'liberty-gradle-plugin'
                 packaging = 'jar'
                 description = 'Liberty Gradle Plug-in.'
-                url = 'https://wasdev.github.io'
+                url = 'https://github.com/OpenLiberty/ci.gradle'
                 licenses {
                     license {
                         name = 'The Apache Software License, Version 2.0'
@@ -204,9 +204,9 @@ publishing {
 
                 developers {
                     developer {
-                        id = 'jgawor'
-                        name = 'Jarek Gawor'
-                        email = 'jgawor@gmail.com'
+                        id = 'OpenLiberty'
+                        name = 'Cheryl King'
+                        email = 'developers@openliberty.io'
                     }
                 }
                 scm {
