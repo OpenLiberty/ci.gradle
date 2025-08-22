@@ -362,7 +362,7 @@ class DeployTask extends AbstractServerTask {
         looseWar.addManifestFile(manifestFile)
     }
 
-    private boolean hasJavaSourceFiles(FileCollection classpath, File outputDir){
+    protected boolean hasJavaSourceFiles(FileCollection classpath, File outputDir){
         for(File f: classpath) {
             if(f.getAbsolutePath().equals(outputDir.getCanonicalPath())) {
                 return true;
