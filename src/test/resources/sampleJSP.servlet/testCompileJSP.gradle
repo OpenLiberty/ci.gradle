@@ -21,6 +21,8 @@ buildscript {
 apply plugin: 'war'
 apply plugin: 'liberty'
 
+compileJava.options.release = 8
+
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
