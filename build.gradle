@@ -11,13 +11,13 @@ base {
 }
 repositories {
     mavenLocal()
-    mavenCentral()
     maven {
         url = 'https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/maven/repository/'
     }
     maven {
         url = 'https://central.sonatype.com/repository/maven-snapshots/'
     }
+    mavenCentral()
 }
 
 buildscript {
