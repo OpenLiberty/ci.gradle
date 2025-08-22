@@ -362,7 +362,7 @@ class DeployTask extends AbstractServerTask {
         looseWar.addManifestFile(manifestFile)
     }
 
-    private boolean hasJavaSourceFiles(FileCollection classpath, File outputDir){
+    protected boolean hasJavaSourceFiles(FileCollection classpath, File outputDir){
         for(File f: classpath) {
             if(f.getAbsolutePath().equals(outputDir.getCanonicalPath())) {
                 return true;
@@ -578,7 +578,7 @@ class DeployTask extends AbstractServerTask {
         }
     }
 
-    private void addLibrary(Element parent, LooseApplication looseApp, String dir, File lib) throws GradleException {
+    protected void addLibrary(Element parent, LooseApplication looseApp, String dir, File lib) throws GradleException {
         if(server.deploy.copyLibsDirectory != null) {
             if(!server.deploy.copyLibsDirectory.exists()) {
                 server.deploy.copyLibsDirectory.mkdirs()
