@@ -15,6 +15,17 @@
  */
 package io.openliberty.tools.gradle
 
+import java.io.BufferedReader
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.FileReader
+import java.io.FileWriter
+import java.io.IOException
+import java.io.InputStreamReader
+import java.io.OutputStreamWriter
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
 import org.apache.commons.io.FileUtils
 import org.w3c.dom.Document
 
@@ -24,8 +35,6 @@ import javax.xml.xpath.XPath
 import javax.xml.xpath.XPathConstants
 import javax.xml.xpath.XPathFactory
 import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
-import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 
@@ -154,6 +163,15 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
         return processOutput;
     }
 
+    /**
+     * Original implementation of verifyLogMessageExists.
+     * Maintained for backward compatibility with existing tests.
+     * 
+     * @param message The message to look for in the log
+     * @param timeout The maximum time to wait for the message in milliseconds
+     * @param log The log file to search
+     * @return true if the message was found, false otherwise
+     */
     protected static boolean verifyLogMessageExists(String message, int timeout, File log)
             throws InterruptedException, FileNotFoundException, IOException {
         int waited = 0;
@@ -168,21 +186,14 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
         return false;
     }
 
-    protected static String findLogMessage(String message, int timeout, File log)
-        throws InterruptedException, FileNotFoundException, IOException {
-        int waited = 0;
-        int sleep = 10;
-        while (waited <= timeout) {
-            String line = readFile(message, log);
-            if (line != null) {
-                return line;
-            }
-            Thread.sleep(sleep);
-            waited += sleep;
-        }
-        return null;
-    }
-
+    /**
+     * Original implementation of readFile that looks for exact string matches.
+     * This method is maintained for backward compatibility with existing tests.
+     * 
+     * @param str The string to search for
+     * @param file The file to search in
+     * @return The line containing the string, or null if not found
+     */
     protected static String readFile(String str, File file) throws FileNotFoundException, IOException {
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line = br.readLine();
@@ -197,41 +208,6 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
             br.close();
         }
         return null;
-    }
-
-    /**
-     * Given an configuration XML file return the features in the featureManager
-     * element if any
-     *
-     * @param file configuration XML file
-     * @return set of features, empty list if no features are found
-     */
-    protected static Set<String> readFeatures(File configurationFile) throws Exception {
-        Set<String> features = new HashSet<String>();
-
-        // return empty list if file does not exist or is not an XML file
-        if (!configurationFile.exists() || !configurationFile.getName().endsWith(".xml")) {
-            return features;
-        }
-
-        // read configuration xml file
-        DocumentBuilderFactory inputBuilderFactory = DocumentBuilderFactory.newInstance();
-        inputBuilderFactory.setIgnoringComments(true);
-        inputBuilderFactory.setCoalescing(true);
-        inputBuilderFactory.setIgnoringElementContentWhitespace(true);
-        inputBuilderFactory.setValidating(false);
-        inputBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false); 
-        inputBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);    
-        DocumentBuilder documentBuilder = inputBuilderFactory.newDocumentBuilder();
-        Document doc = documentBuilder.parse(configurationFile);
-
-        XPath xPath = XPathFactory.newInstance().newXPath();
-        String expression = "/server/featureManager/feature";
-        org.w3c.dom.NodeList nodes = (org.w3c.dom.NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
-        for (int i = 0; i < nodes.getLength(); i++) {
-            features.add(nodes.item(i).getTextContent());
-        }
-        return features;
     }
 
     protected static void runCompileAndGenerateFeatures() throws IOException, InterruptedException, FileNotFoundException {
@@ -267,5 +243,40 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
         }
         result.append(String.format("==Process Output End %d lines==\n", lines.length));
         return result.toString();
+    }
+
+    /**
+     * Given an configuration XML file return the features in the featureManager
+     * element if any
+     *
+     * @param file configuration XML file
+     * @return set of features, empty list if no features are found
+     */
+    protected static Set<String> readFeatures(File configurationFile) throws Exception {
+        Set<String> features = new HashSet<String>();
+
+        // return empty list if file does not exist or is not an XML file
+        if (!configurationFile.exists() || !configurationFile.getName().endsWith(".xml")) {
+            return features;
+        }
+
+        // read configuration xml file
+        DocumentBuilderFactory inputBuilderFactory = DocumentBuilderFactory.newInstance();
+        inputBuilderFactory.setIgnoringComments(true);
+        inputBuilderFactory.setCoalescing(true);
+        inputBuilderFactory.setIgnoringElementContentWhitespace(true);
+        inputBuilderFactory.setValidating(false);
+        inputBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false); 
+        inputBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);    
+        DocumentBuilder documentBuilder = inputBuilderFactory.newDocumentBuilder();
+        Document doc = documentBuilder.parse(configurationFile);
+
+        XPath xPath = XPathFactory.newInstance().newXPath();
+        String expression = "/server/featureManager/feature";
+        org.w3c.dom.NodeList nodes = (org.w3c.dom.NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
+        for (int i = 0; i < nodes.getLength(); i++) {
+            features.add(nodes.item(i).getTextContent());
+        }
+        return features;
     }
 }
