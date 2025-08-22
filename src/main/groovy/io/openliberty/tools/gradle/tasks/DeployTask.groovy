@@ -122,7 +122,7 @@ class DeployTask extends AbstractServerTask {
         }
     }
 
-    private void installProjectArchive(Task task, String appsDir) {
+    protected void installProjectArchive(Task task, String appsDir) {
         String archiveBaseName
         String fileName
         if("springboot".equals(getPackagingType())) {
