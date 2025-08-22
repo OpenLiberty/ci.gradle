@@ -122,7 +122,7 @@ class DeployTask extends AbstractServerTask {
         }
     }
 
-    private void installProjectArchive(Task task, String appsDir) {
+    protected void installProjectArchive(Task task, String appsDir) {
         String archiveBaseName
         String fileName
         if("springboot".equals(getPackagingType())) {
@@ -578,7 +578,7 @@ class DeployTask extends AbstractServerTask {
         }
     }
 
-    private void addLibrary(Element parent, LooseApplication looseApp, String dir, File lib) throws GradleException {
+    protected void addLibrary(Element parent, LooseApplication looseApp, String dir, File lib) throws GradleException {
         if(server.deploy.copyLibsDirectory != null) {
             if(!server.deploy.copyLibsDirectory.exists()) {
                 server.deploy.copyLibsDirectory.mkdirs()
