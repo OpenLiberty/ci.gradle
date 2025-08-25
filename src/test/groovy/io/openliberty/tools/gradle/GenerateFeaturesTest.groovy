@@ -171,25 +171,26 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     }
 
     /**
-     * Conflict between user specified features.
-     * Check for BINARY_SCANNER_CONFLICT_MESSAGE1 (conflict between configured features)
+     * Check for conflicts between configured features
      *
      * This test was updated for Gradle 9 compatibility:
      * - Previously relied on exact string matches that broke with Gradle 9's output formatting
      * - Now checks for key parts of the error message instead of exact format
      * - Still verifies the same functionality: that conflicts between features are detected
      * - Still checks for the same features (cdi-1.2, servlet-4.0) in the error message
+     * - Now checks for the presence of conflict keywords in the error message
      *
      * @throws Exception
      */
     @Test
     public void userConflictTest() throws Exception {
-        // add cdi-1.2 and servlet-4.0 features to server.xml, these conflict
+        // app only uses servlet-4.0, servlet-4.0 conflicts with cdi-1.2
         replaceString("<!--replaceable-->",
+            "<!--Feature generation comment goes below this line-->\n" +
             "  <featureManager>\n" +
-            "    <feature>cdi-1.2</feature>\n" +
             "    <feature>servlet-4.0</feature>\n" +
-            "  </featureManager>", serverXmlFile);
+            "    <feature>cdi-1.2</feature>\n" +
+            "  </featureManager>\n", serverXmlFile);
         runCompileAndGenerateFeatures();
 
         // Check for key parts of the error message instead of the exact format
@@ -203,14 +204,14 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     }
 
     /**
-     * Conflict between user specified features and API usage.
-     * Check for BINARY_SCANNER_CONFLICT_MESSAGE1 (conflict between configured features and API usage)
+     * Check for conflicts between configured features and API usage
      *
      * This test was updated for Gradle 9 compatibility:
      * - Previously relied on exact string matches that broke with Gradle 9's output formatting
      * - Now checks for key parts of the error message instead of exact format
      * - Still verifies the same functionality: that conflicts between configured features and API usage are detected
      * - Still checks for the same features (cdi-1.2, servlet-4.0, cdi-2.0) in the error message
+     * - Now checks for the presence of conflict keywords in the error message
      *
      * @throws Exception
      */
@@ -258,10 +259,10 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
         // add mpOpenAPI-1.0 feature to server.xml, not available in MP 1.2
         replaceString("<!--replaceable-->",
-            "  <featureManager>\n" +
-            "    <feature>mpOpenAPI-1.0</feature>\n" +
-            "  </featureManager>", serverXmlFile);
-
+                "<!--Feature generation comment goes below this line-->\n" +
+                        "  <featureManager>\n" +
+                        "    <feature>mpOpenAPI-1.0</feature>\n" +
+                        "  </featureManager>\n", serverXmlFile);
         runCompileAndGenerateFeatures();
 
         // Check for key parts of the error message instead of the exact format

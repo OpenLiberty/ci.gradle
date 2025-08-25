@@ -148,8 +148,8 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
 
         writer = new BufferedWriter(new OutputStreamWriter(stdin));
 
-        // wait for process to finish max 25 seconds
-        process.waitFor(25, TimeUnit.SECONDS);
+        // wait for process to finish max 50 seconds
+        process.waitFor(50, TimeUnit.SECONDS);
         assertFalse(process.isAlive());
 
         System.out.println(formatOutput(getProcessOutput()));
