@@ -13,11 +13,17 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven {
-        url = 'https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/maven/repository/'
+        name = 'Central Portal Snapshots'
+        url = 'https://central.sonatype.com/repository/maven-snapshots/'
+        content {
+            includeModule("io.openliberty.tools","liberty-ant-tasks")
+            includeModule("io.openliberty.tools","ci.common")
+        }
     }
     maven {
-        url = 'https://central.sonatype.com/repository/maven-snapshots/'
+        url = 'https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/maven/repository/'
     }
+
 }
 
 buildscript {
@@ -56,8 +62,8 @@ compileTestGroovy {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-def libertyAntVersion = "1.9.17-SNAPSHOT"
-def libertyCommonVersion = "1.8.39-SNAPSHOT"
+def libertyAntVersion = "1.9.17"
+def libertyCommonVersion = "1.8.39"
 
 dependencies {
     implementation gradleApi()
@@ -188,7 +194,7 @@ publishing {
                 name = 'liberty-gradle-plugin'
                 packaging = 'jar'
                 description = 'Liberty Gradle Plug-in.'
-                url = 'https://wasdev.github.io'
+                url = 'https://github.com/OpenLiberty/ci.gradle'
                 licenses {
                     license {
                         name = 'The Apache Software License, Version 2.0'
@@ -198,9 +204,9 @@ publishing {
 
                 developers {
                     developer {
-                        id = 'jgawor'
-                        name = 'Jarek Gawor'
-                        email = 'jgawor@gmail.com'
+                        id = 'OpenLiberty'
+                        name = 'Cheryl King'
+                        email = 'developers@openliberty.io'
                     }
                 }
                 scm {
