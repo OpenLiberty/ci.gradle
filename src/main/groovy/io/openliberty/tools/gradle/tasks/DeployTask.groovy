@@ -562,7 +562,7 @@ class DeployTask extends AbstractServerTask {
                 Set<File> compileDepFiles = project.configurations.compile.minus(project.configurations.providedCompile).getFiles()
                 filesAsDeps.addAll(compileDepFiles)
             }
-            if (project.configurations.findByName('impementation') != null) {
+            if (project.configurations.findByName('implementation') != null) {
                 Set<File> implementationDepFiles = project.configurations.implementation.minus(project.configurations.providedCompile).getFiles()
                 filesAsDeps.addAll(implementationDepFiles)
             }
