@@ -59,9 +59,9 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
         // place generated features in server.xml
         replaceString("<!--replaceable-->",
-            "<featureManager>\n" +
-            "  <feature>servlet-4.0</feature>\n" +
-            "</featureManager>\n", serverXmlFile);
+                "<featureManager>\n" +
+                        "  <feature>servlet-4.0</feature>\n" +
+                        "</featureManager>\n", serverXmlFile);
         runGenerateFeatures();
         // no additional features should be generated
         assertTrue(newFeatureFile.exists());
@@ -83,7 +83,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
     /**
      * Verify a scanner log is generated when plugin logging is enabled.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -108,10 +108,10 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     public void customFeaturesTest() throws Exception {
         // complete the setup of the test
         replaceString("<!--replaceable-->",
-            "<featureManager>\n" +
-            "  <feature>jaxrs-2.1</feature>\n" +
-            "  <feature>usr:custom-1.0</feature>\n" +
-            "</featureManager>\n", serverXmlFile);
+                "<featureManager>\n" +
+                        "  <feature>jaxrs-2.1</feature>\n" +
+                        "  <feature>usr:custom-1.0</feature>\n" +
+                        "</featureManager>\n", serverXmlFile);
         assertFalse("Before running", newFeatureFile.exists());
         // run the test
         runCompileAndGenerateFeatures();
@@ -143,16 +143,16 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         String serverXmlContents = new String(Files.readAllBytes(serverXmlFile.toPath()), charset);
         serverXmlContents = "\n" + serverXmlContents;
         assertTrue(serverXmlContents,
-            verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
+                verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
     }
 
     @Test
     public void serverXmlCommentFMTest() throws Exception {
         replaceString("<!--replaceable-->",
-            "<!--Feature generation comment goes below this line-->\n" +
-            "  <featureManager>\n" +
-            "    <feature>jaxrs-2.1</feature>\n" +
-            "  </featureManager>\n", serverXmlFile);
+                "<!--Feature generation comment goes below this line-->\n" +
+                        "  <featureManager>\n" +
+                        "    <feature>jaxrs-2.1</feature>\n" +
+                        "  </featureManager>\n", serverXmlFile);
 
         // initially the expected comment is not found in server.xml
         assertFalse(verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 10, serverXmlFile));
@@ -167,7 +167,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         String serverXmlContents = new String(Files.readAllBytes(serverXmlFile.toPath()), charset);
         serverXmlContents = "\n" + serverXmlContents;
         assertTrue(serverXmlContents,
-            verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
+                verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
     }
 
     /**
@@ -186,19 +186,17 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     public void userConflictTest() throws Exception {
         // app only uses servlet-4.0, servlet-4.0 conflicts with cdi-1.2
         replaceString("<!--replaceable-->",
-            "<!--Feature generation comment goes below this line-->\n" +
-            "  <featureManager>\n" +
-            "    <feature>servlet-4.0</feature>\n" +
-            "    <feature>cdi-1.2</feature>\n" +
-            "  </featureManager>\n", serverXmlFile);
+                "<!--Feature generation comment goes below this line-->\n" +
+                        "  <featureManager>\n" +
+                        "    <feature>servlet-4.0</feature>\n" +
+                        "    <feature>cdi-1.2</feature>\n" +
+                        "  </featureManager>\n", serverXmlFile);
         runCompileAndGenerateFeatures();
 
-        Set<String> recommendedFeatureSet = new HashSet<String>(Arrays.asList("cdi-1.2", "servlet-4.0"));
-        String message = "A working set of features could not be generated due to conflicts " +
-                "between configured features: %s.";
-        // Check for log message containing the expected error message
-        boolean b = verifyLogMessageExists(String.format(message, recommendedFeatureSet), 1000, logFile)
-        assertTrue(formatOutput(getProcessOutput()), b);
+        // Verify log message containing the expected error message
+        // We will be considering the key parts of the error message instead of exact format because Gradle 9's output formatting has changed
+        assertTrue(formatOutput(getProcessOutput()), verifyLogMessageExists("A working set of features could not be generated due to conflicts between configured features", 1000, logFile));
+        assertTrue(formatOutput(getProcessOutput()), verifyLogMessageExists("servlet-4.0, cdi-1.2", 1000, logFile));
     }
 
     /**
@@ -217,30 +215,28 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     public void userAndGeneratedConflictTest() throws Exception {
         // app only uses servlet-4.0 (which will be generated), cdi-1.2 conflicts with servlet-4.0
         replaceString("<!--replaceable-->",
-            "<!--Feature generation comment goes below this line-->\n" +
-            "  <featureManager>\n" +
-            "    <feature>cdi-1.2</feature>\n" +
-            "  </featureManager>\n", serverXmlFile);
+                "<!--Feature generation comment goes below this line-->\n" +
+                        "  <featureManager>\n" +
+                        "    <feature>cdi-1.2</feature>\n" +
+                        "  </featureManager>\n", serverXmlFile);
         runCompileAndGenerateFeatures();
-        // SAMPLE LOG
+
+        // SAMPLE LOG [This log format will be different on different OS]
         // 6>> A working set of features could not be generated due to conflicts between configured features and
         // the application's API usage: [servlet-4.0, cdi-1.2].
         // Review and update your server configuration and application to ensure they are not using conflicting
         // features and APIs from differen2 actionable tasks: 2 executed
         // 7>EE, or Jakarta EE. Refer to the following set of suggested features for guidance: [servlet-4.0, cdi-2.0].
 
-        Set<String> conflictingFeaturesSet = new HashSet<String>(Arrays.asList("cdi-1.2", "servlet-4.0"));
-        String conflictErrorMessage = "A working set of features could not be generated due to conflicts " +
-                "between configured features and the application's API usage: %s.";
-        // Check for log message containing the expected error message
-        boolean conflictMessageFound = verifyLogMessageExists(String.format(conflictErrorMessage, conflictingFeaturesSet), 1000, logFile);
-        assertTrue(formatOutput(getProcessOutput()), conflictMessageFound);
+        // Verify log message containing the expected error message
+        // We will be considering the key parts of the error message instead of exact format because Gradle 9's output formatting has changed
+        assertTrue(formatOutput(getProcessOutput()), verifyLogMessageExists("A working set of features could not be generated due to conflicts between configured features", 1000, logFile));
+        assertTrue(formatOutput(getProcessOutput()), verifyLogMessageExists("servlet-4.0, cdi-1.2", 1000, logFile));
 
-        Set<String> suggestedFeaturesSet = new HashSet<String>(Arrays.asList("cdi-2.0", "servlet-4.0"));
-        String suggestionMessage = "Refer to the following set of suggested features for guidance: %s.";
-        // Check for log message containing the expected error message
-        boolean suggestionMessageFound = verifyLogMessageExists(String.format(suggestionMessage, suggestedFeaturesSet), 1000, logFile);
-        assertTrue(formatOutput(getProcessOutput()), suggestionMessageFound);
+        // Verify log message containing the expected error message
+        // We will be considering the key parts of the error message instead of exact format because Gradle 9's output formatting has changed
+        assertTrue(formatOutput(getProcessOutput()), verifyLogMessageExists("Refer to the following set of suggested features for guidance", 1000, logFile));
+        assertTrue(formatOutput(getProcessOutput()), verifyLogMessageExists("servlet-4.0, cdi-2.0", 1000, logFile));
     }
 
     /**
@@ -270,18 +266,16 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
                         "  </featureManager>\n", serverXmlFile);
         runCompileAndGenerateFeatures();
 
-        Set<String> conflictingFeaturesSet = new HashSet<String>(Arrays.asList("mpOpenAPI-1.0", "servlet-4.0"));
-        String requiredMPLevel = "mp1.2";
-        String conflictErrorMessage = "A working set of features could not be generated due to conflicts in the required features: %s and required levels of MicroProfile: %s";
-        // Check for log message containing the expected error message
-        boolean conflictMessageFound = verifyLogMessageExists(String.format(conflictErrorMessage, conflictingFeaturesSet, requiredMPLevel), 1000, logFile);
-        assertTrue(formatOutput(getProcessOutput()), conflictMessageFound);
+        // Verify log message containing the expected error message
+        // We will be considering the key parts of the error message instead of exact format because Gradle 9's output formatting has changed
+        assertTrue(formatOutput(getProcessOutput()), verifyLogMessageExists("A working set of features could not be generated due to conflicts in the required features", 1000, logFile));
+        assertTrue(formatOutput(getProcessOutput()), verifyLogMessageExists("servlet-4.0, mpOpenAPI-1.0", 1000, logFile));
     }
 
     /**
      * Test calling the scanner with both the EE umbrella dependency and the MP
      * umbrella dependency.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -298,7 +292,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     /**
      * Test calling the scanner with just the EE umbrella dependency and no MP
      * umbrella dependency.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -317,7 +311,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     /**
      * Test calling the scanner with just the MP umbrella dependency and no EE
      * umbrella dependency.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -336,7 +330,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     /**
      * Test calling the scanner with no EE umbrella dependency and no MP
      * umbrella dependency.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -369,7 +363,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
     /**
      * Find a specific log message in the log file.
-     * 
+     *
      * This method is used specifically for finding debug log messages in the output.
      * It was added to support Gradle 9 compatibility while maintaining the original
      * test functionality for checking debug output messages.
