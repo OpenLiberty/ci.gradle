@@ -1,0 +1,33 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url = "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.gradleup.nmcp:com.gradleup.nmcp.gradle.plugin:1.1.0"
+        // Need to pull the Gradle publish pugin here as well
+        classpath "com.gradle.publish:plugin-publish-plugin:0.12.0"
+    }
+}
+
+apply from: 'build.gradle'
+
+// NMCP Plugin configuration for Maven Central publishing
+apply plugin: 'com.gradleup.nmcp'
+apply plugin: 'com.gradleup.nmcp.aggregation'
+
+// Publish with publishAggregationToCentralPortal task
+// Docs: https://github.com/GradleUp/nmcp
+nmcpAggregation {
+    centralPortal {
+        username = project.findProperty('ossrhUsername')
+        password = project.findProperty('ossrhPassword')
+        // Publish manually from the portal
+        publishingType = "USER_MANAGED"
+    }
+    // Required to find projects with the maven-publish plugin (this project)
+    publishAllProjectsProbablyBreakingProjectIsolation()
+}
