@@ -196,7 +196,7 @@ When dev mode runs with container support, it builds a container image and runs 
 
 This task requires applications to be installed as loose applications. Information on configuring loose applications can be found in the [deploy task parameter documentation](deploy.md#Parameters) and the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration).
 
-##### Copying Generated Configurations to Docker Image
+##### Copying Generated Configurations to Container Image
 
 N.B. starting in 3.4.1, dev mode invokes `generate-features` if the `generateFeatures` configuration parameter is set to true. Ensure that the `generated-features.xml` configuration file is copied to your container image via your Containerfile/Dockerfile.
 ```dockerfile
