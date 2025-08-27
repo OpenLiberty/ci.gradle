@@ -27,6 +27,8 @@ nmcpAggregation {
         password = project.findProperty('ossrhPassword')
         // Publish manually from the portal
         publishingType = "USER_MANAGED"
+
+        validationTimeout = java.time.Duration.ZERO
     }
     // Required to find projects with the maven-publish plugin (this project)
     publishAllProjectsProbablyBreakingProjectIsolation()

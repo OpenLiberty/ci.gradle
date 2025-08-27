@@ -83,13 +83,13 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
-task groovydocJar(type: Jar) {
-    archiveClassifier = 'groovydoc'
-    from groovydoc
+task javadocJar(type: Jar) {
+    archiveClassifier = 'javadoc'
+    from javadoc
 }
 
 artifacts {
-    archives groovydocJar, sourcesJar
+    archives javadocJar, sourcesJar
 }
 
 test {
@@ -187,7 +187,7 @@ publishing {
             artifactId = base.archivesName.get()
 
             from components.java
-            artifact groovydocJar
+            artifact javadocJar
             artifact sourcesJar
 
             pom {
@@ -253,3 +253,4 @@ task install {
 publishToMavenLocal.dependsOn jar
 
 groovydoc.enabled = false
+javadoc.enabled = false
