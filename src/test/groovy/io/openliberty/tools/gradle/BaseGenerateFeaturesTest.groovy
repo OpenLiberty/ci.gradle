@@ -15,17 +15,6 @@
  */
 package io.openliberty.tools.gradle
 
-import java.io.BufferedReader
-import java.io.BufferedWriter
-import java.io.File
-import java.io.FileNotFoundException
-import java.io.FileReader
-import java.io.FileWriter
-import java.io.IOException
-import java.io.InputStreamReader
-import java.io.OutputStreamWriter
-import java.nio.charset.StandardCharsets
-import java.nio.file.Files
 import org.apache.commons.io.FileUtils
 import org.w3c.dom.Document
 
@@ -35,6 +24,8 @@ import javax.xml.xpath.XPath
 import javax.xml.xpath.XPathConstants
 import javax.xml.xpath.XPathFactory
 import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 
@@ -101,9 +92,6 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
         if (logFile != null && logFile.exists()) {
             assertTrue(logFile.delete());
         }
-        if (errFile != null && errFile.exists()) {
-            assertTrue(errFile.delete());
-        }
     }
 
     protected static void replaceString(String str, String replacement, File file) throws IOException {
@@ -153,8 +141,8 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
 
         writer = new BufferedWriter(new OutputStreamWriter(stdin));
 
-        // wait for process to finish max 50 seconds
-        process.waitFor(50, TimeUnit.SECONDS);
+        // wait for process to finish max 60 seconds
+        process.waitFor(60, TimeUnit.SECONDS);
         assertFalse(process.isAlive());
 
         System.out.println(formatOutput(getProcessOutput()));
@@ -168,15 +156,6 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
         return processOutput;
     }
 
-    /**
-     * Original implementation of verifyLogMessageExists.
-     * Maintained for backward compatibility with existing tests.
-     * 
-     * @param message The message to look for in the log
-     * @param timeout The maximum time to wait for the message in milliseconds
-     * @param log The log file to search
-     * @return true if the message was found, false otherwise
-     */
     protected static boolean verifyLogMessageExists(String message, int timeout, File log)
             throws InterruptedException, FileNotFoundException, IOException {
         int waited = 0;
@@ -191,14 +170,21 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
         return false;
     }
 
-    /**
-     * Original implementation of readFile that looks for exact string matches.
-     * This method is maintained for backward compatibility with existing tests.
-     * 
-     * @param str The string to search for
-     * @param file The file to search in
-     * @return The line containing the string, or null if not found
-     */
+    protected static String findLogMessage(String message, int timeout, File log)
+        throws InterruptedException, FileNotFoundException, IOException {
+        int waited = 0;
+        int sleep = 10;
+        while (waited <= timeout) {
+            String line = readFile(message, log);
+            if (line != null) {
+                return line;
+            }
+            Thread.sleep(sleep);
+            waited += sleep;
+        }
+        return null;
+    }
+
     protected static String readFile(String str, File file) throws FileNotFoundException, IOException {
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line = br.readLine();
@@ -213,41 +199,6 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
             br.close();
         }
         return null;
-    }
-
-    protected static void runCompileAndGenerateFeatures() throws IOException, InterruptedException, FileNotFoundException {
-        runProcess("compileJava generateFeatures");
-    }
-
-    protected static void runCompileAndGenerateFeaturesDebug() throws IOException, InterruptedException, FileNotFoundException {
-        runProcess("compileJava generateFeatures --debug");
-    }
-
-    protected static void runGenerateFeatures() throws IOException, InterruptedException, FileNotFoundException {
-        runProcess("generateFeatures");
-    }
-
-    // Format the output to help debug test failures.
-    // The problem is that the test case log looks just like the JUnit log of
-    // the calling process.
-    // For a short stream just print it. Add a start and end string to separate
-    // it from the rest of the log.
-    // For long output streams, add a header which indicates how many lines to skip
-    // if you want to read the end. Also add a trailer to similarly show how many
-    // lines to scroll up to find the beginning. Number each line to help parse
-    // the output.
-    protected static String formatOutput(String output) {
-        if (output == null || output.length() < 101) {
-            return "\n==Process Output==\n" + output + "\n==End==";
-        }
-        String[] lines = output.split("\r\n|\r|\n");
-        StringBuffer result = new StringBuffer(String.format("==Process Output %d lines==\n", lines.length));
-        int count = 1;
-        for (String line : lines) {
-            result.append(String.format("%5d>%s\n", count++, line));
-        }
-        result.append(String.format("==Process Output End %d lines==\n", lines.length));
-        return result.toString();
     }
 
     /**
@@ -283,5 +234,40 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
             features.add(nodes.item(i).getTextContent());
         }
         return features;
+    }
+
+    protected static void runCompileAndGenerateFeatures() throws IOException, InterruptedException, FileNotFoundException {
+        runProcess("compileJava generateFeatures");
+    }
+
+    protected static void runCompileAndGenerateFeaturesDebug() throws IOException, InterruptedException, FileNotFoundException {
+        runProcess("compileJava generateFeatures --debug");
+    }
+
+    protected static void runGenerateFeatures() throws IOException, InterruptedException, FileNotFoundException {
+        runProcess("generateFeatures");
+    }
+
+    // Format the output to help debug test failures.
+    // The problem is that the test case log looks just like the JUnit log of
+    // the calling process.
+    // For a short stream just print it. Add a start and end string to separate
+    // it from the rest of the log.
+    // For long output streams, add a header which indicates how many lines to skip
+    // if you want to read the end. Also add a trailer to similarly show how many
+    // lines to scroll up to find the beginning. Number each line to help parse
+    // the output.
+    protected static String formatOutput(String output) {
+        if (output == null || output.length() < 101) {
+            return "\n==Process Output==\n" + output + "\n==End==";
+        }
+        String[] lines = output.split("\r\n|\r|\n");
+        StringBuffer result = new StringBuffer(String.format("==Process Output %d lines==\n", lines.length));
+        int count = 1;
+        for (String line : lines) {
+            result.append(String.format("%5d>%s\n", count++, line));
+        }
+        result.append(String.format("==Process Output End %d lines==\n", lines.length));
+        return result.toString();
     }
 }
