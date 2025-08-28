@@ -171,14 +171,8 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     }
 
     /**
-     * Check for conflicts between configured features
-     *
-     * This test was updated for Gradle 9 compatibility:
-     * - Previously relied on exact string matches that broke with Gradle 9's output formatting
-     * - Now checks for key parts of the error message instead of exact format
-     * - Still verifies the same functionality: that conflicts between features are detected
-     * - Still checks for the same features (cdi-1.2, servlet-4.0) in the error message
-     * - Now checks for the presence of conflict keywords in the error message
+     * Conflict between user specified features.
+     * Check for BINARY_SCANNER_CONFLICT_MESSAGE2 (conflict between configured features)
      *
      * @throws Exception
      */
@@ -193,10 +187,11 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
                         "  </featureManager>\n", serverXmlFile);
         runCompileAndGenerateFeatures();
 
-        // Verify log message containing the expected error message
-        // We will be considering the key parts of the error message instead of exact format because Gradle 9's output formatting has changed
-        assertTrue(formatOutput(getProcessOutput()), verifyLogMessageExists("A working set of features could not be generated due to conflicts between configured features", 1000, logFile));
-        assertTrue(formatOutput(getProcessOutput()), verifyLogMessageExists("servlet-4.0, cdi-1.2", 1000, logFile));
+        // Verify BINARY_SCANNER_CONFLICT_MESSAGE2 error is thrown (BinaryScannerUtil.RecommendationSetException)
+        Set<String> recommendedFeatureSet = new HashSet<String>(Arrays.asList("servlet-4.0"));
+        // search log file instead of process output because warning message in process output may be interrupted
+        boolean b = verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE2, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, errFile);
+        assertTrue(formatOutput(getProcessOutput()), b);
     }
 
     /**
@@ -221,35 +216,16 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
                         "  </featureManager>\n", serverXmlFile);
         runCompileAndGenerateFeatures();
 
-        // SAMPLE LOG [This log format will be different on different OS]
-        // 6>> A working set of features could not be generated due to conflicts between configured features and
-        // the application's API usage: [servlet-4.0, cdi-1.2].
-        // Review and update your server configuration and application to ensure they are not using conflicting
-        // features and APIs from differen2 actionable tasks: 2 executed
-        // 7>EE, or Jakarta EE. Refer to the following set of suggested features for guidance: [servlet-4.0, cdi-2.0].
-
-        // Verify log message containing the expected error message
-        // We will be considering the key parts of the error message instead of exact format because Gradle 9's output formatting has changed
-        assertTrue(formatOutput(getProcessOutput()), verifyLogMessageExists("A working set of features could not be generated due to conflicts between configured features", 1000, logFile));
-        assertTrue(formatOutput(getProcessOutput()), verifyLogMessageExists("servlet-4.0, cdi-1.2", 1000, logFile));
-
-        // Verify log message containing the expected error message
-        // We will be considering the key parts of the error message instead of exact format because Gradle 9's output formatting has changed
-        assertTrue(formatOutput(getProcessOutput()), verifyLogMessageExists("Refer to the following set of suggested features for guidance", 1000, logFile));
-        assertTrue(formatOutput(getProcessOutput()), verifyLogMessageExists("servlet-4.0, cdi-2.0", 1000, logFile));
+        // Verify BINARY_SCANNER_CONFLICT_MESSAGE1 error is thrown (BinaryScannerUtil.FeatureModifiedException)
+        Set<String> recommendedFeatureSet = new HashSet<String>(Arrays.asList("cdi-2.0", "servlet-4.0"));
+        // search log file instead of process output because warning message in process output may be interrupted
+        boolean b = verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE1, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, errFile);
+        assertTrue(formatOutput(getProcessOutput()), b);
     }
 
     /**
      * Conflict between required features in API usage or configured features and MP/EE level specified
      * Check for BINARY_SCANNER_CONFLICT_MESSAGE5 (feature unavailable for required MP/EE levels)
-     *
-     * This test was updated for Gradle 9 compatibility:
-     * - Previously relied on exact string matches that broke with Gradle 9's output formatting
-     * - Now checks for key parts of the error message instead of exact format
-     * - Fixed variable reference from 'serverXml' to 'serverXmlFile'
-     * - Refactored to use standard runCompileAndGenerateFeatures() method for consistency
-     * - Still verifies the same functionality: that conflicts with MP/EE levels are detected
-     * - Still checks for the same features and MP/EE levels in the error message
      *
      * @throws Exception
      */
@@ -266,10 +242,11 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
                         "  </featureManager>\n", serverXmlFile);
         runCompileAndGenerateFeatures();
 
-        // Verify log message containing the expected error message
-        // We will be considering the key parts of the error message instead of exact format because Gradle 9's output formatting has changed
-        assertTrue(formatOutput(getProcessOutput()), verifyLogMessageExists("A working set of features could not be generated due to conflicts in the required features", 1000, logFile));
-        assertTrue(formatOutput(getProcessOutput()), verifyLogMessageExists("servlet-4.0, mpOpenAPI-1.0", 1000, logFile));
+        // use just beginning of BINARY_SCANNER_CONFLICT_MESSAGE5 as error message in logFile may be interrupted with "1 actionable task: 1 executed"
+        assertTrue("Could not find the feature unavailable conflict message in the process output.\n" + processOutput,
+                verifyLogMessageExists("required features: [servlet-4.0, mpOpenAPI-1.0]" +
+                        " and required levels of MicroProfile: mp1.2, Java EE or Jakarta EE: ee8", 1000, errFile));
+
     }
 
     /**
