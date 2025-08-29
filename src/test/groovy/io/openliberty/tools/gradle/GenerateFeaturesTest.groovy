@@ -136,6 +136,13 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         runCompileAndGenerateFeatures();
 
         // verify that generated features file was created
+        // Add retry mechanism to handle potential timing issues
+        int maxRetries = 5;
+        int retryCount = 0;
+        while (!newFeatureFile.exists() && retryCount < maxRetries) {
+            Thread.sleep(3000);
+            retryCount++;
+        }
         assertTrue(newFeatureFile.exists());
 
         // verify expected comment found in server.xml
@@ -190,7 +197,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         // Verify BINARY_SCANNER_CONFLICT_MESSAGE2 error is thrown (BinaryScannerUtil.RecommendationSetException)
         Set<String> recommendedFeatureSet = new HashSet<String>(Arrays.asList("servlet-4.0"));
         // search log file instead of process output because warning message in process output may be interrupted
-        boolean b = verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE2, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, logFile);
+        boolean b = verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE2, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, errFile);
         assertTrue(formatOutput(getProcessOutput()), b);
     }
 
@@ -213,7 +220,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         // Verify BINARY_SCANNER_CONFLICT_MESSAGE1 error is thrown (BinaryScannerUtil.FeatureModifiedException)
         Set<String> recommendedFeatureSet = new HashSet<String>(Arrays.asList("cdi-2.0", "servlet-4.0"));
         // search log file instead of process output because warning message in process output may be interrupted
-        boolean b = verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE1, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, logFile);
+        boolean b = verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE1, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, errFile);
         assertTrue(formatOutput(getProcessOutput()), b);
     }
 
@@ -241,7 +248,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         // use just beginning of BINARY_SCANNER_CONFLICT_MESSAGE5 as error message in logFile may be interrupted with "1 actionable task: 1 executed"
         assertTrue("Could not find the feature unavailable conflict message in the process output.\n" + processOutput,
                 verifyLogMessageExists("required features: [servlet-4.0, mpOpenAPI-1.0]" +
-                        " and required levels of MicroProfile: mp1.2, Java EE or Jakarta EE: ee8", 1000, logFile));
+                        " and required levels of MicroProfile: mp1.2, Java EE or Jakarta EE: ee8", 1000, errFile));
 
     }
 
