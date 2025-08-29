@@ -196,14 +196,36 @@ When dev mode runs with container support, it builds a container image and runs 
 
 This task requires applications to be installed as loose applications. Information on configuring loose applications can be found in the [deploy task parameter documentation](deploy.md#Parameters) and the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration).
 
+##### Copying Generated Configurations to Container Image
+
 N.B. starting in 3.4.1, dev mode invokes `generate-features` if the `generateFeatures` configuration parameter is set to true. Ensure that the `generated-features.xml` configuration file is copied to your container image via your Containerfile/Dockerfile.
 ```dockerfile
-COPY --chown=1001:0  build/wlp/usr/servers/defaultServer/configDropins/overrides/generated-features.xml /config/configDropins/overrides/
+COPY --chown=1001:0  target/liberty/wlp/usr/servers/defaultServer/configDropins/overrides/generated-features.xml /config/configDropins/overrides/
 ```
-If on Linux, it is recommended that you copy the entire `configDropins/overrides` directory to your container image via your Containerfile/Dockerfile.
+If you are using `liberty.var.{var}` or `liberty.defaultVar.{var}`, then the server configuration file named `liberty-plugin-variable-config.xml` is generated in the configDropins/overrides folder or configDropins/defaults folder of the target server respectively.
+To ensure your application runs correctly inside a container, you need to copy this generated liberty-plugin-variable-config.xml file into your container image.
+
+You can do this by adding one of the following lines to your Dockerfile or Containerfile, depending on which type of variable you used.
+To copy the file from the overrides folder:
+
 ```dockerfile
-COPY --chown=1001:0  build/wlp/usr/servers/defaultServer/configDropins/overrides /config/configDropins/overrides
+COPY --chown=1001:0  target/liberty/wlp/usr/servers/defaultServer/configDropins/overrides/liberty-plugin-variable-config.xml /config/configDropins/overrides/
 ```
+To copy the file from the defaults folder:
+
+```dockerfile
+COPY --chown=1001:0  target/liberty/wlp/usr/servers/defaultServer/configDropins/defaults/liberty-plugin-variable-config.xml /config/configDropins/defaults/
+```
+
+
+On Linux, it's a good practice to copy the entire configDropins/overrides and configDropins/defaults directories into your container image using your Dockerfile.
+
+This helps you avoid file permission problems that can happen when the user ID of the container is different from the host's user ID.
+```dockerfile
+COPY --chown=1001:0  target/liberty/wlp/usr/servers/defaultServer/configDropins/overrides /config/configDropins/overrides
+COPY --chown=1001:0  target/liberty/wlp/usr/servers/defaultServer/configDropins/defaults /config/configDropins/defaults
+```
+Remember, you only need to include the command that matches your configuration.
 
 ### Prerequisites
 
