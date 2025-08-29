@@ -447,8 +447,9 @@ class DeployTask extends AbstractServerTask {
             Dependency dependency = entry.getValue();
             File dependencyFile = entry.getKey();
 
-            if (dependency instanceof ProjectDependency) {
-                Project dependencyProject = dependency.getDependencyProject()
+            if (dependency instanceof ProjectDependency) { 
+                def projectPath = dependency.getPath()
+                Project dependencyProject = task.getProject().findProject(projectPath)
                 String projectType = FilenameUtils.getExtension(dependencyFile.toString())
                 switch (projectType) {
                     case "jar":
@@ -503,7 +504,8 @@ class DeployTask extends AbstractServerTask {
             ResolvedDependency resolvedDependency = entry.getValue();
 
             if (dependency instanceof ProjectDependency) { //Adding the project archive and it's transitve dependencies to the loose ear
-                Project dependencyProject = dependency.getDependencyProject()
+                def projectPath = dependency.getPath()
+                Project dependencyProject = task.getProject().findProject(projectPath)
 
                 ResolvedArtifact projectArtifact
 
@@ -723,4 +725,3 @@ class DeployTask extends AbstractServerTask {
         }
     }
 }
-
