@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2024
+ * (C) Copyright IBM Corporation 2024, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,8 @@ public class DevTaskHelper {
                 Dependency[] deployDeps = element.getAllDependencies().toArray()
                 for (Dependency dependency1: deployDeps) {
                     if (dependency1 instanceof ProjectDependency) {
-                        Project dependencyProject = project.getRootProject().findProject(((ProjectDependency) dependency1).getPath())
+                        def projectPath = dependency1.getPath()
+                        Project dependencyProject = project.findProject(projectPath)
                         allDependentProjects.add(dependencyProject)
                         allDependentProjects.addAll(getAllUpstreamProjects(dependencyProject))
                     }
@@ -128,7 +129,8 @@ public class DevTaskHelper {
             File dependencyFile = entry.getKey();
 
             if (dependency instanceof ProjectDependency) {
-                Project dependencyProject = project.getRootProject().findProject(((ProjectDependency) dependency).getPath())
+                def projectPath = dependency.getPath()
+                Project dependencyProject = project.findProject(projectPath)
                 String projectType = FilenameUtils.getExtension(dependencyFile.toString())
                 switch (projectType) {
                     case "war":
