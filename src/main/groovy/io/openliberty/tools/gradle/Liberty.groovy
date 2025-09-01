@@ -101,7 +101,8 @@ class Liberty implements Plugin<Project> {
                 Dependency[] deps = project.configurations.deploy.getAllDependencies().toArray()
                 deps.each { Dependency dep ->
                     if (dep instanceof ProjectDependency) {
-                        def projectDep = dep.getDependencyProject()
+                        def projectPath = dep.getPath()
+                        def projectDep = project.findProject(projectPath)
                         if (projectDep.plugins.hasPlugin('war')) {
                             setFacetVersion(projectDep, 'jst.web', JST_WEB_FACET_VERSION)
                         }

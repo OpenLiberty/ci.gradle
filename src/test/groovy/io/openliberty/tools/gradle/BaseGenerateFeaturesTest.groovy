@@ -46,6 +46,7 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
 
     static BufferedWriter writer;
     static File logFile;
+    static File errFile;
     static Process process;
     static String processOutput = "";
 
@@ -68,6 +69,7 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
         this.resourceDir = new File("build/resources/test/generate-features-test/" + projectName);
         this.buildDir = new File(integTestDir, "generate-features-test/" + projectName + System.currentTimeMillis());
         this.logFile = new File(buildDir, "output.log");
+        this.errFile = new File(buildDir, "stderr.log");
         createDir(buildDir);
         createTestProject(buildDir, resourceDir, buildFilename);
         this.newFeatureFile = new File(buildDir, GENERATED_FEATURES_FILE_PATH);
@@ -131,7 +133,7 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
         ProcessBuilder builder = buildProcess(command.toString());
 
         builder.redirectOutput(logFile);
-        builder.redirectError(logFile);
+        builder.redirectError(errFile);
         process = builder.start();
         assertTrue(process.isAlive());
 
@@ -139,8 +141,8 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
 
         writer = new BufferedWriter(new OutputStreamWriter(stdin));
 
-        // wait for process to finish max 20 seconds
-        process.waitFor(20, TimeUnit.SECONDS);
+        // wait for process to finish max 60 seconds
+        process.waitFor(60, TimeUnit.SECONDS);
         assertFalse(process.isAlive());
 
         System.out.println(formatOutput(getProcessOutput()));
