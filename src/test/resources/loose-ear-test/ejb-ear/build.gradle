@@ -24,7 +24,7 @@ repositories {
 
 dependencies {
     deploy project(':ejb-ejb')
-    deploy project(path:':ejb-war', configuration:'archives')
+    deploy project(path: ':ejb-war', configuration: 'warOnly')
     deploy 'org.apache.commons:commons-text:1.13.1'
     constraints {
         // Override the transitive dependency to address CVE-2025-48924
@@ -58,4 +58,4 @@ liberty {
 }
 
 deploy.dependsOn 'ear'
-ear.dependsOn ':ejb-war:jar', ':ejb-war:war'
+ear.dependsOn ':ejb-war:war'

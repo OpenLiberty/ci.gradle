@@ -1,11 +1,6 @@
 apply plugin: 'war'
 
-// Disable JAR task using the Gradle 9 compatible approach
-tasks.withType(Jar).configureEach {
-    if (it.name == 'jar') {
-        it.enabled = false
-    }
-}
+jar.enabled = false
 
 description = 'WAR Module'
 dependencies {
@@ -14,6 +9,25 @@ dependencies {
     providedCompile project(':ejb-ejb')
 }
 
+//// Create a custom configuration that only includes the WAR artifact
+//configurations {
+//    warOnly.extendsFrom(archives)
+//}
+//
+//artifacts {
+//    warOnly war
+//}
+
+// Create a custom configuration that only includes the WAR artifact
+configurations {
+    warOnly
+}
+
+// Add the WAR artifact to the warOnly configuration
+artifacts {
+    warOnly war
+}
+
 war {
-    archiveFileName = getArchiveBaseName().get() + '.' + getArchiveExtension().get()
+    archiveFileName = getArchiveBaseName().get() + '.war' //+ getArchiveExtension().get()
 }
