@@ -5,6 +5,16 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.11.0'
 }
 
+// Create a custom configuration that only includes the JAR artifact
+configurations {
+    jarOnly
+}
+
+// Add the JAR artifact to the jarOnly configuration
+artifacts {
+    jarOnly jar
+}
+
 jar {
     archiveFileName = rootProject.name+"-"+getArchiveBaseName().get() +"-"+rootProject.version+ '.' + getArchiveExtension().get()
 }
