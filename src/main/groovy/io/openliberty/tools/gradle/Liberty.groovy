@@ -191,13 +191,13 @@ class Liberty implements Plugin<Project> {
         }
     }
 
-    private static File checkAndAppendWlp(Project project, File installDir) {        
-        if (installDir.toString().endsWith("wlp")) {
+    private static File checkAndAppendWlp(Project project, File installDir) {   
+        if (installDir.exists() && new File(installDir,"lib/ws-launch.jar").exists()) {
             return installDir
-        } else { // not valid wlp dir
-            project.getLogger().warn(MessageFormat.format("The installDir {0} path does not reference a wlp folder. Using path {0}{1}wlp instead.", installDir, File.separator))
-            return new File(installDir, 'wlp')
-        }
+        } 
+
+        project.getLogger().warn(MessageFormat.format("The installDir {0} path does not reference a valid Liberty installation. Using path {0}{1}wlp instead.", installDir.getCanonicalPath(), File.separator))
+        return new File(installDir, 'wlp')
     }
 
 }
