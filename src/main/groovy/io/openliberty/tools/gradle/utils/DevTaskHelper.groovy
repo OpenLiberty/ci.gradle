@@ -93,7 +93,7 @@ public class DevTaskHelper {
                         if (dependencyProject != project) {
                             if (allDependentProjects.add(dependencyProject)) {
                                 // prevent infinite recursion and redundant work, as it only makes the recursive call if a new project is found.
-                                allDependentProjects.addAll(getAllDownstreamProjects(dependencyProject))
+                                allDependentProjects.addAll(getAllUpstreamProjects(dependencyProject))
                             }
                         }
                     }
