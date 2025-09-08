@@ -84,7 +84,7 @@ public class DevTaskHelper {
 
         for (Iterator<Configuration> iter = project.getConfigurations().iterator(); iter.hasNext();) {
             Configuration element = iter.next();
-            if (element.canBeResolved && element.visible) {
+            if (element.canBeResolved) {
                 Dependency[] deployDeps = element.getAllDependencies().toArray()
                 for (Dependency dependency1 : deployDeps) {
                     if (dependency1 instanceof ProjectDependency) {
