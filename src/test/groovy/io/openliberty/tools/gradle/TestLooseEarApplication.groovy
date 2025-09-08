@@ -91,7 +91,6 @@ public class TestLooseEarApplication extends AbstractIntegrationTest{
 
       expression = "/archive/archive";
       nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
-        println("GRAD9::::: Nodes Length = " + nodes.getLength())
       Assert.assertEquals("Number of <archive/> element ==>", 2, nodes.getLength());
 
       String ejbJar = "/ejb-ejb.jar"

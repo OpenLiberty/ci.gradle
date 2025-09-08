@@ -9,15 +9,6 @@ dependencies {
     providedCompile project(':ejb-ejb')
 }
 
-//// Create a custom configuration that only includes the WAR artifact
-//configurations {
-//    warOnly.extendsFrom(archives)
-//}
-//
-//artifacts {
-//    warOnly war
-//}
-
 // Create a custom configuration that only includes the WAR artifact
 configurations {
     warOnly
@@ -29,5 +20,5 @@ artifacts {
 }
 
 war {
-    archiveFileName = getArchiveBaseName().get() + '.war' //+ getArchiveExtension().get()
+    archiveFileName = getArchiveBaseName().get() + getArchiveExtension().get()
 }
