@@ -5,7 +5,7 @@ apply plugin: "com.gradle.plugin-publish"
 apply plugin: 'base'
 
 group = 'io.openliberty.tools'
-version = '3.9.5-SNAPSHOT'
+version = '3.9.6-SNAPSHOT'
 base {
     archivesName='liberty-gradle-plugin'
 }
@@ -13,11 +13,17 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven {
-        url = 'https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/maven/repository/'
+        name = 'Central Portal Snapshots'
+        url = 'https://central.sonatype.com/repository/maven-snapshots/'
+        content {
+            includeModule("io.openliberty.tools","liberty-ant-tasks")
+            includeModule("io.openliberty.tools","ci.common")
+        }
     }
     maven {
-        url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        url = 'https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/maven/repository/'
     }
+
 }
 
 buildscript {
@@ -71,7 +77,7 @@ java {
     toolchain {
         // Default to Java 17 for backward compatibility
         languageVersion = JavaLanguageVersion.of(17)
-        
+
         // Allow Java 21 as a compatible alternative
         // This enables the project to work with either Java 17 or Java 21
         if (System.getProperty('java.version').startsWith('21')) {
@@ -80,8 +86,9 @@ java {
     }
 }
 
-def libertyAntVersion = "1.9.16"
-def libertyCommonVersion = "1.8.38"
+def libertyAntVersion = "1.9.17"
+def libertyCommonVersion = "1.8.40-SNAPSHOT"
+
 
 dependencies {
     implementation gradleApi()
@@ -101,13 +108,13 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
-task groovydocJar(type: Jar) {
-    archiveClassifier = 'groovydoc'
-    from groovydoc
+task javadocJar(type: Jar) {
+    archiveClassifier = 'javadoc'
+    from javadoc
 }
 
 artifacts {
-    archives groovydocJar, sourcesJar
+    archives javadocJar, sourcesJar
 }
 
 test {
@@ -206,14 +213,14 @@ publishing {
             artifactId = base.archivesName.get()
 
             from components.java
-            artifact groovydocJar
+            artifact javadocJar
             artifact sourcesJar
 
             pom {
                 name = 'liberty-gradle-plugin'
                 packaging = 'jar'
                 description = 'Liberty Gradle Plug-in.'
-                url = 'https://wasdev.github.io'
+                url = 'https://github.com/OpenLiberty/ci.gradle'
                 licenses {
                     license {
                         name = 'The Apache Software License, Version 2.0'
@@ -223,9 +230,9 @@ publishing {
 
                 developers {
                     developer {
-                        id = 'jgawor'
-                        name = 'Jarek Gawor'
-                        email = 'jgawor@gmail.com'
+                        id = 'OpenLiberty'
+                        name = 'Cheryl King'
+                        email = 'developers@openliberty.io'
                     }
                 }
                 scm {
@@ -242,24 +249,23 @@ publishing {
 if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
 
     if (!version.endsWith("SNAPSHOT")) {
+
         signing {
             sign publishing.publications.libertyGradle
         }
     } else {
         signing.required = false
-    }
 
-    publishing {
-        repositories {
-            maven {
-                name = "Nexus"
-                def releasesRepoUrl = "https://central.sonatype.com/api/v1/publisher"
-                def snapshotsRepoUrl = "https://central.sonatype.com/repository/maven-snapshots/"
-                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        publishing {
+            repositories {
+                maven {
+                    name = "Nexus"
+                    url = "https://central.sonatype.com/repository/maven-snapshots/"
 
-                credentials {
-                    username = ossrhUsername
-                    password = ossrhPassword
+                    credentials {
+                        username = ossrhUsername
+                        password = ossrhPassword
+                    }
                 }
             }
         }
@@ -273,3 +279,4 @@ task install {
 publishToMavenLocal.dependsOn jar
 
 groovydoc.enabled = false
+javadoc.enabled = false
