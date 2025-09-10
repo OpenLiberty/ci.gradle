@@ -20,5 +20,5 @@ artifacts {
 }
 
 war {
-    archiveFileName = getArchiveBaseName().get() + getArchiveExtension().get()
+    archiveFileName = getArchiveBaseName().get() + '.' + getArchiveExtension().get()
 }
