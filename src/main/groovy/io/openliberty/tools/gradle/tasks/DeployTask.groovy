@@ -565,7 +565,7 @@ class DeployTask extends AbstractServerTask {
             }
             //runtimeClasspath: Use this to get all the dependencies required to run your application at runtime. It includes both implementation and runtimeOnly dependencies.
             if (project.configurations.findByName('runtimeClasspath') != null) {
-                Set<File> runtimeClasspathDepFiles = project.configurations.runtimeClasspath.minus(project.configurations.providedCompile).getFiles()
+                Set<File> runtimeClasspathDepFiles = project.configurations.runtimeClasspath.getFiles()
                 filesAsDeps.addAll(runtimeClasspathDepFiles)
             }
             for (File f : filesAsDeps) {
