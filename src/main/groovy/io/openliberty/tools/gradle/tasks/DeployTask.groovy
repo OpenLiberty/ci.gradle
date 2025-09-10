@@ -560,17 +560,17 @@ class DeployTask extends AbstractServerTask {
             //Get the compile and implementation dependencies that are included in the war
             //compileClasspath: Use this to get all the dependencies required to compile your source code. It includes api, implementation, and compileOnly dependencies.
             if (project.configurations.findByName('compileClasspath') != null) {
-                Set<File> compileClasspathDepFiles = project.configurations.compileClasspath.getFiles()
+                Set<File> compileClasspathDepFiles = project.configurations.compileClasspath.minus(project.configurations.providedCompile).getFiles()
                 filesAsDeps.addAll(compileClasspathDepFiles)
             }
             //runtimeClasspath: Use this to get all the dependencies required to run your application at runtime. It includes both implementation and runtimeOnly dependencies.
-                if (project.configurations.findByName('runtimeClasspath') != null) {
-                Set<File> runtimeClasspathDepFiles = project.configurations.runtimeClasspath.getFiles()
+            if (project.configurations.findByName('runtimeClasspath') != null) {
+                Set<File> runtimeClasspathDepFiles = project.configurations.runtimeClasspath.minus(project.configurations.providedCompile).getFiles()
                 filesAsDeps.addAll(runtimeClasspathDepFiles)
             }
-            for (File f : filesAsDeps){
+            for (File f : filesAsDeps) {
                 String extension = FilenameUtils.getExtension(f.getAbsolutePath())
-                if(extension.equals("jar")){
+                if (extension.equals("jar")) {
                     addLibrary(parent, looseApp, dir, f);
                 }
             }
