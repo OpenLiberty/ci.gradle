@@ -558,17 +558,19 @@ class DeployTask extends AbstractServerTask {
         try {
             Set<File> filesAsDeps = new HashSet<File>()
             //Get the compile and implementation dependencies that are included in the war
-            if (project.configurations.findByName('compile') != null) {
-                Set<File> compileDepFiles = project.configurations.compile.minus(project.configurations.providedCompile).getFiles()
-                filesAsDeps.addAll(compileDepFiles)
+            //compileClasspath: Use this to get all the dependencies required to compile your source code. It includes api, implementation, and compileOnly dependencies.
+            if (project.configurations.findByName('compileClasspath') != null) {
+                Set<File> compileClasspathDepFiles = project.configurations.compileClasspath.minus(project.configurations.providedCompile).getFiles()
+                filesAsDeps.addAll(compileClasspathDepFiles)
             }
-            if (project.configurations.findByName('impementation') != null) {
-                Set<File> implementationDepFiles = project.configurations.implementation.minus(project.configurations.providedCompile).getFiles()
-                filesAsDeps.addAll(implementationDepFiles)
+            //runtimeClasspath: Use this to get all the dependencies required to run your application at runtime. It includes both implementation and runtimeOnly dependencies.
+            if (project.configurations.findByName('runtimeClasspath') != null) {
+                Set<File> runtimeClasspathDepFiles = project.configurations.runtimeClasspath.getFiles()
+                filesAsDeps.addAll(runtimeClasspathDepFiles)
             }
-            for (File f : filesAsDeps){
+            for (File f : filesAsDeps) {
                 String extension = FilenameUtils.getExtension(f.getAbsolutePath())
-                if(extension.equals("jar")){
+                if (extension.equals("jar")) {
                     addLibrary(parent, looseApp, dir, f);
                 }
             }
