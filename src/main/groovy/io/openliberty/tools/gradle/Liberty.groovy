@@ -27,6 +27,7 @@ import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.execution.TaskExecutionGraph
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.testing.Test
+import org.gradle.util.GradleVersion
 
 import java.util.Properties
 import java.text.MessageFormat
@@ -101,6 +102,7 @@ class Liberty implements Plugin<Project> {
                 Dependency[] deps = project.configurations.deploy.getAllDependencies().toArray()
                 deps.each { Dependency dep ->
                     if (dep instanceof ProjectDependency) {
+                        validateProjectDependencyConfiguration((ProjectDependency) dep)
                         def projectPath = dep.getPath()
                         def projectDep = project.findProject(projectPath)
                         if (projectDep.plugins.hasPlugin('war')) {
@@ -200,4 +202,12 @@ class Liberty implements Plugin<Project> {
         return new File(installDir, 'wlp')
     }
 
+    protected void validateProjectDependencyConfiguration(ProjectDependency dependency) {
+        if (GradleVersion.current().baseVersion >= GradleVersion.version("9.0")
+                && dependency.getTargetConfiguration() == 'archives') {
+            throw new GradleException("Using 'configuration:archives' with project dependencies is no longer supported in Gradle 9. " +
+                    "Please create a custom configuration (e.g., 'warOnly', 'jarOnly') and use that instead. " +
+                    "See migration guide for more information.")
+        }
+    }
 }

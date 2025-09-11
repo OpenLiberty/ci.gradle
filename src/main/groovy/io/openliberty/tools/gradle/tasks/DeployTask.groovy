@@ -450,6 +450,7 @@ class DeployTask extends AbstractServerTask {
             File dependencyFile = entry.getKey();
 
             if (dependency instanceof ProjectDependency) {
+                validateProjectDependencyConfiguration(dependency)
                 def projectPath = dependency.getPath()
                 Project dependencyProject = task.getProject().findProject(projectPath)
                 String projectType = FilenameUtils.getExtension(dependencyFile.toString())
@@ -506,6 +507,7 @@ class DeployTask extends AbstractServerTask {
             ResolvedDependency resolvedDependency = entry.getValue();
 
             if (dependency instanceof ProjectDependency) { //Adding the project archive and it's transitve dependencies to the loose ear
+                validateProjectDependencyConfiguration((ProjectDependency) dependency)
                 def projectPath = dependency.getPath()
                 Project dependencyProject = task.getProject().findProject(projectPath)
 

@@ -34,7 +34,7 @@ jobs:
       - name: Setup Java ${{ matrix.java }}
         uses: actions/setup-java@v3
         with:
-          distribution: 'semeru'
+          distribution: 'adopt'
           java-version: ${{ matrix.java }}
           cache: 'gradle'
       - name: Checkout ci.common
@@ -122,7 +122,7 @@ jobs:
       - name: Setup Java ${{ matrix.java }}
         uses: actions/setup-java@v3
         with:
-          distribution: 'semeru'
+          distribution: 'adopt'
           java-version: ${{ matrix.java }}
           cache: 'gradle'
       # Moving and cloning to C: drive for Windows for more disk space
