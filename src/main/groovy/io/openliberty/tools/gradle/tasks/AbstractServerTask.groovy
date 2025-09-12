@@ -1205,9 +1205,10 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
 
 
     protected void validateProjectDependencyConfiguration(ProjectDependency dependency) {
-        if (GradleVersion.current().baseVersion >= GradleVersion.version("9.0")
+        if (GradleVersion.current().compareTo(GradleVersion.version("9.0")) >= 0
                 && dependency.getTargetConfiguration() == 'archives') {
-            throw new GradleException("Using 'configuration:archives' with project dependencies is no longer supported in Gradle 9. " +
+            project.getLogger().warn("WARNING: Using 'configuration:archives' with project dependencies is deprecated in Gradle 9. " +
+                    "This may lead to deployment problems. " +
                     "Please create a custom configuration (e.g., 'warOnly', 'jarOnly') and use that instead. " +
                     "See migration guide for more information.")
         }
