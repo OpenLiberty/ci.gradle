@@ -27,6 +27,7 @@ import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.execution.TaskExecutionGraph
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.testing.Test
+import org.gradle.util.GradleVersion
 
 import java.util.Properties
 import java.text.MessageFormat
@@ -101,6 +102,8 @@ class Liberty implements Plugin<Project> {
                 Dependency[] deps = project.configurations.deploy.getAllDependencies().toArray()
                 deps.each { Dependency dep ->
                     if (dep instanceof ProjectDependency) {
+                        validateProjectDependencyConfiguration((ProjectDependency) dep)
+                        validateSimpleProjectDependency(project, (ProjectDependency) dep)
                         def projectPath = dep.getPath()
                         def projectDep = project.findProject(projectPath)
                         if (projectDep.plugins.hasPlugin('war')) {
@@ -200,4 +203,23 @@ class Liberty implements Plugin<Project> {
         return new File(installDir, 'wlp')
     }
 
+    protected void validateProjectDependencyConfiguration(ProjectDependency dependency) {
+        if (GradleVersion.current().compareTo(GradleVersion.version("9.0")) >= 0
+                && dependency.getTargetConfiguration() == 'archives') {
+            project.getLogger().warn("WARNING: Using 'configuration:archives' with project dependencies is deprecated in Gradle 9. " +
+                    "This may lead to deployment problems. " +
+                    "Please create a custom configuration (e.g., 'warOnly', 'jarOnly') and use that instead. " +
+                    "See migration guide for more information.")
+        }
+    }
+    
+    protected void validateSimpleProjectDependency(Project project, ProjectDependency dependency) {
+        if (GradleVersion.current().baseVersion >= GradleVersion.version("9.0")
+                && dependency.getTargetConfiguration() == null) {
+            project.getLogger().warn("WARNING: Simple project dependencies like project(':jar') are not recommended in Gradle 9. " +
+                    "This may lead to deployment problems. " +
+                    "Please specify a configuration explicitly: project(path: ':jar', configuration: 'jarOnly') " +
+                    "See migration guide for more information.")
+        }
+    }
 }

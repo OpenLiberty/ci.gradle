@@ -22,8 +22,8 @@ repositories {
 }
 
 dependencies {
-    deploy project(path:':war', configuration:'archives')
-    deploy project(path:':jar', configuration:'archives')
+    deploy project(path:':war', configuration:'warOnly')
+    deploy project(path:':jar', configuration:'jarOnly')
     testImplementation 'org.junit.jupiter:junit-jupiter:5.11.0'
     libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: runtimeVersion
 }

@@ -35,6 +35,7 @@ import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ModuleDependency
+import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.bundling.War
 import org.gradle.plugins.ear.Ear
@@ -46,6 +47,7 @@ import java.nio.file.StandardCopyOption
 import java.util.Map.Entry
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import org.gradle.util.GradleVersion
 
 abstract class AbstractServerTask extends AbstractLibertyTask {
 
@@ -1201,4 +1203,14 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         }
     }
 
+
+    protected void validateProjectDependencyConfiguration(ProjectDependency dependency) {
+        if (GradleVersion.current().compareTo(GradleVersion.version("9.0")) >= 0
+                && dependency.getTargetConfiguration() == 'archives') {
+            project.getLogger().warn("WARNING: Using 'configuration:archives' with project dependencies is deprecated in Gradle 9. " +
+                    "This may lead to deployment problems. " +
+                    "Please create a custom configuration (e.g., 'warOnly', 'jarOnly') and use that instead. " +
+                    "See migration guide for more information.")
+        }
+    }
 }
