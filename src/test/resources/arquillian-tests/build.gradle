@@ -8,7 +8,7 @@ buildscript {
     }
     dependencies {
         classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
-        classpath "io.spring.gradle:dependency-management-plugin:1.1.4"
+        classpath "io.spring.gradle:dependency-management-plugin:1.1.7"
     }
 }
 
