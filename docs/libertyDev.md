@@ -38,10 +38,7 @@ The following are dev mode supported code changes. Changes to your server such a
 Dev mode can be run on a single Gradle project or on a multi-project build (a project consisting of multiple projects specified as include(<module_name_one>,<module_name_two>,....) section of its settings.gradle). When run on a single Gradle project, only changes within that project are detected and hot deployed. When run on a multi-project build, changes in all projects are detected and hot deployed according to the Gradle build order. Note that any projects that other projects rely on as a compile dependency must have a non-empty Java source folder with Java file(s) before starting dev mode, otherwise the other projects may fail to compile.
 
 To start dev mode on a multi-project build by using the short-form `libertyDev` task for the Liberty Gradle plugin:
-1. Do one of the following:
-* Define the Liberty Gradle plugin in the multi-project build.gradle,
-* or define the Liberty Gradle plugin in the build.gradle of every subproject.
-
+1. Define the Liberty Gradle plugin in the build.gradle of the project that packages and deploys the application, such as an EAR or WAR project.
 2. If the Liberty Gradle plugin is defined in your `build.gradle` file(s), ensure it is at version `3.9.2` or later.
 3. From the directory containing the multi-project `build.gradle`, run:
 ```
