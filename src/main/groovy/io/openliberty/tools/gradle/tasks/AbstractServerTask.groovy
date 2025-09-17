@@ -26,6 +26,7 @@ import io.openliberty.tools.common.plugins.util.DevUtil
 import io.openliberty.tools.common.plugins.util.LibertyPropFilesUtility
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.gradle.utils.CommonLogger
+import io.openliberty.tools.gradle.utils.GradleUtils
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.io.filefilter.FileFilterUtils
@@ -868,8 +869,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         if (server.serverEnvFile != null && server.serverEnvFile.exists()) {
             if (serverEnvPath != null) {
                 logger.debug("The serverEnvFile "+ server.serverEnvFile.getCanonicalPath() + " is merged with the " + serverEnvPath + " file.")
-            }
-            else {
+            } else {
                 logger.debug("The serverEnvFile "+ server.serverEnvFile.getCanonicalPath() + " is merged with the " + getServerDir(project).getCanonicalPath() + " file.")
             }
             Properties configuredServerEnvProps = convertServerEnvToProperties(server.serverEnvFile);
@@ -880,8 +880,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         if (!configuredProps.isEmpty()) {
             if (serverEnvPath != null) {
                 logger.debug("The " + serverEnvPath + " file is merged with inlined configuration.")
-            }
-            else {
+            } else {
                 logger.debug("The " + getServerDir(project).getCanonicalPath() + " file is merged with inlined configuration.")
             }
 
@@ -1205,12 +1204,6 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
 
 
     protected void validateProjectDependencyConfiguration(ProjectDependency dependency) {
-        if (GradleVersion.current().compareTo(GradleVersion.version("9.0")) >= 0
-                && dependency.getTargetConfiguration() == 'archives') {
-            project.getLogger().warn("WARNING: Using 'configuration:archives' with project dependencies is deprecated in Gradle 9. " +
-                    "This may lead to deployment problems. " +
-                    "Please create a custom configuration (e.g., 'warOnly', 'jarOnly') and use that instead. " +
-                    "See migration guide for more information.")
-        }
+        GradleUtils.validateProjectDependencyConfiguration(project, dependency)
     }
 }
