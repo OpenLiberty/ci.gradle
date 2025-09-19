@@ -103,8 +103,8 @@ class Liberty implements Plugin<Project> {
                 Dependency[] deps = project.configurations.deploy.getAllDependencies().toArray()
                 deps.each { Dependency dep ->
                     if (dep instanceof ProjectDependency) {
-                        validateProjectDependencyConfiguration((ProjectDependency) dep)
-                        validateSimpleProjectDependency((ProjectDependency) dep)
+                        validateProjectDependencyConfiguration(project, (ProjectDependency) dep)
+                        validateSimpleProjectDependency(project, (ProjectDependency) dep)
                         def projectPath = dep.getPath()
                         def projectDep = project.findProject(projectPath)
                         if (projectDep.plugins.hasPlugin('war')) {
@@ -204,11 +204,11 @@ class Liberty implements Plugin<Project> {
         return new File(installDir, 'wlp')
     }
 
-    protected void validateProjectDependencyConfiguration(ProjectDependency dependency) {
+    protected void validateProjectDependencyConfiguration(Project project, ProjectDependency dependency) {
         GradleUtils.validateProjectDependencyConfiguration(project, dependency)
     }
     
-    protected void validateSimpleProjectDependency(ProjectDependency dependency) {
+    protected void validateSimpleProjectDependency(Project project, ProjectDependency dependency) {
         GradleUtils.validateSimpleProjectDependency(project, dependency)
     }
 }
