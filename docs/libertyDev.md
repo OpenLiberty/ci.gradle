@@ -39,7 +39,7 @@ Dev mode can be run on a single Gradle project or on a multi-project build (a pr
 
 To start dev mode on a multi-project build by using the short-form `libertyDev` task for the Liberty Gradle plugin:
 1. Define the Liberty Gradle plugin in the build.gradle of the project that packages and deploys the application, such as an EAR or WAR project.
-2. Ensure it is at version `3.9.2` or later.
+2. Ensure the plugin version is at `3.9.2` or later.
 3. From the directory containing the build.gradle with the Liberty Gradle plugin defined or the directory containing the multi-project `build.gradle`, run:
 ```
 $ gradle libertyDev
