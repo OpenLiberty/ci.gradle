@@ -26,6 +26,7 @@ import io.openliberty.tools.common.plugins.util.DevUtil
 import io.openliberty.tools.common.plugins.util.LibertyPropFilesUtility
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.gradle.utils.CommonLogger
+import io.openliberty.tools.gradle.utils.GradleUtils
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.io.filefilter.FileFilterUtils
@@ -35,6 +36,7 @@ import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ModuleDependency
+import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.bundling.War
 import org.gradle.plugins.ear.Ear
@@ -46,6 +48,7 @@ import java.nio.file.StandardCopyOption
 import java.util.Map.Entry
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import org.gradle.util.GradleVersion
 
 abstract class AbstractServerTask extends AbstractLibertyTask {
 
@@ -866,8 +869,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         if (server.serverEnvFile != null && server.serverEnvFile.exists()) {
             if (serverEnvPath != null) {
                 logger.debug("The serverEnvFile "+ server.serverEnvFile.getCanonicalPath() + " is merged with the " + serverEnvPath + " file.")
-            }
-            else {
+            } else {
                 logger.debug("The serverEnvFile "+ server.serverEnvFile.getCanonicalPath() + " is merged with the " + getServerDir(project).getCanonicalPath() + " file.")
             }
             Properties configuredServerEnvProps = convertServerEnvToProperties(server.serverEnvFile);
@@ -878,8 +880,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         if (!configuredProps.isEmpty()) {
             if (serverEnvPath != null) {
                 logger.debug("The " + serverEnvPath + " file is merged with inlined configuration.")
-            }
-            else {
+            } else {
                 logger.debug("The " + getServerDir(project).getCanonicalPath() + " file is merged with inlined configuration.")
             }
 
@@ -1201,4 +1202,8 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         }
     }
 
+
+    protected void validateProjectDependencyConfiguration(ProjectDependency dependency) {
+        GradleUtils.validateProjectDependencyConfiguration(project, dependency)
+    }
 }
