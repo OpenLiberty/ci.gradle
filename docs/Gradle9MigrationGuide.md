@@ -38,7 +38,7 @@ This change is required in all your build scripts that specify Java compatibilit
 
 **Reference Documentation:**
 - [Toolchains for JVM projects](https://docs.gradle.org/9.0.0/userguide/toolchains.html#toolchains)
-- [Java Plugin - Compatibility](https://docs.gradle.org/9.0.0/userguide/java_plugin.html#sec:java_cross_compilation)
+- [Java Plugin - Compatibility](https://docs.gradle.org/current/userguide/java_plugin.html#toolchain_and_compatibility)
 
 ## Build Configuration Changes
 
