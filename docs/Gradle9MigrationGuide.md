@@ -295,9 +295,9 @@ This guide covers the most common changes needed when migrating from Gradle 8 to
 
 If you experience issues not covered in this guide:
 
-1. Check the [Gradle 9.0 Release Notes](https://docs.gradle.org/9.0.0/release-notes.html) for additional information
-2. Review the [Gradle 9.0 Upgrading Guide](https://docs.gradle.org/9.0.0/userguide/upgrading_major_version_9.html) for more detailed explanations
-3. Consult the [Liberty Gradle Plugin documentation](https://github.com/OpenLiberty/ci.gradle) for Liberty-specific guidance
-4. Report issues or request help through our [GitHub Issues](https://github.com/OpenLiberty/ci.gradle/issues) if you encounter problems that aren't addressed by the documentation
+1. Check the [Gradle 9.0 Release Notes](https://docs.gradle.org/9.0.0/release-notes.html) for additional information.
+2. Review the [Gradle 9.0 Upgrading Guide](https://docs.gradle.org/9.0.0/userguide/upgrading_major_version_9.html) for more detailed explanations.
+3. Consult the [Liberty Gradle Plugin documentation](https://github.com/OpenLiberty/ci.gradle) for Liberty-specific guidance.
+4. Report issues or request help through our [GitHub Issues](https://github.com/OpenLiberty/ci.gradle/issues) if you encounter problems that aren't addressed by the documentation.
 
 We're committed to supporting your migration to Gradle 9 and will continue to update this guide based on community feedback.
