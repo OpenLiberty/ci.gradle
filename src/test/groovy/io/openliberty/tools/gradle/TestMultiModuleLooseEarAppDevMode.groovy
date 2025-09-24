@@ -15,7 +15,28 @@ class TestMultiModuleLooseEarAppDevMode extends BaseDevTest {
     public static void setup() throws IOException, InterruptedException, FileNotFoundException {
         createDir(buildDir);
         createTestProject(buildDir, resourceDir, buildFilename);
-        new File(buildDir, "build").createNewFile();
+        
+        // Create necessary directories to prevent "Could not create problems-report directory" error
+        File problemsReportDir = new File(buildDir, "build/reports/problems")
+        if (!problemsReportDir.exists()) {
+            boolean created = problemsReportDir.mkdirs()
+            System.out.println("Creating problems-report directory: " + problemsReportDir.getAbsolutePath() + " - Success: " + created)
+            if (created) {
+                problemsReportDir.setWritable(true, false)
+            }
+        }
+        
+        // Create ear module problems directory
+        File earProblemReportDir = new File(buildDir, "ear/build/reports/problems")
+        if (!earProblemReportDir.exists()) {
+            boolean created = earProblemReportDir.mkdirs()
+            System.out.println("Creating ear problems-report directory: " + earProblemReportDir.getAbsolutePath() + " - Success: " + created)
+            if (created) {
+                earProblemReportDir.setWritable(true, false)
+            }
+        }
+        
+        new File(buildDir, "build").mkdirs();
         runDevMode("--skipTests", buildDir)
     }
 

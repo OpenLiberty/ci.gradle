@@ -34,7 +34,7 @@ jobs:
       - name: Setup Java ${{ matrix.java }}
         uses: actions/setup-java@v3
         with:
-          distribution: 'semeru'
+          distribution: 'adopt'
           java-version: ${{ matrix.java }}
           cache: 'gradle'
       - name: Checkout ci.common
@@ -79,7 +79,7 @@ jobs:
       - name: Run tests with Gradle on Ubuntu
         run:
           # ./gradlew clean install check -P"test.exclude"="**/TestSpringBootApplication30*,**/TestCompileJSPSource17*,**/DevContainerTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --warning-mode=all
-          ./gradlew clean install check -P"test.include"="**/AbstractIntegrationTest*,**/LibertyTest*,**/BaseDevTest*,**/DevTest*,**/DevRecompileTest*,**/PollingDevTest*,**/*Install*Feature*,**/InstallLiberty*,**/InstallDir*,**/LibertyApplicationConfiguration*,**/TestAppConfig*,**/TestAppLists*,**/TestGetApp*,**/TestAppendServerEnvWith*,**/LibertyPackage_*,**/TestCreate*,**/NoServerNameTest*,**/NoAppsTemplateTest*,**/TestCompileJSP*,**/Verify*,**/TestEclipseFacets*,**/*GenerateFeature*,**/PrepareFeatureTest*,**/PluginRepoTest*,**/TestConfigDropinsApp*,**/TestEtcOutputDir*,**/TestOutputDirs*,**/TestPluginConfigFile*,**/TestPluginConfigFile*,**/TestStripVersion*,**/TestWarTasksWithDifferentDependencies*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --warning-mode=all
+          ./gradlew clean install check -P"test.include"="**/AbstractIntegrationTest*,**/LibertyTest*,**/BaseDevTest*,**/DevTest*,**/DevRecompileTest*,**/PollingDevTest*,**/*Install*Feature*,**/InstallLiberty*,**/InstallDir*,**/LibertyApplicationConfiguration*,**/TestAppConfig*,**/TestAppLists*,**/TestGetApp*,**/TestAppendServerEnvWith*,**/LibertyPackage_*,**/TestCreate*,**/NoServerNameTest*,**/NoAppsTemplateTest*,**/TestCompileJSP*,**/Verify*,**/TestEclipseFacets*,**/*GenerateFeature*,**/PrepareFeatureTest*,**/PluginRepoTest*,**/TestConfigDropinsApp*,**/TestEtcOutputDir*,**/TestOutputDirs*,**/TestPluginConfigFile*,**/TestPluginConfigFile*,**/TestStripVersion*,**/TestWarTasksWithDifferentDependencies*,**/TestLoose*,**/TestMultiModuleLoose*,**/ConfigureArquillianTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --warning-mode=all
       # Copy build reports and upload artifact if build failed
       - name: Copy build/report/tests/test for upload
         if: ${{ failure() }}
@@ -122,7 +122,7 @@ jobs:
       - name: Setup Java ${{ matrix.java }}
         uses: actions/setup-java@v3
         with:
-          distribution: 'semeru'
+          distribution: 'adopt'
           java-version: ${{ matrix.java }}
           cache: 'gradle'
       # Moving and cloning to C: drive for Windows for more disk space
@@ -170,7 +170,7 @@ jobs:
         # For Java 8, TestCreateWithConfigDir is excluded because test_micro_clean_liberty_plugin_variable_config runs out of memory
         # run: ./gradlew clean install check -P"test.exclude"="${{env.TEST_EXCLUDE}}" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
         # run: ./gradlew clean install check -P"test.include"="'**/AbstractIntegrationTest*,**/LibertyTest*,**/BaseDevTest*,**/DevTest*,**/DevRecompileTest*,**/PollingDevTest*'" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
-        run: ./gradlew clean install check -P"test.include"="'**/AbstractIntegrationTest*,**/BaseDevTest*,**/DevTest*,**/DevRecompileTest*,**/*Install*Feature*,**/InstallLiberty*,**/InstallDir*,**/LibertyApplicationConfiguration*,**/TestAppConfig*,**/TestAppLists*,**/TestGetApp*,**/TestAppendServerEnvWith*,**/LibertyPackage_*,**/TestCreate*,**/NoServerNameTest*,**/NoAppsTemplateTest*,**/TestCompileJSP*,**/Verify*,**/TestEclipseFacets*,**/PrepareFeatureTest*,**/PluginRepoTest*,**/TestConfigDropinsApp*,**/TestEtcOutputDir*,**/TestOutputDirs*,**/TestPluginConfigFile*,**/TestPluginConfigFile*,**/TestStripVersion*,**/TestWarTasksWithDifferentDependencies*'" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
+        run: ./gradlew clean install check -P"test.include"="'**/AbstractIntegrationTest*,**/BaseDevTest*,**/DevTest*,**/DevRecompileTest*,**/*Install*Feature*,**/InstallLiberty*,**/InstallDir*,**/LibertyApplicationConfiguration*,**/TestAppConfig*,**/TestAppLists*,**/TestGetApp*,**/TestAppendServerEnvWith*,**/LibertyPackage_*,**/TestCreate*,**/NoServerNameTest*,**/NoAppsTemplateTest*,**/TestCompileJSP*,**/Verify*,**/TestEclipseFacets*,**/PrepareFeatureTest*,**/PluginRepoTest*,**/TestConfigDropinsApp*,**/TestEtcOutputDir*,**/TestOutputDirs*,**/TestPluginConfigFile*,**/TestPluginConfigFile*,**/TestStripVersion*,**/TestWarTasksWithDifferentDependencies*,**/TestLoose*,**/TestMultiModuleLoose*,**/ConfigureArquillianTest*'" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
         timeout-minutes: 75
       # Copy build reports and upload artifact if build failed
       - name: Copy build/report/tests/test for upload
