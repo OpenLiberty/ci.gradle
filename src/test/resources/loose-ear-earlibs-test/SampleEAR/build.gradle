@@ -23,8 +23,8 @@ repositories {
 
 dependencies {
     deploy project(':SampleEJB')
-    earlib project(path:':SampleWAR', configuration:'archives')
-    earlib project(path:':SampleWAR2', configuration:'archives')
+    earlib project(path:':SampleWAR', configuration:'warOnly')
+    earlib project(path:':SampleWAR2', configuration:'warOnly')
     testImplementation group: 'commons-httpclient', name: 'commons-httpclient', version:'3.1'
     testImplementation group: 'junit', name: 'junit', version:'4.13.1'
     libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: runtimeVersion

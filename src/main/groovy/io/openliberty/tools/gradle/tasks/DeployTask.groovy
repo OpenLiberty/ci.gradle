@@ -170,7 +170,8 @@ class DeployTask extends AbstractServerTask {
     }
 
 
-    private String getArchiveOutputPath() {
+    @Internal
+    protected String getArchiveOutputPath() {
         String archiveOutputPath;
 
         if (isSpringBoot2plus(springBootVersion)) {
@@ -191,11 +192,12 @@ class DeployTask extends AbstractServerTask {
     }
 
 
-    private String getTargetLibCachePath() {
+    @Internal
+    protected String getTargetLibCachePath() {
         new File(getInstallDir(project), "usr/shared/resources/lib.index.cache").absolutePath
     }
 
-    private String getTargetThinAppPath(String appsDir, String sourceArchiveName) {
+    protected String getTargetThinAppPath(String appsDir, String sourceArchiveName) {
         String appsFolder
         if (appsDir=="dropins") {
             appsFolder = "dropins/spring"
@@ -206,7 +208,7 @@ class DeployTask extends AbstractServerTask {
         new File(createApplicationFolder(appsFolder).absolutePath, sourceArchiveName)
     }
 
-    private String invokeThinOperation(String appsDir) {
+    protected String invokeThinOperation(String appsDir) {
         Map<String, String> params = buildLibertyMap(project);
         String targetThinAppPath
         project.ant.taskdef(name: 'invokeUtil',
@@ -230,13 +232,13 @@ class DeployTask extends AbstractServerTask {
         return targetThinAppPath;
     }
 
-    private boolean isUtilityAvailable(File installDirectory, String utilityName) {
+    protected boolean isUtilityAvailable(File installDirectory, String utilityName) {
             String utilFileName = isWindows ? utilityName+".bat" : utilityName;
             File installUtil = new File(installDirectory, "bin/"+utilFileName);
             return installUtil.exists();
     }
 
-    private installSpringBootFeatureIfNeeded() {
+    protected installSpringBootFeatureIfNeeded() {
         File installDir = getInstallDir(project)
         if (!isUtilityAvailable(installDir, "springBootUtility") && isUtilityAvailable(installDir, "featureUtility")) {
             String fileSuffix = isWindows ? ".bat" : ""
@@ -430,7 +432,7 @@ class DeployTask extends AbstractServerTask {
         looseEar.addManifestFile(manifestFile)
     }
 
-    private void processDeployDependencies(LooseEarApplication looseEar, Task task) {
+    protected void processDeployDependencies(LooseEarApplication looseEar, Task task) {
         HashMap<File, Dependency> completeDeployDeps = new HashMap<File, Dependency>();
 
         File[] filesAsDeps = task.getProject().configurations.deploy.getFiles().toArray()
@@ -447,7 +449,8 @@ class DeployTask extends AbstractServerTask {
             Dependency dependency = entry.getValue();
             File dependencyFile = entry.getKey();
 
-            if (dependency instanceof ProjectDependency) { 
+            if (dependency instanceof ProjectDependency) {
+                validateProjectDependencyConfiguration(dependency)
                 def projectPath = dependency.getPath()
                 Project dependencyProject = task.getProject().findProject(projectPath)
                 String projectType = FilenameUtils.getExtension(dependencyFile.toString())
@@ -480,7 +483,7 @@ class DeployTask extends AbstractServerTask {
         }
     }
 
-    private void processEarlibDependencies (LooseEarApplication looseEar, Task task) {
+    protected void processEarlibDependencies (LooseEarApplication looseEar, Task task) {
         //Add earlib dependencies, requires resolving and checking for transitive dependencies
         //Using Dependency to determine how to add the resource to the loose ear
         //Resolved dependencies are used to get the tranistive dependencies to add to the loose ear
@@ -504,6 +507,7 @@ class DeployTask extends AbstractServerTask {
             ResolvedDependency resolvedDependency = entry.getValue();
 
             if (dependency instanceof ProjectDependency) { //Adding the project archive and it's transitve dependencies to the loose ear
+                validateProjectDependencyConfiguration((ProjectDependency) dependency)
                 def projectPath = dependency.getPath()
                 Project dependencyProject = task.getProject().findProject(projectPath)
 
@@ -557,7 +561,7 @@ class DeployTask extends AbstractServerTask {
         }
     }
 
-    private void addEmbeddedLib(Element parent, Project project, LooseApplication looseApp, String dir) throws Exception {
+    protected void addEmbeddedLib(Element parent, Project project, LooseApplication looseApp, String dir) throws Exception {
         try {
             Set<File> filesAsDeps = new HashSet<File>()
             //Get the compile and implementation dependencies that are included in the war
@@ -725,3 +729,4 @@ class DeployTask extends AbstractServerTask {
         }
     }
 }
+
