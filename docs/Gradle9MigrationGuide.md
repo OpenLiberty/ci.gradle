@@ -262,8 +262,8 @@ If you're using the Arquillian framework with your Liberty projects, be aware th
 
 Spring Boot applications currently lack support for Gradle 9. If you're using Spring Boot with your Liberty projects, you will need to:
 
-1. Continue using Gradle 8.x for Spring Boot applications until official Gradle 9 support is added to Spring Boot
-2. If you must use Gradle 9, you may need to implement custom workarounds or wait for Spring Boot to release a version with Gradle 9 compatibility
+1. Continue using Gradle 8.x for Spring Boot applications until official Gradle 9 support is added to Spring Boot.
+2. If you must use Gradle 9, you may need to implement custom workarounds or wait for Spring Boot to release a version with Gradle 9 compatibility.
 
 This is a known limitation affecting all current Spring Boot versions as of September 2025.
 
