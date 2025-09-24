@@ -65,9 +65,9 @@ test {
 
 **Why this change is necessary:** In Gradle 9, the `failOnNoDiscoveredTests` property is set to `true` by default. This means your build will fail if your test task doesn't find any tests to run. This can be problematic if you have:
 
-- Conditional tests that might not always be present
-- Test filtering that sometimes results in no tests
-- Multi-project builds where some projects might not have tests
+- Conditional tests that might not always be present.
+- Test filtering that sometimes results in no tests.
+- Multi-project builds where some projects might not have tests.
 
 Setting `failOnNoDiscoveredTests = false` allows your build to continue even when no tests are found in a particular module or configuration.
 
@@ -252,8 +252,8 @@ While migrating to Gradle 9, you may encounter dependency resolution issues due 
 
 If you're using the Arquillian framework with your Liberty projects, be aware that Gradle 9 is not fully supported with the Arquillian framework. You have two options:
 
-1. Continue using Gradle 8.5 for projects that depend on Arquillian
-2. If you must use Gradle 9 for your main project but need Arquillian compatibility, consider maintaining a separate standalone test project with Gradle 8.5 that imports your main project's artifacts for testing
+1. Continue using Gradle 8.5 for projects that depend on Arquillian.
+2. If you must use Gradle 9 for your main project but need Arquillian compatibility, consider maintaining a separate standalone test project with Gradle 8.5 that imports your main project's artifacts for testing.
 
 **Reference Documentation:**
 - [Arquillian Documentation](https://arquillian.org/guides/)
