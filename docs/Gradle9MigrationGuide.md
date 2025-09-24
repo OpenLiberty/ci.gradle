@@ -94,7 +94,6 @@ clean.mustRunAfter(libertyStop)
 
 **Reference Documentation:**
 - [Gradle Task Ordering](https://docs.gradle.org/9.0.0/userguide/controlling_task_execution.html#sec:ordering_tasks)
-- [Gradle Controlling Task Execution](https://docs.gradle.org/9.0.0/userguide/controlling_task_execution.html)
 - [Gradle Understanding Tasks](https://docs.gradle.org/9.0.0/userguide/more_about_tasks.html)
 
 ### JSP Compilation
