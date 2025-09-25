@@ -65,9 +65,9 @@ test {
 
 **Why this change is necessary:** In Gradle 9, the `failOnNoDiscoveredTests` property is set to `true` by default. This means your build will fail if your test task doesn't find any tests to run. This can be problematic if you have:
 
-- Conditional tests that might not always be present.
-- Test filtering that sometimes results in no tests.
-- Multi-project builds where some projects might not have tests.
+- Conditional tests that might not always be present
+- Test filtering that sometimes results in no tests
+- Multi-project builds where some projects might not have tests
 
 Setting `failOnNoDiscoveredTests = false` allows your build to continue even when no tests are found in a particular module or configuration.
 
