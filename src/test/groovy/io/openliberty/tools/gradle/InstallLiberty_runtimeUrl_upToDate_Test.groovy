@@ -41,7 +41,7 @@ class InstallLiberty_runtimeUrl_upToDate_Test extends AbstractIntegrationTest{
 
     @Test
     public void test_installLiberty_upToDate() {
-        assert runTaskCheckForUpToDate(buildDir, 'installLiberty', "-PlibertyRuntimeUrl=https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-01-13_1459/openliberty-javaee8-21.0.0.1.zip")
-        assertFalse runTaskCheckForUpToDate(buildDir, 'installLiberty', "-PlibertyRuntimeUrl=https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-02-09_1100/openliberty-javaee8-21.0.0.2.zip")
+        assert runTaskCheckForUpToDate(buildDir, 'installLiberty', "-PlibertyRuntimeUrl=https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2022-01-03_1900/openliberty-jakartaee9-22.0.0.1.zip")
+        assertFalse runTaskCheckForUpToDate(buildDir, 'installLiberty', "-PlibertyRuntimeUrl=https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/22.0.0.2/openliberty-jakartaee9-22.0.0.2.zip")
     }
 }

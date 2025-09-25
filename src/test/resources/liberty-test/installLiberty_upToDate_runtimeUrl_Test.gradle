@@ -14,7 +14,7 @@ buildscript {
 apply plugin: 'liberty'
 
 ext {
-    libertyRuntimeUrl = project.hasProperty('libertyRuntimeUrl') ? project.getProperty('libertyRuntimeUrl') : "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2021-01-13_1459/openliberty-javaee8-21.0.0.1.zip"
+    libertyRuntimeUrl = project.hasProperty('libertyRuntimeUrl') ? project.getProperty('libertyRuntimeUrl') : "https://public.dhe.ibm.com/ibmdl/export/pub/software/openliberty/runtime/release/2022-01-03_1900/openliberty-jakartaee9-22.0.0.1.zip"
 }
 
 
