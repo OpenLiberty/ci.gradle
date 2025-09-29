@@ -22,6 +22,8 @@ repositories {
 }
 
 dependencies {
+    earlib(files("lib/test.jar"))
+    earlib(group: 'org.apache.commons', name: 'commons-lang3', version: '3.18.0')
     deploy project(path:':war', configuration:'archives')
     deploy project(path:':jar', configuration:'archives')
     testImplementation 'org.junit.jupiter:junit-jupiter:5.11.0'

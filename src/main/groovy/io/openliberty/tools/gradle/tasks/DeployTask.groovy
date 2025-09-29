@@ -486,7 +486,7 @@ class DeployTask extends AbstractServerTask {
 
         Dependency[] earlibDeps = task.getProject().configurations.earlib.getAllDependencies().toArray()
         ResolvedDependency[] resolvedEarlibDeps = task.getProject().configurations.earlib.getResolvedConfiguration().getFirstLevelModuleDependencies().toArray()
-
+        Set<File>earFileDeps = task.getProject().configurations.earlib.getFiles();
         for (Dependency dep : earlibDeps) {
             for (ResolvedDependency resolvedDep : resolvedEarlibDeps) {
                 if (dep.getName().equals(resolvedDep.getModuleName())) {
@@ -545,12 +545,18 @@ class DeployTask extends AbstractServerTask {
             }
             else if (dependency instanceof ExternalModuleDependency) { //Adding all artifacts belonging to this dependency and its children
                 resolvedDependency.getAllModuleArtifacts().each {
-                    looseEar.getConfig().addFile(it.getFile(), "/WEB-INF/lib/" + it.getName())
+                    looseEar.getConfig().addFile(it.getFile(), "/lib/" + it.getFile().getName())
+                    // remove resolved earlib files dependency
+                    earFileDeps.remove(it.getFile());
                 }
             }
             else {
                 logger.warn("Dependency " + dependency.getName() + "could not be added to the looseApplication, as it is neither a ProjectDependency or ExternalModuleDependency")
             }
+        }
+        // all pending earlib files dependencies are added
+        for(File file:earFileDeps){
+            looseEar.getConfig().addFile(file, "/lib/" + file.getName())
         }
     }
 
