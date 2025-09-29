@@ -486,7 +486,7 @@ class DeployTask extends AbstractServerTask {
 
         Dependency[] earlibDeps = task.getProject().configurations.earlib.getAllDependencies().toArray()
         ResolvedDependency[] resolvedEarlibDeps = task.getProject().configurations.earlib.getResolvedConfiguration().getFirstLevelModuleDependencies().toArray()
-        Set<File>earFileDeps = task.getProject().configurations.earlib.getFiles();
+        Set<File>earlibFileDeps = task.getProject().configurations.earlib.getFiles();
         for (Dependency dep : earlibDeps) {
             for (ResolvedDependency resolvedDep : resolvedEarlibDeps) {
                 if (dep.getName().equals(resolvedDep.getModuleName())) {
@@ -530,6 +530,7 @@ class DeployTask extends AbstractServerTask {
                         projectDependencyArtifacts.each { //Adding transitive dependecies from project
                             looseEar.getConfig().addFile(it.getFile(), "/WEB-INF/lib/" + it.getName())
                         }
+                        earlibFileDeps.remove(projectArtifact.getFile());
                         break;
                     case "war":
                         Element warElement = looseEar.addWarModule(dependencyProject)
@@ -537,6 +538,7 @@ class DeployTask extends AbstractServerTask {
                         projectDependencyArtifacts.each { //Adding transitive dependecies from war project
                             looseEar.getConfig().addFile(it.getFile(), "/WEB-INF/lib/" + it.getName())
                         }
+                        earlibFileDeps.remove(projectArtifact.getFile());
                         break;
                     default:
                         logger.warn('Application ' + dependencyProject.getName() + ' is expressed as ' + projectType + ' which is not a supported input type. Define applications using Task or File objects of type war, ear, or jar.')
@@ -547,7 +549,7 @@ class DeployTask extends AbstractServerTask {
                 resolvedDependency.getAllModuleArtifacts().each {
                     looseEar.getConfig().addFile(it.getFile(), "/lib/" + it.getFile().getName())
                     // remove resolved earlib files dependency
-                    earFileDeps.remove(it.getFile());
+                    earlibFileDeps.remove(it.getFile());
                 }
             }
             else {
@@ -555,7 +557,7 @@ class DeployTask extends AbstractServerTask {
             }
         }
         // all pending earlib files dependencies are added
-        for(File file:earFileDeps){
+        for(File file:earlibFileDeps){
             looseEar.getConfig().addFile(file, "/lib/" + file.getName())
         }
     }
