@@ -477,16 +477,27 @@ class DeployTask extends AbstractServerTask {
             }
         }
     }
-
+    /**
+     * Add earlib dependencies, requires resolving and checking for transitive dependencies
+     * Using Dependency to determine how to add the resource to the loose ear
+     * Resolved dependencies are used to get the tranistive dependencies to add to the loose ear
+     * There are 3 ways used mainly to configure earlibs
+     * 1. For artifacts from a repository: Use the standard GAV (Group, Artifact, Version) coordinates.
+     *  eg:-  earlib 'org.slf4j:slf4j-api:1.7.30' or earlib group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0'
+     * 2. For artifacts from a local project: Use a multi-project build with the project() dependency notation. This is the most recommended way to manage dependencies between modules.
+     *  eg:-  earlib project(':my-shared-library')
+     * 3. Local Files Only: This approach is for files that are already present in your project's file system, not for artifacts to be downloaded from a repository.
+     *  eg:- earlib files('libs/my-utility-1.0.jar', 'libs/some-other-lib-2.5.jar') or earlib fileTree(dir: 'libs', include: '*.jar')
+     * @param looseEar
+     * @param task
+     */
     private void processEarlibDependencies (LooseEarApplication looseEar, Task task) {
-        //Add earlib dependencies, requires resolving and checking for transitive dependencies
-        //Using Dependency to determine how to add the resource to the loose ear
-        //Resolved dependencies are used to get the tranistive dependencies to add to the loose ear
-        HashMap<Dependency, ResolvedDependency> completeEarlibDeps = new HashMap<Dependency, ResolvedDependency>()
+         HashMap<Dependency, ResolvedDependency> completeEarlibDeps = new HashMap<Dependency, ResolvedDependency>()
 
         Dependency[] earlibDeps = task.getProject().configurations.earlib.getAllDependencies().toArray()
         ResolvedDependency[] resolvedEarlibDeps = task.getProject().configurations.earlib.getResolvedConfiguration().getFirstLevelModuleDependencies().toArray()
-
+        // get all earlib file dependencies, this would include files of all three types mentioned above
+        Set<File>earlibFileDeps = task.getProject().configurations.earlib.getFiles();
         for (Dependency dep : earlibDeps) {
             for (ResolvedDependency resolvedDep : resolvedEarlibDeps) {
                 if (dep.getName().equals(resolvedDep.getModuleName())) {
@@ -500,8 +511,9 @@ class DeployTask extends AbstractServerTask {
         for (Map.Entry<Dependency, ResolvedDependency> entry : completeEarlibDeps){
             Dependency dependency = entry.getKey();
             ResolvedDependency resolvedDependency = entry.getValue();
-
-            if (dependency instanceof ProjectDependency) { //Adding the project archive and it's transitve dependencies to the loose ear
+           if (dependency instanceof ProjectDependency) {
+                //Adding the project archive and it's transitve dependencies to the loose ear
+                //handling earlib dependencies of a local project earlib project(':my-shared-library')
                 Project dependencyProject = dependency.getDependencyProject()
 
                 ResolvedArtifact projectArtifact
@@ -530,6 +542,8 @@ class DeployTask extends AbstractServerTask {
                         projectDependencyArtifacts.each { //Adding transitive dependecies from project
                             looseEar.getConfig().addFile(it.getFile(), "/WEB-INF/lib/" + it.getName())
                         }
+                        // removing from file dependency to avoid duplication of config lines as it already added
+                        earlibFileDeps.remove(projectArtifact.getFile());
                         break;
                     case "war":
                         Element warElement = looseEar.addWarModule(dependencyProject)
@@ -537,20 +551,33 @@ class DeployTask extends AbstractServerTask {
                         projectDependencyArtifacts.each { //Adding transitive dependecies from war project
                             looseEar.getConfig().addFile(it.getFile(), "/WEB-INF/lib/" + it.getName())
                         }
+                        // removing from file dependency to avoid duplication of config lines as it already added
+                        earlibFileDeps.remove(projectArtifact.getFile());
                         break;
                     default:
                         logger.warn('Application ' + dependencyProject.getName() + ' is expressed as ' + projectType + ' which is not a supported input type. Define applications using Task or File objects of type war, ear, or jar.')
                         break;
                 }
             }
-            else if (dependency instanceof ExternalModuleDependency) { //Adding all artifacts belonging to this dependency and its children
+            else if (dependency instanceof ExternalModuleDependency) {
+                //Adding all artifacts belonging to this dependency and its children
+                //handles artifacts from a repository, eg:-   earlib 'org.slf4j:slf4j-api:1.7.30'
                 resolvedDependency.getAllModuleArtifacts().each {
-                    looseEar.getConfig().addFile(it.getFile(), "/WEB-INF/lib/" + it.getName())
+                    looseEar.getConfig().addFile(it.getFile(), "/lib/" + it.getFile().getName())
+                    // removing from file dependency to avoid duplication of config lines as it already added
+                    earlibFileDeps.remove(it.getFile());
                 }
             }
             else {
                 logger.warn("Dependency " + dependency.getName() + "could not be added to the looseApplication, as it is neither a ProjectDependency or ExternalModuleDependency")
             }
+        }
+
+        // all pending earlib files dependencies are added
+        // this would include Local Files like Legacy Libraries
+        // eg:- earlib files('libs/my-utility-1.0.jar', 'libs/some-other-lib-2.5.jar')
+        for(File file:earlibFileDeps){
+            looseEar.getConfig().addFile(file, "/lib/" + file.getName())
         }
     }
 
