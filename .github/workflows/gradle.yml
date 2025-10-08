@@ -66,7 +66,7 @@ jobs:
 
       - name: Run tests with Gradle on Ubuntu
         run:
-          ./gradlew clean install check -P"test.exclude"="**/TestSpringBootApplication*,**/DevContainerTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --warning-mode=all
+          ./gradlew clean install check -P"test.exclude"="**/TestSpringBootApplication2*,**/DevContainerTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --warning-mode=all
       # Copy build reports and upload artifact if build failed
       - name: Copy build/report/tests/test for upload
         if: ${{ failure() }}
@@ -95,7 +95,7 @@ jobs:
         java: [25, 21, 17]
     name: ${{ matrix.RUNTIME }} ${{ matrix.RUNTIME_VERSION }}, Java ${{ matrix.java }}, Windows
     env:
-      TEST_EXCLUDE: ${{ '**/Polling*,**/LibertyTest*,**/GenerateFeaturesTest*,**/TestSpringBootApplication*,**/DevContainerTest*' }}
+      TEST_EXCLUDE: ${{ '**/Polling*,**/LibertyTest*,**/GenerateFeaturesTest*,**/TestSpringBootApplication2*,**/DevContainerTest*' }}
     steps:
       # Checkout repos
       - name: Checkout ci.gradle

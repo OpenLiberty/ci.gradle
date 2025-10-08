@@ -917,7 +917,7 @@ class DevTask extends AbstractFeatureTask {
         public boolean compile(File dir) {
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
-
+            addLibertyRuntimeProperties(gradleBuildLauncher);
             try {
                 if (dir.equals(sourceDirectory)) {
                     runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources');
@@ -954,7 +954,7 @@ class DevTask extends AbstractFeatureTask {
 
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
-
+            addLibertyRuntimeProperties(gradleBuildLauncher);
             ArrayList<String> systemPropertyArgs = new ArrayList<String>();
 
             if (util.getHostName() != null) {
@@ -1504,11 +1504,11 @@ class DevTask extends AbstractFeatureTask {
     }
 
 
-    private void addLibertyRuntimeProperties(BuildLauncher gradleBuildLauncher) {
+    private void daddLibertyRuntimeProperties(BuildLauncher gradleBuildLauncher) {
         Set<Entry<Object, Object>> entries = project.getProperties().entrySet()
         for (Entry<Object, Object> entry : entries) {
             String key = (String) entry.getKey()
-            if (key.startsWith("liberty.runtime")) {
+            if (key.startsWith("liberty.runtime") || entry.value instanceof String) {
                 gradleBuildLauncher.addArguments("-P" + key + "=" + project.getProperty(key));
             }
         }
