@@ -1,6 +1,6 @@
 buildscript {
 	ext {
-		springBootVersion = '3.1.3'
+		springBootVersion = '3.5.6'
 	}
 	repositories {
 	    mavenLocal()
@@ -21,7 +21,7 @@ apply plugin: 'liberty'
 
 group = 'liberty.gradle'
 version = '1.0-SNAPSHOT'
-sourceCompatibility = 17
+compileJava.options.release = 17
 
 repositories {
 	mavenCentral()
@@ -29,7 +29,7 @@ repositories {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
-	libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-jakartaee10', version: '23.0.0.10'
+	libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-jakartaee10', version: runtimeVersion
 }
 
 bootJar {

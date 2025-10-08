@@ -83,6 +83,11 @@ java {
         if (System.getProperty('java.version').startsWith('21')) {
             languageVersion = JavaLanguageVersion.of(21)
         }
+
+        // Allow Java 25 as a compatible alternative
+        if (System.getProperty('java.version').startsWith('25')) {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
     }
 }
 
