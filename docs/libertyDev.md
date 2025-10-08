@@ -20,6 +20,7 @@ While dev mode is running, perform the following in the command terminal to run 
 * <kbd>t</kbd> or <kbd>Enter</kbd> - If `changeOnDemandTestAction` is enabled, type <kbd>t</kbd> and press <kbd>Enter</kbd> to run tests on demand. Otherwise, press <kbd>Enter</kbd>. 
 * <kbd>r</kbd> - To restart the server, type <kbd>r</kbd> and press <kbd>Enter</kbd>.
 * <kbd>h</kbd> - To see the help menu for available actions, type <kbd>h</kbd> and press <kbd>Enter</kbd>.
+* <kbd>p</kbd> - To see the port information, type <kbd>p</kbd> and press <kbd>Enter</kbd>.
 * <kbd>q</kbd> - stop the server and quit dev mode, press <kbd>Ctrl</kbd>-<kbd>C</kbd>, or type <kbd>q</kbd> and press <kbd>Enter</kbd>.
 
 ### Features
@@ -265,6 +266,7 @@ While dev mode is running in container mode, perform the following in the comman
 * <kbd>t</kbd> or <kbd>Enter</kbd> - If `changeOnDemandTestAction` is enabled, type <kbd>t</kbd> and press <kbd>Enter</kbd> to run tests on demand. Otherwise, press <kbd>Enter</kbd>. 
 * <kbd>r</kbd> - To rebuild the container image and restart the container, type <kbd>r</kbd> and press <kbd>Enter</kbd>.
 * <kbd>h</kbd> - To see the help menu for available actions, type <kbd>h</kbd> and press <kbd>Enter</kbd>.
+* <kbd>p</kbd> - To see the port information, type <kbd>p</kbd> and press <kbd>Enter</kbd>.
 * <kbd>q</kbd> - stop the server and quit dev mode, press <kbd>Ctrl</kbd>-<kbd>C</kbd>, or type <kbd>q</kbd> and press <kbd>Enter</kbd>.
 
 ### Linux Limitations
