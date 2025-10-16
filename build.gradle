@@ -5,7 +5,7 @@ apply plugin: "com.gradle.plugin-publish"
 apply plugin: 'base'
 
 group = 'io.openliberty.tools'
-version = '3.9.6-SNAPSHOT'
+version = '4.0.0-M1-SNAPSHOT'
 base {
     archivesName='liberty-gradle-plugin'
 }
@@ -87,7 +87,7 @@ java {
 }
 
 def libertyAntVersion = "1.9.17"
-def libertyCommonVersion = "1.8.40-SNAPSHOT"
+def libertyCommonVersion = "1.8.40"
 
 
 dependencies {
