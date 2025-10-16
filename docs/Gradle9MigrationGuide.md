@@ -2,6 +2,13 @@
 
 This guide provides step-by-step instructions for migrating your projects that use the Liberty Gradle Plugin from Gradle 8 to Gradle 9. It focuses on the key changes that affect end users and provides practical examples to help you update your build scripts.
 
+## Gradle 9 Prerequisites
+Achieving compatibility with Gradle 9 requires the following updates:
+
+1. Java Requirement: The minimum supported version will be Java 17. (Please review the detailed implications section.)
+
+2. Kotlin Update: An upgrade to Kotlin 2.0 is mandatory.
+
 ## Table of Contents
 
 1. [Java Configuration Updates](#java-configuration-updates)
