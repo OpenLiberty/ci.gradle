@@ -10,6 +10,7 @@
  *******************************************************************************/
 // end::copyright[]
 package io.openliberty.guides.multimodules.web;
+import org.apache.commons.lang3.StringUtils;
 
 public class HeightsBean implements java.io.Serializable {
     private String heightCm = null;
@@ -49,7 +50,7 @@ public class HeightsBean implements java.io.Serializable {
         this.feet = io.openliberty.guides.multimodules.lib.Converter.getFeet(cm);
         // end::getFeet[]
         String result = String.valueOf(feet);
-        this.heightFeet = result;
+        this.heightFeet = StringUtils.capitalize(result);
     }
     // end::setHeightFeet[]
 

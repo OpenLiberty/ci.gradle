@@ -119,6 +119,9 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
 
         expression = "/archive/file";
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
-        Assert.assertEquals("Number of <file/> element ==>", 2, nodes.getLength());
+        Assert.assertEquals("Number of <file/> element ==>", 4, nodes.getLength());
+        Assert.assertEquals("/lib/commons-lang3-3.18.0.jar", nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue())
+        Assert.assertEquals("/lib/test.jar", nodes.item(2).getAttributes().getNamedItem("targetInArchive").getNodeValue())
+
     }
 }
