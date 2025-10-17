@@ -82,16 +82,21 @@ public class DevTaskHelper {
     public static Set<Project> getAllUpstreamProjects(Project project) {
         Set<Project> allDependentProjects = new HashSet<>()
 
-        for (Iterator<Configuration> iter = project.getConfigurations().iterator(); iter.hasNext(); ) {
+        for (Iterator<Configuration> iter = project.getConfigurations().iterator(); iter.hasNext();) {
             Configuration element = iter.next();
             if (element.canBeResolved) {
                 Dependency[] deployDeps = element.getAllDependencies().toArray()
-                for (Dependency dependency1: deployDeps) {
+                for (Dependency dependency1 : deployDeps) {
                     if (dependency1 instanceof ProjectDependency) {
                         def projectPath = dependency1.getPath()
                         Project dependencyProject = project.findProject(projectPath)
-                        allDependentProjects.add(dependencyProject)
-                        allDependentProjects.addAll(getAllUpstreamProjects(dependencyProject))
+                        //ignore self dependencies and containment's, some configuration such as nativeImageClasspath has containment's
+                        if (dependencyProject != project) {
+                            if (allDependentProjects.add(dependencyProject)) {
+                                // prevent infinite recursion and redundant work, as it only makes the recursive call if a new project is found.
+                                allDependentProjects.addAll(getAllUpstreamProjects(dependencyProject))
+                            }
+                        }
                     }
                 }
             }
