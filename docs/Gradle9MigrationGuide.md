@@ -5,9 +5,11 @@ This guide provides step-by-step instructions for migrating your projects that u
 ## Gradle 9 Prerequisites
 Achieving compatibility with Gradle 9 requires the following updates:
 
-1. Java Requirement: The minimum supported version will be Java 17. (Please review the detailed implications section.)
+1. Java Requirement: The minimum supported version will be Java 17.
 
 2. Kotlin Update: An upgrade to Kotlin 2.0 is mandatory.
+
+Please go through [gradle official documentation](https://docs.gradle.org/9.0.0/userguide/upgrading_major_version_9.html#changes_major_9) for details.
 
 ## Table of Contents
 
