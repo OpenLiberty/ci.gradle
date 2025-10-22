@@ -21,6 +21,8 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.ResolveException
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import org.gradle.internal.resolve.ArtifactNotFoundException
+import static java.util.Collections.emptyList
+import static java.util.Collections.emptyMap
 
 public class ArtifactDownloadUtil {
     public static File downloadArtifact(Project project, String groupId, String artifactId, String type, String version) throws PluginExecutionException {
@@ -82,11 +84,12 @@ public class ArtifactDownloadUtil {
      */
     public static String getResolvedCoordinates(Project project, String groupId, String artifactId, String version, String type) {
         Properties projectProps = new Properties();
+        CommonLogger logger = new CommonLogger(project)
         project.properties.entrySet().forEach { p -> if (p.value != null) { projectProps.put(p.key, p.value) } }
-        String resolvedGroupId = VariableUtility.resolveVariables(new CommonLogger(project), groupId, Collections.emptyList(), projectProps, new Properties(), Collections.emptyMap())
-        String resolvedArtifactId = VariableUtility.resolveVariables(new CommonLogger(project), artifactId, Collections.emptyList(), projectProps, new Properties(), Collections.emptyMap())
-        String resolvedVersion = VariableUtility.resolveVariables(new CommonLogger(project), version, Collections.emptyList(), projectProps, new Properties(), Collections.emptyMap())
-        String resolvedType = VariableUtility.resolveVariables(new CommonLogger(project), type, Collections.emptyList(), projectProps, new Properties(), Collections.emptyMap())
+        String resolvedGroupId = VariableUtility.resolveVariables(logger, groupId, emptyList(), projectProps, new Properties(), emptyMap())
+        String resolvedArtifactId = VariableUtility.resolveVariables(logger, artifactId, emptyList(), projectProps, new Properties(), emptyMap())
+        String resolvedVersion = VariableUtility.resolveVariables(logger, version, emptyList(), projectProps, new Properties(), emptyMap())
+        String resolvedType = VariableUtility.resolveVariables(logger, type, emptyList(), projectProps, new Properties(), emptyMap())
         return resolvedGroupId + ":" + resolvedArtifactId + ":" + resolvedVersion + "@" + resolvedType
     }
 }
