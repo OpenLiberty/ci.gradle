@@ -702,7 +702,8 @@ class DevTask extends AbstractFeatureTask {
             if (optimizeGenerateFeatures && generateFeatures) {
                 logger.debug("Detected a change in the compile dependencies, regenerating features");
                 // optimize generate features on build dependency change
-                boolean generateFeaturesSuccess = libertyGenerateFeatures(null, true);
+                // If generateToSrc is false then we must copy new generated features file from temp dir to server dir after install
+                boolean generateFeaturesSuccess = libertyGenerateFeatures(null, true, !generateToSrc);
                 if (generateFeaturesSuccess) {
                     util.javaSourceClassPaths.clear();
                 } else {
@@ -725,6 +726,10 @@ class DevTask extends AbstractFeatureTask {
                     if (e.getCause() instanceof BuildException && generateFeatures) {
                         libertyDependencyWarning(e.getCause());
                     }
+                }
+                // If generateToSrc is false then we must copy new generated features file from temp dir to server dir after install
+                if (generateFeaturesSuccess && !generateToSrc) {
+                    util.copyTempFeatureFileToServer(getServerDir(project)); // finalize the generate-features operation
                 }
             }
             return true;
@@ -1026,7 +1031,7 @@ class DevTask extends AbstractFeatureTask {
         }
 
         @Override
-        public boolean libertyGenerateFeatures(Collection<String> classes, boolean optimize) {
+        public boolean libertyGenerateFeatures(Collection<String> classes, boolean optimize, boolean useTmpDir) {
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
@@ -1037,6 +1042,7 @@ class DevTask extends AbstractFeatureTask {
                     options.add("--classFile=" + it);
                 }
                 options.add("--optimize=" + optimize);
+                options.add("--internalDevMode="+useTmpDir);
                 runGenerateFeaturesTask(gradleBuildLauncher, options);
                 return true; // successfully generated features
             } catch (BuildException e) {
@@ -1158,9 +1164,10 @@ class DevTask extends AbstractFeatureTask {
         runGradleTask(gradleBuildLauncher, tasks);
     }
 
-    public void runGenerateFeaturesTask(BuildLauncher gradleBuildLauncher, boolean optimize) throws BuildException {
+    public void runGenerateFeaturesTask(BuildLauncher gradleBuildLauncher, boolean optimize, boolean useTmpDir) throws BuildException {
         List<String> options = new ArrayList<String>();
         options.add("--optimize="+optimize);
+        options.add("--internalDevMode="+useTmpDir);
         runGenerateFeaturesTask(gradleBuildLauncher, options);
     }
 
@@ -1342,7 +1349,8 @@ class DevTask extends AbstractFeatureTask {
                         "The source configuration directory will be modified. Features will automatically be generated in a new file: "
                                 + generatedFileCanonicalPath);
                 try {
-                    runGenerateFeaturesTask(gradleBuildLauncher, true);
+                    // Only generate to a tmp dir once the dev mode loop has started.
+                    runGenerateFeaturesTask(gradleBuildLauncher, true, false);
                 } catch (BuildException e) {
                     Exception pluginEx = getPluginExecutionException(e);
                     if (pluginEx != null) {

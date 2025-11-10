@@ -126,7 +126,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
         logger.debug("--- Generate Features values ---");
         logger.debug("optimize generate features: " + optimize);
-        logger.debug("generate to src or build: " + generationContextDir);
+        logger.debug("called by dev mode internalDevMode: " + internalDevMode);
+        logger.debug("generate to src or build: " + (internalDevMode ? GENERATED_FEATURES_TEMP_PATH : generationContextDir.getAbsolutePath()));
         if (classFiles != null && !classFiles.isEmpty()) {
             logger.debug("Generate features for the following class files: " + classFiles);
         }
@@ -261,7 +262,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                     logger.lifecycle("Generated the following features: " + missingLibertyFeatures);
                     // use logger.lifecycle so that message appears without --info tag on
                     configDocument.writeXMLDocument(generatedXmlFile);
-                    logger.debug("Created file " + generatedXmlFile);
+                    logger.debug("Created file " + generatedXmlFile.getAbsolutePath());
                 } else {
                     logger.lifecycle("Regenerated the following features: " + missingLibertyFeatures);
                     // use logger.lifecycle so that message appears without --info tag on
