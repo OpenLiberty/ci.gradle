@@ -52,10 +52,12 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
     static File serverXmlFile;
     static File newFeatureFile;
     static File newFeatureFileSrc;
+    static File newFeatureFileTmp;
 
     static final String GENERATED_FEATURES_FILE_NAME = "generated-features.xml";
     static final String GENERATED_FEATURES_FILE_PATH = "/build/wlp/usr/servers/defaultServer/configDropins/overrides/" + GENERATED_FEATURES_FILE_NAME;
     static final String GENERATED_FEATURES_FILE_PATH_SRC = "/src/main/liberty/config/configDropins/overrides/" + GENERATED_FEATURES_FILE_NAME;
+    static final String GENERATED_FEATURES_FILE_PATH_TMP = "/build/.libertyFeatures/" + GENERATED_FEATURES_FILE_NAME;
     static final String UMBRELLA_EE = "providedCompile \"jakarta.platform:jakarta.jakartaee-api:8.0.0\"";
     static final String UMBRELLA_MP = "providedCompile \"org.eclipse.microprofile:microprofile:3.2\"";
     static final String ESA_EE_DEPENDENCY = "providedCompile 'io.openliberty.features:servlet-4.0:22.0.0.2'";
@@ -64,6 +66,7 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
     static final String UMBRELLA_MP_OLD = "providedCompile 'org.eclipse.microprofile:microprofile:1.2'";
     static final String TARGET_EE_NULL = "targetJavaEE: null";
     static final String TARGET_MP_NULL = "targetMicroP: null";
+    static final String DEBUG_OPTION = "--debug";
 
     protected static void setUpBeforeTest(String projectName) throws IOException, InterruptedException, FileNotFoundException {
         this.projectName = projectName;
@@ -74,6 +77,7 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
         createTestProject(buildDir, resourceDir, buildFilename);
         this.newFeatureFile = new File(buildDir, GENERATED_FEATURES_FILE_PATH);
         this.newFeatureFileSrc = new File(buildDir, GENERATED_FEATURES_FILE_PATH_SRC);
+        this.newFeatureFileTmp = new File(buildDir, GENERATED_FEATURES_FILE_PATH_TMP);
         this.buildFile = new File(buildDir, buildFilename);
         serverXmlFile = new File(buildDir, "src/main/liberty/config/server.xml");
     }
@@ -237,16 +241,12 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
         return features;
     }
 
-    protected static void runCompileAndGenerateFeatures() throws IOException, InterruptedException, FileNotFoundException {
-        runProcess("compileJava generateFeatures");
-    }
-
-    protected static void runCompileAndGenerateFeaturesToSrc() throws IOException, InterruptedException, FileNotFoundException {
-        runProcess("compileJava generateFeatures --generateToSrc=true");
-    }
-
-    protected static void runCompileAndGenerateFeaturesDebug() throws IOException, InterruptedException, FileNotFoundException {
-        runProcess("compileJava generateFeatures --debug");
+    protected static void runCompileAndGenerateFeatures(String options) throws IOException, InterruptedException, FileNotFoundException {
+        String parameters = "compileJava generateFeatures ";
+        if (options != null) {
+            parameters += options;
+        }
+        runProcess(parameters);
     }
 
     protected static void runGenerateFeatures(String options) throws IOException, InterruptedException, FileNotFoundException {
