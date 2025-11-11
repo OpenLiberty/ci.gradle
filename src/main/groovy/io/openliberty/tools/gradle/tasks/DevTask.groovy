@@ -1330,17 +1330,19 @@ class DevTask extends AbstractFeatureTask {
                 // Optimize generate features on startup
                 runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources'); // ensure class files exist
 
-                String generatedFileCanonicalPath;
-                try {
-                    generatedFileCanonicalPath = new File(configDirectory,
-                            BinaryScannerUtil.GENERATED_FEATURES_FILE_PATH).getCanonicalPath();
-                } catch (IOException e) {
-                    generatedFileCanonicalPath = new File(configDirectory,
-                            BinaryScannerUtil.GENERATED_FEATURES_FILE_PATH).toString();
+                if (generateToSrc) {
+                    String generatedFileCanonicalPath;
+                    try {
+                        generatedFileCanonicalPath = new File(configDirectory,
+                                BinaryScannerUtil.GENERATED_FEATURES_FILE_PATH).getCanonicalPath();
+                    } catch (IOException e) {
+                        generatedFileCanonicalPath = new File(configDirectory,
+                                BinaryScannerUtil.GENERATED_FEATURES_FILE_PATH).toString();
+                    }
+                    logger.warn(
+                            "The source configuration directory will be modified. Features will automatically be generated in a new file: "
+                                    + generatedFileCanonicalPath);
                 }
-                logger.warn(
-                        "The source configuration directory will be modified. Features will automatically be generated in a new file: "
-                                + generatedFileCanonicalPath);
                 try {
                     runGenerateFeaturesTask(gradleBuildLauncher, true);
                 } catch (BuildException e) {
