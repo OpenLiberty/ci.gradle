@@ -12,7 +12,9 @@ buildscript {
 }
 
 apply plugin: 'liberty'
-
+ext {
+    esaArtifactId="hello-esa-plugin"
+}
 repositories {
     mavenCentral()
 	mavenLocal() {

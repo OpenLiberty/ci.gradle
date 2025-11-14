@@ -13,6 +13,10 @@ buildscript {
 
 apply plugin: 'liberty'
 
+// build.gradle
+ext {
+    esaArtifactId="hello-esa-plugin"
+}
 repositories {
     mavenCentral()
 	mavenLocal() {
