@@ -106,6 +106,7 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
 
         if (OSUtil.isWindows()) {
             warWebappsFolder = "\\multi-module-loose-ear-pages-test\\war\\src\\main\\webapp"
+            warBuildResourcesDir="\\multi-module-loose-ear-pages-test\\war\\build\\resources\\main"
         }
         expression = "/archive/archive/dir";
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
