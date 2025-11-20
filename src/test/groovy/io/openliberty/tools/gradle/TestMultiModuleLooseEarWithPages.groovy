@@ -57,6 +57,7 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
                     <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/war/build/resources/main" targetInArchive="/WEB-INF/classes/"/>
                     <archive targetInArchive="/ejb-jar-1.0-SNAPSHOT.jar">
                         <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/classes/java/main" targetInArchive="/"/>
+                        <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/resources/main" targetInArchive="/"/>
                         <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/resources/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
                     </archive>
                     <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/tmp/test/work/.gradle-test-kit/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-api/2.9.0/e0dcd508dfc4864a2f5a1963d6ffad170d970375/log4j-api-2.9.0.jar" targetInArchive="/lib/log4j-api-2.9.0.jar"/>
@@ -73,7 +74,9 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
         String ejbWar = "/ejb-war-1.0-SNAPSHOT.war"
         String warWebappsFolder = "/multi-module-loose-ear-pages-test/war/src/main/webapp"
         String warBuildResourcesDir="/multi-module-loose-ear-pages-test/war/build/resources/main"
+        String jarBuildResourcesDir="/multi-module-loose-ear-pages-test/jar/build/resources/main"
         String ejbJar = "/WEB-INF/lib/ejb-jar-1.0-SNAPSHOT.jar"
+        String ejbJarArchive = "/ejb-jar-1.0-SNAPSHOT.jar"
 
 
         // get input XML Document
@@ -103,29 +106,49 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
         Assert.assertTrue("actual targetInArchive paths [" + expectedResult1 + ","
                 + expectedResult2 + "] is not matching with actual result : " + ejbWar,
                 expectedResult1.equals(ejbWar) || expectedResult2.equals(ejbWar))
+        Assert.assertTrue("actual targetInArchive paths [" + expectedResult1 + ","
+                + expectedResult2 + "] is not matching with actual result : " + ejbJarArchive,
+                expectedResult1.equals(ejbJarArchive) || expectedResult2.equals(ejbJarArchive))
+
 
         if (OSUtil.isWindows()) {
             warWebappsFolder = "\\multi-module-loose-ear-pages-test\\war\\src\\main\\webapp"
             warBuildResourcesDir="\\multi-module-loose-ear-pages-test\\war\\build\\resources\\main"
+            jarBuildResourcesDir="\\multi-module-loose-ear-pages-test\\jar\\build\\resources\\main"
         }
         expression = "/archive/archive/dir";
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
-        Assert.assertEquals("Number of <archive/> element ==>", 4, nodes.getLength());
+        Assert.assertEquals("Number of <archive/> element ==>", 5, nodes.getLength());
 
         String sourceOnDisk1 = nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
         String sourceOnDisk2 = nodes.item(1).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
         String sourceOnDisk3 = nodes.item(2).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
         String sourceOnDisk4 = nodes.item(3).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
+        String sourceOnDisk5 = nodes.item(4).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
 
         Assert.assertTrue("actual sourceOnDisk paths [" + sourceOnDisk1 + ","+ sourceOnDisk2 + ","
                 + sourceOnDisk3 +  ","
                 + sourceOnDisk4 + "] is not containing with actual result : " + warBuildResourcesDir,
-                sourceOnDisk1.contains(warBuildResourcesDir) || sourceOnDisk2.contains(warBuildResourcesDir)|| sourceOnDisk3.contains(warBuildResourcesDir) || sourceOnDisk4.contains(warBuildResourcesDir));
+                sourceOnDisk1.contains(warBuildResourcesDir) || sourceOnDisk2.contains(warBuildResourcesDir)
+                        || sourceOnDisk3.contains(warBuildResourcesDir) || sourceOnDisk4.contains(warBuildResourcesDir)
+                        || sourceOnDisk5.contains(warBuildResourcesDir)
+        );
 
         Assert.assertTrue("actual sourceOnDisk paths [" + sourceOnDisk1 + ","+ sourceOnDisk2 + ","
                 + sourceOnDisk3 +  ","
                 + sourceOnDisk4 + "] is not containing with actual result : " + warWebappsFolder,
-                sourceOnDisk1.contains(warWebappsFolder) || sourceOnDisk2.contains(warWebappsFolder)|| sourceOnDisk3.contains(warWebappsFolder) || sourceOnDisk4.contains(warWebappsFolder));
+                sourceOnDisk1.contains(warWebappsFolder) || sourceOnDisk2.contains(warWebappsFolder)
+                        || sourceOnDisk3.contains(warWebappsFolder) || sourceOnDisk4.contains(warWebappsFolder)
+                        || sourceOnDisk5.contains(warWebappsFolder)
+        );
+
+        Assert.assertTrue("actual sourceOnDisk paths [" + sourceOnDisk1 + ","+ sourceOnDisk2 + ","
+                + sourceOnDisk3 +  ","
+                + sourceOnDisk4 + "] is not containing with actual result : " + jarBuildResourcesDir,
+                sourceOnDisk1.contains(jarBuildResourcesDir) || sourceOnDisk2.contains(jarBuildResourcesDir)
+                        || sourceOnDisk3.contains(jarBuildResourcesDir) || sourceOnDisk4.contains(jarBuildResourcesDir)
+                        || sourceOnDisk5.contains(jarBuildResourcesDir)
+        );
 
         expression = "/archive/archive/archive";
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
