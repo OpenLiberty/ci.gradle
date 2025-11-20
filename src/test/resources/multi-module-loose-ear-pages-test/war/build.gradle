@@ -7,6 +7,9 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.11.0'
     compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
     compileOnly 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
+
+    providedCompile(group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.9.0')
+    providedCompile(group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.9.0')
     implementation project(':jar')
     compileOnly 'org.eclipse.microprofile:microprofile:6.1'
 }
