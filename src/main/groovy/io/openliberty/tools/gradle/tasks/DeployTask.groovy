@@ -560,13 +560,16 @@ class DeployTask extends AbstractServerTask {
                 }
             }
             else if (dependency instanceof ExternalModuleDependency) {
-                //Adding all artifacts belonging to this dependency and its children
-                //handles artifacts from a repository, eg:-   earlib 'org.slf4j:slf4j-api:1.7.30'
-                resolvedDependency.getAllModuleArtifacts().each {
-                    looseEar.getConfig().addFile(it.getFile(), "/lib/" + it.getFile().getName())
-                    // removing from file dependency to avoid duplication of config lines as it already added
-                    earlibFileDeps.remove(it.getFile());
-                }
+               //Adding all artifacts belonging to this dependency and its children
+               //handles artifacts from a repository, eg:-   earlib 'org.slf4j:slf4j-api:1.7.30'
+               resolvedDependency.getAllModuleArtifacts().each {
+                   //making sure duplicate artifacts are not added
+                   if (dependency.getName().equals(it.getModuleVersion().getId().getName())) {
+                       looseEar.getConfig().addFile(it.getFile(), "/lib/" + it.getFile().getName())
+                       // removing from file dependency to avoid duplication of config lines as it already added
+                       earlibFileDeps.remove(it.getFile());
+                   }
+               }
             }
             else {
                 logger.warn("Dependency " + dependency.getName() + "could not be added to the looseApplication, as it is neither a ProjectDependency or ExternalModuleDependency")

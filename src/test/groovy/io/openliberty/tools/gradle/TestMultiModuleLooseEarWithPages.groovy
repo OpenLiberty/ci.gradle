@@ -41,24 +41,31 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
     }
     /*
         Expected output to the XML
-        <?xml version="1.0" encoding="UTF-8"?>
-        <archive>
-            <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/ear/build/tmp/ear/application.xml" targetInArchive="/META-INF/application.xml"/>
-            <archive targetInArchive="/ejb-war-1.0-SNAPSHOT.war">
-                <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/war/src/main/webapp" targetInArchive="/"/>
-                <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/war/build/classes/java/main" targetInArchive="/WEB-INF/classes"/>
-                <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/war/build/resources/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
-                <archive targetInArchive="/WEB-INF/lib/ejb-jar-1.0-SNAPSHOT.jar">
-                    <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/classes/java/main" targetInArchive="/"/>
-                    <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/resources/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
+                <?xml version="1.0" encoding="UTF-8"?>
+                <archive>
+                    <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/ear/build/tmp/ear/application.xml" targetInArchive="/META-INF/application.xml"/>
+                    <archive targetInArchive="/ejb-war-1.0-SNAPSHOT.war">
+                        <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/war/src/main/webapp" targetInArchive="/"/>
+                        <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/war/build/classes/java/main" targetInArchive="/WEB-INF/classes"/>
+                        <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/war/build/resources/main" targetInArchive="/WEB-INF/classes"/>
+                        <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/war/build/resources/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
+                        <archive targetInArchive="/WEB-INF/lib/ejb-jar-1.0-SNAPSHOT.jar">
+                            <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/classes/java/main" targetInArchive="/"/>
+                            <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/resources/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
+                        </archive>
+                    </archive>
+                    <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/war/build/resources/main" targetInArchive="/WEB-INF/classes/"/>
+                    <archive targetInArchive="/ejb-jar-1.0-SNAPSHOT.jar">
+                        <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/classes/java/main" targetInArchive="/"/>
+                        <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/resources/main" targetInArchive="/"/>
+                        <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/resources/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
+                    </archive>
+                    <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/tmp/test/work/.gradle-test-kit/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-api/2.9.0/e0dcd508dfc4864a2f5a1963d6ffad170d970375/log4j-api-2.9.0.jar" targetInArchive="/lib/log4j-api-2.9.0.jar"/>
+                    <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/tmp/test/work/.gradle-test-kit/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-core/2.9.0/52f6548ae1688e126c29b5dc400929dc0128615/log4j-core-2.9.0.jar" targetInArchive="/lib/log4j-core-2.9.0.jar"/>
+                    <file sourceOnDisk="/Users/arunkumarvn/.m2/repository/org/apache/commons/commons-lang3/3.18.0/commons-lang3-3.18.0.jar" targetInArchive="/lib/commons-lang3-3.18.0.jar"/>
+                    <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/ear/lib/test.jar" targetInArchive="/lib/test.jar"/>
+                    <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/ear/build/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
                 </archive>
-            </archive>
-            <archive targetInArchive="/ejb-jar-1.0-SNAPSHOT.jar">
-                <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/classes/java/main" targetInArchive="/"/>
-                <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/resources/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
-            </archive>
-        <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/ear/build/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
-    </archive>
     */
     @Test
     public void test_loose_config_file_contents_are_correct(){
@@ -66,7 +73,10 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
         FileInputStream input = new FileInputStream(on);
         String ejbWar = "/ejb-war-1.0-SNAPSHOT.war"
         String warWebappsFolder = "/multi-module-loose-ear-pages-test/war/src/main/webapp"
+        String warBuildResourcesDir="/multi-module-loose-ear-pages-test/war/build/resources/main"
+        String jarBuildResourcesDir="/multi-module-loose-ear-pages-test/jar/build/resources/main"
         String ejbJar = "/WEB-INF/lib/ejb-jar-1.0-SNAPSHOT.jar"
+        String ejbJarArchive = "/ejb-jar-1.0-SNAPSHOT.jar"
 
 
         // get input XML Document
@@ -84,7 +94,7 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
         XPath xPath = XPathFactory.newInstance().newXPath();
         String expression = "/archive/dir";
         NodeList nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
-        Assert.assertEquals("Number of <dir/> element ==>", 0, nodes.getLength());
+        Assert.assertEquals("Number of <dir/> element ==>", 1, nodes.getLength());
 
         expression = "/archive/archive";
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
@@ -96,20 +106,49 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
         Assert.assertTrue("actual targetInArchive paths [" + expectedResult1 + ","
                 + expectedResult2 + "] is not matching with actual result : " + ejbWar,
                 expectedResult1.equals(ejbWar) || expectedResult2.equals(ejbWar))
+        Assert.assertTrue("actual targetInArchive paths [" + expectedResult1 + ","
+                + expectedResult2 + "] is not matching with actual result : " + ejbJarArchive,
+                expectedResult1.equals(ejbJarArchive) || expectedResult2.equals(ejbJarArchive))
+
 
         if (OSUtil.isWindows()) {
             warWebappsFolder = "\\multi-module-loose-ear-pages-test\\war\\src\\main\\webapp"
+            warBuildResourcesDir="\\multi-module-loose-ear-pages-test\\war\\build\\resources\\main"
+            jarBuildResourcesDir="\\multi-module-loose-ear-pages-test\\jar\\build\\resources\\main"
         }
         expression = "/archive/archive/dir";
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
-        Assert.assertEquals("Number of <archive/> element ==>", 3, nodes.getLength());
+        Assert.assertEquals("Number of <archive/> element ==>", 5, nodes.getLength());
+
         String sourceOnDisk1 = nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
         String sourceOnDisk2 = nodes.item(1).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
         String sourceOnDisk3 = nodes.item(2).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
+        String sourceOnDisk4 = nodes.item(3).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
+        String sourceOnDisk5 = nodes.item(4).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
 
         Assert.assertTrue("actual sourceOnDisk paths [" + sourceOnDisk1 + ","+ sourceOnDisk2 + ","
-                + sourceOnDisk3 + "] is not containing with actual result : " + warWebappsFolder,
-                sourceOnDisk1.contains(warWebappsFolder) || sourceOnDisk2.contains(warWebappsFolder) || sourceOnDisk3.contains(warWebappsFolder));
+                + sourceOnDisk3 +  ","
+                + sourceOnDisk4 + "] is not containing with actual result : " + warBuildResourcesDir,
+                sourceOnDisk1.contains(warBuildResourcesDir) || sourceOnDisk2.contains(warBuildResourcesDir)
+                        || sourceOnDisk3.contains(warBuildResourcesDir) || sourceOnDisk4.contains(warBuildResourcesDir)
+                        || sourceOnDisk5.contains(warBuildResourcesDir)
+        );
+
+        Assert.assertTrue("actual sourceOnDisk paths [" + sourceOnDisk1 + ","+ sourceOnDisk2 + ","
+                + sourceOnDisk3 +  ","
+                + sourceOnDisk4 + "] is not containing with actual result : " + warWebappsFolder,
+                sourceOnDisk1.contains(warWebappsFolder) || sourceOnDisk2.contains(warWebappsFolder)
+                        || sourceOnDisk3.contains(warWebappsFolder) || sourceOnDisk4.contains(warWebappsFolder)
+                        || sourceOnDisk5.contains(warWebappsFolder)
+        );
+
+        Assert.assertTrue("actual sourceOnDisk paths [" + sourceOnDisk1 + ","+ sourceOnDisk2 + ","
+                + sourceOnDisk3 +  ","
+                + sourceOnDisk4 + "] is not containing with actual result : " + jarBuildResourcesDir,
+                sourceOnDisk1.contains(jarBuildResourcesDir) || sourceOnDisk2.contains(jarBuildResourcesDir)
+                        || sourceOnDisk3.contains(jarBuildResourcesDir) || sourceOnDisk4.contains(jarBuildResourcesDir)
+                        || sourceOnDisk5.contains(jarBuildResourcesDir)
+        );
 
         expression = "/archive/archive/archive";
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
@@ -119,9 +158,12 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
 
         expression = "/archive/file";
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
-        Assert.assertEquals("Number of <file/> element ==>", 4, nodes.getLength());
-        Assert.assertEquals("/lib/commons-lang3-3.18.0.jar", nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue())
-        Assert.assertEquals("/lib/test.jar", nodes.item(2).getAttributes().getNamedItem("targetInArchive").getNodeValue())
+        Assert.assertEquals("Number of <file/> element ==>", 6, nodes.getLength());
+
+        Assert.assertEquals("/lib/log4j-api-2.9.0.jar", nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue())
+        Assert.assertEquals("/lib/log4j-core-2.9.0.jar", nodes.item(2).getAttributes().getNamedItem("targetInArchive").getNodeValue())
+        Assert.assertEquals("/lib/commons-lang3-3.18.0.jar", nodes.item(3).getAttributes().getNamedItem("targetInArchive").getNodeValue())
+        Assert.assertEquals("/lib/test.jar", nodes.item(4).getAttributes().getNamedItem("targetInArchive").getNodeValue())
 
     }
 }
