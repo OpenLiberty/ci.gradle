@@ -33,6 +33,7 @@ dependencies {
 }
 
 ear {
+    libDirName = "custom/lib-dir"
     archiveFileName = rootProject.name+"-"+getArchiveBaseName().get() +"-"+rootProject.version+ '.' + getArchiveExtension().get()
     deploymentDescriptor {
         module ('ejb-jar-1.0-SNAPSHOT.jar', 'java')
@@ -45,7 +46,7 @@ liberty {
         name = "ejbServer"
         deploy {
             apps = [ear]
-            copyLibsDirectory = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/libs")
+            copyLibsDirectory = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/copy/libs")
         }
         verifyAppStartTimeout = 30
         looseApplication = true

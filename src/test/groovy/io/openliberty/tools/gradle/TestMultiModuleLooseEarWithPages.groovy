@@ -18,6 +18,8 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/multi-module-loose-ear-pages-test")
     static File buildDir = new File(integTestDir, "/multi-module-loose-ear-pages-test")
     static String buildFilename = "build.gradle"
+    public static final String libDirName = "custom/lib-dir"
+    public static final String copyLibsDirectory = "copy/libs"
 
     @BeforeClass
     public static void setup() {
@@ -41,31 +43,31 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
     }
     /*
         Expected output to the XML
-                <?xml version="1.0" encoding="UTF-8"?>
-                <archive>
-                    <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/ear/build/tmp/ear/application.xml" targetInArchive="/META-INF/application.xml"/>
-                    <archive targetInArchive="/ejb-war-1.0-SNAPSHOT.war">
-                        <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/war/src/main/webapp" targetInArchive="/"/>
-                        <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/war/build/classes/java/main" targetInArchive="/WEB-INF/classes"/>
-                        <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/war/build/resources/main" targetInArchive="/WEB-INF/classes"/>
-                        <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/war/build/resources/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
-                        <archive targetInArchive="/WEB-INF/lib/ejb-jar-1.0-SNAPSHOT.jar">
-                            <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/classes/java/main" targetInArchive="/"/>
-                            <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/resources/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
-                        </archive>
-                    </archive>
-                    <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/war/build/resources/main" targetInArchive="/WEB-INF/classes/"/>
-                    <archive targetInArchive="/ejb-jar-1.0-SNAPSHOT.jar">
-                        <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/classes/java/main" targetInArchive="/"/>
-                        <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/resources/main" targetInArchive="/"/>
-                        <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/resources/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
-                    </archive>
-                    <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/tmp/test/work/.gradle-test-kit/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-api/2.9.0/e0dcd508dfc4864a2f5a1963d6ffad170d970375/log4j-api-2.9.0.jar" targetInArchive="/lib/log4j-api-2.9.0.jar"/>
-                    <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/tmp/test/work/.gradle-test-kit/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-core/2.9.0/52f6548ae1688e126c29b5dc400929dc0128615/log4j-core-2.9.0.jar" targetInArchive="/lib/log4j-core-2.9.0.jar"/>
-                    <file sourceOnDisk="/Users/arunkumarvn/.m2/repository/org/apache/commons/commons-lang3/3.18.0/commons-lang3-3.18.0.jar" targetInArchive="/lib/commons-lang3-3.18.0.jar"/>
-                    <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/ear/lib/test.jar" targetInArchive="/lib/test.jar"/>
-                    <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/ear/build/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
-                </archive>
+    <?xml version="1.0" encoding="UTF-8"?>
+    <archive>
+        <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/ear/build/tmp/ear/application.xml" targetInArchive="/META-INF/application.xml"/>
+        <archive targetInArchive="/ejb-war-1.0-SNAPSHOT.war">
+            <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/war/src/main/webapp" targetInArchive="/"/>
+            <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/war/build/classes/java/main" targetInArchive="/WEB-INF/classes"/>
+            <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/war/build/resources/main" targetInArchive="/WEB-INF/classes"/>
+            <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/war/build/resources/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
+            <archive targetInArchive="/WEB-INF/lib/ejb-jar-1.0-SNAPSHOT.jar">
+                <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/classes/java/main" targetInArchive="/"/>
+                <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/resources/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
+            </archive>
+        </archive>
+        <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/war/build/resources/main" targetInArchive="/WEB-INF/classes/"/>
+        <archive targetInArchive="/ejb-jar-1.0-SNAPSHOT.jar">
+            <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/classes/java/main" targetInArchive="/"/>
+            <dir sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/resources/main" targetInArchive="/"/>
+            <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/jar/build/resources/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
+        </archive>
+        <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/ear/build/copy/libs/428332275272250/log4j-api-2.9.0.jar" targetInArchive="/custom/lib-dir/log4j-api-2.9.0.jar"/>
+        <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/ear/build/copy/libs/428332276331083/log4j-core-2.9.0.jar" targetInArchive="/custom/lib-dir/log4j-core-2.9.0.jar"/>
+        <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/ear/build/copy/libs/428332277620791/commons-lang3-3.18.0.jar" targetInArchive="/custom/lib-dir/commons-lang3-3.18.0.jar"/>
+        <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/ear/build/copy/libs/428332278367833/test.jar" targetInArchive="/custom/lib-dir/test.jar"/>
+        <file sourceOnDisk="/Users/arunkumarvn/Documents/public/ci.gradle/build/testBuilds/multi-module-loose-ear-pages-test/ear/build/tmp/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
+    </archive>
     */
     @Test
     public void test_loose_config_file_contents_are_correct(){
@@ -160,10 +162,19 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
         Assert.assertEquals("Number of <file/> element ==>", 6, nodes.getLength());
 
-        Assert.assertEquals("/lib/log4j-api-2.9.0.jar", nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue())
-        Assert.assertEquals("/lib/log4j-core-2.9.0.jar", nodes.item(2).getAttributes().getNamedItem("targetInArchive").getNodeValue())
-        Assert.assertEquals("/lib/commons-lang3-3.18.0.jar", nodes.item(3).getAttributes().getNamedItem("targetInArchive").getNodeValue())
-        Assert.assertEquals("/lib/test.jar", nodes.item(4).getAttributes().getNamedItem("targetInArchive").getNodeValue())
+        Assert.assertEquals("/" + libDirName + "/log4j-api-2.9.0.jar", nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue())
+        Assert.assertEquals("/" + libDirName+ "/log4j-core-2.9.0.jar", nodes.item(2).getAttributes().getNamedItem("targetInArchive").getNodeValue())
+        Assert.assertEquals("/" + libDirName+ "/commons-lang3-3.18.0.jar", nodes.item(3).getAttributes().getNamedItem("targetInArchive").getNodeValue())
+        Assert.assertEquals("/" + libDirName+ "/test.jar", nodes.item(4).getAttributes().getNamedItem("targetInArchive").getNodeValue())
+        sourceOnDisk1=nodes.item(1).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
+        sourceOnDisk2=nodes.item(2).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
+        sourceOnDisk3=nodes.item(3).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
+        sourceOnDisk4=nodes.item(4).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
+
+        Assert.assertTrue(sourceOnDisk1.contains(copyLibsDirectory) && sourceOnDisk1.contains("log4j-api-2.9.0.jar"))
+        Assert.assertTrue(sourceOnDisk2.contains(copyLibsDirectory) && sourceOnDisk2.contains("log4j-core-2.9.0.jar"))
+        Assert.assertTrue(sourceOnDisk3.contains(copyLibsDirectory) && sourceOnDisk3.contains("commons-lang3-3.18.0.jar"))
+        Assert.assertTrue(sourceOnDisk4.contains(copyLibsDirectory) && sourceOnDisk4.contains("test.jar"))
 
     }
 }
