@@ -19,7 +19,7 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
     static File buildDir = new File(integTestDir, "/multi-module-loose-ear-pages-test")
     static String buildFilename = "build.gradle"
     public static final String libDirName = "custom/lib-dir"
-    public static final String copyLibsDirectory = "copy/libs"
+    public static String copyLibsDirectory = "copy/libs"
 
     @BeforeClass
     public static void setup() {
@@ -115,8 +115,9 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
 
         if (OSUtil.isWindows()) {
             warWebappsFolder = "\\multi-module-loose-ear-pages-test\\war\\src\\main\\webapp"
-            warBuildResourcesDir="\\multi-module-loose-ear-pages-test\\war\\build\\resources\\main"
-            jarBuildResourcesDir="\\multi-module-loose-ear-pages-test\\jar\\build\\resources\\main"
+            warBuildResourcesDir = "\\multi-module-loose-ear-pages-test\\war\\build\\resources\\main"
+            jarBuildResourcesDir = "\\multi-module-loose-ear-pages-test\\jar\\build\\resources\\main"
+            copyLibsDirectory = "copy\\libs"
         }
         expression = "/archive/archive/dir";
         nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
@@ -166,10 +167,11 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
         Assert.assertEquals("/" + libDirName+ "/log4j-core-2.9.0.jar", nodes.item(2).getAttributes().getNamedItem("targetInArchive").getNodeValue())
         Assert.assertEquals("/" + libDirName+ "/commons-lang3-3.18.0.jar", nodes.item(3).getAttributes().getNamedItem("targetInArchive").getNodeValue())
         Assert.assertEquals("/" + libDirName+ "/test.jar", nodes.item(4).getAttributes().getNamedItem("targetInArchive").getNodeValue())
-        sourceOnDisk1=nodes.item(1).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
-        sourceOnDisk2=nodes.item(2).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
-        sourceOnDisk3=nodes.item(3).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
-        sourceOnDisk4=nodes.item(4).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
+
+        sourceOnDisk1 = nodes.item(1).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
+        sourceOnDisk2 = nodes.item(2).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
+        sourceOnDisk3 = nodes.item(3).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
+        sourceOnDisk4 = nodes.item(4).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
 
         Assert.assertTrue(sourceOnDisk1.contains(copyLibsDirectory) && sourceOnDisk1.contains("log4j-api-2.9.0.jar"))
         Assert.assertTrue(sourceOnDisk2.contains(copyLibsDirectory) && sourceOnDisk2.contains("log4j-core-2.9.0.jar"))
