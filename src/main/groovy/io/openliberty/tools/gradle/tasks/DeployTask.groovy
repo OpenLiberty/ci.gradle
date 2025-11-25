@@ -565,10 +565,7 @@ class DeployTask extends AbstractServerTask {
                resolvedDependency.getAllModuleArtifacts().each {
                    //making sure duplicate artifacts are not added
                    if (dependency.getName().equals(it.getModuleVersion().getId().getName())) {
-                       String libDirName= project.ear.libDirName!= null && !project.ear.libDirName.trim().isEmpty() ?
-                               "/" + project.ear.libDirName + "/" :
-                               "/lib/";
-                       addLibrary(looseEar.getDocumentRoot(), looseEar,libDirName, it.getFile());
+                       addLibrary(looseEar.getDocumentRoot(), looseEar, populateLibDirPath(project), it.getFile());
                        // removing from file dependency to avoid duplication of config lines as it already added
                        earlibFileDeps.remove(it.getFile());
                    }
@@ -583,10 +580,7 @@ class DeployTask extends AbstractServerTask {
         // this would include Local Files like Legacy Libraries
         // eg:- earlib files('libs/my-utility-1.0.jar', 'libs/some-other-lib-2.5.jar')
         for(File file:earlibFileDeps){
-           String libDirName= project.ear.libDirName!= null && !project.ear.libDirName.trim().isEmpty() ?
-            "/" + project.ear.libDirName + "/" :
-            "/lib/";
-            addLibrary(looseEar.getDocumentRoot(), looseEar, libDirName, file);
+            addLibrary(looseEar.getDocumentRoot(), looseEar, populateLibDirPath(project), file);
         }
     }
 
@@ -771,6 +765,26 @@ class DeployTask extends AbstractServerTask {
                 throw new GradleException("Failed to deploy the " + appName + " application. The application start message was not found in the log file.")
             }
         }
+    }
+
+    /**
+     * Retrieves the relative path for the EAR library directory.
+     * This method reads the libDirName from the project's EAR configuration.
+     * If the configuration is null or empty, it defaults to "lib".
+     * The returned string is guaranteed to be wrapped in forward slashes.
+     *
+     * @return The formatted library directory path.
+     */
+    protected static String populateLibDirPath(Project currentProject) {
+        def dirName = currentProject.ear.libDirName?.trim() ?: 'lib'
+
+        // Normalize backslashes to forward slashes for Archive compatibility
+        dirName = dirName.replace('\\', '/')
+
+        // Remove leading/trailing slashes to avoid double-slashing (e.g. //lib//)
+        dirName = dirName.replaceAll(/(^\/+)|(\/+$)/, '')
+
+        return "/$dirName/"
     }
 }
 
