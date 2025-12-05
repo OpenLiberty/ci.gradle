@@ -15,11 +15,12 @@ import javax.xml.xpath.XPathFactory
 import io.openliberty.tools.common.plugins.util.OSUtil
 
 import java.nio.file.Path
+import java.nio.file.Paths
 
 public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/multi-module-loose-ear-pages-test")
     static File buildDir = new File(integTestDir, "/multi-module-loose-ear-pages-test")
-    static File earDir = new File(Path.of(buildDir.getPath(),"ear", "build").toUri());
+    static File earDir = new File(Paths.get(buildDir.getPath(), "ear", "build").toUri());
     static String buildFilename = "build.gradle"
     public static final String libDirName = "custom/lib-dir"
     public static String copyLibsDirectory = "copy/libs"
@@ -176,7 +177,7 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
         sourceOnDisk3 = nodes.item(3).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
         sourceOnDisk4 = nodes.item(4).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
 
-        String expectedSourceOnDisk = Path.of(earDir.getPath(), copyLibsDirectory).toString()
+        String expectedSourceOnDisk = Paths.get(earDir.getPath(), copyLibsDirectory).toString()
 
         Assert.assertTrue(sourceOnDisk1.contains(expectedSourceOnDisk) && sourceOnDisk1.endsWith("log4j-api-2.9.0.jar"))
         Assert.assertTrue(sourceOnDisk2.contains(expectedSourceOnDisk) && sourceOnDisk2.endsWith("log4j-core-2.9.0.jar"))
