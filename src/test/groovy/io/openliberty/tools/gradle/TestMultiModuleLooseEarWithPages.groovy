@@ -195,13 +195,13 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
         Pattern dynamicRegexPattern = Pattern.compile(patternString)
 
         Assert.assertTrue(sourceOnDisk1 + " not contained in regex pattern " + dynamicRegexPattern,
-                dynamicRegexPattern.matcher(sourceOnDisk1).find() && sourceOnDisk1.endsWith("log4j-api-2.9.0.jar"))
+                dynamicRegexPattern.matcher(sourceOnDisk1).matches() && sourceOnDisk1.endsWith("log4j-api-2.9.0.jar"))
         Assert.assertTrue(sourceOnDisk2 + " not contained in regex pattern " + dynamicRegexPattern,
-                dynamicRegexPattern.matcher(sourceOnDisk2).find() && sourceOnDisk2.endsWith("log4j-core-2.9.0.jar"))
+                dynamicRegexPattern.matcher(sourceOnDisk2).matches() && sourceOnDisk2.endsWith("log4j-core-2.9.0.jar"))
         Assert.assertTrue(sourceOnDisk3 + " not contained in regex pattern " + dynamicRegexPattern,
-                dynamicRegexPattern.matcher(sourceOnDisk3).find() && sourceOnDisk3.endsWith("commons-lang3-3.18.0.jar"))
+                dynamicRegexPattern.matcher(sourceOnDisk3).matches() && sourceOnDisk3.endsWith("commons-lang3-3.18.0.jar"))
         Assert.assertTrue(sourceOnDisk4 + " not contained in regex pattern " + dynamicRegexPattern,
-                dynamicRegexPattern.matcher(sourceOnDisk4).find() && sourceOnDisk4.endsWith("test.jar"))
+                dynamicRegexPattern.matcher(sourceOnDisk4).matches() && sourceOnDisk4.endsWith("test.jar"))
 
     }
 }
