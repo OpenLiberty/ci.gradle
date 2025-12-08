@@ -161,7 +161,7 @@ jobs:
       working-directory: ${{github.workspace}}
       # LibertyTest is excluded because test0_run hangs
       # For Java 8, TestCreateWithConfigDir is excluded because test_micro_clean_liberty_plugin_variable_config runs out of memory
-      run: ./gradlew clean install check -P"test.include"="**/TestMultiModuleLooseEarWithPages" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
+      run: ./gradlew clean install check -P"test.include"="**/TestMultiModuleLooseEarWithPages*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
       timeout-minutes: 75
     # Copy build reports and upload artifact if build failed
     - name: Copy build/report/tests/test for upload
