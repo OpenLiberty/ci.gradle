@@ -45,6 +45,7 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
         }
         assert new File('build/testBuilds/multi-module-loose-ear-pages-test/ear/build/wlp/usr/servers/ejbServer/apps/ejb-ear-1.0-SNAPSHOT.ear.xml').exists() : 'looseApplication config file was not copied over to the liberty runtime'
     }
+
     /*
         Expected output to the XML
     <?xml version="1.0" encoding="UTF-8"?>
@@ -92,7 +93,7 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
         inputBuilderFactory.setIgnoringElementContentWhitespace(true);
         inputBuilderFactory.setValidating(false);
         inputBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false)
-        inputBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)  
+        inputBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
         DocumentBuilder inputBuilder = inputBuilderFactory.newDocumentBuilder();
         Document inputDoc=inputBuilder.parse(input);
 
@@ -177,9 +178,21 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
         sourceOnDisk3 = nodes.item(3).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
         sourceOnDisk4 = nodes.item(4).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
 
-        String sanitizedPrefix = Paths.get(earDir.getPath(), copyLibsDirectory).toAbsolutePath().normalize()
-        String dynamicRegexPatternString = '^' + sanitizedPrefix + '[\\/](\\d+)[\\/][^\\/]+\\.jar$'
-        Pattern dynamicRegexPattern = Pattern.compile(dynamicRegexPatternString)
+        String fullPrefix = Paths.get(earDir.getPath(), copyLibsDirectory).toAbsolutePath().toString()
+
+        String patternString
+
+        if (OSUtil.isWindows()) {
+            // Replace literal '\' with '\\' in the final regex pattern
+            // '\\\\' in Groovy string literal results in '\\' in the Java regex string
+            String escapedPrefixWindows = fullPrefix.replaceAll('\\\\', '\\\\\\\\')
+            patternString = '^' + escapedPrefixWindows + '\\\\(\\d+)\\\\[^\\\\]+\\.jar$'
+        } else {
+            // Unix logic: No further escaping is required for slashes.
+            patternString = '^' + fullPrefix + '/(\\d+)/[^/]+\\.jar$'
+        }
+
+        Pattern dynamicRegexPattern = Pattern.compile(patternString)
 
         Assert.assertTrue(sourceOnDisk1 + " not contained in regex pattern " + dynamicRegexPattern,
                 dynamicRegexPattern.matcher(sourceOnDisk1).find() && sourceOnDisk1.endsWith("log4j-api-2.9.0.jar"))
