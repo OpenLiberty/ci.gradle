@@ -14,8 +14,8 @@ import javax.xml.xpath.XPathConstants
 import javax.xml.xpath.XPathFactory
 import io.openliberty.tools.common.plugins.util.OSUtil
 
-import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.regex.Pattern
 
 public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/multi-module-loose-ear-pages-test")
@@ -177,12 +177,18 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
         sourceOnDisk3 = nodes.item(3).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
         sourceOnDisk4 = nodes.item(4).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
 
-        String expectedSourceOnDisk = Paths.get(earDir.getPath(), copyLibsDirectory).toString()
+        String sanitizedPrefix = Paths.get(earDir.getPath(), copyLibsDirectory).toAbsolutePath().normalize()
+        String dynamicRegexPatternString = '^' + sanitizedPrefix + '[\\/](\\d+)[\\/][^\\/]+\\.jar$'
+        Pattern dynamicRegexPattern = Pattern.compile(dynamicRegexPatternString)
 
-        Assert.assertTrue(sourceOnDisk1.contains(expectedSourceOnDisk) && sourceOnDisk1.endsWith("log4j-api-2.9.0.jar"))
-        Assert.assertTrue(sourceOnDisk2.contains(expectedSourceOnDisk) && sourceOnDisk2.endsWith("log4j-core-2.9.0.jar"))
-        Assert.assertTrue(sourceOnDisk3.contains(expectedSourceOnDisk) && sourceOnDisk3.endsWith("commons-lang3-3.18.0.jar"))
-        Assert.assertTrue(sourceOnDisk4.contains(expectedSourceOnDisk) && sourceOnDisk4.endsWith("test.jar"))
+        Assert.assertTrue(sourceOnDisk1 + " not contained in regex pattern " + dynamicRegexPattern,
+                dynamicRegexPattern.matcher(sourceOnDisk1).find() && sourceOnDisk1.endsWith("log4j-api-2.9.0.jar"))
+        Assert.assertTrue(sourceOnDisk2 + " not contained in regex pattern " + dynamicRegexPattern,
+                dynamicRegexPattern.matcher(sourceOnDisk2).find() && sourceOnDisk2.endsWith("log4j-core-2.9.0.jar"))
+        Assert.assertTrue(sourceOnDisk3 + " not contained in regex pattern " + dynamicRegexPattern,
+                dynamicRegexPattern.matcher(sourceOnDisk3).find() && sourceOnDisk3.endsWith("commons-lang3-3.18.0.jar"))
+        Assert.assertTrue(sourceOnDisk4 + " not contained in regex pattern " + dynamicRegexPattern,
+                dynamicRegexPattern.matcher(sourceOnDisk4).find() && sourceOnDisk4.endsWith("test.jar"))
 
     }
 }
