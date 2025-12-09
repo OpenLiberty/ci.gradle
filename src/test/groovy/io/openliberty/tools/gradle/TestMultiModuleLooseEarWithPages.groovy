@@ -178,18 +178,16 @@ public class TestMultiModuleLooseEarWithPages extends AbstractIntegrationTest{
         sourceOnDisk3 = nodes.item(3).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
         sourceOnDisk4 = nodes.item(4).getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
 
-        String fullPrefix = Paths.get(earDir.getPath(), copyLibsDirectory).toAbsolutePath().toString()
-
         String patternString
 
         if (OSUtil.isWindows()) {
             // Replace literal '\' with '\\' in the final regex pattern
             // '\\\\' in Groovy string literal results in '\\' in the Java regex string
-            String escapedPrefixWindows = fullPrefix.replaceAll('\\\\', '\\\\\\\\')
-            patternString = '^' + escapedPrefixWindows + '\\\\(\\d+)\\\\[^\\\\]+\\.jar$'
+            String escapedPrefixWindows = copyLibsDirectory.replaceAll('\\\\', '\\\\\\\\')
+            patternString = '.*' + escapedPrefixWindows + '\\\\(\\d+)\\\\[^\\\\]+\\.jar$'
         } else {
             // Unix logic: No further escaping is required for slashes.
-            patternString = '^' + fullPrefix + '/(\\d+)/[^/]+\\.jar$'
+            patternString = '.*' + copyLibsDirectory + '/(\\d+)/[^/]+\\.jar$'
         }
 
         Pattern dynamicRegexPattern = Pattern.compile(patternString)
