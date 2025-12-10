@@ -565,7 +565,7 @@ class DeployTask extends AbstractServerTask {
                resolvedDependency.getAllModuleArtifacts().each {
                    //making sure duplicate artifacts are not added
                    if (dependency.getName().equals(it.getModuleVersion().getId().getName())) {
-                       looseEar.getConfig().addFile(it.getFile(), "/lib/" + it.getFile().getName())
+                       addLibrary(looseEar.getDocumentRoot(), looseEar, populateLibDirPath(project), it.getFile());
                        // removing from file dependency to avoid duplication of config lines as it already added
                        earlibFileDeps.remove(it.getFile());
                    }
@@ -580,7 +580,7 @@ class DeployTask extends AbstractServerTask {
         // this would include Local Files like Legacy Libraries
         // eg:- earlib files('libs/my-utility-1.0.jar', 'libs/some-other-lib-2.5.jar')
         for(File file:earlibFileDeps){
-            looseEar.getConfig().addFile(file, "/lib/" + file.getName())
+            addLibrary(looseEar.getDocumentRoot(), looseEar, populateLibDirPath(project), file);
         }
     }
 
@@ -609,7 +609,21 @@ class DeployTask extends AbstractServerTask {
         }
     }
 
-    private void addLibrary(Element parent, LooseApplication looseApp, String dir, File lib) throws GradleException {
+    /**
+     * Adds a specified library file to the configuration of a loose application,
+     * optionally copying the file to a designated temporary directory before deployment if the copyLibsDirectory is configured.
+     * Used to deploy dependencies and earlib dependencies
+     * The behavior depends on the state of server.deploy.copyLibsDirectory
+     * If copyLibsDirectory is null, the method registers the library file  using its original location.
+     * If copyLibsDirectory is set, the method ensures the directory exists and is valid, then registers the library file with a copy instruction.
+     *
+     * @param parent The parent configuration element (often an XML element or configuration node).
+     * @param looseApp The LooseApplication configuration object used to register files.
+     * @param dir The target directory path within the deployed application structure (e.g., "/WEB-INF/lib/").
+     * @param lib The File object representing the library JAR to be added.
+     * @throws GradleException If server.deploy.copyLibsDirectory is defined but is not a valid directory.
+     */
+    protected void addLibrary(Element parent, LooseApplication looseApp, String dir, File lib) throws GradleException {
         if(server.deploy.copyLibsDirectory != null) {
             if(!server.deploy.copyLibsDirectory.exists()) {
                 server.deploy.copyLibsDirectory.mkdirs()
@@ -751,6 +765,26 @@ class DeployTask extends AbstractServerTask {
                 throw new GradleException("Failed to deploy the " + appName + " application. The application start message was not found in the log file.")
             }
         }
+    }
+
+    /**
+     * Retrieves the relative path for the EAR library directory.
+     * This method reads the libDirName from the project's EAR configuration.
+     * If the configuration is null or empty, it defaults to "lib".
+     * The returned string is guaranteed to be wrapped in forward slashes.
+     *
+     * @return The formatted library directory path.
+     */
+    protected static String populateLibDirPath(Project currentProject) {
+        def dirName = currentProject.ear.libDirName?.trim() ?: 'lib'
+
+        // Normalize backslashes to forward slashes for Archive compatibility
+        dirName = dirName.replace('\\', '/')
+
+        // Remove leading/trailing slashes to avoid double-slashing (e.g. //lib//)
+        dirName = dirName.replaceAll(/(^\/+)|(\/+$)/, '')
+
+        return "/$dirName/"
     }
 }
 
