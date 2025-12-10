@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Properties>
+        <Property name="log-path">logs</Property>
+    </Properties>
+
+    <Appenders>
+        <RollingFile name="DailyRolling" fileName="${log-path}/myexample.log" append="true"
+                     filePattern="${log-path}/myexample-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout>
+                <pattern>%d{ISO8601} %-5p [%c] %x &lt;%t&gt; - %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <!--JsonLayout/-->
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="io.openliberty.guides.multimodules.web.HeightsBean" level="debug">
+            <AppenderRef ref="DailyRolling"/>
+        </Logger>
+        <Root level="debug">
+            <AppenderRef ref="STDOUT"/>
+        </Root>
+    </Loggers>
+</Configuration>

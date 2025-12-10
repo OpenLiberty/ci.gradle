@@ -15,7 +15,6 @@
  */
 package io.openliberty.tools.gradle.tasks
 
-import io.openliberty.tools.gradle.utils.*
 import io.openliberty.tools.ant.ServerTask
 import io.openliberty.tools.common.plugins.config.ApplicationXmlDocument
 import io.openliberty.tools.common.plugins.config.LooseApplication
@@ -23,9 +22,10 @@ import io.openliberty.tools.common.plugins.config.LooseConfigData
 import io.openliberty.tools.common.plugins.config.ServerConfigDocument
 import io.openliberty.tools.common.plugins.util.DevUtil
 import io.openliberty.tools.common.plugins.util.OSUtil
-
+import io.openliberty.tools.gradle.utils.CommonLogger
+import io.openliberty.tools.gradle.utils.LooseEarApplication
+import io.openliberty.tools.gradle.utils.LooseWarApplication
 import org.apache.commons.io.FilenameUtils
-import org.gradle.api.artifacts.UnknownConfigurationException
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -34,20 +34,17 @@ import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.ResolvedDependency
+import org.gradle.api.artifacts.UnknownConfigurationException
 import org.gradle.api.file.FileCollection
-import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.w3c.dom.Element
 
-import java.lang.NumberFormatException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.text.MessageFormat
-import java.util.HashSet
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import java.io.File
 
 class DeployTask extends AbstractServerTask {
 
@@ -568,13 +565,16 @@ class DeployTask extends AbstractServerTask {
                 }
             }
             else if (dependency instanceof ExternalModuleDependency) {
-                //Adding all artifacts belonging to this dependency and its children
-                //handles artifacts from a repository, eg:-   earlib 'org.slf4j:slf4j-api:1.7.30'
-                resolvedDependency.getAllModuleArtifacts().each {
-                    looseEar.getConfig().addFile(it.getFile(), "/lib/" + it.getFile().getName())
-                    // removing from file dependency to avoid duplication of config lines as it already added
-                    earlibFileDeps.remove(it.getFile());
-                }
+               //Adding all artifacts belonging to this dependency and its children
+               //handles artifacts from a repository, eg:-   earlib 'org.slf4j:slf4j-api:1.7.30'
+               resolvedDependency.getAllModuleArtifacts().each {
+                   //making sure duplicate artifacts are not added
+                   if (dependency.getName().equals(it.getModuleVersion().getId().getName())) {
+                       addLibrary(looseEar.getDocumentRoot(), looseEar, populateLibDirPath(project), it.getFile());
+                       // removing from file dependency to avoid duplication of config lines as it already added
+                       earlibFileDeps.remove(it.getFile());
+                   }
+               }
             }
             else {
                 logger.warn("Dependency " + dependency.getName() + "could not be added to the looseApplication, as it is neither a ProjectDependency or ExternalModuleDependency")
@@ -585,7 +585,7 @@ class DeployTask extends AbstractServerTask {
         // this would include Local Files like Legacy Libraries
         // eg:- earlib files('libs/my-utility-1.0.jar', 'libs/some-other-lib-2.5.jar')
         for(File file:earlibFileDeps){
-            looseEar.getConfig().addFile(file, "/lib/" + file.getName())
+            addLibrary(looseEar.getDocumentRoot(), looseEar, populateLibDirPath(project), file);
         }
     }
 
@@ -614,6 +614,20 @@ class DeployTask extends AbstractServerTask {
         }
     }
 
+    /**
+     * Adds a specified library file to the configuration of a loose application,
+     * optionally copying the file to a designated temporary directory before deployment if the copyLibsDirectory is configured.
+     * Used to deploy dependencies and earlib dependencies
+     * The behavior depends on the state of server.deploy.copyLibsDirectory
+     * If copyLibsDirectory is null, the method registers the library file  using its original location.
+     * If copyLibsDirectory is set, the method ensures the directory exists and is valid, then registers the library file with a copy instruction.
+     *
+     * @param parent The parent configuration element (often an XML element or configuration node).
+     * @param looseApp The LooseApplication configuration object used to register files.
+     * @param dir The target directory path within the deployed application structure (e.g., "/WEB-INF/lib/").
+     * @param lib The File object representing the library JAR to be added.
+     * @throws GradleException If server.deploy.copyLibsDirectory is defined but is not a valid directory.
+     */
     protected void addLibrary(Element parent, LooseApplication looseApp, String dir, File lib) throws GradleException {
         if(server.deploy.copyLibsDirectory != null) {
             if(!server.deploy.copyLibsDirectory.exists()) {
@@ -757,6 +771,26 @@ class DeployTask extends AbstractServerTask {
                 throw new GradleException("Failed to deploy the " + appName + " application. The application start message was not found in the log file.")
             }
         }
+    }
+
+    /**
+     * Retrieves the relative path for the EAR library directory.
+     * This method reads the libDirName from the project's EAR configuration.
+     * If the configuration is null or empty, it defaults to "lib".
+     * The returned string is guaranteed to be wrapped in forward slashes.
+     *
+     * @return The formatted library directory path.
+     */
+    protected static String populateLibDirPath(Project currentProject) {
+        def dirName = currentProject.ear.libDirName?.trim() ?: 'lib'
+
+        // Normalize backslashes to forward slashes for Archive compatibility
+        dirName = dirName.replace('\\', '/')
+
+        // Remove leading/trailing slashes to avoid double-slashing (e.g. //lib//)
+        dirName = dirName.replaceAll(/(^\/+)|(\/+$)/, '')
+
+        return "/$dirName/"
     }
 }
 
