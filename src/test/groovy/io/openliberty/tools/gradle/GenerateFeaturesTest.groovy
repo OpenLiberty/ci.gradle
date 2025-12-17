@@ -44,7 +44,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
     @Test
     public void basicTest() throws Exception {
-        runCompileAndGenerateFeatures();
+        runCompileAndGenerateFeatures(null);
         executeBasicTests(newFeatureFile, "");
     }
 
@@ -75,12 +75,24 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
     @Test
     public void generateToSrcTest() throws Exception {
+        String options = "--generateToSrc=true";
         newFeatureFile.delete(); // clean up from other tests but file may not be present so don't assert
         assertFalse(newFeatureFileSrc.exists()); // assuming no other test creates this file
-        runCompileAndGenerateFeaturesToSrc();
+        runCompileAndGenerateFeatures(options);
 
-        executeBasicTests(newFeatureFileSrc, "--generateToSrc=true");
+        executeBasicTests(newFeatureFileSrc, options);
         assertTrue(newFeatureFileSrc.delete()); // clean up the generated file
+    }
+
+    @Test
+    public void internalDevModeTest() throws Exception {
+        String options = "--internalDevMode=true";
+        newFeatureFile.delete(); // clean up from other tests but file may not be present so don't assert
+        assertFalse(newFeatureFileTmp.exists()); // assuming no other test creates this file
+        runCompileAndGenerateFeatures(options);
+
+        executeBasicTests(newFeatureFileTmp, options);
+        assertTrue(newFeatureFileTmp.delete()); // clean up the generated file
     }
 
     @Test
@@ -105,7 +117,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         File scannerLogDir = new File(targetDir, "logs");
         assertFalse(scannerLogDir.exists());
 
-        runCompileAndGenerateFeaturesDebug();
+        runCompileAndGenerateFeatures(DEBUG_OPTION);
         assertTrue(scannerLogDir.exists());
         File[] logDirListing = scannerLogDir.listFiles();
         assertNotNull(logDirListing);
@@ -128,7 +140,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
             "</featureManager>\n", serverXmlFile);
         assertFalse("Before running", newFeatureFile.exists());
         // run the test
-        runCompileAndGenerateFeatures();
+        runCompileAndGenerateFeatures(null);
 
         // verify that the generated features file was created
         assertTrue(newFeatureFile.exists());
@@ -155,7 +167,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
             "    <feature>servlet-4.0</feature>\n" +
             "    <feature>cdi-1.2</feature>\n" +
             "  </featureManager>\n", serverXmlFile);
-        runCompileAndGenerateFeatures();
+        runCompileAndGenerateFeatures(null);
 
         // Verify BINARY_SCANNER_CONFLICT_MESSAGE2 error is thrown (BinaryScannerUtil.RecommendationSetException)
         Set<String> recommendedFeatureSet = new HashSet<String>(Arrays.asList("servlet-4.0"));
@@ -178,7 +190,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
             "  <featureManager>\n" +
             "    <feature>cdi-1.2</feature>\n" +
             "  </featureManager>\n", serverXmlFile);
-        runCompileAndGenerateFeatures();
+        runCompileAndGenerateFeatures(null);
 
         // Verify BINARY_SCANNER_CONFLICT_MESSAGE1 error is thrown (BinaryScannerUtil.FeatureModifiedException)
         Set<String> recommendedFeatureSet = new HashSet<String>(Arrays.asList("cdi-2.0", "servlet-4.0"));
@@ -206,7 +218,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
                         "  <featureManager>\n" +
                         "    <feature>mpOpenAPI-1.0</feature>\n" +
                         "  </featureManager>\n", serverXmlFile);
-        runCompileAndGenerateFeatures();
+        runCompileAndGenerateFeatures(null);
 
         // use just beginning of BINARY_SCANNER_CONFLICT_MESSAGE5 as error message in logFile may be interrupted with "1 actionable task: 1 executed"
         assertTrue("Could not find the feature unavailable conflict message in the process output.\n" + processOutput,
@@ -223,7 +235,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
      */
     @Test
     public void bothEEMPUmbrellaTest() throws Exception {
-        runCompileAndGenerateFeaturesDebug();
+        runCompileAndGenerateFeatures(DEBUG_OPTION);
         // Check for "  targetJavaEE: null" in the debug output
         String line = findLogMessage(TARGET_EE_NULL, 5000, logFile);
         assertNull("Target EE:'" + line+"'", line);
@@ -242,7 +254,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     public void onlyEEUmbrellaTest() throws Exception {
         replaceString(UMBRELLA_MP, ESA_MP_DEPENDENCY, buildFile);
         removeUnusedUmbrellas(buildFile);
-        runCompileAndGenerateFeaturesDebug();
+        runCompileAndGenerateFeatures(DEBUG_OPTION);
         // Check for "  targetJavaEE: null" in the debug output
         String line = findLogMessage(TARGET_EE_NULL, 5000, logFile);
         assertNull("Target EE:" + line, line);
@@ -261,7 +273,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     public void onlyMPUmbrellaTest() throws Exception {
         replaceString(UMBRELLA_EE, ESA_EE_DEPENDENCY, buildFile);
         removeUnusedUmbrellas(buildFile);
-        runCompileAndGenerateFeaturesDebug();
+        runCompileAndGenerateFeatures(DEBUG_OPTION);
         // Check for "  targetJavaEE: null" in the debug output
         String line = findLogMessage(TARGET_EE_NULL, 5000, logFile);
         assertNotNull("Target EE:" + line, line);
@@ -281,7 +293,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         replaceString(UMBRELLA_EE, ESA_EE_DEPENDENCY, buildFile);
         replaceString(UMBRELLA_MP, ESA_MP_DEPENDENCY, buildFile);
         removeUnusedUmbrellas(buildFile);
-        runCompileAndGenerateFeaturesDebug();
+        runCompileAndGenerateFeatures(DEBUG_OPTION);
         // Check for "  targetJavaEE: null" in the debug output
         String line = findLogMessage(TARGET_EE_NULL, 5000, logFile);
         assertNotNull("Target EE:" + line, line);
