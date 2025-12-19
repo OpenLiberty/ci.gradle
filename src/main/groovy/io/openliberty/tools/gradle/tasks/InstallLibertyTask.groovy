@@ -38,7 +38,7 @@ class InstallLibertyTask extends AbstractLibertyTask {
     protected String detachedCoords
     protected String detachedConfigFilePath
     // default to install the latest Open Liberty kernel from Maven Central repository
-    protected String defaultRuntime = "io.openliberty:openliberty-kernel:[25.0.0.3,)"
+    protected String defaultRuntime = "io.openliberty:openliberty-kernel:[25.0.0.9,)"
 
     InstallLibertyTask() {
         configure({
