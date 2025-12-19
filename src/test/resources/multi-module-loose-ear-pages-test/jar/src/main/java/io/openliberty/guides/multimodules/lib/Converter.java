@@ -10,12 +10,16 @@
  *******************************************************************************/
 // end::copyright[]
 package io.openliberty.guides.multimodules.lib;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Converter {
+    private static final Logger LOGGER = LogManager.getLogger(Converter.class.getName());
 
     // tag::getFeetMethod[]
     public static int getFeet(int cm) {
         int feet = (int) (cm / 30.48);
+        LOGGER.info(" Feet is {}",feet);
         return feet;
     }
     // end::getFeetMethod[]
@@ -25,6 +29,7 @@ public class Converter {
         double feet = cm / 30.48;
         int inches = (int) (cm / 2.54) - ((int) feet * 12);
         System.out.println(inches);
+        LOGGER.info(" Inches is {}",inches);
         return inches;
     }
     // end::getInchesMethod[]
