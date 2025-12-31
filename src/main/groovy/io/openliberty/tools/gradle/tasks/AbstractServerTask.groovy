@@ -41,6 +41,7 @@ import org.gradle.plugins.ear.Ear
 import javax.xml.parsers.ParserConfigurationException
 import javax.xml.transform.TransformerException
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.Map.Entry
 import java.util.regex.Matcher
@@ -140,8 +141,15 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         project.ant.taskdef(name: 'server',
                             classname: 'io.openliberty.tools.ant.ServerTask',
                             classpath: project.buildscript.configurations.classpath.asPath)
+
+        // Use standard toolchain configuration
+        Map<String, String> envVars = getToolchainEnvVar();
         params.put('operation', command)
-        project.ant.server(params)
+        project.ant.server(params){
+            envVars.each { key, val ->
+                environmentVariable(name: key, value: val)
+            }
+        }
     }
 
     protected Map<String, String> buildLibertyMap(Project project) {
@@ -1136,6 +1144,10 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
             serverTask.setTimeout(server.timeout)
         }
 
+        Map<String, String> envVars = getToolchainEnvVar();
+        if(!envVars.isEmpty()){
+            serverTask.setEnvironmentVariables(envVars);
+        }
         return serverTask
     }
 
@@ -1183,5 +1195,111 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
             return (new File(destDir, looseConfigFileName));
         }
     }
+    /**
+     * @return environment variable map with Toolchain JDK
+     */
+    @Internal
+    protected Map<String, String> getToolchainEnvVar() {
 
+        String jdkHome = getToolchainJavaHome();
+        if (jdkHome == null) {
+            logger.warn("Could not determine JDK home from toolchain. Toolchain will not be honored");
+            return Collections.emptyMap();
+        }
+
+        String serverDirectory = getServerDir(project).toString()
+        // 1. Read existing config files
+        List<String> serverEnvLines = readConfigFileLines(populateServerEnvFile(serverDirectory));
+
+        List<String> jvmOptionsLines = readConfigFileLines(new File(serverDirectory, "jvm.options"));
+
+        // 2. Check for existing JAVA_HOME configuration
+        // if user has configured JAVA_HOME in server.env or jvm.options, this will get higher precedence over toolchain JDK
+        // hence a warning will be issued
+        if (isJavaHomeSet(serverEnvLines, jvmOptionsLines)) {
+            logger.warn("CWWKM4101W: The toolchain JDK configuration for goal "+ this.path +" is not honored because the JAVA_HOME property is specified in the server.env or jvm.options file"
+            );
+        } else {
+            logger.info("CWWKM4101I: The "+ this.path +" goal is using the configured toolchain JDK located at "+ jdkHome)
+            // 3. Apply toolchain configuration
+            return populateEnvironmentVariablesMap(jdkHome);
+        }
+        return Collections.emptyMap();
+    }
+
+    /**
+     * Determines the primary server.env file to read.
+     * Checks serverEnvFile first, then a default location in serverDirectory.
+     *
+     * @return The File object for the server.env, or null if neither exists or is specified.
+     */
+    @Internal
+    private File populateServerEnvFile(String serverDirectory) {
+        if (server.serverEnvFile!=null && server.serverEnvFile.getCanonicalPath() != null && server.serverEnvFile.getCanonicalPath().exists()) {
+            return server.serverEnvFile.getCanonicalPath();
+        }
+        File defaultServerEnv = new File(serverDirectory, "server.env");
+        if (defaultServerEnv.exists()) {
+            return defaultServerEnv;
+        }
+        return null;
+    }
+
+    /**
+     * Reads all lines from a configuration file, handling null/non-existent files
+     * and I/O exceptions gracefully.
+     *
+     * @param configFile The file to read.
+     * @return A list of strings, each representing a line in the file. Returns an empty list on failure.
+     */
+    @Internal
+    private List<String> readConfigFileLines(File configFile) {
+        if (configFile == null || !configFile.exists()) {
+            return Collections.emptyList();
+        }
+        Path configPath = configFile.toPath();
+        try {
+            return Files.readAllLines(configPath);
+        } catch (IOException e) {
+            logger.warn("Error reading config file: " + configPath);
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Applies the toolchain's JDK home to the ServerTask's environment variables.
+     *
+     * @param jdkHome    The resolved JDK home path.
+     * @return envVars
+     */
+    @Internal
+    private static Map<String, String> populateEnvironmentVariablesMap(String jdkHome) {
+        Map<String, String> envVars = new HashMap<>();
+        envVars.put("JAVA_HOME", jdkHome);
+        return envVars;
+    }
+
+    /**
+     *
+     * @param serverEnvLines lines from server.env
+     * @param jvmOptionsLines lines from jvm.options
+     * @return true or false
+     */
+    @Internal
+    protected static boolean isJavaHomeSet(List<String> serverEnvLines, List<String> jvmOptionsLines) {
+        boolean javaHomeSet = false;
+        for (String serverEnvLine : serverEnvLines) {
+            if (serverEnvLine.startsWith("JAVA_HOME=")) {
+                javaHomeSet = true;
+                break;
+            }
+        }
+        for (String serverEnvLine : jvmOptionsLines) {
+            if (serverEnvLine.contains("JAVA_HOME=")) {
+                javaHomeSet = true;
+                break;
+            }
+        }
+        return javaHomeSet;
+    }
 }

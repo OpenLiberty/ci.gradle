@@ -58,6 +58,14 @@ class CompileJSPTask extends AbstractFeatureTask {
         // don't delete temporary server dir
         compileJsp.setCleanup(false)
         compileJsp.setProject(ant)
+        Map<String, String> envVars = getToolchainEnvVar();
+        if (!envVars.isEmpty()) {
+            if (compileJsp.getEnvironmentVariables() != null && !compileJsp.getEnvironmentVariables().isEmpty()) {
+                compileJsp.setEnvironmentVariables(compileJsp.getEnvironmentVariables().putAll(envVars));
+            } else {
+                compileJsp.setEnvironmentVariables(envVars);
+            }
+        }
         compileJsp.setTaskName('antlib:net/wasdev/wlp/ant:compileJSPs')
         War war;
         if(project.plugins.hasPlugin("war")){

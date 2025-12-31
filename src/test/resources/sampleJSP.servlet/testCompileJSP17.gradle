@@ -23,6 +23,12 @@ apply plugin: 'liberty'
 compileJava.options.release = 17
 
 compileJava.options.encoding = 'UTF-8'
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+        vendor.set(JvmVendorSpec.ADOPTIUM)
+    }
+}
 
 ext {
     // Liberty server properties

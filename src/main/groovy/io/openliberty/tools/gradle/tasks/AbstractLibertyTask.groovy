@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017, 2024.
+ * (C) Copyright IBM Corporation 2017, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,15 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Dependency
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import groovy.xml.XmlParser
+import org.gradle.api.tasks.Nested
+import org.gradle.jvm.toolchain.JavaLauncher
+import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.jvm.toolchain.JavaToolchainService
+
+import javax.inject.Inject
 
 abstract class AbstractLibertyTask extends DefaultTask {
 
@@ -31,6 +38,39 @@ abstract class AbstractLibertyTask extends DefaultTask {
     protected boolean isWindows = System.properties['os.name'].toLowerCase().indexOf("windows") >= 0
     protected String springBootVersion
     protected Task springBootTask
+
+    // Standard toolchain support properties
+    @Nested
+    public final Property<JavaLauncher> javaLauncher = project.objects.property(JavaLauncher)
+
+    public JavaLauncher getJavaLauncher() {
+        return javaLauncher.get()
+    }
+
+    public void setJavaLauncher(JavaLauncher launcher) {
+        javaLauncher.set(launcher)
+    }
+
+    @Inject
+    protected JavaToolchainService getJavaToolchainService() {
+        return project.getExtensions().getByType(JavaToolchainService)
+    }
+
+    // Constructor to configure default toolchain behavior
+    AbstractLibertyTask() {
+        configureDefaults()
+    }
+
+    private void configureDefaults() {
+        // Use project toolchain as default if available
+        try {
+            def toolchain = project.extensions.getByType(JavaPluginExtension).toolchain
+            def defaultLauncher = getJavaToolchainService().launcherFor(toolchain)
+            javaLauncher.convention(defaultLauncher)
+        } catch (Exception e) {
+            logger.debug("Could not configure default toolchain: ${e.message}")
+        }
+    }
 
     protected boolean isInstallDirChanged(Project project) {
 
@@ -192,4 +232,32 @@ abstract class AbstractLibertyTask extends DefaultTask {
         return installProps
     }
 
+    /**
+     * Get the configured Java launcher from standard toolchain properties.
+     * This provides the standard way to access toolchain configuration.
+     */
+    @Internal
+    protected JavaLauncher getConfiguredLauncher() {
+        try {
+            def launcher = javaLauncher.get()
+            logger.info("Successfully got configured launcher: ${launcher}")
+            return launcher
+        } catch (Exception e) {
+            logger.debug("Could not get configured launcher: ${e.message}")
+            return null
+        }
+    }
+
+    /**
+     * Get the Java home path from the configured toolchain.
+     * This provides the standard way to access the JDK path.
+     */
+    @Internal
+    protected String getToolchainJavaHome() {
+        def launcher = getConfiguredLauncher()
+        if (launcher != null) {
+            return launcher.metadata.installationPath.asFile.absolutePath
+        }
+        return null
+    }
 }

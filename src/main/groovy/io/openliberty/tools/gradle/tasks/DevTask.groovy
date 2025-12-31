@@ -37,6 +37,7 @@ import org.gradle.api.internal.file.DefaultFilePropertyFactory
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.TaskAction
@@ -481,6 +482,14 @@ class DevTask extends AbstractFeatureTask {
         @Override
         public ServerTask getServerTask() throws Exception {
             if (serverTask != null) {
+                Map<String, String> envVars = getToolchainEnvVar();
+                if (!envVars.isEmpty()) {
+                    if (serverTask.getEnvironmentVariables() != null && !serverTask.getEnvironmentVariables().isEmpty()) {
+                        serverTask.setEnvironmentVariables(serverTask.getEnvironmentVariables().putAll(envVars));
+                    } else {
+                        serverTask.setEnvironmentVariables(envVars);
+                    }
+                }
                 return serverTask;
             }
 
@@ -489,7 +498,12 @@ class DevTask extends AbstractFeatureTask {
             if (libertyDebug) {
                 serverTask = createServerTask(project, "debug");
                 setLibertyDebugPort(libertyDebugPort);
-                serverTask.setEnvironmentVariables(getDebugEnvironmentVariables());
+                // putting debug environment variables on top of existing java home variable
+                if (serverTask.getEnvironmentVariables() != null && !serverTask.getEnvironmentVariables().isEmpty()) {
+                    serverTask.setEnvironmentVariables(serverTask.getEnvironmentVariables().putAll(getDebugEnvironmentVariables()));
+                } else {
+                    serverTask.setEnvironmentVariables(getDebugEnvironmentVariables());
+                }
             } else {
                 serverTask = createServerTask(project, "run");
             }
@@ -497,6 +511,11 @@ class DevTask extends AbstractFeatureTask {
             serverTask.setClean(clean);
 
             return serverTask;
+        }
+
+        @Internal
+        private void updateServerTaskEnvironmentVariables(Map<String, String> envVars) {
+
         }
 
         @Override
