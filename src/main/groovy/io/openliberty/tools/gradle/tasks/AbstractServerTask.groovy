@@ -1200,7 +1200,10 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      */
     @Internal
     protected Map<String, String> getToolchainEnvVar() {
-
+        if (!isToolchainConfigured()) {
+            logger.debug("Toolchain is not specified in build context")
+            return Collections.emptyMap();
+        }
         String jdkHome = getToolchainJavaHome();
         if (jdkHome == null) {
             logger.warn("Could not determine JDK home from toolchain. Toolchain will not be honored");
@@ -1217,10 +1220,10 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         // if user has configured JAVA_HOME in server.env or jvm.options, this will get higher precedence over toolchain JDK
         // hence a warning will be issued
         if (isJavaHomeSet(serverEnvLines, jvmOptionsLines)) {
-            logger.warn("CWWKM4101W: The toolchain JDK configuration for goal "+ this.path +" is not honored because the JAVA_HOME property is specified in the server.env or jvm.options file"
+            logger.warn("CWWKM4101W: The toolchain JDK configuration for goal " + this.path + " is not honored because the JAVA_HOME property is specified in the server.env or jvm.options file"
             );
         } else {
-            logger.info("CWWKM4101I: The "+ this.path +" goal is using the configured toolchain JDK located at "+ jdkHome)
+            logger.info("CWWKM4101I: The " + this.path + " goal is using the configured toolchain JDK located at " + jdkHome)
             // 3. Apply toolchain configuration
             return populateEnvironmentVariablesMap(jdkHome);
         }

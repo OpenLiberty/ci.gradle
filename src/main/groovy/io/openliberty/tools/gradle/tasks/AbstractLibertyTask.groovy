@@ -260,4 +260,11 @@ abstract class AbstractLibertyTask extends DefaultTask {
         }
         return null
     }
+    @Internal
+    protected String isToolchainConfigured() {
+        def toolchain = project.extensions.getByType(JavaPluginExtension).toolchain
+        if(toolchain.getLanguageVersion().isPresent()){
+            logger.info("CWWKM4100I: Using toolchain from build context. JDK Version specified is ${toolchain.getLanguageVersion().get()}")
+        }
+    }
 }

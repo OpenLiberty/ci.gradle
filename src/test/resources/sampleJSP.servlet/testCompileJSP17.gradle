@@ -26,7 +26,6 @@ compileJava.options.encoding = 'UTF-8'
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
-        vendor.set(JvmVendorSpec.ADOPTIUM)
     }
 }
 
