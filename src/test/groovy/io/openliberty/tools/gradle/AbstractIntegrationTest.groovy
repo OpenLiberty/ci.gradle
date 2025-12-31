@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2015, 2022.
+ * (C) Copyright IBM Corporation 2015, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,5 +215,35 @@ abstract class AbstractIntegrationTest {
                 throw new AssertionError("Unable to merge file '${sourceFile.canonicalPath}' to '${destFile.canonicalPath}'.", e)
             }
         }
+    }
+
+    protected static boolean verifyFileContents(int timeout, String message, File file)
+            throws InterruptedException, FileNotFoundException {
+        int waited = 0;
+        int sleep = 100;
+        while (waited <= timeout) {
+            if (readFile(message, file)) {
+                Thread.sleep(1000);
+                return true;
+            }
+            Thread.sleep(sleep);
+            waited += sleep;
+        }
+        return false;
+    }
+
+    private static boolean readFile(String str, File file) throws FileNotFoundException {
+        Scanner scanner = new Scanner(file);
+        try {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                if (line.contains(str)) {
+                    return true;
+                }
+            }
+        } finally {
+            scanner.close();
+        }
+        return false;
     }
 }
