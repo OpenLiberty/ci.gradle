@@ -64,18 +64,6 @@ jobs:
       run: |
         echo "Primary JAVA_HOME is set to: $JAVA_HOME"
         java -version
-    - name: Verify ~/.m2/toolchains.xml content
-      shell: bash
-      run: |
-        echo "Checking for toolchains.xml in: $HOME/.m2/"
-        ls -l $HOME/.m2/toolchains.xml 2> /dev/null || echo "File does not exist or permission denied."
-        echo "--- toolchains.xml content ---"
-        if [ -f $HOME/.m2/toolchains.xml ]; then
-          cat $HOME/.m2/toolchains.xml
-        else
-          echo "Cannot display content: $HOME/.m2/toolchains.xml not found."
-        fi
-        echo "----------------------------"
     - name: Checkout ci.common
       uses: actions/checkout@v3
       with:
@@ -188,18 +176,22 @@ jobs:
       run: |
         echo "Primary JAVA_HOME is set to: $JAVA_HOME"
         java -version
-    - name: Verify ~/.m2/toolchains.xml content
+    - name: Create Gradle Init Script for Toolchains
       shell: bash
       run: |
-        echo "Checking for toolchains.xml in: $HOME/.m2/"
-        ls -l $HOME/.m2/toolchains.xml 2> /dev/null || echo "File does not exist or permission denied."
-        echo "--- toolchains.xml content ---"
-        if [ -f $HOME/.m2/toolchains.xml ]; then
-          cat $HOME/.m2/toolchains.xml
-        else
-          echo "Cannot display content: $HOME/.m2/toolchains.xml not found."
-        fi
-        echo "----------------------------"
+          mkdir -p ~/.gradle
+          cat <<EOF > ~/.gradle/init.gradle
+          allprojects {
+              tasks.withType(JavaCompile).configureEach {
+                  options.forkOptions.jvmArgs << "-Dorg.gradle.java.installations.paths=${{ env.JAVA_HOME_8_X64 }},${{ env.JAVA_HOME_11_X64 }},${{ env.JAVA_HOME_17_X64 }},${{ env.JAVA_HOME_21_X64 }}"
+              }
+          }
+          settingsEvaluated { settings ->
+              settings.gradle.beforeProject { p ->
+                  p.extensions.extraProperties.set("org.gradle.java.installations.paths", "${{ env.JAVA_HOME_8_X64 }},${{ env.JAVA_HOME_11_X64 }},${{ env.JAVA_HOME_17_X64 }},${{ env.JAVA_HOME_21_X64 }}")
+              }
+          }
+          EOF
     # Moving and cloning to C: drive for Windows for more disk space
     - name: Clone ci.ant, ci.common, ci.gradle repos to C drive
       run: |
@@ -236,7 +228,6 @@ jobs:
       if: ${{ matrix.java == '17'  || matrix.java == '21' }}
       run: >
         ./gradlew clean install check 
-        -P"org.gradle.java.installations.paths=${{ env.JAVA_HOME_8_X64 }},${{ env.JAVA_HOME_11_X64 }},${{ env.JAVA_HOME_17_X64 }},${{ env.JAVA_HOME_21_X64 }}"
         -P"test.include"="**/TestSpringBootApplication30*,**/TestCompileJSPSource17*" 
         -Druntime=${{ matrix.RUNTIME }} 
         -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" 
@@ -245,8 +236,7 @@ jobs:
     - name: Run tests with Gradle on Windows
       working-directory: ${{github.workspace}}
       run: >
-        ./gradlew clean install check 
-        -P"org.gradle.java.installations.paths=${{ env.JAVA_HOME_8_X64 }},${{ env.JAVA_HOME_11_X64 }},${{ env.JAVA_HOME_17_X64 }},${{ env.JAVA_HOME_21_X64 }}"
+        ./gradlew clean install check
         -P"test.exclude"="${{env.TEST_EXCLUDE}}" 
         -Druntime=${{ matrix.RUNTIME }} 
         -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" 
