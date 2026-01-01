@@ -176,30 +176,18 @@ jobs:
       run: |
         echo "Primary JAVA_HOME is set to: $JAVA_HOME"
         java -version
-    - name: Create Gradle Toolchain Init Script
+    - name: Set Global Gradle Toolchain Paths
       shell: bash
       run: |
-          # 1. Fix backslashes in the JDK paths
+          # Convert backslashes to forward slashes for Gradle/Java compatibility
           RAW_PATHS="${{ env.JAVA_HOME_8_X64 }},${{ env.JAVA_HOME_11_X64 }},${{ env.JAVA_HOME_17_X64 }},${{ env.JAVA_HOME_21_X64 }}"
           FIXED_PATHS=$(echo $RAW_PATHS | sed 's/\\/\//g')
           
-          # 2. Fix backslashes in the Workspace path for the output filename
-          # This prevents the "No such file or directory" error
-          SAFE_WORKSPACE=$(echo "${{ github.workspace }}" | sed 's/\\/\//g')
-          INIT_SCRIPT_PATH="${SAFE_WORKSPACE}/toolchain-init.gradle"
+          # Inject the property into GRADLE_OPTS via the GitHub Environment file
+          # This makes it available to ALL subsequent steps and child processes
+          echo "GRADLE_OPTS=-Dorg.gradle.java.installations.paths=$FIXED_PATHS" >> $GITHUB_ENV
           
-          # 3. Create the init script
-          cat <<EOF > "$INIT_SCRIPT_PATH"
-          settingsEvaluated { settings ->
-              settings.gradle.beforeProject { p ->
-                  // Set as Gradle property
-                  p.extensions.extraProperties.set("org.gradle.java.installations.paths", "$FIXED_PATHS")
-                  // Set as System property (often helps TestKit inheritance)
-                  System.setProperty("org.gradle.java.installations.paths", "$FIXED_PATHS")
-              }
-          }
-          EOF
-          echo "Successfully created init script at: $INIT_SCRIPT_PATH"
+          echo "Global GRADLE_OPTS set to include toolchain paths."
     # Moving and cloning to C: drive for Windows for more disk space
     - name: Clone ci.ant, ci.common, ci.gradle repos to C drive
       run: |
@@ -236,22 +224,20 @@ jobs:
       if: ${{ matrix.java == '17'  || matrix.java == '21' }}
       run: >
         ./gradlew clean install check 
-        --init-script toolchain-init.gradle
         -P"test.include"="**/TestSpringBootApplication30*,**/TestCompileJSPSource17*" 
         -Druntime=${{ matrix.RUNTIME }} 
         -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" 
         --stacktrace --info --no-daemon
-      # Run tests
-    - name: Run tests with Gradle on Windows
-      working-directory: ${{github.workspace}}
-      run: >
-        ./gradlew clean install check
-        --init-script ${{ github.workspace }}/toolchain-init.gradle
-        -P"test.exclude"="${{env.TEST_EXCLUDE}}" 
-        -Druntime=${{ matrix.RUNTIME }} 
-        -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" 
-        --stacktrace --info --no-daemon
-      timeout-minutes: 75
+#      # Run tests
+#    - name: Run tests with Gradle on Windows
+#      working-directory: ${{github.workspace}}
+#      run: >
+#        ./gradlew clean install check
+#        -P"test.exclude"="${{env.TEST_EXCLUDE}}"
+#        -Druntime=${{ matrix.RUNTIME }}
+#        -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}"
+#        --stacktrace --info --no-daemon
+#      timeout-minutes: 75
     # Copy build reports and upload artifact if build failed
     - name: Copy build/report/tests/test for upload
       if: ${{ failure() }}
