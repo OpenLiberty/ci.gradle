@@ -139,15 +139,14 @@ abstract class AbstractIntegrationTest {
         }
         args.add("-i")
         args.add("-s")
-        // 1. Capture the toolchain property from the parent test process
-        // Check System Property first, then Project Property
+        // 1. Pull the path from the Test Executor's System properties
         String toolchainPaths = System.getProperty("org.gradle.java.installations.paths")
 
-        // 2. If found, explicitly inject it into the GradleRunner arguments
-        if (toolchainPaths && !toolchainPaths.isEmpty()) {
-            // We use -D here because it's the most direct way to override
-            // toolchain detection in the child process
+        // 2. If it exists, inject it into the GradleRunner arguments
+        if (toolchainPaths) {
             args.add("-Dorg.gradle.java.installations.paths=${toolchainPaths}")
+            // 3. IMPORTANT: Tell Gradle NOT to look for other JDKs
+            args.add("-Dorg.gradle.java.installations.auto-detect=false")
         }
         BuildResult result = GradleRunner.create()
             .withProjectDir(projectDir)
