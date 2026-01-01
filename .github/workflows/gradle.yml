@@ -7,7 +7,7 @@ on:
   push:
     branches: '**'
   pull_request:
-    branches: [ main ]
+    branches: [ main,toolchain_v1 ]
 
 jobs:
 # UNIX BUILDS
