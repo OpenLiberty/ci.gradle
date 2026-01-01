@@ -34,12 +34,12 @@ class StatusTask extends AbstractServerTask {
             if (serverDir.exists()) {
                 File serverXmlFile = new File(serverDir,"server.xml")
                 if (serverXmlFile.exists()) {
-                    def status_process = new ProcessBuilder(buildCommand("status"))
+                    def pb = new ProcessBuilder(buildCommand("status"))
                     Map<String, String> envVars = getToolchainEnvVar();
                     if(!envVars.isEmpty()){
                         pb.environment().putAll(envVars);
                     }
-                    status_process.redirectErrorStream(true).start()
+                    def status_process= redirectErrorStream(true).start()
                     status_process.inputStream.eachLine {
                         println it
                     }
