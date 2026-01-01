@@ -122,9 +122,9 @@ abstract class AbstractIntegrationTest {
 
         // 2. If it exists, inject it into the GradleRunner arguments
         if (toolchainPaths) {
-            args.add("-Dorg.gradle.java.installations.paths=${toolchainPaths}")
+            args.add("-Dorg.gradle.java.installations.paths=${toolchainPaths}".toString())
             // 3. IMPORTANT: Tell Gradle NOT to look for other JDKs
-            args.add("-Dorg.gradle.java.installations.auto-detect=false")
+            args.add("-Dorg.gradle.java.installations.auto-detect=false".toString())
         }
         BuildResult result = GradleRunner.create()
             .withProjectDir(projectDir)
