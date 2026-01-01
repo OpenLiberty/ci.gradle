@@ -117,7 +117,15 @@ abstract class AbstractIntegrationTest {
         }
         args.add("-i")
         args.add("-s")
+        // 1. Pull the path from the Test Executor's System properties
+        String toolchainPaths = System.getProperty("org.gradle.java.installations.paths")
 
+        // 2. If it exists, inject it into the GradleRunner arguments
+        if (toolchainPaths) {
+            args.add("-Dorg.gradle.java.installations.paths=${toolchainPaths}")
+            // 3. IMPORTANT: Tell Gradle NOT to look for other JDKs
+            args.add("-Dorg.gradle.java.installations.auto-detect=false")
+        }
         BuildResult result = GradleRunner.create()
             .withProjectDir(projectDir)
             .forwardOutput()
