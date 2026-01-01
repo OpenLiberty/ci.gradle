@@ -122,6 +122,7 @@ abstract class AbstractIntegrationTest {
             .withProjectDir(projectDir)
             .forwardOutput()
             .withArguments(args)
+            .withEnvironment(System.getenv()) // This passes ALL runner env vars to the sub-build
             .build()
 
         //'it' is null if tasks is a single String
@@ -143,6 +144,7 @@ abstract class AbstractIntegrationTest {
         BuildResult result = GradleRunner.create()
             .withProjectDir(projectDir)
             .forwardOutput()
+            .withEnvironment(System.getenv()) // This passes ALL runner env vars to the sub-build
             .withArguments(args)
             .build()
 
@@ -160,6 +162,7 @@ abstract class AbstractIntegrationTest {
         args.add("-s");
 
         BuildResult result = GradleRunner.create()
+            .withEnvironment(System.getenv()) // This passes ALL runner env vars to the sub-build
             .withProjectDir(projectDir)
             .forwardOutput()
             .withArguments(args)
@@ -179,6 +182,7 @@ abstract class AbstractIntegrationTest {
             .withProjectDir(projectDir)
             .forwardOutput()
             .withArguments(args)
+            .withEnvironment(System.getenv()) // This passes ALL runner env vars to the sub-build
             .build()
 
         return UP_TO_DATE == result.task(":" + task + "").getOutcome()
