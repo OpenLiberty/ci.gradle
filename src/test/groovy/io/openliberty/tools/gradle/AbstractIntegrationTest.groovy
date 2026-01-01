@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2015, 2025.
+ * (C) Copyright IBM Corporation 2015, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,15 +117,7 @@ abstract class AbstractIntegrationTest {
         }
         args.add("-i")
         args.add("-s")
-        // 1. Pull the path from the Test Executor's System properties
-        String toolchainPaths = System.getProperty("org.gradle.java.installations.paths")
 
-        // 2. If it exists, inject it into the GradleRunner arguments
-        if (toolchainPaths) {
-            args.add("-Dorg.gradle.java.installations.paths=${toolchainPaths}".toString())
-            // 3. IMPORTANT: Tell Gradle NOT to look for other JDKs
-            args.add("-Dorg.gradle.java.installations.auto-detect=false".toString())
-        }
         BuildResult result = GradleRunner.create()
             .withProjectDir(projectDir)
             .forwardOutput()
@@ -147,15 +139,7 @@ abstract class AbstractIntegrationTest {
         }
         args.add("-i")
         args.add("-s")
-        // 1. Pull the path from the Test Executor's System properties
-        String toolchainPaths = System.getProperty("org.gradle.java.installations.paths")
 
-        // 2. If it exists, inject it into the GradleRunner arguments
-        if (toolchainPaths) {
-            args.add("-Dorg.gradle.java.installations.paths=${toolchainPaths}")
-            // 3. IMPORTANT: Tell Gradle NOT to look for other JDKs
-            args.add("-Dorg.gradle.java.installations.auto-detect=false")
-        }
         BuildResult result = GradleRunner.create()
             .withProjectDir(projectDir)
             .forwardOutput()
@@ -261,5 +245,34 @@ abstract class AbstractIntegrationTest {
             scanner.close();
         }
         return false;
+    }
+
+
+    protected static void runTasksWithToolchain(File projectDir, String... tasks) {
+        List<String> args = new ArrayList<String>()
+        tasks.each {
+            args.add(it)
+        }
+        args.add("-i")
+        args.add("-s")
+        // use toolchain installation path for windows
+        String toolchainPaths = System.getProperty("org.gradle.java.installations.paths")
+        if (toolchainPaths) {
+            args.add("-Dorg.gradle.java.installations.paths=${toolchainPaths}".toString())
+            // Force Gradle to stop looking for the non-existent 'Adopt_jdk' folder
+            args.add("-Dorg.gradle.java.installations.auto-detect=false".toString())
+        }
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(projectDir)
+                .forwardOutput()
+                .withArguments(args)
+                .build()
+
+        //'it' is null if tasks is a single String
+        if(tasks.length > 1) {
+            tasks.each {
+                assert SUCCESS == result.task(":$it").getOutcome()
+            }
+        }
     }
 }

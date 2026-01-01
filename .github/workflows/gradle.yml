@@ -210,13 +210,12 @@ jobs:
     - name: Run tests with Gradle
       shell: pwsh
       run: |
-        # Convert backslashes to forward slashes for the property
         $FIXED_PATHS = "${{ env.JAVA_HOME_8_X64 }},${{ env.JAVA_HOME_11_X64 }},${{ env.JAVA_HOME_17_X64 }},${{ env.JAVA_HOME_21_X64 }}".Replace('\', '/')
         ./gradlew clean install check `
           -P"test.include"="**/TestSpringBootApplication30*,**/TestCompileJSPSource17*" `
           "-Dorg.gradle.java.installations.paths=$FIXED_PATHS" `
           "-Druntime=${{ matrix.runtime }}" `
-          "-DruntimeVersion=${{ matrix.runtime_version }}"
+          "-DruntimeVersion=${{ matrix.runtime_version }}" --stacktrace --info --no-daemon
 #    # Run tests
 #    - name: Run tests with Gradle on Windows
 #      working-directory: ${{github.workspace}}

@@ -30,8 +30,8 @@ public class TestCompileJSPSource17 extends AbstractIntegrationTest{
     public static void setup() {
         createDir(buildDir)
         createTestProject(buildDir, resourceDir, buildFilename)
-        runTasks(buildDir, 'installFeature')
-        runTasks(buildDir, 'compileJsp')
+        runTasksWithToolchain(buildDir, 'installFeature')
+        runTasksWithToolchain(buildDir, 'compileJsp')
     }
 
     @Test
