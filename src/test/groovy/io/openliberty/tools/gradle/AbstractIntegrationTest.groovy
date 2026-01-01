@@ -111,7 +111,7 @@ abstract class AbstractIntegrationTest {
     }
 
     protected static void runTasks(File projectDir, String... tasks) {
-        List<String> args = new ArrayList<String>()
+        List<String> args = []
         tasks.each {
             args.add(it)
         }
