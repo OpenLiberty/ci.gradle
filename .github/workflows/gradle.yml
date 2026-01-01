@@ -179,20 +179,27 @@ jobs:
     - name: Create Gradle Toolchain Init Script
       shell: bash
       run: |
-          # Convert backslashes to forward slashes
+          # 1. Fix backslashes in the JDK paths
           RAW_PATHS="${{ env.JAVA_HOME_8_X64 }},${{ env.JAVA_HOME_11_X64 }},${{ env.JAVA_HOME_17_X64 }},${{ env.JAVA_HOME_21_X64 }}"
           FIXED_PATHS=$(echo $RAW_PATHS | sed 's/\\/\//g')
           
-          # Create the init script in the workspace root instead of ~/.gradle
-          cat <<EOF > ${{ github.workspace }}/toolchain-init.gradle
+          # 2. Fix backslashes in the Workspace path for the output filename
+          # This prevents the "No such file or directory" error
+          SAFE_WORKSPACE=$(echo "${{ github.workspace }}" | sed 's/\\/\//g')
+          INIT_SCRIPT_PATH="${SAFE_WORKSPACE}/toolchain-init.gradle"
+          
+          # 3. Create the init script
+          cat <<EOF > "$INIT_SCRIPT_PATH"
           settingsEvaluated { settings ->
               settings.gradle.beforeProject { p ->
+                  // Set as Gradle property
                   p.extensions.extraProperties.set("org.gradle.java.installations.paths", "$FIXED_PATHS")
-                  // Also force it into the system properties for TestKit inheritance
+                  // Set as System property (often helps TestKit inheritance)
                   System.setProperty("org.gradle.java.installations.paths", "$FIXED_PATHS")
               }
           }
           EOF
+          echo "Successfully created init script at: $INIT_SCRIPT_PATH"
     # Moving and cloning to C: drive for Windows for more disk space
     - name: Clone ci.ant, ci.common, ci.gradle repos to C drive
       run: |
@@ -229,7 +236,7 @@ jobs:
       if: ${{ matrix.java == '17'  || matrix.java == '21' }}
       run: >
         ./gradlew clean install check 
-        --init-script ${{ github.workspace }}/toolchain-init.gradle
+        --init-script toolchain-init.gradle
         -P"test.include"="**/TestSpringBootApplication30*,**/TestCompileJSPSource17*" 
         -Druntime=${{ matrix.RUNTIME }} 
         -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" 
