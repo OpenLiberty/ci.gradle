@@ -179,24 +179,20 @@ jobs:
     - name: Create Gradle Toolchain Init Script
       shell: bash
       run: |
-        # Ensure the Gradle user home directory exists
-        mkdir -p ~/.gradle
-        
-        # Convert backslashes to forward slashes for the paths to avoid Groovy escaping issues
-        RAW_PATHS="${{ env.JAVA_HOME_8_X64 }},${{ env.JAVA_HOME_11_X64 }},${{ env.JAVA_HOME_17_X64 }},${{ env.JAVA_HOME_21_X64 }}"
-        FIXED_PATHS=$(echo $RAW_PATHS | sed 's/\\/\//g')
-        
-        # Create an init.gradle file using the fixed paths
-        cat <<EOF > ~/.gradle/init.gradle
-        settingsEvaluated { settings ->
-            settings.gradle.beforeProject { p ->
-                p.extensions.extraProperties.set("org.gradle.java.installations.paths", "$FIXED_PATHS")
-            }
-        }
-        EOF
-        # Debug: Print the file to verify slashes are correct
-        echo "Generated init.gradle content:"
-        cat ~/.gradle/init.gradle
+          # Convert backslashes to forward slashes
+          RAW_PATHS="${{ env.JAVA_HOME_8_X64 }},${{ env.JAVA_HOME_11_X64 }},${{ env.JAVA_HOME_17_X64 }},${{ env.JAVA_HOME_21_X64 }}"
+          FIXED_PATHS=$(echo $RAW_PATHS | sed 's/\\/\//g')
+          
+          # Create the init script in the workspace root instead of ~/.gradle
+          cat <<EOF > ${{ github.workspace }}/toolchain-init.gradle
+          settingsEvaluated { settings ->
+              settings.gradle.beforeProject { p ->
+                  p.extensions.extraProperties.set("org.gradle.java.installations.paths", "$FIXED_PATHS")
+                  // Also force it into the system properties for TestKit inheritance
+                  System.setProperty("org.gradle.java.installations.paths", "$FIXED_PATHS")
+              }
+          }
+          EOF
     # Moving and cloning to C: drive for Windows for more disk space
     - name: Clone ci.ant, ci.common, ci.gradle repos to C drive
       run: |
@@ -233,6 +229,7 @@ jobs:
       if: ${{ matrix.java == '17'  || matrix.java == '21' }}
       run: >
         ./gradlew clean install check 
+        --init-script ${{ github.workspace }}/toolchain-init.gradle
         -P"test.include"="**/TestSpringBootApplication30*,**/TestCompileJSPSource17*" 
         -Druntime=${{ matrix.RUNTIME }} 
         -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" 
@@ -242,6 +239,7 @@ jobs:
       working-directory: ${{github.workspace}}
       run: >
         ./gradlew clean install check
+        --init-script ${{ github.workspace }}/toolchain-init.gradle
         -P"test.exclude"="${{env.TEST_EXCLUDE}}" 
         -Druntime=${{ matrix.RUNTIME }} 
         -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" 
