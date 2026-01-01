@@ -30,16 +30,11 @@ public class TestCompileJSPSource17 extends AbstractIntegrationTest{
     public static void setup() {
         createDir(buildDir)
         createTestProject(buildDir, resourceDir, buildFilename)
-        File settingsFile = new File(buildDir, 'settings.gradle')
-        // 1. Define the plugin block to download toolchain jdk
-        String toolchainPlugin = """plugins {id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'}"""
-        // 2. Read existing content (if any) and write the new content at the start
-        String existingContent = settingsFile.exists() ? settingsFile.text : ""
-        settingsFile.text = toolchainPlugin + existingContent
+        // needed to add a plugin to download jdk for toolchain into settings.gradle
+        addToolchainJdkDownloadPluginToSettings(new File(buildDir, 'settings.gradle'))
         runTasks(buildDir, 'installFeature')
         runTasks(buildDir, 'compileJsp')
     }
-
     @Test
     public void check_for_jsp() {
         assert new File('build/testBuilds/test-compile-jsp-source-17/src/main/webapp/index.jsp').exists() : 'index.jsp not found!'
