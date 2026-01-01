@@ -2,6 +2,10 @@
 	This test checks whether the compileJsp task was able to compile the index.jsp file from the test
   project
 */
+//download jdk automatically
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
+}
 group = 'liberty.gradle'
 
 buildscript {

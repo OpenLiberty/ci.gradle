@@ -246,33 +246,4 @@ abstract class AbstractIntegrationTest {
         }
         return false;
     }
-
-
-    protected static void runTasksWithToolchain(File projectDir, String... tasks) {
-        List<String> args = new ArrayList<String>()
-        tasks.each {
-            args.add(it)
-        }
-        args.add("-i")
-        args.add("-s")
-        // use toolchain installation path for windows
-        String toolchainPaths = System.getProperty("org.gradle.java.installations.paths")
-        if (toolchainPaths) {
-            args.add("-Dorg.gradle.java.installations.paths=${toolchainPaths}".toString())
-            // Force Gradle to stop looking for the non-existent 'Adopt_jdk' folder
-            args.add("-Dorg.gradle.java.installations.auto-detect=false".toString())
-        }
-        BuildResult result = GradleRunner.create()
-                .withProjectDir(projectDir)
-                .forwardOutput()
-                .withArguments(args)
-                .build()
-
-        //'it' is null if tasks is a single String
-        if(tasks.length > 1) {
-            tasks.each {
-                assert SUCCESS == result.task(":$it").getOutcome()
-            }
-        }
-    }
 }
