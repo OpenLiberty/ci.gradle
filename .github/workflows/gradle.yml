@@ -207,12 +207,16 @@ jobs:
       working-directory: ${{github.workspace}}/ci.common
       run: mvn -V clean install --batch-mode --no-transfer-progress --errors -DtrimStackTrace=false -DskipTests
     # Run tests that require a minimum of Java 17 or later
-    - name: Run tests with Gradle on Windows
-        # We use pwsh (PowerShell) since that is your current default
+    - name: Run tests with Gradle
       shell: pwsh
       run: |
+        # Convert backslashes to forward slashes for the property
         $FIXED_PATHS = "${{ env.JAVA_HOME_8_X64 }},${{ env.JAVA_HOME_11_X64 }},${{ env.JAVA_HOME_17_X64 }},${{ env.JAVA_HOME_21_X64 }}".Replace('\', '/')
-        ./gradlew clean install check -P"test.include"="**/TestSpringBootApplication30*,**/TestCompileJSPSource17*" "-Dorg.gradle.java.installations.paths=$FIXED_PATHS" "-Druntime=${{ matrix.runtime }}" "-DruntimeVersion=${{ matrix.runtime_version }}" --stacktrace --info --no-daemon
+        ./gradlew clean install check `
+          -P"test.include"="**/TestSpringBootApplication30*,**/TestCompileJSPSource17*" `
+          "-Dorg.gradle.java.installations.paths=$FIXED_PATHS" `
+          "-Druntime=${{ matrix.runtime }}" `
+          "-DruntimeVersion=${{ matrix.runtime_version }}"
 #    # Run tests
 #    - name: Run tests with Gradle on Windows
 #      working-directory: ${{github.workspace}}
