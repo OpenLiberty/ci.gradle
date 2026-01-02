@@ -25,6 +25,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import groovy.xml.XmlParser
 import org.gradle.api.tasks.Nested
+import org.gradle.api.tasks.Optional
 import org.gradle.jvm.toolchain.JavaLauncher
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.jvm.toolchain.JavaToolchainService
@@ -41,10 +42,15 @@ abstract class AbstractLibertyTask extends DefaultTask {
 
     // Standard toolchain support properties
     @Nested
+    @Optional
     public final Property<JavaLauncher> javaLauncher = project.objects.property(JavaLauncher)
 
     public JavaLauncher getJavaLauncher() {
-        return javaLauncher.get()
+        if(!javaLauncher.isPresent()) {
+            configureDefaults();
+        }
+        // return null if somehow configureDefaults failed with default launcher
+        return javaLauncher.getOrNull()
     }
 
     public void setJavaLauncher(JavaLauncher launcher) {
@@ -61,12 +67,22 @@ abstract class AbstractLibertyTask extends DefaultTask {
         configureDefaults()
     }
 
+    /**
+     * configure default java launcher using toolchain
+     * toolchain can be null for a project, but JavaToolchainService is expected to provide the default launcher
+     */
     private void configureDefaults() {
-        // Use project toolchain as default if available
         try {
-            def toolchain = project.extensions.getByType(JavaPluginExtension).toolchain
-            def defaultLauncher = getJavaToolchainService().launcherFor(toolchain)
-            javaLauncher.convention(defaultLauncher)
+            // Check if the extension exists before trying to use it
+            def javaExtension = project.extensions.findByType(JavaPluginExtension)
+            if (javaExtension != null) {
+                // If the toolchain changes, the launcher updates automatically.
+                javaLauncher.convention(
+                        getJavaToolchainService().launcherFor(javaExtension.toolchain)
+                )
+            } else {
+                logger.debug("JavaPluginExtension not found. Using system default JVM for Liberty.")
+            }
         } catch (Exception e) {
             logger.debug("Could not configure default toolchain: ${e.message}")
         }
@@ -239,7 +255,7 @@ abstract class AbstractLibertyTask extends DefaultTask {
     @Internal
     protected JavaLauncher getConfiguredLauncher() {
         try {
-            def launcher = javaLauncher.get()
+            def launcher = getJavaLauncher()
             logger.info("Successfully got configured launcher: ${launcher}")
             return launcher
         } catch (Exception e) {
@@ -262,9 +278,12 @@ abstract class AbstractLibertyTask extends DefaultTask {
     }
     @Internal
     protected String isToolchainConfigured() {
-        def toolchain = project.extensions.getByType(JavaPluginExtension).toolchain
-        if(toolchain.getLanguageVersion().isPresent()){
-            logger.info("CWWKM4100I: Using toolchain from build context. JDK Version specified is ${toolchain.getLanguageVersion().get()}")
+        def javaExtension = project.extensions.findByType(JavaPluginExtension)
+        if (javaExtension != null) {
+            def toolchain = project.extensions.getByType(JavaPluginExtension).toolchain
+            if (toolchain.getLanguageVersion().isPresent()) {
+                logger.info("CWWKM4100I: Using toolchain from build context. JDK Version specified is ${toolchain.getLanguageVersion().get()}")
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2015, 2025.
+ * (C) Copyright IBM Corporation 2015, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -246,4 +246,13 @@ abstract class AbstractIntegrationTest {
         }
         return false;
     }
+
+    protected static void addToolchainJdkDownloadPluginToSettings(File settingsFile) {
+        // 1. Define the plugin block to download toolchain jdk
+        String toolchainPlugin = """plugins {id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'}"""
+        // 2. Read existing content (if any) and write the new content at the start
+        String existingContent = settingsFile.exists() ? settingsFile.text : ""
+        settingsFile.text = toolchainPlugin + existingContent
+    }
+
 }

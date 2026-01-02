@@ -30,10 +30,11 @@ public class TestCompileJSPSource17 extends AbstractIntegrationTest{
     public static void setup() {
         createDir(buildDir)
         createTestProject(buildDir, resourceDir, buildFilename)
+        // needed to add a plugin to download jdk for toolchain into settings.gradle
+        addToolchainJdkDownloadPluginToSettings(new File(buildDir, 'settings.gradle'))
         runTasks(buildDir, 'installFeature')
         runTasks(buildDir, 'compileJsp')
     }
-
     @Test
     public void check_for_jsp() {
         assert new File('build/testBuilds/test-compile-jsp-source-17/src/main/webapp/index.jsp').exists() : 'index.jsp not found!'
