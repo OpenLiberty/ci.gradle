@@ -39,7 +39,7 @@ class StatusTask extends AbstractServerTask {
                     if(!envVars.isEmpty()){
                         pb.environment().putAll(envVars);
                     }
-                    def status_process= redirectErrorStream(true).start()
+                    def status_process= pb.redirectErrorStream(true).start()
                     status_process.inputStream.eachLine {
                         println it
                     }

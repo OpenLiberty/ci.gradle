@@ -76,13 +76,10 @@ abstract class AbstractLibertyTask extends DefaultTask {
             // Check if the extension exists before trying to use it
             def javaExtension = project.extensions.findByType(JavaPluginExtension)
             if (javaExtension != null) {
-                def toolchain = javaExtension.toolchain
-                def defaultLauncher = getJavaToolchainService().launcherFor(toolchain)
-                if (defaultLauncher.isPresent()) {
-                    javaLauncher.convention(defaultLauncher)
-                } else {
-                    logger.warn("Java Toolchain is defined but no matching JDK was found on this system.")
-                }
+                // If the toolchain changes, the launcher updates automatically.
+                javaLauncher.convention(
+                        getJavaToolchainService().launcherFor(javaExtension.toolchain)
+                )
             } else {
                 logger.debug("JavaPluginExtension not found. Using system default JVM for Liberty.")
             }
