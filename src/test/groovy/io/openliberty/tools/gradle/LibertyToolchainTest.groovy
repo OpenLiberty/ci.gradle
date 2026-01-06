@@ -22,8 +22,6 @@ import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runners.MethodSorters
 
-import static org.junit.Assert.assertTrue
-
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class LibertyToolchainTest extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/test/liberty-test")
@@ -31,8 +29,6 @@ class LibertyToolchainTest extends AbstractIntegrationTest{
     static String buildFilename = "build_with_toolchain.gradle"
     static File serverXmlFile = new File(buildDir, "/build/wlp/usr/servers/LibertyProjectServer/server.xml")
     static File messageLog = new File(buildDir, "/build/wlp/usr/servers/LibertyProjectServer/logs/messages.log")
-    public static final String TOOLCHAIN_USED = 'CWWKM4100I: Using toolchain from build context. JDK Version specified is %s'
-    public static final String TOOLCHAIN_CONFIGURED = 'CWWKM4101I: The :%s task is using the configured toolchain JDK'
 
     @BeforeClass
     public static void setup() {
@@ -71,7 +67,7 @@ class LibertyToolchainTest extends AbstractIntegrationTest{
                 }
             }
             BuildResult result = runTasksResult(buildDir, 'libertyRun')
-            assertToolchainLogsForTask(result, "libertyRun", "11")
+            assertToolchainLogsForTask(result, "libertyRun", "11", null)
         } catch (Exception e) {
             throw new AssertionError ("Fail on task libertyRun.", e)
         }
@@ -81,7 +77,7 @@ class LibertyToolchainTest extends AbstractIntegrationTest{
     public void test1_start() {
         try {
            BuildResult result = runTasksResult(buildDir, 'libertyStart')
-           assertToolchainLogsForTask(result, "libertyStart", "11")
+           assertToolchainLogsForTask(result, "libertyStart", "11", messageLog)
         } catch (Exception e) {
             throw new AssertionError ("Fail on task libertyStart.", e)
         }
@@ -109,7 +105,7 @@ class LibertyToolchainTest extends AbstractIntegrationTest{
    public void test4_stop() {
        try{
            BuildResult result = runTasksResult(buildDir, 'libertyStop')
-           assertToolchainLogsForTask(result, "libertyStop", "11")
+           assertToolchainLogsForTask(result, "libertyStop", "11", messageLog)
        } catch (Exception e) {
            throw new AssertionError ("Fail on task libertyStop.", e)
        }
@@ -119,7 +115,7 @@ class LibertyToolchainTest extends AbstractIntegrationTest{
    public void test5_status() {
        try{
            BuildResult result = runTasksResult(buildDir, 'libertyStatus')
-           assertToolchainLogsForTask(result, "libertyStatus", "11")
+           assertToolchainLogsForTask(result, "libertyStatus", "11", messageLog)
        } catch (Exception e) {
          throw new AssertionError ("Fail on task libertyStatus.", e)
        }
@@ -162,7 +158,7 @@ class LibertyToolchainTest extends AbstractIntegrationTest{
 
        try{
            BuildResult result = runTasksResult(buildDir, 'libertyStart')
-           assertToolchainLogsForTask(result, "libertyStart", "11")
+           assertToolchainLogsForTask(result, "libertyStart", "11", messageLog)
        } catch (Exception e) {
           throw new AssertionError ("Fail on task libertyStart after cleanDirs.", e)
        }
@@ -187,7 +183,7 @@ class LibertyToolchainTest extends AbstractIntegrationTest{
 
        try{
            BuildResult result = runTasksResult(buildDir, 'libertyStart')
-           assertToolchainLogsForTask(result, "libertyStart", "11")
+           assertToolchainLogsForTask(result, "libertyStart", "11", messageLog)
        } catch (Exception e) {
           throw new AssertionError ("Fail on task libertyStart after second clean.", e)
        }
@@ -198,7 +194,7 @@ class LibertyToolchainTest extends AbstractIntegrationTest{
 
        try{
            BuildResult result = runTasksResult(buildDir, 'libertyStop')
-           assertToolchainLogsForTask(result, "libertyStop", "11")
+           assertToolchainLogsForTask(result, "libertyStop", "11", messageLog)
        } catch (Exception e) {
           throw new AssertionError ("Fail on task libertyStop after deleting server.xml.", e)
        }
@@ -207,7 +203,7 @@ class LibertyToolchainTest extends AbstractIntegrationTest{
 
        try{
            BuildResult result = runTasksResult(buildDir, 'libertyStatus')
-           assertToolchainLogsForTask(result, "libertyStatus", "11")
+           assertToolchainLogsForTask(result, "libertyStatus", "11", messageLog)
        } catch (Exception e) {
            throw new AssertionError ("Fail on task libertyStatus after deleting server.xml.", e)
        }
@@ -220,14 +216,4 @@ class LibertyToolchainTest extends AbstractIntegrationTest{
            throw new AssertionError ("Fail on task clean after deleting server.xml.", e)
        }
    }
-
-    private static void assertToolchainLogsForTask(BuildResult result, String task, String jdkVersion ) {
-        String consoleLogOutput = result.getOutput()
-
-        assertTrue("messages.log does not exists",messageLog.exists())
-        assertTrue("expected java version not found in messages.log",verifyFileContents(0,
-                "java.version = %s".formatted(jdkVersion),messageLog))
-        assertTrue("Toolchain with version message not found in logs.", consoleLogOutput.contains(TOOLCHAIN_USED.formatted(jdkVersion)))
-        assertTrue("Toolchain honored message for task  not found in logs.", consoleLogOutput.contains(TOOLCHAIN_CONFIGURED.formatted(task)))
-    }
 }
