@@ -1,0 +1,233 @@
+/*
+ * (C) Copyright IBM Corporation 2026.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.openliberty.tools.gradle
+
+import io.openliberty.tools.ant.ServerTask
+import org.gradle.testkit.runner.BuildResult
+import org.junit.BeforeClass
+import org.junit.FixMethodOrder
+import org.junit.Test
+import org.junit.runners.MethodSorters
+
+import static org.junit.Assert.assertTrue
+
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+class LibertyToolchainTest extends AbstractIntegrationTest{
+    static File resourceDir = new File("build/resources/test/liberty-test")
+    static File buildDir = new File(integTestDir, "/liberty-test-with-toolchain")
+    static String buildFilename = "build_with_toolchain.gradle"
+    static File serverXmlFile = new File(buildDir, "/build/wlp/usr/servers/LibertyProjectServer/server.xml")
+    static File messageLog = new File(buildDir, "/build/wlp/usr/servers/LibertyProjectServer/logs/messages.log")
+    public static final String TOOLCHAIN_USED = 'CWWKM4100I: Using toolchain from build context. JDK Version specified is %s'
+    public static final String TOOLCHAIN_CONFIGURED = 'CWWKM4101I: The :%s task is using the configured toolchain JDK'
+
+    @BeforeClass
+    public static void setup() {
+        createDir(buildDir)
+        createTestProject(buildDir, resourceDir, buildFilename)
+        addToolchainJdkDownloadPluginToSettings(new File(buildDir,"settings.gradle"))
+        try {
+            runTasks(buildDir, 'installLiberty')
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task installLiberty.", e)
+        }
+    }
+        
+    @Test
+    public void test0_run() {
+        final int timeout = 120000     // 120 sec, but polling will break out earlier typically
+        final String START_SERVER_MESSAGE_REGEXP = "CWWKF0011I.*"
+
+        ServerTask st = new ServerTask()
+        def installDir = new File(buildDir.getAbsolutePath() + "/build/wlp")
+        st.setInstallDir(installDir)
+        st.setServerName('LibertyProjectServer')
+        st.initTask()
+
+        try{
+            def stop_thread = Thread.start {
+                String verify = st.waitForStringInLog(START_SERVER_MESSAGE_REGEXP, timeout, st.getLogFile())
+                try {
+                    if (verify) {
+                        runTasks(buildDir, 'libertyStop')
+                    } else {
+                        throw new AssertionError ("Fail to start server for libertyRun.", null)
+                    }
+                } catch (Exception e) {
+                    throw new AssertionError ("Fail on task libertyStop for libertyRun.", e)
+                }
+            }
+            BuildResult result = runTasksResult(buildDir, 'libertyRun')
+            assertToolchainLogsForTask(result, "libertyRun", "11")
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task libertyRun.", e)
+        }
+    }
+
+    @Test
+    public void test1_start() {
+        try {
+           BuildResult result = runTasksResult(buildDir, 'libertyStart')
+           assertToolchainLogsForTask(result, "libertyStart", "11")
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task libertyStart.", e)
+        }
+    }
+
+    @Test
+    public void test2_executeDeployTask() {
+        try {
+            runTasks(buildDir, 'deploy')
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task deploy.", e)
+        }
+    }
+
+   @Test
+   public void test3_executeUndeployTask() {
+       try {
+           runTasks(buildDir, 'undeploy')
+       } catch (Exception e) {
+           throw new AssertionError ("Fail on task undeploy.", e)
+       }
+   }
+
+   @Test
+   public void test4_stop() {
+       try{
+           BuildResult result = runTasksResult(buildDir, 'libertyStop')
+           assertToolchainLogsForTask(result, "libertyStop", "11")
+       } catch (Exception e) {
+           throw new AssertionError ("Fail on task libertyStop.", e)
+       }
+   }
+
+   @Test
+   public void test5_status() {
+       try{
+           BuildResult result = runTasksResult(buildDir, 'libertyStatus')
+           assertToolchainLogsForTask(result, "libertyStatus", "11")
+       } catch (Exception e) {
+         throw new AssertionError ("Fail on task libertyStatus.", e)
+       }
+   }
+
+   @Test
+   public void test6_package() {
+       try{
+          runTasks(buildDir, 'libertyPackage')
+       } catch (Exception e) {
+          throw new AssertionError ("Fail on task libertyPackage.", e)
+       }
+   }
+
+   @Test
+   public void test7_installFeature() {
+       try{
+          runTasks(buildDir, 'InstallFeature')
+       } catch (Exception e) {
+          throw new AssertionError ("Fail on task InstallFeature.", e)
+       }
+   }
+
+   @Test
+   public void test8_uninstallFeature() {
+       try{
+          runTasks(buildDir, 'UninstallFeature')
+       } catch (Exception e) {
+          throw new AssertionError ("Fail on task UninstallFeature.", e)
+       }
+   }
+
+   @Test
+   public void test9_cleanDirectories() {
+       try{
+          runTasks(buildDir, 'cleanDirs')
+       } catch (Exception e) {
+          throw new AssertionError ("Fail on task cleanDirs.", e)
+       }
+
+       try{
+           BuildResult result = runTasksResult(buildDir, 'libertyStart')
+           assertToolchainLogsForTask(result, "libertyStart", "11")
+       } catch (Exception e) {
+          throw new AssertionError ("Fail on task libertyStart after cleanDirs.", e)
+       }
+
+       try{
+          runTasks(buildDir, 'clean')
+       } catch (Exception e) {
+          throw new AssertionError ("Fail on task clean while Liberty server is running.", e)
+       }
+
+       try{
+          runTasks(buildDir, 'clean')
+       } catch (Exception e) {
+          throw new AssertionError ("Fail on task clean after clean.", e)
+       }
+
+       try{
+          runTasks(buildDir, 'cleanDirs')
+       } catch (Exception e) {
+          throw new AssertionError ("Fail on task cleanDirs after clean.", e)
+       }
+
+       try{
+           BuildResult result = runTasksResult(buildDir, 'libertyStart')
+           assertToolchainLogsForTask(result, "libertyStart", "11")
+       } catch (Exception e) {
+          throw new AssertionError ("Fail on task libertyStart after second clean.", e)
+       }
+
+       // try deleting the server.xml and see if we can recover
+       assert serverXmlFile.exists() : 'server.xml file does not exist in LibertyProjectServer'
+       assert serverXmlFile.delete() : 'server.xml could not be deleted in LibertyProjectServer'
+
+       try{
+           BuildResult result = runTasksResult(buildDir, 'libertyStop')
+           assertToolchainLogsForTask(result, "libertyStop", "11")
+       } catch (Exception e) {
+          throw new AssertionError ("Fail on task libertyStop after deleting server.xml.", e)
+       }
+
+       assert !serverXmlFile.exists() : 'server.xml file unexpectedly exists in LibertyProjectServer after libertyStop'
+
+       try{
+           BuildResult result = runTasksResult(buildDir, 'libertyStatus')
+           assertToolchainLogsForTask(result, "libertyStatus", "11")
+       } catch (Exception e) {
+           throw new AssertionError ("Fail on task libertyStatus after deleting server.xml.", e)
+       }
+
+       assert serverXmlFile.exists() : 'server.xml file does not exist in LibertyProjectServer after libertyStatus'
+
+       try{
+           runTasks(buildDir, 'clean')
+       } catch (Exception e) {
+           throw new AssertionError ("Fail on task clean after deleting server.xml.", e)
+       }
+   }
+
+    private static void assertToolchainLogsForTask(BuildResult result, String task, String jdkVersion ) {
+        String consoleLogOutput = result.getOutput()
+
+        assertTrue("messages.log does not exists",messageLog.exists())
+        assertTrue("expected java version not found in messages.log",verifyFileContents(0,
+                "java.version = %s".formatted(jdkVersion),messageLog))
+        assertTrue("Toolchain with version message not found in logs.", consoleLogOutput.contains(TOOLCHAIN_USED.formatted(jdkVersion)))
+        assertTrue("Toolchain honored message for task  not found in logs.", consoleLogOutput.contains(TOOLCHAIN_CONFIGURED.formatted(task)))
+    }
+}
