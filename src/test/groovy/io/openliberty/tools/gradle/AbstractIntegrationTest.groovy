@@ -33,6 +33,8 @@ import io.openliberty.tools.common.plugins.util.OSUtil
 
 abstract class AbstractIntegrationTest {
 
+    public static final String TOOLCHAIN_USED = 'CWWKM4100I: Using toolchain from build context. JDK Version specified is %s'
+    public static final String TOOLCHAIN_CONFIGURED = 'CWWKM4101I: The :%s task is using the configured toolchain JDK'
     static File integTestDir = new File('build/testBuilds')
 
     protected static void deleteDir(File dir) {
@@ -253,6 +255,18 @@ abstract class AbstractIntegrationTest {
         // 2. Read existing content (if any) and write the new content at the start
         String existingContent = settingsFile.exists() ? settingsFile.text : ""
         settingsFile.text = toolchainPlugin + existingContent
+    }
+
+
+    protected static void assertToolchainLogsForTask(BuildResult result, String task, String jdkVersion, File messageLog) {
+        String consoleLogOutput = result.getOutput()
+        if (messageLog != null) {
+            assertTrue("messages.log does not exists", messageLog.exists())
+            assertTrue("expected java version not found in messages.log", verifyFileContents(0,
+                    String.format("java.version = %s", jdkVersion), messageLog))
+        }
+        assertTrue("Toolchain with version message not found in logs.", consoleLogOutput.contains(String.format(TOOLCHAIN_USED, jdkVersion)))
+        assertTrue("Toolchain honored message for task  not found in logs.", consoleLogOutput.contains(String.format(TOOLCHAIN_CONFIGURED, task)))
     }
 
 }

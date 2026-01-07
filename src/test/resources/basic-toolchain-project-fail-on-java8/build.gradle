@@ -1,0 +1,46 @@
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+        }
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+apply plugin: 'liberty'
+apply plugin: 'war'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Matches your original Maven dependencies
+    compileOnly 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
+    compileOnly 'org.eclipse.microprofile:microprofile:7.0'
+
+    // Unit Testing
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    }
+}
+
+liberty {
+    server {
+        name = 'LibertyProject'
+        // Port configurations from your Maven properties
+        bootstrapProperties = [
+                'default.http.port': '9080',
+                'default.https.port': '9443',
+                'com.ibm.ws.logging.message.format': 'json'
+        ]
+    }
+}

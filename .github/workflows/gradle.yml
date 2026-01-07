@@ -109,7 +109,7 @@ jobs:
           RUNTIME: wlp
     name: ${{ matrix.RUNTIME }} ${{ matrix.RUNTIME_VERSION }}, Java ${{ matrix.java }}, Windows
     env: 
-      TEST_EXCLUDE: ${{ ((matrix.java == '8') && '**/TestCreateWithConfigDir*,**/Polling*,**/LibertyTest*,**/GenerateFeaturesTest*,**/TestSpringBootApplication30*,**/TestCompileJSPSource17*,**/DevContainerTest*') || '**/Polling*,**/LibertyTest*,**/GenerateFeaturesTest*,**/TestSpringBootApplication30*,**/TestCompileJSPSource17*,**/DevContainerTest*' }}
+      TEST_EXCLUDE: ${{ ((matrix.java == '8') && '**/TestCreateWithConfigDir*,**/Polling*,**/LibertyTest*,**/LibertyToolchainTest*,**/GenerateFeaturesTest*,**/TestSpringBootApplication30*,**/TestCompileJSPSource17*,**/DevContainerTest*') || '**/Polling*,**/LibertyTest*,**/LibertyToolchainTest*,**/GenerateFeaturesTest*,**/TestSpringBootApplication30*,**/TestCompileJSPSource17*,**/DevContainerTest*' }}
     steps:
     # Checkout repos
     - name: Checkout ci.gradle
