@@ -96,7 +96,7 @@ artifacts {
 test {
     minHeapSize = "1G"
     maxHeapSize = "3G"
-    jvmArgs '-Xmx3G', '-XX:MaxMetaspaceSize=512m'
+    jvmArgs '-Xmx3G', '-XX:MaxMetaspaceSize=1G'
 
     systemProperties System.getProperties()
     systemProperty 'runit', 'online'
