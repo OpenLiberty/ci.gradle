@@ -80,16 +80,18 @@ jobs:
     - name: Copy build/report/tests/test for upload
       if: ${{ failure() }}
       run: |
-        mkdir -p ${BUILD_REPORTS_PATH}
-        cp -r test ${BUILD_REPORTS_PATH}
+        # Create the directory within the workspace
+        mkdir -p "${{ github.workspace }}/${{ env.BUILD_REPORTS_PATH }}"
+        # Copy the test results into that directory
+        cp -r test/* "${{ github.workspace }}/${{ env.BUILD_REPORTS_PATH }}"
       working-directory: build/reports/tests
       env:
-        BUILD_REPORTS_PATH: /buildReports/${{runner.os}}/java${{matrix.java}}/${{matrix.RUNTIME}}-${{matrix.RUNTIME_VERSION}}/
+        BUILD_REPORTS_PATH: buildReports/${{ runner.os }}/java${{ matrix.java }}/${{ matrix.RUNTIME }}-${{ matrix.RUNTIME_VERSION }}
     - uses: actions/upload-artifact@v4
       if: ${{ failure() }}
       with:
-        name: buildReportsArtifactLinux
-        path: /buildReports
+        name: buildReportsArtifactLinux_${{matrix.java}}_${{matrix.RUNTIME}}_${{matrix.RUNTIME_VERSION}}
+        path: ${{ github.workspace }}/buildReports/
         retention-days: 3
 
 # WINDOWS BUILDS
@@ -171,6 +173,6 @@ jobs:
     - uses: actions/upload-artifact@v4
       if: ${{ failure() }}
       with:
-        name: buildReportsArtifactWindows
+        name: buildReportsArtifactWindows_${{matrix.java}}_${{matrix.RUNTIME}}_${{matrix.RUNTIME_VERSION}}
         path: C:/buildReports
         retention-days: 3
