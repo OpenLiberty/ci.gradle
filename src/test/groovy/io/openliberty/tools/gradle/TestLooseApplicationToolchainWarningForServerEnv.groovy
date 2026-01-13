@@ -97,7 +97,7 @@ public class TestLooseApplicationToolchainWarningForServerEnv extends AbstractIn
       String nodeValue = nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
 
       if (OSUtil.isWindows()) {
-          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-text-1.13.1.jar") && nodeValue.contains("\\test-loose-application\\build\\libs\\"))
+          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-text-1.13.1.jar") && nodeValue.contains("\\test-loose-application-warning-server-env\\build\\libs\\"))
       } else {
           Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("/commons-text-1.13.1.jar") && nodeValue.contains("/test-loose-application-warning-server-env/build/libs/")) 
       }
@@ -109,7 +109,7 @@ public class TestLooseApplicationToolchainWarningForServerEnv extends AbstractIn
       nodeValue = nodes.item(1).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
 
       if (OSUtil.isWindows()) {
-          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-lang3-3.18.0.jar") && nodeValue.contains("\\test-loose-application\\build\\libs\\"))
+          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-lang3-3.18.0.jar") && nodeValue.contains("\\test-loose-application-warning-server-env\\build\\libs\\"))
       } else {
           Assert.assertTrue('archive sourceOnDisk attribute value not correct', ("/commons-lang3-3.18.0.jar") && nodeValue.contains("/test-loose-application-warning-server-env/build/libs/"))
       }
