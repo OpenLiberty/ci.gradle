@@ -1207,11 +1207,10 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
             return Collections.emptyMap();
         }
 
-        String serverDirectory = getServerDir(project).toString()
         // 1. Read existing config files
-        List<String> serverEnvLines = readConfigFileLines(populateServerEnvFile(serverDirectory));
+        List<String> serverEnvLines = readConfigFileLines(findServerEnvFile());
 
-        List<String> jvmOptionsLines = readConfigFileLines(new File(serverDirectory, "jvm.options"));
+        List<String> jvmOptionsLines = readConfigFileLines(findJvmOptionsFile());
 
         // 2. Check for existing JAVA_HOME configuration
         // if user has configured JAVA_HOME in server.env or jvm.options, this will get higher precedence over toolchain JDK
@@ -1233,15 +1232,44 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      * @return The File object for the server.env, or null if neither exists or is specified.
      */
     @Internal
-    private File populateServerEnvFile(String serverDirectory) {
-        if (server.serverEnvFile!=null && server.serverEnvFile.getCanonicalPath() != null && server.serverEnvFile.getCanonicalPath().exists()) {
-            return server.serverEnvFile.getCanonicalPath();
+    private File findServerEnvFile() {
+        if (server.serverEnvFile != null && server.serverEnvFile.exists()) {
+            return server.serverEnvFile
         }
-        File defaultServerEnv = new File(serverDirectory, "server.env");
-        if (defaultServerEnv.exists()) {
-            return defaultServerEnv;
+        if(server.configDirectory == null){
+            initializeConfigDirectory()
         }
-        return null;
+        if(server.configDirectory.exists()) {
+            File configDirServerEnv = new File(server.configDirectory, "server.env")
+            if (configDirServerEnv.exists()) {
+                return configDirServerEnv
+            }
+        }
+        return null
+    }
+
+    /**
+     * Determines the primary jvm.options file to read.
+     * Checks jvmOptionsFile first, then a default location in configDirectory.
+     *
+     * @return The File object for the jvm.options, or null if neither exists or is specified.
+     */
+    @Internal
+    private File findJvmOptionsFile() {
+        if (server.jvmOptionsFile != null && server.jvmOptionsFile.exists()) {
+            return server.jvmOptionsFile
+        }
+
+        if(server.configDirectory == null){
+            initializeConfigDirectory()
+        }
+        if(server.configDirectory.exists()) {
+            File configDirServerEnv = new File(server.configDirectory, "jvm.options")
+            if (configDirServerEnv.exists()) {
+                return configDirServerEnv
+            }
+        }
+        return null
     }
 
     /**
@@ -1293,8 +1321,8 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
                 break;
             }
         }
-        for (String serverEnvLine : jvmOptionsLines) {
-            if (serverEnvLine.contains("JAVA_HOME=")) {
+        for (String jvmOptionLine : jvmOptionsLines) {
+            if (jvmOptionLine.contains("JAVA_HOME=") || jvmOptionLine.contains("java.home=")) {
                 javaHomeSet = true;
                 break;
             }
