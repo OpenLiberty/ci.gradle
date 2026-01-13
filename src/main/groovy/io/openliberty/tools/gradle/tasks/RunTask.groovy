@@ -16,7 +16,6 @@
 package io.openliberty.tools.gradle.tasks
 
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.logging.LogLevel
 import io.openliberty.tools.ant.ServerTask
 
 class RunTask extends AbstractServerTask {
@@ -61,10 +60,7 @@ class RunTask extends AbstractServerTask {
             }
             def pb = new ProcessBuilder(command)
             pb.environment().put('WLP_USER_DIR', getUserDir(project).getCanonicalPath())
-            Map<String, String> envVars = getToolchainEnvVar();
-            if(!envVars.isEmpty()){
-                pb.environment().putAll(envVars);
-            }
+            addToolchainEnvToProcessBuilder(pb)
             def run_process = pb.redirectErrorStream(true).start()
 
             run_process.inputStream.eachLine {

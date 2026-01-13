@@ -1144,10 +1144,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
             serverTask.setTimeout(server.timeout)
         }
 
-        Map<String, String> envVars = getToolchainEnvVar();
-        if(!envVars.isEmpty()){
-            serverTask.setEnvironmentVariables(envVars);
-        }
+        addToolchainEnvToServerTask(serverTask)
         return serverTask
     }
 
@@ -1220,8 +1217,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         // if user has configured JAVA_HOME in server.env or jvm.options, this will get higher precedence over toolchain JDK
         // hence a warning will be issued
         if (isJavaHomeSet(serverEnvLines, jvmOptionsLines)) {
-            logger.warn("CWWKM4101W: The toolchain JDK configuration for task " + this.path + " is not honored because the JAVA_HOME property is specified in the server.env or jvm.options file"
-            );
+            logger.warn("CWWKM4101W: The toolchain JDK configuration for task " + this.path + " is not honored because the JAVA_HOME property is specified in the server.env or jvm.options file.")
         } else {
             logger.info("CWWKM4101I: The " + this.path + " task is using the configured toolchain JDK located at " + jdkHome)
             // 3. Apply toolchain configuration
@@ -1304,5 +1300,29 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
             }
         }
         return javaHomeSet;
+    }
+
+    /**
+     * get toolchain environment variables and set to ProcessBuilder
+     * @param pb ProcessBuilder
+     */
+    @Internal
+    protected void addToolchainEnvToProcessBuilder(ProcessBuilder pb) {
+        Map<String, String> envVars = getToolchainEnvVar();
+        if (!envVars.isEmpty()) {
+            pb.environment().putAll(envVars);
+        }
+    }
+
+    /**
+     * get toolchain environment variables and set to ServerTask
+     * @param serverTask serverTask
+     */
+    @Internal
+    protected void addToolchainEnvToServerTask(ServerTask serverTask) {
+        Map<String, String> envVars = getToolchainEnvVar();
+        if (!envVars.isEmpty()) {
+            serverTask.setEnvironmentVariables(envVars);
+        }
     }
 }

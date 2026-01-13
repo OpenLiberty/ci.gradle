@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 package io.openliberty.tools.gradle.tasks
-import org.gradle.api.logging.LogLevel
+
 
 import org.gradle.api.tasks.TaskAction
 
@@ -35,10 +35,7 @@ class StatusTask extends AbstractServerTask {
                 File serverXmlFile = new File(serverDir,"server.xml")
                 if (serverXmlFile.exists()) {
                     def pb = new ProcessBuilder(buildCommand("status"))
-                    Map<String, String> envVars = getToolchainEnvVar();
-                    if(!envVars.isEmpty()){
-                        pb.environment().putAll(envVars);
-                    }
+                    addToolchainEnvToProcessBuilder(pb)
                     def status_process= pb.redirectErrorStream(true).start()
                     status_process.inputStream.eachLine {
                         println it
