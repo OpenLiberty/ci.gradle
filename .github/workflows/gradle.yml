@@ -11,88 +11,88 @@ on:
 
 jobs:
 # UNIX BUILDS
-#  build-unix:
-#    runs-on: ubuntu-latest
-#    strategy:
-#      fail-fast: false
-#      matrix:
-#        # test against latest update of each major Java version, as well as specific updates of LTS versions:
-#        RUNTIME: [ol, wlp]
-#        RUNTIME_VERSION: [25.0.0.9]
-#        java: [21, 17, 11, 8]
-#        exclude:
-#        - java: 8
-#          RUNTIME: wlp
-#        - java: 11
-#          RUNTIME: ol
-#    name: ${{ matrix.RUNTIME }} ${{ matrix.RUNTIME_VERSION }}, Java ${{ matrix.java }}, Linux
-#    steps:
-#    # Checkout repos
-#    - name: Checkout ci.gradle
-#      uses: actions/checkout@v3
-#    - name: Setup Java ${{ matrix.java }}
-#      uses: actions/setup-java@v3
-#      with:
-#        distribution: 'adopt'
-#        java-version: ${{ matrix.java }}
-#        cache: 'gradle'
-#    - name: Checkout ci.common
-#      uses: actions/checkout@v3
-#      with:
-#        repository: OpenLiberty/ci.common
-#        path: ci.common
-#    - name: Checkout ci.ant
-#      uses: actions/checkout@v3
-#      with:
-#        repository: OpenLiberty/ci.ant
-#        path: ci.ant
-#    # Cache mvn/gradle packages
-#    - name: Cache Maven packages
-#      uses: actions/cache@v3
-#      with:
-#        path: ~/.m2
-#        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-#        restore-keys: ${{ runner.os }}-m2
-#    - name: Cache Gradle packages
-#      uses: actions/cache@v3
-#      with:
-#        path: |
-#          ~/.gradle/caches
-#          ~/.gradle/wrapper
-#        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-#        restore-keys: |
-#          ${{ runner.os }}-gradle-
-#    # Install dependencies
-#    - name: Install ci.ant and ci.common
-#      run: |
-#        mvn -V clean install -f ci.ant --batch-mode --no-transfer-progress --errors -DtrimStackTrace=false -DskipTests
-#        mvn -V clean install -f ci.common --batch-mode --no-transfer-progress --errors -DtrimStackTrace=false -DskipTests
-#    # Run tests that require a minimum of Java 17 or later
-#    - name: Run tests that require a minimum of Java 17 or later
-#      if: ${{ matrix.java == '17' || matrix.java == '21' }}
-#      run:
-#        ./gradlew clean install check -P"test.include"="**/TestSpringBootApplication30*,**/TestCompileJSPSource17*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --warning-mode=all
-#    # Run tests
-#    - name: Run tests with Gradle on Ubuntu
-#      run:
-#        ./gradlew clean install check -P"test.exclude"="**/TestSpringBootApplication30*,**/TestCompileJSPSource17*,**/DevContainerTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --warning-mode=all
-#    # Copy build reports and upload artifact if build failed
-#    - name: Copy build/report/tests/test for upload
-#      if: ${{ failure() }}
-#      run: |
-#        # Create the directory within the workspace
-#        mkdir -p "${{ github.workspace }}/${{ env.BUILD_REPORTS_PATH }}"
-#        # Copy the test results into that directory
-#        cp -r test/* "${{ github.workspace }}/${{ env.BUILD_REPORTS_PATH }}"
-#      working-directory: build/reports/tests
-#      env:
-#        BUILD_REPORTS_PATH: buildReports/${{ runner.os }}/java${{ matrix.java }}/${{ matrix.RUNTIME }}-${{ matrix.RUNTIME_VERSION }}
-#    - uses: actions/upload-artifact@v4
-#      if: ${{ failure() }}
-#      with:
-#        name: buildReportsArtifactLinux_${{matrix.java}}_${{matrix.RUNTIME}}_${{matrix.RUNTIME_VERSION}}
-#        path: ${{ github.workspace }}/buildReports/
-#        retention-days: 3
+  build-unix:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # test against latest update of each major Java version, as well as specific updates of LTS versions:
+        RUNTIME: [ol, wlp]
+        RUNTIME_VERSION: [25.0.0.9]
+        java: [21, 17, 11, 8]
+        exclude:
+        - java: 8
+          RUNTIME: wlp
+        - java: 11
+          RUNTIME: ol
+    name: ${{ matrix.RUNTIME }} ${{ matrix.RUNTIME_VERSION }}, Java ${{ matrix.java }}, Linux
+    steps:
+    # Checkout repos
+    - name: Checkout ci.gradle
+      uses: actions/checkout@v3
+    - name: Setup Java ${{ matrix.java }}
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'adopt'
+        java-version: ${{ matrix.java }}
+        cache: 'gradle'
+    - name: Checkout ci.common
+      uses: actions/checkout@v3
+      with:
+        repository: OpenLiberty/ci.common
+        path: ci.common
+    - name: Checkout ci.ant
+      uses: actions/checkout@v3
+      with:
+        repository: OpenLiberty/ci.ant
+        path: ci.ant
+    # Cache mvn/gradle packages
+    - name: Cache Maven packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+    # Install dependencies
+    - name: Install ci.ant and ci.common
+      run: |
+        mvn -V clean install -f ci.ant --batch-mode --no-transfer-progress --errors -DtrimStackTrace=false -DskipTests
+        mvn -V clean install -f ci.common --batch-mode --no-transfer-progress --errors -DtrimStackTrace=false -DskipTests
+    # Run tests that require a minimum of Java 17 or later
+    - name: Run tests that require a minimum of Java 17 or later
+      if: ${{ matrix.java == '17' || matrix.java == '21' }}
+      run:
+        ./gradlew clean install check -P"test.include"="**/TestSpringBootApplication30*,**/TestCompileJSPSource17*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --warning-mode=all
+    # Run tests
+    - name: Run tests with Gradle on Ubuntu
+      run:
+        ./gradlew clean install check -P"test.exclude"="**/TestSpringBootApplication30*,**/TestCompileJSPSource17*,**/DevContainerTest*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --warning-mode=all
+    # Copy build reports and upload artifact if build failed
+    - name: Copy build/report/tests/test for upload
+      if: ${{ failure() }}
+      run: |
+        # Create the directory within the workspace
+        mkdir -p "${{ github.workspace }}/${{ env.BUILD_REPORTS_PATH }}"
+        # Copy the test results into that directory
+        cp -r test/* "${{ github.workspace }}/${{ env.BUILD_REPORTS_PATH }}"
+      working-directory: build/reports/tests
+      env:
+        BUILD_REPORTS_PATH: buildReports/${{ runner.os }}/java${{ matrix.java }}/${{ matrix.RUNTIME }}-${{ matrix.RUNTIME_VERSION }}
+    - uses: actions/upload-artifact@v4
+      if: ${{ failure() }}
+      with:
+        name: buildReportsArtifactLinux_${{matrix.java}}_${{matrix.RUNTIME}}_${{matrix.RUNTIME_VERSION}}
+        path: ${{ github.workspace }}/buildReports/
+        retention-days: 3
 
 # WINDOWS BUILDS
   build-windows:
@@ -111,7 +111,7 @@ jobs:
           RUNTIME: wlp
     name: ${{ matrix.RUNTIME }} ${{ matrix.RUNTIME_VERSION }}, Java ${{ matrix.java }}, Windows
     env: 
-      TEST_EXCLUDE: ${{ ((matrix.java == '8') && '**/TestCreateWithConfigDir*,**/Polling*,**/LibertyTest*,**/LibertyToolchainTest*,**/GenerateFeaturesTest*,**/TestSpringBootApplication30*,**/TestCompileJSPSource17*,**/DevContainerTest*') || '**/Polling*,**/LibertyTest*,**/LibertyToolchainTest*,**/GenerateFeaturesTest*,**/TestSpringBootApplication30*,**/TestCompileJSPSource17*,**/DevContainerTest*' }}
+      TEST_EXCLUDE: ${{ ((matrix.java == '8') && '**/TestCreateWithConfigDir*,**/Polling*,**/LibertyTest*,**/LibertyToolchainTest*,**/GenerateFeaturesTest*,**/TestSpringBootApplication30*,**/TestCompileJSPSource17*,**/DevContainerTest*,**/TestLooseApplicationToolchainWarningForJvmOptionsProperty*,**/TestLooseApplicationToolchainWarningForServerEnvProperty*') || '**/Polling*,**/LibertyTest*,**/LibertyToolchainTest*,**/GenerateFeaturesTest*,**/TestSpringBootApplication30*,**/TestCompileJSPSource17*,**/DevContainerTest*,**/TestLooseApplicationToolchainWarningForJvmOptionsProperty*,**/TestLooseApplicationToolchainWarningForServerEnvProperty*'}}
     steps:
     # Checkout repos
     - name: Checkout ci.gradle
@@ -157,14 +157,14 @@ jobs:
       working-directory: ${{github.workspace}}
       if: ${{ matrix.java == '17'  || matrix.java == '21' }}
       run:
-        ./gradlew clean install check -P"test.include"="**/TestLooseApplication*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
+        ./gradlew clean install check -P"test.include"="**/TestSpringBootApplication30*,**/TestCompileJSPSource17*" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
     # Run tests
-#    - name: Run tests with Gradle on Windows
-#      working-directory: ${{github.workspace}}
-#      # LibertyTest is excluded because test0_run hangs
-#      # For Java 8, TestCreateWithConfigDir is excluded because test_micro_clean_liberty_plugin_variable_config runs out of memory
-#      run: ./gradlew clean install check -P"test.exclude"="${{env.TEST_EXCLUDE}}" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
-#      timeout-minutes: 75
+    - name: Run tests with Gradle on Windows
+      working-directory: ${{github.workspace}}
+      # LibertyTest is excluded because test0_run hangs
+      # For Java 8, TestCreateWithConfigDir is excluded because test_micro_clean_liberty_plugin_variable_config runs out of memory
+      run: ./gradlew clean install check -P"test.exclude"="${{env.TEST_EXCLUDE}}" -Druntime=${{ matrix.RUNTIME }} -DruntimeVersion="${{ matrix.RUNTIME_VERSION }}" --stacktrace --info --no-daemon
+      timeout-minutes: 75
     # Copy build reports and upload artifact if build failed
     - name: Copy build/report/tests/test for upload
       if: ${{ failure() }}
