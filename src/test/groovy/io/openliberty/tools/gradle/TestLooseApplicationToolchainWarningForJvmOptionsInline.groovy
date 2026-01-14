@@ -15,20 +15,20 @@ import javax.xml.xpath.XPath
 import javax.xml.xpath.XPathConstants
 import javax.xml.xpath.XPathFactory
 
-public class TestLooseApplicationToolchainWarningForServerEnv extends AbstractIntegrationTest {
+public class TestLooseApplicationToolchainWarningForJvmOptionsInline extends AbstractIntegrationTest {
     static File resourceDir = new File("build/resources/test/sample.servlet")
-    static File buildDir = new File(integTestDir, "/test-loose-application-warning-server-env")
-    static File configDir = new File(buildDir, "src/main/liberty/config")
-    static String buildFilename = "testLooseApplicationToolchainWarningForServerEnv.gradle"
+    static File buildDir = new File(integTestDir, "/test-loose-application-warning-jvm-options-inline")
+    static String buildFilename = "testLooseApplicationToolchainWarningForJvmOptionsInline.gradle"
 
     @BeforeClass
     public static void setup() {
         createDir(buildDir)
         createTestProject(buildDir, resourceDir, buildFilename)
-        File serverEnvFile = new File(configDir, "server.env")
+        File buildFile = new File(buildDir, "build.gradle")
         def javaHome = System.getenv("JAVA_HOME")
-        String toolchainPlugin = "JAVA_HOME=" + javaHome
-        serverEnvFile.append(toolchainPlugin)
+        def fileContent = buildFile.text
+        fileContent = fileContent.replace("REPLACE_JDK_PATH", javaHome) // Literal replacement
+        buildFile.text = fileContent
         addToolchainJdkDownloadPluginToSettings(new File(buildDir, "settings.gradle"))
     }
 
@@ -40,30 +40,29 @@ public class TestLooseApplicationToolchainWarningForServerEnv extends AbstractIn
     @Test
     public void test_loose_config_file_exists() {
         try {
-            BuildResult result = runTasksResult(buildDir, 'deploy')
-            Assert.assertTrue("Toolchain skipped message missing in task output",
-                    result.getOutput()
-                            .contains("CWWKM4101W: The toolchain JDK configuration for task :libertyCreate is not honored because the JAVA_HOME property is specified in server.env."))
+            BuildResult result = runTasksResult(buildDir, 'deploy', 'libertyStart')
+            Assert.assertTrue("Toolchain skipped message missing in task output", result.getOutput().contains("CWWKM4101W: The toolchain JDK configuration for task :libertyCreate is not honored because the JAVA_HOME property is specified in jvm.options."))
+            Assert.assertTrue("Toolchain skipped message missing in task output", result.getOutput().contains("CWWKM4101W: The toolchain JDK configuration for task :libertyStart is not honored because the JAVA_HOME property is specified in jvm.options."))
         } catch (Exception e) {
             throw new AssertionError("Fail on task deploy.", e)
         }
-        assert new File('build/testBuilds/test-loose-application-warning-server-env/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war.xml').exists(): 'looseApplication config file was not copied over to the liberty runtime'
+        assert new File('build/testBuilds/test-loose-application-warning-jvm-options-inline/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war.xml').exists(): 'looseApplication config file was not copied over to the liberty runtime'
     }
 /*
   Expected output to the XML
   <?xml version="1.0" encoding="UTF-8"?>
   <archive>
-      <dir sourceOnDisk="/Users/../../ci.gradle/build/testBuilds/test-loose-application-warning-server-env/src/main/webapp" targetInArchive="/"/>
-      <dir sourceOnDisk="/Users/../../ci.gradle/build/testBuilds/test-loose-application-warning-server-env/build/classes" targetInArchive="/WEB-INF/classes"/>
+      <dir sourceOnDisk="/Users/../../ci.gradle/build/testBuilds/test-loose-application-warning-jvm-options-inline/src/main/webapp" targetInArchive="/"/>
+      <dir sourceOnDisk="/Users/../../ci.gradle/build/testBuilds/test-loose-application-warning-jvm-options-inline/build/classes" targetInArchive="/WEB-INF/classes"/>
       <file sourceOnDisk="/Users/../.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-text/1.13.1/.../commons-text-1.13.1.jar" targetInArchive="/WEB-INF/lib/commons-text-1.13.1.jar"/>
       <file sourceOnDisk="/Users/../.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-lang3/3.18.0/.../commons-lang3-3.18.0.jar" targetInArchive="/WEB-INF/lib/commons-lang3-3.18.0.jar"/>
-      <file sourceOnDisk="/Users/../../ci.gradle/build/testBuilds/test-loose-application-warning-server-env/build/resources/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
+      <file sourceOnDisk="/Users/../../ci.gradle/build/testBuilds/test-loose-application-warning-jvm-options-inline/build/resources/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
   </archive>
 */
 
     @Test
     public void test_loose_config_file_contents_are_correct() {
-        File on = new File("build/testBuilds/test-loose-application-warning-server-env/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war.xml");
+        File on = new File("build/testBuilds/test-loose-application-warning-jvm-options-inline/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war.xml");
         FileInputStream input = new FileInputStream(on);
 
         // get input XML Document
@@ -98,9 +97,9 @@ public class TestLooseApplicationToolchainWarningForServerEnv extends AbstractIn
         String nodeValue = nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
 
         if (OSUtil.isWindows()) {
-            Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-text-1.13.1.jar") && nodeValue.contains("\\test-loose-application-warning-server-env\\build\\libs\\"))
+            Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-text-1.13.1.jar") && nodeValue.contains("\\test-loose-application-warning-jvm-options-inline\\build\\libs\\"))
         } else {
-            Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("/commons-text-1.13.1.jar") && nodeValue.contains("/test-loose-application-warning-server-env/build/libs/"))
+            Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("/commons-text-1.13.1.jar") && nodeValue.contains("/test-loose-application-warning-jvm-options-inline/build/libs/"))
         }
 
         Assert.assertEquals("archive targetInArchive attribute value", "/WEB-INF/lib/commons-lang3-3.18.0.jar",
@@ -110,9 +109,9 @@ public class TestLooseApplicationToolchainWarningForServerEnv extends AbstractIn
         nodeValue = nodes.item(1).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
 
         if (OSUtil.isWindows()) {
-            Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-lang3-3.18.0.jar") && nodeValue.contains("\\test-loose-application-warning-server-env\\build\\libs\\"))
+            Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-lang3-3.18.0.jar") && nodeValue.contains("\\test-loose-application-warning-jvm-options-inline\\build\\libs\\"))
         } else {
-            Assert.assertTrue('archive sourceOnDisk attribute value not correct', ("/commons-lang3-3.18.0.jar") && nodeValue.contains("/test-loose-application-warning-server-env/build/libs/"))
+            Assert.assertTrue('archive sourceOnDisk attribute value not correct', ("/commons-lang3-3.18.0.jar") && nodeValue.contains("/test-loose-application-warning-jvm-options-inline/build/libs/"))
         }
     }
 }

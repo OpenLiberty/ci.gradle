@@ -15,7 +15,7 @@ import javax.xml.xpath.XPath
 import javax.xml.xpath.XPathConstants
 import javax.xml.xpath.XPathFactory
 
-public class TestLooseApplicationToolchainWarningForJvmOptions extends AbstractIntegrationTest{
+public class TestLooseApplicationToolchainWarningForJvmOptions extends AbstractIntegrationTest {
     static File resourceDir = new File("build/resources/test/sample.servlet")
     static File buildDir = new File(integTestDir, "/test-loose-application-warning-jvm-options")
     static File jvmOptionsDir = new File(buildDir, "src/resources")
@@ -25,10 +25,10 @@ public class TestLooseApplicationToolchainWarningForJvmOptions extends AbstractI
     public static void setup() {
         createDir(buildDir)
         createTestProject(buildDir, resourceDir, buildFilename)
-        File jvmOptionsFile=new File(jvmOptionsDir,"jvm.options")
+        File jvmOptionsFile = new File(jvmOptionsDir, "jvm.options")
         def javaHome = System.getenv("JAVA_HOME")
-        String toolchainPlugin = "-Djava.home="+javaHome
-        jvmOptionsFile.append(System.lineSeparator()+toolchainPlugin)
+        String toolchainPlugin = "-Djava.home=" + javaHome
+        jvmOptionsFile.append(System.lineSeparator() + toolchainPlugin)
         addToolchainJdkDownloadPluginToSettings(new File(buildDir, "settings.gradle"))
     }
 
@@ -41,11 +41,11 @@ public class TestLooseApplicationToolchainWarningForJvmOptions extends AbstractI
     public void test_loose_config_file_exists() {
         try {
             BuildResult result = runTasksResult(buildDir, 'deploy')
-            Assert.assertTrue("Toolchain skipped message missing in task output",result.getOutput().contains("CWWKM4101W: The toolchain JDK configuration for task :libertyCreate is not honored because the JAVA_HOME property is specified in the server.env or jvm.options file."))
+            Assert.assertTrue("Toolchain skipped message missing in task output", result.getOutput().contains("CWWKM4101W: The toolchain JDK configuration for task :libertyCreate is not honored because the JAVA_HOME property is specified in jvm.options."))
         } catch (Exception e) {
-            throw new AssertionError ("Fail on task deploy.", e)
+            throw new AssertionError("Fail on task deploy.", e)
         }
-        assert new File('build/testBuilds/test-loose-application-warning-jvm-options/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war.xml').exists() : 'looseApplication config file was not copied over to the liberty runtime'
+        assert new File('build/testBuilds/test-loose-application-warning-jvm-options/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war.xml').exists(): 'looseApplication config file was not copied over to the liberty runtime'
     }
 /*
   Expected output to the XML
@@ -58,58 +58,59 @@ public class TestLooseApplicationToolchainWarningForJvmOptions extends AbstractI
       <file sourceOnDisk="/Users/../../ci.gradle/build/testBuilds/test-loose-application-warning-jvm-options/build/resources/META-INF/MANIFEST.MF" targetInArchive="/META-INF/MANIFEST.MF"/>
   </archive>
 */
+
     @Test
-    public void test_loose_config_file_contents_are_correct(){
-      File on = new File("build/testBuilds/test-loose-application-warning-jvm-options/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war.xml");
-      FileInputStream input = new FileInputStream(on);
+    public void test_loose_config_file_contents_are_correct() {
+        File on = new File("build/testBuilds/test-loose-application-warning-jvm-options/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war.xml");
+        FileInputStream input = new FileInputStream(on);
 
-      // get input XML Document
-      DocumentBuilderFactory inputBuilderFactory = DocumentBuilderFactory.newInstance();
-      inputBuilderFactory.setIgnoringComments(true);
-      inputBuilderFactory.setCoalescing(true);
-      inputBuilderFactory.setIgnoringElementContentWhitespace(true);
-      inputBuilderFactory.setValidating(false);
-      inputBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false)
-      inputBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)  
-      DocumentBuilder inputBuilder = inputBuilderFactory.newDocumentBuilder();
-      Document inputDoc=inputBuilder.parse(input);
+        // get input XML Document
+        DocumentBuilderFactory inputBuilderFactory = DocumentBuilderFactory.newInstance();
+        inputBuilderFactory.setIgnoringComments(true);
+        inputBuilderFactory.setCoalescing(true);
+        inputBuilderFactory.setIgnoringElementContentWhitespace(true);
+        inputBuilderFactory.setValidating(false);
+        inputBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false)
+        inputBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
+        DocumentBuilder inputBuilder = inputBuilderFactory.newDocumentBuilder();
+        Document inputDoc = inputBuilder.parse(input);
 
-      // parse input XML Document
-      XPath xPath = XPathFactory.newInstance().newXPath();
-      String expression = "/archive/dir";
-      NodeList nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
-      Assert.assertEquals("Number of <dir/> element ==>", 2, nodes.getLength());
+        // parse input XML Document
+        XPath xPath = XPathFactory.newInstance().newXPath();
+        String expression = "/archive/dir";
+        NodeList nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
+        Assert.assertEquals("Number of <dir/> element ==>", 2, nodes.getLength());
 
-      expression = "/archive/archive";
-      nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
-      Assert.assertEquals("Number of <archive/> element ==>", 0, nodes.getLength());
+        expression = "/archive/archive";
+        nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
+        Assert.assertEquals("Number of <archive/> element ==>", 0, nodes.getLength());
 
-      expression = "/archive/file";
-      nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
-      Assert.assertEquals("Number of <file/> element ==>", 3, nodes.getLength());
+        expression = "/archive/file";
+        nodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET);
+        Assert.assertEquals("Number of <file/> element ==>", 3, nodes.getLength());
 
-      Assert.assertEquals("archive targetInArchive attribute value", "/WEB-INF/lib/commons-text-1.13.1.jar",
-              nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue());
+        Assert.assertEquals("archive targetInArchive attribute value", "/WEB-INF/lib/commons-text-1.13.1.jar",
+                nodes.item(0).getAttributes().getNamedItem("targetInArchive").getNodeValue());
 
-      // Check that dependencies are located in the test build dir specified by copyLibsDirectory. Otherwise they would be located in the gradle cache somewhere.
-      String nodeValue = nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
+        // Check that dependencies are located in the test build dir specified by copyLibsDirectory. Otherwise they would be located in the gradle cache somewhere.
+        String nodeValue = nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
 
-      if (OSUtil.isWindows()) {
-          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-text-1.13.1.jar") && nodeValue.contains("\\test-loose-application-warning-jvm-options\\build\\libs\\"))
-      } else {
-          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("/commons-text-1.13.1.jar") && nodeValue.contains("/test-loose-application-warning-jvm-options/build/libs/")) 
-      }
+        if (OSUtil.isWindows()) {
+            Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-text-1.13.1.jar") && nodeValue.contains("\\test-loose-application-warning-jvm-options\\build\\libs\\"))
+        } else {
+            Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("/commons-text-1.13.1.jar") && nodeValue.contains("/test-loose-application-warning-jvm-options/build/libs/"))
+        }
 
-      Assert.assertEquals("archive targetInArchive attribute value", "/WEB-INF/lib/commons-lang3-3.18.0.jar",
-              nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue());
+        Assert.assertEquals("archive targetInArchive attribute value", "/WEB-INF/lib/commons-lang3-3.18.0.jar",
+                nodes.item(1).getAttributes().getNamedItem("targetInArchive").getNodeValue());
 
-      // Check that dependencies are located in the test build dir specified by copyLibsDirectory. Otherwise they would be located in the gradle cache somewhere.
-      nodeValue = nodes.item(1).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
+        // Check that dependencies are located in the test build dir specified by copyLibsDirectory. Otherwise they would be located in the gradle cache somewhere.
+        nodeValue = nodes.item(1).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
 
-      if (OSUtil.isWindows()) {
-          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-lang3-3.18.0.jar") && nodeValue.contains("\\test-loose-application-warning-jvm-options\\build\\libs\\"))
-      } else {
-          Assert.assertTrue('archive sourceOnDisk attribute value not correct', ("/commons-lang3-3.18.0.jar") && nodeValue.contains("/test-loose-application-warning-jvm-options/build/libs/"))
-      }
+        if (OSUtil.isWindows()) {
+            Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-lang3-3.18.0.jar") && nodeValue.contains("\\test-loose-application-warning-jvm-options\\build\\libs\\"))
+        } else {
+            Assert.assertTrue('archive sourceOnDisk attribute value not correct', ("/commons-lang3-3.18.0.jar") && nodeValue.contains("/test-loose-application-warning-jvm-options/build/libs/"))
+        }
     }
 }
