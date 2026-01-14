@@ -485,7 +485,9 @@ class DevTask extends AbstractFeatureTask {
                 Map<String, String> envVars = getToolchainEnvVar();
                 if (!envVars.isEmpty()) {
                     if (serverTask.getEnvironmentVariables() != null && !serverTask.getEnvironmentVariables().isEmpty()) {
-                        serverTask.setEnvironmentVariables(serverTask.getEnvironmentVariables().putAll(envVars));
+                        Map<String, String> mergedEnv = new HashMap<>(serverTask.getEnvironmentVariables());
+                        mergedEnv.putAll(envVars);
+                        serverTask.setEnvironmentVariables(mergedEnv);
                     } else {
                         serverTask.setEnvironmentVariables(envVars);
                     }
@@ -500,7 +502,9 @@ class DevTask extends AbstractFeatureTask {
                 setLibertyDebugPort(libertyDebugPort);
                 // putting debug environment variables on top of existing java home variable
                 if (serverTask.getEnvironmentVariables() != null && !serverTask.getEnvironmentVariables().isEmpty()) {
-                    serverTask.setEnvironmentVariables(serverTask.getEnvironmentVariables().putAll(getDebugEnvironmentVariables()));
+                    Map<String, String> mergedEnv = new HashMap<>(serverTask.getEnvironmentVariables());
+                    mergedEnv.putAll(getDebugEnvironmentVariables());
+                    serverTask.setEnvironmentVariables(mergedEnv);
                 } else {
                     serverTask.setEnvironmentVariables(getDebugEnvironmentVariables());
                 }

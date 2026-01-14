@@ -60,8 +60,11 @@ class CompileJSPTask extends AbstractFeatureTask {
         compileJsp.setProject(ant)
         Map<String, String> envVars = getToolchainEnvVar();
         if (!envVars.isEmpty()) {
+            compileJsp.getEnvironmentVariables()
             if (compileJsp.getEnvironmentVariables() != null && !compileJsp.getEnvironmentVariables().isEmpty()) {
-                compileJsp.setEnvironmentVariables(compileJsp.getEnvironmentVariables().putAll(envVars));
+                Map<String, String> mergedEnv = new HashMap<>(compileJsp.getEnvironmentVariables());
+                mergedEnv.putAll(envVars);
+                compileJsp.setEnvironmentVariables(mergedEnv);
             } else {
                 compileJsp.setEnvironmentVariables(envVars);
             }
