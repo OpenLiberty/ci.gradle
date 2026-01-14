@@ -53,7 +53,7 @@ liberty {
             copyLibsDirectory = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/libs")
         }
         env = [
-                'JAVA_HOME':'REPLACE_JDK_PATH'
+                "JAVA_HOME":"REPLACE_JDK_PATH"
         ]
         stripVersion = true
         looseApplication = true

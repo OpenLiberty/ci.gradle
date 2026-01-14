@@ -14,6 +14,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.xpath.XPath
 import javax.xml.xpath.XPathConstants
 import javax.xml.xpath.XPathFactory
+import java.nio.file.Paths
 
 public class TestLooseApplicationToolchainWarningForJvmOptions extends AbstractIntegrationTest {
     static File resourceDir = new File("build/resources/test/sample.servlet")
@@ -26,8 +27,9 @@ public class TestLooseApplicationToolchainWarningForJvmOptions extends AbstractI
         createDir(buildDir)
         createTestProject(buildDir, resourceDir, buildFilename)
         File jvmOptionsFile = new File(jvmOptionsDir, "jvm.options")
-        def javaHome = System.getenv("JAVA_HOME")
-        String toolchainPlugin = "-Djava.home=" + javaHome
+        def javaHome = Paths.get(System.getenv("JAVA_HOME")).toString()
+        def escapedJavaHome = javaHome.replace("\\", "\\\\")
+        String toolchainPlugin = "-Djava.home=" + escapedJavaHome
         jvmOptionsFile.append(System.lineSeparator() + toolchainPlugin)
         addToolchainJdkDownloadPluginToSettings(new File(buildDir, "settings.gradle"))
     }
