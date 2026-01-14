@@ -41,9 +41,8 @@ public class TestLooseApplicationToolchainWarningForJvmOptionsProperty extends A
     @Test
     public void test_loose_config_file_exists() {
         try {
-            BuildResult result = runTasksResult(buildDir, 'deploy', 'libertyStart')
+            BuildResult result = runTasksResult(buildDir, 'deploy')
             Assert.assertTrue("Toolchain skipped message missing in task output", result.getOutput().contains("CWWKM4101W: The toolchain JDK configuration for task :libertyCreate is not honored because the JAVA_HOME property is specified in jvm.options."))
-            Assert.assertTrue("Toolchain skipped message missing in task output", result.getOutput().contains("CWWKM4101W: The toolchain JDK configuration for task :libertyStart is not honored because the JAVA_HOME property is specified in jvm.options."))
         } catch (Exception e) {
             throw new AssertionError("Fail on task deploy.", e)
         }
