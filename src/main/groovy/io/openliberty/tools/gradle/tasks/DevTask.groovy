@@ -942,13 +942,34 @@ class DevTask extends AbstractFeatureTask {
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
             try {
-                if (dir.equals(sourceDirectory)) {
+                boolean isMain = dir.equals(sourceDirectory);
+                boolean isTest = dir.equals(testSourceDirectory);
+
+                if (isMain || isTest) {
+                    def launcher = DevTask.this.getJavaLauncher();
+                    def scopeString = isTest ? "test " : "";
+
+                    if (launcher != null && launcher.metadata != null) {
+                        def metadata = launcher.metadata;
+                        logger.lifecycle(
+                                "Using Java toolchain for dev mode ${scopeString}compilation: " +
+                                        "version=${metadata.languageVersion}, javaHome=${metadata.installationPath.asFile}"
+                        );
+                    } else {
+                        logger.debug(
+                                "No Java toolchain launcher is configured for dev mode ${scopeString}compilation."
+                        );
+                    }
+                }
+
+                if (isMain) {
                     runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources');
                 }
 
-                if (dir.equals(testSourceDirectory)) {
+                if (isTest) {
                     runGradleTask(gradleBuildLauncher, 'compileTestJava', 'processTestResources');
                 }
+
                 return true;
             } catch (BuildException e) {
                 // stdout/stderr from the compile task is sent to the terminal
