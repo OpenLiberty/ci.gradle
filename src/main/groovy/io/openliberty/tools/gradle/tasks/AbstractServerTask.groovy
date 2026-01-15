@@ -411,7 +411,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
                     String[] values = propValue.split(",")
                     for (String nextNameValuePair : values) {
                         String trimmedNameValuePair = nextNameValuePair.trim()
-                        String[] splitNameValue = trimmedNameValuePair.split(":")
+                        String[] splitNameValue = trimmedNameValuePair.split(":",2)
                         String nextPropName = splitNameValue[0].trim()
 
                         // remove surrounding quotes from property names and property values
