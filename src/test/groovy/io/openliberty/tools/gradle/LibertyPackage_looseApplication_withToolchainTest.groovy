@@ -35,6 +35,7 @@ class LibertyPackage_looseApplication_withToolchainTest extends AbstractIntegrat
         createDir(buildDir)
         copyBuildFiles(buildFilename, buildDir)
         copySettingsFile(resourceDir, buildDir)
+        addToolchainJdkDownloadPluginToSettings(new File(buildDir, "settings.gradle"))
         try {
             BuildResult result= runTasksResult(buildDir, 'installLiberty', 'libertyStart', 'libertyStop')
             String consoleLogOutput = result.getOutput();
