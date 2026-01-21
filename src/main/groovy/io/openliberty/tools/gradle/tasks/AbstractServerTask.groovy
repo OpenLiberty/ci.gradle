@@ -1369,7 +1369,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
             jvmOptionsLines = mergeJvmOptions(server.jvmOptions, jvmProjectProps)
         }
         for (String jvmOptionLine : jvmOptionsLines) {
-            if (jvmOptionLine.contains("JAVA_HOME=") || jvmOptionLine.contains("java.home=")) {
+            if (jvmOptionLine.contains("-DJAVA_HOME=") || jvmOptionLine.contains("-Djava.home=")) {
                 logger.warn("CWWKM4101W: The toolchain JDK configuration for task " + this.path + " is not honored because the JAVA_HOME property is specified in jvm.options.")
                 return true
             }
