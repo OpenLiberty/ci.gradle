@@ -1342,8 +1342,18 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
             return true
         }
 
-        // 1. Read existing config files
+        // 1. Read existing server.env file from configDir or custom libert.server.serverEnvFile
         List<String> serverEnvLines = readConfigFileLines(findServerEnvFile())
+        // if mergeServerEnv is true and custom libert.server.serverEnvFile is specified,
+        // then consider configDir server.env separate
+        if (server.mergeServerEnv && server.serverEnvFile != null && server.serverEnvFile.exists()
+            && server.configDirectory != null && server.configDirectory.exists()) {
+            File configDirServerEnv = new File(server.configDirectory, "server.env")
+            if (configDirServerEnv.exists()) {
+                serverEnvLines.addAll(readConfigFileLines(configDirServerEnv))
+            }
+        }
+
         for (String serverEnvLine : serverEnvLines) {
             if (serverEnvLine.startsWith("JAVA_HOME=")) {
                 logger.warn("CWWKM4101W: The toolchain JDK configuration for task " + this.path + " is not honored because the JAVA_HOME property is specified in server.env.")
