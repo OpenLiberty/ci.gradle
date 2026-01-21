@@ -74,6 +74,12 @@ When a Java toolchain is configured, dev mode sets `JAVA_HOME` for the Liberty s
 
 To confirm which JDK the server started with, check `messages.log` for a `java.version` entry.
 
+Example (`messages.log`):
+
+```text
+java.version = 11
+```
+
 #### Build recompilation and tests
 
 When files change, dev mode triggers standard Gradle tasks:
@@ -95,6 +101,7 @@ To show which toolchain is being used when dev mode triggers compilation, dev mo
 * **No Gradle toolchain configured (`java.toolchain` absent)**
 
   Server tasks and dev mode run using the JVM that runs Gradle and whatever configuration is present in `server.env` / `jvm.options`.
+  If `JAVA_HOME` is not set in those files, Liberty uses the default `JAVA_HOME` from the system environment (or the JVM that is running Gradle).
 
 * **Gradle toolchain configured, toolchain JDK resolved successfully**
 
@@ -118,6 +125,14 @@ To show which toolchain is being used when dev mode triggers compilation, dev mo
 * Verify that your project applies the `java` plugin.
 * Verify that `java { toolchain { languageVersion = JavaLanguageVersion.of(11) } }` (or another version) is configured.
 * Ensure that Gradle can resolve the requested toolchain JDK (either from a local JDK or via a provisioning plugin).
+
+  For example, you can use the Foojay toolchains resolver plugin in your `settings.gradle` file to download JDKs automatically:
+
+  ```groovy
+  plugins {
+      id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
+  }
+  ```
 
  **If Liberty does not appear to run with the toolchain JDK (for example, `java.version` in `messages.log` does not match the configured toolchain):**
  
