@@ -1210,7 +1210,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         }
         String jdkHome = getToolchainJavaHome();
         if (jdkHome == null) {
-            logger.warn("Could not determine JDK home from toolchain. Toolchain will not be honored");
+            logger.warn("Could not determine JDK home from toolchain. Toolchain will not be honored.");
             return Collections.emptyMap();
         }
         if (jvmProjectProps.isEmpty() || envProjectProps.isEmpty()) {
