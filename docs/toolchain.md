@@ -77,7 +77,17 @@ To confirm which JDK the server started with, check `messages.log` for a `java.v
 Example (`messages.log`):
 
 ```text
-java.version = 11
+********************************************************************************
+product = Open Liberty 25.0.0.12 (wlp-1.0.108.cl251220251117-0302)
+wlp.install.dir = /path/to/project/build/wlp/
+java.home = /path/to/java/semeru-11.0.28/Contents/Home
+java.version = 11.0.28
+java.runtime = IBM Semeru Runtime Open Edition (11.0.28+6)
+os = Mac OS X (26.1; aarch64) (en_IN)
+process = 62955@Device-Name.local
+Classpath = /path/to/project/build/wlp/bin/tools/ws-server.jar
+Java Library path = /path/to/java/semeru-11.0.28/Contents/Home/lib/default:/path/to/java/semeru-11.0.28/Contents/Home/lib:/usr/lib
+********************************************************************************
 ```
 
 #### Build recompilation and tests
