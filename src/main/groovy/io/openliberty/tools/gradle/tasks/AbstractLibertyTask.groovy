@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017, 2025.
+ * (C) Copyright IBM Corporation 2017, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,12 +76,15 @@ abstract class AbstractLibertyTask extends DefaultTask {
             // Check if the extension exists before trying to use it
             def javaExtension = project.extensions.findByType(JavaPluginExtension)
             if (javaExtension != null) {
-                // If the toolchain changes, the launcher updates automatically.
-                javaLauncher.convention(
-                        getJavaToolchainService().launcherFor(javaExtension.toolchain)
-                )
+                if (javaExtension.toolchain != null && javaExtension.toolchain.languageVersion.isPresent()) {
+                    // If the toolchain changes, the launcher updates automatically.
+                    javaLauncher.convention(
+                            getJavaToolchainService().launcherFor(javaExtension.toolchain))
+                } else {
+                    logger.debug("JavaPluginExtension toolchain is unconfigured. Toolchain JDK will not be honored.")
+                }
             } else {
-                logger.debug("JavaPluginExtension not found. Using system default JVM for Liberty.")
+                logger.debug("JavaPluginExtension not found. Toolchain JDK will not be honored.")
             }
         } catch (Exception e) {
             logger.debug("Could not configure default toolchain: ${e.message}")

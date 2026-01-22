@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017, 2025.
+ * (C) Copyright IBM Corporation 2017, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -411,7 +411,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
                     String[] values = propValue.split(",")
                     for (String nextNameValuePair : values) {
                         String trimmedNameValuePair = nextNameValuePair.trim()
-                        String[] splitNameValue = trimmedNameValuePair.split(":")
+                        String[] splitNameValue = trimmedNameValuePair.split(":",2)
                         String nextPropName = splitNameValue[0].trim()
 
                         // remove surrounding quotes from property names and property values
@@ -821,22 +821,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
     }
 
     private void writeJvmOptions(File file, List<String> options, List<String> projectProperties) throws IOException {
-        List<String> uniqueOptions = getUniqueValues(options)
-        List<String> uniqueProps = getUniqueValues(projectProperties)
-
-        if (! uniqueProps.isEmpty()) {
-            if (uniqueOptions.isEmpty()) {
-                combinedJvmOptions = uniqueProps;
-            } else {
-                combinedJvmOptions = new ArrayList<String> ()
-                // add the project properties (which come from the command line) last so that they take precedence over the options specified in build.gradle
-                combinedJvmOptions.addAll(uniqueOptions)
-                combinedJvmOptions.removeAll(uniqueProps) // remove any exact duplicates before adding all the project properties
-                combinedJvmOptions.addAll(uniqueProps)
-            }
-        } else {
-            combinedJvmOptions = uniqueOptions
-        }
+        combinedJvmOptions = mergeJvmOptions(options, projectProperties)
 
         makeParentDirectory(file)
         PrintWriter writer = null
@@ -851,6 +836,28 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
                 writer.close()
             }
         }
+    }
+
+    @Internal
+    protected List<String> mergeJvmOptions(List<String> options, List<String> projectProperties) {
+        List<String> uniqueOptions = getUniqueValues(options)
+        List<String> uniqueProps = getUniqueValues(projectProperties)
+
+        if (!uniqueProps.isEmpty()) {
+            if (uniqueOptions.isEmpty()) {
+                combinedJvmOptions = uniqueProps;
+            } else {
+                combinedJvmOptions = new ArrayList<String>()
+                // add the project properties (which come from the command line) last so that they take precedence over the options specified in build.gradle
+                combinedJvmOptions.addAll(uniqueOptions)
+                combinedJvmOptions.removeAll(uniqueProps)
+                // remove any exact duplicates before adding all the project properties
+                combinedJvmOptions.addAll(uniqueProps)
+            }
+        } else {
+            combinedJvmOptions = uniqueOptions
+        }
+        return combinedJvmOptions
     }
 
     private String handleServerEnvFileAndProperties(String serverEnvPath, String serverDirectory) {
@@ -1144,10 +1151,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
             serverTask.setTimeout(server.timeout)
         }
 
-        Map<String, String> envVars = getToolchainEnvVar();
-        if(!envVars.isEmpty()){
-            serverTask.setEnvironmentVariables(envVars);
-        }
+        addToolchainEnvToServerTask(serverTask)
         return serverTask
     }
 
@@ -1206,23 +1210,14 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         }
         String jdkHome = getToolchainJavaHome();
         if (jdkHome == null) {
-            logger.warn("Could not determine JDK home from toolchain. Toolchain will not be honored");
+            logger.warn("Could not determine JDK home from toolchain. Toolchain will not be honored.");
             return Collections.emptyMap();
         }
-
-        String serverDirectory = getServerDir(project).toString()
-        // 1. Read existing config files
-        List<String> serverEnvLines = readConfigFileLines(populateServerEnvFile(serverDirectory));
-
-        List<String> jvmOptionsLines = readConfigFileLines(new File(serverDirectory, "jvm.options"));
-
-        // 2. Check for existing JAVA_HOME configuration
-        // if user has configured JAVA_HOME in server.env or jvm.options, this will get higher precedence over toolchain JDK
-        // hence a warning will be issued
-        if (isJavaHomeSet(serverEnvLines, jvmOptionsLines)) {
-            logger.warn("CWWKM4101W: The toolchain JDK configuration for task " + this.path + " is not honored because the JAVA_HOME property is specified in the server.env or jvm.options file"
-            );
-        } else {
+        if (jvmProjectProps.isEmpty() || envProjectProps.isEmpty()) {
+            // run once to make sure project properties are loaded
+            loadLibertyConfigFromProperties();
+        }
+        if (!isJavaHomeSetForEnvProperties() && !isJavaHomeSetForJvmOptions()) {
             logger.info("CWWKM4101I: The " + this.path + " task is using the configured toolchain JDK located at " + jdkHome)
             // 3. Apply toolchain configuration
             return populateEnvironmentVariablesMap(jdkHome);
@@ -1237,15 +1232,44 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      * @return The File object for the server.env, or null if neither exists or is specified.
      */
     @Internal
-    private File populateServerEnvFile(String serverDirectory) {
-        if (server.serverEnvFile!=null && server.serverEnvFile.getCanonicalPath() != null && server.serverEnvFile.getCanonicalPath().exists()) {
-            return server.serverEnvFile.getCanonicalPath();
+    private File findServerEnvFile() {
+        if (server.serverEnvFile != null && server.serverEnvFile.exists()) {
+            return server.serverEnvFile
         }
-        File defaultServerEnv = new File(serverDirectory, "server.env");
-        if (defaultServerEnv.exists()) {
-            return defaultServerEnv;
+        if(server.configDirectory == null){
+            initializeConfigDirectory()
         }
-        return null;
+        if(server.configDirectory.exists()) {
+            File configDirServerEnv = new File(server.configDirectory, "server.env")
+            if (configDirServerEnv.exists()) {
+                return configDirServerEnv
+            }
+        }
+        return null
+    }
+
+    /**
+     * Determines the primary jvm.options file to read.
+     * Checks jvmOptionsFile first, then a default location in configDirectory.
+     *
+     * @return The File object for the jvm.options, or null if neither exists or is specified.
+     */
+    @Internal
+    private File findJvmOptionsFile() {
+        if (server.jvmOptionsFile != null && server.jvmOptionsFile.exists()) {
+            return server.jvmOptionsFile
+        }
+
+        if(server.configDirectory == null){
+            initializeConfigDirectory()
+        }
+        if(server.configDirectory.exists()) {
+            File configDirJvmOptions = new File(server.configDirectory, "jvm.options")
+            if (configDirJvmOptions.exists()) {
+                return configDirJvmOptions
+            }
+        }
+        return null
     }
 
     /**
@@ -1283,26 +1307,83 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
     }
 
     /**
-     *
-     * @param serverEnvLines lines from server.env
-     * @param jvmOptionsLines lines from jvm.options
-     * @return true or false
+     * get toolchain environment variables and set to ProcessBuilder
+     * @param pb ProcessBuilder
      */
     @Internal
-    protected static boolean isJavaHomeSet(List<String> serverEnvLines, List<String> jvmOptionsLines) {
-        boolean javaHomeSet = false;
+    protected void addToolchainEnvToProcessBuilder(ProcessBuilder pb) {
+        Map<String, String> envVars = getToolchainEnvVar();
+        if (!envVars.isEmpty()) {
+            pb.environment().putAll(envVars);
+        }
+    }
+
+    /**
+     * get toolchain environment variables and set to ServerTask
+     * @param serverTask serverTask
+     */
+    @Internal
+    protected void addToolchainEnvToServerTask(ServerTask serverTask) {
+        Map<String, String> envVars = getToolchainEnvVar();
+        if (!envVars.isEmpty()) {
+            serverTask.setEnvironmentVariables(envVars);
+        }
+    }
+
+    /**
+     * check whether java_home is set to any server.env property or project liberty property or server.env config file
+     * @return
+     */
+    @Internal
+    private boolean isJavaHomeSetForEnvProperties() {
+        Properties serverEnvProjectProps = combineServerEnvProperties(server.env, envProjectProps)
+        if (serverEnvProjectProps.containsKey("JAVA_HOME")) {
+            logger.warn("CWWKM4101W: The toolchain JDK configuration for task " + this.path + " is not honored because the JAVA_HOME property is specified in server.env properties.")
+            return true
+        }
+
+        // 1. Read existing server.env file from configDir or custom libert.server.serverEnvFile
+        List<String> serverEnvLines = readConfigFileLines(findServerEnvFile())
+        // if mergeServerEnv is true and custom libert.server.serverEnvFile is specified,
+        // then consider configDir server.env separate
+        if (server.mergeServerEnv && server.serverEnvFile != null && server.serverEnvFile.exists()
+            && server.configDirectory != null && server.configDirectory.exists()) {
+            File configDirServerEnv = new File(server.configDirectory, "server.env")
+            if (configDirServerEnv.exists()) {
+                serverEnvLines.addAll(readConfigFileLines(configDirServerEnv))
+            }
+        }
+
         for (String serverEnvLine : serverEnvLines) {
             if (serverEnvLine.startsWith("JAVA_HOME=")) {
-                javaHomeSet = true;
-                break;
+                logger.warn("CWWKM4101W: The toolchain JDK configuration for task " + this.path + " is not honored because the JAVA_HOME property is specified in server.env.")
+                return true
             }
         }
-        for (String serverEnvLine : jvmOptionsLines) {
-            if (serverEnvLine.contains("JAVA_HOME=")) {
-                javaHomeSet = true;
-                break;
+        return false
+    }
+
+    /**
+     * check whether java_home is set to any jvm.options property or project liberty jvm property or jvm.options config file in config directory
+     * @return
+     */
+    @Internal
+    private boolean isJavaHomeSetForJvmOptions() {
+        File jvmOptionsFile = findJvmOptionsFile()
+        List<String> jvmOptionsLines = new ArrayList<>()
+        // check whether user has defined jvmOptionsFile. if file is defined, it would get highest priority
+        if (jvmOptionsFile != null && jvmOptionsFile.exists()) {
+            jvmOptionsLines = readConfigFileLines(jvmOptionsFile);
+        } else if ((server.jvmOptions != null && !server.jvmOptions.isEmpty()) || !jvmProjectProps.isEmpty()) {
+            // if user has defined jvm.options using server.jvmOptions or as project properties
+            jvmOptionsLines = mergeJvmOptions(server.jvmOptions, jvmProjectProps)
+        }
+        for (String jvmOptionLine : jvmOptionsLines) {
+            if (jvmOptionLine.contains("-DJAVA_HOME=") || jvmOptionLine.contains("-Djava.home=")) {
+                logger.warn("CWWKM4101W: The toolchain JDK configuration for task " + this.path + " is not honored because the JAVA_HOME property is specified in jvm.options.")
+                return true
             }
         }
-        return javaHomeSet;
+        return false
     }
 }

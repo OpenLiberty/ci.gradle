@@ -483,15 +483,7 @@ class DevTask extends AbstractFeatureTask {
         public ServerTask getServerTask() throws Exception {
             if (serverTask != null) {
                 Map<String, String> envVars = getToolchainEnvVar();
-                if (!envVars.isEmpty()) {
-                    if (serverTask.getEnvironmentVariables() != null && !serverTask.getEnvironmentVariables().isEmpty()) {
-                        Map<String, String> mergedEnv = new HashMap<>(serverTask.getEnvironmentVariables());
-                        mergedEnv.putAll(envVars);
-                        serverTask.setEnvironmentVariables(mergedEnv);
-                    } else {
-                        serverTask.setEnvironmentVariables(envVars);
-                    }
-                }
+                updateServerTaskEnvironmentVariables(envVars)
                 return serverTask;
             }
 
@@ -500,14 +492,7 @@ class DevTask extends AbstractFeatureTask {
             if (libertyDebug) {
                 serverTask = createServerTask(project, "debug");
                 setLibertyDebugPort(libertyDebugPort);
-                // putting debug environment variables on top of existing java home variable
-                if (serverTask.getEnvironmentVariables() != null && !serverTask.getEnvironmentVariables().isEmpty()) {
-                    Map<String, String> mergedEnv = new HashMap<>(serverTask.getEnvironmentVariables());
-                    mergedEnv.putAll(getDebugEnvironmentVariables());
-                    serverTask.setEnvironmentVariables(mergedEnv);
-                } else {
-                    serverTask.setEnvironmentVariables(getDebugEnvironmentVariables());
-                }
+                updateServerTaskEnvironmentVariables(getDebugEnvironmentVariables())
             } else {
                 serverTask = createServerTask(project, "run");
             }
@@ -517,9 +502,21 @@ class DevTask extends AbstractFeatureTask {
             return serverTask;
         }
 
+        /**
+         * set environment map passed to server task
+         * @param envVars variables map
+         */
         @Internal
         private void updateServerTaskEnvironmentVariables(Map<String, String> envVars) {
-
+            if (!envVars.isEmpty()) {
+                if (serverTask.getEnvironmentVariables() != null && !serverTask.getEnvironmentVariables().isEmpty()) {
+                    Map<String, String> mergedEnv = new HashMap<>(serverTask.getEnvironmentVariables());
+                    mergedEnv.putAll(envVars);
+                    serverTask.setEnvironmentVariables(mergedEnv);
+                } else {
+                    serverTask.setEnvironmentVariables(envVars);
+                }
+            }
         }
 
         @Override
