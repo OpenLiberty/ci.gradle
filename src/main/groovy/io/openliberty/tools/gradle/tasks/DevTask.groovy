@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2019, 2025.
+ * (C) Copyright IBM Corporation 2019, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.gradle.api.internal.file.DefaultFilePropertyFactory
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.TaskAction
@@ -481,6 +482,8 @@ class DevTask extends AbstractFeatureTask {
         @Override
         public ServerTask getServerTask() throws Exception {
             if (serverTask != null) {
+                Map<String, String> envVars = getToolchainEnvVar();
+                updateServerTaskEnvironmentVariables(envVars)
                 return serverTask;
             }
 
@@ -489,7 +492,7 @@ class DevTask extends AbstractFeatureTask {
             if (libertyDebug) {
                 serverTask = createServerTask(project, "debug");
                 setLibertyDebugPort(libertyDebugPort);
-                serverTask.setEnvironmentVariables(getDebugEnvironmentVariables());
+                updateServerTaskEnvironmentVariables(getDebugEnvironmentVariables())
             } else {
                 serverTask = createServerTask(project, "run");
             }
@@ -497,6 +500,21 @@ class DevTask extends AbstractFeatureTask {
             serverTask.setClean(clean);
 
             return serverTask;
+        }
+
+        /**
+         * set environment map passed to server task
+         * @param envVars variables map
+         */
+        @Internal
+        private void updateServerTaskEnvironmentVariables(Map<String, String> envVars) {
+            if (!envVars.isEmpty()) {
+                if (serverTask.getEnvironmentVariables() != null && !serverTask.getEnvironmentVariables().isEmpty()) {
+                    serverTask.setEnvironmentVariables(serverTask.getEnvironmentVariables().putAll(envVars));
+                } else {
+                    serverTask.setEnvironmentVariables(envVars);
+                }
+            }
         }
 
         @Override

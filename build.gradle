@@ -96,7 +96,7 @@ artifacts {
 test {
     minHeapSize = "1G"
     maxHeapSize = "3G"
-    jvmArgs '-Xmx3G'
+
 
     systemProperties System.getProperties()
     systemProperty 'runit', 'online'
@@ -140,6 +140,7 @@ test {
             prop.setProperty("runtimeVersion", runtimeVersion)
             prop.setProperty("antVersion", libertyAntVersion)
             prop.setProperty("commonVersion", libertyCommonVersion)
+            prop.setProperty("org.gradle.jvmargs", "-Xms1G -Xmx3G -XX:MaxMetaspaceSize=512m")
 
             // save properties to project root folder
             prop.store(output, null)

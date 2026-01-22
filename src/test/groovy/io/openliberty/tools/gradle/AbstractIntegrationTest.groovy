@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2015, 2022.
+ * (C) Copyright IBM Corporation 2015, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import io.openliberty.tools.common.plugins.util.OSUtil
 
 abstract class AbstractIntegrationTest {
 
+    public static final String TOOLCHAIN_USED = 'CWWKM4100I: Using toolchain from build context. JDK Version specified is %s'
+    public static final String TOOLCHAIN_CONFIGURED = 'CWWKM4101I: The :%s task is using the configured toolchain JDK'
     static File integTestDir = new File('build/testBuilds')
 
     protected static void deleteDir(File dir) {
@@ -216,4 +218,55 @@ abstract class AbstractIntegrationTest {
             }
         }
     }
+
+    protected static boolean verifyFileContents(int timeout, String message, File file)
+            throws InterruptedException, FileNotFoundException {
+        int waited = 0;
+        int sleep = 100;
+        while (waited <= timeout) {
+            if (readFile(message, file)) {
+                Thread.sleep(1000);
+                return true;
+            }
+            Thread.sleep(sleep);
+            waited += sleep;
+        }
+        return false;
+    }
+
+    private static boolean readFile(String str, File file) throws FileNotFoundException {
+        Scanner scanner = new Scanner(file);
+        try {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                if (line.contains(str)) {
+                    return true;
+                }
+            }
+        } finally {
+            scanner.close();
+        }
+        return false;
+    }
+
+    protected static void addToolchainJdkDownloadPluginToSettings(File settingsFile) {
+        // 1. Define the plugin block to download toolchain jdk
+        String toolchainPlugin = """plugins {id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'}"""
+        // 2. Read existing content (if any) and write the new content at the start
+        String existingContent = settingsFile.exists() ? settingsFile.text : ""
+        settingsFile.text = toolchainPlugin + existingContent
+    }
+
+
+    protected static void assertToolchainLogsForTask(BuildResult result, String task, String jdkVersion, File messageLog) {
+        String consoleLogOutput = result.getOutput()
+        if (messageLog != null) {
+            assertTrue("messages.log does not exists", messageLog.exists())
+            assertTrue("expected java version not found in messages.log", verifyFileContents(0,
+                    String.format("java.version = %s", jdkVersion), messageLog))
+        }
+        assertTrue("Toolchain with version message not found in logs.", consoleLogOutput.contains(String.format(TOOLCHAIN_USED, jdkVersion)))
+        assertTrue("Toolchain honored message for task  not found in logs.", consoleLogOutput.contains(String.format(TOOLCHAIN_CONFIGURED, task)))
+    }
+
 }
