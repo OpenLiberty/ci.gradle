@@ -29,7 +29,6 @@ public class TestLooseApplicationToolchainWarningForServerEnvProperty extends Ab
         def javaHome = Paths.get(System.getenv("JAVA_HOME")).toString()
         def escapedJavaHome = javaHome.replace("\\", "\\\\")
         buildFile.append("liberty.server.env={\"JAVA_HOME\":\""+escapedJavaHome+"\"}")
-        addToolchainJdkDownloadPluginToSettings(new File(buildDir, "settings.gradle"))
     }
 
     @AfterClass

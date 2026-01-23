@@ -34,7 +34,6 @@ class LibertyToolchainTest extends AbstractIntegrationTest{
     public static void setup() {
         createDir(buildDir)
         createTestProject(buildDir, resourceDir, buildFilename)
-        addToolchainJdkDownloadPluginToSettings(new File(buildDir,"settings.gradle"))
         try {
             runTasks(buildDir, 'installLiberty')
         } catch (Exception e) {

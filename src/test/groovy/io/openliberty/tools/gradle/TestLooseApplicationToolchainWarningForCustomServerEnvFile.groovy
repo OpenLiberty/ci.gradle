@@ -31,7 +31,6 @@ public class TestLooseApplicationToolchainWarningForCustomServerEnvFile extends 
         def escapedJavaHome = javaHome.replace("\\", "\\\\")
         String toolchainPlugin = "JAVA_HOME=" + escapedJavaHome
         serverEnvFile.append(toolchainPlugin)
-        addToolchainJdkDownloadPluginToSettings(new File(buildDir, "settings.gradle"))
     }
 
     @AfterClass

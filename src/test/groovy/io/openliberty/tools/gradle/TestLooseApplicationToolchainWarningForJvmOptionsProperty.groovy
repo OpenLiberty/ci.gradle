@@ -30,7 +30,6 @@ public class TestLooseApplicationToolchainWarningForJvmOptionsProperty extends A
         def javaHome = Paths.get(System.getenv("JAVA_HOME")).toString()
         def escapedJavaHome = javaHome.replace("\\", "\\\\")
         buildFile.append("liberty.server.jvmOptions=[\"-Djava.home="+escapedJavaHome+"\"]")
-        addToolchainJdkDownloadPluginToSettings(new File(buildDir, "settings.gradle"))
     }
 
     @AfterClass

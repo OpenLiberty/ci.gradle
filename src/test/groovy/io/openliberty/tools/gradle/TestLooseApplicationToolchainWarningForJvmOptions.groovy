@@ -31,7 +31,6 @@ public class TestLooseApplicationToolchainWarningForJvmOptions extends AbstractI
         def escapedJavaHome = javaHome.replace("\\", "\\\\")
         String toolchainPlugin = "-Djava.home=" + escapedJavaHome
         jvmOptionsFile.append(System.lineSeparator() + toolchainPlugin)
-        addToolchainJdkDownloadPluginToSettings(new File(buildDir, "settings.gradle"))
     }
 
     @AfterClass
