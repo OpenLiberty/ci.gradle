@@ -239,7 +239,7 @@ abstract class AbstractIntegrationTest {
         try {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
-                if (line.contains(str)) {
+                if (line.contains(str))id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0' {
                     return true;
                 }
             }
@@ -251,7 +251,7 @@ abstract class AbstractIntegrationTest {
 
     protected static void addToolchainJdkDownloadPluginToSettings(File settingsFile) {
         // 1. Define the plugin block to download toolchain jdk
-        String toolchainPlugin = """plugins {id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'}"""
+        String toolchainPlugin = """plugins {}"""
         // 2. Read existing content (if any) and write the new content at the start
         String existingContent = settingsFile.exists() ? settingsFile.text : ""
         settingsFile.text = toolchainPlugin + existingContent
