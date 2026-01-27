@@ -41,7 +41,6 @@ class LibertyApplicationConfigurationIncludeWithToolchainTest extends AbstractIn
     public static void setup() {
         createDir(buildDir)
         createTestProject(buildDir, resourceDir, buildFilename)
-        addToolchainJdkDownloadPluginToSettings(new File(buildDir,"settings.gradle"))
         try {
             //Installing the war built by the other gradle project in the src dir
             runTasks(new File(buildDir, 'test-maven-war'), 'publishToMavenLocal')

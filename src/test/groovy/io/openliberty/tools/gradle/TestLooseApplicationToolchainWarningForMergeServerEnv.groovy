@@ -33,7 +33,6 @@ public class TestLooseApplicationToolchainWarningForMergeServerEnv extends Abstr
         String toolchainPlugin = nl + "JAVA_HOME=" + escapedJavaHome
 
         serverEnvFile.append(toolchainPlugin)
-        addToolchainJdkDownloadPluginToSettings(new File(buildDir, "settings.gradle"))
     }
 
     @AfterClass

@@ -28,7 +28,6 @@ public class TestLooseApplicationWithToolchain extends AbstractIntegrationTest{
     public static void setup() {
         createDir(buildDir)
         createTestProject(buildDir, resourceDir, buildFilename)
-        addToolchainJdkDownloadPluginToSettings(new File(buildDir, 'settings.gradle'))
     }
 
     @AfterClass
