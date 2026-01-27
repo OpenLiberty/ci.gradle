@@ -17,7 +17,6 @@ class DevModeToolchainTest extends BaseDevTest {
     static void setup() throws Exception {
         createDir(buildDir)
         createTestProject(buildDir, resourceDir, buildFilename)
-        addToolchainJdkDownloadPluginToSettings(new File(buildDir, "settings.gradle"))
         File buildFile = new File(buildDir, "build.gradle")
         buildFile.append("\n\njava {\n    toolchain {\n        languageVersion.set(JavaLanguageVersion.of(11))\n    }\n}\n")
 

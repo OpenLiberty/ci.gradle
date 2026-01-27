@@ -943,7 +943,7 @@ class DevTask extends AbstractFeatureTask {
                 boolean isTest = dir.equals(testSourceDirectory);
 
                 if (isMain || isTest) {
-                    def launcher = DevTask.this.getJavaLauncher();
+                    def launcher = getJavaLauncher();
                     def scopeString = isTest ? "test " : "";
 
                     if (launcher != null && launcher.metadata != null) {
