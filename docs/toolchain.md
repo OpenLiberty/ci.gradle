@@ -134,15 +134,7 @@ To show which toolchain is being used when dev mode triggers compilation, dev mo
 
 * Verify that your project applies the `java` plugin.
 * Verify that `java { toolchain { languageVersion = JavaLanguageVersion.of(11) } }` (or another version) is configured.
-* Ensure that Gradle can resolve the requested toolchain JDK (either from a local JDK or via a provisioning plugin).
-
-  For example, you can use the Foojay toolchains resolver plugin in your `settings.gradle` file to download JDKs automatically:
-
-  ```groovy
-  plugins {
-      id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
-  }
-  ```
+* Ensure that Gradle can resolve the requested toolchain JDK by using a locally installed JDK or by automatically downloading one via a [provisioning plugin](https://docs.gradle.org/current/userguide/toolchains.html#sec:provisioning).
 
  **If Liberty does not appear to run with the toolchain JDK (for example, `java.version` in `messages.log` does not match the configured toolchain):**
  
