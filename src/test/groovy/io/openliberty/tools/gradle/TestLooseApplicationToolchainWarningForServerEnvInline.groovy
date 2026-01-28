@@ -31,7 +31,6 @@ public class TestLooseApplicationToolchainWarningForServerEnvInline extends Abst
         def fileContent = buildFile.text
         fileContent = fileContent.replace("REPLACE_JDK_PATH", escapedJavaHome) // Literal replacement
         buildFile.text = fileContent
-        addToolchainJdkDownloadPluginToSettings(new File(buildDir, "settings.gradle"))
     }
 
     @AfterClass
