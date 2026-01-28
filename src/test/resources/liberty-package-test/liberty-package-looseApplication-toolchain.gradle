@@ -1,6 +1,6 @@
 /*
-	This test checks whether the compileJsp task was able to compile the index.jsp file from the test
-  project
+	This test checks whether pakcageLiberty successfully packages the server with a looseApplication that requires
+    files from the src/resrouces folder.
 */
 group = 'liberty.gradle'
 
@@ -20,53 +20,75 @@ buildscript {
 apply plugin: 'war'
 apply plugin: 'liberty'
 
-compileJava.options.release = 17
-
-compileJava.options.encoding = 'UTF-8'
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(8))
     }
 }
 
+compileJava.options.encoding = 'UTF-8'
+
 ext {
     // Liberty server properties
-    wlpServerName = 'LibertyProjectServer17'
+    wlpServerName = 'LibertyProjectServer'
     serverDirectory = "${project.getLayout().getBuildDirectory().getAsFile().get()}/wlp/usr/servers/${wlpServerName}"
     testServerHttpPort = 9080
     testServerHttpsPort = 9443
 
-    // This is set in the ibm-web-ext.xml file
-    warContext = 'sampleJSP.servlet'
+    warContext = 'jpaApp'
 
+}
+
+war {
+    archiveFileName = getArchiveBaseName().get() + '.' + getArchiveExtension().get()
 }
 
 liberty {
     server{
-        serverXmlFile = file("src/resources/server.xml")
-        name = 'LibertyProjectServer17'
+        bootstrapProperties = ['default.http.port': "${testServerHttpPort}" , 'default.https.port': "${testServerHttpsPort}", 'appContext': "${warContext}",'appLocation': "${war.getArchiveFileName().get()}"]
+        name = 'LibertyProjectServer'
         deploy {
             apps = [war]
         }
-        looseApplication = false
-        stripVersion = true
-    }
-    jsp {
-        jspCompileTimeout = 35
-    }
+        features {
+            name = ['servlet-3.1', 'jdbc-4.1', 'jpa-2.0', 'localConnector-1.0']
+            acceptLicense = true
+        }
+        packageLiberty {
+            packageName = 'testPackage'
+        }
+     }
 }
+
 
 repositories {
     mavenCentral()
 }
 
+configurations{
+     derby { transitive = true }
+}
+
 dependencies {
-    testImplementation group: 'commons-logging', name: 'commons-logging', version:'1.0.4'
+    implementation group: 'javax.persistence', name: 'persistence-api', version:'1.0.2'
+    implementation group: 'javax.transaction', name: 'javax.transaction-api', version:'1.2'
     testImplementation group: 'junit', name: 'junit', version:'4.13.1'
-    providedCompile group: 'org.apache.geronimo.specs', name: 'geronimo-servlet_3.0_spec', version:'1.0'
-    testImplementation 'junit:junit:4.13.1'
+    testImplementation group: 'org.apache.cxf', name: 'cxf-rt-rs-client', version:'3.1.1'
+    testImplementation group: 'org.glassfish', name: 'javax.json', version:'1.0.4'
     providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
-    libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
+    derby group: 'org.apache.derby', name: 'derby', version: '10.17.1.0'
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-kernel', version: runtimeVersion
+}
+
+
+task copyDerby {
+    doLast {
+        copy {
+            from configurations.derby
+            into "${project.getLayout().getBuildDirectory().getAsFile().get()}/wlp/usr/shared/resources"
+            include '*.jar'
+        }
+    }
 }
 
 test {
@@ -94,9 +116,7 @@ task printMessageAboutRunningServer {
         println "To stop the server run 'gradle libertyStop'"
     }
 }
-
-deploy.dependsOn 'war'
-war.dependsOn 'compileJSP'
+libertyPackage.dependsOn 'deploy'
 integrationTest.dependsOn 'libertyStart', 'testClasses'
 integrationTest.finalizedBy 'libertyStop'
 libertyStart.finalizedBy 'printMessageAboutRunningServer'
