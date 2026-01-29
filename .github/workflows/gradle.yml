@@ -7,7 +7,7 @@ on:
   push:
     branches: '**'
   pull_request:
-    branches: [ feature/gradle9 ]
+    branches: [ gradle9_JAN-2026 ]
 
 jobs:
   # UNIX BUILDS
