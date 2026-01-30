@@ -12,10 +12,6 @@ buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
-        // Sonatype repo for getting the latest binary scanner jar snapshot
-        maven {
-            url 'https://oss.sonatype.org/content/repositories/snapshots/'
-        }
     }
     dependencies {
         classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"

@@ -10,6 +10,10 @@
  *******************************************************************************/
 // end::copyright[]
 package io.openliberty.guides.multimodules.web;
+import org.apache.commons.lang3.StringUtils;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class HeightsBean implements java.io.Serializable {
     private String heightCm = null;
@@ -18,6 +22,8 @@ public class HeightsBean implements java.io.Serializable {
     private int cm = 0;
     private int feet = 1;
     private int inches = 0;
+
+    private static final Logger LOGGER = LogManager.getLogger(HeightsBean.class.getName());
 
     public HeightsBean() {
     }
@@ -49,7 +55,8 @@ public class HeightsBean implements java.io.Serializable {
         this.feet = io.openliberty.guides.multimodules.lib.Converter.getFeet(cm);
         // end::getFeet[]
         String result = String.valueOf(feet);
-        this.heightFeet = result;
+        this.heightFeet = StringUtils.capitalize(result);
+        LOGGER.info("heightFeet is {}", this.heightFeet);
     }
     // end::setHeightFeet[]
 
@@ -61,6 +68,7 @@ public class HeightsBean implements java.io.Serializable {
         // end::getInches[]
         String result = String.valueOf(inches);
         this.heightInches = result;
+        LOGGER.info("heightInches is {}", this.heightInches);
     }
     // end::setHeightInches[]
 
