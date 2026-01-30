@@ -3,15 +3,16 @@ buildscript {
         mavenLocal()
         mavenCentral()
         maven {
-            name = 'Sonatype Nexus Snapshots'
-            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
         }
     }
     dependencies {
         classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
     }
 }
-
+ext{
+    appSecClientVersion="18.0.0.2"
+}
 apply plugin: 'liberty'
 
 repositories {
@@ -20,7 +21,7 @@ repositories {
 
 dependencies {
     libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: runtimeVersion
-    libertyFeature 'io.openliberty.features:appSecurityClient-1.0:18.0.0.2'
+    libertyFeature 'io.openliberty.features:appSecurityClient-1.0:$appSecClientVersion'
 }
 
 liberty {

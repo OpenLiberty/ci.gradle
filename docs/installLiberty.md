@@ -124,12 +124,12 @@ This will get version 19.0.0.11 of `com.ibm.websphere.appserver.runtime:wlp-webP
 
 In gradle.properties:
 ```
-liberty.installDir=<path to installed wlp>
+liberty.installDir=<path to Liberty installation directory>
 ```
 
 From the command line:
 ```
-gradle build -Pliberty.installDir=<path to installed wlp>
+gradle build -Pliberty.installDir=<path to Liberty installation directory>
 ```
 
 #### Using Maven artifact

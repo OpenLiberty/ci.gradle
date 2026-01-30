@@ -1,0 +1,122 @@
+/*
+	This test checks whether pakcageLiberty successfully packages the server with a looseApplication that requires
+    files from the src/resrouces folder.
+*/
+group = 'liberty.gradle'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+        }
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+apply plugin: 'war'
+apply plugin: 'liberty'
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    }
+}
+
+compileJava.options.encoding = 'UTF-8'
+
+ext {
+    // Liberty server properties
+    wlpServerName = 'LibertyProjectServer'
+    serverDirectory = "${project.getLayout().getBuildDirectory().getAsFile().get()}/wlp/usr/servers/${wlpServerName}"
+    testServerHttpPort = 9080
+    testServerHttpsPort = 9443
+
+    warContext = 'jpaApp'
+
+}
+
+war {
+    archiveFileName = getArchiveBaseName().get() + '.' + getArchiveExtension().get()
+}
+
+liberty {
+    server{
+        bootstrapProperties = ['default.http.port': "${testServerHttpPort}" , 'default.https.port': "${testServerHttpsPort}", 'appContext': "${warContext}",'appLocation': "${war.getArchiveFileName().get()}"]
+        name = 'LibertyProjectServer'
+        deploy {
+            apps = [war]
+        }
+        features {
+            name = ['servlet-3.1', 'jdbc-4.1', 'jpa-2.0', 'localConnector-1.0']
+            acceptLicense = true
+        }
+        packageLiberty {
+            packageName = 'testPackage'
+        }
+     }
+}
+
+
+repositories {
+    mavenCentral()
+}
+
+configurations{
+     derby { transitive = true }
+}
+
+dependencies {
+    implementation group: 'javax.persistence', name: 'persistence-api', version:'1.0.2'
+    implementation group: 'javax.transaction', name: 'javax.transaction-api', version:'1.2'
+    testImplementation group: 'junit', name: 'junit', version:'4.13.1'
+    testImplementation group: 'org.apache.cxf', name: 'cxf-rt-rs-client', version:'3.1.1'
+    testImplementation group: 'org.glassfish', name: 'javax.json', version:'1.0.4'
+    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+    derby group: 'org.apache.derby', name: 'derby', version: '10.17.1.0'
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-kernel', version: runtimeVersion
+}
+
+
+task copyDerby {
+    doLast {
+        copy {
+            from configurations.derby
+            into "${project.getLayout().getBuildDirectory().getAsFile().get()}/wlp/usr/shared/resources"
+            include '*.jar'
+        }
+    }
+}
+
+test {
+    println 'inside the test block'
+    reports.html.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/reports/unit")
+    reports.junitXml.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/test-results/unit")
+    exclude '**/it/**'
+}
+
+
+task integrationTest(type: Test) {
+    group = 'Verification'
+    description = 'Runs the integration tests.'
+    reports.html.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/reports/it")
+    reports.junitXml.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/test-results/it")
+    include '**/it/**'
+    exclude '**/unit/**'
+
+    systemProperties = ['liberty.test.port': testServerHttpPort, 'war.name': warContext]
+}
+
+task printMessageAboutRunningServer {
+    doLast {
+        println "The server is now running at http://localhost:${testServerHttpPort}/${warContext}"
+        println "To stop the server run 'gradle libertyStop'"
+    }
+}
+libertyPackage.dependsOn 'deploy'
+integrationTest.dependsOn 'libertyStart', 'testClasses'
+integrationTest.finalizedBy 'libertyStop'
+libertyStart.finalizedBy 'printMessageAboutRunningServer'
