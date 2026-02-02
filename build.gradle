@@ -83,6 +83,10 @@ java {
         if (System.getProperty('java.version').startsWith('21')) {
             languageVersion = JavaLanguageVersion.of(21)
         }
+
+        if (System.getProperty('java.version').startsWith('25')) {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
     }
 }
 
