@@ -125,6 +125,10 @@ test {
     systemProperties System.getProperties()
     systemProperty 'runit', 'online'
 
+    if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version('9.0')) {
+        exclude '**/TestSpringBootApplication20*'
+    }
+
     doFirst {
         String runtimeGroup
         String runtimeArtifactId

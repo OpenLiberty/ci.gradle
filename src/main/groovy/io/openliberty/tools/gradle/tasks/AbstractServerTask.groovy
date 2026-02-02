@@ -1250,7 +1250,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      * @return The File object for the server.env, or null if neither exists or is specified.
      */
     @Internal
-    private File findServerEnvFile() {
+    protected File findServerEnvFile() {
         if (server.serverEnvFile != null && server.serverEnvFile.exists()) {
             return server.serverEnvFile
         }
