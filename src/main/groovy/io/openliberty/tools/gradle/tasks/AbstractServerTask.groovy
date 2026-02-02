@@ -1273,7 +1273,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      * @return The File object for the jvm.options, or null if neither exists or is specified.
      */
     @Internal
-    private File findJvmOptionsFile() {
+    protected File findJvmOptionsFile() {
         if (server.jvmOptionsFile != null && server.jvmOptionsFile.exists()) {
             return server.jvmOptionsFile
         }
@@ -1298,7 +1298,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      * @return A list of strings, each representing a line in the file. Returns an empty list on failure.
      */
     @Internal
-    private List<String> readConfigFileLines(File configFile) {
+    protected List<String> readConfigFileLines(File configFile) {
         if (configFile == null || !configFile.exists()) {
             return Collections.emptyList();
         }
@@ -1318,7 +1318,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      * @return envVars
      */
     @Internal
-    private static Map<String, String> populateEnvironmentVariablesMap(String jdkHome) {
+    protected static Map<String, String> populateEnvironmentVariablesMap(String jdkHome) {
         Map<String, String> envVars = new HashMap<>();
         envVars.put("JAVA_HOME", jdkHome);
         return envVars;

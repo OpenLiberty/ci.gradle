@@ -2,6 +2,7 @@ package io.openliberty.tools.gradle
 
 import io.openliberty.tools.common.plugins.util.OSUtil
 import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.GradleRunner
 import org.junit.AfterClass
 import org.junit.Assert
 import org.junit.BeforeClass
@@ -39,11 +40,11 @@ public class TestLooseApplicationWithToolchain extends AbstractIntegrationTest{
     @Test
     public void test_loose_config_file_exists() {
         try {
-            result = runTasksResult(buildDir, 'deploy')
+            result = runTasksResult(buildDir, 'deploy', 'deploy', '--info', '--stacktrace')
         } catch (Exception e) {
             throw new AssertionError ("Fail on task deploy.", e)
         }
-        assert new File('build/testBuilds/test-loose-application/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war.xml').exists() : 'looseApplication config file was not copied over to the liberty runtime'
+        assert new File('build/testBuilds/test-loose-application-with-toolchain/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war.xml').exists() : 'looseApplication config file was not copied over to the liberty runtime'
     }
 /*
   Expected output to the XML
@@ -58,7 +59,7 @@ public class TestLooseApplicationWithToolchain extends AbstractIntegrationTest{
 */
     @Test
     public void test_loose_config_file_contents_are_correct(){
-      File on = new File("build/testBuilds/test-loose-application/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war.xml");
+      File on = new File("build/testBuilds/test-loose-application-with-toolchain/build/wlp/usr/servers/LibertyProjectServer/apps/sample.servlet.war.xml");
       FileInputStream input = new FileInputStream(on);
 
       // get input XML Document
@@ -93,9 +94,9 @@ public class TestLooseApplicationWithToolchain extends AbstractIntegrationTest{
       String nodeValue = nodes.item(0).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
 
       if (OSUtil.isWindows()) {
-          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-text-1.13.1.jar") && nodeValue.contains("\\test-loose-application\\build\\libs\\"))
+          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-text-1.13.1.jar") && nodeValue.contains("\\test-loose-application-with-toolchain\\build\\libs\\"))
       } else {
-          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("/commons-text-1.13.1.jar") && nodeValue.contains("/test-loose-application/build/libs/")) 
+          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("/commons-text-1.13.1.jar") && nodeValue.contains("/test-loose-application-with-toolchain/build/libs/")) 
       }
 
       Assert.assertEquals("archive targetInArchive attribute value", "/WEB-INF/lib/commons-lang3-3.18.0.jar",
@@ -105,15 +106,15 @@ public class TestLooseApplicationWithToolchain extends AbstractIntegrationTest{
       nodeValue = nodes.item(1).getAttributes().getNamedItem("sourceOnDisk").getNodeValue();
 
       if (OSUtil.isWindows()) {
-          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-lang3-3.18.0.jar") && nodeValue.contains("\\test-loose-application\\build\\libs\\"))
+          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("\\commons-lang3-3.18.0.jar") && nodeValue.contains("\\test-loose-application-with-toolchain\\build\\libs\\"))
       } else {
-          Assert.assertTrue('archive sourceOnDisk attribute value not correct', ("/commons-lang3-3.18.0.jar") && nodeValue.contains("/test-loose-application/build/libs/"))
+          Assert.assertTrue('archive sourceOnDisk attribute value not correct', nodeValue.endsWith("/commons-lang3-3.18.0.jar") && nodeValue.contains("/test-loose-application-with-toolchain/build/libs/"))
       }
     }
 
     @Test
     public void test_server_env_file_contains_keystore_password(){
-        def serverEnvFile = new File("build/testBuilds/test-loose-application/build/wlp/usr/servers/LibertyProjectServer/server.env")
+        def serverEnvFile = new File("build/testBuilds/test-loose-application-with-toolchain/build/wlp/usr/servers/LibertyProjectServer/server.env")
 
         assert serverEnvFile.exists() : "file not found"
 
