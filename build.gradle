@@ -5,6 +5,17 @@ apply plugin: 'signing'
 apply plugin: "com.gradle.plugin-publish"
 apply plugin: 'base'
 
+signing {
+    required = false
+}
+
+tasks.withType(org.gradle.plugins.signing.Sign).configureEach {
+    onlyIf {
+        // Skip signing tasks unless a signatory is available.
+        project.signing.signatory != null
+    }
+}
+
 group = 'io.openliberty.tools'
 version = '4.0.0-SNAPSHOT'
 base {
@@ -224,8 +235,6 @@ publishing {
             artifactId = base.archivesName.get()
 
             from components.java
-            artifact javadocJar
-            artifact sourcesJar
 
             pom {
                 name = 'liberty-gradle-plugin'
