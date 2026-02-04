@@ -843,7 +843,6 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         }
     }
 
-    @Internal
     protected List<String> mergeJvmOptions(List<String> options, List<String> projectProperties) {
         List<String> uniqueOptions = getUniqueValues(options)
         List<String> uniqueProps = getUniqueValues(projectProperties)
@@ -1249,7 +1248,6 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      *
      * @return The File object for the server.env, or null if neither exists or is specified.
      */
-    @Internal
     protected File findServerEnvFile() {
         if (server.serverEnvFile != null && server.serverEnvFile.exists()) {
             return server.serverEnvFile
@@ -1272,7 +1270,6 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      *
      * @return The File object for the jvm.options, or null if neither exists or is specified.
      */
-    @Internal
     protected File findJvmOptionsFile() {
         if (server.jvmOptionsFile != null && server.jvmOptionsFile.exists()) {
             return server.jvmOptionsFile
@@ -1297,7 +1294,6 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      * @param configFile The file to read.
      * @return A list of strings, each representing a line in the file. Returns an empty list on failure.
      */
-    @Internal
     protected List<String> readConfigFileLines(File configFile) {
         if (configFile == null || !configFile.exists()) {
             return Collections.emptyList();
@@ -1317,7 +1313,6 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      * @param jdkHome    The resolved JDK home path.
      * @return envVars
      */
-    @Internal
     protected static Map<String, String> populateEnvironmentVariablesMap(String jdkHome) {
         Map<String, String> envVars = new HashMap<>();
         envVars.put("JAVA_HOME", jdkHome);
@@ -1328,7 +1323,6 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      * get toolchain environment variables and set to ProcessBuilder
      * @param pb ProcessBuilder
      */
-    @Internal
     protected void addToolchainEnvToProcessBuilder(ProcessBuilder pb) {
         Map<String, String> envVars = getToolchainEnvVar();
         if (!envVars.isEmpty()) {
@@ -1336,7 +1330,6 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         }
     }
 
-    @Internal
     protected void addToolchainEnvToServerTask(ServerTask serverTask) {
         Map<String, String> envVars = getToolchainEnvVar();
         if (!envVars.isEmpty()) {

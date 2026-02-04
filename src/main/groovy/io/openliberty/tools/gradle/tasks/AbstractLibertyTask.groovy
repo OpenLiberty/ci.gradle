@@ -207,7 +207,6 @@ abstract class AbstractLibertyTask extends DefaultTask {
         }
         return task
     }
-    @Internal
     protected boolean isLibertyInstalledAndValid(Project project) {
         File installDir = getInstallDir(project)
         boolean installationExists = installDir.exists() && new File(installDir,"lib/ws-launch.jar").exists()

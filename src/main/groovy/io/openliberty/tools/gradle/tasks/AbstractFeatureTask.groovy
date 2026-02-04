@@ -279,7 +279,6 @@ public class AbstractFeatureTask extends AbstractServerTask {
      * @param suppressLogs if true info and warning will be logged as debug
      * @return instance of ServerFeatureUtil
      */
-    @Internal
     protected ServerFeatureUtil getServerFeatureUtil(boolean suppressLogs, Map<String, File> libDirPropFiles) {
         if (servUtil == null) {
             servUtil = new ServerFeatureTaskUtil();

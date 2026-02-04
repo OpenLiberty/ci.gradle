@@ -1,4 +1,5 @@
 apply plugin: 'groovy'
+apply plugin: 'java-gradle-plugin'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply plugin: "com.gradle.plugin-publish"
@@ -34,7 +35,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.12.0"
+        classpath "com.gradle.publish:plugin-publish-plugin:1.0.0"
     }
 }
 
@@ -49,6 +50,10 @@ tasks.withType(JavaCompile).configureEach {
 // Ensure test tasks use UTF-8 encoding via JVM args, not via options.encoding
 tasks.withType(Test).configureEach {
     jvmArgs '-Dfile.encoding=UTF-8'
+}
+
+processResources {
+    exclude 'META-INF/gradle-plugins/io.openliberty.tools.gradle.Liberty.properties'
 }
 
 compileJava {
@@ -99,26 +104,22 @@ dependencies {
     implementation localGroovy()
     implementation ("io.openliberty.tools:liberty-ant-tasks:$libertyAntVersion")
     implementation ("io.openliberty.tools:ci.common:$libertyCommonVersion")
-    implementation group: 'commons-io', name: 'commons-io', version: '2.14.0'
-    provided group: 'com.ibm.websphere.appserver.spi', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
+    implementation 'commons-io:commons-io:2.14.0'
+    provided 'com.ibm.websphere.appserver.spi:com.ibm.websphere.appserver.spi.kernel.embeddable:1.0.0'
     testImplementation 'junit:junit:4.13.1'
     testImplementation gradleTestKit()
 }
 
 sourceSets.main.compileClasspath += configurations.provided
 
-task sourcesJar(type: Jar) {
+tasks.register('sourcesJar', Jar) {
     archiveClassifier = 'sources'
     from sourceSets.main.allSource
 }
 
-task javadocJar(type: Jar) {
+tasks.register('javadocJar', Jar) {
     archiveClassifier = 'javadoc'
     from javadoc
-}
-
-artifacts {
-    archives javadocJar, sourcesJar
 }
 
 test {
@@ -201,16 +202,18 @@ test {
     }
 }
 
-pluginBundle {
+gradlePlugin {
     website = 'https://github.com/OpenLiberty/ci.gradle'
     vcsUrl = 'https://github.com/OpenLiberty/ci.gradle'
     description = 'Gradle plugin for managing Liberty servers'
-    tags = ['liberty', 'websphere', 'devops']
 
     plugins {
         cigradle {
             id = 'io.openliberty.tools.gradle.Liberty'
+            implementationClass = 'io.openliberty.tools.gradle.Liberty'
             displayName = 'ci.gradle'
+            description = 'Gradle plugin for managing Liberty servers'
+            tags.set(['liberty', 'websphere', 'devops'])
         }
     }
 }
@@ -280,7 +283,7 @@ if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')
     }
 }
 
-task install {
+tasks.register('install') {
     dependsOn "publishToMavenLocal", ":pluginRepo:publishTestPublicationToTestRepository"
 }
 
