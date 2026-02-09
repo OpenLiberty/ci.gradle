@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2025.
+ * (C) Copyright IBM Corporation 2014, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ class StopTask extends AbstractServerTask {
     void stop() {
         File serverDir = getServerDir(project)
 
-        // Clean up force-stopped marker file if it exists (since this is a normal stop)
         ServerUtils.cleanupForceStoppedMarker(getServerDir(project), logger)
 
         if (isLibertyInstalledAndValid(project)) {
@@ -45,7 +44,6 @@ class StopTask extends AbstractServerTask {
                     serverTaskStop.setUseEmbeddedServer(server.embedded)
                     serverTaskStop.execute()
 
-                    // Verify server is fully stopped and resources are released
                     if (!ServerUtils.verifyServerFullyStopped(serverDir, logger)) {
                         // If normal stop verification fails, try forced cleanup
                         ServerUtils.forceCleanupServerResources(serverDir, logger)

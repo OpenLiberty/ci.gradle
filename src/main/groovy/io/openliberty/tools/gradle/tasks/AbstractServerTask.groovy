@@ -1114,13 +1114,11 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
             Dependency depCopy = dep;
 
             // In Gradle 9.0.0, we cannot modify dependencies after a configuration has been resolved
-            // Create a detached configuration with a copy of the dependency
             Configuration detachedConfig;
             if (dep instanceof ModuleDependency) { //Check that dep isn't a File dependency
-                // Create a copy of the dependency that we can modify
                 ModuleDependency moduleDep = (ModuleDependency) dep;
                 ModuleDependency depClone = moduleDep.copy();
-                depClone.setTransitive(false); //Only want main artifacts, one for Maven and one or more for Gradle/Ivy dependencies
+                depClone.setTransitive(false);
                 detachedConfig = project.configurations.detachedConfiguration(depClone);
                 depCopy = depClone;
             } else {
@@ -1128,8 +1126,6 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
             }
 
             // In Gradle 9.0.0, the files(dep) method on configurations is no longer supported for dependency objects.
-            // Using detachedConfiguration(dep) creates an isolated configuration just for this dependency,
-            // and resolve() returns the set of files that make up the artifacts.
             Set<File> depArtifacts = detachedConfig.resolve() //Resolve the artifacts
             for (File depArtifact : depArtifacts) {
                 File appFile = depArtifact
