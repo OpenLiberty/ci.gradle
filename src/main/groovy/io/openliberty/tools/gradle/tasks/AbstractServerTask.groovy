@@ -1329,13 +1329,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
     protected void addToolchainEnvToServerTask(ServerTask serverTask) {
         Map<String, String> envVars = getToolchainEnvVar();
         if (!envVars.isEmpty()) {
-            if (serverTask.getEnvironmentVariables() != null && !serverTask.getEnvironmentVariables().isEmpty()) {
-                Map<String, String> mergedEnv = new HashMap<>(serverTask.getEnvironmentVariables());
-                mergedEnv.putAll(envVars);
-                serverTask.setEnvironmentVariables(mergedEnv);
-            } else {
-                serverTask.setEnvironmentVariables(envVars);
-            }
+            serverTask.setEnvironmentVariables(envVars);
         }
     }
 

@@ -40,7 +40,7 @@ public class TestLooseApplicationWithToolchain extends AbstractIntegrationTest{
     @Test
     public void test_loose_config_file_exists() {
         try {
-            result = runTasksResult(buildDir, 'deploy', 'deploy', '--info', '--stacktrace')
+            result = runTasksResult(buildDir, 'deploy', '--info', '--stacktrace')
         } catch (Exception e) {
             throw new AssertionError ("Fail on task deploy.", e)
         }

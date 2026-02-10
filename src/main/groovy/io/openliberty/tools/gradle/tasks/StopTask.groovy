@@ -33,7 +33,7 @@ class StopTask extends AbstractServerTask {
     void stop() {
         File serverDir = getServerDir(project)
 
-        ServerUtils.cleanupForceStoppedMarker(getServerDir(project), logger)
+        ServerUtils.cleanupForceStoppedMarker(serverDir, logger)
 
         if (isLibertyInstalledAndValid(project)) {
             if (serverDir.exists()) {
