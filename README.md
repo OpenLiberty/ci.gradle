@@ -41,7 +41,7 @@ To run DevContainerTests locally, you must have either Podman or Docker set up a
 For the full Java and Gradle version compatibility matrix, see the [Gradle Compatibility Matrix](https://docs.gradle.org/current/userguide/compatibility.html).
 
 - **Gradle 9.x** requires Java 17 or later and plugin version **3.9.4** or later.
-- **Gradle 7.6 / 8.x** works with Java 8, 11, or 17 and plugin version **3.8.2** or later.
+- **Gradle 7.6 / 8.x** works with Java 8, 11, 17, or 21 and plugin version **3.8.2** or later.
 
 For Liberty Gradle Plugin-specific compatibility details, known limitations, and migration guidance, see the [Detailed Compatibility Matrix](docs/Gradle9MigrationGuide.md#detailed-compatibility-matrix) in the Migration Guide.
 
