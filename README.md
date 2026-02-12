@@ -43,6 +43,8 @@ For the full Java and Gradle version compatibility matrix, see the [Gradle Compa
 - **Gradle 9.x** requires Java 17 or later and plugin version **3.9.4** or later.
 - **Gradle 7.6 / 8.x** works with Java 8, 11, 17, or 21 and plugin version **3.8.2** or later.
 
+The Liberty Gradle Plugin is tested with Long-Term-Support (LTS) releases of Java. The plugin, as of release 3.8, supports Java 8, 11, 17 and 21. As of release 4.0.0, we support Java 25 as well. Versions 3.5 to 3.7.x support Java 8, 11 and 17. Prior to version 3.5, the plugin is supported on Java 8 and 11. For running applications on older versions of Java, please check out our toolchain support.
+
 For Liberty Gradle Plugin-specific compatibility details, known limitations, and migration guidance, see the [Detailed Compatibility Matrix](docs/Gradle9MigrationGuide.md#detailed-compatibility-matrix) in the Migration Guide.
 
 ### Adding the plugin to the build script
