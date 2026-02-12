@@ -17,8 +17,10 @@ buildscript {
 apply plugin: 'war'
 apply plugin: 'liberty'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
 
 compileJava.options.encoding = 'UTF-8'
 

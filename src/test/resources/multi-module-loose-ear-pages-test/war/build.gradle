@@ -10,8 +10,18 @@ dependencies {
 
     providedCompile(group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.9.0')
     providedCompile(group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.9.0')
-    implementation project(':jar')
+    implementation project(path: ':jar', configuration: 'jarOnly')
     compileOnly 'org.eclipse.microprofile:microprofile:6.1'
+}
+
+// Create a custom configuration that only includes the WAR artifact
+configurations {
+    warOnly
+}
+
+// Add the WAR artifact to the warOnly configuration
+artifacts {
+    warOnly war
 }
 
 war {

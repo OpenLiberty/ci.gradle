@@ -71,7 +71,7 @@ abstract class AbstractLibertyTask extends DefaultTask {
      * configure default java launcher using toolchain
      * toolchain can be null for a project, but JavaToolchainService is expected to provide the default launcher
      */
-    private void configureDefaults() {
+    void configureDefaults() {
         try {
             // Check if the extension exists before trying to use it
             def javaExtension = project.extensions.findByType(JavaPluginExtension)
@@ -207,7 +207,6 @@ abstract class AbstractLibertyTask extends DefaultTask {
         }
         return task
     }
-    @Internal
     protected boolean isLibertyInstalledAndValid(Project project) {
         File installDir = getInstallDir(project)
         boolean installationExists = installDir.exists() && new File(installDir,"lib/ws-launch.jar").exists()

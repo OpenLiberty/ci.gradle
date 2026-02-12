@@ -5,6 +5,16 @@ dependencies {
     implementation group: 'javax', name: 'javaee-api', version:'7.0'
 }
 
+// Create a custom configuration that only includes the JAR artifact
+configurations {
+    jarOnly
+}
+
+// Add the JAR artifact to the jarOnly configuration
+artifacts {
+    jarOnly jar
+}
+
 jar {
     archiveFileName = getArchiveBaseName().get() + '.' + getArchiveExtension().get()
 }
