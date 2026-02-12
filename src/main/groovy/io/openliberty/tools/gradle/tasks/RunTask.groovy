@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2023.
+ * (C) Copyright IBM Corporation 2014, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,14 @@
 package io.openliberty.tools.gradle.tasks
 
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.logging.LogLevel
 import io.openliberty.tools.ant.ServerTask
 
 class RunTask extends AbstractServerTask {
 
     RunTask() {
         configure({
-            description "Runs a Liberty server under the Gradle process."
-            group 'Liberty'
+            description = "Runs a Liberty server under the Gradle process."
+            group = 'Liberty'
         })
     }
 
@@ -61,7 +60,7 @@ class RunTask extends AbstractServerTask {
             }
             def pb = new ProcessBuilder(command)
             pb.environment().put('WLP_USER_DIR', getUserDir(project).getCanonicalPath())
-
+            addToolchainEnvToProcessBuilder(pb)
             def run_process = pb.redirectErrorStream(true).start()
 
             run_process.inputStream.eachLine {

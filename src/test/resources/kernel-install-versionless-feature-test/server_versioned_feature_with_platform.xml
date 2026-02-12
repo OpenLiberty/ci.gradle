@@ -1,0 +1,6 @@
+<server description="default server">
+    <featureManager>    
+        <feature>servlet-4.0</feature>
+        <platform>javaee-8.0</platform>
+    </featureManager>     
+</server>

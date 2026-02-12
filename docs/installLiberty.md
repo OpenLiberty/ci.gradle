@@ -20,7 +20,7 @@ You need to include `group`, `name`, and `version` values that describe the arti
 
 ### Properties
 
-Use the [general runtime properies](libertyExtensions.md#general-runtime-properties) for properties to configure the runtime installation location if you want to override the defaults.  By default, the runtime is installed in the `${project.buildDir}/wlp` folder.
+Use the [general runtime properies](libertyExtensions.md#general-runtime-properties) for properties to configure the runtime installation location if you want to override the defaults.  By default, the runtime is installed in the `${project.getLayout().getBuildDirectory().getAsFile().get()}/wlp` folder.
 
 You can also use the `runtime` properties object in the [general runtime properies](libertyExtensions.md#general-runtime-properties) to configure the `group`, `name`, or `version` values of the artifact to use. These will override any `libertyRuntime` dependency configuration and can also be specified in a gradle.properties file or from the command line as project properties.
 
@@ -124,12 +124,12 @@ This will get version 19.0.0.11 of `com.ibm.websphere.appserver.runtime:wlp-webP
 
 In gradle.properties:
 ```
-liberty.installDir=<path to installed wlp>
+liberty.installDir=<path to Liberty installation directory>
 ```
 
 From the command line:
 ```
-gradle build -Pliberty.installDir=<path to installed wlp>
+gradle build -Pliberty.installDir=<path to Liberty installation directory>
 ```
 
 #### Using Maven artifact

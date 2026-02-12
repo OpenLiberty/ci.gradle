@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2021.
+ * (C) Copyright IBM Corporation 2014, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,14 @@ import io.openliberty.tools.gradle.extensions.DeployExtension
 import io.openliberty.tools.gradle.extensions.LibertyExtension
 import io.openliberty.tools.gradle.extensions.ServerExtension
 import io.openliberty.tools.gradle.extensions.arquillian.ArquillianExtension
+import io.openliberty.tools.gradle.utils.GradleUtils
 
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.execution.TaskExecutionGraph
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.testing.Test
+import org.gradle.util.GradleVersion
 
 import java.util.Properties
 import java.text.MessageFormat
@@ -101,7 +103,10 @@ class Liberty implements Plugin<Project> {
                 Dependency[] deps = project.configurations.deploy.getAllDependencies().toArray()
                 deps.each { Dependency dep ->
                     if (dep instanceof ProjectDependency) {
-                        def projectDep = dep.getDependencyProject()
+                        validateProjectDependencyConfiguration(project, (ProjectDependency) dep)
+                        validateSimpleProjectDependency(project, (ProjectDependency) dep)
+                        def projectPath = dep.getPath()
+                        def projectDep = project.findProject(projectPath)
                         if (projectDep.plugins.hasPlugin('war')) {
                             setFacetVersion(projectDep, 'jst.web', JST_WEB_FACET_VERSION)
                         }
@@ -170,12 +175,18 @@ class Liberty implements Plugin<Project> {
 
     private static File getInstallDir(Project project) {
         if (project.hasProperty('liberty.installDir')) {
-            File installDir = checkAndAppendWlp(project, new File(project.projectDir, project.getProperties().get('liberty.installDir')))
+            // installDir should be an absolute path, not a relative one
+            File installDir = checkAndAppendWlp(project, new File(project.getProperties().get('liberty.installDir')))
+            if (!installDir.exists()) {
+                // if that path does not exist, try a relative path to project for backwards compatibility
+                project.getLogger().info(MessageFormat.format("The installDir project property {0} does not reference a valid absolute path. Checking with a relative path to the project instead.", project.getProperties().get('liberty.installDir')))
+                installDir = checkAndAppendWlp(project, new File(project.projectDir, project.getProperties().get('liberty.installDir')))
+            }
             project.getLogger().info("installDir project property detected. Using ${installDir.getCanonicalPath()}.")
             return installDir
         } else if (project.liberty.installDir == null) {
             if (project.liberty.baseDir == null) {
-                return new File(project.buildDir, 'wlp')
+                return new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'wlp')
             } else {
                 return new File(project.liberty.baseDir, 'wlp')
             }
@@ -184,13 +195,20 @@ class Liberty implements Plugin<Project> {
         }
     }
 
-    private static File checkAndAppendWlp(Project project, File installDir) {        
-        if (installDir.toString().endsWith("wlp")) {
+    private static File checkAndAppendWlp(Project project, File installDir) {   
+        if (installDir.exists() && new File(installDir,"lib/ws-launch.jar").exists()) {
             return installDir
-        } else { // not valid wlp dir
-            project.getLogger().warn(MessageFormat.format("The installDir {0} path does not reference a wlp folder. Using path {0}{1}wlp instead.", installDir, File.separator))
-            return new File(installDir, 'wlp')
-        }
+        } 
+
+        project.getLogger().warn(MessageFormat.format("The installDir {0} path does not reference a valid Liberty installation. Using path {0}{1}wlp instead.", installDir.getCanonicalPath(), File.separator))
+        return new File(installDir, 'wlp')
     }
 
+    protected void validateProjectDependencyConfiguration(Project project, ProjectDependency dependency) {
+        GradleUtils.validateProjectDependencyConfiguration(project, dependency)
+    }
+    
+    protected void validateSimpleProjectDependency(Project project, ProjectDependency dependency) {
+        GradleUtils.validateSimpleProjectDependency(project, dependency)
+    }
 }

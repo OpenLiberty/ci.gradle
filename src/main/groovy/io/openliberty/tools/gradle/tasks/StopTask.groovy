@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2023.
+ * (C) Copyright IBM Corporation 2014, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,24 @@ import org.gradle.api.logging.LogLevel
 
 import org.gradle.api.tasks.TaskAction
 import io.openliberty.tools.ant.ServerTask
+import io.openliberty.tools.gradle.utils.ServerUtils
 
 class StopTask extends AbstractServerTask {
 
     StopTask() {
         configure({
-            description 'Stops the Liberty server.'
-            group 'Liberty'
+            description = 'Stops the Liberty server.'
+            group = 'Liberty'
         })
     }
 
     @TaskAction
     void stop() {
+        File serverDir = getServerDir(project)
+
+        ServerUtils.cleanupForceStoppedMarker(serverDir, logger)
+
         if (isLibertyInstalledAndValid(project)) {
-            File serverDir = getServerDir(project)
             if (serverDir.exists()) {
                 File serverXmlFile = new File(serverDir,"server.xml")
                 boolean defaultServerTemplateUsed = copyDefaultServerTemplate(getInstallDir(project),serverDir)
@@ -39,6 +43,11 @@ class StopTask extends AbstractServerTask {
                     ServerTask serverTaskStop = createServerTask(project, "stop");
                     serverTaskStop.setUseEmbeddedServer(server.embedded)
                     serverTaskStop.execute()
+
+                    if (!ServerUtils.verifyServerFullyStopped(serverDir, logger)) {
+                        // If normal stop verification fails, try forced cleanup
+                        ServerUtils.forceCleanupServerResources(serverDir, logger)
+                    }
                 } else {
         	        logger.error ('The server cannot be stopped. There is no server.xml file in the server.')
                 }

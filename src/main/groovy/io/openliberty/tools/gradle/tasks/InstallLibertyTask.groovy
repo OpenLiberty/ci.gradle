@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2024.
+ * (C) Copyright IBM Corporation 2014, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,45 +15,40 @@
  */
 package io.openliberty.tools.gradle.tasks
 
-import javax.xml.parsers.*
+import groovy.xml.MarkupBuilder
 import groovy.xml.StreamingMarkupBuilder
-
+import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.ResolveException
+import org.gradle.api.artifacts.ResolvedConfiguration
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
-import org.gradle.api.logging.LogLevel
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ResolvedConfiguration
-import org.gradle.api.artifacts.ResolvedArtifact
-import org.gradle.api.artifacts.ResolveException
-import org.gradle.api.artifacts.Dependency
-import org.gradle.api.artifacts.repositories.MavenArtifactRepository
-import groovy.xml.MarkupBuilder
+import org.gradle.api.tasks.TaskAction
+import groovy.xml.XmlParser
+import groovy.xml.XmlNodePrinter
 
 import java.util.Map.Entry
-import java.util.Set
-
-import org.gradle.api.GradleException
 
 class InstallLibertyTask extends AbstractLibertyTask {
     protected Properties libertyRuntimeProjectProps = new Properties()
     protected String detachedCoords
     protected String detachedConfigFilePath
     // default to install the latest Open Liberty kernel from Maven Central repository
-    protected String defaultRuntime = "io.openliberty:openliberty-kernel:[23.0.0.3,)"
+    protected String defaultRuntime = "io.openliberty:openliberty-kernel:[25.0.0.3,)"
 
     InstallLibertyTask() {
         configure({
-            description 'Installs Liberty from a repository'
-            group 'Liberty'
+            description = 'Installs Liberty from a repository'
+            group  = 'Liberty'
         })
         outputs.upToDateWhen {
             // ensure a Liberty installation exists at the install directory
             getInstallDir(project).exists() && new File(getInstallDir(project), 'lib/ws-launch.jar').exists() && 
-            project.buildDir.exists() && new File(project.buildDir, 'liberty-plugin-config.xml').exists() &&
+            project.getLayout().getBuildDirectory().getAsFile().get().exists() && new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml').exists() &&
             !isInstallDirChanged(project)
         }
     }
@@ -124,7 +119,7 @@ class InstallLibertyTask extends AbstractLibertyTask {
 
             String licenseFilePath = project.configurations.getByName('libertyLicense').getAsPath()
             if (licenseFilePath) {
-                def command = "java -jar " + licenseFilePath + " --acceptLicense " + project.buildDir
+                def command = "java -jar " + licenseFilePath + " --acceptLicense " + project.getLayout().getBuildDirectory().getAsFile().get()
                 def process = command.execute()
                 process.waitFor()
             }
@@ -134,7 +129,7 @@ class InstallLibertyTask extends AbstractLibertyTask {
 
     protected void updatePluginXmlFile() {
         XmlParser pluginXmlParser = new XmlParser()
-        Node libertyPluginConfig = pluginXmlParser.parse(new File(project.buildDir, 'liberty-plugin-config.xml'))
+        Node libertyPluginConfig = pluginXmlParser.parse(new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml'))
 
         Node installDirNode = libertyPluginConfig.getAt('installDirectory').isEmpty() ? libertyPluginConfig.appendNode('installDirectory') : libertyPluginConfig.getAt('installDirectory').get(0)
         installDirNode.setValue(getInstallDir(project).toString())
@@ -186,41 +181,41 @@ class InstallLibertyTask extends AbstractLibertyTask {
             }
         }
 
-        new File( project.buildDir, 'liberty-plugin-config.xml' ).withWriter('UTF-8') { output ->
+        new File( project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml' ).withWriter('UTF-8') { output ->
             output << new StreamingMarkupBuilder().bind { mkp.xmlDeclaration(encoding: 'UTF-8', version: '1.0' ) }
             XmlNodePrinter printer = new XmlNodePrinter( new PrintWriter(output) )
             printer.preserveWhitespace = true
             printer.print( libertyPluginConfig )
         }
 
-        logger.info ("Updating Liberty plugin config info at ${project.buildDir}/liberty-plugin-config.xml.")
+        logger.info ("Updating Liberty plugin config info at ${project.getLayout().getBuildDirectory().getAsFile().get()}/liberty-plugin-config.xml.")
 
     }
 
     protected void createPluginXmlFile(boolean isExisting) {
         if(!this.state.upToDate) {
-            if (!project.buildDir.exists()) {
-                logger.info ("Creating missing project buildDir at ${project.buildDir}.")
-                project.buildDir.mkdirs()
+            if (!project.getLayout().getBuildDirectory().getAsFile().get().exists()) {
+                logger.info ("Creating missing project buildDir at ${project.getLayout().getBuildDirectory().getAsFile().get()}.")
+                project.getLayout().getBuildDirectory().getAsFile().get().mkdirs()
             }
 
             // if the file already exists, update it instead of replacing it
-            if (new File(project.buildDir, 'liberty-plugin-config.xml').exists()) {
+            if (new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml').exists()) {
                 updatePluginXmlFile()
             } else {
-                new File(project.buildDir, 'liberty-plugin-config.xml').withWriter { writer ->
+                new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml').withWriter { writer ->
                     def xmlDoc = new MarkupBuilder(writer)
                     xmlDoc.mkp.xmlDeclaration(version: "1.0", encoding: "UTF-8")
                     xmlDoc.'liberty-plugin-config'('version':'2.0') {
                         outputLibertyPropertiesToXml(xmlDoc, isExisting)
                     }
                 }
-                logger.info ("Creating Liberty plugin config info to ${project.buildDir}/liberty-plugin-config.xml.")
+                logger.info ("Creating Liberty plugin config info to ${project.getLayout().getBuildDirectory().getAsFile().get()}/liberty-plugin-config.xml.")
             }
         }
     }
 
-    private boolean checkAndLoadInstallExtensionProperties(Map<String,String> props) {
+    protected boolean checkAndLoadInstallExtensionProperties(Map<String,String> props) {
         boolean hasInstallExtProps = false;
 
         if (project.liberty.install.licenseCode != null) {
@@ -273,7 +268,7 @@ class InstallLibertyTask extends AbstractLibertyTask {
         return hasInstallExtProps
     }
 
-    private Map<String, String> buildInstallLibertyMap(Project project) {
+    protected Map<String, String> buildInstallLibertyMap(Project project) {
 
         detachedCoords = null
         detachedConfigFilePath = null
@@ -327,7 +322,7 @@ class InstallLibertyTask extends AbstractLibertyTask {
         }
 
         if (project.liberty.baseDir == null) {
-           result.put('baseDir', project.buildDir)
+           result.put('baseDir', project.getLayout().getBuildDirectory().getAsFile().get())
         } else {
            result.put('baseDir', project.liberty.baseDir)
         }
@@ -450,7 +445,7 @@ class InstallLibertyTask extends AbstractLibertyTask {
         return getUpdatedLibertyRuntimeCoordinates(defaultRuntime)
     }
 
-    private void loadLibertyRuntimeProperties() {
+    protected void loadLibertyRuntimeProperties() {
         Set<Entry<Object, Object>> entries = project.getProperties().entrySet()
         for (Entry<Object, Object> entry : entries) {
             String key = (String) entry.getKey()

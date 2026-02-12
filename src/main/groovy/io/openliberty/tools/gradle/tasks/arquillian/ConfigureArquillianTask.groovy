@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017, 2021.
+ * (C) Copyright IBM Corporation 2017, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,23 @@
 
 package io.openliberty.tools.gradle.tasks.arquillian;
 
-import java.io.File
-import java.io.FileNotFoundException
-import java.io.IOException
-import javax.xml.parsers.ParserConfigurationException
-import javax.xml.xpath.XPathExpressionException
-import org.gradle.api.artifacts.UnknownConfigurationException
-import org.gradle.api.GradleException
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.logging.LogLevel
-import org.xml.sax.SAXException
-import io.openliberty.tools.common.arquillian.objects.LibertyProperty;
-import io.openliberty.tools.common.arquillian.objects.LibertyRemoteObject
 import io.openliberty.tools.common.arquillian.objects.LibertyManagedObject
+import io.openliberty.tools.common.arquillian.objects.LibertyProperty
+import io.openliberty.tools.common.arquillian.objects.LibertyRemoteObject
 import io.openliberty.tools.common.arquillian.util.ArquillianConfigurationException
 import io.openliberty.tools.common.arquillian.util.ArtifactCoordinates;
 import io.openliberty.tools.common.arquillian.util.Constants
 import io.openliberty.tools.common.arquillian.util.HttpPortUtil
 import io.openliberty.tools.gradle.tasks.AbstractServerTask
+import org.gradle.api.GradleException
+import org.gradle.api.artifacts.UnknownConfigurationException
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.TaskAction
+import org.xml.sax.SAXException
+
+import javax.xml.parsers.ParserConfigurationException
+import javax.xml.xpath.XPathExpressionException
 
 class ConfigureArquillianTask extends AbstractServerTask {
 
@@ -46,8 +43,8 @@ class ConfigureArquillianTask extends AbstractServerTask {
 
     ConfigureArquillianTask() {
         configure({
-            description "Automatically generates arquillian.xml for projects that use Arquillian Liberty Managed or Remote containers."
-            group 'Liberty'
+            description = "Automatically generates arquillian.xml for projects that use Arquillian Liberty Managed or Remote containers."
+            group = 'Liberty'
         })
     }
 
@@ -68,7 +65,7 @@ class ConfigureArquillianTask extends AbstractServerTask {
 
     @TaskAction
     void doExecute() throws GradleException {
-        File arquillianXml = new File(project.getBuildDir(), "resources/test/arquillian.xml");
+        File arquillianXml = new File(project.getLayout().getBuildDirectory().getAsFile().get(), "resources/test/arquillian.xml");
         try {
             if (project.configurations.getByName('testCompile') != null) {
                 project.configurations.testCompile.find {

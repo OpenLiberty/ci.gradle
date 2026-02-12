@@ -1,0 +1,49 @@
+apply plugin: "liberty"
+apply plugin: "war"
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+// configure liberty-gradle-plugin 
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // provided dependencies
+    providedCompile "jakarta.platform:jakarta.jakartaee-api:8.0.0"
+    providedCompile "org.eclipse.microprofile:microprofile:3.2"
+
+    // test dependencies
+    testImplementation "junit:junit:4.13.1"
+    testImplementation "org.apache.cxf:cxf-rt-rs-client:3.2.6"
+    testImplementation "org.apache.cxf:cxf-rt-rs-extension-providers:3.2.6"
+    testImplementation "org.glassfish:javax.json:1.0.4"
+    testImplementation "javax.xml.bind:jaxb-api:2.3.1"
+}
+
+liberty {
+    installDir = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/wlp")
+
+    dev {
+        skipInstallFeature=true
+    }
+}
+
+clean.dependsOn "libertyStop"

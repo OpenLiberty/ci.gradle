@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2015, 2022.
+ * (C) Copyright IBM Corporation 2015, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,6 @@
 
 package io.openliberty.tools.gradle
 
-import java.io.File
-
-import java.util.List
-import java.util.ArrayList
 
 import static org.junit.Assert.*
 
@@ -28,11 +24,13 @@ import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE
-import org.gradle.api.GradleException
+
 import io.openliberty.tools.common.plugins.util.OSUtil
 
 abstract class AbstractIntegrationTest {
 
+    public static final String TOOLCHAIN_USED = 'CWWKM4100I: Using toolchain from build context. JDK Version specified is %s'
+    public static final String TOOLCHAIN_CONFIGURED = 'CWWKM4101I: The :%s task is using the configured toolchain JDK'
     static File integTestDir = new File('build/testBuilds')
 
     protected static void deleteDir(File dir) {
@@ -149,6 +147,25 @@ abstract class AbstractIntegrationTest {
         return result
     }
 
+    // Use this method when the task is supposed to fail. Then the returned BuildResult can be
+    // checked for any expected output.
+    protected static BuildResult runTasksFailResult(File projectDir, String... tasks) {
+        List<String> args = new ArrayList<String>();
+        for (String task: tasks) {
+            args.add(task);
+        }
+        args.add("-i");
+        args.add("-s");
+
+        BuildResult result = GradleRunner.create()
+            .withProjectDir(projectDir)
+            .forwardOutput()
+            .withArguments(args)
+            .buildAndFail();
+
+        return result;
+    }
+
     protected static boolean runTaskCheckForUpToDate(File projectDir, String task, String argument) {
         List<String> args = new ArrayList<String>()
         args.add(task)
@@ -196,6 +213,47 @@ abstract class AbstractIntegrationTest {
                 throw new AssertionError("Unable to merge file '${sourceFile.canonicalPath}' to '${destFile.canonicalPath}'.", e)
             }
         }
+    }
+
+    protected static boolean verifyFileContents(int timeout, String message, File file)
+            throws InterruptedException, FileNotFoundException {
+        int waited = 0;
+        int sleep = 100;
+        while (waited <= timeout) {
+            if (readFile(message, file)) {
+                Thread.sleep(1000);
+                return true;
+            }
+            Thread.sleep(sleep);
+            waited += sleep;
+        }
+        return false;
+    }
+
+    private static boolean readFile(String str, File file) throws FileNotFoundException {
+        Scanner scanner = new Scanner(file);
+        try {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                if (line.contains(str)) {
+                    return true;
+                }
+            }
+        } finally {
+            scanner.close();
+        }
+        return false;
+    }
+
+    protected static void assertToolchainLogsForTask(BuildResult result, String task, String jdkVersion, File messageLog) {
+        String consoleLogOutput = result.getOutput()
+        if (messageLog != null) {
+            assertTrue("messages.log does not exists", messageLog.exists())
+            assertTrue("expected java version not found in messages.log", verifyFileContents(0,
+                    String.format("java.version = %s", jdkVersion), messageLog))
+        }
+        assertTrue("Toolchain with version message not found in logs.", consoleLogOutput.contains(String.format(TOOLCHAIN_USED, jdkVersion)))
+        assertTrue("Toolchain honored message for task  not found in logs.", consoleLogOutput.contains(String.format(TOOLCHAIN_CONFIGURED, task)))
     }
 
 }

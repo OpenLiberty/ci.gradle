@@ -6,9 +6,8 @@ buildscript {
         mavenLocal()
         mavenCentral()
         maven {
-            name = 'Sonatype Nexus Snapshots'
-            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
-        }
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+       }
     }
     dependencies {
         classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
@@ -18,21 +17,23 @@ buildscript {
 apply plugin: 'war'
 apply plugin: 'liberty'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
 
 compileJava.options.encoding = 'UTF-8'
 
 ext {
     // Liberty server properties
     wlpServerName = 'LibertyProjectServer'
-    serverDirectory = "${project.buildDir}/wlp/usr/servers/${wlpServerName}"
+    serverDirectory = "${project.getLayout().getBuildDirectory().getAsFile().get()}/wlp/usr/servers/${wlpServerName}"
     testServerHttpPort = 9080
     testServerHttpsPort = 9443
 
     warContext = 'sample.servlet-1'
     appName = 'LibertyProject'
-    packageDir = "${project.buildDir}"
+    packageDir = "${project.getLayout().getBuildDirectory().getAsFile().get()}"
     packagingType = 'usr'
 
 
@@ -75,17 +76,17 @@ dependencies {
 
 test {
     println 'inside the test block'
-    reports.html.outputLocation = file("$buildDir/reports/unit")
-    reports.junitXml.outputLocation = file("$buildDir/test-results/unit")
+    reports.html.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/reports/unit")
+    reports.junitXml.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/test-results/unit")
     exclude '**/it/**'
 }
 
 
 task integrationTest(type: Test) {
-    group 'Verification'
-    description 'Runs the integration tests.'
-    reports.html.outputLocation = file("$buildDir/reports/it")
-    reports.junitXml.outputLocation = file("$buildDir/test-results/it")
+    group = 'Verification'
+    description = 'Runs the integration tests.'
+    reports.html.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/reports/it")
+    reports.junitXml.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/test-results/it")
     include '**/it/**'
     exclude '**/unit/**'
 

@@ -5,7 +5,7 @@ buildscript {
         mavenLocal()
         mavenCentral()
         maven {
-            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
         }
     }
     dependencies {
@@ -13,7 +13,7 @@ buildscript {
     }
 }
 
-project.buildDir = '../build'
+project.getLayout().setBuildDirectory('../build')
 
 dependencies {
     implementation 'io.openliberty.arquillian:arquillian-liberty-remote:1.0.8'

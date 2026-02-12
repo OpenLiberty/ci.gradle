@@ -6,9 +6,8 @@ buildscript {
         mavenCentral()
 		mavenLocal()
         maven {
-            name = 'Sonatype Nexus Snapshots'
-            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
-        }
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+       }
     }
     dependencies {
         classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
@@ -20,8 +19,8 @@ apply plugin: 'liberty'
 repositories {
     mavenCentral()
     maven {
-        name 'liberty-starter-maven-repo'
-        url 'https://liberty-starter.wasdev.developer.ibm.com/start/api/v1/repo'
+        name = 'liberty-starter-maven-repo'
+        url = 'https://liberty-starter.wasdev.developer.ibm.com/start/api/v1/repo'
     }
 }
 

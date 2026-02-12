@@ -1,0 +1,102 @@
+/*
+	This test checks whether the compileJsp task was able to compile the index.jsp file from the test
+  project
+*/
+group = 'liberty.gradle'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+        }
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+apply plugin: 'war'
+apply plugin: 'liberty'
+
+compileJava.options.release = 17
+
+compileJava.options.encoding = 'UTF-8'
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
+ext {
+    // Liberty server properties
+    wlpServerName = 'LibertyProjectServer17'
+    serverDirectory = "${project.getLayout().getBuildDirectory().getAsFile().get()}/wlp/usr/servers/${wlpServerName}"
+    testServerHttpPort = 9080
+    testServerHttpsPort = 9443
+
+    // This is set in the ibm-web-ext.xml file
+    warContext = 'sampleJSP.servlet'
+
+}
+
+liberty {
+    server{
+        serverXmlFile = file("src/resources/server.xml")
+        name = 'LibertyProjectServer17'
+        deploy {
+            apps = [war]
+        }
+        looseApplication = false
+        stripVersion = true
+    }
+    jsp {
+        jspCompileTimeout = 35
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation group: 'commons-logging', name: 'commons-logging', version:'1.0.4'
+    testImplementation group: 'junit', name: 'junit', version:'4.13.1'
+    providedCompile group: 'org.apache.geronimo.specs', name: 'geronimo-servlet_3.0_spec', version:'1.0'
+    testImplementation 'junit:junit:4.13.1'
+    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+    libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
+}
+
+test {
+    println 'inside the test block'
+    reports.html.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/reports/unit")
+    reports.junitXml.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/test-results/unit")
+    exclude '**/it/**'
+}
+
+
+task integrationTest(type: Test) {
+    group = 'Verification'
+    description = 'Runs the integration tests.'
+    reports.html.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/reports/it")
+    reports.junitXml.outputLocation = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/test-results/it")
+    include '**/it/**'
+    exclude '**/unit/**'
+
+    systemProperties = ['liberty.test.port': testServerHttpPort, 'war.name': warContext]
+}
+
+task printMessageAboutRunningServer {
+    doLast {
+        println "The server is now running at http://localhost:${testServerHttpPort}/${warContext}"
+        println "To stop the server run 'gradle libertyStop'"
+    }
+}
+
+deploy.dependsOn 'war'
+war.dependsOn 'compileJSP'
+integrationTest.dependsOn 'libertyStart', 'testClasses'
+integrationTest.finalizedBy 'libertyStop'
+libertyStart.finalizedBy 'printMessageAboutRunningServer'

@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2024.
+ * (C) Copyright IBM Corporation 2014, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,12 @@
 package io.openliberty.tools.gradle.tasks
 
 import io.openliberty.tools.gradle.Liberty
-
+import org.gradle.api.Project
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.logging.LogLevel
-import org.gradle.api.Project
+import groovy.xml.XmlParser
 
 class CreateTask extends AbstractServerTask {
 
@@ -30,8 +29,8 @@ class CreateTask extends AbstractServerTask {
 
     CreateTask() {
         configure({
-            description 'Creates a Liberty server.'
-            group 'Liberty'
+            description = 'Creates a Liberty server.'
+            group = 'Liberty'
         })
         outputs.upToDateWhen {
             getServerDir(project).exists() && (new File(getServerDir(project), 'server.xml')).exists() && !isServerDirChanged(project)
@@ -70,7 +69,7 @@ class CreateTask extends AbstractServerTask {
 
     @InputFile
     File getPluginConfigXml() {
-        return new File(project.buildDir, 'liberty-plugin-config.xml')
+        return new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml')
     }
 
     @TaskAction
@@ -97,12 +96,12 @@ class CreateTask extends AbstractServerTask {
     }
 
     protected boolean isServerDirChanged(Project project) {
-        if (!project.buildDir.exists() || !(new File(project.buildDir, 'liberty-plugin-config.xml')).exists()) {
+        if (!project.getLayout().getBuildDirectory().getAsFile().get().exists() || !(new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml')).exists()) {
             return false
         }
 
         XmlParser pluginXmlParser = new XmlParser()
-        Node libertyPluginConfig = pluginXmlParser.parse(new File(project.buildDir, 'liberty-plugin-config.xml'))
+        Node libertyPluginConfig = pluginXmlParser.parse(new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml'))
         if (!libertyPluginConfig.getAt('serverDirectory').isEmpty()) {
             File currentDir = getServerDir(project)
             File previousDir = new File(libertyPluginConfig.getAt('serverDirectory')[0].value)
