@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2021, 2023.
+ * (C) Copyright IBM Corporation 2021, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,21 @@
  */
 package io.openliberty.tools.gradle.tasks
 
-
 import io.openliberty.tools.common.plugins.util.AbstractContainerSupportUtil
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil.ProductProperties
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.PluginScenarioException
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
+import io.openliberty.tools.common.plugins.util.ServerFeatureUtil.FeaturesPlatforms
+
 import io.openliberty.tools.gradle.utils.ArtifactDownloadUtil
-import java.util.Map.Entry
-import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.options.Option
-import org.gradle.testfixtures.ProjectBuilder
-import org.gradle.api.artifacts.Configuration
+
+import java.util.Map.Entry
 
 public class AbstractFeatureTask extends AbstractServerTask {
 
@@ -218,33 +218,32 @@ public class AbstractFeatureTask extends AbstractServerTask {
         return result;
     }
 
-    protected Set<String> getSpecifiedFeatures(String containerName) throws PluginExecutionException {
-        InstallFeatureUtil util = getInstallFeatureUtil(null, containerName);
+    protected FeaturesPlatforms getSpecifiedFeatures(String containerName) throws PluginExecutionException {
+        InstallFeatureUtil util = getInstallFeatureUtil(null, containerName)
+        FeaturesPlatforms getServerFeaturesResult = new FeaturesPlatforms()
         // if createNewInstallFeatureUtil failed to create a new InstallFeatureUtil instance, then features are installed via ant
         if (installFeaturesFromAnt) {
-            Set<String> featuresInstalledFromAnt;
             if (server.features.name != null) {
-                featuresInstalledFromAnt = new HashSet<String>(server.features.name);
-                return featuresInstalledFromAnt;
-            } else {
-                featuresInstalledFromAnt = new HashSet<String>();
-                return featuresInstalledFromAnt;
+                getServerFeaturesResult.getFeatures().addAll(server.features.name)
             }
+            return getServerFeaturesResult
         }
 
         def pluginListedFeatures = getPluginListedFeatures(false)
         def dependencyFeatures = getDependencyFeatures()
-        def serverFeatures = null;
 
         // if DevMode provides a server directory parameter use that for finding the server features
         if (serverDirectoryParam != null) {
-            serverFeatures = util.getServerFeatures(new File(serverDirectoryParam), getLibertyDirectoryPropertyFiles(serverDirectoryParam))
+            getServerFeaturesResult = util.getServerFeatures(new File(serverDirectoryParam), getLibertyDirectoryPropertyFiles(serverDirectoryParam))
         } else if (getServerDir(project).exists()) {
-            serverFeatures = util.getServerFeatures(getServerDir(project), getLibertyDirectoryPropertyFiles(null))
+            getServerFeaturesResult = util.getServerFeatures(getServerDir(project), getLibertyDirectoryPropertyFiles(null))
         }
 
+        Set<String> serverFeatures = getServerFeaturesResult != null ? getServerFeaturesResult.getFeatures() : new HashSet<String>()
+        Set<String> serverPlatforms = getServerFeaturesResult != null ? getServerFeaturesResult.getPlatforms() : new HashSet<String>()
+
         Set<String> featuresToInstall = util.combineToSet(pluginListedFeatures, dependencyFeatures, serverFeatures)
-        return featuresToInstall
+        return new FeaturesPlatforms(featuresToInstall, serverPlatforms)
     }
 	
 	/*
@@ -280,7 +279,6 @@ public class AbstractFeatureTask extends AbstractServerTask {
      * @param suppressLogs if true info and warning will be logged as debug
      * @return instance of ServerFeatureUtil
      */
-    @Internal
     protected ServerFeatureUtil getServerFeatureUtil(boolean suppressLogs, Map<String, File> libDirPropFiles) {
         if (servUtil == null) {
             servUtil = new ServerFeatureTaskUtil();
@@ -297,7 +295,7 @@ public class AbstractFeatureTask extends AbstractServerTask {
     private void createNewInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons, Collection<Map<String,String>> keyMap) throws PluginExecutionException {
         try {
 			logger.info("Feature signature verify option: " + server.features.verify)
-            util = new InstallFeatureTaskUtil(getInstallDir(project), project.getBuildDir(), server.features.from, server.features.to, pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons, server.features.verify, keyMap)
+            util = new InstallFeatureTaskUtil(getInstallDir(project), project.getLayout().getBuildDirectory().getAsFile().get(), server.features.from, server.features.to, pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons, server.features.verify, keyMap)
         } catch (PluginScenarioException e) {
             logger.debug("Exception received: " + e.getMessage(), (Throwable) e)
             logger.debug("Installing features from installUtility.")

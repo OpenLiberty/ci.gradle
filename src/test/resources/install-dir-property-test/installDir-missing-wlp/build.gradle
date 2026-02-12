@@ -3,8 +3,7 @@ buildscript {
         mavenCentral()
         mavenLocal()
         maven {
-            name = 'Sonatype Nexus Snapshots'
-            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
         }
     }
 
@@ -16,7 +15,7 @@ buildscript {
 apply plugin: 'liberty'
 
 liberty {
-    installDir = file("${project(':installDir-valid-install').buildDir}")
+    installDir = file("${project(':installDir-valid-install').getLayout().getBuildDirectory().getAsFile().get()}")
 
     server{
         name = 'test'

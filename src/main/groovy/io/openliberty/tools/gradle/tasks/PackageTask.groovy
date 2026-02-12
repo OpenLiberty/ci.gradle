@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2023.
+ * (C) Copyright IBM Corporation 2014, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,14 @@
  */
 package io.openliberty.tools.gradle.tasks
 
+import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
+import io.openliberty.tools.common.plugins.util.VersionUtility
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.logging.LogLevel
-
-import java.util.ArrayList
-import java.util.Arrays
-import java.util.Map
-import java.util.HashMap
-import java.util.EnumSet
-import java.util.List
-import java.io.File
-import java.io.IOException
 
 class PackageTask extends AbstractServerTask {
-
+    public static final String MIN_SUPPORTED_VERSION_WITH_ARCHIVE_OPTION_POSIX_FORMAT = "25.0.0.11";
     private enum PackageFileType {
         JAR("jar"),
         TAR("tar"),
@@ -62,8 +54,8 @@ class PackageTask extends AbstractServerTask {
 
     PackageTask() {
         configure({
-            description 'Generates a Liberty server archive.'
-            group 'Liberty'
+            description = 'Generates a Liberty server archive.'
+            group = 'Liberty'
         })
     }
 
@@ -71,7 +63,7 @@ class PackageTask extends AbstractServerTask {
     void packageServer() {
         // Set default server.outputDir to liberty-alt-output-dir for libertyPackage task.
         if (getOutputDir(project).equals(getUserDir(project).toString() + "/servers")) {
-            server.outputDir = new File(project.getBuildDir(), "liberty-alt-output-dir");
+            server.outputDir = new File(project.getLayout().getBuildDirectory().getAsFile().get(), "liberty-alt-output-dir");
         }
 
         def params = buildLibertyMap(project)
@@ -79,6 +71,14 @@ class PackageTask extends AbstractServerTask {
         def packageFile = getPackageFile()
         params.put('archive', packageFile)
         logger.info 'Packaging ' + packageFile
+
+        List<InstallFeatureUtil.ProductProperties> propertiesList = InstallFeatureUtil.loadProperties(getInstallDir(project));
+        String openLibertyVersion = InstallFeatureUtil.getOpenLibertyVersion(propertiesList);
+        if (openLibertyVersion != null &&
+                VersionUtility.compareArtifactVersion(openLibertyVersion,
+                        MIN_SUPPORTED_VERSION_WITH_ARCHIVE_OPTION_POSIX_FORMAT, true) >= 0) {
+            params.put('usePosixRules', "true")
+        }
 
         if (server.packageLiberty.include != null && server.packageLiberty.include.length() != 0) {
             params.put('include', server.packageLiberty.include)
@@ -125,7 +125,7 @@ class PackageTask extends AbstractServerTask {
      * @throws IOException
      */
     private String getPackageDirectory() throws IOException {
-        def buildDirLibFolder = new File(project.getBuildDir(),'libs')
+        def buildDirLibFolder = new File(project.getLayout().getBuildDirectory().getAsFile().get(),'libs')
         if (server.packageLiberty.packageDirectory != null && !server.packageLiberty.packageDirectory.isEmpty()) {
             // check if path is relative or absolute, convert to canonical
             def dir = new File(server.packageLiberty.packageDirectory)

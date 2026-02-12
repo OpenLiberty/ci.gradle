@@ -1,0 +1,15 @@
+<server description="Sample Liberty server">
+
+    <featureManager>
+        <feature>servlet-6.0</feature>
+        <feature>pages-3.1</feature>
+    </featureManager>
+
+
+    <httpEndpoint httpPort="9080" httpsPort="9443"
+        id="defaultHttpEndpoint">
+    <tcpOptions soReuseAddr="true"/>
+
+    </httpEndpoint>
+
+</server>

@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2018, 2019.
+ * (C) Copyright IBM Corporation 2018, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,11 @@
 package io.openliberty.tools.gradle.extensions.arquillian
 
 class ArquillianExtension {
+    //  Skips the `configureArquillian` task if `arquillian.xml` already exists in the `build` directory. Default is false.
     boolean skipIfArquillianXmlExists = false
+
+    // Used to set key/value pairs of configuration parameters in `arquillian.xml`.
+    // **Managed:** A dictionary containing values for `wlpHome`, `serverName`, and `httpPort` as specified in the `liberty-gradle-plugin`.
+    // **Remote:** An empty dictionary when using the Arquillian Liberty Remote container.
     Map<String, String> arquillianProperties = null
 }

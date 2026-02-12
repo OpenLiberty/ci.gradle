@@ -85,7 +85,17 @@ public class TestCompileJSP extends AbstractIntegrationTest{
 
         Assert.assertTrue("servlet-3.1 <feature/> found ==>", features.contains("servlet-3.1"))
         Assert.assertTrue("jsp-2.3 <feature/> found ==>", features.contains("jsp-2.3"))
+
+        // parse input XML Document
+        String expression2 = "/server/jspEngine";       
+        nodes = (NodeList) xPath.compile(expression2).evaluate(inputDoc, XPathConstants.NODESET)
+        Assert.assertEquals("Number of <jspEngine/> elements ==>", 1, nodes.getLength())
+
+        if (nodes.item(0) instanceof Element) {
+            Element child = (Element) nodes.item(0)
+            String nodeValue = child.getAttribute("javaSourceLevel")
+            Assert.assertTrue("Unexpected javaSourceLevel ==>"+nodeValue, nodeValue.equals("8"))
+        }
     }
 
-    
 }

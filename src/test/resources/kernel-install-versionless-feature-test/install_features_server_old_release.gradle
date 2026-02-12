@@ -1,0 +1,31 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+        }
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+apply plugin: 'liberty'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Runtime set to older version on purpose before versionless feature support was added
+    libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: '24.0.0.6'
+}
+
+liberty {
+    server{
+        features {
+            acceptLicense = true
+        }
+    }
+}

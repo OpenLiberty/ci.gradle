@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2023.
+ * (C) Copyright IBM Corporation 2014, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,14 @@ import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
 import io.openliberty.tools.common.plugins.util.DevUtil
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.PluginScenarioException
+import io.openliberty.tools.common.plugins.util.ServerFeatureUtil.FeaturesPlatforms
 
 class InstallFeatureTask extends AbstractFeatureTask {
 
     InstallFeatureTask() {
         configure({
-            description 'Install a new feature to the Liberty server'
-            group 'Liberty'
+            description = 'Install a new feature to the Liberty server'
+            group = 'Liberty'
         })
     }
     
@@ -78,8 +79,11 @@ class InstallFeatureTask extends AbstractFeatureTask {
             installFeatureFromAnt();
         }
         else {
-            Set<String> featuresToInstall = getSpecifiedFeatures(containerName);
-            util.installFeatures(server.features.acceptLicense, new ArrayList<String>(featuresToInstall))
+            FeaturesPlatforms fp = getSpecifiedFeatures(containerName);
+            Set<String> featuresToInstall = fp == null ? new HashSet<String>() : fp.getFeatures();
+            Set<String> platformsToInstall = fp == null ? new HashSet<String>() : fp.getPlatforms();
+
+            util.installFeatures(server.features.acceptLicense, new ArrayList<String>(featuresToInstall), new ArrayList<String>(platformsToInstall))
         }
     }
 
@@ -102,7 +106,7 @@ class InstallFeatureTask extends AbstractFeatureTask {
     void installFeatureFromAnt() {
         // Set default server.outputDir to liberty-alt-output-dir for installFeature task.
         if (getOutputDir(project).equals(getUserDir(project).toString() + "/servers")) {
-            server.outputDir = new File(project.getBuildDir(), "liberty-alt-output-dir");
+            server.outputDir = new File(project.getLayout().getBuildDirectory().getAsFile().get(), "liberty-alt-output-dir");
         }
 
         def params = buildAntParams()

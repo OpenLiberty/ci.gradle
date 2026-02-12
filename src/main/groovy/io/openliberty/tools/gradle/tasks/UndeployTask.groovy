@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2024.
+ * (C) Copyright IBM Corporation 2014, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,8 @@ package io.openliberty.tools.gradle.tasks
 import org.gradle.api.GradleException
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.logging.LogLevel
 
 import io.openliberty.tools.ant.ServerTask
-import io.openliberty.tools.common.plugins.config.ServerConfigDocument
 
 import io.openliberty.tools.gradle.utils.CommonLogger
 
@@ -34,8 +32,8 @@ class UndeployTask extends AbstractServerTask {
 
     UndeployTask() {
         configure({
-            description 'Removes an application from the Liberty server.'
-            group 'Liberty'
+            description = 'Removes an application from the Liberty server.'
+            group = 'Liberty'
         })
     }
 
@@ -79,8 +77,7 @@ class UndeployTask extends AbstractServerTask {
             File serverXML = new File(getServerDir(project).getCanonicalPath(), "server.xml")
 
             try {
-                getServerConfigDocument(new CommonLogger(project), serverXML, server.configDirectory,
-                        server.bootstrapPropertiesFile, combinedBootstrapProperties, server.serverEnvFile, false, getLibertyDirectoryPropertyFiles(null))
+                getServerConfigDocument(new CommonLogger(project), serverXML)
 
                 //appName will be set to a name derived from appFile if no name can be found.
                 appName = scd.findNameForLocation(file)
