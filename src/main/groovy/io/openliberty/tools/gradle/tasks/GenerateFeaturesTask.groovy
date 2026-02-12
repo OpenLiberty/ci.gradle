@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2021, 2023.
+ * (C) Copyright IBM Corporation 2021, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import io.openliberty.tools.common.plugins.util.BinaryScannerUtil
 import static io.openliberty.tools.common.plugins.util.BinaryScannerUtil.*;
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
+import io.openliberty.tools.common.plugins.util.ServerFeatureUtil.FeaturesPlatforms
 import io.openliberty.tools.gradle.utils.ArtifactDownloadUtil
 
 import org.gradle.api.GradleException
@@ -48,8 +49,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
     GenerateFeaturesTask() {
         configure({
-            description 'Generate the features used by an application and add to the configuration of a Liberty server'
-            group 'Liberty'
+            description = 'Generate the features used by an application and add to the configuration of a Liberty server'
+            group = 'Liberty'
         })
     }
 
@@ -174,10 +175,16 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
             servUtil.setLowerCaseFeatures(false);
             // get set of user defined features so they can be omitted from the generated file that will be written
-            Set<String> userDefinedFeatures = optimize ? existingFeatures : servUtil.getServerFeatures(server.configDirectory, server.serverXmlFile, new HashMap<String, File>(), generatedFiles);
+            Set<String> userDefinedFeatures = optimize ? existingFeatures : new HashSet<String>();
+            if (!optimize) {
+                FeaturesPlatforms fp = servUtil.getServerFeatures(server.configDirectory, server.serverXmlFile, new HashMap<String, File>(), generatedFiles);
+                if (fp != null) {
+                    userDefinedFeatures = fp.getFeatures();
+                }
+            }
             logger.debug("User defined features:" + userDefinedFeatures);
             servUtil.setLowerCaseFeatures(true);
-            if (userDefinedFeatures != null) {
+            if (!userDefinedFeatures.isEmpty()) {
                 missingLibertyFeatures.removeAll(userDefinedFeatures);
             }
         }
@@ -233,10 +240,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     private Set<String> getServerFeatures(ServerFeatureUtil servUtil, Set<String> generatedFiles, boolean excludeGenerated) {
         servUtil.setLowerCaseFeatures(false);
         // if optimizing, ignore generated files when passing in existing features to binary scanner
-        Set<String> existingFeatures = servUtil.getServerFeatures(server.configDirectory, server.serverXmlFile, new HashMap<String, File>(), excludeGenerated ? generatedFiles : null); // pass generatedFiles to exclude them
-        if (existingFeatures == null) {
-            existingFeatures = new HashSet<String>();
-        }
+        FeaturesPlatforms fp = servUtil.getServerFeatures(server.configDirectory, server.serverXmlFile, new HashMap<String, File>(), excludeGenerated ? generatedFiles : null); // pass generatedFiles to exclude them
+        Set<String> existingFeatures = fp == null ? new HashSet<String>() : fp.getFeatures();
+
         servUtil.setLowerCaseFeatures(true);
         return existingFeatures;
     }
@@ -244,9 +250,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     // returns the features specified in the generated-features.xml file
     private Set<String> getGeneratedFeatures(ServerFeatureUtil servUtil, File generatedFeaturesFile) {
         servUtil.setLowerCaseFeatures(false);
-        Set<String> genFeatSet = new HashSet<String>();
-        servUtil.getServerXmlFeatures(genFeatSet, server.configDirectory,
+        FeaturesPlatforms fp = servUtil.getServerXmlFeatures(new FeaturesPlatforms(), server.configDirectory,
                 generatedFeaturesFile, null, null);
+        Set<String> genFeatSet = fp == null ? new HashSet<String>() : fp.getFeatures();
         servUtil.setLowerCaseFeatures(true);
         return genFeatSet;
     }
@@ -264,7 +270,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             return ArtifactDownloadUtil.downloadBuildArtifact(project, BINARY_SCANNER_MAVEN_GROUP_ID, BINARY_SCANNER_MAVEN_ARTIFACT_ID, BINARY_SCANNER_MAVEN_TYPE, BINARY_SCANNER_MAVEN_VERSION);
         } catch (Exception e) {
             throw new PluginExecutionException("Could not retrieve the artifact " + BINARY_SCANNER_MAVEN_GROUP_ID + "."
-                    + BINARY_SCANNER_MAVEN_ARTIFACT_ID
+                    + BINARY_SCANNER_MAVEN_ARTIFACT_ID + "." + BINARY_SCANNER_MAVEN_VERSION
                     + " needed for generateFeatures. Ensure you have a connection to Maven Central or another repository that contains the "
                     + BINARY_SCANNER_MAVEN_GROUP_ID + "." + BINARY_SCANNER_MAVEN_ARTIFACT_ID
                     + ".jar configured in your build.gradle.",

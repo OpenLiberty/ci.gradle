@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2019, 2023.
+ * (C) Copyright IBM Corporation 2019, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,40 +15,44 @@
  */
 package io.openliberty.tools.gradle.tasks
 
+import groovy.xml.XmlParser
+import io.openliberty.tools.ant.ServerTask
+import io.openliberty.tools.common.plugins.util.BinaryScannerUtil
+import io.openliberty.tools.common.plugins.util.DevUtil
+import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
+import io.openliberty.tools.common.plugins.util.JavaCompilerOptions
+import io.openliberty.tools.common.plugins.util.LibertyPropFilesUtility
+import io.openliberty.tools.common.plugins.util.PluginExecutionException
+import io.openliberty.tools.common.plugins.util.PluginScenarioException
+import io.openliberty.tools.common.plugins.util.ProjectModule
+import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
+import io.openliberty.tools.common.plugins.util.ServerFeatureUtil.FeaturesPlatforms
+import io.openliberty.tools.common.plugins.util.ServerStatusUtil
+import io.openliberty.tools.gradle.utils.CommonLogger
+import io.openliberty.tools.gradle.utils.DevTaskHelper
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.internal.file.DefaultFilePropertyFactory
+import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.SourceSet
-import org.gradle.api.logging.LogLevel
+import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.tooling.BuildException
 import org.gradle.tooling.BuildLauncher
-import org.gradle.tooling.ProjectConnection
 import org.gradle.tooling.GradleConnector
+import org.gradle.tooling.ProjectConnection
 
+import java.nio.file.Path
+import java.util.Map.Entry
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
-
-import io.openliberty.tools.ant.ServerTask
-
-import io.openliberty.tools.common.plugins.util.DevUtil
-import io.openliberty.tools.common.plugins.util.InstallFeatureUtil;
-import io.openliberty.tools.common.plugins.util.PluginExecutionException
-import io.openliberty.tools.common.plugins.util.PluginScenarioException
-import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
-import io.openliberty.tools.common.plugins.util.ServerStatusUtil
-import io.openliberty.tools.common.plugins.util.ProjectModule
-import io.openliberty.tools.common.plugins.util.BinaryScannerUtil
-
 import java.util.concurrent.TimeUnit
-import java.util.Map.Entry
-import java.nio.file.Path;
 
 class DevTask extends AbstractFeatureTask {
 
@@ -65,8 +69,8 @@ class DevTask extends AbstractFeatureTask {
 
     DevTask() {
         configure({
-            description 'Runs a Liberty server in dev mode'
-            group 'Liberty'
+            description = 'Runs a Liberty server in dev mode'
+            group = 'Liberty'
         })
     }
 
@@ -89,6 +93,7 @@ class DevTask extends AbstractFeatureTask {
     private static final boolean DEFAULT_KEEP_TEMP_CONTAINERFILE = false;
     private static final boolean DEFAULT_GENERATE_FEATURES = false;
     private static final boolean DEFAULT_SKIP_INSTALL_FEATURE = false;
+    private static final boolean DEFAULT_CHANGE_ON_DEMAND_TESTS_ACTION = false;
 
     // Debug port for BuildLauncher tasks launched from DevTask as parent JVM
     // (parent defaults to '5005')
@@ -96,6 +101,14 @@ class DevTask extends AbstractFeatureTask {
     private static final int DEFAULT_CHILD_DEBUG_PORT = 6006;
 
     protected final String CONTAINER_PROPERTY_ARG = '-P'+CONTAINER_PROPERTY+'=true';
+
+    private Boolean changeOnDemandTestsAction;
+
+    @Option(option = 'changeOnDemandTestsAction', description = 'If this option is enabled, change the action for running on demand tests from Enter to type t and press Enter. The default value is false.')
+    void setChangeOnDemandTestsAction(boolean changeOnDemandTestsAction) {
+        this.changeOnDemandTestsAction = changeOnDemandTestsAction;
+        project.liberty.dev.changeOnDemandTestsAction = this.changeOnDemandTestsAction;
+    }
 
     private Boolean hotTests;
 
@@ -322,7 +335,7 @@ class DevTask extends AbstractFeatureTask {
     void setGenerateFeatures(String generateFeatures) {
         this.generateFeatures = Boolean.parseBoolean(generateFeatures);
     }
-
+    
     @Optional
     @Input
     Boolean skipInstallFeature;
@@ -331,6 +344,7 @@ class DevTask extends AbstractFeatureTask {
     @Option(option = 'skipInstallFeature', description = 'If set to true, the installFeature task will be skipped when dev mode is started on an already existing Liberty runtime installation. It will also be skipped when dev mode is running and a restart of the server is triggered either directly by the user or by application changes. The installFeature task will be invoked though when dev mode is running and a change to the configured features is detected. The default value is false.')
     void setSkipInstallFeature(String skipInstallFeature) {
         this.skipInstallFeature = Boolean.parseBoolean(skipInstallFeature);
+        project.liberty.dev.skipInstallFeature = this.skipInstallFeature;
     }
 
     @Optional
@@ -353,32 +367,37 @@ class DevTask extends AbstractFeatureTask {
     private class DevTaskUtil extends DevUtil {
 
         Set<String> existingFeatures;
+        Set<String> existingPlatforms;
 
         Set<String> existingLibertyFeatureDependencies;
 
         Map<String, File> libertyDirPropertyFiles = new HashMap<String, File> ();
 
         private ServerTask serverTask = null;
-
         DevTaskUtil(File buildDir, File installDirectory, File userDirectory, File serverDirectory, File sourceDirectory, File testSourceDirectory,
-                    File configDirectory, File projectDirectory, List<File> resourceDirs,
+                    File configDirectory, File projectDirectory, List<File> resourceDirs, boolean changeOnDemandTestsAction,
                     boolean  hotTests, boolean  skipTests, boolean skipInstallFeature, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
                     boolean libertyDebug, boolean pollingTest, boolean container, File containerfile, File containerBuildContext,
                     String containerRunOpts, int containerBuildTimeout, boolean skipDefaultPorts, boolean keepTempContainerfile, 
-                    String mavenCacheLocation, String packagingType, File buildFile, boolean generateFeatures
+                    String mavenCacheLocation, String packagingType, File buildFile, boolean generateFeatures, List<Path> webResourceDirs,
+                    List<ProjectModule> projectModuleList, Map<String, List<String>> parentBuildGradle, File serverOutputDir
         ) throws IOException, PluginExecutionException {
             super(buildDir, serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory, /* multi module project directory */ projectDirectory,
-                    resourceDirs, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, skipInstallFeature, artifactId,  serverStartTimeout,
+                    resourceDirs, changeOnDemandTestsAction, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, skipInstallFeature, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, containerfile, containerBuildContext, containerRunOpts, containerBuildTimeout, skipDefaultPorts,
-                    null /* compileOptions not needed since useBuildRecompile is true */, keepTempContainerfile, mavenCacheLocation, null /* multi module upstream projects */,
-                    false /* recompileDependencies only supported in ci.maven */, packagingType, buildFile, null /* parent build files */, generateFeatures, null /* compileArtifactPaths */, null /* testArtifactPaths */, new ArrayList<Path>() /* webResources */
+                    null /* compileOptions not needed since useBuildRecompile is true */, keepTempContainerfile, mavenCacheLocation, projectModuleList /* multi module upstream projects */,
+                    projectModuleList.size() > 0 /* recompileDependencies as true for multi module */, packagingType, buildFile, parentBuildGradle /* parent build files */, generateFeatures, null /* compileArtifactPaths */, null /* testArtifactPaths */, webResourceDirs /* webResources */
                 );
-
-            this.libertyDirPropertyFiles = AbstractServerTask.getLibertyDirectoryPropertyFiles(installDirectory, userDirectory, serverDirectory);
+            this.libertyDirPropertyFiles = LibertyPropFilesUtility.getLibertyDirectoryPropertyFiles(new CommonLogger(project), installDirectory, userDirectory, serverDirectory, serverOutputDir);
             ServerFeatureUtil servUtil = getServerFeatureUtil(true, libertyDirPropertyFiles);
-            this.existingFeatures = servUtil.getServerFeatures(serverDirectory, libertyDirPropertyFiles);
+            FeaturesPlatforms fp = servUtil.getServerFeatures(serverDirectory, libertyDirPropertyFiles);
+
+            if (fp != null) {
+                this.existingFeatures = fp.getFeatures()
+                this.existingPlatforms = fp.getPlatforms()
+            }
 
             this.existingLibertyFeatureDependencies = new HashSet<String>();
 
@@ -463,6 +482,8 @@ class DevTask extends AbstractFeatureTask {
         @Override
         public ServerTask getServerTask() throws Exception {
             if (serverTask != null) {
+                Map<String, String> envVars = getToolchainEnvVar();
+                updateServerTaskEnvironmentVariables(envVars)
                 return serverTask;
             }
 
@@ -471,7 +492,7 @@ class DevTask extends AbstractFeatureTask {
             if (libertyDebug) {
                 serverTask = createServerTask(project, "debug");
                 setLibertyDebugPort(libertyDebugPort);
-                serverTask.setEnvironmentVariables(getDebugEnvironmentVariables());
+                updateServerTaskEnvironmentVariables(getDebugEnvironmentVariables())
             } else {
                 serverTask = createServerTask(project, "run");
             }
@@ -481,16 +502,41 @@ class DevTask extends AbstractFeatureTask {
             return serverTask;
         }
 
+        /**
+         * set environment map passed to server task
+         * @param envVars variables map
+         */
+        @Internal
+        private void updateServerTaskEnvironmentVariables(Map<String, String> envVars) {
+            if (!envVars.isEmpty()) {
+                if (serverTask.getEnvironmentVariables() != null && !serverTask.getEnvironmentVariables().isEmpty()) {
+                    Map<String, String> mergedEnv = new HashMap<>(serverTask.getEnvironmentVariables());
+                    mergedEnv.putAll(envVars);
+                    serverTask.setEnvironmentVariables(mergedEnv);
+                } else {
+                    serverTask.setEnvironmentVariables(envVars);
+                }
+            }
+        }
+
         @Override
         public boolean updateArtifactPaths(ProjectModule projectModule, boolean redeployCheck, boolean generateFeatures, ThreadPoolExecutor executor)
                 throws PluginExecutionException {
-            // not supported for Gradle, only used for multi module Maven projects
+            // for multi module, unable to identify the changes made, showing option for user. return true to trigger recompile
+            if (isMultiModuleProject()) {
+                warn("A change was detected in a build file. The libertyDev task could not determine if a server restart is required. To restart server, type 'r' and press Enter.");
+                return true;
+            }
             return false;
         }
 
         @Override
         public boolean updateArtifactPaths(File parentBuildFile) {
-            // not supported for Gradle, only used for multi module Maven projects
+            // for multi module, unable to identify the changes made, showing option for user. return true to trigger recompile
+            if (isMultiModuleProject()) {
+                warn("A change was detected in a build file. The libertyDev task could not determine if a server restart is required. To restart server, type 'r' and press Enter.");
+                return true;
+            }
             return false;
         }
         
@@ -519,6 +565,11 @@ class DevTask extends AbstractFeatureTask {
             boolean restartServer = false;
             boolean installFeatures = false;
             boolean optimizeGenerateFeatures = false;
+            // for multi module, unable to identify the changes made, showing option for user. return true to trigger recompile
+            if (isMultiModuleProject()) {
+                warn("A change was detected in a build file. The libertyDev task could not determine if a server restart is required. To restart server, type 'r' and press Enter.");
+                return true;
+            }
 
             ProjectBuilder builder = ProjectBuilder.builder();
             Project newProject;
@@ -813,7 +864,8 @@ class DevTask extends AbstractFeatureTask {
         @Override
         public void installFeatures(File configFile, File serverDir, boolean generateFeatures) {
             ServerFeatureUtil servUtil = getServerFeatureUtil(true, libertyDirPropertyFiles);
-            Set<String> features = servUtil.getServerFeatures(serverDir, libertyDirPropertyFiles);
+            FeaturesPlatforms fp = servUtil.getServerFeatures(serverDir, libertyDirPropertyFiles);
+            Set<String> features = fp == null ? null : fp.getFeatures();
 
             if (features == null) {
                 return;
@@ -875,8 +927,10 @@ class DevTask extends AbstractFeatureTask {
         @Override
         public void updateExistingFeatures() {
             ServerFeatureUtil servUtil = getServerFeatureUtil(true, libertyDirPropertyFiles);
-            Set<String> features = servUtil.getServerFeatures(getServerDir(project), libertyDirPropertyFiles);
-            existingFeatures = features;
+            FeaturesPlatforms fp = servUtil.getServerFeatures(getServerDir(project), libertyDirPropertyFiles);
+
+            this.existingFeatures = fp == null ? new HashSet<String>() : fp.getFeatures();
+            this.existingPlatforms = fp == null ? new HashSet<String>() : fp.getPlatforms();
         }
 
         @Override
@@ -885,13 +939,34 @@ class DevTask extends AbstractFeatureTask {
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
             try {
-                if (dir.equals(sourceDirectory)) {
+                boolean isMain = dir.equals(sourceDirectory);
+                boolean isTest = dir.equals(testSourceDirectory);
+
+                if (isMain || isTest) {
+                    def launcher = getJavaLauncher();
+                    def scopeString = isTest ? "test " : "";
+
+                    if (launcher != null && launcher.metadata != null) {
+                        def metadata = launcher.metadata;
+                        logger.lifecycle(
+                                "Using Java toolchain for dev mode ${scopeString}compilation: " +
+                                        "version=${metadata.languageVersion}, javaHome=${metadata.installationPath.asFile}"
+                        );
+                    } else {
+                        logger.debug(
+                                "No Java toolchain launcher is configured for dev mode ${scopeString}compilation."
+                        );
+                    }
+                }
+
+                if (isMain) {
                     runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources');
                 }
 
-                if (dir.equals(testSourceDirectory)) {
+                if (isTest) {
                     runGradleTask(gradleBuildLauncher, 'compileTestJava', 'processTestResources');
                 }
+
                 return true;
             } catch (BuildException e) {
                 // stdout/stderr from the compile task is sent to the terminal
@@ -1186,11 +1261,7 @@ class DevTask extends AbstractFeatureTask {
             generateFeatures = DEFAULT_GENERATE_FEATURES;
         }
 
-        if (skipInstallFeature == null) {
-            skipInstallFeature = DEFAULT_SKIP_INSTALL_FEATURE;
-        }
-
-        processContainerParams();
+        processDevExtensionParams();
     }
 
     @TaskAction
@@ -1213,11 +1284,11 @@ class DevTask extends AbstractFeatureTask {
         initializeConfigDirectory();
         File configDirectory = server.configDirectory;
         // getOutputDir returns a string
-        File serverOutputDir = new File(getOutputDir(project));
+        File outputDir = new File(getOutputDir(project));
 
         if (!container) {
             if (serverDirectory.exists()) {
-                if (ServerStatusUtil.isServerRunning(serverInstallDir, serverOutputDir, serverName)) {
+                if (ServerStatusUtil.isServerRunning(serverInstallDir, outputDir, serverName)) {
                     throw new Exception("The server " + serverName
                             + " is already running. Terminate all instances of the server before starting dev mode."
                             + " You can stop a server instance with the command 'gradle libertyStop'.");
@@ -1242,15 +1313,24 @@ class DevTask extends AbstractFeatureTask {
 
         File buildFile = project.getBuildFile();
 
+        List<Path> webResourceDirs = DevTaskHelper.getWebSourceDirectoriesToMonitor(project);
         // Instantiate util before any child gradle tasks launched so it can help find available port if needed
+        // Project modules contain all child modules. This project modules will be present only for multi-module
+        // used to watch sub project src and test source files
+        List<ProjectModule> projectModules = getProjectModules()
+        // get parent build.gradle to register
+        Map<String, List<String>> parentBuildGradle = new HashMap<String, List<String>>();
+        if(projectModules.size()>0) {
+            DevTaskHelper.updateParentBuildFiles(parentBuildGradle, project)
+        }
         try {
-            this.util = new DevTaskUtil(project.buildDir, serverInstallDir, getUserDir(project, serverInstallDir),
+            this.util = new DevTaskUtil(project.getLayout().getBuildDirectory().getAsFile().get(), serverInstallDir, getUserDir(project, serverInstallDir),
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
-                resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), skipInstallFeature.booleanValue(), artifactId, serverStartTimeout.intValue(),
+                resourceDirs, changeOnDemandTestsAction.booleanValue(), hotTests.booleanValue(), skipTests.booleanValue(), skipInstallFeature.booleanValue(), artifactId, serverStartTimeout.intValue(),
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(),
                 libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), containerfile, containerBuildContext, containerRunOpts,
                 containerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempContainerfile.booleanValue(), localMavenRepoForFeatureUtility,
-                getPackagingType(), buildFile, generateFeatures.booleanValue()
+                DevTaskHelper.getPackagingType(project), buildFile, generateFeatures.booleanValue(), webResourceDirs, projectModules, parentBuildGradle, new File(outputDir, serverName)
             );
         } catch (IOException | PluginExecutionException e) {
             throw new GradleException("Error initializing dev mode.", e)
@@ -1390,10 +1470,65 @@ class DevTask extends AbstractFeatureTask {
         }
     }
 
+    private List<ProjectModule> getProjectModules() {
+        List<ProjectModule> upstreamProjects = new ArrayList<ProjectModule>();
+        for (Project dependencyProject : DevTaskHelper.getAllUpstreamProjects(project)) {
+            // In Maven , there is a step to set compiler options for upstream project
+            // Gradle does not need to manually inject compiler options because
+            // we are directly calling compileJava task, which internally takes the compiler options
+            // from task definition or command line arguments
+            JavaCompilerOptions upstreamCompilerOptions = new JavaCompilerOptions();
+            SourceSet mainSourceSet = dependencyProject.sourceSets.main;
+            SourceSet testSourceSet = dependencyProject.sourceSets.test;
+            DefaultFilePropertyFactory.DefaultDirectoryVar outputDirectory = mainSourceSet.java.classesDirectory;
+            DefaultFilePropertyFactory.DefaultDirectoryVar testOutputDirectory = testSourceSet.java.classesDirectory;
+            Set<String> compileArtifacts = new HashSet<String>();
+            Set<String> testArtifacts = new HashSet<String>();
+            File upstreamSourceDir = new File(mainSourceSet.java.sourceDirectories.asPath)
+            File upstreamOutputDir = outputDirectory.asFile.get();
+            File upstreamTestSourceDir = new File(testSourceSet.java.sourceDirectories.asPath);
+            File upstreamTestOutputDir = testOutputDirectory.asFile.get();
+            // resource directories
+            List<File> upstreamResourceDirs = mainSourceSet.resources.srcDirs.toList();
+            //get gradle project properties. It is observed that project properties contain all gradle properties
+            // properties are overridden automatically with the highest precedence
+            // in gradle, we are only using skipTests
+            boolean upstreamSkipTests = dependencyProject.hasProperty("skipTests") ? DevTaskHelper.parseBooleanIfDefined(dependencyProject.properties.get("skipTests")) : skipTests
+
+            if (DevTaskHelper.getPackagingType(dependencyProject).equals("ear")) {
+                upstreamSkipUTs = true;
+            }
+            // build list of dependent modules -> can be kept as empty list for gradle
+            // In gradle multi module project, we are calling compileJava for ear
+            // Then gradle internally identifies other transitive project dependencies and calls compileJava for each of them
+            // gradle checks whether the task is UP TO DATE, if its already UP TO DATE, it wont be triggered again
+            List<File> dependentModules = new ArrayList<File>();
+            ProjectModule upstreamProject = new ProjectModule(dependencyProject.getBuildFile(),
+                    dependencyProject.getName(),
+                    DevTaskHelper.getPackagingType(dependencyProject),
+                    compileArtifacts,
+                    testArtifacts,
+                    upstreamSourceDir,
+                    upstreamOutputDir,
+                    upstreamTestSourceDir,
+                    upstreamTestOutputDir,
+                    upstreamResourceDirs,
+                    upstreamSkipTests,
+                    false,
+                    false,
+                    upstreamCompilerOptions,
+                    dependentModules);
+
+            upstreamProjects.add(upstreamProject);
+        }
+
+        return upstreamProjects;
+    }
+
     private boolean isInstallDirChanged(Project project, File currentInstallDir) {
-        if (project.buildDir.exists() && new File(project.buildDir, 'liberty-plugin-config.xml').exists()) {
+        if (project.getLayout().getBuildDirectory().getAsFile().get().exists() && new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml').exists()) {
             XmlParser pluginXmlParser = new XmlParser()
-            Node libertyPluginConfig = pluginXmlParser.parse(new File(project.buildDir, 'liberty-plugin-config.xml'))
+            Node libertyPluginConfig = pluginXmlParser.parse(new File(project.getLayout().getBuildDirectory().getAsFile().get(), 'liberty-plugin-config.xml'))
             if (!libertyPluginConfig.getAt('installDirectory').isEmpty()) {
                 Node installDirNode = libertyPluginConfig.getAt('installDirectory').get(0)
                 String installDirValue = installDirNode.text()
@@ -1431,8 +1566,8 @@ class DevTask extends AbstractFeatureTask {
         }
     }
 
-    // Get container option values from build.gradle if not specified on the command line
-    private void processContainerParams() throws Exception {
+    // Get dev extension parameter values from build.gradle if not specified on the command line
+    private void processDevExtensionParams() throws Exception {
         // process parameters from dev extension
         if (container == null) {
             boolean buildContainerSetting = project.liberty.dev.container; // get from build.gradle or from -Pdev_mode_container=true
@@ -1483,6 +1618,24 @@ class DevTask extends AbstractFeatureTask {
                 setKeepTempContainerfile(buildKeepTempDockerfileSetting);
             } else {
                 setKeepTempContainerfile(DEFAULT_KEEP_TEMP_CONTAINERFILE);
+            }
+        }
+
+        if (changeOnDemandTestsAction == null) {
+            boolean buildChangeOnDemandTestsActionSetting = project.liberty.dev.changeOnDemandTestsAction; // get from build.gradle
+            if (buildChangeOnDemandTestsActionSetting == null) {
+                setChangeOnDemandTestsAction(DEFAULT_CHANGE_ON_DEMAND_TESTS_ACTION);
+            } else {
+                setChangeOnDemandTestsAction(buildChangeOnDemandTestsActionSetting);
+            }
+        }
+
+        if (skipInstallFeature == null) {
+            boolean buildSkipInstallFeatureSetting = project.liberty.dev.skipInstallFeature; // get from build.gradle
+            if (buildSkipInstallFeatureSetting == null) {
+                setSkipInstallFeature(String.valueOf(DEFAULT_SKIP_INSTALL_FEATURE));
+            } else {
+                setSkipInstallFeature(String.valueOf(buildSkipInstallFeatureSetting));
             }
         }
     }

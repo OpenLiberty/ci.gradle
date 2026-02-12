@@ -1,0 +1,57 @@
+apply plugin: 'ear'
+apply plugin: 'liberty'
+
+description = 'EAR Module'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+        }
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    earlib(files("lib/test.jar"))
+    earlib(group: 'org.apache.commons', name: 'commons-lang3', version: '3.18.0')
+    earlib(group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.9.0')
+    earlib(group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.9.0')
+    deploy project(path:':war', configuration:'warOnly')
+    deploy project(path:':jar', configuration:'jarOnly')
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.0'
+    libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: runtimeVersion
+}
+
+ear {
+    libDirName = "custom/lib-dir"
+    archiveFileName = rootProject.name+"-"+getArchiveBaseName().get() +"-"+rootProject.version+ '.' + getArchiveExtension().get()
+    deploymentDescriptor {
+        module ('ejb-jar-1.0-SNAPSHOT.jar', 'java')
+        webModule ('ejb-war-1.0-SNAPSHOT.war', '/converter')
+    }
+}
+
+liberty {
+    server {
+        name = "ejbServer"
+        deploy {
+            apps = [ear]
+            copyLibsDirectory = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/copy/libs")
+        }
+        verifyAppStartTimeout = 30
+        looseApplication = true
+    }
+}
+
+deploy.dependsOn 'ear'
+ear.dependsOn ':jar:jar', ':war:war'

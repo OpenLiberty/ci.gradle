@@ -1,0 +1,21 @@
+<server description="Sample Liberty server">
+
+    <featureManager>
+        <feature>pages-3.1</feature>
+    </featureManager>
+
+    <variable name="http.port" defaultValue="9080" />
+    <variable name="https.port" defaultValue="9443" />
+
+    <!-- tag::server[] -->
+    <httpEndpoint host="*" httpPort="${http.port}"
+        httpsPort="${https.port}" id="defaultHttpEndpoint" />
+
+    <!-- tag::EARdefinition[] -->
+    <enterpriseApplication id="guide-gradle-multimodules-ear"
+                           location="guide-gradle-multimodules-ear-1.0-SNAPSHOT.ear"
+                           name="guide-gradle-multimodules-ear">
+    </enterpriseApplication>
+    <!-- end::EARdefinition[] -->
+    <!-- end::server[] -->
+</server>

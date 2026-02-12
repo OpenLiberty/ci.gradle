@@ -1,1 +1,9 @@
-//Empty
+pluginManagement {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven {
+            url = uri(file("$rootDir/../../plugin-test-repository/"))
+        }
+    }
+}

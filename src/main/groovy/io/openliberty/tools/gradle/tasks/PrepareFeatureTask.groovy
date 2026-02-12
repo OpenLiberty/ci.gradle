@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2021.
+ * (C) Copyright IBM Corporation 2021, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ class PrepareFeatureTask extends AbstractPrepareTask {
 
     PrepareFeatureTask() {
         configure({
-            description 'Prepare a user feature for upload to a maven repository'
-            group 'Liberty'
+            description = 'Prepare a user feature for upload to a maven repository'
+            group = 'Liberty'
         })
     }
 

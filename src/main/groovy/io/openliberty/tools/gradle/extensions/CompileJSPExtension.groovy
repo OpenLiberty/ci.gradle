@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2019.
+ * (C) Copyright IBM Corporation 2019, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,10 @@ package io.openliberty.tools.gradle.extensions
 
 class CompileJSPExtension {
  
+    // Sets the JSP version to use. Valid values are `2.2` or `2.3`. The default value is `2.3`.
     String jspVersion
+
+    // Maximum time to wait (in seconds) for all the JSP files to compile. 
+    // The server is stopped and the goal ends after this specified time. The default value is 30 seconds.
     int jspCompileTimeout = 40
 }

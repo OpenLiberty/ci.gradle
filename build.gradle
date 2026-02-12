@@ -1,42 +1,70 @@
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.OutputStream
-import java.util.Properties
-
 apply plugin: 'groovy'
+apply plugin: 'java-gradle-plugin'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply plugin: "com.gradle.plugin-publish"
+apply plugin: 'base'
 
-archivesBaseName = 'liberty-gradle-plugin'
+signing {
+    required = false
+}
+
+tasks.withType(org.gradle.plugins.signing.Sign).configureEach {
+    onlyIf {
+        // Skip signing tasks unless a signatory is available.
+        project.signing.signatory != null
+    }
+}
+
 group = 'io.openliberty.tools'
-version = '3.8.2'
-
+version = '4.0.0-SNAPSHOT'
+base {
+    archivesName='liberty-gradle-plugin'
+}
 repositories {
     mavenLocal()
     mavenCentral()
     maven {
-        url 'https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/maven/repository/'
+        name = 'Central Portal Snapshots'
+        url = 'https://central.sonatype.com/repository/maven-snapshots/'
+        content {
+            includeModule("io.openliberty.tools","liberty-ant-tasks")
+            includeModule("io.openliberty.tools","ci.common")
+        }
     }
     maven {
-        url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        url = 'https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/maven/repository/'
     }
+
 }
 
 buildscript {
     repositories {
         mavenLocal()
         maven {
-            url "https://plugins.gradle.org/m2/"
+            url = "https://plugins.gradle.org/m2/"
         }
     }
     dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.12.0"
+        classpath "com.gradle.publish:plugin-publish-plugin:1.0.0"
     }
 }
 
 configurations {
     provided
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+}
+
+// Ensure test tasks use UTF-8 encoding via JVM args, not via options.encoding
+tasks.withType(Test).configureEach {
+    jvmArgs '-Dfile.encoding=UTF-8'
+}
+
+processResources {
+    exclude 'META-INF/gradle-plugins/io.openliberty.tools.gradle.Liberty.properties'
 }
 
 compileJava {
@@ -59,43 +87,63 @@ compileTestGroovy {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-def libertyAntVersion = "1.9.14"
-def libertyCommonVersion = "1.8.32"
+// In-order to support both Java 17, Java 21 and Java 25, we configure the toolchain
+// Reference: https://docs.gradle.org/current/userguide/toolchains.html
+java {
+    toolchain {
+        // Default to Java 17 for backward compatibility
+        languageVersion = JavaLanguageVersion.of(17)
+
+        // Allow Java 21 or Java 25 as a compatible alternative
+        // This enables the project to work with either Java 17, Java 21 or Java 25
+        if (System.getProperty('java.version').startsWith('21')) {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+
+        if (System.getProperty('java.version').startsWith('25')) {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
+    }
+}
+
+def libertyAntVersion = "1.9.18"
+def libertyCommonVersion = "1.8.40"
+
 
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
     implementation ("io.openliberty.tools:liberty-ant-tasks:$libertyAntVersion")
     implementation ("io.openliberty.tools:ci.common:$libertyCommonVersion")
-    implementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
-    provided group: 'com.ibm.websphere.appserver.spi', name: 'com.ibm.websphere.appserver.spi.kernel.embeddable', version: '1.0.0'
+    implementation 'commons-io:commons-io:2.14.0'
+    provided 'com.ibm.websphere.appserver.spi:com.ibm.websphere.appserver.spi.kernel.embeddable:1.0.0'
     testImplementation 'junit:junit:4.13.1'
     testImplementation gradleTestKit()
 }
 
 sourceSets.main.compileClasspath += configurations.provided
 
-task sourcesJar(type: Jar) {
+tasks.register('sourcesJar', Jar) {
     archiveClassifier = 'sources'
     from sourceSets.main.allSource
 }
 
-task groovydocJar(type: Jar) {
-    archiveClassifier = 'groovydoc'
-    from groovydoc
-}
-
-artifacts {
-    archives groovydocJar, sourcesJar
+tasks.register('javadocJar', Jar) {
+    archiveClassifier = 'javadoc'
+    from javadoc
 }
 
 test {
+    failOnNoDiscoveredTests = false
     minHeapSize = "1G"
     maxHeapSize = "3G"
-    jvmArgs '-Xmx3G'
 
     systemProperties System.getProperties()
     systemProperty 'runit', 'online'
+
+    if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version('9.0')) {
+        exclude '**/TestSpringBootApplication20*'
+    }
 
     doFirst {
         String runtimeGroup
@@ -116,29 +164,30 @@ test {
 
         try {
 
-        output = new FileOutputStream("${buildDir}/gradle.properties");
+            output = new FileOutputStream("${project.getLayout().getBuildDirectory().getAsFile().get()}/gradle.properties")
 
-        if (libertyRuntime == "ol") {
-            runtimeGroup = "io.openliberty"
-            runtimeArtifactId = "openliberty-runtime"
-            kernelArtifactId = "openliberty-kernel"
-        } else {
-            runtimeGroup = "com.ibm.websphere.appserver.runtime"
-            runtimeArtifactId = "wlp-javaee7"
-            kernelArtifactId = "wlp-kernel"
-        }
+            if (libertyRuntime == "ol") {
+                runtimeGroup = "io.openliberty"
+                runtimeArtifactId = "openliberty-runtime"
+                kernelArtifactId = "openliberty-kernel"
+            } else {
+                runtimeGroup = "com.ibm.websphere.appserver.runtime"
+                runtimeArtifactId = "wlp-javaee7"
+                kernelArtifactId = "wlp-kernel"
+            }
 
-        // set the properties value
-        prop.setProperty("lgpVersion", version)
-        prop.setProperty("runtimeGroup", runtimeGroup)
-        prop.setProperty("runtimeArtifactId", runtimeArtifactId)
-        prop.setProperty("kernelArtifactId", kernelArtifactId)
-        prop.setProperty("runtimeVersion", runtimeVersion)
-        prop.setProperty("antVersion", libertyAntVersion)
-        prop.setProperty("commonVersion", libertyCommonVersion)
+            // set the properties value
+            prop.setProperty("lgpVersion", version)
+            prop.setProperty("runtimeGroup", runtimeGroup)
+            prop.setProperty("runtimeArtifactId", runtimeArtifactId)
+            prop.setProperty("kernelArtifactId", kernelArtifactId)
+            prop.setProperty("runtimeVersion", runtimeVersion)
+            prop.setProperty("antVersion", libertyAntVersion)
+            prop.setProperty("commonVersion", libertyCommonVersion)
+            prop.setProperty("org.gradle.jvmargs", "-Xms1G -Xmx3G -XX:MaxMetaspaceSize=512m")
 
-        // save properties to project root folder
-        prop.store(output, null)
+            // save properties to project root folder
+            prop.store(output, null)
 
         } catch (IOException io) {
             io.printStackTrace()
@@ -164,16 +213,18 @@ test {
     }
 }
 
-pluginBundle {
+gradlePlugin {
     website = 'https://github.com/OpenLiberty/ci.gradle'
     vcsUrl = 'https://github.com/OpenLiberty/ci.gradle'
     description = 'Gradle plugin for managing Liberty servers'
-    tags = ['liberty', 'websphere', 'devops']
 
     plugins {
         cigradle {
             id = 'io.openliberty.tools.gradle.Liberty'
+            implementationClass = 'io.openliberty.tools.gradle.Liberty'
             displayName = 'ci.gradle'
+            description = 'Gradle plugin for managing Liberty servers'
+            tags.set(['liberty', 'websphere', 'devops'])
         }
     }
 }
@@ -181,17 +232,15 @@ pluginBundle {
 publishing {
     publications {
         libertyGradle (MavenPublication) {
-            artifactId = archivesBaseName
+            artifactId = base.archivesName.get()
 
             from components.java
-            artifact groovydocJar
-            artifact sourcesJar 
 
             pom {
                 name = 'liberty-gradle-plugin'
                 packaging = 'jar'
                 description = 'Liberty Gradle Plug-in.'
-                url = 'https://wasdev.github.io'
+                url = 'https://github.com/OpenLiberty/ci.gradle'
                 licenses {
                     license {
                         name = 'The Apache Software License, Version 2.0'
@@ -201,9 +250,9 @@ publishing {
 
                 developers {
                     developer {
-                        id = 'jgawor'
-                        name = 'Jarek Gawor'
-                        email = 'jgawor@gmail.com'
+                        id = 'OpenLiberty'
+                        name = 'Cheryl King'
+                        email = 'developers@openliberty.io'
                     }
                 }
                 scm {
@@ -218,36 +267,36 @@ publishing {
 }
 
 if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
-    
+
     if (!version.endsWith("SNAPSHOT")) {
+
         signing {
             sign publishing.publications.libertyGradle
         }
     } else {
         signing.required = false
-    }
 
-    publishing {
-        repositories {
-            maven {
-                name = "Nexus"
-                def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-                def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
-                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        publishing {
+            repositories {
+                maven {
+                    name = "Nexus"
+                    url = "https://central.sonatype.com/repository/maven-snapshots/"
 
-                credentials {
-                    username = ossrhUsername
-                    password = ossrhPassword
+                    credentials {
+                        username = ossrhUsername
+                        password = ossrhPassword
+                    }
                 }
             }
         }
     }
 }
 
-task install {
+tasks.register('install') {
     dependsOn "publishToMavenLocal", ":pluginRepo:publishTestPublicationToTestRepository"
 }
 
 publishToMavenLocal.dependsOn jar
 
 groovydoc.enabled = false
+javadoc.enabled = false

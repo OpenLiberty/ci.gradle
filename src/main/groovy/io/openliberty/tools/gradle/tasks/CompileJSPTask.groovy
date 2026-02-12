@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017, 2020.
+ * (C) Copyright IBM Corporation 2017, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,22 @@
  */
 package io.openliberty.tools.gradle.tasks
 
-import java.io.File;
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.HashSet;
-
-import org.gradle.api.tasks.TaskAction
+import io.openliberty.tools.ant.jsp.CompileJSPs
+import org.apache.tools.ant.Project
 import org.gradle.api.Task
-import org.gradle.api.GradleException
+import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.War
 import org.gradle.api.logging.LogLevel
 
-import org.apache.tools.ant.Project;
-import io.openliberty.tools.ant.jsp.CompileJSPs;
+import io.openliberty.tools.common.plugins.util.ServerFeatureUtil.FeaturesPlatforms
 
 class CompileJSPTask extends AbstractFeatureTask {
     protected Project ant = new Project();
 
     CompileJSPTask() {
         configure({
-            description 'Compile the JSP files in the src/main/webapp directory. '
-            group 'Liberty'
+            description = 'Compile the JSP files in the src/main/webapp directory. '
+            group = 'Liberty'
         })
     }
 
@@ -59,17 +52,30 @@ class CompileJSPTask extends AbstractFeatureTask {
     protected void perTaskCompileJSP(Task task) throws Exception {
         CompileJSPs compileJsp = new CompileJSPs()
         compileJsp.setInstallDir(getInstallDir(project))
-        compileJsp.setTempdir(project.buildDir)
-        compileJsp.setDestdir(new File(project.buildDir.getAbsolutePath()+"/classes/java"))
+        compileJsp.setTempdir(project.getLayout().getBuildDirectory().getAsFile().get())
+        compileJsp.setDestdir(new File(project.getLayout().getBuildDirectory().getAsFile().get().getAbsolutePath()+"/classes/java"))
         compileJsp.setTimeout(project.liberty.jsp.jspCompileTimeout)
         // don't delete temporary server dir
         compileJsp.setCleanup(false)
         compileJsp.setProject(ant)
+        Map<String, String> envVars = getToolchainEnvVar();
+        if (!envVars.isEmpty()) {
+            if (compileJsp.getEnvironmentVariables() != null && !compileJsp.getEnvironmentVariables().isEmpty()) {
+                Map<String, String> mergedEnv = new HashMap<>(compileJsp.getEnvironmentVariables());
+                mergedEnv.putAll(envVars);
+                compileJsp.setEnvironmentVariables(mergedEnv);
+            } else {
+                compileJsp.setEnvironmentVariables(envVars);
+            }
+        }
         compileJsp.setTaskName('antlib:net/wasdev/wlp/ant:compileJSPs')
-
-        if (project.convention.plugins.war.webAppDirName != null) {
-            compileJsp.setSrcdir(project.convention.plugins.war.webAppDir)
-        } else {
+        War war;
+        if(project.plugins.hasPlugin("war")){
+            war = (War)project.war
+            if ( war.getWebAppDirectory().getAsFile().get() != null) {
+                compileJsp.setSrcdir( war.getWebAppDirectory().getAsFile().get())
+            }
+        }else {
             compileJsp.setSrcdir(new File("src/main/webapp"))
         }
         Set<String> classpath = new HashSet<String>();
@@ -85,15 +91,27 @@ class CompileJSPTask extends AbstractFeatureTask {
         logger.debug("Classpath: " + classpathStr)
         compileJsp.setClasspath(classpathStr)
 
+        // Java version for compiling jsps
+        setCompileJavaSourceVersion(compileJsp, task)
+
         //Feature list
-        Set<String> installedFeatures = getSpecifiedFeatures(null);
+        Set<String> installedFeatures = new HashSet<String>();
+        FeaturesPlatforms fp = getSpecifiedFeatures(null);
+        if (fp != null) {
+            installedFeatures = fp.getFeatures();
+        }
 
         //Set JSP Feature Version
         setJspVersion(compileJsp, installedFeatures);
 
-        //Removing jsp features at it is already set at this point 
-        installedFeatures.remove("jsp-2.3");
-        installedFeatures.remove("jsp-2.2");
+        //Removing jsp and pages features as the jspVersion is already set at this point 
+        Iterator<String> it = installedFeatures.iterator();
+        while (it.hasNext()) {
+            String nextItem = it.next();
+            if (nextItem.startsWith("jsp-") || nextItem.startsWith("pages-")) {
+                it.remove();
+            }
+        }
         
         if(installedFeatures != null && !installedFeatures.isEmpty()) {
             compileJsp.setFeatures(installedFeatures.toString().replace("[", "").replace("]", ""));
@@ -103,23 +121,40 @@ class CompileJSPTask extends AbstractFeatureTask {
         compileJsp.execute()
     }
 
-        private void setJspVersion(CompileJSPs compile, Set<String> installedFeatures) {
-            //If no conditions are met, defaults to 2.3 from the ant task
-            if (project.liberty.jsp.jspVersion != null) {
-                compile.setJspVersion(project.liberty.jsp.jspVersion);
-            }
-            else {
-                Iterator it = installedFeatures.iterator();
-                String currentFeature;
-                while (it.hasNext()) {
-                    currentFeature = (String) it.next();
-                    if(currentFeature.startsWith("jsp-")) {
-                        String version = currentFeature.replace("jsp-", "");
-                        compile.setJspVersion(version);
-                        break;
-                    }
+    private void setCompileJavaSourceVersion(CompileJSPs compile, Task task) {
+        Task compileTask = project.tasks.getByName('compileJava')
+        
+        if (compileTask != null) {
+            String release = (String) compileTask.getOptions().getRelease().getOrNull()
+            if (release != null) {
+                logger.info("Found release from compileJava options: "+release)
+                compile.setSource(release)
+                return
+            } 
+        }
+        
+        if (project.hasProperty('sourceCompatibility')) {
+            logger.info("Found sourceCompatibility")
+            compile.setSource((String) project.getProperties().get('sourceCompatibility'))
+        }
+    }
+
+    private void setJspVersion(CompileJSPs compile, Set<String> installedFeatures) {
+        //If no conditions are met, defaults to 2.3 from the ant task
+        if (project.liberty.jsp.jspVersion != null) {
+            compile.setJspVersion(project.liberty.jsp.jspVersion);
+        } else {
+            Iterator it = installedFeatures.iterator();
+            String currentFeature;
+            while (it.hasNext()) {
+                currentFeature = (String) it.next();
+                if(currentFeature.startsWith("jsp-") || currentFeature.startsWith("pages-")) {
+                    String version = currentFeature.substring(currentFeature.indexOf("-")+1);
+                    compile.setJspVersion(version);
+                    break;
                 }
             }
+        }
     }
 
     protected void setCompileDependencies(Task task, Set<String> classpaths) {

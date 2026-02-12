@@ -1,0 +1,75 @@
+// tag::copyright[]
+/*******************************************************************************
+ * Copyright (c) 2017, 2019 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
+// end::copyright[]
+package io.openliberty.guides.multimodules.web;
+import org.apache.commons.lang3.StringUtils;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+public class HeightsBean implements java.io.Serializable {
+    private String heightCm = null;
+    private String heightFeet = null;
+    private String heightInches = null;
+    private int cm = 0;
+    private int feet = 1;
+    private int inches = 0;
+
+    private static final Logger LOGGER = LogManager.getLogger(HeightsBean.class.getName());
+
+    public HeightsBean() {
+    }
+
+    // Capitalize the first letter of the name i.e. first letter after get
+    // If first letter is not capitalized, it must match the property name in
+    // index.jsp
+    public String getHeightCm() {
+        return heightCm;
+    }
+
+    public String getHeightFeet() {
+        return heightFeet;
+    }
+
+    public String getHeightInches() {
+        return heightInches;
+    }
+
+    public void setHeightCm(String heightcm) {
+        this.heightCm = heightcm;
+    }
+
+    // Need an input as placeholder, you can choose not to use the input
+    // tag::setHeightFeet[]
+    public void setHeightFeet(String heightfeet) {
+        this.cm = Integer.valueOf(heightCm);
+        // tag::getFeet[]
+        this.feet = io.openliberty.guides.multimodules.lib.Converter.getFeet(cm);
+        // end::getFeet[]
+        String result = String.valueOf(feet);
+        this.heightFeet = StringUtils.capitalize(result);
+        LOGGER.info("heightFeet is {}", this.heightFeet);
+    }
+    // end::setHeightFeet[]
+
+    // tag::setHeightInches[]
+    public void setHeightInches(String heightinches) {
+        this.cm = Integer.valueOf(heightCm);
+        // tag::getInches[]
+        this.inches = io.openliberty.guides.multimodules.lib.Converter.getInches(cm);
+        // end::getInches[]
+        String result = String.valueOf(inches);
+        this.heightInches = result;
+        LOGGER.info("heightInches is {}", this.heightInches);
+    }
+    // end::setHeightInches[]
+
+}

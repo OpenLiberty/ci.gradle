@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2015, 2019.
+ * (C) Copyright IBM Corporation 2015, 2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,10 @@ package io.openliberty.tools.gradle.extensions
 
 class DumpExtension {
     
+    // Comma-separated list of diagnostic information to include in the dump. Valid values include `thread`, `system`, and `heap`. 
     String include
+
+    // Location of the target dump file. 
     String archive
     String os
 }

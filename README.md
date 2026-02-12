@@ -4,6 +4,7 @@ The Liberty Gradle plugin supports install and operational control of Liberty ru
 
 * [Build](#build)
 * [Usage](#usage)
+  * [Compatibility / Support](#compatibility--support)
 * [Plugin Configuration](#plugin-configuration)
 * [Tasks](#tasks)
 * [Extensions](#extensions)
@@ -25,17 +26,26 @@ To build the plugin and run the integration tests execute the following commands
  $ ./gradlew install check -Druntime=<wlp|ol> -DruntimeVersion=<runtime_version> -DwlpLicense=<liberty_license_code>
  ```
 
+If you are writing any code affecting [libertyDevc](docs/libertyDev.md#libertydevc-task-container-mode) task, please be aware that the DevContainerTests are not run as part of the automated tests during the GitHub Actions (GHA) builds. Therefore, it is crucial to run these tests locally to ensure your changes are working correctly.
+
+To run DevContainerTests locally, you must have either Podman or Docker set up and available on your system. Once your containerization tool is ready, you can execute the tests using the command provided below.
+
+ ```bash
+ $ ./gradlew install check -P"test.include"="**/DevContainerTest*" -Druntime=<wlp|ol> -DruntimeVersion=<runtime_version> -DwlpLicense=<liberty_license_code>
+ ```
+
 ## Usage
 
-### Gradle Support
+### Compatibility / Support
 
-The Liberty Gradle Plugin supports running with Gradle 7.6+ and Gradle 8.x as of release 3.7. When using a Gradle wrapper, ensure the wrapper version matches the version of Gradle being used.
+For the full Java and Gradle version compatibility matrix, see the [Gradle Compatibility Matrix](https://docs.gradle.org/current/userguide/compatibility.html).
 
-### Java Support
+- **Gradle 9.x** requires Java 17 or later and plugin version **3.9.4** or later.
+- **Gradle 7.6 / 8.x** works with Java 8, 11, 17, or 21 and plugin version **3.8.2** or later.
 
-The Liberty Gradle Plugin is tested with Long-Term-Support (LTS) releases of Java. The plugin, as of release 3.8, supports Java 8, 11, 17 and 21. Versions 3.5 to 3.7.x support Java 8, 11 and 17. Prior to version 3.5, the plugin is supported on Java 8 and 11.
+The Liberty Gradle Plugin is tested with Long-Term-Support (LTS) releases of Java. The plugin, as of release 3.8, supports Java 8, 11, 17 and 21. As of release 4.0.0, we support Java 25 as well. Versions 3.5 to 3.7.x support Java 8, 11 and 17. Prior to version 3.5, the plugin is supported on Java 8 and 11. For running applications on older versions of Java, please check out our toolchain support.
 
-Note: To use the Liberty Gradle Plugin with Java 21, a minimum of Gradle 8.4 is required. Since Gradle does not officially support Java 21 yet, there may be unknown issues. All of our automated tests are passing with Gradle 8.4 though.
+For Liberty Gradle Plugin-specific compatibility details, known limitations, and migration guidance, see the [Detailed Compatibility Matrix](docs/Gradle9MigrationGuide.md#detailed-compatibility-matrix) in the Migration Guide.
 
 ### Adding the plugin to the build script
 
@@ -50,12 +60,12 @@ buildscript {
     repositories {
         mavenCentral()
         maven {
-            name = 'Sonatype Nexus Snapshots'
-            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+            name = 'Central Portal Snapshots'
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
         }
     }
     dependencies {
-        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.7'
+        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.9.4'
     }
 }
 ```
@@ -75,13 +85,13 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath ('io.openliberty.tools:liberty-ant-tasks:1.9.13')
-        classpath ('io.openliberty.tools:ci.common:1.8.28')
+        classpath ('io.openliberty.tools:liberty-ant-tasks:1.9.16')
+        classpath ('io.openliberty.tools:ci.common:1.8.38')
     }
 }
 
 plugins {
-    id "io.openliberty.tools.gradle.Liberty" version "3.7"
+    id "io.openliberty.tools.gradle.Liberty" version "3.9.4"
 }
 ```
 
@@ -101,7 +111,7 @@ Example using `libertyRuntime` property to install an Open Liberty beta runtime:
 
 ```groovy
 dependencies {
-    libertyRuntime group: 'io.openliberty.beta', name: 'openliberty-runtime', version: '23.0.0.2-beta'
+    libertyRuntime group: 'io.openliberty.beta', name: 'openliberty-runtime', version: '25.0.0.7-beta'
 }
 ```
 
@@ -109,7 +119,7 @@ Example using `libertyRuntime` property to install a specific Open Liberty runti
 
 ```groovy
 dependencies {
-    libertyRuntime group: 'io.openliberty', name: 'openliberty-kernel', version: '23.0.0.3'
+    libertyRuntime group: 'io.openliberty', name: 'openliberty-kernel', version: '25.0.0.6'
 }
 ```
 
@@ -119,7 +129,7 @@ Example using the `libertyRuntime` property to install a WebSphere Liberty runti
 
 ```groovy
 dependencies {
-    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-webProfile8', version: '22.0.0.12'
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-webProfile8', version: '25.0.0.6'
 }
 ```
 
