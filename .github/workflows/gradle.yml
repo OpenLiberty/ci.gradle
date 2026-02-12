@@ -85,7 +85,7 @@ jobs:
       working-directory: build/reports/tests
       env:
         BUILD_REPORTS_PATH: /buildReports/${{runner.os}}/java${{matrix.java}}/${{matrix.RUNTIME}}-${{matrix.RUNTIME_VERSION}}/
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: ${{ failure() }}
       with:
         name: buildReportsArtifactLinux
@@ -167,7 +167,7 @@ jobs:
       if: ${{ failure() }}
       working-directory: C:/ci.gradle
       run: cp -r build/reports/tests/test D:/buildReports/${{runner.os}}/java${{matrix.java}}/${{matrix.RUNTIME}}-${{matrix.RUNTIME_VERSION}}/
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: ${{ failure() }}
       with:
         name: buildReportsArtifactWindows
