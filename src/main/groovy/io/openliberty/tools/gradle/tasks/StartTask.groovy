@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2025.
+ * (C) Copyright IBM Corporation 2014, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ class StartTask extends AbstractServerTask {
 
     @TaskAction
     void start() {
-        // Clean up force-stopped marker file if it exists
         ServerUtils.cleanupForceStoppedMarker(getServerDir(project), logger);
 
         ServerTask serverTaskStart = createServerTask(project, "start");
