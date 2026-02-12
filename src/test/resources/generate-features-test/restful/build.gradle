@@ -1,8 +1,11 @@
 apply plugin: "liberty"
 apply plugin: "war"
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
 }
@@ -12,10 +15,6 @@ buildscript {
     repositories {
         mavenCentral()
         mavenLocal()
-        // Sonatype repo for getting the latest binary scanner jar snapshot
-        maven {
-            url 'https://oss.sonatype.org/content/repositories/snapshots/'
-        }
     }
     dependencies {
         classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
@@ -31,7 +30,7 @@ dependencies {
     providedCompile "javax:javaee-api:EE_VERSION"
     providedCompile "org.eclipse.microprofile:microprofile:MP_VERSION"
     providedCompile "javax.json.bind:javax.json.bind-api:1.0"
-    providedCompile "org.apache.commons:commons-lang3:3.0"
+    providedCompile "org.apache.commons:commons-lang3:3.18.0"
     providedCompile "javax.xml.bind:jaxb-api:2.2.11"
     providedCompile "com.sun.xml.bind:jaxb-core:2.2.11"
     providedCompile "com.sun.xml.bind:jaxb-impl:2.2.11"

@@ -3,12 +3,12 @@ buildscript {
         mavenLocal()
         mavenCentral()
         maven {
-            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
         }
     }
     dependencies {
         classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
-        classpath "io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE"
+        classpath "io.spring.gradle:dependency-management-plugin:1.1.7"
     }
 }
 
@@ -19,8 +19,11 @@ allprojects {
     apply plugin: 'java'
     apply plugin: 'liberty'
 
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
     }
@@ -29,7 +32,7 @@ allprojects {
         mavenLocal()
         mavenCentral()
         maven {
-            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
         }
     }
 

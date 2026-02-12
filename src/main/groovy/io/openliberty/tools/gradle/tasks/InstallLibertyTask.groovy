@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2025.
+ * (C) Copyright IBM Corporation 2014, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,7 +215,7 @@ class InstallLibertyTask extends AbstractLibertyTask {
         }
     }
 
-    private boolean checkAndLoadInstallExtensionProperties(Map<String,String> props) {
+    protected boolean checkAndLoadInstallExtensionProperties(Map<String,String> props) {
         boolean hasInstallExtProps = false;
 
         if (project.liberty.install.licenseCode != null) {
@@ -268,7 +268,7 @@ class InstallLibertyTask extends AbstractLibertyTask {
         return hasInstallExtProps
     }
 
-    private Map<String, String> buildInstallLibertyMap(Project project) {
+    protected Map<String, String> buildInstallLibertyMap(Project project) {
 
         detachedCoords = null
         detachedConfigFilePath = null
@@ -445,7 +445,7 @@ class InstallLibertyTask extends AbstractLibertyTask {
         return getUpdatedLibertyRuntimeCoordinates(defaultRuntime)
     }
 
-    private void loadLibertyRuntimeProperties() {
+    protected void loadLibertyRuntimeProperties() {
         Set<Entry<Object, Object>> entries = project.getProperties().entrySet()
         for (Entry<Object, Object> entry : entries) {
             String key = (String) entry.getKey()

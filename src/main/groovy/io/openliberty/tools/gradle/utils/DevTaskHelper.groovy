@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2024
+ * (C) Copyright IBM Corporation 2024, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,15 +82,21 @@ public class DevTaskHelper {
     public static Set<Project> getAllUpstreamProjects(Project project) {
         Set<Project> allDependentProjects = new HashSet<>()
 
-        for (Iterator<Configuration> iter = project.getConfigurations().iterator(); iter.hasNext(); ) {
+        for (Iterator<Configuration> iter = project.getConfigurations().iterator(); iter.hasNext();) {
             Configuration element = iter.next();
             if (element.canBeResolved) {
                 Dependency[] deployDeps = element.getAllDependencies().toArray()
-                for (Dependency dependency1: deployDeps) {
+                for (Dependency dependency1 : deployDeps) {
                     if (dependency1 instanceof ProjectDependency) {
-                        Project dependencyProject = dependency1.getDependencyProject()
-                        allDependentProjects.add(dependencyProject)
-                        allDependentProjects.addAll(getAllUpstreamProjects(dependencyProject))
+                        def projectPath = dependency1.getPath()
+                        Project dependencyProject = project.findProject(projectPath)
+                        //ignore self dependencies and containment's, some configuration such as nativeImageClasspath has containment's
+                        if (dependencyProject != project) {
+                            if (allDependentProjects.add(dependencyProject)) {
+                                // prevent infinite recursion and redundant work, as it only makes the recursive call if a new project is found.
+                                allDependentProjects.addAll(getAllUpstreamProjects(dependencyProject))
+                            }
+                        }
                     }
                 }
             }
@@ -128,7 +134,8 @@ public class DevTaskHelper {
             File dependencyFile = entry.getKey();
 
             if (dependency instanceof ProjectDependency) {
-                Project dependencyProject = dependency.getDependencyProject()
+                def projectPath = dependency.getPath()
+                Project dependencyProject = project.findProject(projectPath)
                 String projectType = FilenameUtils.getExtension(dependencyFile.toString())
                 switch (projectType) {
                     case "war":

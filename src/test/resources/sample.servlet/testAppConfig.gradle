@@ -6,9 +6,8 @@ buildscript {
         mavenLocal()
         mavenCentral()
         maven {
-            name = 'Sonatype Nexus Snapshots'
-            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
-        }
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+       }
     }
     dependencies {
         classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
@@ -18,8 +17,10 @@ buildscript {
 apply plugin: 'war'
 apply plugin: 'liberty'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
 
 compileJava.options.encoding = 'UTF-8'
 

@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2025.
+ * (C) Copyright IBM Corporation 2014, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@ package io.openliberty.tools.gradle.tasks
 
 import io.openliberty.tools.ant.ServerTask
 import io.openliberty.tools.gradle.utils.CommonLogger
+import io.openliberty.tools.gradle.utils.ServerUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Task
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 
 class StartTask extends AbstractServerTask {
@@ -34,6 +36,8 @@ class StartTask extends AbstractServerTask {
 
     @TaskAction
     void start() {
+        ServerUtils.cleanupForceStoppedMarker(getServerDir(project), logger);
+
         ServerTask serverTaskStart = createServerTask(project, "start");
         serverTaskStart.setUseEmbeddedServer(server.embedded)
         serverTaskStart.setClean(server.clean)
@@ -74,7 +78,8 @@ class StartTask extends AbstractServerTask {
         }
     }
 
-    private Set<String> getAppNamesFromServerXml() {
+    @Internal
+    protected Set<String> getAppNamesFromServerXml() {
         Set<String> appNames
 
         File serverConfigFile = new File(getServerDir(project), 'server.xml')
