@@ -18,6 +18,7 @@ package io.openliberty.tools.gradle.utils
 import io.openliberty.tools.common.CommonLoggerI
 
 import org.gradle.api.Project
+import org.gradle.api.logging.LogLevel
 
 public class CommonLogger implements CommonLoggerI {
 
