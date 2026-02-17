@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017, 2025.
+ * (C) Copyright IBM Corporation 2017, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,16 @@ class CompileJSPTask extends AbstractFeatureTask {
         // don't delete temporary server dir
         compileJsp.setCleanup(false)
         compileJsp.setProject(ant)
+        Map<String, String> envVars = getToolchainEnvVar();
+        if (!envVars.isEmpty()) {
+            if (compileJsp.getEnvironmentVariables() != null && !compileJsp.getEnvironmentVariables().isEmpty()) {
+                Map<String, String> mergedEnv = new HashMap<>(compileJsp.getEnvironmentVariables());
+                mergedEnv.putAll(envVars);
+                compileJsp.setEnvironmentVariables(mergedEnv);
+            } else {
+                compileJsp.setEnvironmentVariables(envVars);
+            }
+        }
         compileJsp.setTaskName('antlib:net/wasdev/wlp/ant:compileJSPs')
         War war;
         if(project.plugins.hasPlugin("war")){

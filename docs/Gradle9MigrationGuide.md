@@ -5,21 +5,73 @@ This guide provides step-by-step instructions for migrating your projects that u
 ## Gradle 9 Prerequisites
 Achieving compatibility with Gradle 9 requires the following updates:
 
-1. Java Requirement: The minimum supported version will be Java 17.
+1. Java Requirement: The minimum supported version is Java 17. Java 21 and Java 25 are also supported via toolchains.
 
-2. Kotlin Update: An upgrade to Kotlin 2.0 is mandatory.
+2. Gradle Version: We recommend Gradle 9.1.0 or later (9.0.0 does not support Java 25).
 
-Please go through [gradle official documentation](https://docs.gradle.org/9.0.0/userguide/upgrading_major_version_9.html#changes_major_9) for details.
+3. Kotlin Update: An upgrade to Kotlin 2.0 is mandatory.
+
+Please go through [gradle official documentation](https://docs.gradle.org/9.1.0/userguide/upgrading_major_version_9.html#changes_major_9) for details.
 
 ## Table of Contents
 
-1. [Java Configuration Updates](#java-configuration-updates)
-2. [Build Configuration Changes](#build-configuration-changes)
-3. [Multi-Project Build Changes](#multi-project-build-changes)
-4. [EAR/WAR/JAR Configuration Changes](#earwarjar-configuration-changes)
-5. [Project Dependencies](#project-dependencies)
-6. [Testing Considerations](#testing-considerations)
-7. [Known Issues and Workarounds](#known-issues-and-workarounds)
+1. [Detailed Compatibility Matrix](#detailed-compatibility-matrix)
+2. [Java Configuration Updates](#java-configuration-updates)
+3. [Java Toolchain and Foojay Resolver](#java-toolchain-and-foojay-resolver)
+4. [Build Configuration Changes](#build-configuration-changes)
+5. [Multi-Project Build Changes](#multi-project-build-changes)
+6. [EAR/WAR/JAR Configuration Changes](#earwarjar-configuration-changes)
+7. [Project Dependencies](#project-dependencies)
+8. [Known Issues and Workarounds](#known-issues-and-workarounds)
+
+## Detailed Compatibility Matrix
+
+The following matrix shows test results for each combination of Java version, Gradle version, and Liberty Gradle Plugin version. The status applies to `libertyStart`, `libertyRun`, and `libertyDev` tasks (all tasks pass or fail together for a given combination). For a high-level summary, see the [Compatibility / Support](../README.md#compatibility--support) section in the README.
+
+| Java | Gradle | Plugin | Status | Failure Reason |
+|------|--------|--------|:------:|----------------|
+| 8    | 7.6    | 3.8.2            |  pass  | |
+| 8    | 7.6    | 3.9.4            |  pass  | |
+| 8    | 7.6    | 3.10.0           |  fail  | Gradle 7.6 ASM incompatible with Java 21 bytecode in jackson-core-2.19.2 |
+| 8    | 7.6    | 4.0.0-SNAPSHOT   |  fail  | Gradle 7.6 ASM incompatible with Java 21 bytecode in jackson-core-2.19.2 |
+| 8    | 8.5    | 3.8.2            |  pass  | |
+| 8    | 8.5    | 3.9.4            |  pass  | |
+| 8    | 8.5    | 3.10.0           |  pass  | |
+| 8    | 8.5    | 4.0.0-SNAPSHOT   |  pass  | |
+| 8    | 9.1.0  | 3.8.2            |  fail  | Gradle 9 requires Java 17+ |
+| 8    | 9.1.0  | 3.9.4            |  fail  | Gradle 9 requires Java 17+ |
+| 8    | 9.1.0  | 3.10.0           |  fail  | Gradle 9 requires Java 17+ |
+| 8    | 9.1.0  | 4.0.0-SNAPSHOT   |  fail  | Gradle 9 requires Java 17+ |
+| 11   | 7.6    | 3.8.2            |  pass  | |
+| 11   | 7.6    | 3.9.4            |  pass  | |
+| 11   | 7.6    | 3.10.0           |  fail  | Gradle 7.6 ASM incompatible with Java 21 bytecode in jackson-core-2.19.2 |
+| 11   | 7.6    | 4.0.0-SNAPSHOT   |  fail  | Gradle 7.6 ASM incompatible with Java 21 bytecode in jackson-core-2.19.2 |
+| 11   | 8.5    | 3.8.2            |  pass  | |
+| 11   | 8.5    | 3.9.4            |  pass  | |
+| 11   | 8.5    | 3.10.0           |  pass  | |
+| 11   | 8.5    | 4.0.0-SNAPSHOT   |  pass  | |
+| 11   | 9.1.0  | 3.8.2            |  fail  | Gradle 9 requires Java 17+ |
+| 11   | 9.1.0  | 3.9.4            |  fail  | Gradle 9 requires Java 17+ |
+| 11   | 9.1.0  | 3.10.0           |  fail  | Gradle 9 requires Java 17+ |
+| 11   | 9.1.0  | 4.0.0-SNAPSHOT   |  fail  | Gradle 9 requires Java 17+ |
+| 17   | 7.6    | 3.8.2            |  pass  | |
+| 17   | 7.6    | 3.9.4            |  pass  | |
+| 17   | 7.6    | 3.10.0           |  fail  | Gradle 7.6 ASM incompatible with Java 21 bytecode in jackson-core-2.19.2 |
+| 17   | 7.6    | 4.0.0-SNAPSHOT   |  fail  | Gradle 7.6 ASM incompatible with Java 21 bytecode in jackson-core-2.19.2 |
+| 17   | 8.5    | 3.8.2            |  pass  | |
+| 17   | 8.5    | 3.9.4            |  pass  | |
+| 17   | 8.5    | 3.10.0           |  pass  | |
+| 17   | 8.5    | 4.0.0-SNAPSHOT   |  pass  | |
+| 17   | 9.1.0  | 3.8.2            |  fail  | Plugin 3.8.2 uses removed `ConfigureUtil` API |
+| 17   | 9.1.0  | 3.9.4            |  pass  | |
+| 17   | 9.1.0  | 3.10.0           |  pass  | |
+| 17   | 9.1.0  | 4.0.0-SNAPSHOT   |  pass  | |
+
+### Key Takeaways
+
+- **Gradle 9 requires Java 17 or later.** Java 8 and 11 are not supported with any plugin version on Gradle 9.
+- **Gradle 7.6 is incompatible with plugin 3.10.0+** due to ASM version limitations that cannot handle Java 21 bytecode in jackson-core-2.19.2. Upgrade to Gradle 8.5+ or stay on plugin 3.9.4.
+- **Plugin 3.8.2 is incompatible with Gradle 9** because it relies on the `ConfigureUtil` API which was removed in Gradle 9. Use plugin 3.9.4 or later.
 
 ## Java Configuration Updates
 
@@ -48,6 +100,28 @@ This change is required in all your build scripts that specify Java compatibilit
 **Reference Documentation:**
 - [Toolchains for JVM projects](https://docs.gradle.org/9.0.0/userguide/toolchains.html#toolchains)
 - [Java Plugin - Compatibility](https://docs.gradle.org/current/userguide/java_plugin.html#toolchain_and_compatibility)
+
+## Java Toolchain and Foojay Resolver
+
+Gradle 9 has improved support for [Java toolchains](https://docs.gradle.org/current/userguide/toolchains.html). If your project needs to build or run with a Java version different from the one running Gradle (e.g., Java 21 or Java 25), configure a toolchain in your `build.gradle`:
+
+```groovy
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+```
+
+To allow Gradle to automatically download the required JDK when it is not installed locally, add the [Foojay Toolchain Resolver](https://github.com/gradle/foojay-toolchains) plugin to your `settings.gradle`:
+
+```groovy
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+```
+
+**Why this is important:** Without the foojay resolver, Gradle will fail if the requested toolchain JDK is not already installed on the machine. This is especially relevant for CI environments and for projects that target Java 21 or Java 25.
 
 ## Build Configuration Changes
 
@@ -259,22 +333,23 @@ While migrating to Gradle 9, you may encounter dependency resolution issues due 
 
 ### Arquillian Tests
 
-If you're using the Arquillian framework with your Liberty projects, be aware that Gradle 9 is not fully supported with the Arquillian framework. You have two options:
-
-1. Continue using Gradle 8.5 for projects that depend on Arquillian.
-2. If you must use Gradle 9 for your main project but need Arquillian compatibility, consider maintaining a separate standalone test project with Gradle 8.5 that imports your main project's artifacts for testing.
-
-**Reference Documentation:**
-- [Arquillian Documentation](https://arquillian.org/guides/)
+Arquillian support has not been validated with Gradle 9. If your project uses the Arquillian framework, continue using Gradle 8.x until compatibility is confirmed.
 
 ### Spring Boot Applications
 
-Spring Boot applications currently lack support for Gradle 9. If you're using Spring Boot with your Liberty projects, you will need to:
+**Spring Boot 3.x** is supported with Gradle 9 when using Java 17 or later. To ensure compatibility, update your Spring Boot project build files as follows:
 
-1. Continue using Gradle 8.x for Spring Boot applications until official Gradle 9 support is added to Spring Boot.
-2. If you must use Gradle 9, you may need to implement custom workarounds or wait for Spring Boot to release a version with Gradle 9 compatibility.
+1. Set `sourceCompatibility` and `targetCompatibility` to `JavaVersion.VERSION_17` (or later) using the `java {}` block syntax.
+2. Use Spring Boot 3.4.1 or later.
 
-This is a known limitation affecting all current Spring Boot versions as of September 2025.
+```groovy
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+```
+
+**Spring Boot 2.x** is not supported with Gradle 9. If your project depends on Spring Boot 2.x, continue using Gradle 8.x.
 
 ### File Locking Issues
 
@@ -304,8 +379,8 @@ This guide covers the most common changes needed when migrating from Gradle 8 to
 
 If you experience issues not covered in this guide:
 
-1. Check the [Gradle 9.0 Release Notes](https://docs.gradle.org/9.0.0/release-notes.html) for additional information.
-2. Review the [Gradle 9.0 Upgrading Guide](https://docs.gradle.org/9.0.0/userguide/upgrading_major_version_9.html) for more detailed explanations.
+1. Check the [Gradle 9.1 Release Notes](https://docs.gradle.org/9.1.0/release-notes.html) for additional information.
+2. Review the [Gradle 9.1 Upgrading Guide](https://docs.gradle.org/9.1.0/userguide/upgrading_major_version_9.html) for more detailed explanations.
 3. Consult the [Liberty Gradle Plugin documentation](https://github.com/OpenLiberty/ci.gradle) for Liberty-specific guidance.
 4. Report issues or request help through our [GitHub Issues](https://github.com/OpenLiberty/ci.gradle/issues) if you encounter problems that aren't addressed by the documentation.
 

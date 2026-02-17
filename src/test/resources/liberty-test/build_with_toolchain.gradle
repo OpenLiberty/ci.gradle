@@ -1,0 +1,57 @@
+apply plugin: 'liberty'
+apply plugin: 'java'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+        }
+    }
+    dependencies {
+        classpath fileTree(dir: '../libs', include: '*.jar', exclude: ['*-groovydoc.jar', '*-sources.jar'])
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
+}
+liberty {
+    server{
+        name = 'LibertyProjectServer'
+        deploy {
+            dropins = [file('../../resources/test/test-war.war')]
+        }
+
+        undeploy {
+            dropins = [file('test-war.war')]
+        }
+
+        packageLiberty {
+            include = 'minify'
+            os='Linux'
+        }
+
+        features {
+            name= ['mongodb-2.0']
+            acceptLicense = true
+        }
+
+        uninstallfeatures {
+            name= ['mongodb-2.0']
+        }
+    }
+}

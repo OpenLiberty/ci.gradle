@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2021, 2024.
+ * (C) Copyright IBM Corporation 2021, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -279,7 +279,6 @@ public class AbstractFeatureTask extends AbstractServerTask {
      * @param suppressLogs if true info and warning will be logged as debug
      * @return instance of ServerFeatureUtil
      */
-    @Internal
     protected ServerFeatureUtil getServerFeatureUtil(boolean suppressLogs, Map<String, File> libDirPropFiles) {
         if (servUtil == null) {
             servUtil = new ServerFeatureTaskUtil();

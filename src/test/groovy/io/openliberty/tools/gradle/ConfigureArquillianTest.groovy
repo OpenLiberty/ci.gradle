@@ -47,7 +47,6 @@ class ConfigureArquillianTest extends AbstractIntegrationTest {
         BuildResult result = GradleRunner.create()
             .withProjectDir(buildDir)
             .forwardOutput()
-            .withGradleVersion("8.5") // Use Gradle 8.5 which is compatible with the dependency management plugin
             .withArguments("build", "-x", "test", "-i", "-s")
             .build()
     }
