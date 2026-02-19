@@ -15,7 +15,7 @@ Please go through [gradle official documentation](https://docs.gradle.org/9.1.0/
 
 ## Table of Contents
 
-1. [Detailed Compatibility Matrix](#detailed-compatibility-matrix)
+1. [Compatibility Requirements](#compatibility_requirements)
 2. [Java Configuration Updates](#java-configuration-updates)
 3. [Java Toolchain and Foojay Resolver](#java-toolchain-and-foojay-resolver)
 4. [Build Configuration Changes](#build-configuration-changes)
@@ -24,54 +24,20 @@ Please go through [gradle official documentation](https://docs.gradle.org/9.1.0/
 7. [Project Dependencies](#project-dependencies)
 8. [Known Issues and Workarounds](#known-issues-and-workarounds)
 
-## Detailed Compatibility Matrix
+## Compatibility Requirements
 
-The following matrix shows test results for each combination of Java version, Gradle version, and Liberty Gradle Plugin version. The status applies to `libertyStart`, `libertyRun`, and `libertyDev` tasks (all tasks pass or fail together for a given combination). For a high-level summary, see the [Compatibility / Support](../README.md#compatibility--support) section in the README.
 
-| Java | Gradle | Plugin | Status | Failure Reason |
-|------|--------|--------|:------:|----------------|
-| 8    | 7.6    | 3.8.2            |  pass  | |
-| 8    | 7.6    | 3.9.4            |  pass  | |
-| 8    | 7.6    | 3.10.0           |  fail  | Gradle 7.6 ASM incompatible with Java 21 bytecode in jackson-core-2.19.2 |
-| 8    | 7.6    | 4.0.0-SNAPSHOT   |  fail  | Gradle 7.6 ASM incompatible with Java 21 bytecode in jackson-core-2.19.2 |
-| 8    | 8.5    | 3.8.2            |  pass  | |
-| 8    | 8.5    | 3.9.4            |  pass  | |
-| 8    | 8.5    | 3.10.0           |  pass  | |
-| 8    | 8.5    | 4.0.0-SNAPSHOT   |  pass  | |
-| 8    | 9.1.0  | 3.8.2            |  fail  | Gradle 9 requires Java 17+ |
-| 8    | 9.1.0  | 3.9.4            |  fail  | Gradle 9 requires Java 17+ |
-| 8    | 9.1.0  | 3.10.0           |  fail  | Gradle 9 requires Java 17+ |
-| 8    | 9.1.0  | 4.0.0-SNAPSHOT   |  fail  | Gradle 9 requires Java 17+ |
-| 11   | 7.6    | 3.8.2            |  pass  | |
-| 11   | 7.6    | 3.9.4            |  pass  | |
-| 11   | 7.6    | 3.10.0           |  fail  | Gradle 7.6 ASM incompatible with Java 21 bytecode in jackson-core-2.19.2 |
-| 11   | 7.6    | 4.0.0-SNAPSHOT   |  fail  | Gradle 7.6 ASM incompatible with Java 21 bytecode in jackson-core-2.19.2 |
-| 11   | 8.5    | 3.8.2            |  pass  | |
-| 11   | 8.5    | 3.9.4            |  pass  | |
-| 11   | 8.5    | 3.10.0           |  pass  | |
-| 11   | 8.5    | 4.0.0-SNAPSHOT   |  pass  | |
-| 11   | 9.1.0  | 3.8.2            |  fail  | Gradle 9 requires Java 17+ |
-| 11   | 9.1.0  | 3.9.4            |  fail  | Gradle 9 requires Java 17+ |
-| 11   | 9.1.0  | 3.10.0           |  fail  | Gradle 9 requires Java 17+ |
-| 11   | 9.1.0  | 4.0.0-SNAPSHOT   |  fail  | Gradle 9 requires Java 17+ |
-| 17   | 7.6    | 3.8.2            |  pass  | |
-| 17   | 7.6    | 3.9.4            |  pass  | |
-| 17   | 7.6    | 3.10.0           |  fail  | Gradle 7.6 ASM incompatible with Java 21 bytecode in jackson-core-2.19.2 |
-| 17   | 7.6    | 4.0.0-SNAPSHOT   |  fail  | Gradle 7.6 ASM incompatible with Java 21 bytecode in jackson-core-2.19.2 |
-| 17   | 8.5    | 3.8.2            |  pass  | |
-| 17   | 8.5    | 3.9.4            |  pass  | |
-| 17   | 8.5    | 3.10.0           |  pass  | |
-| 17   | 8.5    | 4.0.0-SNAPSHOT   |  pass  | |
-| 17   | 9.1.0  | 3.8.2            |  fail  | Plugin 3.8.2 uses removed `ConfigureUtil` API |
-| 17   | 9.1.0  | 3.9.4            |  pass  | |
-| 17   | 9.1.0  | 3.10.0           |  pass  | |
-| 17   | 9.1.0  | 4.0.0-SNAPSHOT   |  pass  | |
+To ensure a successful migration, please note the following version requirements:
 
-### Key Takeaways
+* **Liberty Gradle Plugin 4.0.0+**: Starting with version 4.0.0, the Liberty Gradle Plugin requires Gradle 9.0 or later.
 
-- **Gradle 9 requires Java 17 or later.** Java 8 and 11 are not supported with any plugin version on Gradle 9.
-- **Gradle 7.6 is incompatible with plugin 3.10.0+** due to ASM version limitations that cannot handle Java 21 bytecode in jackson-core-2.19.2. Upgrade to Gradle 8.5+ or stay on plugin 3.9.4.
-- **Plugin 3.8.2 is incompatible with Gradle 9** because it relies on the `ConfigureUtil` API which was removed in Gradle 9. Use plugin 3.9.4 or later.
+* **Java Requirement**: Gradle 9 requires Java 17 as the minimum runtime version. Java 21 and 25 are supported via toolchains.
+
+* **Kotlin Update**: If your build uses Kotlin, an upgrade to Kotlin 2.0 is mandatory.
+
+* **Recommended Version**: We recommend using Gradle 9.1.0 or later to ensure full support for Java 25.
+
+Note: If you must remain on Gradle 8 or earlier, please continue using Liberty Gradle Plugin version 3.10.x or below.
 
 ## Java Configuration Updates
 
