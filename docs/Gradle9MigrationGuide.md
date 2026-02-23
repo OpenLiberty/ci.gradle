@@ -37,7 +37,7 @@ To ensure a successful migration, please note the following version requirements
 
 * **Recommended Version**: We recommend using Gradle 9.1.0 or later to ensure full support for Java 25.
 
-Note: If you must remain on Gradle 8 or earlier, please continue using Liberty Gradle Plugin version 3.10.x or below.
+Note: If you must remain on Gradle 8 or earlier, you must use a **3.x** version of Liberty Gradle Plugin. We recommend using the latest **3.x** version of Liberty Gradle Plugin available
 
 ## Java Configuration Updates
 
