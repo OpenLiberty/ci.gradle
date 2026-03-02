@@ -22,7 +22,7 @@ class InstallFeatureToolchainTest extends AbstractIntegrationTest {
         def fileContent = buildFile.text
         fileContent = fileContent.replace(
             "apply plugin: 'liberty'",
-            "apply plugin: 'liberty'\napply plugin: 'java'\n\njava {\n    toolchain {\n        languageVersion = JavaLanguageVersion.of(17)\n    }\n}"
+            "apply plugin: 'liberty'\napply plugin: 'java'\n\njava {\n    toolchain {\n        languageVersion = JavaLanguageVersion.of(11)\n    }\n}"
         )
         buildFile.text = fileContent
     }
