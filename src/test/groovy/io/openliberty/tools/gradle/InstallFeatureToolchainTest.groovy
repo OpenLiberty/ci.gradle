@@ -44,6 +44,22 @@ class InstallFeatureToolchainTest extends AbstractIntegrationTest {
                 output.contains(String.format(TOOLCHAIN_CONFIGURED, "installFeature")))
     }
 
+    @Test
+    public void testInstallFeatureWithToolchainValidatesProduct() {
+        BuildResult result = runTasksResult(buildDir, "installFeature")
+        
+        String output = result.getOutput()
+
+        assertTrue("Should show toolchain configured message for installFeature task",
+                output.contains(String.format(TOOLCHAIN_CONFIGURED, "installFeature")))
+        
+        assertTrue("Product validation should use toolchain JAVA_HOME",
+                output.contains("Product validation is using toolchain JAVA_HOME:"))
+        
+        assertTrue("Product validation should complete successfully",
+                output.contains("Product validation completed successfully"))
+    }
+
     private copyServer(String serverFile) {
         assertTrue(new File(resourceDir, serverFile).exists())
         copyFile(new File(resourceDir, serverFile), new File(buildDir, "build/wlp/usr/servers/defaultServer/server.xml"))
