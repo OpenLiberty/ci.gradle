@@ -64,6 +64,8 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
     # Install dependencies
+    - name: Remove cached ci.common to ensure fresh build
+      run: rm -rf ~/.m2/repository/io/openliberty/tools/ci.common
     - name: Install ci.ant and ci.common
       run: |
         mvn -V clean install -f ci.ant --batch-mode --no-transfer-progress --errors -DtrimStackTrace=false -DskipTests
@@ -151,6 +153,8 @@ jobs:
       working-directory: ${{github.workspace}}/ci.ant
       run: mvn -V clean install --batch-mode --no-transfer-progress --errors -DtrimStackTrace=false -DskipTests
     # Install ci.common
+    - name: Remove cached ci.common to ensure fresh build
+      run: rm -rf ~/.m2/repository/io/openliberty/tools/ci.common
     - name: Install ci.common
       working-directory: ${{github.workspace}}/ci.common
       run: mvn -V clean install --batch-mode --no-transfer-progress --errors -DtrimStackTrace=false -DskipTests
