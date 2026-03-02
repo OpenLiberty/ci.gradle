@@ -42,20 +42,10 @@ class InstallFeatureToolchainTest extends AbstractIntegrationTest {
 
         assertTrue("Should show toolchain configured message for installFeature task",
                 output.contains(String.format(TOOLCHAIN_CONFIGURED, "installFeature")))
-    }
 
-    @Test
-    public void testInstallFeatureWithToolchainValidatesProduct() {
-        BuildResult result = runTasksResult(buildDir, "installFeature")
-        
-        String output = result.getOutput()
-
-        assertTrue("Should show toolchain configured message for installFeature task",
-                output.contains(String.format(TOOLCHAIN_CONFIGURED, "installFeature")))
-        
         assertTrue("Product validation should use toolchain JAVA_HOME",
                 output.contains("Product validation is using toolchain JAVA_HOME:"))
-        
+
         assertTrue("Product validation should complete successfully",
                 output.contains("Product validation completed successfully"))
     }
