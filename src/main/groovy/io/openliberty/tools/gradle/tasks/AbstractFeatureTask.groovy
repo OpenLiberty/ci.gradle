@@ -296,9 +296,6 @@ public class AbstractFeatureTask extends AbstractServerTask {
         try {
 			logger.info("Feature signature verify option: " + server.features.verify)
             Map<String, String> envVars = getToolchainEnvVar()
-            if (envVars != null && !envVars.isEmpty() && envVars.containsKey("JAVA_HOME")) {
-                logger.debug("Passing toolchain JAVA_HOME to InstallFeatureUtil: " + envVars.get("JAVA_HOME"))
-            }
             util = new InstallFeatureTaskUtil(getInstallDir(project), project.getLayout().getBuildDirectory().getAsFile().get(), server.features.from, server.features.to, pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons, server.features.verify, keyMap, envVars)
         } catch (PluginScenarioException e) {
             logger.debug("Exception received: " + e.getMessage(), (Throwable) e)
