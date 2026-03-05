@@ -19,7 +19,7 @@ tasks.withType(org.gradle.plugins.signing.Sign).configureEach {
 }
 
 group = 'io.openliberty.tools'
-version = '4.0.0-SNAPSHOT'
+version = '4.0.0'
 base {
     archivesName='liberty-gradle-plugin'
 }
