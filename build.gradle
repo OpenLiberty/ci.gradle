@@ -1,3 +1,4 @@
+import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
 apply plugin: 'groovy'
 apply plugin: 'java-gradle-plugin'
 apply plugin: 'maven-publish'
@@ -11,6 +12,11 @@ signing {
     required = false
 }
 
+tasks.withType(AbstractPublishToMaven).configureEach {
+    dependsOn tasks.withType(Sign)
+}
+
+
 tasks.withType(org.gradle.plugins.signing.Sign).configureEach {
     onlyIf {
         // Skip signing tasks unless a signatory is available.
@@ -19,7 +25,7 @@ tasks.withType(org.gradle.plugins.signing.Sign).configureEach {
 }
 
 group = 'io.openliberty.tools'
-version = '4.0.0'
+version = '4.0.0-SNAPSHOT'
 base {
     archivesName='liberty-gradle-plugin'
 }
@@ -319,4 +325,25 @@ nmcpAggregation {
     }
     // Required to find projects with the maven-publish plugin (this project)
     publishAllProjectsProbablyBreakingProjectIsolation()
+    afterEvaluate {
+        tasks.matching {
+            it.name == 'publishCigradlePluginMarkerMavenPublicationToNmcpRepository' ||
+                    it.name == 'publishPluginMavenPublicationToNmcpRepository'
+        }.configureEach {
+            enabled = false
+        }
+        project(':pluginRepo').tasks.matching {
+            it.name.contains('ToNmcpRepository')
+        }.configureEach {
+            enabled = false
+        }
+    }
+
+    tasks.matching { it.name.startsWith('nmcp') }.configureEach {
+        mustRunAfter tasks.withType(AbstractPublishToMaven)
+    }
+
+    tasks.named('nmcpZipAggregation') {
+        duplicatesStrategy = DuplicatesStrategy.WARN
+    }
 }
