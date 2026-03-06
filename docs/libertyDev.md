@@ -20,6 +20,7 @@ While dev mode is running, perform the following in the command terminal to run 
 * <kbd>t</kbd> or <kbd>Enter</kbd> - If `changeOnDemandTestAction` is enabled, type <kbd>t</kbd> and press <kbd>Enter</kbd> to run tests on demand. Otherwise, press <kbd>Enter</kbd>. 
 * <kbd>r</kbd> - To restart the server, type <kbd>r</kbd> and press <kbd>Enter</kbd>.
 * <kbd>h</kbd> - To see the help menu for available actions, type <kbd>h</kbd> and press <kbd>Enter</kbd>.
+* <kbd>p</kbd> - To see the port information, type <kbd>p</kbd> and press <kbd>Enter</kbd>.
 * <kbd>q</kbd> - stop the server and quit dev mode, press <kbd>Ctrl</kbd>-<kbd>C</kbd>, or type <kbd>q</kbd> and press <kbd>Enter</kbd>.
 
 ### Features
@@ -38,12 +39,9 @@ The following are dev mode supported code changes. Changes to your server such a
 Dev mode can be run on a single Gradle project or on a multi-project build (a project consisting of multiple projects specified as include(<module_name_one>,<module_name_two>,....) section of its settings.gradle). When run on a single Gradle project, only changes within that project are detected and hot deployed. When run on a multi-project build, changes in all projects are detected and hot deployed according to the Gradle build order. Note that any projects that other projects rely on as a compile dependency must have a non-empty Java source folder with Java file(s) before starting dev mode, otherwise the other projects may fail to compile.
 
 To start dev mode on a multi-project build by using the short-form `libertyDev` task for the Liberty Gradle plugin:
-1. Do one of the following:
-* Define the Liberty Gradle plugin in the multi-project build.gradle,
-* or define the Liberty Gradle plugin in the build.gradle of every subproject.
-
-2. If the Liberty Gradle plugin is defined in your `build.gradle` file(s), ensure it is at version `3.9.2` or later.
-3. From the directory containing the multi-project `build.gradle`, run:
+1. Define the Liberty Gradle plugin in the build.gradle of the project that packages and deploys the application, such as an EAR or WAR project.
+2. Ensure the plugin version is at `3.9.2` or later.
+3. From the directory containing the build.gradle with the Liberty Gradle plugin defined or the directory containing the multi-project `build.gradle`, run:
 ```
 $ gradle libertyDev
 ```
@@ -196,14 +194,36 @@ When dev mode runs with container support, it builds a container image and runs 
 
 This task requires applications to be installed as loose applications. Information on configuring loose applications can be found in the [deploy task parameter documentation](deploy.md#Parameters) and the [Liberty server configuration](libertyExtensions.md#liberty-server-configuration).
 
+##### Copying Generated Configurations to Container Image
+
 N.B. starting in 3.4.1, dev mode invokes `generate-features` if the `generateFeatures` configuration parameter is set to true. Ensure that the `generated-features.xml` configuration file is copied to your container image via your Containerfile/Dockerfile.
 ```dockerfile
-COPY --chown=1001:0  build/wlp/usr/servers/defaultServer/configDropins/overrides/generated-features.xml /config/configDropins/overrides/
+COPY --chown=1001:0  target/liberty/wlp/usr/servers/defaultServer/configDropins/overrides/generated-features.xml /config/configDropins/overrides/
 ```
-If on Linux, it is recommended that you copy the entire `configDropins/overrides` directory to your container image via your Containerfile/Dockerfile.
+If you are using `liberty.var.{var}` or `liberty.defaultVar.{var}`, then the server configuration file named `liberty-plugin-variable-config.xml` is generated in the configDropins/overrides folder or configDropins/defaults folder of the target server respectively.
+To ensure your application runs correctly inside a container, you need to copy this generated liberty-plugin-variable-config.xml file into your container image.
+
+You can do this by adding one of the following lines to your Dockerfile or Containerfile, depending on which type of variable you used.
+To copy the file from the overrides folder:
+
 ```dockerfile
-COPY --chown=1001:0  build/wlp/usr/servers/defaultServer/configDropins/overrides /config/configDropins/overrides
+COPY --chown=1001:0  target/liberty/wlp/usr/servers/defaultServer/configDropins/overrides/liberty-plugin-variable-config.xml /config/configDropins/overrides/
 ```
+To copy the file from the defaults folder:
+
+```dockerfile
+COPY --chown=1001:0  target/liberty/wlp/usr/servers/defaultServer/configDropins/defaults/liberty-plugin-variable-config.xml /config/configDropins/defaults/
+```
+
+
+On Linux, it's a good practice to copy the entire configDropins/overrides and configDropins/defaults directories into your container image using your Dockerfile.
+
+This helps you avoid file permission problems that can happen when the user ID of the container is different from the host's user ID.
+```dockerfile
+COPY --chown=1001:0  target/liberty/wlp/usr/servers/defaultServer/configDropins/overrides /config/configDropins/overrides
+COPY --chown=1001:0  target/liberty/wlp/usr/servers/defaultServer/configDropins/defaults /config/configDropins/defaults
+```
+Remember, you only need to include the command that matches your configuration.
 
 ### Prerequisites
 
@@ -246,6 +266,7 @@ While dev mode is running in container mode, perform the following in the comman
 * <kbd>t</kbd> or <kbd>Enter</kbd> - If `changeOnDemandTestAction` is enabled, type <kbd>t</kbd> and press <kbd>Enter</kbd> to run tests on demand. Otherwise, press <kbd>Enter</kbd>. 
 * <kbd>r</kbd> - To rebuild the container image and restart the container, type <kbd>r</kbd> and press <kbd>Enter</kbd>.
 * <kbd>h</kbd> - To see the help menu for available actions, type <kbd>h</kbd> and press <kbd>Enter</kbd>.
+* <kbd>p</kbd> - To see the port information, type <kbd>p</kbd> and press <kbd>Enter</kbd>.
 * <kbd>q</kbd> - stop the server and quit dev mode, press <kbd>Ctrl</kbd>-<kbd>C</kbd>, or type <kbd>q</kbd> and press <kbd>Enter</kbd>.
 
 ### Linux Limitations

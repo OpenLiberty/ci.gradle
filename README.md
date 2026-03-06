@@ -25,6 +25,14 @@ To build the plugin and run the integration tests execute the following commands
  $ ./gradlew install check -Druntime=<wlp|ol> -DruntimeVersion=<runtime_version> -DwlpLicense=<liberty_license_code>
  ```
 
+If you are writing any code affecting [libertyDevc](docs/libertyDev.md#libertydevc-task-container-mode) task, please be aware that the DevContainerTests are not run as part of the automated tests during the GitHub Actions (GHA) builds. Therefore, it is crucial to run these tests locally to ensure your changes are working correctly.
+
+To run DevContainerTests locally, you must have either Podman or Docker set up and available on your system. Once your containerization tool is ready, you can execute the tests using the command provided below.
+
+ ```bash
+ $ ./gradlew install check -P"test.include"="**/DevContainerTest*" -Druntime=<wlp|ol> -DruntimeVersion=<runtime_version> -DwlpLicense=<liberty_license_code>
+ ```
+
 ## Usage
 
 ### Gradle Support
@@ -50,12 +58,12 @@ buildscript {
     repositories {
         mavenCentral()
         maven {
-            name = 'Sonatype Nexus Snapshots'
-            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+            name = 'Central Portal Snapshots'
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
         }
     }
     dependencies {
-        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.7'
+        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.9.4'
     }
 }
 ```
@@ -75,13 +83,13 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath ('io.openliberty.tools:liberty-ant-tasks:1.9.13')
-        classpath ('io.openliberty.tools:ci.common:1.8.28')
+        classpath ('io.openliberty.tools:liberty-ant-tasks:1.9.16')
+        classpath ('io.openliberty.tools:ci.common:1.8.38')
     }
 }
 
 plugins {
-    id "io.openliberty.tools.gradle.Liberty" version "3.7"
+    id "io.openliberty.tools.gradle.Liberty" version "3.9.4"
 }
 ```
 
@@ -101,7 +109,7 @@ Example using `libertyRuntime` property to install an Open Liberty beta runtime:
 
 ```groovy
 dependencies {
-    libertyRuntime group: 'io.openliberty.beta', name: 'openliberty-runtime', version: '25.0.0.2-beta'
+    libertyRuntime group: 'io.openliberty.beta', name: 'openliberty-runtime', version: '25.0.0.7-beta'
 }
 ```
 
@@ -109,7 +117,7 @@ Example using `libertyRuntime` property to install a specific Open Liberty runti
 
 ```groovy
 dependencies {
-    libertyRuntime group: 'io.openliberty', name: 'openliberty-kernel', version: '25.0.0.3'
+    libertyRuntime group: 'io.openliberty', name: 'openliberty-kernel', version: '25.0.0.6'
 }
 ```
 
@@ -119,7 +127,7 @@ Example using the `libertyRuntime` property to install a WebSphere Liberty runti
 
 ```groovy
 dependencies {
-    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-webProfile8', version: '24.0.0.12'
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-webProfile8', version: '25.0.0.6'
 }
 ```
 

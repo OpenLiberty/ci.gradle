@@ -1,0 +1,45 @@
+apply plugin: "liberty"
+apply plugin: "war"
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    providedCompile 'jakarta.platform:jakarta.jakartaee-api:9.1.0'
+    providedCompile 'org.eclipse.microprofile:microprofile:5.0'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+    testImplementation 'org.jboss.resteasy:resteasy-client:6.0.0.Final'
+    testImplementation 'org.jboss.resteasy:resteasy-json-binding-provider:6.0.0.Final'
+    testImplementation 'org.glassfish:jakarta.json:2.0.1'
+    testImplementation 'javax.xml.bind:jaxb-api:2.3.1'
+}
+
+war {
+    archiveBaseName = 'rest'
+}
+
+test {
+    systemProperty 'liberty.test.port', '9080'
+}
+
+liberty {
+    server {
+        looseApplication = false
+    }
+}

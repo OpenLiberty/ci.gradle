@@ -3,8 +3,7 @@ buildscript {
         mavenLocal()
         mavenCentral()
         maven {
-            name = 'Sonatype Nexus Snapshots'
-            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
         }
     }
     dependencies {
@@ -13,7 +12,9 @@ buildscript {
 }
 
 apply plugin: 'liberty'
-
+ext {
+    esaArtifactId="hello-esa-plugin"
+}
 repositories {
 	mavenLocal()     {
         metadataSources {

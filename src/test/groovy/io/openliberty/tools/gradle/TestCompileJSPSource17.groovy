@@ -33,7 +33,6 @@ public class TestCompileJSPSource17 extends AbstractIntegrationTest{
         runTasks(buildDir, 'installFeature')
         runTasks(buildDir, 'compileJsp')
     }
-
     @Test
     public void check_for_jsp() {
         assert new File('build/testBuilds/test-compile-jsp-source-17/src/main/webapp/index.jsp').exists() : 'index.jsp not found!'
@@ -98,5 +97,15 @@ public class TestCompileJSPSource17 extends AbstractIntegrationTest{
         }
     }
 
-    
+    @Test
+    public void check_jsp_messages_log_exists() {
+        assert new File('build/testBuilds/test-compile-jsp-source-17/build/compileJsp/servers/defaultServer/logs/messages.log').exists() : 'messages.log not found!'
+    }
+
+    @Test
+    public void check_jsp_messages_log_has_java_toolchain_version() {
+        verifyFileContents(0,
+                "java.version = 17",
+                new File('build/testBuilds/test-compile-jsp-source-17/build/compileJsp/servers/defaultServer/logs/messages.log'))
+    }
 }
