@@ -16,14 +16,6 @@ tasks.withType(AbstractPublishToMaven).configureEach {
     dependsOn tasks.withType(Sign)
 }
 
-
-tasks.withType(org.gradle.plugins.signing.Sign).configureEach {
-    onlyIf {
-        // Skip signing tasks unless a signatory is available.
-        project.signing.signatory != null
-    }
-}
-
 group = 'io.openliberty.tools'
 version = '4.0.1-SNAPSHOT'
 base {
@@ -279,13 +271,11 @@ publishing {
 if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
 
     if (!version.endsWith("SNAPSHOT")) {
-
         signing {
+            required = true
             sign publishing.publications.libertyGradle
         }
     } else {
-        signing.required = false
-
         publishing {
             repositories {
                 maven {
