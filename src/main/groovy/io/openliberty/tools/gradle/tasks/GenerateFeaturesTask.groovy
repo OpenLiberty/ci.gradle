@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2021, 2025.
+ * (C) Copyright IBM Corporation 2021, 2026
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,8 +46,10 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     private static final boolean DEFAULT_OPTIMIZE = true;
     // Default value of the generateToSrc option
     private static final boolean DEFAULT_GENERATETOSRC = false;
-    // Default value of the internalDevMode option
-    private static final boolean DEFAULT_DEVMODE = false;
+    // Default value of the useTempDirAsOutput option
+    private static final boolean DEFAULT_OUTPUT = false;
+    // Default value of the useTempDirAsContext option
+    private static final boolean DEFAULT_CONTEXT = false;
 
     // The executable file used to scan binaries for the Liberty features they use.
     private File binaryScanner;
@@ -61,6 +63,15 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
      * We will select one server config as the context of this operation.
      */
     private File generationContextDir;
+
+    /**
+     * Liberty features are generated in the context of a certain server and they are stored in
+     * an XML file in the configDir, the serverDir or a temporary directory. When using dev
+     * mode we must write to the tempDir and call install-features before we can use the
+     * features in the running server. When not using dev mode we can just write the features
+     * to the configDir or serverDir as indicated by the generateToSrc option.
+     */
+    private File generationOutputDir;
 
     GenerateFeaturesTask() {
         configure({
@@ -92,17 +103,36 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         this.generateToSrc = Boolean.parseBoolean(generateToSrc);
     }
 
-    private Boolean internalDevMode = null;
+    private Boolean useTempDirAsOutput = null;
 
     /**
-     * The internalDevMode parameter is for internal use only. It is not for users.
+     * The useTempDirAsOutput parameter is for internal use only. It is not for users.
      * The parameter is only used when generateToSrc is false meaning we generate to serverDir.
-     * When the parameter is true we will write the generated features file to the temp directory.
-     * This is required because the features must all be installed before writing to server Dir in devmode.
+     * It is needed in dev mode because the server is running and we need to ensure the features
+     * that are generated are installed before we update a running server.
+     * When the parameter is true we will write the generated features file to the special generate-features
+     * temp directory.
      */
-    @Option(option = 'internalDevMode', description = 'Internal only option indicating dev mode is active')
-    void setInternalDevMode(String internalDevMode) {
-        this.internalDevMode = Boolean.parseBoolean(internalDevMode);
+    @Option(option = 'useTempDirAsOutput', description = 'Internal only option indicating where dev mode is to generate features')
+    void setUseTempDirAsOutput(String useTempDirAsOutput) {
+        this.useTempDirAsOutput = Boolean.parseBoolean(useTempDirAsOutput);
+    }
+
+    private Boolean useTempDirAsContext = null;
+
+    /**
+     * The useTempDirAsContext parameter is for internal use only. It is not for users.
+     * It is needed in dev mode when the user updates a server config file which might affect
+     * the features that will be generated. In such a case we will required the caller to copy the
+     * serverDir configuration files into the special generate-features temp directory and augment it
+     * with the file changed by the user. We do not do this all the time because of the performance
+     * cost of copying all the files.
+     * When the parameter is true we will use the generate-features temp directory as the context for
+     * feature generation.
+     */
+    @Option(option = "useTempDirAsContext", description = 'Internal only option indicating how dev mode is to generate features')
+    void setUseTempDirAsContext(String useTempDirAsContext) {
+        this.useTempDirAsContext = Boolean.parseBoolean(useTempDirAsContext);
     }
 
     @TaskAction
@@ -116,18 +146,30 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         if (generateToSrc == null) {
             generateToSrc = DEFAULT_GENERATETOSRC;
         }
-        if (internalDevMode == null) {
-            internalDevMode = DEFAULT_DEVMODE;
+        if (useTempDirAsOutput == null) {
+            useTempDirAsOutput = DEFAULT_OUTPUT;
+        }
+        if (useTempDirAsContext == null) {
+            useTempDirAsContext = DEFAULT_CONTEXT;
         }
 
         initializeConfigDirectory();
-        // The server.configDirectory is in the src directory. Otherwise generate for the build dir.
-        generationContextDir = generateToSrc ? server.configDirectory : getServerDir(project);
+        if (useTempDirAsContext) {
+            // When this parameter is true it is required that the caller has copied the config into this dir.
+            generationContextDir = getGeneratedFeaturesTempDir();
+        } else {
+            // The server.configDirectory is the one in the src directory. Otherwise generate for the build/wlp dir.
+            generationContextDir = generateToSrc ? server.configDirectory : getServerDir(project);
+        }
+        // When using dev mode we always generate to a temporary directory so we can call install before writing to server dir.
+        generationOutputDir = useTempDirAsOutput ? getGeneratedFeaturesTempDir() : generationContextDir;
 
         logger.debug("--- Generate Features values ---");
         logger.debug("optimize generate features: " + optimize);
-        logger.debug("called by dev mode internalDevMode: " + internalDevMode);
-        logger.debug("generate to src or build: " + (internalDevMode ? GENERATED_FEATURES_TEMP_PATH : generationContextDir.getAbsolutePath()));
+        logger.debug("generate from src or build: " + generationContextDir);
+        logger.debug("useTempDirAsOutput (dev mode only): " + useTempDirAsOutput);
+        logger.debug("useTempDirAsContext (dev mode only): " + useTempDirAsContext);
+        logger.debug("generate to directory: " + generationOutputDir.getAbsolutePath());
         if (classFiles != null && !classFiles.isEmpty()) {
             logger.debug("Generate features for the following class files: " + classFiles);
         }
@@ -236,15 +278,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         }
         logger.debug("Features detected by binary scanner which are not in server.xml : " + missingLibertyFeatures);
 
-        // generate the new features into an xml file in the correct context directory
-        def generatedXmlFile;
-        if (internalDevMode) {
-            // create a temp dir in the build directory for the generated-features.xml in dev mode
-            // The ServerConfigXmlDocument will create the directories if needed.
-            generatedXmlFile = new File(project.getLayout().getBuildDirectory().getAsFile().get(), GENERATED_FEATURES_TEMP_PATH);
-        } else {
-            generatedXmlFile = new File(generationContextDir, GENERATED_FEATURES_FILE_PATH);
-        }
+        // generate the new features into an xml file in the correct output directory
+        // The ServerConfigXmlDocument will create the directories if needed.
+        def generatedXmlFile = new File(generationOutputDir, GENERATED_FEATURES_FILE_PATH);
         try {
             if (missingLibertyFeatures.size() > 0) {
                 Set<String> existingGeneratedFeatures = getGeneratedFeatures(servUtil, generatedXmlFile);
@@ -304,6 +340,11 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         Set<String> genFeatSet = fp == null ? new HashSet<String>() : fp.getFeatures();
         servUtil.setLowerCaseFeatures(true);
         return genFeatSet;
+    }
+
+    // returns the hidden directory we use for generate-features special purposes
+    private File getGeneratedFeaturesTempDir() {
+        return new File(project.getLayout().getBuildDirectory().getAsFile().get(), GENERATED_FEATURES_TEMP_DIR);
     }
 
     /**
