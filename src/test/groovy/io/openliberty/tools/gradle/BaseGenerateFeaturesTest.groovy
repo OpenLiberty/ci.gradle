@@ -57,7 +57,7 @@ class BaseGenerateFeaturesTest extends AbstractIntegrationTest {
     static final String GENERATED_FEATURES_FILE_NAME = "generated-features.xml";
     static final String GENERATED_FEATURES_FILE_PATH = "/build/wlp/usr/servers/defaultServer/configDropins/overrides/" + GENERATED_FEATURES_FILE_NAME;
     static final String GENERATED_FEATURES_FILE_PATH_SRC = "/src/main/liberty/config/configDropins/overrides/" + GENERATED_FEATURES_FILE_NAME;
-    static final String GENERATED_FEATURES_FILE_PATH_TMP = "/build/.libertyFeatures/" + GENERATED_FEATURES_FILE_NAME;
+    static final String GENERATED_FEATURES_FILE_PATH_TMP = "/build/.libertyFeatures/configDropins/overrides/" + GENERATED_FEATURES_FILE_NAME;
     static final String UMBRELLA_EE = "providedCompile \"jakarta.platform:jakarta.jakartaee-api:8.0.0\"";
     static final String UMBRELLA_MP = "providedCompile \"org.eclipse.microprofile:microprofile:3.2\"";
     static final String ESA_EE_DEPENDENCY = "providedCompile 'io.openliberty.features:servlet-4.0:22.0.0.2'";
