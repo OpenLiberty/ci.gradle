@@ -1072,7 +1072,7 @@ class DevTask extends AbstractFeatureTask {
         }
 
         @Override
-        public boolean libertyGenerateFeatures(Collection<String> classes, boolean optimize, boolean useTmpDir) {
+        public boolean libertyGenerateFeatures(Collection<String> classes, boolean optimize, boolean generateToSrc, boolean useTmpDirOut, boolean useTmpDirIn) {
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
@@ -1082,8 +1082,11 @@ class DevTask extends AbstractFeatureTask {
                     // generate features for only the classFiles passed (if any)
                     options.add("--classFile=" + it);
                 }
+                // Set up the arguments to the generateFeatures task
                 options.add("--optimize=" + optimize);
-                options.add("--internalDevMode="+useTmpDir);
+                options.add("--generateToSrc=" + generateToSrc);
+                options.add("--useTempDirAsOutput="+useTmpDirOut);
+                options.add("--useTempDirAsContext="+useTmpDirIn);
                 runGenerateFeaturesTask(gradleBuildLauncher, options);
                 return true; // successfully generated features
             } catch (BuildException e) {
