@@ -258,12 +258,12 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                         configDocument.createFeature(missing);
                     }
                     // Generate log message before writing file as the file change event kicks off other dev mode actions
-                    logger.lifecycle("Generated the following features: " + missingLibertyFeatures);
+                    logger.lifecycle("Generated the features " + missingLibertyFeatures + " in the file " + newServerXmlSrc.getAbsolutePath());
                     // use logger.lifecycle so that message appears without --info tag on
                     configDocument.writeXMLDocument(generatedXmlFile);
                     logger.debug("Created file " + generatedXmlFile);
                 } else {
-                    logger.lifecycle("Regenerated the following features: " + missingLibertyFeatures);
+                    logger.lifecycle("Generated the features " + missingLibertyFeatures + " and confirmed they exist in the file: " + newServerXmlSrc.getAbsolutePath());
                     // use logger.lifecycle so that message appears without --info tag on
                 }
             } else {
