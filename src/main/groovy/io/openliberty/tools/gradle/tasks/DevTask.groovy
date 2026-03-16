@@ -717,18 +717,17 @@ class DevTask extends AbstractFeatureTask {
                     installFeatures = true;
                     existingLibertyFeatureDependencies.addAll(newLibertyFeatureDependencies);
                 }
-
             }
+            boolean generateFeaturesSuccess = false;
             if (optimizeGenerateFeatures && generateFeatures) {
                 logger.debug("Detected a change in the compile dependencies, regenerating features");
+                // This code cannot be accessed until ci.gradle supports modification of build.gradle in dev mode
                 // optimize generate features on build dependency change
                 // If generateToSrc is false then we must copy new generated features file from temp dir to server dir after install
-                boolean generateFeaturesSuccess = libertyGenerateFeatures(null, true, !generateToSrc);
-                if (generateFeaturesSuccess) {
-                    util.javaSourceClassPaths.clear();
-                } else {
-                    installFeatures = false;
-                }
+                // generateFeaturesSuccess = optimizeGenerateFeatures(!generateToSrc);
+                // if (!generateFeaturesSuccess) {
+                //     installFeatures = false;
+                // }
             }
             if (restartServer) {
                 // - stop Server
@@ -751,6 +750,10 @@ class DevTask extends AbstractFeatureTask {
                 if (generateFeaturesSuccess && !generateToSrc) {
                     util.copyTempFeatureFileToServer(getServerDir(project)); // finalize the generate-features operation
                 }
+                // Update the stored features list after generated features file updated
+                // if (generateFeaturesSuccess) {
+                //     updateExistingFeatures(); // update the dev mode cache of features in the server
+                // }
             }
             return true;
         }
