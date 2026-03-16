@@ -91,7 +91,7 @@ class DevTask extends AbstractFeatureTask {
     private static final boolean DEFAULT_CONTAINER = false;
     private static final boolean DEFAULT_SKIP_DEFAULT_PORTS = false;
     private static final boolean DEFAULT_KEEP_TEMP_CONTAINERFILE = false;
-    private static final boolean DEFAULT_GENERATE_FEATURES = false;
+    private static final boolean DEFAULT_GENERATE_FEATURES = true;
     private static final boolean DEFAULT_GENERATE_TO_SRC = false;
     private static final boolean DEFAULT_SKIP_INSTALL_FEATURE = false;
     private static final boolean DEFAULT_CHANGE_ON_DEMAND_TESTS_ACTION = false;
@@ -329,7 +329,7 @@ class DevTask extends AbstractFeatureTask {
 
     @Optional
     @Input
-    Boolean generateFeatures;
+    Boolean generateFeatures = null;
 
     // Need to use a string value to allow someone to specify --generateFeatures=false, if not explicitly set defaults to true
     @Option(option = 'generateFeatures', description = 'If true, scan the application binary files to determine which Liberty features should be used. The default value is false.')
@@ -1211,10 +1211,12 @@ class DevTask extends AbstractFeatureTask {
         runGradleTask(gradleBuildLauncher, tasks);
     }
 
-    public void runGenerateFeaturesTask(BuildLauncher gradleBuildLauncher, boolean optimize, boolean useTmpDir) throws BuildException {
+    public void runGenerateFeaturesTask(BuildLauncher gradleBuildLauncher, boolean optimize) throws BuildException {
         List<String> options = new ArrayList<String>();
-        options.add("--optimize="+optimize);
-        options.add("--internalDevMode="+useTmpDir);
+        options.add("--optimize=" + optimize);
+        options.add("--generateToSrc=" + this.generateToSrc);
+        options.add("--useTempDirAsOutput=false");
+        options.add("--useTempDirAsContext=false");
         runGenerateFeaturesTask(gradleBuildLauncher, options);
     }
 
@@ -1306,14 +1308,18 @@ class DevTask extends AbstractFeatureTask {
         DefaultFilePropertyFactory.DefaultDirectoryVar testOutputDirectory = testSourceSet.java.classesDirectory;
         List<File> resourceDirs = mainSourceSet.resources.srcDirs.toList();
 
+logger.warn ('action 0')
         File serverDirectory = getServerDir(project);
         String serverName = server.name;
         File serverInstallDir = getInstallDir(project);
         // make sure server.configDirectory is set before accessing it
+        logger.warn ('action 1')
         initializeConfigDirectory();
+        logger.warn ('action 2')
         File configDirectory = server.configDirectory;
         // getOutputDir returns a string
         File outputDir = new File(getOutputDir(project));
+        logger.warn ('action 3')
 
         if (!container) {
             if (serverDirectory.exists()) {
@@ -1330,6 +1336,7 @@ class DevTask extends AbstractFeatureTask {
             logger.info("No resource directory detected, using default directory: " + defaultResourceDir);
             resourceDirs.add(defaultResourceDir);
         }
+        logger.warn ('action 4')
 
         String artifactId = project.getName();
 
@@ -1351,18 +1358,6 @@ class DevTask extends AbstractFeatureTask {
         Map<String, List<String>> parentBuildGradle = new HashMap<String, List<String>>();
         if(projectModules.size()>0) {
             DevTaskHelper.updateParentBuildFiles(parentBuildGradle, project)
-        }
-        try {
-            this.util = new DevTaskUtil(project.getLayout().getBuildDirectory().getAsFile().get(), serverInstallDir, getUserDir(project, serverInstallDir),
-                serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
-                resourceDirs, changeOnDemandTestsAction.booleanValue(), hotTests.booleanValue(), skipTests.booleanValue(), skipInstallFeature.booleanValue(), artifactId, serverStartTimeout.intValue(),
-                verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(),
-                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), containerfile, containerBuildContext, containerRunOpts,
-                containerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempContainerfile.booleanValue(), localMavenRepoForFeatureUtility,
-                DevTaskHelper.getPackagingType(project), buildFile, generateFeatures.booleanValue(), generateToSrc.booleanValue(), webResourceDirs, projectModules, parentBuildGradle, new File(outputDir, serverName)
-            );
-        } catch (IOException | PluginExecutionException e) {
-            throw new GradleException("Error initializing dev mode.", e)
         }
 
         ProjectConnection gradleConnection = initGradleProjectConnection();
@@ -1397,7 +1392,8 @@ class DevTask extends AbstractFeatureTask {
                                 + generatedFileCanonicalPath);
                 try {
                     // Only generate to a tmp dir once the dev mode loop has started.
-                    runGenerateFeaturesTask(gradleBuildLauncher, true, false);
+                    boolean optimize = true;
+                    runGenerateFeaturesTask(gradleBuildLauncher, optimize);
                 } catch (BuildException e) {
                     Exception pluginEx = getPluginExecutionException(e);
                     if (pluginEx != null) {
@@ -1463,6 +1459,20 @@ class DevTask extends AbstractFeatureTask {
             gradleConnection.close();
         }
 
+        logger.warn ('action 5')
+        try {
+            this.util = new DevTaskUtil(project.getLayout().getBuildDirectory().getAsFile().get(), serverInstallDir, getUserDir(project, serverInstallDir),
+                serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
+                resourceDirs, changeOnDemandTestsAction.booleanValue(), hotTests.booleanValue(), skipTests.booleanValue(), skipInstallFeature.booleanValue(), artifactId, serverStartTimeout.intValue(),
+                verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(),
+                libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), containerfile, containerBuildContext, containerRunOpts,
+                containerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempContainerfile.booleanValue(), localMavenRepoForFeatureUtility,
+                DevTaskHelper.getPackagingType(project), buildFile, generateFeatures.booleanValue(), generateToSrc.booleanValue(), webResourceDirs, projectModules, parentBuildGradle, new File(outputDir, serverName)
+            );
+        } catch (IOException | PluginExecutionException e) {
+            throw new GradleException("Error initializing dev mode.", e)
+        }
+        logger.warn ('action 6')
 
         util.addShutdownHook(executor);
 
