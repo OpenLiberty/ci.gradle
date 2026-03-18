@@ -1308,18 +1308,14 @@ class DevTask extends AbstractFeatureTask {
         DefaultFilePropertyFactory.DefaultDirectoryVar testOutputDirectory = testSourceSet.java.classesDirectory;
         List<File> resourceDirs = mainSourceSet.resources.srcDirs.toList();
 
-        logger.warn ('action 0')
         File serverDirectory = getServerDir(project);
         String serverName = server.name;
         File serverInstallDir = getInstallDir(project);
         // make sure server.configDirectory is set before accessing it
-        logger.warn ('action 1')
         initializeConfigDirectory();
-        logger.warn ('action 2')
         File configDirectory = server.configDirectory;
         // getOutputDir returns a string
         File outputDir = new File(getOutputDir(project));
-        logger.warn ('action 3')
 
         if (!container) {
             if (serverDirectory.exists()) {
@@ -1336,7 +1332,6 @@ class DevTask extends AbstractFeatureTask {
             logger.info("No resource directory detected, using default directory: " + defaultResourceDir);
             resourceDirs.add(defaultResourceDir);
         }
-        logger.warn ('action 4')
 
         String artifactId = project.getName();
 
@@ -1394,7 +1389,6 @@ class DevTask extends AbstractFeatureTask {
             gradleConnection.close();
         }
 
-        logger.warn ('action 5')
         try {
             this.util = new DevTaskUtil(project.getLayout().getBuildDirectory().getAsFile().get(), serverInstallDir, getUserDir(project, serverInstallDir),
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, project.getRootDir(),
@@ -1407,7 +1401,6 @@ class DevTask extends AbstractFeatureTask {
         } catch (IOException | PluginExecutionException e) {
             throw new GradleException("Error initializing dev mode.", e)
         }
-        logger.warn ('action 6')
 
         util.addShutdownHook(executor);
 
@@ -1447,17 +1440,14 @@ class DevTask extends AbstractFeatureTask {
 
     private void generateFeaturesOnStartup(BuildLauncher gradleBuildLauncher) {
         if (generateFeatures) {
-            logger.warn ('dev mode action compile for generate features step')
             // Optimize generate features on startup
             runGradleTask(gradleBuildLauncher, 'compileJava', 'processResources'); // ensure class files exist
-            logger.warn ('next call generate features task, server directory needed now for xml, generateToSrc='+generateToSrc)
 
             try {
                 // Only generate to a tmp dir once the dev mode loop has started.
                 boolean optimize = true;
                 runGenerateFeaturesTask(gradleBuildLauncher, optimize);
             } catch (BuildException e) {
-                logger.warn ('exception')
                 Exception pluginEx = getPluginExecutionException(e);
                 if (pluginEx != null) {
                     // PluginExecutionException indicates that the binary scanner jar could not be found
@@ -1507,7 +1497,6 @@ class DevTask extends AbstractFeatureTask {
                     gradleBuildLauncher.addArguments("--exclude-task", "installFeature"); // skip installing features at startup since flag was set
                 }
             }
-            logger.warn ('not container, create liberty')
             addLibertyRuntimeProperties(gradleBuildLauncher);
             runGradleTask(gradleBuildLauncher, 'libertyCreate');
 
