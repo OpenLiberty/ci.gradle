@@ -5,7 +5,7 @@ This guide provides step-by-step instructions for migrating your projects that u
 ## Gradle 9 Prerequisites
 Achieving compatibility with Gradle 9 requires the following updates:
 
-1. Java Requirement: The minimum supported version is Java 17. Java 21 and Java 25 are also supported via toolchains.
+1. Java Requirement: The minimum supported version for running Gradle 9 is Java 17. Java 21 and Java 25 are also supported.
 
 2. Gradle Version: We recommend Gradle 9.1.0 or later (9.0.0 does not support Java 25).
 
@@ -31,7 +31,7 @@ To ensure a successful migration, please note the following version requirements
 
 * **Liberty Gradle Plugin 4.0.0+**: Starting with version 4.0.0, the Liberty Gradle Plugin requires Gradle 9.0 or later.
 
-* **Java Requirement**: Gradle 9 requires Java 17 as the minimum runtime version. Java 21 and 25 are supported via toolchains.
+* **Java Requirement**: Gradle 9 requires Java 17 as the minimum runtime version. Java 21 and 25 are also supported.
 
 * **Kotlin Update**: If your build uses Kotlin, an upgrade to Kotlin 2.0 is mandatory.
 
