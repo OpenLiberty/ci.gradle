@@ -1377,7 +1377,7 @@ class DevTask extends AbstractFeatureTask {
                 } else {
                     // If generate features to server directory then create server first.
                     createLibertyOnStartup(gradleBuildLauncher, serverInstallDir);
-                    runGradleTask(gradleBuildLauncher, 'deploy'); // copy config to server dir
+                    // runGradleTask(gradleBuildLauncher, 'deploy'); // copy config to server dir
                     generateFeaturesOnStartup(gradleBuildLauncher);
                 }
             } else {
