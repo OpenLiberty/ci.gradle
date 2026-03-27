@@ -172,20 +172,20 @@ public class LooseEarApplication extends LooseApplication {
                 // Add all class directories
                 dependencyProject.sourceSets.main.output.classesDirs.files.each { File classesDirectory ->
                     if (classesDirectory.exists()) {
-                        logger.debug("  Adding class dir: ${classesDirectory}")
+                        logger.debug("Adding class dir: ${classesDirectory}")
                         config.addDir(moduleArchive, classesDirectory, "/")
                     } else {
-                        logger.debug("  Skipping non-existent class dir: ${classesDirectory}")
+                        logger.debug("Skipping non-existent class dir: ${classesDirectory}")
                     }
                 }
                 
                 // Add resource directory
                 def resourcesDirectory = dependencyProject.sourceSets.main.output.resourcesDir
                 if (resourcesDirectory?.exists()) {
-                    logger.debug("  Adding resource dir: ${resourcesDirectory}")
+                    logger.debug("Adding resource dir: ${resourcesDirectory}")
                     config.addDir(moduleArchive, resourcesDirectory, "/")
                 } else {
-                    logger.debug("  No resources dir or doesn't exist: ${resourcesDirectory}")
+                    logger.debug("No resources dir or doesn't exist: ${resourcesDirectory}")
                 }
             }
         } catch (Exception e) {
