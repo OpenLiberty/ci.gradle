@@ -20,6 +20,7 @@ import io.openliberty.tools.common.plugins.config.LooseConfigData
 import org.apache.commons.io.FilenameUtils
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.logging.Logger
 import org.gradle.plugins.ear.Ear
 import org.w3c.dom.Element
@@ -90,12 +91,16 @@ public class LooseEarApplication extends LooseApplication {
     }
 
     public Element addJarModule(Project proj) throws Exception {
+        logger.debug("Adding JAR module for project: ${proj.name}")
         Element moduleArchive = config.addArchive("/" + proj.jar.getArchiveFileName().get());
         proj.sourceSets.main.getOutput().getClassesDirs().each{config.addDir(moduleArchive, it, "/");}
         if (resourcesDirContentsExist(proj)) {
             config.addDir(moduleArchive, proj.sourceSets.main.getOutput().getResourcesDir(), "/");
         }
         addModules(moduleArchive, proj)
+        
+        addDependencyClassDirectories(moduleArchive, proj)
+        
         return moduleArchive;
     }
     
@@ -117,6 +122,74 @@ public class LooseEarApplication extends LooseApplication {
                 default:
                     break
             }
+        }
+    }
+
+    /**
+     * Add dependency class directories so EJB modules can see classes from their dependencies
+     * @param moduleArchive
+     * @param proj
+     */
+    private void addDependencyClassDirectories(Element moduleArchive, Project proj) {
+        try {
+            Set<Project> projectDependencies = new HashSet<Project>();
+            
+            // Check compileClasspath for compile-time dependencies
+            if (proj.configurations.findByName('compileClasspath') != null) {
+                proj.configurations.compileClasspath.allDependencies.each { dep ->
+                    if (dep instanceof ProjectDependency) { // Ensure it's a project dependency
+                        Project depProj = proj.rootProject.findProject(dep.path)
+                        if (depProj != null) {
+                            projectDependencies.add(depProj)
+                        }
+                    }
+                }
+            }
+            
+            // Check runtimeClasspath for runtime dependencies
+            if (proj.configurations.findByName('runtimeClasspath') != null) {
+                proj.configurations.runtimeClasspath.allDependencies.each { dep ->
+                    if (dep instanceof ProjectDependency) { // Ensure it's a project dependency
+                        Project depProj = proj.rootProject.findProject(dep.path)
+                        if (depProj != null) {
+                            projectDependencies.add(depProj)
+                        }
+                    }
+                }
+            }
+            
+            logger.debug("Found ${projectDependencies.size()} project dependencies for ${proj.name}")
+            
+            // Process each project dependency
+            projectDependencies.each { dependencyProject ->
+                if (!dependencyProject.hasProperty('sourceSets')) { // Not a Java project
+                    logger.debug("Skipping ${dependencyProject.name} - no sourceSets found (not a Java project)")
+                    return
+                }
+                
+                logger.debug("Adding dependency ${dependencyProject.name} class directories to ${proj.name}")
+                
+                // Add all class directories
+                dependencyProject.sourceSets.main.output.classesDirs.files.each { File classesDirectory ->
+                    if (classesDirectory.exists()) {
+                        logger.debug("  Adding class dir: ${classesDirectory}")
+                        config.addDir(moduleArchive, classesDirectory, "/")
+                    } else {
+                        logger.debug("  Skipping non-existent class dir: ${classesDirectory}")
+                    }
+                }
+                
+                // Add resource directory
+                def resourcesDirectory = dependencyProject.sourceSets.main.output.resourcesDir
+                if (resourcesDirectory?.exists()) {
+                    logger.debug("  Adding resource dir: ${resourcesDirectory}")
+                    config.addDir(moduleArchive, resourcesDirectory, "/")
+                } else {
+                    logger.debug("  No resources dir or doesn't exist: ${resourcesDirectory}")
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Could not add dependency class directories for ${proj.name}: ${e.message}", e)
         }
     }
     
