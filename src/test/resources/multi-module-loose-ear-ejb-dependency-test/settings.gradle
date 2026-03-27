@@ -1,0 +1,8 @@
+rootProject.name = 'ejb-dependency'
+include ':lib-jar'
+include ':ejb-jar'
+include ':ear'
+
+project(':lib-jar').projectDir = "$rootDir/lib-jar" as File
+project(':ejb-jar').projectDir = "$rootDir/ejb-jar" as File
+project(':ear').projectDir = "$rootDir/ear" as File
