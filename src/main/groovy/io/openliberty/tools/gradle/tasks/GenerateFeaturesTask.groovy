@@ -80,7 +80,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         })
     }
 
-    private List<String> classFiles;
+    private List<String> classFiles = null;
 
     @Option(option = 'classFile', description = 'If set and optimize is false, will generate features for the list of classes passed.')
     void setClassFiles(List<String> classFiles) {
