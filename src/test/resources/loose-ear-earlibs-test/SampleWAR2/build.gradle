@@ -10,6 +10,14 @@ dependencies {
     providedCompile project(':SampleEJB')
 }
 
+configurations {
+    warOnly
+}
+
+artifacts {
+    warOnly war
+}
+
 war {
     archiveFileName = getArchiveBaseName().get() + '.' + getArchiveExtension().get()
 }

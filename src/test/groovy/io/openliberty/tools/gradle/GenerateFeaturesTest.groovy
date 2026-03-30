@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2022, 2025
+ * (C) Copyright IBM Corporation 2022, 2026
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,6 +152,60 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         assertEquals(expectedFeatures, features);
     }
 
+<<<<<<< HEAD
+=======
+    @Test
+    public void serverXmlCommentNoFMTest() throws Exception {
+        // initially the expected comment is not found in server.xml
+        assertFalse(verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 10, serverXmlFile));
+        // also we wish to test behaviour when there is no <featureManager> element so test that
+        assertFalse(verifyLogMessageExists("<featureManager>", 10, serverXmlFile));
+
+        runCompileAndGenerateFeatures();
+
+        // verify that generated features file was created
+        // Add retry mechanism to handle potential timing issues
+        int maxRetries = 5;
+        int retryCount = 0;
+        while (!newFeatureFile.exists() && retryCount < maxRetries) {
+            Thread.sleep(3000);
+            retryCount++;
+        }
+        assertTrue(newFeatureFile.exists());
+
+        // verify expected comment found in server.xml
+        Charset charset = StandardCharsets.UTF_8;
+        String serverXmlContents = new String(Files.readAllBytes(serverXmlFile.toPath()), charset);
+        serverXmlContents = "\n" + serverXmlContents;
+        assertTrue(serverXmlContents,
+            verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
+    }
+
+    @Test
+    public void serverXmlCommentFMTest() throws Exception {
+        replaceString("<!--replaceable-->",
+            "<!--Feature generation comment goes below this line-->\n" +
+            "  <featureManager>\n" +
+            "    <feature>jaxrs-2.1</feature>\n" +
+            "  </featureManager>\n", serverXmlFile);
+
+        // initially the expected comment is not found in server.xml
+        assertFalse(verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 10, serverXmlFile));
+
+        runCompileAndGenerateFeatures();
+
+        // verify that generated features file was created
+        assertTrue(newFeatureFile.exists());
+
+        // verify expected comment found in server.xml
+        Charset charset = StandardCharsets.UTF_8;
+        String serverXmlContents = new String(Files.readAllBytes(serverXmlFile.toPath()), charset);
+        serverXmlContents = "\n" + serverXmlContents;
+        assertTrue(serverXmlContents,
+            verifyLogMessageExists(GenerateFeaturesTask.FEATURES_FILE_MESSAGE, 100, serverXmlFile));
+    }
+
+>>>>>>> main
     /**
      * Conflict between user specified features.
      * Check for BINARY_SCANNER_CONFLICT_MESSAGE2 (conflict between configured features)
@@ -172,7 +226,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         // Verify BINARY_SCANNER_CONFLICT_MESSAGE2 error is thrown (BinaryScannerUtil.RecommendationSetException)
         Set<String> recommendedFeatureSet = new HashSet<String>(Arrays.asList("servlet-4.0"));
         // search log file instead of process output because warning message in process output may be interrupted
-        boolean b = verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE2, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, logFile);
+        boolean b = verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE2, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, errFile);
         assertTrue(formatOutput(getProcessOutput()), b);
     }
 
@@ -195,7 +249,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         // Verify BINARY_SCANNER_CONFLICT_MESSAGE1 error is thrown (BinaryScannerUtil.FeatureModifiedException)
         Set<String> recommendedFeatureSet = new HashSet<String>(Arrays.asList("cdi-2.0", "servlet-4.0"));
         // search log file instead of process output because warning message in process output may be interrupted
-        boolean b = verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE1, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, logFile);
+        boolean b = verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE1, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, errFile);
         assertTrue(formatOutput(getProcessOutput()), b);
     }
 
@@ -223,7 +277,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
         // use just beginning of BINARY_SCANNER_CONFLICT_MESSAGE5 as error message in logFile may be interrupted with "1 actionable task: 1 executed"
         assertTrue("Could not find the feature unavailable conflict message in the process output.\n" + processOutput,
                 verifyLogMessageExists("required features: [servlet-4.0, mpOpenAPI-1.0]" +
-                        " and required levels of MicroProfile: mp1.2, Java EE or Jakarta EE: ee8", 1000, logFile));
+                        " and required levels of MicroProfile: mp1.2, Java EE or Jakarta EE: ee8", 1000, errFile));
 
     }
 
