@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2021, 2025.
+ * (C) Copyright IBM Corporation 2021, 2026
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,9 +48,6 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     private static final boolean DEFAULT_GENERATETOSRC = false;
     // Default value of the internalDevMode option
     private static final boolean DEFAULT_DEVMODE = false;
-
-    // The executable file used to scan binaries for the Liberty features they use.
-    private File binaryScanner;
 
     /**
      * Generating features is performed relative to a certain server. We only generate features
@@ -107,8 +104,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
     @TaskAction
     void generateFeatures() {
-        binaryScanner = getBinaryScannerJarFromRepository();
-        BinaryScannerHandler binaryScannerHandler = new BinaryScannerHandler(binaryScanner);
+        // The executable file used to scan binaries for the Liberty features they use.
+        File binaryScannerJar = getBinaryScannerJarFromRepository();
+        BinaryScannerHandler binaryScannerHandler = new BinaryScannerHandler(binaryScannerJar);
 
         if (optimize == null) {
             optimize = DEFAULT_OPTIMIZE;
