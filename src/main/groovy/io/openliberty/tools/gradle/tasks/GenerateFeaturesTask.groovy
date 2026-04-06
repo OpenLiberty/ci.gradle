@@ -23,8 +23,10 @@ import static io.openliberty.tools.common.plugins.util.BinaryScannerUtil.*;
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil.FeaturesPlatforms
+import io.openliberty.tools.common.plugins.util.VersionUtility;
 import io.openliberty.tools.gradle.utils.ArtifactDownloadUtil
 
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
@@ -41,6 +43,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     public static final String GENERATED_FEATURES_COMMENT = "The following features were generated based on API usage detected in your application";
     public static final String NO_NEW_FEATURES_COMMENT = "No additional features generated";
     public static final String NO_CLASS_FILES_WARNING = "Could not find class files to generate features against. Liberty features will not be generated. Ensure your project has first been compiled.";
+    private static final String OPEN_LIBERTY_PRODUCT_ID = "io.openliberty";
+    private static final String CLOSED_LIBERTY_PRODUCT_ID = "com.ibm.websphere.appserver.runtime";
 
     // Default value of the optimize task option
     private static final boolean DEFAULT_OPTIMIZE = true;
@@ -169,7 +173,20 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             String logLocation = project.getBuildDir().getCanonicalPath();
             String eeVersionArg = composeEEVersion(eeVersion);
             String mpVersionArg = composeMPVersion(mpVersion);
-            scannedFeatureList = binaryScannerHandler.runBinaryScanner(nonCustomFeatures, classFiles, directories, logLocation, eeVersionArg, mpVersionArg, optimize);
+            File baseFeatureListFile = null;
+            File coreFeatureListFile = null;
+            String libertyGroupId = getLibertyRuntimeGroupId();
+            logger.debug("Resolve the liberty groupId used to fetch feature lists, getLibertyRuntimeGroupId()="+libertyGroupId);
+            if (CLOSED_LIBERTY_PRODUCT_ID.equals(libertyGroupId)) {
+                baseFeatureListFile = getClosedFeatureListFile(FEATURE_LIST_BASE);
+                coreFeatureListFile = getClosedFeatureListFile(FEATURE_LIST_CORE);
+            } else if (OPEN_LIBERTY_PRODUCT_ID.equals(libertyGroupId)) {
+                // For open liberty pass the same file to each parameter
+                baseFeatureListFile = getOpenFeatureListFile();
+                coreFeatureListFile = baseFeatureListFile;
+            } // else should not happen, just pass null values
+            scannedFeatureList = binaryScannerHandler.runBinaryScanner(nonCustomFeatures, classFiles, directories, logLocation,
+                eeVersionArg, mpVersionArg, baseFeatureListFile, coreFeatureListFile, optimize);
         } catch (BinaryScannerUtil.NoRecommendationException noRecommendation) {
             throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE3, noRecommendation.getConflicts()));
         } catch (BinaryScannerUtil.FeatureModifiedException featuresModified) {
@@ -322,6 +339,100 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                     + ".jar configured in your build.gradle.",
                     e);
         }
+    }
+
+    /*
+     * Gets the file containing the Open Liberty base feature list from the local cache.
+     * Downloads it first from connected repositories such as Maven Central if a newer release is available than the cached version.
+     * Note: Maven updates artifacts daily by default based on the last updated timestamp. Users should use 'mvn -U' to force
+     * updates if needed.
+     * 
+     * @return The File object of the feature list in the local cache or null if version number not available
+     */
+    public static String OPEN_LIBERTY_FEATURE_LIST_START = "25.0.0.7";
+    private File getOpenFeatureListFile() {
+        String libertyVersion = getLibertyRuntimeVersion();
+        if (libertyVersion == null) {
+            return null;
+        }
+        // Feature lists were first published for 25.0.0.7. For liberty releases prior to this simply use the
+        // earliest available feature list, 25.0.0.7.
+        if (VersionUtility.compareArtifactVersion(libertyVersion, OPEN_LIBERTY_FEATURE_LIST_START, true) < 0) {
+            libertyVersion = OPEN_LIBERTY_FEATURE_LIST_START;
+        }
+        libertyVersion = "[" + libertyVersion + "]"; // Maven syntax to specify an exact version, not a range
+        return ArtifactDownloadUtil.downloadBuildArtifact(project, OLBASE_FEATURELIST_GROUP_ID, OLBASE_FEATURELIST_ARTIFACT_ID, OLBASE_FEATURELIST_TYPE, libertyVersion);
+    }
+
+    /*
+     * Gets the file containing the Websphere or Open Liberty base feature list from the local cache.
+     * Downloads it first from connected repositories such as Maven Central if a newer release is available than the cached version.
+     * Note: Maven updates artifacts daily by default based on the last updated timestamp. Users should use 'mvn -U' to force
+     * updates if needed.
+     * 
+     * @return The File object of the feature list in the local cache.
+     */
+    private static String CLOSED_LIBERTY_FEATURE_LIST_START1 = "25.0.0.7";
+    private static String CLOSED_LIBERTY_FEATURE_LIST_START2 = "25.0.0.10";
+    private static String CLOSED_LIBERTY_FEATURE_LIST_END = "25.0.0.12";
+    private static String FEATURE_LIST_BASE = "base";
+    private static String FEATURE_LIST_CORE = "core";
+    private File getClosedFeatureListFile(String featureListVar) {
+        // Feature lists are only available for 25.0.0.7 and 25.0.0.10-25.0.0.12.
+        // For releases earlier than 25.0.0.10 use 25.0.0.7, for releases after 25.0.0.12 use 25.0.0.12.
+        String libertyGroupId, libertyArtifactId;
+        String libertyVersion = getLibertyRuntimeVersion();
+        if (libertyVersion == null) {
+            return null;
+        }
+        // There is a value for 25.0.0.7 but not for 25.0.0.8 or 25.0.0.9 and none for <25.0.0.7
+        // so for any liberty <25.0.0.10 use the 07 values
+        if (VersionUtility.compareArtifactVersion(libertyVersion, CLOSED_LIBERTY_FEATURE_LIST_START2, true) < 0) {
+            libertyGroupId = WS1_FEATURELIST_GROUP_ID;
+            libertyVersion = CLOSED_LIBERTY_FEATURE_LIST_START1;
+        } else { // 25.0.0.10 and up
+            libertyGroupId = WS2_FEATURELIST_GROUP_ID;
+            // if >25.0.0.12 just use 25.0.0.12
+            if (VersionUtility.compareArtifactVersion(libertyVersion, CLOSED_LIBERTY_FEATURE_LIST_END, true) > 0) {
+                libertyVersion = CLOSED_LIBERTY_FEATURE_LIST_END;
+            } // else liberty version is 25.0.0.10-25.0.0.12
+        }
+        if (featureListVar.equals(FEATURE_LIST_BASE)) {
+            libertyArtifactId = WSBASE_FEATURELIST_ARTIFACT_ID;
+        } else {
+            libertyArtifactId = WSCORE_FEATURELIST_ARTIFACT_ID;
+        }
+        libertyVersion = "[" + libertyVersion + "]"; // Maven syntax to specify an exact version, not a range
+        getLog().debug("Closed liberty feature list coordinates, libertyGroupId="+libertyGroupId+" libertyArtifactId="+libertyArtifactId+" WS_FEATURELIST_TYPE="+WS_FEATURELIST_TYPE+" libertyVersion="+libertyVersion);
+        return ArtifactDownloadUtil.downloadBuildArtifact(project, libertyGroupId, libertyArtifactId, WS_FEATURELIST_TYPE, libertyVersion);
+    }
+
+    // resolve the Liberty version from one of the sources
+    private String getLibertyRuntimeVersion() {
+        String libertyRuntimeVersion = null
+        Configuration config = project.configurations.getByName('libertyRuntime')
+        if (config != null) {
+             config.dependencies.find { libertyArtifact ->
+                 libertyRuntimeVersion = libertyArtifact.version
+                 logger.debug 'Found Liberty runtime version: ' + libertyRuntimeVersion
+                 return true
+             }
+        }
+        return libertyRuntimeVersion
+    }
+
+    // resolve the Liberty version from one of the sources
+    private String getLibertyRuntimeGroupId() {
+        String libertyRuntimeGroupId = null
+        Configuration config = project.configurations.getByName('libertyRuntime')
+        if (config != null) {
+             config.dependencies.find { libertyArtifact ->
+                 libertyRuntimeGroupId = libertyArtifact.group
+                 logger.debug 'Found Liberty runtime group ID: ' + libertyRuntimeGroupId
+                 return true
+             }
+        }
+        return libertyRuntimeGroupId
     }
 
     private Set<String> getClassesDirectories() {
