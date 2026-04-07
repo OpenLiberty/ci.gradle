@@ -72,8 +72,8 @@ public class TestMultiModuleLooseEarEjbDependency extends AbstractIntegrationTes
         expression = "dir"
         NodeList dirNodes = (NodeList) xPath.compile(expression).evaluate(ejbModuleNode, XPathConstants.NODESET)
 
-        Assert.assertTrue("EJB module should have at least 2 <dir> elements (own classes + dependency classes)", 
-                         dirNodes.getLength() >= 2)
+        Assert.assertEquals("EJB module should have exactly 2 <dir> elements (own classes + dependency classes)",
+                         2, dirNodes.getLength())
 
         // Verify that one of the directories is from lib-jar module
         boolean foundLibJarClasses = false
