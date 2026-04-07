@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2021, 2025.
+ * (C) Copyright IBM Corporation 2021, 2026
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.gradle.api.tasks.options.Option
 import org.gradle.api.logging.LogLevel
 import org.xml.sax.SAXException
 import org.w3c.dom.Element;
+import org.apache.maven.artifact.versioning.ComparableVersion
 
 import javax.xml.parsers.ParserConfigurationException
 import javax.xml.transform.TransformerException
@@ -344,12 +345,18 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
      */
     protected getEEVersion(Object project) {
         String eeVersion = null
+        logger.warn("getEEVersion")
         project.configurations.compileClasspath.allDependencies.each {
             dependency ->
                 if ((dependency.group.equals("javax") && dependency.name.equals("javaee-api")) ||
                     (dependency.group.equals("jakarta.platform") &&
-                        dependency.name.equals("jakarta.jakartaee-api"))) {
+                        (dependency.name.equals("jakarta.jakartaee-api") ||
+                        dependency.name.equals("jakarta.jakartaee-web-api") ||
+                        dependency.name.equals("jakarta.jakartaee-core-api") ||
+                        dependency.name.equals("jakarta.jakartaee-bom") ||
+                        dependency.name.equals("jakartaee-api-parent")))) {
                     String newVersion = dependency.version
+        logger.warn("eeVersion="+eeVersion+" newVersion="+newVersion+" (cVerNum < newVer)="+(cVerNum.compareTo(newVer)));
                     if (newVersion != null && isLatestVersion(eeVersion, newVersion)) {
                         eeVersion = newVersion
                     }
@@ -383,8 +390,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         if (currentVer == null || currentVer.isEmpty())  {
             return true;
         }
-        // Comparing versions: mp4 > mp3.3 > mp3.0 > mp3
-        return (currentVer.compareTo(newVer) < 0);
+        def cVerNum = new ComparableVersion(currentVer)
+        def newVerNum = new ComparableVersion(newVer)
+        return (cVerNum.compareTo(newVer));
     }
 
     // Define the logging functions of the binary scanner handler and make it available in this plugin
