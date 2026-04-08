@@ -165,8 +165,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                 // log as warning and continue to call binary scanner to detect conflicts in user specified features
                 logger.warn(NO_CLASS_FILES_WARNING);
             }
-            eeVersion = getEEVersion(project);
-            mpVersion = getMPVersion(project);
+            eeVersion = getEEVersion(project, servUtil);
+            mpVersion = getMPVersion(project, servUtil);
 
             String logLocation = project.getBuildDir().getCanonicalPath();
             String eeVersionArg = composeEEVersion(eeVersion);
@@ -284,15 +284,25 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         }
     }
 
-    // Get the features from the server config and optionally exclude the specified config files from the search.
     private Set<String> getServerFeatures(ServerFeatureUtil servUtil, Set<String> generatedFiles, boolean excludeGenerated) {
+        return getServerFeaturesPlatforms(servUtil, generatedFiles, excludeGenerated, true);
+    }
+    private Set<String> getServerPlatforms(ServerFeatureUtil servUtil, Set<String> generatedFiles, boolean excludeGenerated) {
+        return getServerFeaturesPlatforms(servUtil, generatedFiles, excludeGenerated, false); // platforms
+    }
+
+    // Get the features from the server config and optionally exclude the specified config files from the search.
+    private Set<String> getServerFeaturesPlatforms(ServerFeatureUtil servUtil, Set<String> generatedFiles, boolean excludeGenerated, boolean features) {
         servUtil.setLowerCaseFeatures(false);
         // if optimizing, ignore generated files when passing in existing features to binary scanner
         FeaturesPlatforms fp = servUtil.getServerFeatures(generationContextDir, server.serverXmlFile, new HashMap<String, File>(), excludeGenerated ? generatedFiles : null); // pass generatedFiles to exclude them
-        Set<String> existingFeatures = fp == null ? new HashSet<String>() : fp.getFeatures();
-
         servUtil.setLowerCaseFeatures(true);
-        return existingFeatures;
+        if (fp == null) {
+            return new HashSet<String>();
+        } else if (features) {
+            return fp.getFeatures();
+        } // else
+        return fp.getPlatforms();
     }
 
     // returns the features specified in the generated-features.xml file
@@ -342,7 +352,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
      * @param project
      * @return latest EE major version corresponding to the EE umbrella dependency, null if an EE umbrella dependency is not found
      */
-    protected getEEVersion(Object project) {
+    private static final String JAKARTA_PLATFORM_NAME="jakartaee-"; // jakartaee-10.0 etc.
+    protected getEEVersion(Object project, ServerFeatureUtil servUtil) {
         String eeVersion = null
         project.configurations.compileClasspath.allDependencies.each {
             dependency ->
@@ -355,6 +366,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                     }
                 }
         }
+        if (eeVersion == null) {
+            eeVersion = getPlatformVersion(JAKARTA_PLATFORM_NAME, servUtil);
+        }
         return eeVersion;
     }
     /**
@@ -363,7 +377,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
      * @param project
      * @return latest MP major version corresponding to the MP umbrella dependency, null if an MP umbrella dependency is not found
      */
-    protected getMPVersion(Object project) {
+    private static final String MP_PLATFORM_NAME="microProfile-"; // microProfile-7.0 etc.
+    protected getMPVersion(Object project, ServerFeatureUtil servUtil) {
         String mpVersion = null
         project.configurations.compileClasspath.allDependencies.each {
             dependency ->
@@ -375,6 +390,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                     }
                 }
         }
+        if (mpVersion == null) {
+            mpVersion = getPlatformVersion(MP_PLATFORM_NAME, servUtil);
+        }
         return mpVersion;
     }
 
@@ -385,6 +403,19 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         }
         // Comparing versions: mp4 > mp3.3 > mp3.0 > mp3
         return (currentVer.compareTo(newVer) < 0);
+    }
+
+    // Retrieve all platforms from the server.xml and related files and look for the platform specified.
+    // Platforms have the format jakartaee-10.0 or microProfile-7.1. Just return the version number (10.0 or 7.1 in these examples).
+    private String getPlatformVersion(String platformName, ServerFeatureUtil servUtil) {
+        Set<String> platforms = getServerPlatforms(servUtil, null, false);
+        for (String p : platforms) {
+            logger.debug("GenerateFeaturesTask.getPlatformVersion, searching for platform:" + platformName + " platform=" + p);
+            if (p.startsWith(platformName)) {
+                return p.substring(platformName.length());
+            }
+        }
+        return null;
     }
 
     // Define the logging functions of the binary scanner handler and make it available in this plugin
