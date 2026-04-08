@@ -353,6 +353,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
      * @return latest EE major version corresponding to the EE umbrella dependency, null if an EE umbrella dependency is not found
      */
     private static final String JAKARTA_PLATFORM_NAME="jakartaee-"; // jakartaee-10.0 etc.
+    private static final String JAVAEE_PLATFORM_NAME="javaee-"; // javaee-7.0 etc.
     protected getEEVersion(Object project, ServerFeatureUtil servUtil) {
         String eeVersion = null
         project.configurations.compileClasspath.allDependencies.each {
@@ -366,8 +367,13 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                     }
                 }
         }
+        // if the dependencies do not indicate the Jakarta version then reference the platform specified in server.xml
+        // E.g. pom may specify jakarta.persistence:jakarta.persistence-api:2.2.3 to compile but does not specify Jakarta 9.1
         if (eeVersion == null) {
             eeVersion = getPlatformVersion(JAKARTA_PLATFORM_NAME, servUtil);
+        }
+        if (eeVersion == null) {
+            eeVersion = getPlatformVersion(JAVAEE_PLATFORM_NAME, servUtil);
         }
         return eeVersion;
     }
