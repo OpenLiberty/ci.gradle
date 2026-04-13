@@ -34,16 +34,8 @@ public class TestMultiModuleLooseEarEjbDependency extends AbstractIntegrationTes
             throw new AssertionError("The source file '${resourceDir.canonicalPath}' doesn't exist.", null)
         }
         try {
-            FileUtils.copyDirectory(resourceDir, buildDir, new FileFilter() {
-               public boolean accept (File pathname) {
-                   return ((!pathname.getPath().endsWith(".gradle") && 
-                            !pathname.getPath().endsWith(".gradle.kts")) ||
-                            pathname.getPath().endsWith("settings.gradle") ||
-                            pathname.getPath().endsWith("build.gradle"))
-               }
-            });
-            // Copy build.gradle
-            copyFile(new File(resourceDir, buildFilename), new File(buildDir, "build.gradle"))
+            // Copy all resources
+            FileUtils.copyDirectory(resourceDir, buildDir)
             // Copy gradle.properties with absolute path
             copyFile(new File(projectDir, "build/gradle.properties"), new File(buildDir, "gradle.properties"))
         } catch (IOException e) {
