@@ -20,10 +20,10 @@ import org.w3c.dom.Document
 import org.w3c.dom.NodeList
 import org.w3c.dom.Node
 
-public class TestMultiModuleLooseEarEjbDependency extends AbstractIntegrationTest {
-    static File projectDir = new File(TestMultiModuleLooseEarEjbDependency.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getParentFile().getParentFile().getParentFile()
-    static File resourceDir = new File(projectDir, "build/resources/test/multi-module-loose-ear-ejb-dependency-test")
-    static File buildDir = new File(projectDir, "build/testBuilds/multi-module-loose-ear-ejb-dependency-test")
+public class TestMultiModuleLooseEarTransitiveDependency extends AbstractIntegrationTest {
+    static File projectDir = new File(TestMultiModuleLooseEarTransitiveDependency.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getParentFile().getParentFile().getParentFile()
+    static File resourceDir = new File(projectDir, "build/resources/test/multi-module-loose-ear-transitive-test")
+    static File buildDir = new File(projectDir, "build/testBuilds/multi-module-loose-ear-transitive-test")
     static String buildFilename = "build.gradle"
 
     @BeforeClass
@@ -34,6 +34,7 @@ public class TestMultiModuleLooseEarEjbDependency extends AbstractIntegrationTes
             throw new AssertionError("The source file '${resourceDir.canonicalPath}' doesn't exist.", null)
         }
         try {
+            // Copy all resources except .gradle files (include settings.gradle and build.gradle)
             FileUtils.copyDirectory(resourceDir, buildDir, new FileFilter() {
                public boolean accept (File pathname) {
                    return ((!pathname.getPath().endsWith(".gradle") && 
@@ -64,13 +65,13 @@ public class TestMultiModuleLooseEarEjbDependency extends AbstractIntegrationTes
             throw new AssertionError("Fail on task deploy.", e)
         }
         
-        File looseXml = new File('build/testBuilds/multi-module-loose-ear-ejb-dependency-test/ear/build/wlp/usr/servers/testServer/apps/ejb-dependency-ear-1.0.ear.xml')
+        File looseXml = new File('build/testBuilds/multi-module-loose-ear-transitive-test/ear/build/wlp/usr/servers/testServer/apps/ejb-transitive-dependency-ear-1.0.ear.xml')
         assert looseXml.exists() : 'Loose application config file was not created'
     }
 
     @Test
-    public void test_ejb_module_includes_dependency_classes() {
-        File looseXml = new File('build/testBuilds/multi-module-loose-ear-ejb-dependency-test/ear/build/wlp/usr/servers/testServer/apps/ejb-dependency-ear-1.0.ear.xml')
+    public void test_ejb_module_includes_transitive_dependencies() {
+        File looseXml = new File('build/testBuilds/multi-module-loose-ear-transitive-test/ear/build/wlp/usr/servers/testServer/apps/ejb-transitive-dependency-ear-1.0.ear.xml')
         FileInputStream input = new FileInputStream(looseXml)
 
         DocumentBuilderFactory inputBuilderFactory = DocumentBuilderFactory.newInstance()
@@ -85,7 +86,7 @@ public class TestMultiModuleLooseEarEjbDependency extends AbstractIntegrationTes
 
         XPath xPath = XPathFactory.newInstance().newXPath()
 
-        String expression = "/archive/archive[@targetInArchive='/ejb-dependency-ejb-jar-1.0.jar']"
+        String expression = "/archive/archive[@targetInArchive='/ejb-transitive-dependency-ejb-jar-1.0.jar']"
         NodeList ejbModuleNodes = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET)
         Assert.assertEquals("Should have exactly one EJB module archive", 1, ejbModuleNodes.getLength())
 
@@ -94,53 +95,35 @@ public class TestMultiModuleLooseEarEjbDependency extends AbstractIntegrationTes
         expression = "dir"
         NodeList dirNodes = (NodeList) xPath.compile(expression).evaluate(ejbModuleNode, XPathConstants.NODESET)
 
-        Assert.assertEquals("EJB module should have exactly 2 <dir> elements (own classes + dependency classes)",
-                         2, dirNodes.getLength())
+        Assert.assertEquals("EJB module should have exactly 3 <dir> elements (own classes + lib-jar + base-jar)", 
+                         3, dirNodes.getLength())
 
-        // Verify that one of the directories is from lib-jar module
+        // Verify that directories are from all three modules
+        boolean foundEjbClasses = false
         boolean foundLibJarClasses = false
+        boolean foundBaseJarClasses = false
+        
         for (int i = 0; i < dirNodes.getLength(); i++) {
             Node dirNode = dirNodes.item(i)
             String sourceOnDisk = dirNode.getAttributes().getNamedItem("sourceOnDisk").getNodeValue()
             
-            if (sourceOnDisk.contains("lib-jar") && sourceOnDisk.contains("classes")) {
-                foundLibJarClasses = true
-                
-                // Verify targetInArchive is "/"
+            if (sourceOnDisk.contains("ejb-jar") && sourceOnDisk.contains("classes")) {
+                foundEjbClasses = true
                 String targetInArchive = dirNode.getAttributes().getNamedItem("targetInArchive").getNodeValue()
-                Assert.assertEquals("Dependency classes should be at root of EJB JAR", "/", targetInArchive)
-                break
+                Assert.assertEquals("EJB module's own classes should be at root of JAR", "/", targetInArchive)
+            } else if (sourceOnDisk.contains("lib-jar") && sourceOnDisk.contains("classes")) {
+                foundLibJarClasses = true
+                String targetInArchive = dirNode.getAttributes().getNamedItem("targetInArchive").getNodeValue()
+                Assert.assertEquals("Direct dependency classes should be at root of EJB JAR", "/", targetInArchive)
+            } else if (sourceOnDisk.contains("base-jar") && sourceOnDisk.contains("classes")) {
+                foundBaseJarClasses = true
+                String targetInArchive = dirNode.getAttributes().getNamedItem("targetInArchive").getNodeValue()
+                Assert.assertEquals("Transitive dependency classes should be at root of EJB JAR", "/", targetInArchive)
             }
         }
         
-        Assert.assertTrue("EJB module should include lib-jar classes directory", foundLibJarClasses)
-    }
-
-    @Test
-    public void test_ejb_module_own_classes_included() {
-        File looseXml = new File('build/testBuilds/multi-module-loose-ear-ejb-dependency-test/ear/build/wlp/usr/servers/testServer/apps/ejb-dependency-ear-1.0.ear.xml')
-        FileInputStream input = new FileInputStream(looseXml)
-
-        DocumentBuilderFactory inputBuilderFactory = DocumentBuilderFactory.newInstance()
-        inputBuilderFactory.setIgnoringComments(true)
-        inputBuilderFactory.setCoalescing(true)
-        inputBuilderFactory.setIgnoringElementContentWhitespace(true)
-        inputBuilderFactory.setValidating(false)
-        inputBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false)
-        inputBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
-        DocumentBuilder inputBuilder = inputBuilderFactory.newDocumentBuilder()
-        Document inputDoc = inputBuilder.parse(input)
-
-        XPath xPath = XPathFactory.newInstance().newXPath()
-
-        String expression = "/archive/archive[@targetInArchive='/ejb-dependency-ejb-jar-1.0.jar']/dir[contains(@sourceOnDisk, 'ejb-jar') and contains(@sourceOnDisk, 'classes')]"
-        NodeList ejbModuleOwnClasses = (NodeList) xPath.compile(expression).evaluate(inputDoc, XPathConstants.NODESET)
-        
-        Assert.assertTrue("EJB module should include its own classes directory", ejbModuleOwnClasses.getLength() > 0)
-
-        // Verify it targets root of JAR
-        Node dirNode = ejbModuleOwnClasses.item(0)
-        String targetInArchive = dirNode.getAttributes().getNamedItem("targetInArchive").getNodeValue()
-        Assert.assertEquals("EJB module's own classes should be at root of JAR", "/", targetInArchive)
+        Assert.assertTrue("EJB module should include its own classes directory", foundEjbClasses)
+        Assert.assertTrue("EJB module should include lib-jar classes directory (direct dependency)", foundLibJarClasses)
+        Assert.assertTrue("EJB module should include base-jar classes directory (transitive dependency)", foundBaseJarClasses)
     }
 }

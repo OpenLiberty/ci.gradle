@@ -1,0 +1,4 @@
+rootProject.name = 'ejb-mixed-dependency'
+include ':lib-jar'
+include ':ejb-jar'
+include ':ear'

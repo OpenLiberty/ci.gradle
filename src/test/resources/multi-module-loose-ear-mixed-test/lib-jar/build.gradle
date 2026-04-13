@@ -1,8 +1,7 @@
-description = 'EJB Module'
+description = 'Library Module'
 
 dependencies {
     compileOnly group: 'javax', name: 'javaee-api', version:'7.0'
-    implementation project(':lib-jar')
 }
 
 jar {

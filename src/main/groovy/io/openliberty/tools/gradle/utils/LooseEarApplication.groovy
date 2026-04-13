@@ -126,39 +126,49 @@ public class LooseEarApplication extends LooseApplication {
     }
 
     /**
-     * Add dependency class directories so EJB modules can see classes from their dependencies
-     * @param moduleArchive
-     * @param proj
+     * Recursively collect all project dependencies (including transitive)
+     * @param project The project to collect dependencies from
+     * @param collected The set to add dependencies to
      */
+    private void collectProjectDependenciesRecursively(Project project, Set<Project> collected) {
+        // Add the project itself
+        collected.add(project)
+        
+        // Recursively collect dependencies from compileClasspath
+        if (project.configurations.findByName('compileClasspath') != null) {
+            project.configurations.compileClasspath.allDependencies.each { dep ->
+                if (dep instanceof ProjectDependency) {
+                    Project depProj = project.rootProject.findProject(dep.path)
+                    if (depProj != null && !collected.contains(depProj)) {
+                        collectProjectDependenciesRecursively(depProj, collected)
+                    }
+                }
+            }
+        }
+        
+        // Recursively collect dependencies from runtimeClasspath
+        if (project.configurations.findByName('runtimeClasspath') != null) {
+            project.configurations.runtimeClasspath.allDependencies.each { dep ->
+                if (dep instanceof ProjectDependency) {
+                    Project depProj = project.rootProject.findProject(dep.path)
+                    if (depProj != null && !collected.contains(depProj)) {
+                        collectProjectDependenciesRecursively(depProj, collected)
+                    }
+                }
+            }
+        }
+    }
+    
     private void addDependencyClassDirectories(Element moduleArchive, Project proj) {
         try {
             Set<Project> projectDependencies = new HashSet<Project>();
             
-            // Check compileClasspath for compile-time dependencies
-            if (proj.configurations.findByName('compileClasspath') != null) {
-                proj.configurations.compileClasspath.allDependencies.each { dep ->
-                    if (dep instanceof ProjectDependency) { // Ensure it's a project dependency
-                        Project depProj = proj.rootProject.findProject(dep.path)
-                        if (depProj != null) {
-                            projectDependencies.add(depProj)
-                        }
-                    }
-                }
-            }
+            // Collect all project dependencies (including transitive) recursively
+            collectProjectDependenciesRecursively(proj, projectDependencies)
+            // Remove the project itself - we only want dependencies
+            projectDependencies.remove(proj)
             
-            // Check runtimeClasspath for runtime dependencies
-            if (proj.configurations.findByName('runtimeClasspath') != null) {
-                proj.configurations.runtimeClasspath.allDependencies.each { dep ->
-                    if (dep instanceof ProjectDependency) { // Ensure it's a project dependency
-                        Project depProj = proj.rootProject.findProject(dep.path)
-                        if (depProj != null) {
-                            projectDependencies.add(depProj)
-                        }
-                    }
-                }
-            }
-            
-            logger.debug("Found ${projectDependencies.size()} project dependencies for ${proj.name}")
+            logger.debug("Found ${projectDependencies.size()} project dependencies (including transitive) for ${proj.name}")
             
             // Process each project dependency
             projectDependencies.each { dependencyProject ->
