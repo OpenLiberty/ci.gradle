@@ -21,23 +21,22 @@ import org.w3c.dom.NodeList
 import org.w3c.dom.Node
 
 public class TestMultiModuleLooseEarEjbDependency extends AbstractIntegrationTest {
-    static File projectDir = new File(TestMultiModuleLooseEarEjbDependency.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getParentFile().getParentFile().getParentFile()
-    static File resourceDir = new File(projectDir, "build/resources/test/multi-module-loose-ear-ejb-dependency-test")
-    static File buildDir = new File(projectDir, "build/testBuilds/multi-module-loose-ear-ejb-dependency-test")
+    static File resourceDir = new File("build/resources/test/multi-module-loose-ear-ejb-dependency-test")
+    static File buildDir = new File(integTestDir, "/multi-module-loose-ear-ejb-dependency-test")
     static String buildFilename = "build.gradle"
 
     @BeforeClass
     public static void setup() {
         createDir(buildDir)
-        // Inline createTestProject logic with absolute paths
+        // Inline createTestProject logic
         if (!resourceDir.exists()){
             throw new AssertionError("The source file '${resourceDir.canonicalPath}' doesn't exist.", null)
         }
         try {
             // Copy all resources
             FileUtils.copyDirectory(resourceDir, buildDir)
-            // Copy gradle.properties with absolute path
-            copyFile(new File(projectDir, "build/gradle.properties"), new File(buildDir, "gradle.properties"))
+            // Copy gradle.properties
+            copyFile(new File("build/gradle.properties"), new File(buildDir, "gradle.properties"))
         } catch (IOException e) {
             throw new AssertionError("Unable to copy directory '${buildDir.canonicalPath}'.", e)
         }
