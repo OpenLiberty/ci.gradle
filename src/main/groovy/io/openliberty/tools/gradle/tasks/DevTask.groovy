@@ -1209,11 +1209,12 @@ class DevTask extends AbstractFeatureTask {
     }
 
     public void runGenerateFeaturesTask(BuildLauncher gradleBuildLauncher, List<String> options) throws BuildException {
-        String[] tasks = new String[options != null ? options.size() + 1 : 1];
+        String[] tasks = new String[options != null ? options.size() + 2 : 2];
         tasks[0] = 'generateFeatures';
+        tasks[1] = '--isDevMode=true';
         if (options != null) {
             for(int i = 0; i < options.size(); i++) {
-                tasks[i+1] = options.get(i);
+                tasks[i+2] = options.get(i);
             }
         }
 
