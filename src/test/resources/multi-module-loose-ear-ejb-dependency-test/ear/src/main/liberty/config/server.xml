@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<server description="Test server">
+    <featureManager>
+        <feature>ejb-3.2</feature>
+    </featureManager>
+
+    <httpEndpoint id="defaultHttpEndpoint"
+                  host="*"
+                  httpPort="9080"
+                  httpsPort="9443" />
+
+    <application location="ejb-dependency-ear-1.0.ear"/>
+</server>
