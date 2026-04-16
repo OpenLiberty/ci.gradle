@@ -23,7 +23,6 @@ import org.w3c.dom.Node
 public class TestMultiModuleLooseEarTransitiveDependency extends AbstractIntegrationTest {
     static File resourceDir = new File("build/resources/test/multi-module-loose-ear-transitive-test")
     static File buildDir = new File(integTestDir, "/multi-module-loose-ear-transitive-test")
-    static String buildFilename = "build.gradle"
 
     @BeforeClass
     public static void setup() {
