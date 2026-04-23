@@ -959,15 +959,18 @@ class DevTask extends AbstractFeatureTask {
                     def scopeString = isTest ? "test " : "";
 
                     if (launcher != null && launcher.metadata != null) {
-                        def metadata = launcher.metadata;
-                        logger.lifecycle(
-                                "Using Java toolchain for dev mode ${scopeString}compilation: " +
-                                        "version=${metadata.languageVersion}, javaHome=${metadata.installationPath.asFile}"
-                        );
+                        if (isJavaHomeSetForEnvProperties || isJavaHomeSetForJvmOptions) {
+                            logger.debug("JAVA_HOME is set in ${isJavaHomeSetForEnvProperties ? 'server.env' : 'jvm.options'}, " +
+                                    "taking precedence over Java toolchain for dev mode ${scopeString}compilation.");
+                        } else {
+                            def metadata = launcher.metadata;
+                            logger.lifecycle(
+                                    "Using Java toolchain for dev mode ${scopeString}compilation: " +
+                                            "version=${metadata.languageVersion}, javaHome=${metadata.installationPath.asFile}"
+                            );
+                        }
                     } else {
-                        logger.debug(
-                                "No Java toolchain launcher is configured for dev mode ${scopeString}compilation."
-                        );
+                        logger.debug("No Java toolchain launcher is configured for dev mode ${scopeString}compilation.");
                     }
                 }
 
@@ -1206,11 +1209,12 @@ class DevTask extends AbstractFeatureTask {
     }
 
     public void runGenerateFeaturesTask(BuildLauncher gradleBuildLauncher, List<String> options) throws BuildException {
-        String[] tasks = new String[options != null ? options.size() + 1 : 1];
+        String[] tasks = new String[options != null ? options.size() + 2 : 2];
         tasks[0] = 'generateFeatures';
+        tasks[1] = '--isDevMode=true';
         if (options != null) {
             for(int i = 0; i < options.size(); i++) {
-                tasks[i+1] = options.get(i);
+                tasks[i+2] = options.get(i);
             }
         }
 
