@@ -39,8 +39,7 @@ jobs:
     - name: Checkout ci.common
       uses: actions/checkout@v3
       with:
-        repository: sajeerzeji/ci.common
-        reference: GH752-duplicate_processFileChanges_calls_for_java_source_files_in_devmode
+        repository: OpenLiberty/ci.common
         path: ci.common
     - name: Checkout ci.ant
       uses: actions/checkout@v3
@@ -128,7 +127,7 @@ jobs:
     - name: Clone ci.ant, ci.common, ci.gradle repos to C drive
       run: |
         echo ${{github.workspace}}
-        git clone https://github.com/sajeerzeji/ci.common.git --branch GH752-duplicate_processFileChanges_calls_for_java_source_files_in_devmode --single-branch ${{github.workspace}}/ci.common
+        git clone https://github.com/OpenLiberty/ci.common.git ${{github.workspace}}/ci.common
         git clone https://github.com/OpenLiberty/ci.ant.git ${{github.workspace}}/ci.ant
     # Cache mvn/gradle packages
     - name: Cache Maven packages
