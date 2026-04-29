@@ -1,7 +1,7 @@
-
 apply plugin: 'war'
 
 jar.enabled = false
+
 description = 'WAR Module'
 dependencies {
     testImplementation group: 'junit', name: 'junit', version:'4.13.1'
@@ -9,7 +9,16 @@ dependencies {
     providedCompile project(':ejb-ejb')
 }
 
+// Create a custom configuration that only includes the WAR artifact
+configurations {
+    warOnly
+}
+
+// Add the WAR artifact to the warOnly configuration
+artifacts {
+    warOnly war
+}
+
 war {
     archiveFileName = getArchiveBaseName().get() + '.' + getArchiveExtension().get()
 }
-
