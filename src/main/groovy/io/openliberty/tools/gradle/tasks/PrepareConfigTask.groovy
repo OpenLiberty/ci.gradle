@@ -86,7 +86,7 @@ class PrepareConfigTask extends AbstractServerTask {
      */
     @Input
     @Optional
-    boolean includeServerInfo = true
+    Boolean includeServerInfo = true
 
     PrepareConfigTask() {
         configure({

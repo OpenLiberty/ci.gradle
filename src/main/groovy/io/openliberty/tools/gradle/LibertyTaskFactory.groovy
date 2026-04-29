@@ -66,7 +66,7 @@ class LibertyTaskFactory {
         project.tasks.create('installFeature', InstallFeatureTask)
         project.tasks.create('generateFeatures', GenerateFeaturesTask)
         project.tasks.create('prepareFeature', PrepareFeatureTask)
-        project.tasks.create('prepareConfig', PrepareConfigTask)
+        project.tasks.create('libertyPrepareConfig', PrepareConfigTask)
         project.tasks.create('uninstallFeature', UninstallFeatureTask)
         project.tasks.create('cleanDirs', CleanTask)
         project.tasks.create('configureArquillian', ConfigureArquillianTask)
