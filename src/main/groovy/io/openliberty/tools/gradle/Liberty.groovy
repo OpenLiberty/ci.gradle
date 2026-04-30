@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2025.
+ * (C) Copyright IBM Corporation 2014, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,14 @@ import io.openliberty.tools.gradle.extensions.DeployExtension
 import io.openliberty.tools.gradle.extensions.LibertyExtension
 import io.openliberty.tools.gradle.extensions.ServerExtension
 import io.openliberty.tools.gradle.extensions.arquillian.ArquillianExtension
+import io.openliberty.tools.gradle.utils.GradleUtils
 
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.execution.TaskExecutionGraph
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.testing.Test
+import org.gradle.util.GradleVersion
 
 import java.util.Properties
 import java.text.MessageFormat
@@ -101,7 +103,10 @@ class Liberty implements Plugin<Project> {
                 Dependency[] deps = project.configurations.deploy.getAllDependencies().toArray()
                 deps.each { Dependency dep ->
                     if (dep instanceof ProjectDependency) {
-                        def projectDep = dep.getDependencyProject()
+                        validateProjectDependencyConfiguration(project, (ProjectDependency) dep)
+                        validateSimpleProjectDependency(project, (ProjectDependency) dep)
+                        def projectPath = dep.getPath()
+                        def projectDep = project.findProject(projectPath)
                         if (projectDep.plugins.hasPlugin('war')) {
                             setFacetVersion(projectDep, 'jst.web', JST_WEB_FACET_VERSION)
                         }
@@ -199,4 +204,11 @@ class Liberty implements Plugin<Project> {
         return new File(installDir, 'wlp')
     }
 
+    protected void validateProjectDependencyConfiguration(Project project, ProjectDependency dependency) {
+        GradleUtils.validateProjectDependencyConfiguration(project, dependency)
+    }
+    
+    protected void validateSimpleProjectDependency(Project project, ProjectDependency dependency) {
+        GradleUtils.validateSimpleProjectDependency(project, dependency)
+    }
 }

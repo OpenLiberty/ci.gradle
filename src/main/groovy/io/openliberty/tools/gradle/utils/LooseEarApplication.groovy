@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2018, 2025
+ * (C) Copyright IBM Corporation 2018, 2026
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ public class LooseEarApplication extends LooseApplication {
      * @param proj current project
      * @return
      */
-    private static boolean resourcesDirContentsExist(Project proj) {
+    protected static boolean resourcesDirContentsExist(Project proj) {
         def resourcesDir = proj.sourceSets.main.getOutput().getResourcesDir()
 
         // Check if it's a directory, and then check the 'list' array for emptiness

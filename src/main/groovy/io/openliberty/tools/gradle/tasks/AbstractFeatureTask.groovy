@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2021, 2024.
+ * (C) Copyright IBM Corporation 2021, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,8 +110,8 @@ public class AbstractFeatureTask extends AbstractServerTask {
     }
 
     private class InstallFeatureTaskUtil extends InstallFeatureUtil {
-        public InstallFeatureTaskUtil(File installDir, File buildDir, String from, String to, Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons, String verify, Collection<Map<String,String>> keyMap)  throws PluginScenarioException, PluginExecutionException {
-            super(installDir, buildDir, from, to, pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons, verify, keyMap)
+        public InstallFeatureTaskUtil(File installDir, File buildDir, String from, String to, Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons, String verify, Collection<Map<String,String>> keyMap, Map<String, String> environmentVariables)  throws PluginScenarioException, PluginExecutionException {
+            super(installDir, buildDir, from, to, pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons, verify, keyMap, environmentVariables)
             setContainerEngine(this);
         }
 
@@ -279,7 +279,6 @@ public class AbstractFeatureTask extends AbstractServerTask {
      * @param suppressLogs if true info and warning will be logged as debug
      * @return instance of ServerFeatureUtil
      */
-    @Internal
     protected ServerFeatureUtil getServerFeatureUtil(boolean suppressLogs, Map<String, File> libDirPropFiles) {
         if (servUtil == null) {
             servUtil = new ServerFeatureTaskUtil();
@@ -296,7 +295,8 @@ public class AbstractFeatureTask extends AbstractServerTask {
     private void createNewInstallFeatureUtil(Set<String> pluginListedEsas, List<ProductProperties> propertiesList, String openLibertyVerion, String containerName, List<String> additionalJsons, Collection<Map<String,String>> keyMap) throws PluginExecutionException {
         try {
 			logger.info("Feature signature verify option: " + server.features.verify)
-            util = new InstallFeatureTaskUtil(getInstallDir(project), project.getLayout().getBuildDirectory().getAsFile().get(), server.features.from, server.features.to, pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons, server.features.verify, keyMap)
+            Map<String, String> envVars = getToolchainEnvVar()
+            util = new InstallFeatureTaskUtil(getInstallDir(project), project.getLayout().getBuildDirectory().getAsFile().get(), server.features.from, server.features.to, pluginListedEsas, propertiesList, openLibertyVerion, containerName, additionalJsons, server.features.verify, keyMap, envVars)
         } catch (PluginScenarioException e) {
             logger.debug("Exception received: " + e.getMessage(), (Throwable) e)
             logger.debug("Installing features from installUtility.")

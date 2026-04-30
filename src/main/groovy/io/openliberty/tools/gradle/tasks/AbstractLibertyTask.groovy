@@ -45,6 +45,9 @@ abstract class AbstractLibertyTask extends DefaultTask {
     @Optional
     public final Property<JavaLauncher> javaLauncher = project.objects.property(JavaLauncher)
 
+    // Cached toolchain javaHome
+    private String resolvedToolchainJavaHome = null
+
     public JavaLauncher getJavaLauncher() {
         if(!javaLauncher.isPresent()) {
             configureDefaults();
@@ -71,7 +74,7 @@ abstract class AbstractLibertyTask extends DefaultTask {
      * configure default java launcher using toolchain
      * toolchain can be null for a project, but JavaToolchainService is expected to provide the default launcher
      */
-    private void configureDefaults() {
+    void configureDefaults() {
         try {
             // Check if the extension exists before trying to use it
             def javaExtension = project.extensions.findByType(JavaPluginExtension)
@@ -207,7 +210,6 @@ abstract class AbstractLibertyTask extends DefaultTask {
         }
         return task
     }
-    @Internal
     protected boolean isLibertyInstalledAndValid(Project project) {
         File installDir = getInstallDir(project)
         boolean installationExists = installDir.exists() && new File(installDir,"lib/ws-launch.jar").exists()
@@ -273,11 +275,14 @@ abstract class AbstractLibertyTask extends DefaultTask {
      */
     @Internal
     protected String getToolchainJavaHome() {
+        if (resolvedToolchainJavaHome != null) {
+            return resolvedToolchainJavaHome
+        }
         def launcher = getConfiguredLauncher()
         if (launcher != null) {
-            return launcher.metadata.installationPath.asFile.absolutePath
+            resolvedToolchainJavaHome = launcher.metadata.installationPath.asFile.absolutePath
         }
-        return null
+        return resolvedToolchainJavaHome
     }
     @Internal
     protected boolean isToolchainConfigured() {

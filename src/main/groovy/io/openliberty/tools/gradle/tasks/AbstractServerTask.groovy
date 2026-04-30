@@ -26,14 +26,17 @@ import io.openliberty.tools.common.plugins.util.DevUtil
 import io.openliberty.tools.common.plugins.util.LibertyPropFilesUtility
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.gradle.utils.CommonLogger
+import io.openliberty.tools.gradle.utils.GradleUtils
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.io.filefilter.FileFilterUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ModuleDependency
+import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.bundling.War
 import org.gradle.plugins.ear.Ear
@@ -46,6 +49,7 @@ import java.nio.file.StandardCopyOption
 import java.util.Map.Entry
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import org.gradle.util.GradleVersion
 
 abstract class AbstractServerTask extends AbstractLibertyTask {
 
@@ -72,6 +76,9 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
 
     protected def server
     protected def springBootBuildTask
+
+    protected boolean isJavaHomeSetForEnvProperties = false
+    protected boolean isJavaHomeSetForJvmOptions = false
 
     private enum PropertyType {
         BOOTSTRAP("liberty.server.bootstrapProperties"),
@@ -382,7 +389,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         writeServerPropertiesToXml(project)
     }
 
-    private void loadLibertyConfigFromProperties() {
+    protected void loadLibertyConfigFromProperties() {
         Set<Entry<Object, Object>> entries = project.getProperties().entrySet()
         for (Entry<Object, Object> entry : entries) {
             String key = (String) entry.getKey()
@@ -434,7 +441,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         }
     }
 
-    private void addProjectProperty(String propName, String propValue, PropertyType propType) {
+    protected void addProjectProperty(String propName, String propValue, PropertyType propType) {
         if (propValue != null) {
             logger.debug("Processing Liberty configuration from property with type "+ propType +" and name "+ propName +" and value "+ propValue)
         } else {
@@ -639,8 +646,9 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
 
         return new Tuple(appTasks, appFiles)
     }
-    
-    private boolean isSupportedType(){
+
+    @Internal
+    protected boolean isSupportedType(){
       switch (getPackagingType()) {
         case "ear":
         case "war":
@@ -770,7 +778,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         logger.info ("Adding Liberty plugin config info to ${project.getLayout().getBuildDirectory().getAsFile().get()}/liberty-plugin-config.xml.")
     }
 
-    private void writeBootstrapProperties(File file, Properties properties, Map<String, String> projectProperties) throws IOException {
+    protected void writeBootstrapProperties(File file, Properties properties, Map<String, String> projectProperties) throws IOException {
         Map<String,String> convertedProps = convertPropertiesToMap(properties)
         if (! projectProperties.isEmpty()) {
             if (properties == null) {
@@ -820,7 +828,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         return uniqueValues
     }
 
-    private void writeJvmOptions(File file, List<String> options, List<String> projectProperties) throws IOException {
+    protected void writeJvmOptions(File file, List<String> options, List<String> projectProperties) throws IOException {
         combinedJvmOptions = mergeJvmOptions(options, projectProperties)
 
         makeParentDirectory(file)
@@ -838,7 +846,6 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         }
     }
 
-    @Internal
     protected List<String> mergeJvmOptions(List<String> options, List<String> projectProperties) {
         List<String> uniqueOptions = getUniqueValues(options)
         List<String> uniqueProps = getUniqueValues(projectProperties)
@@ -860,7 +867,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         return combinedJvmOptions
     }
 
-    private String handleServerEnvFileAndProperties(String serverEnvPath, String serverDirectory) {
+    protected String handleServerEnvFileAndProperties(String serverEnvPath, String serverDirectory) {
         File envFile = new File(serverDirectory, "server.env")
         Properties configuredProps = combineServerEnvProperties(server.env, envProjectProps);
 
@@ -872,15 +879,14 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         }
     }
 
-    private String setServerEnvWithAppendServerEnvHelper(File envFile, String serverEnvPath, Properties configuredProps) {
+    protected String setServerEnvWithAppendServerEnvHelper(File envFile, String serverEnvPath, Properties configuredProps) {
         Properties serverEnvProps = convertServerEnvToProperties(envFile);
         Properties mergedProperties = new Properties();
 
         if (server.serverEnvFile != null && server.serverEnvFile.exists()) {
             if (serverEnvPath != null) {
                 logger.debug("The serverEnvFile "+ server.serverEnvFile.getCanonicalPath() + " is merged with the " + serverEnvPath + " file.")
-            }
-            else {
+            } else {
                 logger.debug("The serverEnvFile "+ server.serverEnvFile.getCanonicalPath() + " is merged with the " + getServerDir(project).getCanonicalPath() + " file.")
             }
             Properties configuredServerEnvProps = convertServerEnvToProperties(server.serverEnvFile);
@@ -891,8 +897,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         if (!configuredProps.isEmpty()) {
             if (serverEnvPath != null) {
                 logger.debug("The " + serverEnvPath + " file is merged with inlined configuration.")
-            }
-            else {
+            } else {
                 logger.debug("The " + getServerDir(project).getCanonicalPath() + " file is merged with inlined configuration.")
             }
 
@@ -911,7 +916,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         return serverEnvPath;
     }
 
-    private String setServerEnvPathHelperForAppendServerEnv(File envFile, Properties configuredProps, String serverEnvPath) {
+    protected String setServerEnvPathHelperForAppendServerEnv(File envFile, Properties configuredProps, String serverEnvPath) {
         boolean configDirEnvMerged = serverEnvPath != null;
         boolean serverEnvFileMerged = server.serverEnvFile != null && server.serverEnvFile.exists()
         boolean inlineEnvPropsMerged = !configuredProps.isEmpty()
@@ -941,7 +946,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         return updatedServerEnvPath.toString();
     }
 
-    private String setServerEnvHelper(File envFile, String serverEnvPath, Properties configuredProps) {
+    protected String setServerEnvHelper(File envFile, String serverEnvPath, Properties configuredProps) {
         if ((server.env != null && !server.env.isEmpty()) || !envProjectProps.isEmpty()) {
             Properties envPropsToWrite = configuredProps
             if (serverEnvPath == null && server.serverEnvFile == null) {
@@ -967,7 +972,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      * envProps, to which any of a list of special properties found in envFile have been added.  We give precedence
      * to properties already in envProps.
      */
-    private Properties mergeSpecialPropsFromInstallServerEnvIfAbsent(File envFile, Properties envProps) throws IOException {
+    protected Properties mergeSpecialPropsFromInstallServerEnvIfAbsent(File envFile, Properties envProps) throws IOException {
 
         // Make a copy to avoid side effects 
         Properties mergedProps = new Properties()
@@ -985,7 +990,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
     }
 
 
-    private Properties convertServerEnvToProperties(File serverEnv) {
+    protected Properties convertServerEnvToProperties(File serverEnv) {
         Properties serverEnvProps = new Properties();
 
         if ((serverEnv == null) || !serverEnv.exists()) {
@@ -1011,7 +1016,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         return serverEnvProps;
     }
 
-    private Properties combineServerEnvProperties(Properties properties, Properties projectProperties) {
+    protected Properties combineServerEnvProperties(Properties properties, Properties projectProperties) {
         Properties combinedEnvProperties = new Properties()
         if (! projectProperties.isEmpty()) {
             if (properties.isEmpty()) {
@@ -1028,7 +1033,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         return combinedEnvProperties;
     }
     
-    private void writeServerEnvProperties(File file, Properties combinedEnvProperties) throws IOException {
+    protected void writeServerEnvProperties(File file, Properties combinedEnvProperties) throws IOException {
         makeParentDirectory(file)
         PrintWriter writer = null
         try {
@@ -1047,7 +1052,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
     }
 
 
-    private void writeConfigDropinsServerVariables(File file, Properties varProps, Properties varProjectProps, boolean isDefaultVar) throws IOException, TransformerException, ParserConfigurationException {
+    protected void writeConfigDropinsServerVariables(File file, Properties varProps, Properties varProjectProps, boolean isDefaultVar) throws IOException, TransformerException, ParserConfigurationException {
 
         ServerConfigXmlDocument configDocument = ServerConfigXmlDocument.newInstance()
 
@@ -1067,7 +1072,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
 
     }
 
-    private void makeParentDirectory(File file) {
+    protected void makeParentDirectory(File file) {
         File parentDir = file.getParentFile()
         if (parentDir != null) {
             parentDir.mkdirs()
@@ -1109,15 +1114,26 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
 
         //This loops thorugh all the Dependency objects that get created by the configuration
         for (Dependency dep : project.configurations.libertyApp.getDependencies()) {
+            Dependency depCopy = dep;
+
+            // In Gradle 9.0.0, we cannot modify dependencies after a configuration has been resolved
+            Configuration detachedConfig;
             if (dep instanceof ModuleDependency) { //Check that dep isn't a File dependency
-                dep.setTransitive(false) //Only want main artifacts, one for Maven and one or more for Gradle/Ivy dependencies
+                ModuleDependency moduleDep = (ModuleDependency) dep;
+                ModuleDependency depClone = moduleDep.copy();
+                depClone.setTransitive(false);
+                detachedConfig = project.configurations.detachedConfiguration(depClone);
+                depCopy = depClone;
+            } else {
+                detachedConfig = project.configurations.detachedConfiguration(dep);
             }
 
-            Set<File> depArtifacts = project.configurations.libertyApp.files(dep) //Resolve the artifacts
+            // In Gradle 9.0.0, the files(dep) method on configurations is no longer supported for dependency objects.
+            Set<File> depArtifacts = detachedConfig.resolve() //Resolve the artifacts
             for (File depArtifact : depArtifacts) {
                 File appFile = depArtifact
-                if (dep instanceof ModuleDependency && server.stripVersion && depArtifact.getName().contains(dep.getVersion())) {
-                    String noVersionName = depArtifact.getName().minus("-" + dep.getVersion()) //Assuming default Gradle naming scheme
+                if (depCopy instanceof ModuleDependency && server.stripVersion && depArtifact.getName().contains(((ModuleDependency)depCopy).getVersion())) {
+                    String noVersionName = depArtifact.getName().minus("-" + ((ModuleDependency)depCopy).getVersion()) //Assuming default Gradle naming scheme
                     File noVersionDependencyFile = new File(project.getLayout().getBuildDirectory().asFile.get(), 'libs/' + noVersionName) //Copying the file to build/libs with no version
                     FileUtils.copyFile(depArtifact, noVersionDependencyFile)
                     appFile = noVersionDependencyFile
@@ -1217,7 +1233,11 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
             // run once to make sure project properties are loaded
             loadLibertyConfigFromProperties();
         }
-        if (!isJavaHomeSetForEnvProperties() && !isJavaHomeSetForJvmOptions()) {
+
+        this.isJavaHomeSetForEnvProperties = isJavaHomeSetForEnvProperties();
+        this.isJavaHomeSetForJvmOptions = isJavaHomeSetForJvmOptions();
+
+        if (!isJavaHomeSetForEnvProperties && !isJavaHomeSetForJvmOptions) {
             logger.info("CWWKM4101I: The " + this.path + " task is using the configured toolchain JDK located at " + jdkHome)
             // 3. Apply toolchain configuration
             return populateEnvironmentVariablesMap(jdkHome);
@@ -1231,8 +1251,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      *
      * @return The File object for the server.env, or null if neither exists or is specified.
      */
-    @Internal
-    private File findServerEnvFile() {
+    protected File findServerEnvFile() {
         if (server.serverEnvFile != null && server.serverEnvFile.exists()) {
             return server.serverEnvFile
         }
@@ -1254,8 +1273,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      *
      * @return The File object for the jvm.options, or null if neither exists or is specified.
      */
-    @Internal
-    private File findJvmOptionsFile() {
+    protected File findJvmOptionsFile() {
         if (server.jvmOptionsFile != null && server.jvmOptionsFile.exists()) {
             return server.jvmOptionsFile
         }
@@ -1279,8 +1297,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      * @param configFile The file to read.
      * @return A list of strings, each representing a line in the file. Returns an empty list on failure.
      */
-    @Internal
-    private List<String> readConfigFileLines(File configFile) {
+    protected List<String> readConfigFileLines(File configFile) {
         if (configFile == null || !configFile.exists()) {
             return Collections.emptyList();
         }
@@ -1299,8 +1316,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      * @param jdkHome    The resolved JDK home path.
      * @return envVars
      */
-    @Internal
-    private static Map<String, String> populateEnvironmentVariablesMap(String jdkHome) {
+    protected static Map<String, String> populateEnvironmentVariablesMap(String jdkHome) {
         Map<String, String> envVars = new HashMap<>();
         envVars.put("JAVA_HOME", jdkHome);
         return envVars;
@@ -1310,7 +1326,6 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      * get toolchain environment variables and set to ProcessBuilder
      * @param pb ProcessBuilder
      */
-    @Internal
     protected void addToolchainEnvToProcessBuilder(ProcessBuilder pb) {
         Map<String, String> envVars = getToolchainEnvVar();
         if (!envVars.isEmpty()) {
@@ -1318,11 +1333,6 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         }
     }
 
-    /**
-     * get toolchain environment variables and set to ServerTask
-     * @param serverTask serverTask
-     */
-    @Internal
     protected void addToolchainEnvToServerTask(ServerTask serverTask) {
         Map<String, String> envVars = getToolchainEnvVar();
         if (!envVars.isEmpty()) {
@@ -1335,7 +1345,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      * @return
      */
     @Internal
-    private boolean isJavaHomeSetForEnvProperties() {
+    protected boolean isJavaHomeSetForEnvProperties() {
         Properties serverEnvProjectProps = combineServerEnvProperties(server.env, envProjectProps)
         if (serverEnvProjectProps.containsKey("JAVA_HOME")) {
             logger.warn("CWWKM4101W: The toolchain JDK configuration for task " + this.path + " is not honored because the JAVA_HOME property is specified in server.env properties.")
@@ -1347,7 +1357,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
         // if mergeServerEnv is true and custom libert.server.serverEnvFile is specified,
         // then consider configDir server.env separate
         if (server.mergeServerEnv && server.serverEnvFile != null && server.serverEnvFile.exists()
-            && server.configDirectory != null && server.configDirectory.exists()) {
+                && server.configDirectory != null && server.configDirectory.exists()) {
             File configDirServerEnv = new File(server.configDirectory, "server.env")
             if (configDirServerEnv.exists()) {
                 serverEnvLines.addAll(readConfigFileLines(configDirServerEnv))
@@ -1368,7 +1378,7 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      * @return
      */
     @Internal
-    private boolean isJavaHomeSetForJvmOptions() {
+    protected boolean isJavaHomeSetForJvmOptions() {
         File jvmOptionsFile = findJvmOptionsFile()
         List<String> jvmOptionsLines = new ArrayList<>()
         // check whether user has defined jvmOptionsFile. if file is defined, it would get highest priority
@@ -1385,5 +1395,9 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
             }
         }
         return false
+    }
+
+    protected void validateProjectDependencyConfiguration(ProjectDependency dependency) {
+        GradleUtils.validateProjectDependencyConfiguration(project, dependency)
     }
 }

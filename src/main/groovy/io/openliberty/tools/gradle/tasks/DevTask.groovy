@@ -959,15 +959,18 @@ class DevTask extends AbstractFeatureTask {
                     def scopeString = isTest ? "test " : "";
 
                     if (launcher != null && launcher.metadata != null) {
-                        def metadata = launcher.metadata;
-                        logger.lifecycle(
-                                "Using Java toolchain for dev mode ${scopeString}compilation: " +
-                                        "version=${metadata.languageVersion}, javaHome=${metadata.installationPath.asFile}"
-                        );
+                        if (isJavaHomeSetForEnvProperties || isJavaHomeSetForJvmOptions) {
+                            logger.debug("JAVA_HOME is set in ${isJavaHomeSetForEnvProperties ? 'server.env' : 'jvm.options'}, " +
+                                    "taking precedence over Java toolchain for dev mode ${scopeString}compilation.");
+                        } else {
+                            def metadata = launcher.metadata;
+                            logger.lifecycle(
+                                    "Using Java toolchain for dev mode ${scopeString}compilation: " +
+                                            "version=${metadata.languageVersion}, javaHome=${metadata.installationPath.asFile}"
+                            );
+                        }
                     } else {
-                        logger.debug(
-                                "No Java toolchain launcher is configured for dev mode ${scopeString}compilation."
-                        );
+                        logger.debug("No Java toolchain launcher is configured for dev mode ${scopeString}compilation.");
                     }
                 }
 
