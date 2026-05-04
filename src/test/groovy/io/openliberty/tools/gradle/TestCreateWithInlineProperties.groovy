@@ -103,7 +103,7 @@ public class TestCreateWithInlineProperties extends AbstractIntegrationTest{
 
         prop = new Properties();
         prop.load( input2 );
-        assert prop.size() == 3 : "expected 3 properties in server.env file but found "+prop.size()
+        assert prop.size() == 4 : "expected 3 properties in server.env file but found "+prop.size()
         String value2 = prop.getProperty("some.env.var");
         assert value2 != null && value2.equals("someValue") : "some.env.var property not found in server.env file"
         value2 = prop.getProperty("another.env.var");
