@@ -156,6 +156,7 @@ The Liberty plugin provides the following tasks for your project:
 | [libertyDump](docs/libertyDump.md#libertydump-task)                | Dumps diagnostic information from the Liberty server into an archive. |
 | [libertyJavaDump](docs/libertyJavaDump.md#libertyjavadump-task)    | Dumps diagnostic information from the Liberty server JVM. |
 | [libertyPackage](docs/libertyPackage.md#libertypackage-task)       | Packages a Liberty server. |
+| [libertyPrepareConfig](docs/prepareConfig.md#libertyprepareconfig-task) | Prepares Liberty configuration and generates liberty-plugin-config.xml for tooling integration. |
 | [libertyRun](docs/libertyRun.md#libertyrun-task)                   | Runs a Liberty server in the Gradle foreground process. |
 | [libertyStart](docs/libertyStart.md#libertystart-task)             | Starts the Liberty server in a background process. |
 | [libertyStatus](docs/libertyStatus.md)                             | Checks to see if the Liberty server is running. |

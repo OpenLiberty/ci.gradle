@@ -66,6 +66,7 @@ class PrepareConfigTask extends AbstractServerTask {
         logger.info("Mock Liberty server structure created: ${mockServerDir.absolutePath}")
     }
 
+
     private void createInitialConfigFile(File buildDir) {
         File configFile = new File(buildDir, "liberty-plugin-config.xml")
         configFile.withWriter('UTF-8') { writer ->

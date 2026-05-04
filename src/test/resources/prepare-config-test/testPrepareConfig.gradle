@@ -1,0 +1,49 @@
+group = 'liberty.gradle'
+version = '1'
+
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven {
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+        }
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+apply plugin: 'war'
+apply plugin: 'liberty'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+compileJava.options.encoding = 'UTF-8'
+
+ext {
+    // Liberty server properties
+    wlpServerName = 'testServer'
+}
+
+liberty {
+    server {
+        name = wlpServerName
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    providedCompile 'jakarta.platform:jakarta.jakartaee-web-api:9.1.0'
+    providedCompile 'org.eclipse.microprofile:microprofile:5.0'
+    testImplementation 'junit:junit:4.13.1'
+    libertyRuntime group: runtimeGroup, name: runtimeArtifactId, version: runtimeVersion
+}
+
+
