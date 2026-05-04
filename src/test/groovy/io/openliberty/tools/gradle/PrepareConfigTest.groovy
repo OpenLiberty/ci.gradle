@@ -51,7 +51,7 @@ class PrepareConfigTest extends AbstractIntegrationTest {
             [path: "/liberty-plugin-config/installDirectory", contains: ["tmp", "wlp"], message: "Install directory"],
             [path: "$SERVER_PATH_PREFIX/userDirectory", contains: ["tmp", "wlp", "usr"], message: "User directory"],
             [path: "$SERVER_PATH_PREFIX/serverDirectory", contains: ["tmp", "testServer"], message: "Server directory"],
-            [path: "$SERVER_PATH_PREFIX/configDirectory", contains: ["liberty/config"], message: "Config directory"],
+            [path: "$SERVER_PATH_PREFIX/configDirectory", contains: ["liberty", "config"], message: "Config directory"],
             [path: "$SERVER_PATH_PREFIX/applications/application/appsDirectory", expected: "apps", message: "Apps directory"],
             [path: "$SERVER_PATH_PREFIX/looseApplication", expected: "true", message: "Loose application"],
             [path: "$SERVER_PATH_PREFIX/applications/application/projectType", expected: "war", message: "Project type"]
