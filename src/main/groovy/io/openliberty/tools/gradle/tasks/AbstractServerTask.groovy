@@ -974,16 +974,19 @@ abstract class AbstractServerTask extends AbstractLibertyTask {
      */
     protected Properties mergeSpecialPropsFromInstallServerEnvIfAbsent(File envFile, Properties envProps) throws IOException {
 
-        // Make a copy to avoid side effects 
+        String[] specialProps = ["keystore_password", "ltpa_keys_password"]
+
+        // Make a copy to avoid side effects
         Properties mergedProps = new Properties()
         mergedProps.putAll(envProps)
 
         // From install (target) dir
         Properties serverEnvProps = convertServerEnvToProperties(envFile)
 
-        String propertyName = "keystore_password"
-        if (serverEnvProps.containsKey(propertyName)) {
-            mergedProps.putIfAbsent(propertyName,serverEnvProps.get(propertyName))
+        for (String propertyName : specialProps) {
+            if (serverEnvProps.containsKey(propertyName)) {
+                mergedProps.putIfAbsent(propertyName, serverEnvProps.get(propertyName))
+            }
         }
 
         return mergedProps
