@@ -370,10 +370,13 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         // if the dependencies do not indicate the Jakarta version then reference the platform specified in server.xml
         // E.g. pom may specify jakarta.persistence:jakarta.persistence-api:2.2.3 to compile but does not specify Jakarta 9.1
         if (eeVersion == null) {
-            eeVersion = getPlatformVersion(JAKARTA_PLATFORM_NAME, servUtil);
-        }
-        if (eeVersion == null) {
-            eeVersion = getPlatformVersion(JAVAEE_PLATFORM_NAME, servUtil);
+            Set<String> platformVersions = new HashSet<String>();
+            // Gather all Jakarta EE platform versions
+            platformVersions.addAll(getAllPlatformVersions(JAKARTA_PLATFORM_NAME, servUtil));
+            // Gather all Java EE platform versions
+            platformVersions.addAll(getAllPlatformVersions(JAVAEE_PLATFORM_NAME, servUtil));
+            // Find the maximum version from all platforms
+            eeVersion = findMaxVersion(platformVersions);
         }
         return eeVersion;
     }
@@ -397,7 +400,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                 }
         }
         if (mpVersion == null) {
-            mpVersion = getPlatformVersion(MP_PLATFORM_NAME, servUtil);
+            mpVersion = findMaxVersion(getAllPlatformVersions(MP_PLATFORM_NAME, servUtil));
         }
         return mpVersion;
     }
@@ -411,17 +414,18 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         return (currentVer.compareTo(newVer) < 0);
     }
 
-    // Retrieve all platforms from the server.xml and related files and look for the platform specified.
-    // Platforms have the format jakartaee-10.0 or microProfile-7.1. Just return the version number (10.0 or 7.1 in these examples).
-    private String getPlatformVersion(String platformName, ServerFeatureUtil servUtil) {
+    // Retrieve all platforms from the server.xml and related files that match the platform specified.
+    // Platforms have the format jakartaee-10.0 or microProfile-7.1. Return all version numbers (10.0, 7.1, etc.) that match.
+    private Set<String> getAllPlatformVersions(String platformName, ServerFeatureUtil servUtil) {
+        Set<String> platformVersions = new HashSet<String>();
         Set<String> platforms = getServerPlatforms(servUtil, null, false);
         for (String p : platforms) {
-            logger.debug("GenerateFeaturesTask.getPlatformVersion, searching for platform:" + platformName + " platform=" + p);
+            logger.debug("GenerateFeaturesTask.getAllPlatformVersions, searching for platform:" + platformName + " platform=" + p);
             if (p.startsWith(platformName)) {
-                return p.substring(platformName.length());
+                platformVersions.add(p.substring(platformName.length()));
             }
         }
-        return null;
+        return platformVersions;
     }
 
     // Define the logging functions of the binary scanner handler and make it available in this plugin
