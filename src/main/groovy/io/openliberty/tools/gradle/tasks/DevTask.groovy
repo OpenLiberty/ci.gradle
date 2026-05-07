@@ -1382,9 +1382,11 @@ class DevTask extends AbstractFeatureTask {
                     generatedFileCanonicalPath = new File(configDirectory,
                             BinaryScannerUtil.GENERATED_FEATURES_FILE_PATH).toString();
                 }
-                logger.warn(
-                        "The source configuration directory will be modified. Features will automatically be generated in a new file: "
-                                + generatedFileCanonicalPath);
+                if (generateToSrc) {
+                    logger.info(
+                            "The source configuration directory will be modified. Features will automatically be generated in a new file: "
+                                    + generatedFileCanonicalPath);
+                }
                 try {
                     runGenerateFeaturesTask(gradleBuildLauncher, true);
                 } catch (BuildException e) {
@@ -1394,7 +1396,7 @@ class DevTask extends AbstractFeatureTask {
                         logger.error(pluginEx.getMessage() + ".\nDisabling the automatic generation of features.");
                         generateFeatures = false;
                     } else if (e.getCause() != null) {
-                        throw new BuildException(e.getCause().getMessage() + " To disable the automatic generation of features, start dev mode with --generateFeatures=false.", e.getCause());
+                        throw new BuildException(e.getCause().getMessage() + " To disable the automatic generation of features, type 'g' and press 'Enter' once dev mode is running or restart dev mode with --generateFeatures=false.", e.getCause());
                     } else {
                         throw new BuildException("Failed to run the generateFeaturesTask. To disable the automatic generation of features, start dev mode with --generateFeatures=false.", e)
                     }
