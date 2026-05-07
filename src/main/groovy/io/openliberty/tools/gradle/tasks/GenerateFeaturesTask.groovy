@@ -342,7 +342,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                 configDocument.writeXMLDocument(serverDirXmlFile);
             } catch (TransformerException | IOException e) {
                 logger.warn("Failed to write generated-features.xml to server directory: "
-                    + serverDirXmlFile + ". " + e.getMessage());
+                    + serverDirXmlFile.getAbsolutePath() + ". Ensure your ID has write permission to the server configuration directory. "
+                    + e.getMessage());
                 return false;
             }
         }
