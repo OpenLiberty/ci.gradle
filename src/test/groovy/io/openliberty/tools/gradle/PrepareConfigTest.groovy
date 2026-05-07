@@ -17,6 +17,7 @@ package io.openliberty.tools.gradle
 
 import static org.junit.Assert.*
 
+import io.openliberty.tools.common.plugins.util.PrepareConfigUtil
 import org.junit.BeforeClass
 import org.junit.Test
 import org.w3c.dom.Document
@@ -28,7 +29,8 @@ class PrepareConfigTest extends AbstractIntegrationTest {
     static String buildFilename = "testPrepareConfig.gradle"
     
     private static final String CONFIG_FILE_PATH = "build/liberty-plugin-config.xml"
-    private static final String MOCK_SERVER_PATH = "build/tmp/wlp/usr/servers/testServer"
+    private static final String TEMP_DIR_NAME = PrepareConfigUtil.DEFAULT_TEMP_DIR_NAME
+    private static final String MOCK_SERVER_PATH = "build/${TEMP_DIR_NAME}/wlp/usr/servers/testServer"
     private static final String SERVER_PATH_PREFIX = "/liberty-plugin-config/servers/server"
 
     @BeforeClass
@@ -48,9 +50,9 @@ class PrepareConfigTest extends AbstractIntegrationTest {
     public void test_xml_content_validation() {
         def xpathTests = [
             [path: "$SERVER_PATH_PREFIX/serverName", expected: "testServer", message: "Server name"],
-            [path: "/liberty-plugin-config/installDirectory", contains: ["tmp", "wlp"], message: "Install directory"],
-            [path: "$SERVER_PATH_PREFIX/userDirectory", contains: ["tmp", "wlp", "usr"], message: "User directory"],
-            [path: "$SERVER_PATH_PREFIX/serverDirectory", contains: ["tmp", "testServer"], message: "Server directory"],
+            [path: "/liberty-plugin-config/installDirectory", contains: [TEMP_DIR_NAME, "wlp"], message: "Install directory"],
+            [path: "$SERVER_PATH_PREFIX/userDirectory", contains: [TEMP_DIR_NAME, "wlp", "usr"], message: "User directory"],
+            [path: "$SERVER_PATH_PREFIX/serverDirectory", contains: [TEMP_DIR_NAME, "testServer"], message: "Server directory"],
             [path: "$SERVER_PATH_PREFIX/configDirectory", contains: ["liberty", "config"], message: "Config directory"],
             [path: "$SERVER_PATH_PREFIX/applications/application/appsDirectory", expected: "apps", message: "Apps directory"],
             [path: "$SERVER_PATH_PREFIX/looseApplication", expected: "true", message: "Loose application"],
@@ -74,10 +76,10 @@ class PrepareConfigTest extends AbstractIntegrationTest {
     @Test
     public void test_mock_server_structure() {
         def paths = [
-            [path: "build/tmp", name: "tmp"],
-            [path: "build/tmp/wlp", name: "wlp"],
-            [path: "build/tmp/wlp/usr", name: "usr"],
-            [path: "build/tmp/wlp/usr/servers", name: "servers"],
+            [path: "build/${TEMP_DIR_NAME}", name: TEMP_DIR_NAME],
+            [path: "build/${TEMP_DIR_NAME}/wlp", name: "wlp"],
+            [path: "build/${TEMP_DIR_NAME}/wlp/usr", name: "usr"],
+            [path: "build/${TEMP_DIR_NAME}/wlp/usr/servers", name: "servers"],
             [path: MOCK_SERVER_PATH, name: "testServer"]
         ]
 

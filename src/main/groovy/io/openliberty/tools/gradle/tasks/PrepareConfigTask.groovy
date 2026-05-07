@@ -19,10 +19,22 @@ import groovy.xml.StreamingMarkupBuilder
 import groovy.xml.XmlNodePrinter
 import groovy.xml.XmlParser
 import io.openliberty.tools.common.plugins.util.PrepareConfigUtil
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import groovy.xml.MarkupBuilder
 
 class PrepareConfigTask extends AbstractServerTask {
+
+    /**
+     * Name of the temporary directory used for mock Liberty server structures.
+     * This directory is created under the build output directory (build/).
+     * Default value is "liberty-var-cache".
+     *
+     * Example: If set to "my-temp", the mock server will be created at:
+     * build/my-temp/wlp/usr/servers/{serverName}
+     */
+    @Input
+    String prepareConfigTempDir = PrepareConfigUtil.DEFAULT_TEMP_DIR_NAME
 
     PrepareConfigTask() {
         configure({
@@ -37,15 +49,20 @@ class PrepareConfigTask extends AbstractServerTask {
         
         File buildDir = project.getLayout().getBuildDirectory().getAsFile().get()
         
+        // Validate and use the configured temp directory name
+        String tempDirName = (prepareConfigTempDir != null && !prepareConfigTempDir.trim().isEmpty())
+            ? prepareConfigTempDir.trim()
+            : PrepareConfigUtil.DEFAULT_TEMP_DIR_NAME
+        
         // Create mock Liberty server structure
-        File mockServerDir = PrepareConfigUtil.createMockLibertyServerStructure(buildDir, server.name)
+        File mockServerDir = PrepareConfigUtil.createMockLibertyServerStructure(buildDir, server.name, tempDirName)
         
         // Create initial liberty-plugin-config.xml file (required by copyConfigFiles)
         createInitialConfigFile(buildDir)
         
         // Temporarily override userDirectory to point to mock location
         File originalUserDir = project.liberty.userDir
-        File mockUserDir = PrepareConfigUtil.getMockUserDirectory(buildDir)
+        File mockUserDir = PrepareConfigUtil.getMockUserDirectory(buildDir, tempDirName)
         
         try {
             // Set userDir to mock location so getServerDir() returns mock server directory
@@ -60,7 +77,7 @@ class PrepareConfigTask extends AbstractServerTask {
         }
         
         // Add installDirectory if missing
-        addInstallDirectoryIfMissing(buildDir)
+        addInstallDirectoryIfMissing(buildDir, tempDirName)
         
         logger.info("Liberty configuration file generated: ${buildDir}/liberty-plugin-config.xml")
         logger.info("Mock Liberty server structure created: ${mockServerDir.absolutePath}")
@@ -78,9 +95,9 @@ class PrepareConfigTask extends AbstractServerTask {
         }
     }
 
-    private void addInstallDirectoryIfMissing(File buildDir) {
+    private void addInstallDirectoryIfMissing(File buildDir, String tempDirName) {
         File configFile = new File(buildDir, "liberty-plugin-config.xml")
-        File mockInstallDir = PrepareConfigUtil.getMockInstallDirectory(buildDir)
+        File mockInstallDir = PrepareConfigUtil.getMockInstallDirectory(buildDir, tempDirName)
         
         def pluginXmlParser = new XmlParser()
         def libertyPluginConfig = pluginXmlParser.parse(configFile)
