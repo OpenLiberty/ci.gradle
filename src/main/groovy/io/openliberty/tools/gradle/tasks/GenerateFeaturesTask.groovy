@@ -162,6 +162,20 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             return;
         } */
 
+        // Detect if there is a generate-features.xml file in src already when generating to server dir
+        if (!generateToSrc && new File(server.configDirectory, GENERATED_FEATURES_FILE_PATH).exists()) {
+            if (isDevMode) { // this is serious because dev mode will overwrite the generated file when copying from src
+                logger.error("A generated-features.xml file was detected in the configured source Liberty configuration directory. " +
+                    "It will overwrite the file generated at this time. " +
+                    "You must type 's' + Enter to toggle the option to generate features to the src directory or " +
+                    "remove the generated-features.xml file in the Liberty configuration directory if you need to generate to the server directory.");
+            } else { // command line task just a warning that this configuration is not expected
+                logger.warn("A generated-features.xml file was detected in the configured source Liberty configuration directory. " +
+                    "You must use the option --generateToSrc=true to update the source Liberty configuration directory or " +
+                    "remove the generated-features.xml file in the source Liberty configuration directory if you intend to update the server directory.");
+            }
+        }
+
         // get existing server features from source directory
         ServerFeatureUtil servUtil = getServerFeatureUtil(true, null);
         Set<String> generatedFiles = new HashSet<String>();
