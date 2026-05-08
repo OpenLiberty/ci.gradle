@@ -41,10 +41,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     public static final String GENERATED_FEATURES_COMMENT = "The following features were generated based on API usage detected in your application";
     public static final String NO_NEW_FEATURES_COMMENT = "No additional features generated";
     public static final String NO_CLASS_FILES_WARNING = "Could not find class files to generate features against. Liberty features will not be generated. Ensure your project has first been compiled.";
-    public static final String VERSIONLESS_FEATURE_DETECTED_DEVMODE = "If you would like to continue using auto-generation of features, " \
-            + "please remove all versionless features from your server configuration. " \
-            + "If you would like to continue using versionless features, you can use the 'g' hot key " \
-            + "to toggle off auto-generation of features.";
+    public static final String VERSIONLESS_FEATURE_DETECTED_DEVMODE = "Versionless features are detected in the server configuration. " \
+            + "If you would like to continue using the automatic generation of features, remove all versionless features from your server configuration. " \
+            + "If you would like to continue using versionless features, you can disable the automatic generation of features.";
     public static final String VERSIONLESS_FEATURE_DETECTED = "Versionless features are detected in the server configuration. " \
             + "To use the 'generate-features' goal, remove all versionless features from your server configuration. " \
             + "If you would like to continue using versionless features, you cannot use the 'generate-features' goal.";
