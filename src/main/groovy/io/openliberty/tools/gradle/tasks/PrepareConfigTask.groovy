@@ -25,17 +25,6 @@ import groovy.xml.MarkupBuilder
 
 class PrepareConfigTask extends AbstractServerTask {
 
-    /**
-     * Name of the temporary directory used for mock Liberty server structures.
-     * This directory is created under the build output directory (build/).
-     * Default value is "liberty-var-cache".
-     *
-     * Example: If set to "my-temp", the mock server will be created at:
-     * build/my-temp/wlp/usr/servers/{serverName}
-     */
-    @Input
-    String prepareConfigTempDir = PrepareConfigUtil.DEFAULT_TEMP_DIR_NAME
-
     PrepareConfigTask() {
         configure({
             description = 'Prepare Liberty configuration and generate liberty-plugin-config.xml'
@@ -49,10 +38,14 @@ class PrepareConfigTask extends AbstractServerTask {
         
         File buildDir = project.getLayout().getBuildDirectory().getAsFile().get()
         
-        // Validate and use the configured temp directory name
-        String tempDirName = (prepareConfigTempDir != null && !prepareConfigTempDir.trim().isEmpty())
-            ? prepareConfigTempDir.trim()
+        // Check for project property override, otherwise use default
+        String tempDirName = project.hasProperty('prepareConfigTempDir')
+            ? project.property('prepareConfigTempDir').toString().trim()
             : PrepareConfigUtil.DEFAULT_TEMP_DIR_NAME
+        
+        if (tempDirName.isEmpty()) {
+            tempDirName = PrepareConfigUtil.DEFAULT_TEMP_DIR_NAME
+        }
         
         // Create mock Liberty server structure
         File mockServerDir = PrepareConfigUtil.createMockLibertyServerStructure(buildDir, server.name, tempDirName)
