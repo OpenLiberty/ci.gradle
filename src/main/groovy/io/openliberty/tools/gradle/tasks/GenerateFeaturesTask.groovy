@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2021, 2025.
+ * (C) Copyright IBM Corporation 2021, 2026
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,12 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     public static final String GENERATED_FEATURES_COMMENT = "The following features were generated based on API usage detected in your application";
     public static final String NO_NEW_FEATURES_COMMENT = "No additional features generated";
     public static final String NO_CLASS_FILES_WARNING = "Could not find class files to generate features against. Liberty features will not be generated. Ensure your project has first been compiled.";
+    public static final String VERSIONLESS_FEATURE_DETECTED_DEVMODE = "Versionless features are detected in the server configuration. " \
+            + "If you would like to continue using the automatic generation of features, remove all versionless features from your server configuration. " \
+            + "If you would like to continue using versionless features, you can disable the automatic generation of features.";
+    public static final String VERSIONLESS_FEATURE_DETECTED = "Versionless features are detected in the server configuration. " \
+            + "To use the 'generate-features' goal, remove all versionless features from your server configuration. " \
+            + "If you would like to continue using versionless features, you cannot use the 'generate-features' goal.";
 
     // Default value of the optimize task option
     private static final boolean DEFAULT_OPTIMIZE = true;
@@ -48,6 +54,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     private static final boolean DEFAULT_GENERATETOSRC = false;
     // Default value of the internalDevMode option
     private static final boolean DEFAULT_DEVMODE = false;
+    // Default value of the isDevMode option
+    private static final boolean DEFAULT_ISDEVMODE = false;
 
     // The executable file used to scan binaries for the Liberty features they use.
     private File binaryScanner;
@@ -105,6 +113,20 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         this.internalDevMode = Boolean.parseBoolean(internalDevMode);
     }
 
+    private Boolean isDevMode = null;
+
+    /**
+     * The isDevMode parameter is for internal use only. It is not for users.
+     * This option must only be set to true when this task is called from dev mode and false otherwise.
+     * This option is added to support generateToSrc and to cause writing the generated features file
+     * to the server directory (if it exists) in stand-alone mode (not dev mode) in order to save the user
+     * having to copy it manually.
+     */
+    @Option(option = 'isDevMode', description = 'Internal only option indicating dev mode is active')
+    void setIsDevMode(String devModeArg) {
+        this.isDevMode = Boolean.parseBoolean(devModeArg);
+    }
+
     @TaskAction
     void generateFeatures() {
         binaryScanner = getBinaryScannerJarFromRepository();
@@ -118,6 +140,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         }
         if (internalDevMode == null) {
             internalDevMode = DEFAULT_DEVMODE;
+        }
+        if (isDevMode == null) {
+            isDevMode = DEFAULT_ISDEVMODE;
         }
 
         initializeConfigDirectory();
@@ -143,6 +168,22 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             return;
         } */
 
+        // Detect if there is a generate-features.xml file in src already when generating to server dir
+        if (!generateToSrc && new File(server.configDirectory, GENERATED_FEATURES_FILE_PATH).exists()) {
+            if (isDevMode) { // this is serious because dev mode will overwrite the generated file when copying from src
+                logger.error("A 'generated-features.xml' file was detected in the source Liberty configuration directory. " +
+                    "It will overwrite the file generated to the server directory by the automatic generation of features. " +
+                    "To continue to generate features to the server directory, you must delete the 'generated-features.xml' file " +
+                    "in the source Liberty configuration directory. To generate features to the source Liberty configuration " +
+                    "directory instead, you can type 's' + Enter.");
+            } else { // command line task just a warning that this configuration is not expected
+                logger.warn("A 'generated-features.xml' file was detected in the source Liberty configuration directory. " +
+                    "To generate features to the server directory, it is recommended you delete the 'generated-features.xml' " +
+                    "file in the source Liberty configuration directory. To generate features to the source Liberty " +
+                    "configuration directory, you must use the option --generateToSrc=true.");
+            }
+        }
+ 
         // get existing server features from source directory
         ServerFeatureUtil servUtil = getServerFeatureUtil(true, null);
         Set<String> generatedFiles = new HashSet<String>();
@@ -204,6 +245,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         } catch (BinaryScannerUtil.IllegalTargetException illegalTargets) {
             String messages = buildInvalidArgExceptionMessage(illegalTargets.getEELevel(), illegalTargets.getMPLevel(), eeVersion, mpVersion);
             throw new GradleException(messages);
+        } catch (BinaryScannerUtil.VersionlessFeatureDetectedException versionless) {
+            throw new GradleException(isDevMode ? VERSIONLESS_FEATURE_DETECTED_DEVMODE : VERSIONLESS_FEATURE_DETECTED);
         } catch (PluginExecutionException x) {
             // throw an error when there is a problem not caught in runBinaryScanner()
             Object o = x.getCause();
@@ -244,6 +287,13 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         } else {
             generatedXmlFile = new File(generationContextDir, GENERATED_FEATURES_FILE_PATH);
         }
+        // For standalone goal (not dev mode) with generateToSrc=true, also write to server dir if it exists
+        File serverDirectory = getServerDir(project);
+        boolean shouldWriteToServerDir = !isDevMode && generateToSrc && (serverDirectory != null) && serverDirectory.exists();
+        File serverDirXmlFile = null;
+        if (shouldWriteToServerDir) {
+            serverDirXmlFile = new File(serverDirectory, GENERATED_FEATURES_FILE_PATH);
+        }
         try {
             if (missingLibertyFeatures.size() > 0) {
                 Set<String> existingGeneratedFeatures = getGeneratedFeatures(servUtil, generatedXmlFile);
@@ -262,6 +312,13 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                     // use logger.lifecycle so that message appears without --info tag on
                     configDocument.writeXMLDocument(generatedXmlFile);
                     logger.debug("Created file " + generatedXmlFile);
+
+                    // For standalone mode with generateToSrc=true, also write to server directory
+                    if (shouldWriteToServerDir) {
+                        if (writeToServerDir(configDocument, serverDirXmlFile, true)) {
+                            logger.debug("Also created file " + serverDirXmlFile);
+                        }
+                    }
                 } else {
                     logger.lifecycle("Regenerated the following features: " + missingLibertyFeatures);
                     // use logger.lifecycle so that message appears without --info tag on
@@ -276,12 +333,31 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                     Element featureManagerElem = configDocument.createFeatureManager();
                     configDocument.createComment(featureManagerElem, NO_NEW_FEATURES_COMMENT);
                     configDocument.writeXMLDocument(generatedXmlFile);
+
+                    // For standalone mode with generateToSrc=true, also write to server directory
+                    if (shouldWriteToServerDir) {
+                        writeToServerDir(configDocument, serverDirXmlFile, serverDirXmlFile.exists());
+                    }
                 }
             }
         } catch (ParserConfigurationException | TransformerException | IOException e) {
             logger.debug("Exception creating the server features file", e);
             throw new GradleException("Automatic generation of features failed. Error attempting to create the " + GENERATED_FEATURES_FILE_NAME + ". Ensure your id has write permission to the server installation directory.", e);
         }
+    }
+
+    private boolean writeToServerDir(ServerConfigXmlDocument configDocument, File serverDirXmlFile, boolean exists) {
+        if (exists) {
+            try {
+                configDocument.writeXMLDocument(serverDirXmlFile);
+            } catch (TransformerException | IOException e) {
+                logger.warn("Failed to write generated-features.xml to server directory: "
+                    + serverDirXmlFile.getAbsolutePath() + ". Ensure your ID has write permission to the server configuration directory. "
+                    + "Message from the Exception: " + e.getMessage());
+                return false;
+            }
+        }
+        return true;
     }
 
     // Get the features from the server config and optionally exclude the specified config files from the search.
