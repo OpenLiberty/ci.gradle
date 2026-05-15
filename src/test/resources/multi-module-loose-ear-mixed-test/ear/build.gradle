@@ -1,0 +1,48 @@
+apply plugin: 'ear'
+apply plugin: 'liberty'
+
+description = 'EAR Module'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+        }
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    deploy project(path:':ejb-jar', configuration:'archives')
+    libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: runtimeVersion
+}
+
+ear {
+    archiveFileName = rootProject.name+"-"+getArchiveBaseName().get() +"-"+rootProject.version+ '.' + getArchiveExtension().get()
+    deploymentDescriptor {
+        module ('ejb-mixed-dependency-ejb-jar-1.0.jar', 'ejb')
+    }
+}
+
+liberty {
+    server {
+        name = "testServer"
+        deploy {
+            apps = [ear]
+        }
+        verifyAppStartTimeout = 30
+        looseApplication = true
+    }
+}
+
+deploy.dependsOn 'ear'
+ear.dependsOn ':ejb-jar:jar', ':lib-jar:jar'

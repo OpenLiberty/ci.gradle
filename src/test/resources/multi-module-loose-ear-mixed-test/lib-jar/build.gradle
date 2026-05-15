@@ -1,0 +1,9 @@
+description = 'Library Module'
+
+dependencies {
+    compileOnly group: 'javax', name: 'javaee-api', version:'7.0'
+}
+
+jar {
+    archiveFileName = rootProject.name+"-"+getArchiveBaseName().get() +"-"+rootProject.version+ '.' + getArchiveExtension().get()
+}

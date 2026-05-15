@@ -1,0 +1,10 @@
+rootProject.name = 'ejb-transitive-dependency'
+include ':base-jar'
+include ':lib-jar'
+include ':ejb-jar'
+include ':ear'
+
+project(':base-jar').projectDir = "$rootDir/base-jar" as File
+project(':lib-jar').projectDir = "$rootDir/lib-jar" as File
+project(':ejb-jar').projectDir = "$rootDir/ejb-jar" as File
+project(':ear').projectDir = "$rootDir/ear" as File
