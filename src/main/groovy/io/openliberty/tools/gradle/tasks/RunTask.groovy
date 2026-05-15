@@ -52,6 +52,13 @@ class RunTask extends AbstractServerTask {
             ServerTask serverTaskRun = createServerTask(project, "run");
             serverTaskRun.setUseEmbeddedServer(server.embedded)
             serverTaskRun.setClean(server.clean)
+            
+            // When using embedded mode with Gradle daemon, the shutdown hook may not execute on Ctrl+C
+            // because the daemon JVM continues running. Warn the user about this limitation.
+            logger.warn("Starting Liberty server in embedded mode. Note: When using the Gradle daemon, " +
+                       "the server may continue running after pressing Ctrl+C. " +
+                       "Use 'gradle libertyStop' to stop the server or 'gradle --stop' to stop the daemon.")
+            
             serverTaskRun.execute();
         } else {
             List<String> command = buildCommand("run")

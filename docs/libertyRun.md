@@ -10,9 +10,22 @@ gradle libertyRun --no-daemon
 `libertyRun` also depends on `deploy` if configured.  
 
 ### What is the Gradle Daemon and why --no-daemon?
-The Gradle Daemon is a long-running background process designed to help speed up the build process. It does so by caching project information and staying alive, avoiding constant JVM startup costs. This behavior is default until specified otherwise.  
-Gradle's current daemon design makes it difficult to use a `run` task, as a Ctrl-C would kill the daemon while simultaneously leaving the application running in the background. Therefore, we need `--no-daemon` so that the signal can be received and properly handled.  
-In the event that a user does run a `libertyRun` with a daemon (default), an external `libertyStop` must be called in order to properly shut down the server. A Ctrl-C while the Gradle process is running will not stop the server. Use `libertyStatus` to confirm the state of your server.  
+The Gradle Daemon is a long-running background process designed to help speed up the build process. It does so by caching project information and staying alive, avoiding constant JVM startup costs. This behavior is default until specified otherwise.
+Gradle's current daemon design makes it difficult to use a `run` task, as a Ctrl-C would kill the daemon while simultaneously leaving the application running in the background. Therefore, we need `--no-daemon` so that the signal can be received and properly handled.
+In the event that a user does run a `libertyRun` with a daemon (default), an external `libertyStop` must be called in order to properly shut down the server. A Ctrl-C while the Gradle process is running will not stop the server. Use `libertyStatus` to confirm the state of your server.
+
+### Embedded Server Mode with Gradle Daemon
+When using `embedded = true` in the Liberty server configuration along with the Gradle daemon, the Liberty server runs within the daemon JVM. This creates an additional complication:
+- Pressing Ctrl-C terminates the client connection but **not** the daemon JVM
+- The embedded Liberty server continues running in the daemon JVM
+- The shutdown hook registered by the plugin does not execute because the daemon JVM remains alive
+
+**Workarounds:**
+1. Use `gradle libertyStop` to stop the embedded server
+2. Use `gradle --stop` to stop the entire Gradle daemon (which will also stop the embedded server)
+3. Use `--no-daemon` flag when running `libertyRun` to avoid this issue entirely
+
+**Recommendation:** For embedded server mode, it is strongly recommended to use `--no-daemon` or avoid using embedded mode with the daemon.
 
 ### 0% or 66% Executing?
 While running this task, Gradle will show something like:  
