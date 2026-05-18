@@ -110,6 +110,49 @@ class BaseDevTest extends AbstractIntegrationTest {
         assertTrue(targetDir.exists());
     }
 
+    /**
+     * Start dev mode without waiting for server startup to complete.
+     * This is useful for testing early quit functionality during startup.
+     */
+    protected static void startDevModeWithoutWaiting(File buildDirectory) throws IOException, InterruptedException, FileNotFoundException {
+        startDevModeWithoutWaiting("--generateFeatures=true", buildDirectory)
+    }
+
+    protected static void startDevModeWithoutWaiting(String params, File buildDirectory) throws IOException, InterruptedException, FileNotFoundException {
+        buildDir = buildDirectory;
+        logFile = new File(buildDir, "output.log");
+        errFile = new File(buildDir, "stderr.log");
+        
+        System.out.println("Starting dev mode without waiting for startup with params..."+params);
+        
+        // get gradle wrapper from project root dir
+        File gradlew;
+        String os = System.getProperty("os.name");
+        if (os != null && os.toLowerCase().startsWith("windows")) {
+            gradlew = new File("gradlew.bat")
+        } else {
+            gradlew = new File("gradlew")
+        }
+
+        StringBuilder command = new StringBuilder(gradlew.getAbsolutePath() + " --warning-mode none libertyDev");
+        if (params != null) {
+            command.append(" " + params);
+        }
+        System.out.println("Running command: " + command.toString());
+        ProcessBuilder builder = buildProcess(command.toString());
+
+        builder.redirectOutput(logFile);
+        builder.redirectError(errFile);
+        process = builder.start();
+        assertTrue(process.isAlive());
+
+        OutputStream stdin = process.getOutputStream();
+        writer = new BufferedWriter(new OutputStreamWriter(stdin));
+        
+        // Do NOT wait for server startup - return immediately
+        System.out.println("Dev mode process started, not waiting for startup");
+    }
+
     protected static ProcessBuilder buildProcess(String processCommand) {
         ProcessBuilder builder = new ProcessBuilder();
         builder.directory(buildDir);
