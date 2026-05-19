@@ -1444,6 +1444,8 @@ class DevTask extends AbstractFeatureTask {
         propertyFiles.add(new File(project.getRootDir(), "gradle.properties"));
         util.setPropertyFiles(propertyFiles);
 
+        util.startEarlyHotkeyReader(executor);
+
         util.startServer();
 
        
