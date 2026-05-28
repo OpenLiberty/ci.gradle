@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2021, 2025.
+ * (C) Copyright IBM Corporation 2021, 2026
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,10 @@ import static io.openliberty.tools.common.plugins.util.BinaryScannerUtil.*;
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil.FeaturesPlatforms
+import io.openliberty.tools.common.plugins.util.VersionUtility;
 import io.openliberty.tools.gradle.utils.ArtifactDownloadUtil
 
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
@@ -41,6 +43,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     public static final String GENERATED_FEATURES_COMMENT = "The following features were generated based on API usage detected in your application";
     public static final String NO_NEW_FEATURES_COMMENT = "No additional features generated";
     public static final String NO_CLASS_FILES_WARNING = "Could not find class files to generate features against. Liberty features will not be generated. Ensure your project has first been compiled.";
+    private static final String OPEN_LIBERTY_PRODUCT_ID = "io.openliberty";
+    private static final String WEBSPHERE_LIBERTY_PRODUCT_ID = "com.ibm.websphere.appserver.runtime";
 
     // Default value of the optimize task option
     private static final boolean DEFAULT_OPTIMIZE = true;
@@ -48,9 +52,6 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     private static final boolean DEFAULT_GENERATETOSRC = false;
     // Default value of the internalDevMode option
     private static final boolean DEFAULT_DEVMODE = false;
-
-    // The executable file used to scan binaries for the Liberty features they use.
-    private File binaryScanner;
 
     /**
      * Generating features is performed relative to a certain server. We only generate features
@@ -107,8 +108,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
     @TaskAction
     void generateFeatures() {
-        binaryScanner = getBinaryScannerJarFromRepository();
-        BinaryScannerHandler binaryScannerHandler = new BinaryScannerHandler(binaryScanner);
+        // The executable file used to scan binaries for the Liberty features they use.
+        File binaryScannerJar = getBinaryScannerJarFromRepository();
+        BinaryScannerHandler binaryScannerHandler = new BinaryScannerHandler(binaryScannerJar);
 
         if (optimize == null) {
             optimize = DEFAULT_OPTIMIZE;
@@ -171,7 +173,23 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             String logLocation = project.getBuildDir().getCanonicalPath();
             String eeVersionArg = composeEEVersion(eeVersion);
             String mpVersionArg = composeMPVersion(mpVersion);
-            scannedFeatureList = binaryScannerHandler.runBinaryScanner(nonCustomFeatures, classFiles, directories, logLocation, eeVersionArg, mpVersionArg, optimize);
+            Map featureListFileMap = new HashMap<String, File>();
+            String libertyGroupId = getLibertyRuntimeGroupId();
+            logger.debug("Resolve the liberty groupId used to fetch feature lists, getLibertyRuntimeGroupId()="+libertyGroupId);
+            if (WEBSPHERE_LIBERTY_PRODUCT_ID.equals(libertyGroupId)) {
+                File baseFeatureListFile = getWebSphereFeatureListFile(FEATURE_LIST_BASE);
+                featureListFileMap.put(WSBASE_FEATURELIST_KEY, baseFeatureListFile);
+                File coreFeatureListFile = getWebSphereFeatureListFile(FEATURE_LIST_CORE);
+                featureListFileMap.put(WSCORE_FEATURELIST_KEY, coreFeatureListFile);
+            } else if (OPEN_LIBERTY_PRODUCT_ID.equals(libertyGroupId)) {
+                File featureListFile = getOpenFeatureListFile();
+                featureListFileMap.put(OL_FEATURELIST_KEY, featureListFile);
+                // Also pass the Base featurelist when using Open Liberty to work around a bug in the feature-gen jar
+                File baseFeatureListFile = getWebSphereFeatureListFile(FEATURE_LIST_BASE);
+                featureListFileMap.put(WSBASE_FEATURELIST_KEY, baseFeatureListFile);
+            } // else should not happen, just pass empty map
+            scannedFeatureList = binaryScannerHandler.runBinaryScanner(nonCustomFeatures, classFiles, directories, logLocation,
+                eeVersionArg, mpVersionArg, featureListFileMap, optimize);
         } catch (BinaryScannerUtil.NoRecommendationException noRecommendation) {
             throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE3, noRecommendation.getConflicts()));
         } catch (BinaryScannerUtil.FeatureModifiedException featuresModified) {
@@ -324,6 +342,94 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                     + ".jar configured in your build.gradle.",
                     e);
         }
+    }
+
+    /*
+     * Gets the file containing the Open Liberty base feature list from the local cache.
+     * Downloads it first from connected repositories such as Maven Central if a newer release is available than the cached version.
+     * Note: Maven updates artifacts daily by default based on the last updated timestamp. Users should use 'mvn -U' to force
+     * updates if needed.
+     * 
+     * @return The File object of the feature list in the local cache or null if version number not available
+     */
+    private static String OPEN_LIBERTY_FEATURE_LIST_START = "25.0.0.7";
+    private File getOpenFeatureListFile() {
+        String libertyVersion = getLibertyRuntimeVersion();
+        if (libertyVersion == null) {
+            return null;
+        }
+        // Feature lists were first published for 25.0.0.7. For liberty releases prior to this simply use the
+        // earliest available feature list, 25.0.0.7.
+        if (VersionUtility.compareArtifactVersion(libertyVersion, OPEN_LIBERTY_FEATURE_LIST_START, true) < 0) {
+            libertyVersion = OPEN_LIBERTY_FEATURE_LIST_START;
+        }
+        libertyVersion = "[" + libertyVersion + "]"; // Maven syntax to specify an exact version, not a range
+        return ArtifactDownloadUtil.downloadBuildArtifact(project, OLBASE_FEATURELIST_GROUP_ID, OLBASE_FEATURELIST_ARTIFACT_ID, OLBASE_FEATURELIST_TYPE, libertyVersion);
+    }
+
+    /*
+     * Gets the file containing the indicated Websphere feature list from the local cache.
+     * Downloads it first from connected repositories such as Maven Central if a newer release is available than the cached version.
+     * Note: Maven updates artifacts daily by default based on the last updated timestamp. Users should use 'mvn -U' to force
+     * updates if needed.
+     * 
+     * @return The File object of the feature list in the local cache.
+     */
+    private static String FEATURE_LIST_BASE = "base";
+    private static String FEATURE_LIST_CORE = "core";
+    private File getWebSphereFeatureListFile(String featureListVar) {
+        // For releases earlier than 25.0.0.7 use 25.0.0.7 Maven coordinates (batch 1).
+        // For releases 25.0.0.8 to 25.0.0.12 use batch 2 coordinates. 
+        // For 26.0.0.1 and later use the third batch.
+        String libertyGroupId, libertyArtifactId;
+        String libertyVersion = getLibertyRuntimeVersion();
+        if (libertyVersion == null) {
+            return null;
+        }
+        // Publishing started with 25.0.0.7 so for any liberty <25.0.0.7 use the 07 values
+        if (VersionUtility.compareArtifactVersion(libertyVersion, WS_FEATURE_LIST_VERSION_BATCH1, true) <= 0) {
+            libertyGroupId = WS_FEATURELIST_GROUP_ID_BATCH1;
+            libertyArtifactId = (featureListVar.equals(FEATURE_LIST_BASE)) ? WS_BASE_FEATURE_LIST_ARTIFACT_ID_BATCH1 : WS_CORE_FEATURE_LIST_ARTIFACT_ID_BATCH1;
+            libertyVersion = WS_FEATURE_LIST_VERSION_BATCH1; // must set for versions before 07
+        } else if (VersionUtility.compareArtifactVersion(libertyVersion, WS_FEATURE_LIST_VERSION_BATCH3, true) < 0) {
+            // 25.0.0.8 to 25.0.0.12
+            libertyGroupId = WS_FEATURELIST_GROUP_ID_BATCH2;
+            libertyArtifactId = (featureListVar.equals(FEATURE_LIST_BASE)) ? WS_BASE_FEATURE_LIST_ARTIFACT_ID_BATCH2 : WS_CORE_FEATURE_LIST_ARTIFACT_ID_BATCH2;
+        } else { // 26.0.0.1 and up
+            libertyGroupId = WS_FEATURELIST_GROUP_ID_BATCH3;
+            libertyArtifactId = (featureListVar.equals(FEATURE_LIST_BASE)) ? WS_BASE_FEATURE_LIST_ARTIFACT_ID_BATCH3 : WS_CORE_FEATURE_LIST_ARTIFACT_ID_BATCH3;
+        }
+        libertyVersion = "[" + libertyVersion + "]"; // Maven syntax to specify an exact version, not a range
+        getLog().debug("WebSphere Liberty feature list coordinates, libertyGroupId="+libertyGroupId+" libertyArtifactId="+libertyArtifactId+" WS_FEATURELIST_TYPE="+WS_FEATURELIST_TYPE+" libertyVersion="+libertyVersion);
+        return ArtifactDownloadUtil.downloadBuildArtifact(project, libertyGroupId, libertyArtifactId, WS_FEATURELIST_TYPE, libertyVersion);
+    }
+
+    // resolve the Liberty version from one of the sources
+    private String getLibertyRuntimeVersion() {
+        String libertyRuntimeVersion = null
+        Configuration config = project.configurations.getByName('libertyRuntime')
+        if (config != null) {
+             config.dependencies.find { libertyArtifact ->
+                 libertyRuntimeVersion = libertyArtifact.version
+                 logger.debug 'Found Liberty runtime version: ' + libertyRuntimeVersion
+                 return true
+             }
+        }
+        return libertyRuntimeVersion
+    }
+
+    // resolve the Liberty version from one of the sources
+    private String getLibertyRuntimeGroupId() {
+        String libertyRuntimeGroupId = null
+        Configuration config = project.configurations.getByName('libertyRuntime')
+        if (config != null) {
+             config.dependencies.find { libertyArtifact ->
+                 libertyRuntimeGroupId = libertyArtifact.group
+                 logger.debug 'Found Liberty runtime group ID: ' + libertyRuntimeGroupId
+                 return true
+             }
+        }
+        return libertyRuntimeGroupId
     }
 
     private Set<String> getClassesDirectories() {
