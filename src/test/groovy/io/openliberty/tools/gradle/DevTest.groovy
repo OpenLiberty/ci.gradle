@@ -265,7 +265,7 @@ class DevTest extends BaseDevTest {
         // toggle on
         writer.write("g\n");
         writer.flush();
-        assertTrue(autoGenOn, verifyLogMessage(21000, autoGenOn)); // allow time to run scanner
+        assertTrue(autoGenOn, verifyLogMessage(21000, autoGenOn)); // allow time to run generator
         // After generate features is toggled off and on we end up with the same features as before
         assertTrue(verifyLogMessage(61000, REGENERATE_FEATURES, ++regenerateCount));
         // Remove a class and use 'optimize' to rebuild the generated features

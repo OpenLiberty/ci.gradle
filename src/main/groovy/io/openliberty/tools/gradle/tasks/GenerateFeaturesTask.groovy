@@ -18,8 +18,8 @@ package io.openliberty.tools.gradle.tasks
 
 import io.openliberty.tools.common.plugins.config.ServerConfigXmlDocument
 import io.openliberty.tools.common.plugins.config.XmlDocument
-import io.openliberty.tools.common.plugins.util.BinaryScannerUtil
-import static io.openliberty.tools.common.plugins.util.BinaryScannerUtil.*;
+import io.openliberty.tools.common.plugins.util.FeatureGenUtil
+import static io.openliberty.tools.common.plugins.util.FeatureGenUtil.*;
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil.FeaturesPlatforms
@@ -109,8 +109,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     @TaskAction
     void generateFeatures() {
         // The executable file used to scan binaries for the Liberty features they use.
-        File binaryScannerJar = getBinaryScannerJarFromRepository();
-        BinaryScannerHandler binaryScannerHandler = new BinaryScannerHandler(binaryScannerJar);
+        File featureGenJar = getFeatureGenJarFromRepository();
+        FeatureGenHandler featureGenHandler = new FeatureGenHandler(featureGenJar);
 
         if (optimize == null) {
             optimize = DEFAULT_OPTIMIZE;
@@ -152,7 +152,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
         Set<String> existingFeatures = getServerFeatures(servUtil, generatedFiles, optimize);
         logger.debug("Existing features:" + existingFeatures);
-        Set<String> nonCustomFeatures = new HashSet<String>(); // binary scanner only handles actual Liberty features
+        Set<String> nonCustomFeatures = new HashSet<String>(); // feature generator only handles actual Liberty features
         for (String feature : existingFeatures) { // custom features are "usr:feature-1.0" or "myExt:feature-2.0"
             if (!feature.contains(":")) nonCustomFeatures.add(feature);
         }
@@ -164,7 +164,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         try {
             Set<String> directories = getClassesDirectories();
             if (directories.isEmpty() && (classFiles == null || classFiles.isEmpty())) {
-                // log as warning and continue to call binary scanner to detect conflicts in user specified features
+                // log as warning and continue to call feature generator to detect conflicts in user specified features
                 logger.warn(NO_CLASS_FILES_WARNING);
             }
             eeVersion = getEEVersion(project);
@@ -188,14 +188,14 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                 File baseFeatureListFile = getWebSphereFeatureListFile(FEATURE_LIST_BASE);
                 featureListFileMap.put(WSBASE_FEATURELIST_KEY, baseFeatureListFile);
             } // else should not happen, just pass empty map
-            scannedFeatureList = binaryScannerHandler.runBinaryScanner(nonCustomFeatures, classFiles, directories, logLocation,
+            scannedFeatureList = featureGenHandler.runFeatureGenerator(nonCustomFeatures, classFiles, directories, logLocation,
                 eeVersionArg, mpVersionArg, featureListFileMap, optimize);
-        } catch (BinaryScannerUtil.NoRecommendationException noRecommendation) {
-            throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE3, noRecommendation.getConflicts()));
-        } catch (BinaryScannerUtil.FeatureModifiedException featuresModified) {
+        } catch (FeatureGenUtil.NoRecommendationException noRecommendation) {
+            throw new GradleException(String.format(FeatureGenUtil.FEATURE_GEN_CONFLICT_MESSAGE3, noRecommendation.getConflicts()));
+        } catch (FeatureGenUtil.FeatureModifiedException featuresModified) {
             Set<String> userFeatures = (optimize) ? existingFeatures :
                 getServerFeatures(servUtil, generatedFiles, true); // user features excludes generatedFiles
-            Set<String> modifiedSet = featuresModified.getFeatures(); // a set that works after being modified by the scanner
+            Set<String> modifiedSet = featuresModified.getFeatures(); // a set that works after being modified by the generator
 
             if (modifiedSet.containsAll(userFeatures)) {
                 // none of the user features were modified, only features which were generated earlier.
@@ -206,24 +206,24 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             } else {
                 Set<String> allAppFeatures = featuresModified.getSuggestions(); // suggestions are scanned from binaries
                 allAppFeatures.addAll(userFeatures); // scanned plus configured features were detected to be in conflict
-                logger.debug("FeatureModifiedException, combine suggestions from scanner with user features in error msg");
-                throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE1, allAppFeatures, modifiedSet));
+                logger.debug("FeatureModifiedException, combine suggestions from generator with user features in error msg");
+                throw new GradleException(String.format(FeatureGenUtil.FEATURE_GEN_CONFLICT_MESSAGE1, allAppFeatures, modifiedSet));
             }
-        } catch (BinaryScannerUtil.RecommendationSetException showRecommendation) {
+        } catch (FeatureGenUtil.RecommendationSetException showRecommendation) {
             if (showRecommendation.isExistingFeaturesConflict()) {
-                throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE2, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
+                throw new GradleException(String.format(FeatureGenUtil.FEATURE_GEN_CONFLICT_MESSAGE2, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
             }
-            throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE1, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
-        } catch (BinaryScannerUtil.FeatureUnavailableException featureUnavailable) {
-            throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE5, featureUnavailable.getConflicts(), featureUnavailable.getMPLevel(),
+            throw new GradleException(String.format(FeatureGenUtil.FEATURE_GEN_CONFLICT_MESSAGE1, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
+        } catch (FeatureGenUtil.FeatureUnavailableException featureUnavailable) {
+            throw new GradleException(String.format(FeatureGenUtil.FEATURE_GEN_CONFLICT_MESSAGE5, featureUnavailable.getConflicts(), featureUnavailable.getMPLevel(),
                     featureUnavailable.getEELevel(), featureUnavailable.getUnavailableFeatures()));
-        } catch (BinaryScannerUtil.IllegalTargetComboException illegalCombo) {
-            throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_INVALID_COMBO_MESSAGE, eeVersion, mpVersion));
-        } catch (BinaryScannerUtil.IllegalTargetException illegalTargets) {
+        } catch (FeatureGenUtil.IllegalTargetComboException illegalCombo) {
+            throw new GradleException(String.format(FeatureGenUtil.FEATURE_GEN_INVALID_COMBO_MESSAGE, eeVersion, mpVersion));
+        } catch (FeatureGenUtil.IllegalTargetException illegalTargets) {
             String messages = buildInvalidArgExceptionMessage(illegalTargets.getEELevel(), illegalTargets.getMPLevel(), eeVersion, mpVersion);
             throw new GradleException(messages);
         } catch (PluginExecutionException x) {
-            // throw an error when there is a problem not caught in runBinaryScanner()
+            // throw an error when there is a problem not caught in runFeatureGenerator()
             Object o = x.getCause();
             if (o != null) {
                 logger.debug("Caused by exception:" + x.getCause().getClass().getName());
@@ -251,7 +251,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                 missingLibertyFeatures.removeAll(userDefinedFeatures);
             }
         }
-        logger.debug("Features detected by binary scanner which are not in server.xml : " + missingLibertyFeatures);
+        logger.debug("Features detected by feature generator which are not in server.xml : " + missingLibertyFeatures);
 
         // generate the new features into an xml file in the correct context directory
         def generatedXmlFile;
@@ -305,7 +305,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     // Get the features from the server config and optionally exclude the specified config files from the search.
     private Set<String> getServerFeatures(ServerFeatureUtil servUtil, Set<String> generatedFiles, boolean excludeGenerated) {
         servUtil.setLowerCaseFeatures(false);
-        // if optimizing, ignore generated files when passing in existing features to binary scanner
+        // if optimizing, ignore generated files when passing in existing features to feature generator
         FeaturesPlatforms fp = servUtil.getServerFeatures(generationContextDir, server.serverXmlFile, new HashMap<String, File>(), excludeGenerated ? generatedFiles : null); // pass generatedFiles to exclude them
         Set<String> existingFeatures = fp == null ? new HashSet<String>() : fp.getFeatures();
 
@@ -324,21 +324,21 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     }
 
     /**
-     * Gets the binary scanner jar file from the local cache.
+     * Gets the feature generator jar file from the local cache.
      * Downloads it first from connected repositories such as Maven Central if a newer release is available than the cached version.
      * Note: Maven updates artifacts daily by default based on the last updated timestamp. Users should use 'mvn -U' to force updates if needed.
      *
-     * @return The File object of the binary-app-scanner.jar in the local cache.
-     * @throws PluginExecutionException indicates the binary-app-scanner.jar could not be found
+     * @return The File object of the feature-gen.jar in the local cache.
+     * @throws PluginExecutionException indicates the feature-gen.jar could not be found
      */
-    private File getBinaryScannerJarFromRepository() throws PluginExecutionException {
+    private File getFeatureGenJarFromRepository() throws PluginExecutionException {
         try {
-            return ArtifactDownloadUtil.downloadBuildArtifact(project, BINARY_SCANNER_MAVEN_GROUP_ID, BINARY_SCANNER_MAVEN_ARTIFACT_ID, BINARY_SCANNER_MAVEN_TYPE, BINARY_SCANNER_MAVEN_VERSION);
+            return ArtifactDownloadUtil.downloadBuildArtifact(project, FEATURE_GEN_MAVEN_GROUP_ID, FEATURE_GEN_MAVEN_ARTIFACT_ID, FEATURE_GEN_MAVEN_TYPE, FEATURE_GEN_MAVEN_VERSION);
         } catch (Exception e) {
-            throw new PluginExecutionException("Could not retrieve the artifact " + BINARY_SCANNER_MAVEN_GROUP_ID + "."
-                    + BINARY_SCANNER_MAVEN_ARTIFACT_ID + "." + BINARY_SCANNER_MAVEN_VERSION
+            throw new PluginExecutionException("Could not retrieve the artifact " + FEATURE_GEN_MAVEN_GROUP_ID + "."
+                    + FEATURE_GEN_MAVEN_ARTIFACT_ID + "." + FEATURE_GEN_MAVEN_VERSION
                     + " needed for generateFeatures. Ensure you have a connection to Maven Central or another repository that contains the "
-                    + BINARY_SCANNER_MAVEN_GROUP_ID + "." + BINARY_SCANNER_MAVEN_ARTIFACT_ID
+                    + FEATURE_GEN_MAVEN_GROUP_ID + "." + FEATURE_GEN_MAVEN_ARTIFACT_ID
                     + ".jar configured in your build.gradle.",
                     e);
         }
@@ -493,10 +493,10 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         return (currentVer.compareTo(newVer) < 0);
     }
 
-    // Define the logging functions of the binary scanner handler and make it available in this plugin
-    private class BinaryScannerHandler extends BinaryScannerUtil {
-        BinaryScannerHandler(File scannerFile) {
-            super(scannerFile);
+    // Define the logging functions of the feature generator handler and make it available in this plugin
+    private class FeatureGenHandler extends FeatureGenUtil {
+        FeatureGenHandler(File generatorFile) {
+            super(generatorFile);
         }
 
         @Override

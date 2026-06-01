@@ -25,7 +25,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 
 import static org.junit.Assert.*
-import static io.openliberty.tools.common.plugins.util.BinaryScannerUtil.*;
+import static io.openliberty.tools.common.plugins.util.FeatureGenUtil.*;
 
 class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
@@ -108,18 +108,18 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     }
 
     /**
-     * Verify a scanner log is generated when plugin logging is enabled.
+     * Verify a generator log is generated when plugin logging is enabled.
      * 
      * @throws Exception
      */
     @Test
-    public void scannerLogExistenceTest() throws Exception {
-        File scannerLogDir = new File(targetDir, "logs");
-        assertFalse(scannerLogDir.exists());
+    public void featureGenLogExistenceTest() throws Exception {
+        File featureGenLogDir = new File(targetDir, "logs");
+        assertFalse(featureGenLogDir.exists());
 
         runCompileAndGenerateFeatures(DEBUG_OPTION);
-        assertTrue(scannerLogDir.exists());
-        File[] logDirListing = scannerLogDir.listFiles();
+        assertTrue(featureGenLogDir.exists());
+        File[] logDirListing = featureGenLogDir.listFiles();
         assertNotNull(logDirListing);
         boolean logExists = false;
         for (File child : logDirListing) {
@@ -154,7 +154,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
     /**
      * Conflict between user specified features.
-     * Check for BINARY_SCANNER_CONFLICT_MESSAGE2 (conflict between configured features)
+     * Check for FEATURE_GEN_CONFLICT_MESSAGE2 (conflict between configured features)
      *
      * @throws Exception
      */
@@ -169,16 +169,16 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
             "  </featureManager>\n", serverXmlFile);
         runCompileAndGenerateFeatures(null);
 
-        // Verify BINARY_SCANNER_CONFLICT_MESSAGE2 error is thrown (BinaryScannerUtil.RecommendationSetException)
+        // Verify FEATURE_GEN_CONFLICT_MESSAGE2 error is thrown (FeatureGenUtil.RecommendationSetException)
         Set<String> recommendedFeatureSet = new HashSet<String>(Arrays.asList("servlet-4.0"));
         // search log file instead of process output because warning message in process output may be interrupted
-        boolean b = verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE2, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, errFile);
+        boolean b = verifyLogMessageExists(String.format(FEATURE_GEN_CONFLICT_MESSAGE2, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, errFile);
         assertTrue(formatOutput(getProcessOutput()), b);
     }
 
     /**
      * Conflict between user specified features and API usage.
-     * Check for BINARY_SCANNER_CONFLICT_MESSAGE1 (conflict between configured features and API usage)
+     * Check for FEATURE_GEN_CONFLICT_MESSAGE1 (conflict between configured features and API usage)
      *
      * @throws Exception
      */
@@ -192,18 +192,18 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
             "  </featureManager>\n", serverXmlFile);
         runCompileAndGenerateFeatures(null);
 
-        // Verify BINARY_SCANNER_CONFLICT_MESSAGE1 error is thrown (BinaryScannerUtil.FeatureModifiedException)
+        // Verify FEATURE_GEN_CONFLICT_MESSAGE1 error is thrown (FeatureGenUtil.FeatureModifiedException)
         Set<String> recommendedFeatureSet = new HashSet<String>(Arrays.asList("cdi-2.0", "servlet-4.0"));
         // search log file instead of process output because warning message in process output may be interrupted
-        boolean b = verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE1, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, errFile);
+        boolean b = verifyLogMessageExists(String.format(FEATURE_GEN_CONFLICT_MESSAGE1, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, errFile);
         assertTrue(formatOutput(getProcessOutput()), b);
     }
 
-    // TODO add an integration test for feature conflict for API usage (BINARY_SCANNER_CONFLICT_MESSAGE3), ie. MP4 and EE9
+    // TODO add an integration test for feature conflict for API usage (FEATURE_GEN_CONFLICT_MESSAGE3), ie. MP4 and EE9
 
     /**
      * Conflict between required features in API usage or configured features and MP/EE level specified
-     * Check for BINARY_SCANNER_CONFLICT_MESSAGE5 (feature unavailable for required MP/EE levels)
+     * Check for FEATURE_GEN_CONFLICT_MESSAGE5 (feature unavailable for required MP/EE levels)
      *
      * @throws Exception
      */
@@ -220,7 +220,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
                         "  </featureManager>\n", serverXmlFile);
         runCompileAndGenerateFeatures(null);
 
-        // use just beginning of BINARY_SCANNER_CONFLICT_MESSAGE5 as error message in logFile may be interrupted with "1 actionable task: 1 executed"
+        // use just beginning of FEATURE_GEN_CONFLICT_MESSAGE5 as error message in logFile may be interrupted with "1 actionable task: 1 executed"
         assertTrue("Could not find the feature unavailable conflict message in the process output.\n" + processOutput,
                 verifyLogMessageExists("required features: [servlet-4.0, mpOpenAPI-1.0]" +
                         " and required levels of MicroProfile: mp1.2, Java EE or Jakarta EE: ee8", 1000, errFile));
@@ -228,7 +228,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     }
 
     /**
-     * Test calling the scanner with both the EE umbrella dependency and the MP
+     * Test calling the generator with both the EE umbrella dependency and the MP
      * umbrella dependency.
      * 
      * @throws Exception
@@ -245,7 +245,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     }
 
     /**
-     * Test calling the scanner with just the EE umbrella dependency and no MP
+     * Test calling the generator with just the EE umbrella dependency and no MP
      * umbrella dependency.
      * 
      * @throws Exception
@@ -264,7 +264,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     }
 
     /**
-     * Test calling the scanner with just the MP umbrella dependency and no EE
+     * Test calling the generator with just the MP umbrella dependency and no EE
      * umbrella dependency.
      * 
      * @throws Exception
@@ -283,7 +283,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
     }
 
     /**
-     * Test calling the scanner with no EE umbrella dependency and no MP
+     * Test calling the generator with no EE umbrella dependency and no MP
      * umbrella dependency.
      * 
      * @throws Exception
