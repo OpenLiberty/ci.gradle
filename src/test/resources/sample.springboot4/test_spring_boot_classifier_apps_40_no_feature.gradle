@@ -32,7 +32,7 @@ repositories {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
-	libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-kernel', version: runtimeVersion
+	libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-kernel', version: '26.0.0.5'
 }
 
 bootJar {
