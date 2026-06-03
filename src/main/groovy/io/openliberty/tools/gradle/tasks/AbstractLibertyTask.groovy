@@ -34,6 +34,8 @@ import org.gradle.jvm.toolchain.JavaToolchainService
 import javax.inject.Inject
 
 abstract class AbstractLibertyTask extends DefaultTask {
+    protected static final Map<Integer, String> MIN_LIBERTY_VERSION_BY_SPRING_BOOT_MAJOR_VERSION =
+            [4: "26.0.0.5"].asImmutable()
 
     //params that get built with installLiberty
     protected def params
@@ -190,25 +192,30 @@ abstract class AbstractLibertyTask extends DefaultTask {
         return null
     }
 
-    protected static boolean requiresSpringBoot4MinimumLibertyVersion(String springBootVersion) {
+    protected static Integer getSpringBootMajorVersion(String springBootVersion) {
         if (!isSpringBoot2plus(springBootVersion)) {
-            return false
+            return null
         }
         String majorVersion = springBootVersion.substring(0, springBootVersion.indexOf('.'))
         try {
-            return Integer.parseInt(majorVersion) >= 4
+            return Integer.parseInt(majorVersion)
         } catch (NumberFormatException e) {
-            return false
+            return null
         }
+    }
+
+    protected static String getSpringBootMinimumLibertyVersion(String springBootVersion) {
+        Integer springBootMajorVersion = getSpringBootMajorVersion(springBootVersion)
+        return springBootMajorVersion == null ? null : MIN_LIBERTY_VERSION_BY_SPRING_BOOT_MAJOR_VERSION.get(springBootMajorVersion)
     }
 
     protected void validateSpringBootLibertyVersion() {
         String detectedSpringBootVersion = springBootVersion ?: findSpringBootVersion(project)
-        if (!requiresSpringBoot4MinimumLibertyVersion(detectedSpringBootVersion)) {
+        String minimumVersion = getSpringBootMinimumLibertyVersion(detectedSpringBootVersion)
+        if (minimumVersion == null) {
             return
         }
         String libertyVersion = getLibertyInstallProperties().getProperty(COM_IBM_WEBSPHERE_PRODUCTVERSION_KEY)
-        String minimumVersion = "26.0.0.5"
         if (VersionUtility.compareArtifactVersion(libertyVersion, minimumVersion, true) < 0) {
             throw new GradleException("Spring Boot ${detectedSpringBootVersion} applications require Liberty runtime version ${minimumVersion} or later. The configured Liberty runtime version is ${libertyVersion}.")
         }
