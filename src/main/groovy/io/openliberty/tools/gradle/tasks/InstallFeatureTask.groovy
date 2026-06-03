@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2025.
+ * (C) Copyright IBM Corporation 2014, 2026.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,7 @@ class InstallFeatureTask extends AbstractFeatureTask {
             }
         }
     
+        validateSpringBootLibertyVersion()
         def pluginListedEsas = getPluginListedFeatures(true)
         def additionalJsons = getAdditionalJsonList();
         def keyMap = getKeyMap();

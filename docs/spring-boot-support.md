@@ -29,6 +29,8 @@ The Liberty features that support the Spring Boot starters can be found [here](h
 
 The Spring Boot Gradle plugin 3.x and 4.x require Java 17 and a minimum of Gradle 7.5. There is a known build conflict that Spring Boot Gradle plugin 1.5.x is incompatible with Gradle 5.x. As the Spring Boot 1.5.x plugin will not be updated to support Gradle 5.x, consider upgrading the Spring Boot plugin or downgrading Gradle.
 
+Spring Boot version 4.x also requires Jakarta EE 11 or later support in the target Liberty runtime configuration. When configuring Liberty for Spring Boot 4.x applications, use Jakarta EE 11 compatible features such as Servlet 6.1 together with [`springBoot-4.0`].
+
 | Spring Boot version | Advised Gradle version                                                               |
 | ------------------- |--------------------------------------------------------------------------------------|
 | 4.x | 8.14+ or 9.x                                                                         |

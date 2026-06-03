@@ -15,6 +15,7 @@
  */
 package io.openliberty.tools.gradle.tasks
 
+import io.openliberty.tools.common.plugins.util.VersionUtility
 import io.openliberty.tools.gradle.Liberty
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -187,6 +188,30 @@ abstract class AbstractLibertyTask extends DefaultTask {
             return "springBoot-"+majorVersion+".0"
         }
         return null
+    }
+
+    protected static boolean requiresSpringBoot4MinimumLibertyVersion(String springBootVersion) {
+        if (!isSpringBoot2plus(springBootVersion)) {
+            return false
+        }
+        String majorVersion = springBootVersion.substring(0, springBootVersion.indexOf('.'))
+        try {
+            return Integer.parseInt(majorVersion) >= 4
+        } catch (NumberFormatException e) {
+            return false
+        }
+    }
+
+    protected void validateSpringBootLibertyVersion() {
+        String detectedSpringBootVersion = springBootVersion ?: findSpringBootVersion(project)
+        if (!requiresSpringBoot4MinimumLibertyVersion(detectedSpringBootVersion)) {
+            return
+        }
+        String libertyVersion = getLibertyInstallProperties().getProperty(COM_IBM_WEBSPHERE_PRODUCTVERSION_KEY)
+        String minimumVersion = "26.0.0.5"
+        if (VersionUtility.compareArtifactVersion(libertyVersion, minimumVersion, true) < 0) {
+            throw new GradleException("Spring Boot ${detectedSpringBootVersion} applications require Liberty runtime version ${minimumVersion} or later. The configured Liberty runtime version is ${libertyVersion}.")
+        }
     }
 
     protected static Task findSpringBootTask(Project project, String springBootVersion) {

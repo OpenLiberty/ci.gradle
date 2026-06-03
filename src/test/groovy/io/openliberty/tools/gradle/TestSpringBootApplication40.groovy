@@ -49,7 +49,17 @@ public class TestSpringBootApplication40 extends AbstractIntegrationTest{
 
     @After
     public void tearDown() throws Exception {
-        runTasks(buildDir,'libertyStop')
+        File buildFile = new File(buildDir, 'build.gradle')
+        if (buildFile.exists()) {
+            String buildContents = buildFile.getText('UTF-8')
+            if (buildContents.contains('liberty')) {
+                try {
+                    runTasks(buildDir,'libertyStop')
+                } catch (Exception e) {
+                    // ignore cleanup failures for tests that fail before the liberty tasks are available
+                }
+            }
+        }
     }
 
 
@@ -222,6 +232,17 @@ public class TestSpringBootApplication40 extends AbstractIntegrationTest{
             String output = result.getOutput()
             assertTrue(output.contains("Found multiple springBootApplication elements specified in the server configuration in files"))
             assertTrue(output.contains("included_server.xml"))
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task deploy.", e)
+        }
+    }
+
+    @Test
+    public void test_spring_boot_apps_40_unsupported_liberty_version() {
+        try {
+            BuildResult result = runTasksFailResult(buildDir, 'deploy', '-PtestRuntimeVersion=25.0.0.12')
+            String output = result.getOutput()
+            assertTrue(output.contains("Spring Boot 4.0.5 applications require Liberty runtime version 26.0.0.5 or later. The configured Liberty runtime version is 25.0.0.12."))
         } catch (Exception e) {
             throw new AssertionError ("Fail on task deploy.", e)
         }
