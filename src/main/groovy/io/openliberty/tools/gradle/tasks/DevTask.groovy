@@ -17,7 +17,7 @@ package io.openliberty.tools.gradle.tasks
 
 import groovy.xml.XmlParser
 import io.openliberty.tools.ant.ServerTask
-import io.openliberty.tools.common.plugins.util.FeatureGenUtil
+import io.openliberty.tools.common.plugins.util.FeatureGeneratorUtil
 import io.openliberty.tools.common.plugins.util.DevUtil
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
 import io.openliberty.tools.common.plugins.util.JavaCompilerOptions
@@ -1377,10 +1377,10 @@ class DevTask extends AbstractFeatureTask {
                 String generatedFileCanonicalPath;
                 try {
                     generatedFileCanonicalPath = new File(configDirectory,
-                            FeatureGenUtil.GENERATED_FEATURES_FILE_PATH).getCanonicalPath();
+                            FeatureGeneratorUtil.GENERATED_FEATURES_FILE_PATH).getCanonicalPath();
                 } catch (IOException e) {
                     generatedFileCanonicalPath = new File(configDirectory,
-                            FeatureGenUtil.GENERATED_FEATURES_FILE_PATH).toString();
+                            FeatureGeneratorUtil.GENERATED_FEATURES_FILE_PATH).toString();
                 }
                 logger.warn(
                         "The source configuration directory will be modified. Features will automatically be generated in a new file: "

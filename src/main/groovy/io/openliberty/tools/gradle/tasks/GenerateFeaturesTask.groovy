@@ -18,8 +18,8 @@ package io.openliberty.tools.gradle.tasks
 
 import io.openliberty.tools.common.plugins.config.ServerConfigXmlDocument
 import io.openliberty.tools.common.plugins.config.XmlDocument
-import io.openliberty.tools.common.plugins.util.FeatureGenUtil
-import static io.openliberty.tools.common.plugins.util.FeatureGenUtil.*;
+import io.openliberty.tools.common.plugins.util.FeatureGeneratorUtil
+import static io.openliberty.tools.common.plugins.util.FeatureGeneratorUtil.*;
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil.FeaturesPlatforms
@@ -190,9 +190,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             } // else should not happen, just pass empty map
             scannedFeatureList = featureGenHandler.runFeatureGenerator(nonCustomFeatures, classFiles, directories, logLocation,
                 eeVersionArg, mpVersionArg, featureListFileMap, optimize);
-        } catch (FeatureGenUtil.NoRecommendationException noRecommendation) {
-            throw new GradleException(String.format(FeatureGenUtil.FEATURE_GEN_CONFLICT_MESSAGE3, noRecommendation.getConflicts()));
-        } catch (FeatureGenUtil.FeatureModifiedException featuresModified) {
+        } catch (FeatureGeneratorUtil.NoRecommendationException noRecommendation) {
+            throw new GradleException(String.format(FeatureGeneratorUtil.FEATURE_GEN_CONFLICT_MESSAGE3, noRecommendation.getConflicts()));
+        } catch (FeatureGeneratorUtil.FeatureModifiedException featuresModified) {
             Set<String> userFeatures = (optimize) ? existingFeatures :
                 getServerFeatures(servUtil, generatedFiles, true); // user features excludes generatedFiles
             Set<String> modifiedSet = featuresModified.getFeatures(); // a set that works after being modified by the generator
@@ -207,19 +207,19 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                 Set<String> allAppFeatures = featuresModified.getSuggestions(); // suggestions are scanned from binaries
                 allAppFeatures.addAll(userFeatures); // scanned plus configured features were detected to be in conflict
                 logger.debug("FeatureModifiedException, combine suggestions from generator with user features in error msg");
-                throw new GradleException(String.format(FeatureGenUtil.FEATURE_GEN_CONFLICT_MESSAGE1, allAppFeatures, modifiedSet));
+                throw new GradleException(String.format(FeatureGeneratorUtil.FEATURE_GEN_CONFLICT_MESSAGE1, allAppFeatures, modifiedSet));
             }
-        } catch (FeatureGenUtil.RecommendationSetException showRecommendation) {
+        } catch (FeatureGeneratorUtil.RecommendationSetException showRecommendation) {
             if (showRecommendation.isExistingFeaturesConflict()) {
-                throw new GradleException(String.format(FeatureGenUtil.FEATURE_GEN_CONFLICT_MESSAGE2, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
+                throw new GradleException(String.format(FeatureGeneratorUtil.FEATURE_GEN_CONFLICT_MESSAGE2, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
             }
-            throw new GradleException(String.format(FeatureGenUtil.FEATURE_GEN_CONFLICT_MESSAGE1, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
-        } catch (FeatureGenUtil.FeatureUnavailableException featureUnavailable) {
-            throw new GradleException(String.format(FeatureGenUtil.FEATURE_GEN_CONFLICT_MESSAGE5, featureUnavailable.getConflicts(), featureUnavailable.getMPLevel(),
+            throw new GradleException(String.format(FeatureGeneratorUtil.FEATURE_GEN_CONFLICT_MESSAGE1, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
+        } catch (FeatureGeneratorUtil.FeatureUnavailableException featureUnavailable) {
+            throw new GradleException(String.format(FeatureGeneratorUtil.FEATURE_GEN_CONFLICT_MESSAGE5, featureUnavailable.getConflicts(), featureUnavailable.getMPLevel(),
                     featureUnavailable.getEELevel(), featureUnavailable.getUnavailableFeatures()));
-        } catch (FeatureGenUtil.IllegalTargetComboException illegalCombo) {
-            throw new GradleException(String.format(FeatureGenUtil.FEATURE_GEN_INVALID_COMBO_MESSAGE, eeVersion, mpVersion));
-        } catch (FeatureGenUtil.IllegalTargetException illegalTargets) {
+        } catch (FeatureGeneratorUtil.IllegalTargetComboException illegalCombo) {
+            throw new GradleException(String.format(FeatureGeneratorUtil.FEATURE_GEN_INVALID_COMBO_MESSAGE, eeVersion, mpVersion));
+        } catch (FeatureGeneratorUtil.IllegalTargetException illegalTargets) {
             String messages = buildInvalidArgExceptionMessage(illegalTargets.getEELevel(), illegalTargets.getMPLevel(), eeVersion, mpVersion);
             throw new GradleException(messages);
         } catch (PluginExecutionException x) {
@@ -494,7 +494,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     }
 
     // Define the logging functions of the feature generator handler and make it available in this plugin
-    private class FeatureGenHandler extends FeatureGenUtil {
+    private class FeatureGenHandler extends FeatureGeneratorUtil {
         FeatureGenHandler(File generatorFile) {
             super(generatorFile);
         }

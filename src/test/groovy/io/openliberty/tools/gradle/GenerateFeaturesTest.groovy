@@ -25,7 +25,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 
 import static org.junit.Assert.*
-import static io.openliberty.tools.common.plugins.util.FeatureGenUtil.*;
+import static io.openliberty.tools.common.plugins.util.FeatureGeneratorUtil.*;
 
 class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
@@ -169,7 +169,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
             "  </featureManager>\n", serverXmlFile);
         runCompileAndGenerateFeatures(null);
 
-        // Verify FEATURE_GEN_CONFLICT_MESSAGE2 error is thrown (FeatureGenUtil.RecommendationSetException)
+        // Verify FEATURE_GEN_CONFLICT_MESSAGE2 error is thrown (FeatureGeneratorUtil.RecommendationSetException)
         Set<String> recommendedFeatureSet = new HashSet<String>(Arrays.asList("servlet-4.0"));
         // search log file instead of process output because warning message in process output may be interrupted
         boolean b = verifyLogMessageExists(String.format(FEATURE_GEN_CONFLICT_MESSAGE2, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, errFile);
@@ -192,7 +192,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
             "  </featureManager>\n", serverXmlFile);
         runCompileAndGenerateFeatures(null);
 
-        // Verify FEATURE_GEN_CONFLICT_MESSAGE1 error is thrown (FeatureGenUtil.FeatureModifiedException)
+        // Verify FEATURE_GEN_CONFLICT_MESSAGE1 error is thrown (FeatureGeneratorUtil.FeatureModifiedException)
         Set<String> recommendedFeatureSet = new HashSet<String>(Arrays.asList("cdi-2.0", "servlet-4.0"));
         // search log file instead of process output because warning message in process output may be interrupted
         boolean b = verifyLogMessageExists(String.format(FEATURE_GEN_CONFLICT_MESSAGE1, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, errFile);
