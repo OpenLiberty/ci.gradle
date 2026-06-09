@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2021, 2025.
+ * (C) Copyright IBM Corporation 2021, 2026
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,15 @@ package io.openliberty.tools.gradle.tasks
 
 import io.openliberty.tools.common.plugins.config.ServerConfigXmlDocument
 import io.openliberty.tools.common.plugins.config.XmlDocument
-import io.openliberty.tools.common.plugins.util.BinaryScannerUtil
-import static io.openliberty.tools.common.plugins.util.BinaryScannerUtil.*;
+import io.openliberty.tools.common.plugins.util.FeatureGeneratorUtil
+import static io.openliberty.tools.common.plugins.util.FeatureGeneratorUtil.*;
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil.FeaturesPlatforms
+import io.openliberty.tools.common.plugins.util.VersionUtility;
 import io.openliberty.tools.gradle.utils.ArtifactDownloadUtil
 
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
@@ -41,6 +43,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     public static final String GENERATED_FEATURES_COMMENT = "The following features were generated based on API usage detected in your application";
     public static final String NO_NEW_FEATURES_COMMENT = "No additional features generated";
     public static final String NO_CLASS_FILES_WARNING = "Could not find class files to generate features against. Liberty features will not be generated. Ensure your project has first been compiled.";
+    private static final String OPEN_LIBERTY_PRODUCT_ID = "io.openliberty";
+    private static final String WEBSPHERE_LIBERTY_PRODUCT_ID = "com.ibm.websphere.appserver.runtime";
 
     // Default value of the optimize task option
     private static final boolean DEFAULT_OPTIMIZE = true;
@@ -48,9 +52,6 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     private static final boolean DEFAULT_GENERATETOSRC = false;
     // Default value of the internalDevMode option
     private static final boolean DEFAULT_DEVMODE = false;
-
-    // The executable file used to scan binaries for the Liberty features they use.
-    private File binaryScanner;
 
     /**
      * Generating features is performed relative to a certain server. We only generate features
@@ -107,8 +108,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
     @TaskAction
     void generateFeatures() {
-        binaryScanner = getBinaryScannerJarFromRepository();
-        BinaryScannerHandler binaryScannerHandler = new BinaryScannerHandler(binaryScanner);
+        // The executable file used to scan binaries for the Liberty features they use.
+        File featureGenJar = getFeatureGenJarFromRepository();
+        FeatureGenHandler featureGenHandler = new FeatureGenHandler(featureGenJar);
 
         if (optimize == null) {
             optimize = DEFAULT_OPTIMIZE;
@@ -150,7 +152,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
         Set<String> existingFeatures = getServerFeatures(servUtil, generatedFiles, optimize);
         logger.debug("Existing features:" + existingFeatures);
-        Set<String> nonCustomFeatures = new HashSet<String>(); // binary scanner only handles actual Liberty features
+        Set<String> nonCustomFeatures = new HashSet<String>(); // feature generator only handles actual Liberty features
         for (String feature : existingFeatures) { // custom features are "usr:feature-1.0" or "myExt:feature-2.0"
             if (!feature.contains(":")) nonCustomFeatures.add(feature);
         }
@@ -162,7 +164,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         try {
             Set<String> directories = getClassesDirectories();
             if (directories.isEmpty() && (classFiles == null || classFiles.isEmpty())) {
-                // log as warning and continue to call binary scanner to detect conflicts in user specified features
+                // log as warning and continue to call feature generator to detect conflicts in user specified features
                 logger.warn(NO_CLASS_FILES_WARNING);
             }
             eeVersion = getEEVersion(project);
@@ -171,13 +173,29 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             String logLocation = project.getBuildDir().getCanonicalPath();
             String eeVersionArg = composeEEVersion(eeVersion);
             String mpVersionArg = composeMPVersion(mpVersion);
-            scannedFeatureList = binaryScannerHandler.runBinaryScanner(nonCustomFeatures, classFiles, directories, logLocation, eeVersionArg, mpVersionArg, optimize);
-        } catch (BinaryScannerUtil.NoRecommendationException noRecommendation) {
-            throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE3, noRecommendation.getConflicts()));
-        } catch (BinaryScannerUtil.FeatureModifiedException featuresModified) {
+            Map featureListFileMap = new HashMap<String, File>();
+            String libertyGroupId = getLibertyRuntimeGroupId();
+            logger.debug("Resolve the liberty groupId used to fetch feature lists, getLibertyRuntimeGroupId()="+libertyGroupId);
+            if (WEBSPHERE_LIBERTY_PRODUCT_ID.equals(libertyGroupId)) {
+                File baseFeatureListFile = getWebSphereFeatureListFile(FEATURE_LIST_BASE);
+                featureListFileMap.put(WSBASE_FEATURELIST_KEY, baseFeatureListFile);
+                File coreFeatureListFile = getWebSphereFeatureListFile(FEATURE_LIST_CORE);
+                featureListFileMap.put(WSCORE_FEATURELIST_KEY, coreFeatureListFile);
+            } else if (OPEN_LIBERTY_PRODUCT_ID.equals(libertyGroupId)) {
+                File featureListFile = getOpenFeatureListFile();
+                featureListFileMap.put(OL_FEATURELIST_KEY, featureListFile);
+                // Also pass the Base featurelist when using Open Liberty to work around a bug in the feature-gen jar
+                File baseFeatureListFile = getWebSphereFeatureListFile(FEATURE_LIST_BASE);
+                featureListFileMap.put(WSBASE_FEATURELIST_KEY, baseFeatureListFile);
+            } // else should not happen, just pass empty map
+            scannedFeatureList = featureGenHandler.runFeatureGenerator(nonCustomFeatures, classFiles, directories, logLocation,
+                eeVersionArg, mpVersionArg, featureListFileMap, optimize);
+        } catch (FeatureGeneratorUtil.NoRecommendationException noRecommendation) {
+            throw new GradleException(String.format(FeatureGeneratorUtil.FEATURE_GEN_CONFLICT_MESSAGE3, noRecommendation.getConflicts()));
+        } catch (FeatureGeneratorUtil.FeatureModifiedException featuresModified) {
             Set<String> userFeatures = (optimize) ? existingFeatures :
                 getServerFeatures(servUtil, generatedFiles, true); // user features excludes generatedFiles
-            Set<String> modifiedSet = featuresModified.getFeatures(); // a set that works after being modified by the scanner
+            Set<String> modifiedSet = featuresModified.getFeatures(); // a set that works after being modified by the generator
 
             if (modifiedSet.containsAll(userFeatures)) {
                 // none of the user features were modified, only features which were generated earlier.
@@ -188,24 +206,24 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             } else {
                 Set<String> allAppFeatures = featuresModified.getSuggestions(); // suggestions are scanned from binaries
                 allAppFeatures.addAll(userFeatures); // scanned plus configured features were detected to be in conflict
-                logger.debug("FeatureModifiedException, combine suggestions from scanner with user features in error msg");
-                throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE1, allAppFeatures, modifiedSet));
+                logger.debug("FeatureModifiedException, combine suggestions from generator with user features in error msg");
+                throw new GradleException(String.format(FeatureGeneratorUtil.FEATURE_GEN_CONFLICT_MESSAGE1, allAppFeatures, modifiedSet));
             }
-        } catch (BinaryScannerUtil.RecommendationSetException showRecommendation) {
+        } catch (FeatureGeneratorUtil.RecommendationSetException showRecommendation) {
             if (showRecommendation.isExistingFeaturesConflict()) {
-                throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE2, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
+                throw new GradleException(String.format(FeatureGeneratorUtil.FEATURE_GEN_CONFLICT_MESSAGE2, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
             }
-            throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE1, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
-        } catch (BinaryScannerUtil.FeatureUnavailableException featureUnavailable) {
-            throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE5, featureUnavailable.getConflicts(), featureUnavailable.getMPLevel(),
+            throw new GradleException(String.format(FeatureGeneratorUtil.FEATURE_GEN_CONFLICT_MESSAGE1, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
+        } catch (FeatureGeneratorUtil.FeatureUnavailableException featureUnavailable) {
+            throw new GradleException(String.format(FeatureGeneratorUtil.FEATURE_GEN_CONFLICT_MESSAGE5, featureUnavailable.getConflicts(), featureUnavailable.getMPLevel(),
                     featureUnavailable.getEELevel(), featureUnavailable.getUnavailableFeatures()));
-        } catch (BinaryScannerUtil.IllegalTargetComboException illegalCombo) {
-            throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_INVALID_COMBO_MESSAGE, eeVersion, mpVersion));
-        } catch (BinaryScannerUtil.IllegalTargetException illegalTargets) {
+        } catch (FeatureGeneratorUtil.IllegalTargetComboException illegalCombo) {
+            throw new GradleException(String.format(FeatureGeneratorUtil.FEATURE_GEN_INVALID_COMBO_MESSAGE, eeVersion, mpVersion));
+        } catch (FeatureGeneratorUtil.IllegalTargetException illegalTargets) {
             String messages = buildInvalidArgExceptionMessage(illegalTargets.getEELevel(), illegalTargets.getMPLevel(), eeVersion, mpVersion);
             throw new GradleException(messages);
         } catch (PluginExecutionException x) {
-            // throw an error when there is a problem not caught in runBinaryScanner()
+            // throw an error when there is a problem not caught in runFeatureGenerator()
             Object o = x.getCause();
             if (o != null) {
                 logger.debug("Caused by exception:" + x.getCause().getClass().getName());
@@ -233,7 +251,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                 missingLibertyFeatures.removeAll(userDefinedFeatures);
             }
         }
-        logger.debug("Features detected by binary scanner which are not in server.xml : " + missingLibertyFeatures);
+        logger.debug("Features detected by feature generator which are not in server.xml : " + missingLibertyFeatures);
 
         // generate the new features into an xml file in the correct context directory
         def generatedXmlFile;
@@ -287,7 +305,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     // Get the features from the server config and optionally exclude the specified config files from the search.
     private Set<String> getServerFeatures(ServerFeatureUtil servUtil, Set<String> generatedFiles, boolean excludeGenerated) {
         servUtil.setLowerCaseFeatures(false);
-        // if optimizing, ignore generated files when passing in existing features to binary scanner
+        // if optimizing, ignore generated files when passing in existing features to feature generator
         FeaturesPlatforms fp = servUtil.getServerFeatures(generationContextDir, server.serverXmlFile, new HashMap<String, File>(), excludeGenerated ? generatedFiles : null); // pass generatedFiles to exclude them
         Set<String> existingFeatures = fp == null ? new HashSet<String>() : fp.getFeatures();
 
@@ -306,24 +324,112 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     }
 
     /**
-     * Gets the binary scanner jar file from the local cache.
+     * Gets the feature generator jar file from the local cache.
      * Downloads it first from connected repositories such as Maven Central if a newer release is available than the cached version.
      * Note: Maven updates artifacts daily by default based on the last updated timestamp. Users should use 'mvn -U' to force updates if needed.
      *
-     * @return The File object of the binary-app-scanner.jar in the local cache.
-     * @throws PluginExecutionException indicates the binary-app-scanner.jar could not be found
+     * @return The File object of the feature-gen.jar in the local cache.
+     * @throws PluginExecutionException indicates the feature-gen.jar could not be found
      */
-    private File getBinaryScannerJarFromRepository() throws PluginExecutionException {
+    private File getFeatureGenJarFromRepository() throws PluginExecutionException {
         try {
-            return ArtifactDownloadUtil.downloadBuildArtifact(project, BINARY_SCANNER_MAVEN_GROUP_ID, BINARY_SCANNER_MAVEN_ARTIFACT_ID, BINARY_SCANNER_MAVEN_TYPE, BINARY_SCANNER_MAVEN_VERSION);
+            return ArtifactDownloadUtil.downloadBuildArtifact(project, FEATURE_GEN_MAVEN_GROUP_ID, FEATURE_GEN_MAVEN_ARTIFACT_ID, FEATURE_GEN_MAVEN_TYPE, FEATURE_GEN_MAVEN_VERSION);
         } catch (Exception e) {
-            throw new PluginExecutionException("Could not retrieve the artifact " + BINARY_SCANNER_MAVEN_GROUP_ID + "."
-                    + BINARY_SCANNER_MAVEN_ARTIFACT_ID + "." + BINARY_SCANNER_MAVEN_VERSION
+            throw new PluginExecutionException("Could not retrieve the artifact " + FEATURE_GEN_MAVEN_GROUP_ID + "."
+                    + FEATURE_GEN_MAVEN_ARTIFACT_ID + "." + FEATURE_GEN_MAVEN_VERSION
                     + " needed for generateFeatures. Ensure you have a connection to Maven Central or another repository that contains the "
-                    + BINARY_SCANNER_MAVEN_GROUP_ID + "." + BINARY_SCANNER_MAVEN_ARTIFACT_ID
+                    + FEATURE_GEN_MAVEN_GROUP_ID + "." + FEATURE_GEN_MAVEN_ARTIFACT_ID
                     + ".jar configured in your build.gradle.",
                     e);
         }
+    }
+
+    /*
+     * Gets the file containing the Open Liberty base feature list from the local cache.
+     * Downloads it first from connected repositories such as Maven Central if a newer release is available than the cached version.
+     * Note: Maven updates artifacts daily by default based on the last updated timestamp. Users should use 'mvn -U' to force
+     * updates if needed.
+     * 
+     * @return The File object of the feature list in the local cache or null if version number not available
+     */
+    private static String OPEN_LIBERTY_FEATURE_LIST_START = "25.0.0.7";
+    private File getOpenFeatureListFile() {
+        String libertyVersion = getLibertyRuntimeVersion();
+        if (libertyVersion == null) {
+            return null;
+        }
+        // Feature lists were first published for 25.0.0.7. For liberty releases prior to this simply use the
+        // earliest available feature list, 25.0.0.7.
+        if (VersionUtility.compareArtifactVersion(libertyVersion, OPEN_LIBERTY_FEATURE_LIST_START, true) < 0) {
+            libertyVersion = OPEN_LIBERTY_FEATURE_LIST_START;
+        }
+        libertyVersion = "[" + libertyVersion + "]"; // Maven syntax to specify an exact version, not a range
+        return ArtifactDownloadUtil.downloadBuildArtifact(project, OLBASE_FEATURELIST_GROUP_ID, OLBASE_FEATURELIST_ARTIFACT_ID, OLBASE_FEATURELIST_TYPE, libertyVersion);
+    }
+
+    /*
+     * Gets the file containing the indicated Websphere feature list from the local cache.
+     * Downloads it first from connected repositories such as Maven Central if a newer release is available than the cached version.
+     * Note: Maven updates artifacts daily by default based on the last updated timestamp. Users should use 'mvn -U' to force
+     * updates if needed.
+     * 
+     * @return The File object of the feature list in the local cache.
+     */
+    private static String FEATURE_LIST_BASE = "base";
+    private static String FEATURE_LIST_CORE = "core";
+    private File getWebSphereFeatureListFile(String featureListVar) {
+        // For releases earlier than 25.0.0.7 use 25.0.0.7 Maven coordinates (batch 1).
+        // For releases 25.0.0.8 to 25.0.0.12 use batch 2 coordinates. 
+        // For 26.0.0.1 and later use the third batch.
+        String libertyGroupId, libertyArtifactId;
+        String libertyVersion = getLibertyRuntimeVersion();
+        if (libertyVersion == null) {
+            return null;
+        }
+        // Publishing started with 25.0.0.7 so for any liberty <25.0.0.7 use the 07 values
+        if (VersionUtility.compareArtifactVersion(libertyVersion, WS_FEATURE_LIST_VERSION_BATCH1, true) <= 0) {
+            libertyGroupId = WS_FEATURELIST_GROUP_ID_BATCH1;
+            libertyArtifactId = (featureListVar.equals(FEATURE_LIST_BASE)) ? WS_BASE_FEATURE_LIST_ARTIFACT_ID_BATCH1 : WS_CORE_FEATURE_LIST_ARTIFACT_ID_BATCH1;
+            libertyVersion = WS_FEATURE_LIST_VERSION_BATCH1; // must set for versions before 07
+        } else if (VersionUtility.compareArtifactVersion(libertyVersion, WS_FEATURE_LIST_VERSION_BATCH3, true) < 0) {
+            // 25.0.0.8 to 25.0.0.12
+            libertyGroupId = WS_FEATURELIST_GROUP_ID_BATCH2;
+            libertyArtifactId = (featureListVar.equals(FEATURE_LIST_BASE)) ? WS_BASE_FEATURE_LIST_ARTIFACT_ID_BATCH2 : WS_CORE_FEATURE_LIST_ARTIFACT_ID_BATCH2;
+        } else { // 26.0.0.1 and up
+            libertyGroupId = WS_FEATURELIST_GROUP_ID_BATCH3;
+            libertyArtifactId = (featureListVar.equals(FEATURE_LIST_BASE)) ? WS_BASE_FEATURE_LIST_ARTIFACT_ID_BATCH3 : WS_CORE_FEATURE_LIST_ARTIFACT_ID_BATCH3;
+        }
+        libertyVersion = "[" + libertyVersion + "]"; // Maven syntax to specify an exact version, not a range
+        getLog().debug("WebSphere Liberty feature list coordinates, libertyGroupId="+libertyGroupId+" libertyArtifactId="+libertyArtifactId+" WS_FEATURELIST_TYPE="+WS_FEATURELIST_TYPE+" libertyVersion="+libertyVersion);
+        return ArtifactDownloadUtil.downloadBuildArtifact(project, libertyGroupId, libertyArtifactId, WS_FEATURELIST_TYPE, libertyVersion);
+    }
+
+    // resolve the Liberty version from one of the sources
+    private String getLibertyRuntimeVersion() {
+        String libertyRuntimeVersion = null
+        Configuration config = project.configurations.getByName('libertyRuntime')
+        if (config != null) {
+             config.dependencies.find { libertyArtifact ->
+                 libertyRuntimeVersion = libertyArtifact.version
+                 logger.debug 'Found Liberty runtime version: ' + libertyRuntimeVersion
+                 return true
+             }
+        }
+        return libertyRuntimeVersion
+    }
+
+    // resolve the Liberty version from one of the sources
+    private String getLibertyRuntimeGroupId() {
+        String libertyRuntimeGroupId = null
+        Configuration config = project.configurations.getByName('libertyRuntime')
+        if (config != null) {
+             config.dependencies.find { libertyArtifact ->
+                 libertyRuntimeGroupId = libertyArtifact.group
+                 logger.debug 'Found Liberty runtime group ID: ' + libertyRuntimeGroupId
+                 return true
+             }
+        }
+        return libertyRuntimeGroupId
     }
 
     private Set<String> getClassesDirectories() {
@@ -387,10 +493,10 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         return (currentVer.compareTo(newVer) < 0);
     }
 
-    // Define the logging functions of the binary scanner handler and make it available in this plugin
-    private class BinaryScannerHandler extends BinaryScannerUtil {
-        BinaryScannerHandler(File scannerFile) {
-            super(scannerFile);
+    // Define the logging functions of the feature generator handler and make it available in this plugin
+    private class FeatureGenHandler extends FeatureGeneratorUtil {
+        FeatureGenHandler(File generatorFile) {
+            super(generatorFile);
         }
 
         @Override

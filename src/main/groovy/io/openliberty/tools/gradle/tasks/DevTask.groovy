@@ -17,7 +17,7 @@ package io.openliberty.tools.gradle.tasks
 
 import groovy.xml.XmlParser
 import io.openliberty.tools.ant.ServerTask
-import io.openliberty.tools.common.plugins.util.BinaryScannerUtil
+import io.openliberty.tools.common.plugins.util.FeatureGeneratorUtil
 import io.openliberty.tools.common.plugins.util.DevUtil
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
 import io.openliberty.tools.common.plugins.util.JavaCompilerOptions
@@ -1087,7 +1087,7 @@ class DevTask extends AbstractFeatureTask {
                 // log errors instead of throwing an exception so we do not flood console with stacktrace
                 Exception pluginEx = getPluginExecutionException(e);
                 if (pluginEx != null) {
-                    // PluginExecutionException indicates that the binary scanner jar could not be found
+                    // PluginExecutionException indicates that the feature generator jar could not be found
                     logger.error(pluginEx.getMessage() + ".\nDisabling the automatic generation of features.");
                     setFeatureGeneration(false);
                 } else {
@@ -1377,10 +1377,10 @@ class DevTask extends AbstractFeatureTask {
                 String generatedFileCanonicalPath;
                 try {
                     generatedFileCanonicalPath = new File(configDirectory,
-                            BinaryScannerUtil.GENERATED_FEATURES_FILE_PATH).getCanonicalPath();
+                            FeatureGeneratorUtil.GENERATED_FEATURES_FILE_PATH).getCanonicalPath();
                 } catch (IOException e) {
                     generatedFileCanonicalPath = new File(configDirectory,
-                            BinaryScannerUtil.GENERATED_FEATURES_FILE_PATH).toString();
+                            FeatureGeneratorUtil.GENERATED_FEATURES_FILE_PATH).toString();
                 }
                 logger.warn(
                         "The source configuration directory will be modified. Features will automatically be generated in a new file: "
@@ -1390,7 +1390,7 @@ class DevTask extends AbstractFeatureTask {
                 } catch (BuildException e) {
                     Exception pluginEx = getPluginExecutionException(e);
                     if (pluginEx != null) {
-                        // PluginExecutionException indicates that the binary scanner jar could not be found
+                        // PluginExecutionException indicates that the feature generator jar could not be found
                         logger.error(pluginEx.getMessage() + ".\nDisabling the automatic generation of features.");
                         generateFeatures = false;
                     } else if (e.getCause() != null) {
@@ -1703,7 +1703,7 @@ class DevTask extends AbstractFeatureTask {
             // compare class strings to verify if a PluginExecutionException is present
             // using "rootCause instanceof PluginExecutionException" will return false
             if (rootCause.getClass().toString().equals(PluginExecutionException.toString())) {
-                logger.debug("Found PluginExecutionException indicating that the binary-app-scanner.jar could not be resolved")
+                logger.debug("Found PluginExecutionException indicating that the feature-gen.jar could not be resolved")
                 return rootCause;
             }
             rootCause = rootCause.getCause();

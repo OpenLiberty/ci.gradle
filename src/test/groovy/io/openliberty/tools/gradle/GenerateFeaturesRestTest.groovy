@@ -23,7 +23,7 @@ import org.junit.Test
 import static org.junit.Assert.assertTrue
 /**
  * Liberty generateFeatures task tests for various MicroProfile and Java EE versions
- * Test to ensure the binary scanner honours the version of MicroProfile and Java EE
+ * Test to ensure the feature generator honours the version of MicroProfile and Java EE
  * specified in the build.gradle.
  */
 class GenerateFeaturesRestTest extends BaseGenerateFeaturesTest {
