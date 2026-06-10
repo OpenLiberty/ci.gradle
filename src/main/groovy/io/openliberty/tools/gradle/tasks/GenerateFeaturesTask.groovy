@@ -348,25 +348,29 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     protected getEEVersion(Object project, ServerFeatureUtil servUtil) {
         Set<String> eeVersionsDetected = new HashSet<String>();
         logger.warn("getEEVersion")
-        project.configurations.compileClasspath.allDependencies.each {
-            dependency ->
-                if (dependency.scope.equals("provided") ||
-                    dependency.scope.equals("compile") ||
-                    dependency.scope.equals("import")) {
-                    if ((dependency.group.equals("javax") && dependency.name.equals("javaee-api")) ||
-                        (dependency.group.equals("jakarta.platform") &&
-                            (dependency.name.equals("jakarta.jakartaee-api") ||
-                            dependency.name.equals("jakarta.jakartaee-web-api") ||
-                            dependency.name.equals("jakarta.jakartaee-core-api") ||
-                            dependency.name.equals("jakarta.jakartaee-bom") ||
-                            dependency.name.equals("jakartaee-api-parent")))) {
-                        if (dependency.version != null) {
-                            logger.debug("Java and/or Jakarta EE umbrella dependency version: " + dependency.version + " found in project");
-                            logger.warn ("Java and/or Jakarta EE umbrella dependency version: " + dependency.version + " found in project");
-                            eeVersionsDetected.add(dependency.version);
+        project.configurations.each { config ->
+            if (config.name.equals("implementation") ||
+                config.name.equals("compileOnly")) {
+                config.compileClasspath.allDependencies.each { dependency ->
+                    if (dependency.scope.equals("provided") ||
+                        dependency.scope.equals("compile") ||
+                        dependency.scope.equals("import")) {
+                        if ((dependency.group.equals("javax") && dependency.name.equals("javaee-api")) ||
+                            (dependency.group.equals("jakarta.platform") &&
+                                (dependency.name.equals("jakarta.jakartaee-api") ||
+                                dependency.name.equals("jakarta.jakartaee-web-api") ||
+                                dependency.name.equals("jakarta.jakartaee-core-api") ||
+                                dependency.name.equals("jakarta.jakartaee-bom") ||
+                                dependency.name.equals("jakartaee-api-parent")))) {
+                            if (dependency.version != null) {
+                                logger.debug("Java and/or Jakarta EE umbrella dependency version: " + dependency.version + " found in project");
+                                logger.warn ("Java and/or Jakarta EE umbrella dependency version: " + dependency.version + " found in project");
+                                eeVersionsDetected.add(dependency.version);
+                            }
                         }
                     }
                 }
+            }
         }
         // If there are no dependencies try looking at server.xml for platform entries
         if (eeVersionsDetected.size() == 0) {
@@ -418,9 +422,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     private static final String MP_PLATFORM_NAME="microProfile-"; // microProfile-7.0 etc.
     protected getMPVersion(Object project, ServerFeatureUtil servUtil) {
         Set<String> mpVersionsDetected = new HashSet<String>();
-        project.configurations.compileClasspath.allDependencies.each {
-            dependency ->
-                if (dependency.scope.equals("provided")) {
+        project.configurations.each { config ->
+            if (config.name.equals("implementation")) {
+                config.compileClasspath.allDependencies.each { dependency ->
                     if (dependency.group.equals("org.eclipse.microprofile") &&
                             dependency.name.equals("microprofile")) {
                         if (dependency.version != null) {
@@ -430,6 +434,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                         }
                     }
                 }
+            }
         }
         // If there are no dependencies try looking at server.xml for platform entries
         if (mpVersionsDetected.size() == 0) {
