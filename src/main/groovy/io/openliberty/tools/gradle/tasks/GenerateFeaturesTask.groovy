@@ -348,29 +348,22 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     protected getEEVersion(Object project, ServerFeatureUtil servUtil) {
         Set<String> eeVersionsDetected = new HashSet<String>();
         logger.warn("getEEVersion")
-        project.configurations.each { config ->
-            if (config.name.equals("implementation") ||
-                config.name.equals("compileOnly")) {
-                config.compileClasspath.allDependencies.each { dependency ->
-                    if (dependency.scope.equals("provided") ||
-                        dependency.scope.equals("compile") ||
-                        dependency.scope.equals("import")) {
-                        if ((dependency.group.equals("javax") && dependency.name.equals("javaee-api")) ||
-                            (dependency.group.equals("jakarta.platform") &&
-                                (dependency.name.equals("jakarta.jakartaee-api") ||
-                                dependency.name.equals("jakarta.jakartaee-web-api") ||
-                                dependency.name.equals("jakarta.jakartaee-core-api") ||
-                                dependency.name.equals("jakarta.jakartaee-bom") ||
-                                dependency.name.equals("jakartaee-api-parent")))) {
-                            if (dependency.version != null) {
-                                logger.debug("Java and/or Jakarta EE umbrella dependency version: " + dependency.version + " found in project");
-                                logger.warn ("Java and/or Jakarta EE umbrella dependency version: " + dependency.version + " found in project");
-                                eeVersionsDetected.add(dependency.version);
-                            }
-                        }
+        // compileClasspath is the correct scope for the dependencies so no need to check scope separately like in Maven
+        project.configurations.compileClasspath.allDependencies.each {
+            dependency ->
+                if ((dependency.group.equals("javax") && dependency.name.equals("javaee-api")) ||
+                    (dependency.group.equals("jakarta.platform") &&
+                        (dependency.name.equals("jakarta.jakartaee-api") ||
+                        dependency.name.equals("jakarta.jakartaee-web-api") ||
+                        dependency.name.equals("jakarta.jakartaee-core-api") ||
+                        dependency.name.equals("jakarta.jakartaee-bom") ||
+                        dependency.name.equals("jakartaee-api-parent")))) {
+                    if (dependency.version != null) {
+                        logger.debug("Java and/or Jakarta EE umbrella dependency version: " + dependency.version + " found in project");
+                        logger.warn ("Java and/or Jakarta EE umbrella dependency version: " + dependency.version + " found in project");
+                        eeVersionsDetected.add(dependency.version);
                     }
                 }
-            }
         }
         // If there are no dependencies try looking at server.xml for platform entries
         if (eeVersionsDetected.size() == 0) {
@@ -386,6 +379,38 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                 eeVersion + ") found to generate Liberty features.");
         }
         return eeVersion;
+    }
+
+    /**
+     * Returns the latest MicroProfile major version detected in the project dependencies
+     *
+     * @param project
+     * @return latest MP major version corresponding to the MP umbrella dependency, null if an MP umbrella dependency is not found
+     */
+    private static final String MP_PLATFORM_NAME="microProfile-"; // microProfile-7.0 etc.
+    protected getMPVersion(Object project, ServerFeatureUtil servUtil) {
+        Set<String> mpVersionsDetected = new HashSet<String>();
+        project.configurations.compileClasspath.allDependencies.each {
+            dependency ->
+                if (dependency.group.equals("org.eclipse.microprofile") &&
+                        dependency.name.equals("microprofile")) {
+                    if (dependency.version != null) {
+                        logger.debug("MicroProfile umbrella dependency version: " + dependency.version + " found in project");
+                        logger.warn ("MicroProfile umbrella dependency version: " + dependency.version + " found in project");
+                        mpVersionsDetected.add(dependency.version);
+                    }
+                }
+        }
+        // If there are no dependencies try looking at server.xml for platform entries
+        if (mpVersionsDetected.size() == 0) {
+            mpVersionsDetected.addAll(getAllPlatformVersions(MP_PLATFORM_NAME, servUtil));
+        }
+        String mpVersion = findMaxVersion(mpVersionsDetected);
+        if (mpVersionsDetected.size() > 1) {
+            logger.lifecycle("Multiple MicroProfile versions found, using the latest version (" +
+                mpVersion + ") found to generate Liberty features.");
+        }
+        return mpVersion;
     }
 
     /**
@@ -411,41 +436,6 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             }
         }
         return maxVersion;
-    }
-
-    /**
-     * Returns the latest MicroProfile major version detected in the project dependencies
-     *
-     * @param project
-     * @return latest MP major version corresponding to the MP umbrella dependency, null if an MP umbrella dependency is not found
-     */
-    private static final String MP_PLATFORM_NAME="microProfile-"; // microProfile-7.0 etc.
-    protected getMPVersion(Object project, ServerFeatureUtil servUtil) {
-        Set<String> mpVersionsDetected = new HashSet<String>();
-        project.configurations.each { config ->
-            if (config.name.equals("implementation")) {
-                config.compileClasspath.allDependencies.each { dependency ->
-                    if (dependency.group.equals("org.eclipse.microprofile") &&
-                            dependency.name.equals("microprofile")) {
-                        if (dependency.version != null) {
-                            logger.debug("MicroProfile umbrella dependency version: " + ver + " found in project");
-                            logger.warn ("MicroProfile umbrella dependency version: " + ver + " found in project");
-                            mpVersionsDetected.add(dependency.version);
-                        }
-                    }
-                }
-            }
-        }
-        // If there are no dependencies try looking at server.xml for platform entries
-        if (mpVersionsDetected.size() == 0) {
-            mpVersionsDetected.addAll(getAllPlatformVersions(MP_PLATFORM_NAME, servUtil));
-        }
-        String mpVersion = findMaxVersion(mpVersionsDetected);
-        if (mpVersionsDetected.size() > 1) {
-            logger.lifecycle("Multiple MicroProfile versions found, using the latest version (" +
-                mpVersion + ") found to generate Liberty features.");
-        }
-        return mpVersion;
     }
 
     // Retrieve all platforms from the server.xml and related files that match the platform specified.
