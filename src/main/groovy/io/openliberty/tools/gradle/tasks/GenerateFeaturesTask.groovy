@@ -347,7 +347,6 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     private static final String JAVAEE_PLATFORM_NAME="javaee-"; // javaee-7.0 etc.
     protected getEEVersion(Object project, ServerFeatureUtil servUtil) {
         Set<String> eeVersionsDetected = new HashSet<String>();
-        logger.warn("getEEVersion")
         // compileClasspath is the correct scope for the dependencies so no need to check scope separately like in Maven
         project.configurations.compileClasspath.allDependencies.each {
             dependency ->
@@ -360,7 +359,6 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                         dependency.name.equals("jakartaee-api-parent")))) {
                     if (dependency.version != null) {
                         logger.debug("Java and/or Jakarta EE umbrella dependency version: " + dependency.version + " found in project");
-                        logger.warn ("Java and/or Jakarta EE umbrella dependency version: " + dependency.version + " found in project");
                         eeVersionsDetected.add(dependency.version);
                     }
                 }
@@ -396,7 +394,6 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                         dependency.name.equals("microprofile")) {
                     if (dependency.version != null) {
                         logger.debug("MicroProfile umbrella dependency version: " + dependency.version + " found in project");
-                        logger.warn ("MicroProfile umbrella dependency version: " + dependency.version + " found in project");
                         mpVersionsDetected.add(dependency.version);
                     }
                 }
