@@ -109,7 +109,7 @@ java {
 }
 
 def libertyAntVersion = "1.9.18"
-def libertyCommonVersion = "1.8.41"
+def libertyCommonVersion = "1.8.42-SNAPSHOT"
 
 dependencies {
     implementation gradleApi()
@@ -117,6 +117,7 @@ dependencies {
     implementation ("io.openliberty.tools:liberty-ant-tasks:$libertyAntVersion")
     implementation ("io.openliberty.tools:ci.common:$libertyCommonVersion")
     implementation 'commons-io:commons-io:2.14.0'
+    implementation 'org.apache.maven:maven-artifact:3.9.6'
     provided 'com.ibm.websphere.appserver.spi:com.ibm.websphere.appserver.spi.kernel.embeddable:1.0.0'
     testImplementation 'junit:junit:4.13.1'
     testImplementation gradleTestKit()
