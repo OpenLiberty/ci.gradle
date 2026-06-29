@@ -1,0 +1,29 @@
+
+apply plugin: 'java'
+
+description = 'JAR Module'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.0'
+}
+
+// Create a custom configuration that only includes the JAR artifact
+configurations {
+    jarOnly
+}
+
+artifacts {
+    jarOnly jar
+}
+
+jar {
+    archiveFileName = rootProject.name + "-" + getArchiveBaseName().get() + "-" + rootProject.version + '.' + getArchiveExtension().get()
+}

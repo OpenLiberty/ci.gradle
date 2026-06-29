@@ -1,0 +1,52 @@
+//
+// This EAR module intentionally applies ONLY 'ear' and 'liberty' plugins —
+// no 'java' plugin is applied here or from the root build.gradle.
+// This reproduces the exact user scenario that triggered:
+//   "Could not get unknown property 'main' for SourceSet container"
+// when running 'libertyDev' on Gradle 9 with liberty-gradle-plugin 4.x.
+//
+apply plugin: 'ear'
+apply plugin: 'liberty'
+
+description = 'EAR Module'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+        }
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+dependencies {
+    deploy project(path: ':war', configuration: 'warOnly')
+    deploy project(path: ':jar', configuration: 'jarOnly')
+    libertyRuntime group: runtimeGroup, name: kernelArtifactId, version: runtimeVersion
+}
+
+ear {
+    archiveFileName = rootProject.name + "-" + getArchiveBaseName().get() + "-" + rootProject.version + '.' + getArchiveExtension().get()
+    deploymentDescriptor {
+        webModule('ejb-war-1.0-SNAPSHOT.war', '/converter')
+    }
+}
+
+liberty {
+    server {
+        name = "ejbServer"
+        deploy {
+            apps = [ear]
+            copyLibsDirectory = file("${project.getLayout().getBuildDirectory().getAsFile().get()}/copy/libs")
+        }
+        verifyAppStartTimeout = 30
+        looseApplication = true
+    }
+}
+
+deploy.dependsOn 'ear'
+ear.dependsOn ':jar:jar', ':war:war'

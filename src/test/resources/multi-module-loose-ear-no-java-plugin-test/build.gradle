@@ -1,0 +1,17 @@
+allprojects {
+    group = 'io.openliberty.guides'
+    version = '1.0-SNAPSHOT'
+}
+
+// Intentionally NOT applying the 'java' plugin to all subprojects here.
+// The 'ear' submodule only has 'ear' + 'liberty' plugins applied.
+// This reproduces the user scenario that caused:
+//   "Could not get unknown property 'main' for SourceSet container"
+// The fix in DevTask.groovy uses sourceSets.findByName('main') which
+// returns null instead of throwing when 'java' is not applied.
+subprojects {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
