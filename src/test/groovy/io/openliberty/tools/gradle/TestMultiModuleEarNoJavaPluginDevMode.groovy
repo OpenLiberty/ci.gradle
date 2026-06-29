@@ -97,7 +97,7 @@ class TestMultiModuleEarNoJavaPluginDevMode extends BaseDevTest {
         javaWriter.close()
 
         assertTrue("Greeter.class should be recompiled after source change",
-                waitForCompilation(targetGreeter, lastModified, 120000))
+                waitForCompilation(targetGreeter, lastModified, 12000))
     }
 
     /**
@@ -116,7 +116,7 @@ class TestMultiModuleEarNoJavaPluginDevMode extends BaseDevTest {
         buildWriter.close()
 
         assertTrue("Expected build file change warning in dev mode output",
-                verifyLogMessage(120000,
+                verifyLogMessage(12000,
                         "A change was detected in a build file. The libertyDev task could not determine if a server restart is required. To restart server, type 'r' and press Enter."))
     }
 

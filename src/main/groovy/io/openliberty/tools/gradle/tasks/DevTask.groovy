@@ -33,7 +33,6 @@ import io.openliberty.tools.gradle.utils.DevTaskHelper
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.internal.file.DefaultFilePropertyFactory
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
@@ -1284,8 +1283,12 @@ class DevTask extends AbstractFeatureTask {
         } else {
             testSourceDirectory = new File(project.projectDir, "src/test/java")
         }
-        DefaultFilePropertyFactory.DefaultDirectoryVar outputDirectory = mainSourceSet != null ? mainSourceSet.java.classesDirectory : null;
-        DefaultFilePropertyFactory.DefaultDirectoryVar testOutputDirectory = testSourceSet != null ? testSourceSet.java.classesDirectory : null;
+        File outputDirectory = mainSourceSet != null
+                ? mainSourceSet.java.classesDirectory.asFile.get()
+                : new File(project.getLayout().getBuildDirectory().getAsFile().get(), "classes/java/main");
+        File testOutputDirectory = testSourceSet != null
+                ? testSourceSet.java.classesDirectory.asFile.get()
+                : new File(project.getLayout().getBuildDirectory().getAsFile().get(), "classes/java/test");
         List<File> resourceDirs = mainSourceSet != null ? mainSourceSet.resources.srcDirs.toList() : new ArrayList<File>();
 
         File serverDirectory = getServerDir(project);
@@ -1308,7 +1311,7 @@ class DevTask extends AbstractFeatureTask {
         } // else TODO check if the container is already running?
 
         if (resourceDirs.isEmpty()) {
-            File defaultResourceDir = new File(project.getRootDir() + "/src/main/resources");
+            File defaultResourceDir = new File(project.projectDir, "src/main/resources");
             logger.info("No resource directory detected, using default directory: " + defaultResourceDir);
             resourceDirs.add(defaultResourceDir);
         }
@@ -1472,7 +1475,7 @@ class DevTask extends AbstractFeatureTask {
         // which is where the server.xml is located if a specific serverXmlFile
         // configuration parameter is not specified.
         try {
-            util.watchFiles(outputDirectory.get().asFile, testOutputDirectory.get().asFile, executor, serverXMLFile,
+            util.watchFiles(outputDirectory, testOutputDirectory, executor, serverXMLFile,
                             project.liberty.server.bootstrapPropertiesFile, project.liberty.server.jvmOptionsFile);
         } catch (PluginScenarioException e) {
             if (e.getMessage() != null) {
@@ -1493,14 +1496,12 @@ class DevTask extends AbstractFeatureTask {
             JavaCompilerOptions upstreamCompilerOptions = new JavaCompilerOptions();
             SourceSet mainSourceSet = dependencyProject.sourceSets.findByName('main');
             SourceSet testSourceSet = dependencyProject.sourceSets.findByName('test');
-            DefaultFilePropertyFactory.DefaultDirectoryVar outputDirectory = mainSourceSet != null ? mainSourceSet.java.classesDirectory : null;
-            DefaultFilePropertyFactory.DefaultDirectoryVar testOutputDirectory = testSourceSet != null ? testSourceSet.java.classesDirectory : null;
             Set<String> compileArtifacts = new HashSet<String>();
             Set<String> testArtifacts = new HashSet<String>();
             File upstreamSourceDir = mainSourceSet != null ? new File(mainSourceSet.java.sourceDirectories.asPath) : new File(dependencyProject.projectDir, "src/main/java");
-            File upstreamOutputDir = outputDirectory != null ? outputDirectory.asFile.get() : new File(dependencyProject.layout.buildDirectory.asFile.get(), "classes/java/main");
+            File upstreamOutputDir = mainSourceSet != null ? mainSourceSet.java.classesDirectory.asFile.get() : new File(dependencyProject.layout.buildDirectory.asFile.get(), "classes/java/main");
             File upstreamTestSourceDir = testSourceSet != null ? new File(testSourceSet.java.sourceDirectories.asPath) : new File(dependencyProject.projectDir, "src/test/java");
-            File upstreamTestOutputDir = testOutputDirectory != null ? testOutputDirectory.asFile.get() : new File(dependencyProject.layout.buildDirectory.asFile.get(), "classes/java/test");
+            File upstreamTestOutputDir = testSourceSet != null ? testSourceSet.java.classesDirectory.asFile.get() : new File(dependencyProject.layout.buildDirectory.asFile.get(), "classes/java/test");
             // resource directories
             List<File> upstreamResourceDirs = mainSourceSet != null ? mainSourceSet.resources.srcDirs.toList() : new ArrayList<File>();
             //get gradle project properties. It is observed that project properties contain all gradle properties
