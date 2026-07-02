@@ -37,6 +37,8 @@ import org.gradle.api.artifacts.ResolvedDependency
 import org.gradle.api.artifacts.UnknownConfigurationException
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
 import org.w3c.dom.Element
 
@@ -392,22 +394,24 @@ class DeployTask extends AbstractServerTask {
             if (!isCurrentProject && siblingProject != null) {
                 Element archive = looseApp.addArchive(parent, "/WEB-INF/lib/" + dep.getName());
                 //Add sibling project class directories to <archive/> as <dir>
-                siblingProject.sourceSets.main.getOutput().getClassesDirs().each {
+                SourceSetContainer siblingSourceSets = siblingProject.extensions.findByType(SourceSetContainer)
+                SourceSet siblingMainSourceSet = siblingSourceSets?.findByName('main')
+                siblingMainSourceSet?.getOutput()?.getClassesDirs()?.each {
                     looseApp.getConfig().addDir(archive, it, "/");
                 }
                 Task resourceTask = siblingProject.getTasks().findByPath(":" + projectDependencyString + ":processResources");
                 if (resourceTask != null && resourceTask.getDestinationDir() != null) {
                     looseApp.addOutputDir(archive, resourceTask.getDestinationDir(), "/");
                 }
-                File resourceDir = siblingProject.sourceSets.main.getOutput().getResourcesDir()
+                File resourceDir = siblingMainSourceSet?.getOutput()?.getResourcesDir()
                 File manifestFile = null
-                if (resourceDir.exists() && resourceDir.listFiles().length > 0) {
+                if (resourceDir != null && resourceDir.exists() && resourceDir.listFiles().length > 0) {
                     File metaInfDir = new File(resourceDir, "META-INF")
                     if (metaInfDir.exists() && metaInfDir.listFiles().length > 0) {
                         manifestFile = new File(metaInfDir, "MANIFEST.MF")
                     }
                 }
-                looseApp.addManifestFileWithParent(archive, manifestFile, resourceDir.getParentFile().getCanonicalPath());
+                looseApp.addManifestFileWithParent(archive, manifestFile, resourceDir?.getParentFile()?.getCanonicalPath());
             } else if (FilenameUtils.getExtension(dep.getAbsolutePath()).equalsIgnoreCase("jar")) {
                 addLibrary(parent, looseApp, "/WEB-INF/lib/", dep);
             } else {

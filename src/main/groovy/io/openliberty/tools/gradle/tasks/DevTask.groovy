@@ -33,13 +33,13 @@ import io.openliberty.tools.gradle.utils.DevTaskHelper
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.internal.file.DefaultFilePropertyFactory
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
 import org.gradle.testfixtures.ProjectBuilder
@@ -1271,14 +1271,27 @@ class DevTask extends AbstractFeatureTask {
     void action() {
         initializeDefaultValues();
 
-        SourceSet mainSourceSet = project.sourceSets.main;
-        SourceSet testSourceSet = project.sourceSets.test;
+        SourceSetContainer sourceSets = project.extensions.findByType(SourceSetContainer)
+        SourceSet mainSourceSet = sourceSets?.findByName('main')
+        SourceSet testSourceSet = sourceSets?.findByName('test')
 
-        sourceDirectory = mainSourceSet.java.srcDirs.iterator().next()
-        testSourceDirectory = testSourceSet.java.srcDirs.iterator().next()
-        DefaultFilePropertyFactory.DefaultDirectoryVar outputDirectory = mainSourceSet.java.classesDirectory;
-        DefaultFilePropertyFactory.DefaultDirectoryVar testOutputDirectory = testSourceSet.java.classesDirectory;
-        List<File> resourceDirs = mainSourceSet.resources.srcDirs.toList();
+        if (mainSourceSet != null && !mainSourceSet.java.srcDirs.isEmpty()) {
+            sourceDirectory = mainSourceSet.java.srcDirs.iterator().next()
+        } else {
+            sourceDirectory = new File(project.projectDir, "src/main/java")
+        }
+        if (testSourceSet != null && !testSourceSet.java.srcDirs.isEmpty()) {
+            testSourceDirectory = testSourceSet.java.srcDirs.iterator().next()
+        } else {
+            testSourceDirectory = new File(project.projectDir, "src/test/java")
+        }
+        File outputDirectory = mainSourceSet != null
+                ? mainSourceSet.java.classesDirectory.asFile.get()
+                : new File(project.getLayout().getBuildDirectory().getAsFile().get(), "classes/java/main");
+        File testOutputDirectory = testSourceSet != null
+                ? testSourceSet.java.classesDirectory.asFile.get()
+                : new File(project.getLayout().getBuildDirectory().getAsFile().get(), "classes/java/test");
+        List<File> resourceDirs = mainSourceSet != null ? mainSourceSet.resources.srcDirs.toList() : new ArrayList<File>();
 
         File serverDirectory = getServerDir(project);
         String serverName = server.name;
@@ -1300,7 +1313,7 @@ class DevTask extends AbstractFeatureTask {
         } // else TODO check if the container is already running?
 
         if (resourceDirs.isEmpty()) {
-            File defaultResourceDir = new File(project.getRootDir() + "/src/main/resources");
+            File defaultResourceDir = new File(project.projectDir, "src/main/resources");
             logger.info("No resource directory detected, using default directory: " + defaultResourceDir);
             resourceDirs.add(defaultResourceDir);
         }
@@ -1464,7 +1477,7 @@ class DevTask extends AbstractFeatureTask {
         // which is where the server.xml is located if a specific serverXmlFile
         // configuration parameter is not specified.
         try {
-            util.watchFiles(outputDirectory.get().asFile, testOutputDirectory.get().asFile, executor, serverXMLFile,
+            util.watchFiles(outputDirectory, testOutputDirectory, executor, serverXMLFile,
                             project.liberty.server.bootstrapPropertiesFile, project.liberty.server.jvmOptionsFile);
         } catch (PluginScenarioException e) {
             if (e.getMessage() != null) {
@@ -1483,18 +1496,17 @@ class DevTask extends AbstractFeatureTask {
             // we are directly calling compileJava task, which internally takes the compiler options
             // from task definition or command line arguments
             JavaCompilerOptions upstreamCompilerOptions = new JavaCompilerOptions();
-            SourceSet mainSourceSet = dependencyProject.sourceSets.main;
-            SourceSet testSourceSet = dependencyProject.sourceSets.test;
-            DefaultFilePropertyFactory.DefaultDirectoryVar outputDirectory = mainSourceSet.java.classesDirectory;
-            DefaultFilePropertyFactory.DefaultDirectoryVar testOutputDirectory = testSourceSet.java.classesDirectory;
+            SourceSetContainer depSourceSets = dependencyProject.extensions.findByType(SourceSetContainer)
+            SourceSet mainSourceSet = depSourceSets?.findByName('main')
+            SourceSet testSourceSet = depSourceSets?.findByName('test')
             Set<String> compileArtifacts = new HashSet<String>();
             Set<String> testArtifacts = new HashSet<String>();
-            File upstreamSourceDir = new File(mainSourceSet.java.sourceDirectories.asPath)
-            File upstreamOutputDir = outputDirectory.asFile.get();
-            File upstreamTestSourceDir = new File(testSourceSet.java.sourceDirectories.asPath);
-            File upstreamTestOutputDir = testOutputDirectory.asFile.get();
+            File upstreamSourceDir = (mainSourceSet != null && !mainSourceSet.java.srcDirs.isEmpty()) ? new File(mainSourceSet.java.sourceDirectories.asPath) : new File(dependencyProject.projectDir, "src/main/java");
+            File upstreamOutputDir = mainSourceSet != null ? mainSourceSet.java.classesDirectory.asFile.get() : new File(dependencyProject.layout.buildDirectory.asFile.get(), "classes/java/main");
+            File upstreamTestSourceDir = (testSourceSet != null && !testSourceSet.java.srcDirs.isEmpty()) ? new File(testSourceSet.java.sourceDirectories.asPath) : new File(dependencyProject.projectDir, "src/test/java");
+            File upstreamTestOutputDir = testSourceSet != null ? testSourceSet.java.classesDirectory.asFile.get() : new File(dependencyProject.layout.buildDirectory.asFile.get(), "classes/java/test");
             // resource directories
-            List<File> upstreamResourceDirs = mainSourceSet.resources.srcDirs.toList();
+            List<File> upstreamResourceDirs = mainSourceSet != null ? mainSourceSet.resources.srcDirs.toList() : new ArrayList<File>();
             //get gradle project properties. It is observed that project properties contain all gradle properties
             // properties are overridden automatically with the highest precedence
             // in gradle, we are only using skipTests

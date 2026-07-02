@@ -1,0 +1,17 @@
+<server description="Sample Liberty server">
+
+    <featureManager>
+        <feature>servlet-4.0</feature>
+    </featureManager>
+
+    <variable name="http.port" defaultValue="9082" />
+    <variable name="https.port" defaultValue="9447" />
+
+    <httpEndpoint host="*" httpPort="${http.port}"
+        httpsPort="${https.port}" id="defaultHttpEndpoint" />
+
+    <enterpriseApplication id="ejb-ear-1.0-SNAPSHOT"
+                           location="ejb-ear-1.0-SNAPSHOT.ear"
+                           name="ejb-ear-1.0-SNAPSHOT">
+    </enterpriseApplication>
+</server>
