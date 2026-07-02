@@ -39,6 +39,7 @@ import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
 import org.gradle.testfixtures.ProjectBuilder
@@ -1270,15 +1271,16 @@ class DevTask extends AbstractFeatureTask {
     void action() {
         initializeDefaultValues();
 
-        SourceSet mainSourceSet = project.sourceSets.findByName('main');
-        SourceSet testSourceSet = project.sourceSets.findByName('test');
+        SourceSetContainer sourceSets = project.extensions.findByType(SourceSetContainer)
+        SourceSet mainSourceSet = sourceSets?.findByName('main')
+        SourceSet testSourceSet = sourceSets?.findByName('test')
 
-        if (mainSourceSet != null) {
+        if (mainSourceSet != null && !mainSourceSet.java.srcDirs.isEmpty()) {
             sourceDirectory = mainSourceSet.java.srcDirs.iterator().next()
         } else {
             sourceDirectory = new File(project.projectDir, "src/main/java")
         }
-        if (testSourceSet != null) {
+        if (testSourceSet != null && !testSourceSet.java.srcDirs.isEmpty()) {
             testSourceDirectory = testSourceSet.java.srcDirs.iterator().next()
         } else {
             testSourceDirectory = new File(project.projectDir, "src/test/java")
@@ -1494,13 +1496,14 @@ class DevTask extends AbstractFeatureTask {
             // we are directly calling compileJava task, which internally takes the compiler options
             // from task definition or command line arguments
             JavaCompilerOptions upstreamCompilerOptions = new JavaCompilerOptions();
-            SourceSet mainSourceSet = dependencyProject.sourceSets.findByName('main');
-            SourceSet testSourceSet = dependencyProject.sourceSets.findByName('test');
+            SourceSetContainer depSourceSets = dependencyProject.extensions.findByType(SourceSetContainer)
+            SourceSet mainSourceSet = depSourceSets?.findByName('main')
+            SourceSet testSourceSet = depSourceSets?.findByName('test')
             Set<String> compileArtifacts = new HashSet<String>();
             Set<String> testArtifacts = new HashSet<String>();
-            File upstreamSourceDir = mainSourceSet != null ? new File(mainSourceSet.java.sourceDirectories.asPath) : new File(dependencyProject.projectDir, "src/main/java");
+            File upstreamSourceDir = (mainSourceSet != null && !mainSourceSet.java.srcDirs.isEmpty()) ? new File(mainSourceSet.java.sourceDirectories.asPath) : new File(dependencyProject.projectDir, "src/main/java");
             File upstreamOutputDir = mainSourceSet != null ? mainSourceSet.java.classesDirectory.asFile.get() : new File(dependencyProject.layout.buildDirectory.asFile.get(), "classes/java/main");
-            File upstreamTestSourceDir = testSourceSet != null ? new File(testSourceSet.java.sourceDirectories.asPath) : new File(dependencyProject.projectDir, "src/test/java");
+            File upstreamTestSourceDir = (testSourceSet != null && !testSourceSet.java.srcDirs.isEmpty()) ? new File(testSourceSet.java.sourceDirectories.asPath) : new File(dependencyProject.projectDir, "src/test/java");
             File upstreamTestOutputDir = testSourceSet != null ? testSourceSet.java.classesDirectory.asFile.get() : new File(dependencyProject.layout.buildDirectory.asFile.get(), "classes/java/test");
             // resource directories
             List<File> upstreamResourceDirs = mainSourceSet != null ? mainSourceSet.resources.srcDirs.toList() : new ArrayList<File>();
