@@ -17,7 +17,7 @@ package io.openliberty.tools.gradle.tasks
 
 import groovy.xml.XmlParser
 import io.openliberty.tools.ant.ServerTask
-import io.openliberty.tools.common.plugins.util.BinaryScannerUtil
+import io.openliberty.tools.common.plugins.util.FeatureGeneratorUtil
 import io.openliberty.tools.common.plugins.util.DevUtil
 import io.openliberty.tools.common.plugins.util.InstallFeatureUtil
 import io.openliberty.tools.common.plugins.util.JavaCompilerOptions
@@ -379,16 +379,16 @@ class DevTask extends AbstractFeatureTask {
                     boolean  hotTests, boolean  skipTests, boolean skipInstallFeature, String artifactId, int serverStartTimeout,
                     int verifyAppStartTimeout, int appUpdateTimeout, double compileWait,
                     boolean libertyDebug, boolean pollingTest, boolean container, File containerfile, File containerBuildContext,
-                    String containerRunOpts, int containerBuildTimeout, boolean skipDefaultPorts, boolean keepTempContainerfile, 
-                    String mavenCacheLocation, String packagingType, File buildFile, boolean generateFeatures, List<Path> webResourceDirs,
-                    List<ProjectModule> projectModuleList, Map<String, List<String>> parentBuildGradle, File serverOutputDir
+                    String containerRunOpts, int containerBuildTimeout, boolean skipDefaultPorts, boolean keepTempContainerfile,
+                    String mavenCacheLocation, String packagingType, File buildFile, boolean generateFeatures, boolean generateToSrc,
+                    List<Path> webResourceDirs, List<ProjectModule> projectModuleList, Map<String, List<String>> parentBuildGradle, File serverOutputDir
         ) throws IOException, PluginExecutionException {
             super(buildDir, serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, projectDirectory, /* multi module project directory */ projectDirectory,
                     resourceDirs, changeOnDemandTestsAction, hotTests, skipTests, false /* skipUTs */, false /* skipITs */, skipInstallFeature, artifactId,  serverStartTimeout,
                     verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug,
                     true /* useBuildRecompile */, true /* gradle */, pollingTest, container, containerfile, containerBuildContext, containerRunOpts, containerBuildTimeout, skipDefaultPorts,
                     null /* compileOptions not needed since useBuildRecompile is true */, keepTempContainerfile, mavenCacheLocation, projectModuleList /* multi module upstream projects */,
-                    projectModuleList.size() > 0 /* recompileDependencies as true for multi module */, packagingType, buildFile, parentBuildGradle /* parent build files */, generateFeatures, null /* compileArtifactPaths */, null /* testArtifactPaths */, webResourceDirs /* webResources */
+                    projectModuleList.size() > 0 /* recompileDependencies as true for multi module */, packagingType, buildFile, parentBuildGradle /* parent build files */, generateFeatures, generateToSrc, null /* compileArtifactPaths */, null /* testArtifactPaths */, webResourceDirs /* webResources */
                 );
             this.libertyDirPropertyFiles = LibertyPropFilesUtility.getLibertyDirectoryPropertyFiles(new CommonLogger(project), installDirectory, userDirectory, serverDirectory, serverOutputDir);
             ServerFeatureUtil servUtil = getServerFeatureUtil(true, libertyDirPropertyFiles);
@@ -710,7 +710,7 @@ class DevTask extends AbstractFeatureTask {
             if (optimizeGenerateFeatures && generateFeatures) {
                 logger.debug("Detected a change in the compile dependencies, regenerating features");
                 // optimize generate features on build dependency change
-                boolean generateFeaturesSuccess = libertyGenerateFeatures(null, true);
+                boolean generateFeaturesSuccess = libertyGenerateFeatures(null, true, false, false, false);
                 if (generateFeaturesSuccess) {
                     util.javaSourceClassPaths.clear();
                 } else {
@@ -1058,17 +1058,22 @@ class DevTask extends AbstractFeatureTask {
         }
 
         @Override
-        public boolean libertyGenerateFeatures(Collection<String> classes, boolean optimize) {
+        public boolean libertyGenerateFeatures(Collection<String> classes, boolean optimize, boolean genToSrc, boolean useTmpDirOut, boolean useTmpDirIn) {
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
             try {
                 List<String> options = new ArrayList<String>();
-                classes.each {
-                    // generate features for only the classFiles passed (if any)
-                    options.add("--classFile=" + it);
+                if (classes != null) {
+                    classes.each {
+                        // generate features for only the classFiles passed (if any)
+                        options.add("--classFile=" + it);
+                    }
                 }
                 options.add("--optimize=" + optimize);
+                options.add("--generateToSrc=" + genToSrc);
+                options.add("--useTmpDirOut=" + useTmpDirOut);
+                options.add("--useTmpDirIn=" + useTmpDirIn);
                 runGenerateFeaturesTask(gradleBuildLauncher, options);
                 return true; // successfully generated features
             } catch (BuildException e) {
@@ -1346,7 +1351,7 @@ class DevTask extends AbstractFeatureTask {
                 verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(),
                 libertyDebug.booleanValue(), pollingTest.booleanValue(), container.booleanValue(), containerfile, containerBuildContext, containerRunOpts,
                 containerBuildTimeout, skipDefaultPorts.booleanValue(), keepTempContainerfile.booleanValue(), localMavenRepoForFeatureUtility,
-                DevTaskHelper.getPackagingType(project), buildFile, generateFeatures.booleanValue(), webResourceDirs, projectModules, parentBuildGradle, new File(outputDir, serverName)
+                DevTaskHelper.getPackagingType(project), buildFile, generateFeatures.booleanValue(), false /* generateToSrc */, webResourceDirs, projectModules, parentBuildGradle, new File(outputDir, serverName)
             );
         } catch (IOException | PluginExecutionException e) {
             throw new GradleException("Error initializing dev mode.", e)
@@ -1374,10 +1379,10 @@ class DevTask extends AbstractFeatureTask {
                 String generatedFileCanonicalPath;
                 try {
                     generatedFileCanonicalPath = new File(configDirectory,
-                            BinaryScannerUtil.GENERATED_FEATURES_FILE_PATH).getCanonicalPath();
+                            FeatureGeneratorUtil.GENERATED_FEATURES_FILE_PATH).getCanonicalPath();
                 } catch (IOException e) {
                     generatedFileCanonicalPath = new File(configDirectory,
-                            BinaryScannerUtil.GENERATED_FEATURES_FILE_PATH).toString();
+                            FeatureGeneratorUtil.GENERATED_FEATURES_FILE_PATH).toString();
                 }
                 logger.warn(
                         "The source configuration directory will be modified. Features will automatically be generated in a new file: "
@@ -1467,9 +1472,6 @@ class DevTask extends AbstractFeatureTask {
         if (hotTests && testSourceDirectory.exists()) {
             // if hot testing, run tests on startup and then watch for keypresses
             util.runTestThread(false, executor, -1, false, false);
-        } else {
-            // else watch for key presses immediately
-            util.runHotkeyReaderThread(executor);
         }
 
         // Note that serverXMLFile can be null. DevUtil will automatically watch

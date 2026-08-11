@@ -18,8 +18,8 @@ package io.openliberty.tools.gradle.tasks
 
 import io.openliberty.tools.common.plugins.config.ServerConfigXmlDocument
 import io.openliberty.tools.common.plugins.config.XmlDocument
-import io.openliberty.tools.common.plugins.util.BinaryScannerUtil
-import static io.openliberty.tools.common.plugins.util.BinaryScannerUtil.*;
+import io.openliberty.tools.common.plugins.util.FeatureGeneratorUtil
+import static io.openliberty.tools.common.plugins.util.FeatureGeneratorUtil.*;
 import io.openliberty.tools.common.plugins.util.PluginExecutionException
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil
 import io.openliberty.tools.common.plugins.util.ServerFeatureUtil.FeaturesPlatforms
@@ -69,6 +69,27 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         this.optimize = Boolean.parseBoolean(optimize);
     }
 
+    private boolean generateToSrc = false;
+
+    @Option(option = 'generateToSrc', description = 'If true, generate the features file into the src/main/liberty/config directory instead of a temporary directory.')
+    void setGenerateToSrc(String generateToSrc) {
+        this.generateToSrc = Boolean.parseBoolean(generateToSrc);
+    }
+
+    private boolean useTmpDirOut = false;
+
+    @Option(option = 'useTmpDirOut', description = 'If true, write the generated features file to a temporary directory.')
+    void setUseTmpDirOut(String useTmpDirOut) {
+        this.useTmpDirOut = Boolean.parseBoolean(useTmpDirOut);
+    }
+
+    private boolean useTmpDirIn = false;
+
+    @Option(option = 'useTmpDirIn', description = 'If true, read the existing generated features file from the temporary directory as input.')
+    void setUseTmpDirIn(String useTmpDirIn) {
+        this.useTmpDirIn = Boolean.parseBoolean(useTmpDirIn);
+    }
+
     @TaskAction
     void generateFeatures() {
         binaryScanner = getBinaryScannerJarFromRepository();
@@ -80,6 +101,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
 
         logger.debug("--- Generate Features values ---");
         logger.debug("optimize generate features: " + optimize);
+        logger.debug("generateToSrc: " + generateToSrc);
+        logger.debug("useTmpDirOut: " + useTmpDirOut);
+        logger.debug("useTmpDirIn: " + useTmpDirIn);
         if (classFiles != null && !classFiles.isEmpty()) {
             logger.debug("Generate features for the following class files: " + classFiles);
         }
@@ -127,9 +151,9 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
             String eeVersionArg = composeEEVersion(eeVersion);
             String mpVersionArg = composeMPVersion(mpVersion);
             scannedFeatureList = binaryScannerHandler.runBinaryScanner(nonCustomFeatures, classFiles, directories, logLocation, eeVersionArg, mpVersionArg, optimize);
-        } catch (BinaryScannerUtil.NoRecommendationException noRecommendation) {
-            throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE3, noRecommendation.getConflicts()));
-        } catch (BinaryScannerUtil.FeatureModifiedException featuresModified) {
+        } catch (FeatureGeneratorUtil.NoRecommendationException noRecommendation) {
+            throw new GradleException(String.format(FeatureGeneratorUtil.FEATURE_GEN_CONFLICT_MESSAGE3, noRecommendation.getConflicts()));
+        } catch (FeatureGeneratorUtil.FeatureModifiedException featuresModified) {
             Set<String> userFeatures = (optimize) ? existingFeatures : 
                 getServerFeatures(servUtil, generatedFiles, true); // user features excludes generatedFiles
             Set<String> modifiedSet = featuresModified.getFeatures(); // a set that works after being modified by the scanner
@@ -144,19 +168,19 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
                 Set<String> allAppFeatures = featuresModified.getSuggestions(); // suggestions are scanned from binaries
                 allAppFeatures.addAll(userFeatures); // scanned plus configured features were detected to be in conflict
                 logger.debug("FeatureModifiedException, combine suggestions from scanner with user features in error msg");
-                throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE1, allAppFeatures, modifiedSet));
+                throw new GradleException(String.format(FeatureGeneratorUtil.FEATURE_GEN_CONFLICT_MESSAGE1, allAppFeatures, modifiedSet));
             }
-        } catch (BinaryScannerUtil.RecommendationSetException showRecommendation) {
+        } catch (FeatureGeneratorUtil.RecommendationSetException showRecommendation) {
             if (showRecommendation.isExistingFeaturesConflict()) {
-                throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE2, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
+                throw new GradleException(String.format(FeatureGeneratorUtil.FEATURE_GEN_CONFLICT_MESSAGE2, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
             }
-            throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE1, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
-        } catch (BinaryScannerUtil.FeatureUnavailableException featureUnavailable) {
-            throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_CONFLICT_MESSAGE5, featureUnavailable.getConflicts(), featureUnavailable.getMPLevel(),
+            throw new GradleException(String.format(FeatureGeneratorUtil.FEATURE_GEN_CONFLICT_MESSAGE1, showRecommendation.getConflicts(), showRecommendation.getSuggestions()));
+        } catch (FeatureGeneratorUtil.FeatureUnavailableException featureUnavailable) {
+            throw new GradleException(String.format(FeatureGeneratorUtil.FEATURE_GEN_CONFLICT_MESSAGE5, featureUnavailable.getConflicts(), featureUnavailable.getMPLevel(),
                     featureUnavailable.getEELevel(), featureUnavailable.getUnavailableFeatures()));
-        } catch (BinaryScannerUtil.IllegalTargetComboException illegalCombo) {
-            throw new GradleException(String.format(BinaryScannerUtil.BINARY_SCANNER_INVALID_COMBO_MESSAGE, eeVersion, mpVersion));
-        } catch (BinaryScannerUtil.IllegalTargetException illegalTargets) {
+        } catch (FeatureGeneratorUtil.IllegalTargetComboException illegalCombo) {
+            throw new GradleException(String.format(FeatureGeneratorUtil.FEATURE_GEN_INVALID_COMBO_MESSAGE, eeVersion, mpVersion));
+        } catch (FeatureGeneratorUtil.IllegalTargetException illegalTargets) {
             String messages = buildInvalidArgExceptionMessage(illegalTargets.getEELevel(), illegalTargets.getMPLevel(), eeVersion, mpVersion);
             throw new GradleException(messages);
         } catch (PluginExecutionException x) {
@@ -190,7 +214,8 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
         }
         logger.debug("Features detected by binary scanner which are not in server.xml : " + missingLibertyFeatures);
 
-        def newServerXmlSrc = new File(server.configDirectory, GENERATED_FEATURES_FILE_PATH);
+        File outputDir = (useTmpDirOut) ? new File(project.getBuildDir(), GENERATED_FEATURES_TEMP_DIR) : server.configDirectory;
+        def newServerXmlSrc = new File(outputDir, GENERATED_FEATURES_FILE_PATH);
         try {
             if (missingLibertyFeatures.size() > 0) {
                 Set<String> existingGeneratedFeatures = getGeneratedFeatures(servUtil, newServerXmlSrc);
@@ -267,12 +292,12 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
      */
     private File getBinaryScannerJarFromRepository() throws PluginExecutionException {
         try {
-            return ArtifactDownloadUtil.downloadBuildArtifact(project, BINARY_SCANNER_MAVEN_GROUP_ID, BINARY_SCANNER_MAVEN_ARTIFACT_ID, BINARY_SCANNER_MAVEN_TYPE, BINARY_SCANNER_MAVEN_VERSION);
+            return ArtifactDownloadUtil.downloadBuildArtifact(project, FEATURE_GEN_MAVEN_GROUP_ID, FEATURE_GEN_MAVEN_ARTIFACT_ID, FEATURE_GEN_MAVEN_TYPE, FEATURE_GEN_MAVEN_VERSION);
         } catch (Exception e) {
-            throw new PluginExecutionException("Could not retrieve the artifact " + BINARY_SCANNER_MAVEN_GROUP_ID + "."
-                    + BINARY_SCANNER_MAVEN_ARTIFACT_ID + "." + BINARY_SCANNER_MAVEN_VERSION
+            throw new PluginExecutionException("Could not retrieve the artifact " + FEATURE_GEN_MAVEN_GROUP_ID + "."
+                    + FEATURE_GEN_MAVEN_ARTIFACT_ID + "." + FEATURE_GEN_MAVEN_VERSION
                     + " needed for generateFeatures. Ensure you have a connection to Maven Central or another repository that contains the "
-                    + BINARY_SCANNER_MAVEN_GROUP_ID + "." + BINARY_SCANNER_MAVEN_ARTIFACT_ID
+                    + FEATURE_GEN_MAVEN_GROUP_ID + "." + FEATURE_GEN_MAVEN_ARTIFACT_ID
                     + ".jar configured in your build.gradle.",
                     e);
         }
@@ -392,7 +417,7 @@ class GenerateFeaturesTask extends AbstractFeatureTask {
     }
 
     // Define the logging functions of the binary scanner handler and make it available in this plugin
-    private class BinaryScannerHandler extends BinaryScannerUtil {
+    private class BinaryScannerHandler extends FeatureGeneratorUtil {
         BinaryScannerHandler(File scannerFile) {
             super(scannerFile);
         }

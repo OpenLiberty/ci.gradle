@@ -25,7 +25,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 
 import static org.junit.Assert.*
-import static io.openliberty.tools.common.plugins.util.BinaryScannerUtil.*;
+import static io.openliberty.tools.common.plugins.util.FeatureGeneratorUtil.*;
 
 class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
@@ -179,7 +179,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
 
     /**
      * Conflict between user specified features.
-     * Check for BINARY_SCANNER_CONFLICT_MESSAGE2 (conflict between configured features)
+     * Check for FEATURE_GEN_CONFLICT_MESSAGE2 (conflict between configured features)
      *
      * @throws Exception
      */
@@ -194,16 +194,16 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
             "  </featureManager>\n", serverXmlFile);
         runCompileAndGenerateFeatures();
 
-        // Verify BINARY_SCANNER_CONFLICT_MESSAGE2 error is thrown (BinaryScannerUtil.RecommendationSetException)
+        // Verify FEATURE_GEN_CONFLICT_MESSAGE2 error is thrown (FeatureGeneratorUtil.RecommendationSetException)
         Set<String> recommendedFeatureSet = new HashSet<String>(Arrays.asList("servlet-4.0"));
         // search log file instead of process output because warning message in process output may be interrupted
-        boolean b = verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE2, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, errFile);
+        boolean b = verifyLogMessageExists(String.format(FEATURE_GEN_CONFLICT_MESSAGE2, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, errFile);
         assertTrue(formatOutput(getProcessOutput()), b);
     }
 
     /**
      * Conflict between user specified features and API usage.
-     * Check for BINARY_SCANNER_CONFLICT_MESSAGE1 (conflict between configured features and API usage)
+     * Check for FEATURE_GEN_CONFLICT_MESSAGE1 (conflict between configured features and API usage)
      *
      * @throws Exception
      */
@@ -217,18 +217,18 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
             "  </featureManager>\n", serverXmlFile);
         runCompileAndGenerateFeatures();
 
-        // Verify BINARY_SCANNER_CONFLICT_MESSAGE1 error is thrown (BinaryScannerUtil.FeatureModifiedException)
+        // Verify FEATURE_GEN_CONFLICT_MESSAGE1 error is thrown (FeatureGeneratorUtil.FeatureModifiedException)
         Set<String> recommendedFeatureSet = new HashSet<String>(Arrays.asList("cdi-2.0", "servlet-4.0"));
         // search log file instead of process output because warning message in process output may be interrupted
-        boolean b = verifyLogMessageExists(String.format(BINARY_SCANNER_CONFLICT_MESSAGE1, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, errFile);
+        boolean b = verifyLogMessageExists(String.format(FEATURE_GEN_CONFLICT_MESSAGE1, getCdi12ConflictingFeatures(), recommendedFeatureSet), 1000, errFile);
         assertTrue(formatOutput(getProcessOutput()), b);
     }
 
-    // TODO add an integration test for feature conflict for API usage (BINARY_SCANNER_CONFLICT_MESSAGE3), ie. MP4 and EE9
+    // TODO add an integration test for feature conflict for API usage (FEATURE_GEN_CONFLICT_MESSAGE3), ie. MP4 and EE9
 
     /**
      * Conflict between required features in API usage or configured features and MP/EE level specified
-     * Check for BINARY_SCANNER_CONFLICT_MESSAGE5 (feature unavailable for required MP/EE levels)
+     * Check for FEATURE_GEN_CONFLICT_MESSAGE5 (feature unavailable for required MP/EE levels)
      *
      * @throws Exception
      */
@@ -245,7 +245,7 @@ class GenerateFeaturesTest extends BaseGenerateFeaturesTest {
                         "  </featureManager>\n", serverXmlFile);
         runCompileAndGenerateFeatures();
 
-        // use just beginning of BINARY_SCANNER_CONFLICT_MESSAGE5 as error message in logFile may be interrupted with "1 actionable task: 1 executed"
+        // use just beginning of FEATURE_GEN_CONFLICT_MESSAGE5 as error message in logFile may be interrupted with "1 actionable task: 1 executed"
         assertTrue("Could not find the feature unavailable conflict message in the process output.\n" + processOutput,
                 verifyLogMessageExists("required features: [servlet-4.0, mpOpenAPI-1.0]" +
                         " and required levels of MicroProfile: mp1.2, Java EE or Jakarta EE: ee8", 1000, errFile));
