@@ -3,6 +3,7 @@ package io.openliberty.tools.gradle
 import org.gradle.testkit.runner.BuildResult;
 import org.junit.AfterClass
 import org.junit.BeforeClass
+import org.junit.Ignore
 import org.junit.Test
 import io.openliberty.tools.common.plugins.util.OSUtil
 
@@ -22,7 +23,10 @@ public class TestAppConfig extends AbstractIntegrationTest{
         runTasks(buildDir, 'libertyStop')
     }
 
+    // Note: Variable expansion log messages are logged at DEBUG level.
+    // This test will only pass when run locally in debug mode (--debug).
     @Test
+    @Ignore("Requires Gradle debug mode (--debug) to capture debug log messages for variable expansion")
     public void test_start_with_timeout_success() {
         try {
             BuildResult result = runTasksResult(buildDir, 'libertyStart')

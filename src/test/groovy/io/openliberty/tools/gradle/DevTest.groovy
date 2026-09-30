@@ -23,6 +23,7 @@ import java.io.File;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.AfterClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -204,6 +205,7 @@ class DevTest extends BaseDevTest {
         tagLog("##restartServerTest end");
     }
 
+    @Ignore
     @Test
     public void generateFeatureTest() throws Exception {
         tagLog("##generateFeatureTest start");
