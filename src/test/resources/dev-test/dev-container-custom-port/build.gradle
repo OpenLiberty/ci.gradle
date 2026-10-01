@@ -1,0 +1,51 @@
+apply plugin: "liberty"
+apply plugin: "war"
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven {
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+        }
+    }
+    dependencies {
+        classpath "io.openliberty.tools:liberty-gradle-plugin:$lgpVersion"
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    providedCompile 'jakarta.platform:jakarta.jakartaee-api:9.1.0'
+    providedCompile 'org.eclipse.microprofile:microprofile:5.0'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+    testImplementation 'org.jboss.resteasy:resteasy-client:6.0.0.Final'
+    testImplementation 'org.jboss.resteasy:resteasy-json-binding-provider:6.0.0.Final'
+    testImplementation 'org.glassfish:jakarta.json:2.0.1'
+    testImplementation 'javax.xml.bind:jaxb-api:2.3.1'
+}
+
+war {
+    archiveBaseName = 'rest'
+}
+
+// Non-default ports set via liberty.server.var to exercise port resolution fix (GH#541)
+liberty.server.var.'default.http.port'  = '9090'
+liberty.server.var.'default.https.port' = '9453'
+
+test {
+    systemProperty 'liberty.test.port', '9090'
+}
