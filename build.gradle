@@ -109,7 +109,7 @@ java {
 }
 
 def libertyAntVersion = "1.9.19"
-def libertyCommonVersion = "1.8.44-SNAPSHOT"
+def libertyCommonVersion = "1.8.44"
 
 
 dependencies {
