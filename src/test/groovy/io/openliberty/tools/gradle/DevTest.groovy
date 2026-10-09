@@ -205,7 +205,6 @@ class DevTest extends BaseDevTest {
         tagLog("##restartServerTest end");
     }
 
-    @Ignore
     @Test
     public void generateFeatureTest() throws Exception {
         tagLog("##generateFeatureTest start");
@@ -255,6 +254,10 @@ class DevTest extends BaseDevTest {
         assertTrue(verifyLogMessage(10000, SERVER_XML_COMMENT, serverXmlFile));
         // should appear as part of the message "CWWKF0012I: The server installed the following features:"
         assertTrue(verifyLogMessage(123000, SERVER_INSTALLED_FEATURES, errFile, ++installedFeaturesCount));
+
+        // Re-snapshot count after feature installation; ci.common lifecycle changes may trigger
+        // additional generate-features runs during/after feature install.
+        runGenerateFeaturesCount = countOccurrences(RUNNING_GENERATE_FEATURES, logFile);
 
         // Performance of generate features when there is a compilation error is tested in DevRecompileTest
 
