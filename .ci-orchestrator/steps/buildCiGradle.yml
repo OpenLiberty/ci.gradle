@@ -1,0 +1,10 @@
+- stepName: "CiGradleBuild"
+  coreStep: true
+  workType: Jenkins
+  projectName: CiGradleBuild
+  timeoutInMinutes: 30
+  dependsOn:
+    - stepName: CiGradleDependencyBuild
+      awaitOutputProperties: true
+  properties:
+    jenkinsServiceName: "websphere-extra-jenkins"
