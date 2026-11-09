@@ -10,10 +10,17 @@ cd "${REPO_ROOT}"
 RUNTIME="${RUNTIME:-ol}"
 RUNTIME_VERSION="${RUNTIME_VERSION:-26.0.0.6}"
 
+BUILD_PROPERTIES="${BUILD_PROPERTIES:-${HOME}/Build/jenkins_build.properties}"
+GRADLE_PROPS_ARGS=()
+if [[ -f "${BUILD_PROPERTIES}" ]]; then
+    GRADLE_PROPS_ARGS+=("-Dbuild.properties.path=${BUILD_PROPERTIES}")
+fi
+
 chmod +x ./gradlew
 timeout 180m ./gradlew check \
     -P"test.exclude"="**/DevContainerTest*,**/DevEarlyQuitTest*,**/Devc*" \
     -Druntime="${RUNTIME}" \
     -DruntimeVersion="${RUNTIME_VERSION}" \
+    "${GRADLE_PROPS_ARGS[@]}" \
     --no-daemon \
     --stacktrace --info --warning-mode=all

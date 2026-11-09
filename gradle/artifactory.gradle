@@ -1,0 +1,40 @@
+File propsFile = System.properties['build.properties.path'] != null ?
+        new File(System.properties['build.properties.path']) :
+        new File(System.properties['user.home'], 'gradle.startup.properties')
+
+Properties artifactoryProps = new Properties()
+if (propsFile.exists()) {
+    propsFile.withInputStream { artifactoryProps.load(it) }
+}
+
+// Artifactory connections fail if a user accidentally adds whitespace to tokens.
+['artifactory.download.server', 'artifactory.download.user', 'artifactory.download.token'].each { key ->
+    if (artifactoryProps.getProperty(key) != null) {
+        artifactoryProps.setProperty(key, artifactoryProps.getProperty(key).trim())
+    }
+}
+
+// This is to support more controlled dependency management if we are able to access particular internal systems.
+boolean useArtifactory = propsFile.exists() &&
+        !Boolean.parseBoolean(artifactoryProps.getProperty('artifactory.force.external.repo')) &&
+        artifactoryProps.getProperty('artifactory.download.server')
+
+if (useArtifactory) {
+    String mirrorUrl = 'https://' + artifactoryProps.getProperty('artifactory.download.server') + '/artifactory/wasliberty-maven-remote'
+    String mirrorUser = artifactoryProps.getProperty('artifactory.download.user')
+    String mirrorToken = artifactoryProps.getProperty('artifactory.download.token')
+
+    repositories.all { repo ->
+        if (repo instanceof MavenArtifactRepository && repo.name == 'MavenRepo') {
+            repo.url = mirrorUrl
+            repo.credentials {
+                username = mirrorUser
+                password = mirrorToken
+            }
+            repo.metadataSources {
+                mavenPom()
+                artifact()
+            }
+        }
+    }
+}
