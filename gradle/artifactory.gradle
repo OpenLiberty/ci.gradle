@@ -25,15 +25,19 @@ if (useArtifactory) {
     String mirrorToken = artifactoryProps.getProperty('artifactory.download.token')
 
     repositories.all { repo ->
-        if (repo instanceof MavenArtifactRepository && repo.name == 'MavenRepo') {
-            repo.url = mirrorUrl
-            repo.credentials {
-                username = mirrorUser
-                password = mirrorToken
-            }
-            repo.metadataSources {
-                mavenPom()
-                artifact()
+        if (repo instanceof MavenArtifactRepository) {
+            boolean isMavenCentral = repo.name == 'MavenRepo'
+            boolean isSonatypeSnapshots = repo.url.toString().startsWith('https://central.sonatype.com/')
+            if (isMavenCentral || isSonatypeSnapshots) {
+                repo.url = mirrorUrl
+                repo.credentials {
+                    username = mirrorUser
+                    password = mirrorToken
+                }
+                repo.metadataSources {
+                    mavenPom()
+                    artifact()
+                }
             }
         }
     }
