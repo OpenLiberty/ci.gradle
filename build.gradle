@@ -145,6 +145,7 @@ test {
 
     File testKitDir = layout.buildDirectory.dir('testkit').get().asFile
     systemProperty 'org.gradle.testkit.dir', testKitDir.absolutePath
+    environment 'GRADLE_USER_HOME', testKitDir.absolutePath
     doFirst {
         File initDir = new File(testKitDir, 'init.d')
         initDir.mkdirs()
