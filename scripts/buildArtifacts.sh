@@ -16,6 +16,12 @@ git clone --depth=1 -b 1.x git@github.com:OpenLiberty/ci.common.git ci.common
 mvn -V clean install -f ci.ant --batch-mode --no-transfer-progress --errors -DtrimStackTrace=false -DskipTests
 mvn -V clean install -f ci.common --batch-mode --no-transfer-progress --errors -DtrimStackTrace=false -DskipTests
 
+BUILD_PROPERTIES="${BUILD_PROPERTIES:-${HOME}/Build/jenkins_build.properties}"
+GRADLE_PROPS_ARGS=()
+if [[ -f "${BUILD_PROPERTIES}" ]]; then
+    GRADLE_PROPS_ARGS+=("-Dbuild.properties.path=${BUILD_PROPERTIES}")
+fi
+
 # Build and install ci.gradle artifacts locally
 chmod +x ./gradlew
-./gradlew clean install -x test --no-daemon --stacktrace --info
+./gradlew clean install -x test --no-daemon --stacktrace --info "${GRADLE_PROPS_ARGS[@]}"

@@ -1,0 +1,61 @@
+File propsFile = System.properties['build.properties.path'] != null ?
+        new File(System.properties['build.properties.path']) :
+        new File(System.properties['user.home'], 'gradle.startup.properties')
+
+Properties artifactoryProps = new Properties()
+if (propsFile.exists()) {
+    propsFile.withInputStream { artifactoryProps.load(it) }
+}
+
+// Artifactory connections fail if a user accidentally adds whitespace to tokens.
+['artifactory.download.server', 'artifactory.download.user', 'artifactory.download.token'].each { key ->
+    if (artifactoryProps.getProperty(key) != null) {
+        artifactoryProps.setProperty(key, artifactoryProps.getProperty(key).trim())
+    }
+}
+
+// This is to support more controlled dependency management if we are able to access particular internal systems.
+boolean useArtifactory = propsFile.exists() &&
+        !Boolean.parseBoolean(artifactoryProps.getProperty('artifactory.force.external.repo')) &&
+        artifactoryProps.getProperty('artifactory.download.server')
+
+repositories.clear()
+repositories {
+    if (useArtifactory) {
+        maven {
+            credentials {
+                username = artifactoryProps.getProperty('artifactory.download.user')
+                password = artifactoryProps.getProperty('artifactory.download.token')
+            }
+            url = 'https://' + artifactoryProps.getProperty('artifactory.download.server') + '/artifactory/wasliberty-maven-remote'
+            metadataSources {
+                mavenPom()
+                artifact()
+            }
+        }
+    } else {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+            metadataSources {
+                mavenPom()
+                artifact()
+            }
+        }
+        maven {
+            url = 'https://plugins.gradle.org/m2/'
+            metadataSources {
+                mavenPom()
+                artifact()
+            }
+        }
+        maven {
+            url = 'https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/maven/repository/'
+            metadataSources {
+                mavenPom()
+                artifact()
+            }
+        }
+    }
+}

@@ -1,3 +1,79 @@
+pluginManagement {
+  /**
+   * Load properties before initializing in order to use credentials to configure repositories.
+   */
+  File usrHomeProps = (System.properties['build.properties.path'] != null) ? file(System.properties['build.properties.path']) : file(System.properties['user.home'] + '/gradle.startup.properties')
+
+  Properties props = new Properties()
+  if (usrHomeProps.exists()) {
+    usrHomeProps.withInputStream { props.load(it) }
+  }
+
+  // Artifactory connections fail if a user accidentally adds whitespace to tokens.
+  def stripTrailingWhitespace = [
+          'artifactory.download.user',
+          'artifactory.download.token',
+          'artifactory.download.server',
+  ]
+  stripTrailingWhitespace.each { key ->
+    if (props.get(key) != null) {
+      String value = props.get(key)
+      props.setProperty(key, value.trim())
+    }
+  }
+
+  // This is to support more controlled dependency management if we are able to access particular internal systems.
+  boolean isUsingArtifactory = (usrHomeProps.exists()
+                                && !Boolean.parseBoolean(props.getProperty('artifactory.force.external.repo'))
+                                && props.getProperty('artifactory.download.server'))
+  props.setProperty('is.using.artifactory', isUsingArtifactory.toString())
+
+  gradle.ext.userProps = props
+
+  // applying this script will configure the project to use either:
+  // A) maven central (if on public network)
+  // B) internal maven central mirror (if on IBM network)
+  gradle.ext.mavenCentralOrMirror = { repos ->
+    if (isUsingArtifactory) {
+      repos.maven {
+        credentials {
+          username = props.getProperty('artifactory.download.user')
+          password = props.getProperty('artifactory.download.token')
+        }
+        url = 'https://' + props.getProperty('artifactory.download.server') + '/artifactory/wasliberty-maven-remote'
+        metadataSources {
+          mavenPom()
+          artifact()
+        }
+      }
+    } else {
+      repos.mavenCentral()
+    }
+  }
+
+  repositories {
+    /**
+     * Prefer a configured Artifactory over plugins.gradle.org.
+     * Do not fall back to plugins.gradle.org when there are Artifactory outages.
+     */
+    if (isUsingArtifactory) {
+      maven {
+        credentials {
+          username = props.getProperty('artifactory.download.user')
+          password = props.getProperty('artifactory.download.token')
+        }
+        url = 'https://' + props.getProperty('artifactory.download.server') + '/artifactory/wasliberty-maven-remote'
+        metadataSources {
+          mavenPom()
+          artifact()
+        }
+      }
+    } else {
+      gradlePluginPortal()
+    }
+  }
+}
+
 rootProject.name = 'ci.gradle'
 
 include ':pluginRepo'
